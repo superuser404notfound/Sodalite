@@ -85,7 +85,7 @@ Please include:
 1. **What you did**: exact steps
 2. **What you expected**
 3. **What actually happened**
-4. **Build version**: Settings, scroll to the bottom, e.g. `0.1.0 (1)`
+4. **Build version**: Settings, scroll to the bottom, e.g. `0.12.0 (1)`
 5. **tvOS version**: Settings on the Apple TV, System, About
 6. **Jellyfin server version** if relevant
 7. **A photo of the screen** if it's a visual bug. Taking a screenshot from the Siri Remote (`TV` + `Play/Pause`) lands the file on your Mac via Photos.

@@ -94,7 +94,7 @@ The Seerr integration isn't a tacked-on link to a web view. It's a first-class p
 
 ### 🎬 Watch
 - **Direct Play** for almost every codec on your server: H.264, HEVC, HEVC Main10, AV1, VP9, VP8, MPEG-4 Part 2 (XVID / DIVX), MPEG-2, VC-1. Containers: MKV, MP4, MOV, AVI, MPEG-TS, M2TS, VOB, 3GP, WebM, OGG, FLV. Server-side transcoding stays reserved for fringe codecs (WMV3, Theora, RealVideo).
-- **HDR10, HDR10+, Dolby Vision, HLG**: auto-detected, sent through with full color metadata. HDR10+ streams forward per-frame ST 2094-40 dynamic metadata so HDR10+ TVs apply the source's tone-mapping curves; Dolby Vision streams signal as `dvh1` so DV-capable TVs switch into Dolby Vision mode for Profile 5, 8.1 and 8.4. The display switches to the matching HDR mode automatically (Match Content).
+- **HDR10, HDR10+, Dolby Vision, HLG**: auto-detected, sent through with full color metadata. HDR10+ streams forward per-frame ST 2094-40 dynamic metadata so HDR10+ TVs apply the source's tone-mapping curves; Dolby Vision streams switch DV-capable TVs into Dolby Vision mode for Profile 5, 8.1 and 8.4 (Profile 7 is converted to single-layer 8.1 on device so it engages DV too): Profile 5 signals via a bare `dvh1` track tag, while 8.1 and 8.4 carry `dvh1` in `SUPPLEMENTAL-CODECS` on an `hvc1` base. The display switches to the matching HDR mode automatically (Match Content).
 - **Dolby Atmos** via EAC3+JOC, wrapped as Dolby MAT 2.0 so your AVR's Atmos light actually comes on
 - **Multichannel surround**: 5.1, 7.1 with correct channel layout
 - **Resume** from where you left off, on any device
@@ -189,7 +189,7 @@ If you also want to work on the engine, clone it next to this repo and switch th
 
 Xcode 26+ and Swift 6.0+ are required.
 
-For engine-level debugging without an Apple TV in the loop, AetherEngine ships a standalone macOS CLI (`aetherctl probe / serve / validate <url>`). See the [AetherEngine README](https://github.com/superuser404notfound/AetherEngine#aetherctl) for usage.
+For engine-level debugging without an Apple TV in the loop, AetherEngine ships a standalone macOS CLI (`aetherctl probe / serve / validate <url>`). See [AetherEngine's CLI docs](https://github.com/superuser404notfound/AetherEngine/blob/main/docs/cli.md) for usage.
 
 ## Roadmap
 
