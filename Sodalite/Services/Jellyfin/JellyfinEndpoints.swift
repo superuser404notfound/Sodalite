@@ -363,6 +363,7 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "MaxStartDate", value: iso.string(from: maxStart)),
                 URLQueryItem(name: "SortBy", value: "StartDate"),
                 URLQueryItem(name: "EnableImages", value: "true"),
+                URLQueryItem(name: "Fields", value: "Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle"),
             ]
 
         case .liveTvRecommendedPrograms(let userID, let category, let limit):
@@ -379,7 +380,7 @@ enum JellyfinEndpoint: APIEndpoint {
                 flag,
                 URLQueryItem(name: "EnableImages", value: "true"),
                 // ChannelInfo populates ChannelName so the card subtitle + synthesized JellyfinChannel have a name without a channel fetch.
-                URLQueryItem(name: "Fields", value: "ChannelInfo"),
+                URLQueryItem(name: "Fields", value: "ChannelInfo,Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle"),
                 URLQueryItem(name: "SortBy", value: "StartDate"),
                 URLQueryItem(name: "Limit", value: String(limit)),
             ]

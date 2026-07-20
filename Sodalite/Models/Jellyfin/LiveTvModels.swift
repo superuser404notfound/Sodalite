@@ -53,6 +53,14 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
     let isSeries: Bool?
     let isKids: Bool?
     let isSports: Bool?
+    /// Series name for episode-type programs (populated when the EPG source provides it).
+    let seriesName: String?
+    /// Season number for episode-type programs.
+    let parentIndexNumber: Int?
+    /// Episode number within its season.
+    let indexNumber: Int?
+    /// The episode title, separate from `name` (available when the EPG source provides it).
+    let episodeTitle: String?
     /// Set when a single-program record timer exists for this program.
     let timerId: String?
     /// Set when a series timer covers this program.
@@ -74,6 +82,10 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
         case isSeries = "IsSeries"
         case isKids = "IsKids"
         case isSports = "IsSports"
+        case seriesName = "SeriesName"
+        case parentIndexNumber = "ParentIndexNumber"
+        case indexNumber = "IndexNumber"
+        case episodeTitle = "EpisodeTitle"
         case timerId = "TimerId"
         case seriesTimerId = "SeriesTimerId"
     }

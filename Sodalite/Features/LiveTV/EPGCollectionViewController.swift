@@ -509,7 +509,8 @@ final class EPGCollectionViewController: UIViewController,
             name: channel.name, overview: nil, startDate: Date().addingTimeInterval(-1),
             endDate: Date().addingTimeInterval(3600), genres: nil, imageTags: nil,
             isLive: true, isNews: nil, isMovie: nil, isSeries: nil,
-            isKids: nil, isSports: nil, timerId: nil, seriesTimerId: nil)
+            isKids: nil, isSports: nil, seriesName: nil, parentIndexNumber: nil,
+            indexNumber: nil, episodeTitle: nil, timerId: nil, seriesTimerId: nil)
     }
 }
 

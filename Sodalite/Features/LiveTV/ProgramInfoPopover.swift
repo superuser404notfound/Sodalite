@@ -68,6 +68,12 @@ struct ProgramInfoPopover: View {
     @ViewBuilder
     private var infoBlock: some View {
         Text(program.name).font(hSizeClass == .compact ? .title2 : .title)
+        // Episode identity — prefers episode title as the primary label, falls back to series name.
+        if let label = episodeLabel {
+            Text(label)
+                .font(.headline)
+                .foregroundStyle(.secondary)
+        }
         if let start = program.startDate, let end = program.endDate {
             Text("\(channel.name) · \(start.formatted(date: .omitted, time: .shortened)) - \(end.formatted(date: .omitted, time: .shortened))")
                 .font(.headline).foregroundStyle(.secondary)
@@ -79,6 +85,23 @@ struct ProgramInfoPopover: View {
         if let overview = program.overview {
             Text(overview).font(.body).lineLimit(8)
         }
+    }
+
+    /// Builds the episode-identity label with cascading priority:
+    /// episodeTitle > seriesName > S/E numbers alone.
+    var episodeLabel: String? {
+        let se = if let s = program.parentIndexNumber, let e = program.indexNumber {
+            "S\(s):E\(e)"
+        } else {
+            nil as String?
+        }
+        if let title = program.episodeTitle {
+            return se.map { "\($0) · \(title)" } ?? title
+        }
+        if let series = program.seriesName {
+            return se.map { "\(series) · \($0)" } ?? series
+        }
+        return se
     }
 
     @ViewBuilder
