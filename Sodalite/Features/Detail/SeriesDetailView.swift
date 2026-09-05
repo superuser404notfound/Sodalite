@@ -1108,6 +1108,8 @@ struct SeriesDetailView: View {
             if vm.episodes.isEmpty && vm.isLoadingEpisodes {
                 episodeSkeletonRow(vm: vm)
             } else if !vm.episodes.isEmpty {
+                // Resolved once for the row: the ring reads the same target the Play button acts on, so the two cannot name different episodes.
+                let playTargetID = playTarget(vm: vm)?.id
                 ScrollViewReader { episodeProxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: hSizeClass == .compact ? metrics.itemSpacing : 24) {
@@ -1119,8 +1121,7 @@ struct SeriesDetailView: View {
                                         EpisodeLandscapeCard(
                                             episode: episode,
                                             imageURL: dependencies.jellyfinImageService.episodeThumbnailURL(for: episode),
-                                            isSelected: selectedEpisode?.id == episode.id,
-                                            isCurrent: vm.currentEpisodeID == episode.id,
+                                            isPlayTarget: playTargetID == episode.id,
                                             isFocused: focusedEpisodeID == episode.id,
                                             isPlayed: vm.isPlayed(episode),
                                             isFavorite: vm.isFavorite(episode)

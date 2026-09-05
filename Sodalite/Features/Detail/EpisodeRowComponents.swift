@@ -131,8 +131,9 @@ struct EpisodeSkeletonCard: View {
 struct EpisodeLandscapeCard: View {
     let episode: JellyfinItem
     let imageURL: URL?
-    var isSelected: Bool = false
-    var isCurrent: Bool = false
+
+    /// The episode the page's Play button acts on, resolved by the page's own playTarget so the ring and the button cannot claim different cards.
+    var isPlayTarget: Bool = false
 
     /// Passed explicitly (focusedEpisodeID == episode.id): @Environment(\.isFocused) in a Button label is unreliable on tvOS.
     var isFocused: Bool = false
@@ -232,18 +233,21 @@ struct EpisodeLandscapeCard: View {
         return episode.resumeRemainingTicks?.ticksToCompactDisplay
     }
 
-    /// Focus stroke beats selected/current. Selection keeps the control tint, while focus uses the semantic media role.
-    private var strokeStyle: AnyShapeStyle {
-        if isFocused { return AnyShapeStyle(appearanceTheme.palette.focus.color) }
-        if isSelected { return AnyShapeStyle(TintShapeStyle.tint.opacity(0.8)) }
-        if isCurrent { return AnyShapeStyle(Color.green.opacity(0.8)) }
-        return AnyShapeStyle(Color.clear)
+    private var stroke: EpisodeCardStroke {
+        .role(isFocused: isFocused, isPlayTarget: isPlayTarget)
     }
 
-    private var strokeWidth: CGFloat {
-        if isFocused { return 4 }
-        return isCurrent ? 3 : 2
+    /// Focus takes the semantic media role, the play target a green that is neither of the two accent
+    /// roles on this row (the tint on the episode token, the focus role on the ring next door).
+    private var strokeStyle: AnyShapeStyle {
+        switch stroke {
+        case .focused: return AnyShapeStyle(appearanceTheme.palette.focus.color)
+        case .playTarget: return AnyShapeStyle(Color.Theme.success.opacity(0.8))
+        case .none: return AnyShapeStyle(Color.clear)
+        }
     }
+
+    private var strokeWidth: CGFloat { stroke.lineWidth }
 }
 
 // MARK: - Episode Synopsis Box
@@ -355,5 +359,32 @@ struct EpisodeRowAim: Equatable {
             return currentEpisodeID
         }
         return episodeIDs.first
+    }
+}
+
+// MARK: - Episode Card Stroke
+
+/// What the ring around an episode card says, and how thick it is saying it.
+///
+/// It used to carry three meanings, two of which always landed on the same card: the page resolves
+/// its play target from the selected episode first, so "selected" and "what Play does" were one
+/// answer drawn twice, in two colours. Focus wins over the play target, because a ring answers "you
+/// are here" before it answers "this is where Play goes".
+enum EpisodeCardStroke: CaseIterable {
+    case none
+    case playTarget
+    case focused
+
+    static func role(isFocused: Bool, isPlayTarget: Bool) -> EpisodeCardStroke {
+        if isFocused { return .focused }
+        return isPlayTarget ? .playTarget : .none
+    }
+
+    var lineWidth: CGFloat {
+        switch self {
+        case .none: return 0
+        case .playTarget: return 3
+        case .focused: return 4
+        }
     }
 }
