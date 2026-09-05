@@ -71,6 +71,42 @@ struct AppearanceThemeTests {
         }
     }
 
+    /// Sodalite#112. The Now Playing Play/Pause circle is accent-filled in both states, so the glyph
+    /// is drawn on `restingControl` as often as on `control`. Darkening moves the fill AWAY from a
+    /// white glyph and TOWARD a dark one, so it is the dark-glyph presets that have to be checked,
+    /// and they are checked here rather than at the button, which owns no colour logic.
+    @Test("the derived foreground clears 3:1 on the resting fill as well")
+    func foregroundSurvivesTheRestingFill() {
+        for preset in AccentPreset.allCases {
+            let ratio = preset.palette.foreground.contrastRatio(with: preset.palette.restingControl)
+            #expect(ratio >= 3.0, "\(preset.rawValue) draws its glyph at \(ratio):1 while unfocused")
+        }
+        // Same argument as the rule above: the claim is about every colour, not the 23 in the
+        // catalog. Measured floor is 3.72:1, at a magenta just over the foreground threshold.
+        for step in 0...255 {
+            let value = UInt32(step)
+            for hex in [value << 16 | value << 8 | value, value << 16, value << 8, value] {
+                let color = RGBColor(hex: hex)
+                let resting = color.darkened(by: AccentPalette.restingDarkening)
+                #expect(color.legibleForeground.contrastRatio(with: resting) >= 3.0,
+                        "\(String(format: "%06X", hex)) loses its glyph when darkened")
+            }
+        }
+    }
+
+    /// The other half of #112: the resting shade is the focus signal, so it has to be a real step.
+    /// Indigo is the tightest at 1.363:1, and dropping the darkening to 25% would put it under this
+    /// floor, which is the point. Anything that reads "focused" only because a ring is missing is
+    /// not a focus state on a screen where Play/Pause is what focus lands on by default.
+    @Test("the resting fill is a visible step below the accent")
+    func restingFillIsAVisibleStep() {
+        for preset in AccentPreset.allCases {
+            let step = preset.palette.control.contrastRatio(with: preset.palette.restingControl)
+            #expect(step >= 1.30, "\(preset.rawValue) only steps \(step):1 on focus")
+            #expect(preset.palette.restingControl != preset.palette.control)
+        }
+    }
+
     @Test("entitlement fallback is independent per axis")
     func entitlementResolution() {
         let free = AppearanceThemeResolver.resolve(
