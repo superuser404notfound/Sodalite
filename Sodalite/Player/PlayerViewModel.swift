@@ -1752,32 +1752,20 @@ final class PlayerViewModel {
             scrubPreview.update(fraction: scrubProgress, durationSeconds: dur)
         } else { updateLiveScrubPreview() }
 
-        // Instant skip (Sodalite#60): commit the jump on a short idle instead of waiting for Select.
-        // The delay is what makes three quick presses one seek rather than three restarts, and it keeps
-        // a press that lands mid-seek from computing its target off a stale position.
-        if preferences.instantSkipSeek {
-            controlsTimer = Task {
-                try? await Task.sleep(for: .seconds(Self.instantSkipCommitDelay))
-                guard !Task.isCancelled else { return }
-                commitScrub()
-            }
-            return
-        }
-
-        // Auto-cancel on idle (matches scrubPanEnded): discard the scrub + fade controls after 5s if the
-        // user taps left/right and walks away without committing via Select.
+        // Sodalite#114 (was the opt-in of #60): the press IS the seek and the transport rising is its
+        // feedback, the way the system player behaves. The short idle is what makes three quick presses
+        // one seek rather than three restarts, and it keeps a press landing mid-seek from computing its
+        // target off a stale position.
         controlsTimer = Task {
-            try? await Task.sleep(for: .seconds(5))
+            try? await Task.sleep(for: .seconds(Self.skipCommitDelay))
             guard !Task.isCancelled else { return }
-            isScrubbing = false
-            scrubPreview.clear()
-            hideControlsIfPlaying()
+            commitScrub()
         }
     }
 
-    /// Idle window a left/right press waits before an instant skip seeks, so a burst of presses
-    /// coalesces into a single seek.
-    static let instantSkipCommitDelay: Double = 0.3
+    /// Idle window a left/right press waits before it seeks, so a burst of presses coalesces into a
+    /// single seek.
+    static let skipCommitDelay: Double = 0.3
 
     /// Reset the error trio so a fresh `startPlayback` shows nothing stale while loading.
     func clearError() {
@@ -2978,8 +2966,8 @@ final class PlayerViewModel {
         }
     }
 
-    /// Touch skip (double-tap sides). seekJump sets the scrub target (the tvOS model then waits for a
-    /// Select press to commit); on touch we commit immediately so it actually seeks.
+    /// Touch skip (double-tap sides). seekJump sets the scrub target and arms a short coalescing idle;
+    /// on touch we commit right there, since a tap has no burst to wait for.
     func skip(by seconds: Double) {
         seekJump(seconds: seconds)
         commitScrub()

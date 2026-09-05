@@ -93,22 +93,12 @@ struct PlaybackSettingsView: View {
 
                 #if os(tvOS)
                 boolRow(
-                    icon: "arrow.left.arrow.right",
-                    title: "settings.playback.instantSkip",
-                    subtitle: "settings.playback.instantSkip.subtitle",
+                    icon: "hand.draw",
+                    title: "settings.playback.touchpadScrubbing",
+                    subtitle: "settings.playback.touchpadScrubbing.subtitle",
                     value: Binding(
-                        get: { prefs.instantSkipSeek },
-                        set: { prefs.instantSkipSeek = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "playpause.circle",
-                    title: "settings.playback.selectTogglesPlayback",
-                    subtitle: "settings.playback.selectTogglesPlayback.subtitle",
-                    value: Binding(
-                        get: { prefs.selectTogglesPlayback },
-                        set: { prefs.selectTogglesPlayback = $0 }
+                        get: { prefs.touchpadScrubbing },
+                        set: { prefs.touchpadScrubbing = $0 }
                     )
                 )
                 #endif

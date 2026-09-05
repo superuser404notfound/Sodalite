@@ -147125,328 +147125,6 @@
         }
       }
     },
-    "settings.playback.instantSkip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Okamžitý přeskok"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Øjeblikkeligt spring"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sofort springen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Άμεση μετάβαση"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instant Skip"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salto inmediato"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Välitön hyppy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saut immédiat"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trenutačni preskok"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Azonnali ugrás"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salto immediato"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "即時スキップ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "즉시 건너뛰기"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Umiddelbart hopp"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direct springen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Natychmiastowy skok"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salto imediato"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salto imediato"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salt imediat"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мгновенный переход"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Okamžitý skok"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direkt hopp"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anında atlama"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Миттєвий перехід"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即跳转"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即跳轉"
-          }
-        }
-      }
-    },
-    "settings.playback.instantSkip.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tlačítka vlevo a vpravo skočí ihned, místo aby čekala na potvrzení cílového času kliknutím."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Venstre eller højre springer med det samme i stedet for at vente på et klik, der bekræfter tidspunktet."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links oder Rechts springt sofort, statt auf einen Klick zur Bestätigung der Zielzeit zu warten."
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Το αριστερό ή το δεξί μεταβαίνει αμέσως, χωρίς να περιμένει κλικ για επιβεβαίωση του χρόνου."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left or right jumps straight away instead of waiting for a click to confirm the target time."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Izquierda o derecha salta al instante en lugar de esperar un clic para confirmar el tiempo."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vasen tai oikea hyppää heti sen sijaan, että odottaisi napsautusta kohdeajan vahvistamiseksi."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gauche ou droite saute immédiatement au lieu d'attendre un clic pour confirmer la position."
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lijevo ili desno skače odmah umjesto da čeka klik za potvrdu ciljnog vremena."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A balra vagy jobbra gomb azonnal ugrik, nem vár kattintásra a célidő megerősítéséhez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sinistra o destra salta subito invece di attendere un clic per confermare il punto."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "左右ボタンを押すと、クリックで確定せずにすぐジャンプします。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "좌우 버튼을 누르면 클릭으로 확인하지 않고 바로 이동합니다."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Venstre eller høyre hopper med en gang i stedet for å vente på et klikk som bekrefter tidspunktet."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links of rechts springt meteen in plaats van te wachten op een klik om de tijd te bevestigen."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przyciski w lewo i w prawo przeskakują od razu, bez potwierdzania kliknięciem."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esquerda ou direita salta na hora, sem esperar um clique para confirmar o tempo."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esquerda ou direita salta de imediato, sem esperar por um clique para confirmar o tempo."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stânga sau dreapta sare imediat, fără să aștepte un clic pentru confirmarea momentului."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Влево или вправо переходит сразу, не дожидаясь нажатия для подтверждения времени."
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tlačidlá vľavo a vpravo skočia okamžite, bez potvrdenia kliknutím."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vänster eller höger hoppar direkt i stället för att vänta på ett klick som bekräftar tiden."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sol veya sağ, hedef zamanı tıklamayla onaylamadan hemen atlar."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ліворуч або праворуч переходить одразу, не чекаючи натискання для підтвердження часу."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按左右键立即跳转，无需再点按确认目标时间。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按左右鍵立即跳轉，無需再點按確認目標時間。"
-          }
-        }
-      }
-    },
     "settings.playback.language.ara" : {
       "comment" : "Audio/subtitle language name",
       "extractionState" : "manual",
@@ -156325,328 +156003,6 @@
         }
       }
     },
-    "settings.playback.selectTogglesPlayback" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknutí přepíná přehrávání"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik starter og pauser"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klick pausiert die Wiedergabe"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Το κλικ εναλλάσσει την αναπαραγωγή"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Click Toggles Playback"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El clic pausa la reproducción"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Napsautus keskeyttää toiston"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le clic met en pause"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik pauzira reprodukciju"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kattintás szünetelteti a lejátszást"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il clic mette in pausa"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クリックで再生／一時停止"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "클릭으로 재생/일시정지"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk pauser avspillingen"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik pauzeert het afspelen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknięcie wstrzymuje odtwarzanie"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O clique pausa a reprodução"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O clique coloca em pausa"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clicul pune pauză"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нажатие ставит на паузу"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknutie pozastaví prehrávanie"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klick pausar uppspelningen"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tıklama oynatmayı duraklatır"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Натискання ставить на паузу"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "点按暂停或继续播放"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "點按暫停或繼續播放"
-          }
-        }
-      }
-    },
-    "settings.playback.selectTogglesPlayback.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jedním kliknutím pozastavíte nebo obnovíte přehrávání, místo abyste nejdřív vyvolali ovládání. Ovládání otevřete tlačítkem nahoru nebo dolů."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sæt på pause og fortsæt med ét enkelt klik i stedet for først at hente betjeningen frem. Op eller ned åbner stadig betjeningen."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausiert und setzt mit einem einzigen Klick fort, statt zuerst die Steuerung einzublenden. Die Steuerung öffnet weiterhin Hoch oder Runter."
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Παύση και συνέχιση με ένα κλικ, αντί να εμφανίζονται πρώτα τα χειριστήρια. Τα χειριστήρια ανοίγουν πάντα με πάνω ή κάτω."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause and resume with a single click instead of waking the controls first. Up or Down still opens the controls."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa y reanuda con un solo clic, en lugar de mostrar primero los controles. Arriba o abajo sigue abriendo los controles."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keskeytä ja jatka yhdellä napsautuksella sen sijaan, että ohjaimet avautuisivat ensin. Ylös tai alas avaa edelleen ohjaimet."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Met en pause et reprend d'un seul clic au lieu d'afficher d'abord les commandes. Haut ou bas ouvre toujours les commandes."
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pauzira i nastavlja jednim klikom umjesto da najprije prikaže kontrole. Kontrole se i dalje otvaraju tipkom gore ili dolje."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyetlen kattintással szünetel és folytat, ahelyett hogy előbb a vezérlők jelennének meg. A vezérlőket továbbra is a fel vagy le gomb nyitja meg."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mette in pausa e riprende con un solo clic invece di mostrare prima i comandi. Su o giù apre ancora i comandi."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "コントロールを表示せずに、1回のクリックで一時停止と再生を切り替えます。コントロールは上下ボタンで開けます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "컨트롤을 먼저 띄우지 않고 한 번의 클릭으로 일시정지하거나 다시 재생합니다. 컨트롤은 위 또는 아래 버튼으로 열 수 있습니다."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sett på pause og fortsett med ett klikk i stedet for å hente frem kontrollene først. Opp eller ned åpner fortsatt kontrollene."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pauzeert en hervat met één klik in plaats van eerst de bediening te tonen. Omhoog of omlaag opent de bediening nog steeds."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wstrzymuje i wznawia jednym kliknięciem, zamiast najpierw wyświetlać sterowanie. Sterowanie nadal otwiera przycisk w górę lub w dół."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa e retoma com um único clique, em vez de exibir primeiro os controles. Para cima ou para baixo continua abrindo os controles."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coloca em pausa e retoma com um único clique, em vez de mostrar primeiro os controlos. Para cima ou para baixo continua a abrir os controlos."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pune pauză și reia cu un singur clic, în loc să afișeze mai întâi comenzile. Sus sau jos deschide în continuare comenzile."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пауза и возобновление одним нажатием, вместо того чтобы сначала показывать элементы управления. Кнопки вверх и вниз по-прежнему открывают их."
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pozastaví a obnoví prehrávanie jedným kliknutím namiesto toho, aby sa najprv zobrazili ovládacie prvky. Ovládanie stále otvoríte tlačidlom nahor alebo nadol."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa och återuppta med ett enda klick i stället för att först ta fram kontrollerna. Upp eller ner öppnar fortfarande kontrollerna."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Önce kontrolleri açmak yerine tek tıklamayla duraklatır ve devam ettirir. Kontroller yukarı veya aşağı tuşuyla yine açılır."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пауза та відновлення одним натисканням замість того, щоб спершу показувати елементи керування. Кнопки вгору та вниз і далі відкривають їх."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "点按一次即可暂停或继续播放，无需先调出播放控制。播放控制仍可通过上下键打开。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "點按一次即可暫停或繼續播放，無需先叫出播放控制。播放控制仍可用上下鍵開啟。"
-          }
-        }
-      }
-    },
     "settings.playback.serverTrickplay" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -164695,6 +164051,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "播放設定"
+          }
+        }
+      }
+    },
+    "settings.playback.touchpadScrubbing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posun přejetím"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stryg for at spole"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischen zum Spulen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ολίσθηση με σύρσιμο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe to Scrub"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslizar para avanzar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelaa pyyhkäisemällä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balayer pour se déplacer"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prelazak prstom za pomicanje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Húzás a tekeréshez"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorri per spostarti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スワイプでシーク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쓸어넘겨 탐색"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sveip for å spole"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veeg om te spoelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przesuwanie palcem przewija"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslizar para navegar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslizar para navegar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisare pentru derulare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотка свайпом"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posun potiahnutím"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svep för att spola"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydırarak sarma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотування свайпом"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑动拖拽进度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑動拖曳進度"
+          }
+        }
+      }
+    },
+    "settings.playback.touchpadScrubbing.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přejetím po dotykové ploše ovladače posunete přehrávání. Vypnuto posouvají jen tlačítka vlevo a vpravo, takže položený palec časovou osou nepohne."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Træk hen over fjernbetjeningens berøringsflade for at flytte afspilningen. Slået fra spoler kun venstre og højre, så en hvilende tommelfinger ikke kan flytte tidslinjen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über die Touchfläche der Fernbedienung wischen, um die Wiedergabeposition zu verschieben. Aus springen nur Links und Rechts, ein aufliegender Daumen verschiebt die Zeitleiste also nicht."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σύρετε πάνω στην επιφάνεια αφής του τηλεχειριστηρίου για να μετακινήσετε την αναπαραγωγή. Απενεργοποιημένο, μεταπηδούν μόνο το αριστερά και το δεξιά, οπότε ένας ακίνητος αντίχειρας δεν μετακινεί τη γραμμή χρόνου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag across the remote's touch surface to move the playhead. Off, only left and right seek, so a resting thumb cannot shift the timeline."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza por la superficie táctil del mando para mover la reproducción. Desactivado, solo avanzan izquierda y derecha, así que un pulgar apoyado no mueve la línea de tiempo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedä kaukosäätimen kosketuspinnalla siirtääksesi toistokohtaa. Pois päältä vain vasen ja oikea kelaavat, joten paikallaan lepäävä peukalo ei siirrä aikajanaa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites glisser le doigt sur la surface tactile de la télécommande pour déplacer la lecture. Désactivé, seuls gauche et droite se déplacent, un pouce posé ne bouge donc pas la timeline."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povucite prstom po dodirnoj površini daljinskog za pomicanje reprodukcije. Isključeno, premotavaju samo lijevo i desno, pa naslonjeni palac ne pomiče vremensku traku."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Húzza az ujját a távirányító érintőfelületén a lejátszási pozíció mozgatásához. Kikapcsolva csak a balra és a jobbra tekert, így a rajta pihenő hüvelykujj nem mozdítja el az idővonalat."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorri sulla superficie touch del telecomando per spostare la riproduzione. Disattivato, si spostano solo sinistra e destra, così un pollice appoggiato non muove la timeline."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リモコンのタッチ面をなぞると再生位置が動きます。オフのときは左右のみが移動し、指を置いたままでもタイムラインは動きません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리모컨 터치 면을 문질러 재생 위치를 옮깁니다. 끄면 좌우 버튼만 탐색하므로 손가락을 올려 두어도 타임라인이 움직이지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dra over fjernkontrollens berøringsflate for å flytte avspillingen. Av spoler bare venstre og høyre, så en hvilende tommel ikke flytter tidslinjen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veeg over het aanraakvlak van de afstandsbediening om de afspeelpositie te verplaatsen. Uit verspringen alleen links en rechts, zodat een rustende duim de tijdlijn niet verschuift."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przesuń palcem po polu dotykowym pilota, aby przesunąć odtwarzanie. Wyłączone, przewijają tylko lewo i prawo, więc spoczywający kciuk nie przesunie osi czasu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize pela superfície sensível ao toque do controle para mover a reprodução. Desativado, apenas esquerda e direita avançam, então um dedo apoiado não move a linha do tempo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize pela superfície tátil do comando para mover a reprodução. Desativado, apenas esquerda e direita avançam, pelo que um dedo pousado não move a linha temporal."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisați pe suprafața tactilă a telecomenzii pentru a muta redarea. Dezactivat, derulează doar stânga și dreapta, așa că un deget sprijinit nu mișcă cronologia."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проведите по сенсорной панели пульта, чтобы переместить позицию воспроизведения. Когда выключено, перематывают только «влево» и «вправо», поэтому лежащий палец не сдвинет шкалу."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potiahnutím po dotykovej ploche diaľkového ovládača posuniete prehrávanie. Vypnuté, posúvajú len tlačidlá vľavo a vpravo, takže položený palec časovou osou nepohne."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dra över fjärrkontrollens pekyta för att flytta uppspelningen. Av spolar bara vänster och höger, så en vilande tumme inte flyttar tidslinjen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma konumunu taşımak için kumandanın dokunmatik yüzeyinde parmağınızı kaydırın. Kapalıyken yalnızca sol ve sağ atlar, böylece duran bir parmak zaman çizelgesini oynatmaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проведіть по сенсорній панелі пульта, щоб перемістити позицію відтворення. Коли вимкнено, перемотують лише «вліво» і «вправо», тож палець, що лежить, не зсуне шкалу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在遥控器触控面上滑动即可移动播放位置。关闭后只有左右键跳转，手指搁在触控面上也不会移动时间轴。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在遙控器觸控面上滑動即可移動播放位置。關閉後只有左右鍵跳轉，手指擱在觸控面上也不會移動時間軸。"
           }
         }
       }

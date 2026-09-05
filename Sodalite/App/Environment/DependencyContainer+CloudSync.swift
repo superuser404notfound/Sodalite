@@ -232,13 +232,12 @@ extension DependencyContainer {
                 networkBufferDepth: p.networkBufferDepth.rawValue,
                 rememberTrackSelections: p.rememberTrackSelections,
                 autoForcedSubtitles: p.autoForcedSubtitles,
-                selectTogglesPlayback: p.selectTogglesPlayback,
-                instantSkipSeek: p.instantSkipSeek,
                 autoSkipRecap: p.autoSkipRecap,
                 subtitlesOnSkipBack: p.subtitlesOnSkipBack,
                 liveTeletextPage: p.liveTeletextPage.rawValue,
                 autoplayCountdown: p.autoplayCountdown,
-                forceDolbyVisionOnNonDVDisplay: p.forceDolbyVisionOnNonDVDisplay
+                forceDolbyVisionOnNonDVDisplay: p.forceDolbyVisionOnNonDVDisplay,
+                touchpadScrubbing: p.touchpadScrubbing
             ))
         case .appearance:
             let a = stores.appearance
@@ -333,8 +332,6 @@ extension DependencyContainer {
             }
             if let remember = p.rememberTrackSelections { store.rememberTrackSelections = remember }
             if let forced = p.autoForcedSubtitles { store.autoForcedSubtitles = forced }
-            if let selectToggles = p.selectTogglesPlayback { store.selectTogglesPlayback = selectToggles }
-            if let instantSkip = p.instantSkipSeek { store.instantSkipSeek = instantSkip }
             if let autoSkipRecap = p.autoSkipRecap { store.autoSkipRecap = autoSkipRecap }
             if let skipBackSubs = p.subtitlesOnSkipBack { store.subtitlesOnSkipBack = skipBackSubs }
             if let teletextPage = p.liveTeletextPage {
@@ -342,6 +339,7 @@ extension DependencyContainer {
             }
             if let countdown = p.autoplayCountdown { store.autoplayCountdown = countdown }
             if let forceDV = p.forceDolbyVisionOnNonDVDisplay { store.forceDolbyVisionOnNonDVDisplay = forceDV }
+            if let touchpadScrub = p.touchpadScrubbing { store.touchpadScrubbing = touchpadScrub }
         case .appearance(let a):
             let store = appearancePreferences
             if let accentChoice = AppearancePreferences.AccentChoice(rawValue: a.accentChoice) {

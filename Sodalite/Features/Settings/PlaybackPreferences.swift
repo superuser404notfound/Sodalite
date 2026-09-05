@@ -44,8 +44,7 @@ final class PlaybackPreferences {
         static let networkBufferDepth = "playback.networkBufferDepth"
         static let liveTeletextPage = "playback.liveTeletextPage"
         static let rememberTrackSelections = "playback.rememberTrackSelections"
-        static let selectTogglesPlayback = "playback.selectTogglesPlayback"
-        static let instantSkipSeek = "playback.instantSkipSeek"
+        static let touchpadScrubbing = "playback.touchpadScrubbing"
         static let subtitlesOnSkipBack = "playback.subtitlesOnSkipBack"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
     }
@@ -361,19 +360,12 @@ final class PlaybackPreferences {
         didSet { store.set(rememberTrackSelections, forKey: Keys.rememberTrackSelections) }
     }
 
-    /// Sodalite#58 (tvOS): ON makes a click on hidden controls pause/resume straight away instead of
-    /// only waking the transport, for CEC remotes whose only usable key is Select. Up/Down still opens
-    /// the transport. Default OFF, the Siri Remote flow stays as it is.
-    var selectTogglesPlayback: Bool {
-        didSet { store.set(selectTogglesPlayback, forKey: Keys.selectTogglesPlayback) }
-    }
-
-    /// Sodalite#60 (tvOS): ON seeks straight after a left/right press instead of parking the target on
-    /// the bar until Select commits it, for CEC remotes where the extra click is a chore. Presses inside
-    /// `PlayerViewModel.instantSkipCommitDelay` still coalesce into one seek. Default OFF, the Siri
-    /// Remote preview-then-confirm flow stays as it is.
-    var instantSkipSeek: Bool {
-        didSet { store.set(instantSkipSeek, forKey: Keys.instantSkipSeek) }
+    /// Sodalite#114 (tvOS): OFF stops a horizontal swipe over the remote's touch surface from moving
+    /// the playhead, for people who drive the box by clicking the ring and keep brushing the pad.
+    /// Default ON. Vertical swipes and the list navigation inside menus are untouched, there the swipe
+    /// is the navigation.
+    var touchpadScrubbing: Bool {
+        didSet { store.set(touchpadScrubbing, forKey: Keys.touchpadScrubbing) }
     }
 
     /// Sodalite#63: after a backward jump, show subtitles until playback reaches the position the jump
@@ -456,8 +448,7 @@ final class PlaybackPreferences {
         self.liveTeletextPage = (store.string(forKey: Keys.liveTeletextPage))
             .flatMap(LiveTeletextPage.init(rawValue:)) ?? .auto
         self.rememberTrackSelections = store.object(forKey: Keys.rememberTrackSelections) as? Bool ?? true
-        self.selectTogglesPlayback = store.object(forKey: Keys.selectTogglesPlayback) as? Bool ?? false
-        self.instantSkipSeek = store.object(forKey: Keys.instantSkipSeek) as? Bool ?? false
+        self.touchpadScrubbing = store.object(forKey: Keys.touchpadScrubbing) as? Bool ?? true
         self.subtitlesOnSkipBack = store.object(forKey: Keys.subtitlesOnSkipBack) as? Bool ?? true
     }
 }
