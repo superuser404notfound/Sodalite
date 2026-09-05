@@ -2,7 +2,8 @@
 """Publish ROADMAP.md into a single, self-updating Discord message.
 
 The message is created once and edited from then on, so the channel holds one
-pinned roadmap rather than a growing pile of copies.
+pinned roadmap rather than a growing pile of copies. It carries one embed per
+bucket, because one embed stops at 4096 characters and the roadmap passed that.
 
 Environment:
   DISCORD_ROADMAP_WEBHOOK     webhook URL of the target channel (required)
@@ -26,7 +27,10 @@ REPO_URL = "https://github.com/superuser404notfound/Sodalite"
 ROADMAP_URL = f"{REPO_URL}/blob/main/ROADMAP.md"
 EMBED_TITLE = "Sodalite roadmap"
 EMBED_COLOR = 0x007AFF  # the app's accent
-DESCRIPTION_LIMIT = 4096
+FOOTER_TEXT = "Updated automatically from ROADMAP.md"
+DESCRIPTION_LIMIT = 4096  # one embed
+TOTAL_LIMIT = 6000  # every embed of one message together, title and footer counted
+MAX_EMBEDS = 10
 USER_AGENT = "Sodalite-Roadmap/1.0 (+%s)" % REPO_URL
 
 
@@ -64,40 +68,75 @@ def unwrap(markdown: str) -> str:
     return "\n".join(out)
 
 
-def build_description(markdown: str) -> str:
-    """Drop the file's own H1 (the embed carries the title) and fit the limit."""
+def sections(body: str) -> list[str]:
+    """Cut the body into the preamble and one chunk per bucket."""
+    chunks: list[str] = []
+    current: list[str] = []
+    for line in body.splitlines():
+        if line.startswith("## ") and current:
+            chunks.append("\n".join(current).strip())
+            current = [line]
+        else:
+            current.append(line)
+    chunks.append("\n".join(current).strip())
+    return [chunk for chunk in chunks if chunk]
+
+
+def build_descriptions(markdown: str) -> list[str]:
+    """Drop the file's own H1 (the embed carries the title) and fit the limits.
+
+    A bucket per embed buys room up to the message's own 6000, and the tail
+    link stays for the day that runs out too. Truncation lands on an entry
+    boundary, so the channel never shows half of one.
+    """
     lines = markdown.splitlines()
     if lines and lines[0].startswith("# "):
         lines = lines[1:]
     body = unwrap("\n".join(lines)).strip()
 
-    if len(body) <= DESCRIPTION_LIMIT:
-        return body
-
     tail = f"\n\n[Read the rest on GitHub]({ROADMAP_URL})"
-    budget = DESCRIPTION_LIMIT - len(tail)
-    cut = body.rfind("\n### ", 0, budget)
-    if cut == -1:
-        cut = body.rfind("\n\n", 0, budget)
-    if cut == -1:
-        cut = budget
-    return body[:cut].rstrip() + tail
+    budget = TOTAL_LIMIT - len(EMBED_TITLE) - len(FOOTER_TEXT)
+    out: list[str] = []
+    spent = 0
+
+    for chunk in sections(body):
+        room = min(DESCRIPTION_LIMIT, budget - spent)
+        if len(out) < MAX_EMBEDS and len(chunk) <= room:
+            out.append(chunk)
+            spent += len(chunk)
+            continue
+
+        room -= len(tail)
+        cut = chunk.rfind("\n### ", 0, room) if room > 0 else -1
+        if cut == -1 and room > 0:
+            cut = chunk.rfind("\n\n", 0, room)
+        if cut > 0 and len(out) < MAX_EMBEDS:
+            out.append(chunk[:cut].rstrip() + tail)
+        elif out:
+            # No room for even a stub, so the tail replaces the last entry
+            # already published rather than growing the message.
+            last = out[-1]
+            keep = last.rfind("\n### ", 0, max(len(last) - len(tail), 0))
+            out[-1] = last[:keep if keep > 0 else max(len(last) - len(tail), 0)].rstrip() + tail
+        break
+
+    return out or [body[:DESCRIPTION_LIMIT]]
 
 
-def build_payload(description: str) -> dict:
-    return {
-        "embeds": [
-            {
-                "title": EMBED_TITLE,
-                "url": ROADMAP_URL,
-                "description": description,
-                "color": EMBED_COLOR,
-                "footer": {"text": "Updated automatically from ROADMAP.md"},
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
-        ],
-        "allowed_mentions": {"parse": []},
-    }
+def build_payload(descriptions: list[str]) -> dict:
+    embeds = []
+    for index, description in enumerate(descriptions):
+        embed = {"description": description, "color": EMBED_COLOR}
+        if index == 0:
+            # Only the first one carries the title and the link. Discord merges
+            # embeds that share a url.
+            embed["title"] = EMBED_TITLE
+            embed["url"] = ROADMAP_URL
+        if index == len(descriptions) - 1:
+            embed["footer"] = {"text": FOOTER_TEXT}
+            embed["timestamp"] = datetime.now(timezone.utc).isoformat()
+        embeds.append(embed)
+    return {"embeds": embeds, "allowed_mentions": {"parse": []}}
 
 
 def request(method: str, url: str, payload: dict) -> dict:
@@ -142,9 +181,10 @@ def main() -> None:
     except OSError as error:
         raise SystemExit(f"cannot read {args.roadmap}: {error}")
 
-    description = build_description(markdown)
-    payload = build_payload(description)
-    print(f"description: {len(description)} of {DESCRIPTION_LIMIT} characters")
+    descriptions = build_descriptions(markdown)
+    payload = build_payload(descriptions)
+    total = sum(len(part) for part in descriptions) + len(EMBED_TITLE) + len(FOOTER_TEXT)
+    print(f"{len(descriptions)} embeds, {total} of {TOTAL_LIMIT} characters")
 
     if args.dry_run:
         print(json.dumps(payload, indent=2, ensure_ascii=False))
