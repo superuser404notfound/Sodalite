@@ -3,7 +3,9 @@
 
 The message is created once and edited from then on, so the channel holds one
 pinned roadmap rather than a growing pile of copies. It carries one embed per
-bucket, because one embed stops at 4096 characters and the roadmap passed that.
+bucket, because one embed stops at 4096 characters and the roadmap passed that,
+and a bucket that outgrows an embed on its own is split at an entry boundary
+across the next one.
 
 Environment:
   DISCORD_ROADMAP_WEBHOOK     webhook URL of the target channel (required)
@@ -82,12 +84,28 @@ def sections(body: str) -> list[str]:
     return [chunk for chunk in chunks if chunk]
 
 
+def entries(chunk: str) -> list[str]:
+    """Cut a bucket into its heading and one piece per entry."""
+    pieces: list[str] = []
+    current: list[str] = []
+    for line in chunk.splitlines():
+        if line.startswith("### ") and current:
+            pieces.append("\n".join(current).strip())
+            current = [line]
+        else:
+            current.append(line)
+    pieces.append("\n".join(current).strip())
+    return [piece for piece in pieces if piece]
+
+
 def build_descriptions(markdown: str) -> list[str]:
     """Drop the file's own H1 (the embed carries the title) and fit the limits.
 
-    A bucket per embed buys room up to the message's own 6000, and the tail
-    link stays for the day that runs out too. Truncation lands on an entry
-    boundary, so the channel never shows half of one.
+    A bucket per embed buys room up to the message's own 6000, and a bucket
+    that passes 4096 on its own continues in the next embed rather than losing
+    its tail entries. Every cut lands on an entry boundary, so the channel
+    never shows half of one, and the link to GitHub stays for the day the whole
+    message runs out.
     """
     lines = markdown.splitlines()
     if lines and lines[0].startswith("# "):
@@ -99,26 +117,47 @@ def build_descriptions(markdown: str) -> list[str]:
     out: list[str] = []
     spent = 0
 
-    for chunk in sections(body):
-        room = min(DESCRIPTION_LIMIT, budget - spent)
-        if len(out) < MAX_EMBEDS and len(chunk) <= room:
-            out.append(chunk)
-            spent += len(chunk)
-            continue
+    def room() -> int:
+        return min(DESCRIPTION_LIMIT, budget - spent) if len(out) < MAX_EMBEDS else 0
 
-        room -= len(tail)
-        cut = chunk.rfind("\n### ", 0, room) if room > 0 else -1
-        if cut == -1 and room > 0:
-            cut = chunk.rfind("\n\n", 0, room)
-        if cut > 0 and len(out) < MAX_EMBEDS:
-            out.append(chunk[:cut].rstrip() + tail)
-        elif out:
-            # No room for even a stub, so the tail replaces the last entry
-            # already published rather than growing the message.
-            last = out[-1]
-            keep = last.rfind("\n### ", 0, max(len(last) - len(tail), 0))
-            out[-1] = last[:keep if keep > 0 else max(len(last) - len(tail), 0)].rstrip() + tail
-        break
+    def commit(text: str) -> None:
+        nonlocal spent
+        out.append(text)
+        spent += len(text)
+
+    def close_with_tail() -> None:
+        """Nothing more fits, so the last embed ends in a pointer to the file."""
+        nonlocal spent
+        if not out or out[-1].endswith(tail):
+            return
+        last = out[-1]
+        spent -= len(last)
+        while len(last) + len(tail) > min(DESCRIPTION_LIMIT, budget - spent):
+            cut = last.rfind("\n### ")
+            if cut <= 0:
+                last = last[:max(0, min(DESCRIPTION_LIMIT, budget - spent) - len(tail))]
+                break
+            last = last[:cut].rstrip()
+        out[-1] = last.rstrip() + tail
+        spent += len(out[-1])
+
+    for chunk in sections(body):
+        pending = ""
+        for piece in entries(chunk):
+            candidate = f"{pending}\n\n{piece}" if pending else piece
+            if len(candidate) <= room():
+                pending = candidate
+                continue
+            if pending:
+                commit(pending)
+                pending = ""
+            if len(piece) <= room():
+                pending = piece
+                continue
+            close_with_tail()
+            return out
+        if pending:
+            commit(pending)
 
     return out or [body[:DESCRIPTION_LIMIT]]
 
