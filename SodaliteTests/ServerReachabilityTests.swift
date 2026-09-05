@@ -124,3 +124,46 @@ struct ServerReachabilityTests {
         #expect(ServerReachability.unreachable.isFailure)
     }
 }
+
+/// Sodalite#122, second round. The Local Network denial screen from Sodalite#92 claimed matrix row 1
+/// on a device the report predicted it would stay silent on. Measured on an iPhone 17 Pro, Wi-Fi
+/// off, 5G up, LAN-only server: the scoped probe reported a denial and the app told its owner to
+/// switch on a permission that was already on.
+///
+/// The permission governs a LAN this device is attached to. With no Wi-Fi and no Ethernet there is
+/// no such LAN, so every reason the probe can report is answering a different question, and the
+/// accusation is incoherent before it is wrong. That is a coherence check on a claim about the
+/// DEVICE, not a prediction about reachability, which is why it can only ever withdraw a claim.
+@Suite("Local network denial preconditions")
+struct LocalNetworkAttachmentTests {
+    private func reading(satisfied: Bool, uses: Bool, has: Bool) -> NetworkPathSnapshot.Reading {
+        NetworkPathSnapshot.Reading(
+            isSatisfied: satisfied, usesLocalInterface: uses, hasLocalInterface: has
+        )
+    }
+
+    @Test("cellular alone is not a local network")
+    func cellularOnly() {
+        #expect(reading(satisfied: true, uses: false, has: false).isAttachedToALocalNetwork == false)
+    }
+
+    @Test("Wi-Fi in use is a local network")
+    func wifiInUse() {
+        #expect(reading(satisfied: true, uses: true, has: true).isAttachedToALocalNetwork)
+    }
+
+    /// The generous half of the OR, and the reason both readings are taken. A phone on Wi-Fi that
+    /// the system currently prefers to route around is still attached to a LAN, and a denial there
+    /// is real. Suppressing it would put back the wrong sentence #92 exists to remove.
+    @Test("Wi-Fi present but unused still counts")
+    func wifiPresentUnused() {
+        #expect(reading(satisfied: true, uses: false, has: true).isAttachedToALocalNetwork)
+    }
+
+    /// Airplane mode: no path and no interfaces. Not a denial either, and `.noNetwork` is what says
+    /// so instead.
+    @Test("no path at all is not a denial")
+    func noPath() {
+        #expect(reading(satisfied: false, uses: false, has: false).isAttachedToALocalNetwork == false)
+    }
+}

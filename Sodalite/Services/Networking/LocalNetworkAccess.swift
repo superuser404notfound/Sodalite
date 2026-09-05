@@ -85,11 +85,39 @@ nonisolated enum LocalNetworkAccess {
     /// somebody with such a server could close by measuring what the reading actually is.
     static func isDenied(for url: URL) async -> Bool {
         guard isGoverned(url), let host = url.host(), let port = port(for: url) else { return false }
+        guard isAttachedToALocalNetwork(host: host, port: port) else { return false }
         let denied = await LocalNetworkProber.shared.isDenied(host: host, port: port)
         guard denied else { return false }
         LogTap.shared.note("[network] local network access denied by this device for \(host):\(port)")
         raiseIfNothingIsGettingThrough(url)
         return true
+    }
+
+    /// A denial cannot be true where there is no local network to be kept off (Sodalite#122).
+    ///
+    /// The permission governs access to a LAN this device is attached to. With Wi-Fi off and only
+    /// cellular carrying the path, there is no such LAN, and every reason the probe can report
+    /// becomes an answer to a different question. Measured on an iPhone 17 Pro on 5G against a
+    /// LAN-only server: the probe said denied and the app told its owner to switch on a permission
+    /// that was already on, which is a worse sentence than the vague one #92 replaced. The truth
+    /// there is that the server is not on the network this phone is currently attached to, and
+    /// `ServerReachability` is what says so.
+    ///
+    /// This is a coherence check on the accusation, not a prediction about reachability, which is
+    /// why it is safe where a "cellular means unreachable" rule would not be: it can only ever
+    /// withdraw a claim the app was about to make about the DEVICE.
+    ///
+    /// Fails open on an unknown path. The monitor's first callback may not have landed yet, and a
+    /// missing reading is not evidence of anything.
+    private static func isAttachedToALocalNetwork(host: String, port: UInt16) -> Bool {
+        guard let reading = NetworkPathSnapshot.shared.current else { return true }
+        guard !reading.isAttachedToALocalNetwork else { return true }
+        LogTap.shared.note(
+            "[network] not accusing this device over \(host):\(port): no local network to be denied "
+            + "(satisfied=\(reading.isSatisfied) usesLocal=\(reading.usesLocalInterface) "
+            + "hasLocal=\(reading.hasLocalInterface))"
+        )
+        return false
     }
 
     /// A denial is true about the address it was measured on, and the error case says so. Whether it

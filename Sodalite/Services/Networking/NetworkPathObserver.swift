@@ -26,7 +26,7 @@ final class NetworkPathObserver {
         monitor.pathUpdateHandler = { path in
             // Recorded off the monitor queue, before the MainActor hop: the route resolve reads
             // this synchronously and must not race a hop that has not landed yet.
-            NetworkPathSnapshot.shared.record(isSatisfied: path.status == .satisfied)
+            NetworkPathSnapshot.shared.record(NetworkPathSnapshot.Reading(path))
             Task { @MainActor [weak self] in
                 self?.pathDidUpdate()
             }
@@ -68,18 +68,47 @@ final class NetworkPathObserver {
 nonisolated final class NetworkPathSnapshot: @unchecked Sendable {
     static let shared = NetworkPathSnapshot()
 
-    private let lock = NSLock()
-    private var satisfied: Bool?
+    struct Reading: Sendable, Equatable {
+        let isSatisfied: Bool
+        /// Is the path actually running over Wi-Fi or Ethernet right now?
+        let usesLocalInterface: Bool
+        /// Is such an interface in the picture at all, used or not? Broader than the above on
+        /// purpose: a device on Wi-Fi that the system currently prefers to route around is still a
+        /// device attached to a local network.
+        let hasLocalInterface: Bool
 
-    var isSatisfied: Bool? {
-        lock.lock()
-        defer { lock.unlock() }
-        return satisfied
+        /// True where a local network exists for a permission to govern. Both readings are taken
+        /// because only the pair says which one iOS actually moves when Wi-Fi goes off, and the
+        /// generous OR is the safe side: it can only ever fail to suppress a denial, never suppress
+        /// a real one.
+        var isAttachedToALocalNetwork: Bool { usesLocalInterface || hasLocalInterface }
     }
 
-    func record(isSatisfied: Bool) {
+    private let lock = NSLock()
+    private var reading: Reading?
+
+    var current: Reading? {
         lock.lock()
-        satisfied = isSatisfied
+        defer { lock.unlock() }
+        return reading
+    }
+
+    var isSatisfied: Bool? { current?.isSatisfied }
+
+    func record(_ reading: Reading) {
+        lock.lock()
+        self.reading = reading
         lock.unlock()
+    }
+}
+
+extension NetworkPathSnapshot.Reading {
+    nonisolated init(_ path: NWPath) {
+        let localTypes: Set<NWInterface.InterfaceType> = [.wifi, .wiredEthernet]
+        self.init(
+            isSatisfied: path.status == .satisfied,
+            usesLocalInterface: localTypes.contains(where: path.usesInterfaceType),
+            hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) }
+        )
     }
 }
