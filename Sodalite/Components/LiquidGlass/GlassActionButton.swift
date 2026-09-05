@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct GlassActionButton: View {
+    @Environment(\.appearanceTheme) private var appearanceTheme
+
     let title: LocalizedStringKey
     let systemImage: String
     var isProminent: Bool = false
@@ -19,6 +21,13 @@ struct GlassActionButton: View {
     /// When set via `.collapsesActionButtonLabel(true)`, secondary buttons collapse to an icon-only pill revealing the title on focus, so a crowded row (Bluey: 8 actions) fits.
     @Environment(\.collapsesActionButtonLabel) private var collapsesLabel
 
+    /// Everything drawn on the accent fill takes the accent's own foreground (Sodalite#111): white
+    /// is only legible on a dark accent, and ten of the twenty-three presets are not dark. The
+    /// destructive fill is red and the secondary fill is a dim white, so both stay white-labelled.
+    private var contentColor: Color {
+        isProminent && !isDestructive ? appearanceTheme.palette.foreground.color : .white
+    }
+
     var body: some View {
         Button(role: isDestructive ? .destructive : nil) {
             action()
@@ -29,13 +38,15 @@ struct GlassActionButton: View {
                 subtitle: subtitle,
                 isProminent: isProminent,
                 isLoading: isLoading,
-                collapsesLabel: collapsesLabel
+                collapsesLabel: collapsesLabel,
+                contentColor: contentColor
             )
         }
         .buttonStyle(GlassButtonStyle(
             isProminent: isProminent,
             isDestructive: isDestructive,
-            progressFraction: progressFraction
+            progressFraction: progressFraction,
+            contentColor: contentColor
         ))
         .disabled(isLoading && disablesWhileLoading)
         // Keep the title for VoiceOver even when the visible label collapses to an icon-only pill.
@@ -51,6 +62,7 @@ private struct GlassActionButtonLabel: View {
     let isProminent: Bool
     let isLoading: Bool
     let collapsesLabel: Bool
+    let contentColor: Color
 
     @Environment(\.isFocused) private var isFocused
     /// Measured intrinsic width of the trailing title/subtitle (leading gap baked in); the visible copy animates its frame 0→this so text fades in step with the growing width.
@@ -77,7 +89,7 @@ private struct GlassActionButtonLabel: View {
             if let subtitle, !subtitle.isEmpty {
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(contentColor.opacity(0.75))
                     .monospacedDigit()
                     .lineLimit(1)
             }
@@ -170,30 +182,28 @@ struct GlassButtonStyle: ButtonStyle {
     var isProminent: Bool = false
     /// With `isProminent`, makes the fill destructive red; non-prominent destructive stays grey (parent Button's role handles VoiceOver).
     var isDestructive: Bool = false
-    /// 0…1 resume-progress fill behind the label, accent-tinted; ignored when nil.
+    /// 0…1 resume progress, drawn as a bar along the bottom of the fill; ignored when nil.
     var progressFraction: Double? = nil
+    /// What the label, the glyph and the progress bar are painted in. Derived by the button from
+    /// the accent, so this style never has to know which accent is in play.
+    var contentColor: Color = .white
     @Environment(\.isFocused) private var isFocused
 
-    /// A progress-overlay tile drops its prominent fill: the accent backdrop drowned out the accent progress capsule, so it falls back to neutral grey to let the capsule pop.
-    private var effectivelyProminent: Bool {
-        isProminent && (progressFraction ?? 0) <= 0
-    }
+    /// The fill the label's contrast was measured against (Sodalite#113). Named so the test can
+    /// composite the same values instead of copying two literals that would drift.
+    static let restingFillOpacity: Double = 0.7
+    static let focusedFillOpacity: Double = 0.9
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .foregroundStyle(contentColor)
             .background(
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(backgroundFill)
 
                     if let fraction = progressFraction, fraction > 0 {
-                        GeometryReader { geo in
-                            Capsule()
-                                .fill(.tint.opacity(isFocused ? 0.95 : 0.85))
-                                .frame(width: geo.size.width * CGFloat(min(1.0, fraction)))
-                        }
-                        // Clip the inner fill to the outer capsule so a fraction near 1.0 doesn't bleed past the rounded edge.
-                        .clipShape(Capsule())
+                        progressBar(fraction)
                     }
                 }
             )
@@ -208,12 +218,39 @@ struct GlassButtonStyle: ButtonStyle {
             .animation(.smooth(duration: 0.32), value: isFocused)
     }
 
+    /// Progress used to be an accent capsule filling the tile from the leading edge, which forced
+    /// the tile to drop its accent fill (accent on accent does not read) and put half the label on
+    /// the accent and half on grey, so no single label colour was right. Drawing it in the label's
+    /// own colour instead means the tile keeps the prominent fill every other primary action wears,
+    /// and the whole label sits on one known ground.
+    private func progressBar(_ fraction: Double) -> some View {
+        GeometryReader { geo in
+            let height = max(4, geo.size.height * 0.08)
+            Capsule()
+                .fill(contentColor.opacity(0.28))
+                .frame(height: height)
+                .overlay(alignment: .leading) {
+                    Capsule()
+                        .fill(contentColor)
+                        .frame(
+                            width: (geo.size.width - Self.barInset * 2) * CGFloat(min(1.0, max(0, fraction))),
+                            height: height
+                        )
+                }
+                .padding(.horizontal, Self.barInset)
+                .position(x: geo.size.width / 2, y: geo.size.height - height * 2)
+        }
+    }
+
+    /// Lines the bar up with the label's own leading edge rather than the capsule's.
+    private static let barInset: CGFloat = 24
+
     private var backgroundFill: AnyShapeStyle {
-        if effectivelyProminent {
+        if isProminent {
             if isDestructive {
-                return AnyShapeStyle(Color.Theme.destructive.opacity(isFocused ? 0.9 : 0.7))
+                return AnyShapeStyle(Color.Theme.destructive.opacity(isFocused ? Self.focusedFillOpacity : Self.restingFillOpacity))
             }
-            return AnyShapeStyle(TintShapeStyle.tint.opacity(isFocused ? 0.9 : 0.7))
+            return AnyShapeStyle(TintShapeStyle.tint.opacity(isFocused ? Self.focusedFillOpacity : Self.restingFillOpacity))
         }
         return AnyShapeStyle(.white.opacity(isFocused ? 0.2 : 0.1))
     }
