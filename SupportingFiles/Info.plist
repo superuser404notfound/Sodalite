@@ -48,6 +48,17 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Sodalite#115: without this the Game Controller framework MERGES the physical Apple TV remote
+	     with the virtual one from an iPhone's Control Center into a single device whose
+	     productCategory reads "Coalesced Remote", and the real remote's own category disappears.
+	     Measured on the living room Apple TV on 2026-09-05: opening the iPhone remote replaced
+	     "Siri Remote (2nd Generation)" with "Coalesced Remote" for as long as it stayed open.
+	     SiriRemoteSurfaceTracker gates the edge-click seek on the 1st-generation category, so
+	     coalescing would silently switch the feature off for anyone whose household has that widget
+	     up. Apple recommends the key for correct 2021-remote support as well (GCDirectionalGamepad.h).
+	     Inert on iOS, where there is no remote to coalesce; this file is shared by both app targets. -->
+	<key>GCSupportsMultipleMicroGamepads</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AtkinsonHyperlegible-Regular.ttf</string>
