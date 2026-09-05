@@ -16,9 +16,24 @@ import GameController
 @MainActor
 final class SiriRemoteSurfaceTracker {
 
-    /// How long a latched click stays answerable. Only a guard against a stale latch explaining a much
-    /// later press; the latch and the `.select` press it belongs to are milliseconds apart.
+    /// How long a latched click stays answerable. It has to clear the host's own 0.35 s hold threshold:
+    /// the `.select` tap recognizer requires the hold recognizer to FAIL first, so the press this latch
+    /// answers can arrive a third of a second after the button went down. A tighter window would drop
+    /// exactly the slower clicks. It matters at all because coalescing is off (see Info.plist), so a
+    /// physical and a Control Center remote can be live at once and one can latch while the other clicks.
     private static let latchLifetime: TimeInterval = 1.0
+
+    /// Remotes whose whole surface sits on one button, where a click carries no direction of its own.
+    /// The 2021 remote is deliberately absent: its outer ring already delivers real `.leftArrow` and
+    /// `.rightArrow` presses, which never reach the select handler, and reading its clickpad as an edge
+    /// surface as well would give a single press two meanings in the band where the two overlap.
+    private static let trackedCategories: Set<String> = [
+        GCProductCategorySiriRemote1stGen,
+        // The virtual remote in an iPhone's Control Center has a full-surface touchpad of the same
+        // shape, so the same gesture reads the same way. It also makes the feature testable on hardware
+        // that is actually at hand, which no 1st-generation remote here is.
+        GCProductCategoryControlCenterRemote,
+    ]
 
     private var latchedDirection: Int?
     private var latchedAt: Date?
@@ -93,7 +108,7 @@ final class SiriRemoteSurfaceTracker {
 
     private func attach(_ controller: GCController) {
         guard attachedControllers[ObjectIdentifier(controller)] == nil,
-              controller.productCategory == GCProductCategorySiriRemote1stGen,
+              Self.trackedCategories.contains(controller.productCategory),
               let pad = controller.microGamepad else { return }
         // Raw touchpad position instead of a sliding window centred on first contact: the window is the
         // right model for steering, the wrong one for "which part of the glass is under the thumb".
