@@ -37,6 +37,7 @@ final class SiriRemoteSurfaceTracker {
                 MainActor.assumeIsolated { self?.refreshControllers() }
             })
         }
+        note("tracker started")
         refreshControllers()
     }
 
@@ -78,7 +79,7 @@ final class SiriRemoteSurfaceTracker {
     /// correctly ignored" from "the tracker never ran". Both readings matter and they look identical.
     private func logInventory(_ connected: [GCController]) {
         guard !connected.isEmpty else {
-            LogTap.shared.note("[EdgeClick] scan: GameController reports no controllers at all")
+            note("scan: GameController reports no controllers at all")
             return
         }
         let inventory = connected.map { controller in
@@ -87,7 +88,7 @@ final class SiriRemoteSurfaceTracker {
             let taken = attachedControllers[ObjectIdentifier(controller)] != nil ? "TRACKED" : "ignored"
             return "\(category) [\(pad), \(taken)]"
         }.joined(separator: ", ")
-        LogTap.shared.note("[EdgeClick] scan: \(connected.count) controller(s): \(inventory)")
+        note("scan: \(connected.count) controller(s): \(inventory)")
     }
 
     private func attach(_ controller: GCController) {
@@ -108,6 +109,27 @@ final class SiriRemoteSurfaceTracker {
         attachedControllers[ObjectIdentifier(controller)] = controller
     }
 
+    /// Every line this class produces goes through here. Besides the ring buffer a DEBUG build also
+    /// appends to the app container, because the 300-line buffer rolls a scan line off within seconds of
+    /// playback starting and these lines have to survive long enough to be pulled off the device.
+    /// `Library/Caches` on purpose: tvOS forbids app writes to `Documents` and swallows the failure.
+    private func note(_ line: String) {
+        LogTap.shared.note("[EdgeClick] \(line)")
+        #if DEBUG
+        guard let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let url = dir.appendingPathComponent("edgeclick.txt")
+        let stamped = "\(Date()) \(line)\n"
+        guard let data = stamped.data(using: .utf8) else { return }
+        if let handle = try? FileHandle(forWritingTo: url) {
+            defer { try? handle.close() }
+            try? handle.seekToEnd()
+            try? handle.write(contentsOf: data)
+        } else {
+            try? data.write(to: url)
+        }
+        #endif
+    }
+
     private func latch(x: Float, y: Float) {
         let direction = SiriRemoteEdgeClick.direction(x: x, y: y)
         latchedDirection = direction
@@ -115,8 +137,8 @@ final class SiriRemoteSurfaceTracker {
         // The threshold is a guess (no 1st-generation remote on this side), so every reading is logged
         // against it. Settings > Diagnostic Log is reachable on an App Store build, which makes a
         // reporter's screenshot the only way this number gets calibrated from real thumbs.
-        LogTap.shared.note(String(
-            format: "[EdgeClick] surface click x=%.2f y=%.2f threshold=%.2f -> %@",
+        note(String(
+            format: "surface click x=%.2f y=%.2f threshold=%.2f -> %@",
             x, y, SiriRemoteEdgeClick.edgeThreshold,
             direction.map { $0 < 0 ? "back" : "forward" } ?? "centre"))
     }
