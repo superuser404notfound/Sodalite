@@ -186,18 +186,13 @@ extension PlayerViewModel {
         }
     }
 
-    /// End a continuous spool (release): stop spooling but KEEP the preview,
-    /// like a pan scrub; user commits with Select or it auto-cancels on idle.
-    /// With instant skip on, the release IS the commit, so a held key behaves
-    /// like the discrete presses next to it (Sodalite#60).
+    /// End a continuous spool (release): the release IS the commit, so a held key lands the same way
+    /// the discrete presses next to it do (Sodalite#60, unconditional since #114). The touchpad pan
+    /// keeps its own preview-then-confirm ending in `scrubPanEnded`.
     func endContinuousSeek() {
         guard continuousSeekTask != nil else { return }
         continuousSeekTask?.cancel()
         continuousSeekTask = nil
-        if preferences.instantSkipSeek {
-            commitScrub()
-        } else {
-            scrubPanEnded()
-        }
+        commitScrub()
     }
 }

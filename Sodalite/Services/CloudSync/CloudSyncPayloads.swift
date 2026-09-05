@@ -109,7 +109,7 @@ struct PlaybackSettingsPayload: Codable, Equatable {
     var preferLosslessAudioBridge: Bool
     var showScrubPreview: Bool
     var preferServerTrickplay: Bool
-    /// The eight below are optional because they were added after the payload shipped.
+    /// The six below are optional because they were added after the payload shipped.
     /// Swift's synthesized Decodable does NOT fall back to a property default on a missing
     /// key, it throws, and one thrown key drops the whole payload: a device on an older
     /// build would silently stop syncing its playback settings to a newer one. A missing
@@ -118,16 +118,19 @@ struct PlaybackSettingsPayload: Codable, Equatable {
     var networkBufferDepth: String?
     var rememberTrackSelections: Bool?
     var autoForcedSubtitles: Bool?
-    var selectTogglesPlayback: Bool?
-    var instantSkipSeek: Bool?
     var autoSkipRecap: Bool?
     var subtitlesOnSkipBack: Bool?
-    /// Shipped after the payload, so optional for the same reason as the eight above.
+    /// Shipped after the payload, so optional for the same reason as the six above.
     var liveTeletextPage: String?
     /// Sodalite#67, same reason again.
     var autoplayCountdown: Bool?
     /// AetherEngine#455, same reason again.
     var forceDolbyVisionOnNonDVDisplay: Bool?
+    /// Sodalite#114, same reason again. It replaces `selectTogglesPlayback` and `instantSkipSeek`,
+    /// which are gone: both became the behaviour. A device still on the old build keeps writing them,
+    /// and `CloudSyncForwardCompat` carries them through this build untouched, so its own switches
+    /// keep working while nothing here reads them.
+    var touchpadScrubbing: Bool?
 }
 
 /// Sodalite#46. Unlike the other settings payloads this one is NOT last-writer-wins:

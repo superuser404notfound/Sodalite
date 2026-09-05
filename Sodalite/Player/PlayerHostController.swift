@@ -888,15 +888,11 @@ final class PlayerHostController: AVPlayerViewController {
             viewModel.activateControl(viewModel.controlsFocus)
         } else if viewModel.isScrubbing {
             viewModel.commitScrub()
-        } else if viewModel.showControls {
-            viewModel.togglePlayPause()
-        } else if viewModel.preferences.selectTogglesPlayback {
-            // Sodalite#58: CEC remotes reach the Apple TV with Select as their only usable key, so the
-            // wake-the-transport click costs them a second press per pause. togglePlayPause raises the
-            // transport itself, and Up/Down still opens it without touching playback.
-            viewModel.togglePlayPause()
         } else {
-            viewModel.showControlsTemporarily()
+            // Sodalite#58, unconditional since #114: a click on hidden controls pauses or resumes, the
+            // way the system player behaves. togglePlayPause raises the transport itself, so the click
+            // still gives feedback, and Up/Down still opens it without touching playback.
+            viewModel.togglePlayPause()
         }
     }
 
@@ -1275,6 +1271,10 @@ final class PlayerHostController: AVPlayerViewController {
         let horizontalScrubs =
             !viewModel.showControls
             || viewModel.controlsFocus == .progressBar
+        // Sodalite#114: with touchpad scrubbing off the horizontal swipe is inert. Deliberately a
+        // second gate rather than folding it into horizontalScrubs, which would drop the swipe into
+        // the button-nav branch below and turn the gesture the user switched off into a skip.
+        let panScrubs = horizontalScrubs && viewModel.preferences.touchpadScrubbing
 
         switch gesture.state {
         case .began:
@@ -1296,6 +1296,7 @@ final class PlayerHostController: AVPlayerViewController {
             switch panAxis {
             case .horizontal:
                 if horizontalScrubs {
+                    guard panScrubs else { return }
                     if !scrubCommitted {
                         let v = gesture.velocity(in: view)
                         guard abs(v.x) >= Self.scrubCommitMinVelocity else { return }
@@ -1327,8 +1328,10 @@ final class PlayerHostController: AVPlayerViewController {
                 break
             }
         case .ended, .cancelled:
-            // Only finalise when actually scrubbing; horizontal-into-nav never touched the timeline.
-            if panAxis == .horizontal && horizontalScrubs {
+            // Only finalise when actually scrubbing; horizontal-into-nav never touched the timeline,
+            // and neither did a swipe with scrubbing switched off. Without the second half a swipe
+            // landing inside a press-skip's commit idle would park that skip on a discard timer.
+            if panAxis == .horizontal && panScrubs {
                 viewModel.scrubPanEnded()
             }
             panAxis = .undetermined
