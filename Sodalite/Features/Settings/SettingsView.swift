@@ -567,6 +567,7 @@ struct SettingsTileButtonStyle: ButtonStyle {
     #endif
     /// A custom ButtonStyle must self-dim when disabled; the default bordered style auto-dims, this one doesn't.
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     func makeBody(configuration: Configuration) -> some View {
         #if os(tvOS)
@@ -575,6 +576,12 @@ struct SettingsTileButtonStyle: ButtonStyle {
         let active = configuration.isPressed
         #endif
         return configuration.label
+            // Same fill as GlassButtonStyle's prominent variant, so the same rule about what goes
+            // on top of it applies (Sodalite#111). Only the prominent tile: a resting tile is a dim
+            // white on a dark ground, and its label is the call site's to colour.
+            .foregroundStyle(isProminent
+                ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
+                : AnyShapeStyle(.foreground))
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(fill(active: active))
