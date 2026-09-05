@@ -50,6 +50,18 @@ final class AppState {
     /// off nothing behind it works, and clears the flag when a foreground re-probe disagrees.
     var isLocalNetworkDenied = false
 
+    /// Whether the active Jellyfin server answers from where this device is standing, as measured
+    /// by the route probe rather than inferred from a failed request (Sodalite#122). Written only
+    /// by the Jellyfin leg of the route resolve, and deliberately not by the Seerr leg: a LAN-only
+    /// Seerr beside a Jellyfin on a public name says nothing about whether Home can load.
+    ///
+    /// Home reads it to stop waiting for its own timeouts. Offline downloads (#81) becomes the
+    /// second consumer, which is why the verdict is app state and not a thrown error: "run this
+    /// session against the server or against the disk" is one question asked once at launch, not a
+    /// per-request failure, and the same fact must not end up re-derived by a second rule that
+    /// drifts from this one.
+    var serverReachability: ServerReachability = .unknown
+
     /// Bumped when something outside a feature has made its last failure obsolete, so the feature
     /// reloads what it already gave up on. Raised today by the return from a Local Network denial:
     /// the permission is back, and Home is still showing the error it hit while it was off.
@@ -66,6 +78,10 @@ final class AppState {
         activeServer = server
         activeUser = user
         isAuthenticated = true
+        // A verdict belongs to the server it was measured on. Carrying one across a switch would
+        // let the box you just left speak for the one you just picked, for the two seconds until
+        // its own probe lands (Sodalite#122).
+        serverReachability = .unknown
     }
 
     /// Replaces activeUser.name + .policy (preserving other fields) after a profile switch/restore once getCurrentUser() returns the server's own view: policy, else the keychain stub's policy: nil keeps permission-gated UI hidden until logout/login; name, because the keychain bootstrap can carry another server's profile name from an install predating the per-server name resolution.

@@ -21,6 +21,9 @@ extension DependencyContainer {
     private func resolveJellyfinRoute() async {
         guard let server = activeServer else {
             activeJellyfinRoute = nil
+            // Nothing to be reachable or not: a signed-out session must not keep the last server's
+            // verdict standing behind the login screen.
+            appState?.serverReachability = .unknown
             return
         }
         guard let resolved = await ServerRouteResolver.resolve(
@@ -30,6 +33,17 @@ extension DependencyContainer {
             probe: { await ServerProbe.jellyfin($0) }
         ) else { return }
         guard !Task.isCancelled else { return }
+
+        // One failed probe is a suspicion; two are a verdict. The probe's two second cap is tight
+        // on a slow cellular link, and being wrong is no longer free: a failure now paints a screen
+        // where it used to fall back silently, so a working remote server on a bad link would flash
+        // an error before its first row landed. Paid only on the failure path, and only once.
+        var isReachable = resolved.isReachable
+        if !isReachable {
+            isReachable = await ServerProbe.jellyfin(resolved.url)
+            guard !Task.isCancelled else { return }
+        }
+        publishReachability(url: resolved.url, isReachable: isReachable, server: server)
 
         serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
         activeJellyfinRoute = resolved.route
@@ -59,6 +73,33 @@ extension DependencyContainer {
 
         seerrClient.baseURL = resolved.url
         NotificationCenter.default.post(name: .serverRouteDidChange, object: nil)
+    }
+
+    /// Publishes what the probe just measured, so the rest of the app shares one verdict instead of
+    /// each screen proving the same thing again against a thirty second timeout (Sodalite#122).
+    ///
+    /// The classification happens here, once, for the same reason: this is where both facts the
+    /// verdict needs are in hand at the same moment, the address that was probed and whether the
+    /// server carries a second slot to fall back on.
+    ///
+    /// A verdict that improves back to reachable also asks the features to reload. Home gave up
+    /// while the server was unreachable and holds nothing that would bring it back on its own; this
+    /// is the same signal the return from a Local Network denial raises, for the same reason.
+    private func publishReachability(url: URL, isReachable: Bool, server: JellyfinServer) {
+        guard let appState else { return }
+        let verdict = ServerReachability.classify(
+            probedURL: url,
+            answered: isReachable,
+            hasAlternateSlot: server.internalURL != nil && server.externalURL != nil,
+            pathIsSatisfied: NetworkPathSnapshot.shared.isSatisfied
+        )
+        let previous = appState.serverReachability
+        guard verdict != previous else { return }
+        appState.serverReachability = verdict
+        LogTap.shared.note("[network] \(server.name) is \(verdict) at \(url.host() ?? "?")")
+        if verdict == .reachable, previous.isFailure {
+            appState.requestContentReload += 1
+        }
     }
 
     /// Jellyfin and Seerr ids live in the same store; prefix avoids collisions.

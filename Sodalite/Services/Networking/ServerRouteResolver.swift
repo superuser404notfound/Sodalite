@@ -1,13 +1,27 @@
 import Foundation
 
-/// Picks the live URL for a dual-slot server. Both slots are probed in
-/// parallel; internal wins whenever it answers, external is the fallback,
-/// and when neither answers the last-known route keeps the session on
-/// whatever worked before (existing error paths then surface the outage).
+/// Picks the live URL for a server, and says whether it answered.
+///
+/// Both slots are probed in parallel; internal wins whenever it answers, external is the fallback,
+/// and when neither answers the last-known route keeps the session on whatever worked before.
+///
+/// A single-slot server is probed too, which is the whole of Sodalite#122. With one slot there is
+/// nothing to choose, so the probe used to be skipped as pointless work: the resolver was built to
+/// answer *which of two*, and "neither" was not in its return type. But "does this address answer
+/// from here" is the question the rest of the app actually needs, it is the only place the app asks
+/// it cheaply (two seconds, capped, against an unauthenticated endpoint), and a LAN-only server is
+/// exactly the configuration that goes dark off the home network. Skipping the probe there meant
+/// the app rediscovered the answer one thirty second request timeout at a time, under a spinner.
+///
+/// `isReachable` never changes routing. An unreachable address is still returned, and still used;
+/// only what the app is willing to say about it changes.
 enum ServerRouteResolver {
     struct Resolved: Equatable, Sendable {
         let url: URL
         let route: ServerRoute
+        /// Did `url` answer its probe? False on the both-slots-dead fallback, and on a single slot
+        /// that did not respond.
+        let isReachable: Bool
     }
 
     static func resolve(
@@ -20,21 +34,25 @@ enum ServerRouteResolver {
         case (nil, nil):
             return nil
         case (let internalURL?, nil):
-            return Resolved(url: internalURL, route: .internal)
+            return Resolved(url: internalURL, route: .internal, isReachable: await probe(internalURL))
         case (nil, let externalURL?):
-            return Resolved(url: externalURL, route: .external)
+            return Resolved(url: externalURL, route: .external, isReachable: await probe(externalURL))
         case (let internalURL?, let externalURL?):
             async let externalReachable = probe(externalURL)
             if await probe(internalURL) {
-                return Resolved(url: internalURL, route: .internal)
+                // externalReachable is left unawaited on purpose: scope exit cancels it, and the
+                // internal route has already won. Awaiting it would put the external slot's full
+                // probe cap in front of every launch on the home network.
+                return Resolved(url: internalURL, route: .internal, isReachable: true)
             }
             if await externalReachable {
-                return Resolved(url: externalURL, route: .external)
+                return Resolved(url: externalURL, route: .external, isReachable: true)
             }
             let fallback = lastKnown ?? .internal
             return Resolved(
                 url: fallback == .internal ? internalURL : externalURL,
-                route: fallback
+                route: fallback,
+                isReachable: false
             )
         }
     }
