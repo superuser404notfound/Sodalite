@@ -29,6 +29,9 @@ struct ExternalSubtitleView: View {
                     activeSubtitleCodec: viewModel.activeSubtitleCodec,
                     hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                     videoSize: viewModel.videoSize
+                    // No pictureMode: the external window pins its layer to .resizeAspect
+                    // (ExternalSubtitleWindowController), so the picture there is aspect-fit
+                    // whatever the device screen is set to, and the overlay's default matches it.
                 )
             }
         }

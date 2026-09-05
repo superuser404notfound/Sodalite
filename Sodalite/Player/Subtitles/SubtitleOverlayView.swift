@@ -46,6 +46,11 @@ struct SubtitleOverlayView: View {
     let hasSecondaryTrack: Bool
     /// Coded video dims for bitmap-canvas mapping; .zero falls back to full-bounds layout.
     var videoSize: CGSize = .zero
+    /// Which rectangle the picture actually occupies. `.fill` draws the video `.resizeAspectFill`,
+    /// so the picture covers the surface and overflows it; cues placed against the picture have to
+    /// follow it there instead of staying on the aspect-fit band the video would occupy in
+    /// `.original` (#120).
+    var pictureMode: PlaybackPreferences.PictureMode = .original
 
     /// Fixed bottom inset for text cues while controls are visible, above the 300 pt gradient band.
     private static let controlsVisibleBottomInset: CGFloat = 280
@@ -248,14 +253,17 @@ struct SubtitleOverlayView: View {
             let (pointSize, maxWidth) = textMetrics(in: size)
             let offset = Self.placedOffset(
                 placement: placement,
-                in: Self.aspectFitRect(videoSize: videoSize, in: size),
+                in: Self.videoRect(videoSize: videoSize, in: size,
+                                   fillsSurface: pictureMode == .fill),
                 container: size,
                 margin: Self.placedMargin,
                 verticalShift: bitmapVerticalShift(in: size),
                 // Unlike a bitmap cue, a placed text cue still gets out of the chrome's way: on
                 // teletext every cue carries a placement, so leaving them put would hide the
-                // whole track behind the transport bar.
-                bottomLimit: controlsVisible ? size.height - Self.controlsVisibleBottomInset : .infinity)
+                // whole track behind the transport bar. Absent the chrome the limit is still the
+                // bottom edge, since under `.fill` the picture runs past it (#120).
+                bottomLimit: controlsVisible ? size.height - Self.controlsVisibleBottomInset : size.height,
+                topLimit: 0)
             Group {
                 switch line {
                 case .plain(_, let text): styledText(text, pointSize: pointSize)
@@ -290,13 +298,19 @@ struct SubtitleOverlayView: View {
     ///
     /// `verticalShift` is the user's vertical-position dial, the same delta bitmap cues get.
     /// `bottomLimit` is the lowest the block may end, which lifts a low cue clear of the player
-    /// chrome and leaves everything above it untouched.
+    /// chrome and leaves everything above it untouched. `topLimit` is the highest it may start,
+    /// which holds a cue on screen when `.fill` pushes the picture past the top edge (#120); it
+    /// wins over `bottomLimit`, since a block too tall for the gap is read from its first line.
+    ///
+    /// `placedOffset` calls this with a zero block size, because SwiftUI sizes the block itself
+    /// there, so both limits act on the anchor rather than on the block's own edges.
     nonisolated static func placedOrigin(placement: SubtitleTextPlacement,
                                          blockSize: CGSize,
                                          in frame: CGRect,
                                          margin: CGFloat,
                                          verticalShift: CGFloat,
-                                         bottomLimit: CGFloat) -> CGPoint {
+                                         bottomLimit: CGFloat,
+                                         topLimit: CGFloat = -.infinity) -> CGPoint {
         let requested = placement.alignment ?? 2
         let an = (1...9).contains(requested) ? requested : 2
         let column = (an - 1) % 3     // 0 left, 1 centre, 2 right
@@ -321,7 +335,7 @@ struct SubtitleOverlayView: View {
                 : row == 1 ? frame.midY - blockSize.height / 2
                 : frame.minY + margin
         }
-        return CGPoint(x: x, y: min(y + verticalShift, bottomLimit - blockSize.height))
+        return CGPoint(x: x, y: max(min(y + verticalShift, bottomLimit - blockSize.height), topLimit))
     }
 
     /// Whether an anchor is inside the picture and can therefore be drawn. `SubtitleTextPlacement`
@@ -370,10 +384,11 @@ struct SubtitleOverlayView: View {
                                          container: CGSize,
                                          margin: CGFloat,
                                          verticalShift: CGFloat,
-                                         bottomLimit: CGFloat) -> CGSize {
+                                         bottomLimit: CGFloat,
+                                         topLimit: CGFloat = -.infinity) -> CGSize {
         let target = placedOrigin(placement: placement, blockSize: .zero, in: frame,
                                   margin: margin, verticalShift: verticalShift,
-                                  bottomLimit: bottomLimit)
+                                  bottomLimit: bottomLimit, topLimit: topLimit)
         let requested = placement.alignment ?? 2
         let an = (1...9).contains(requested) ? requested : 2
         let column = (an - 1) % 3
@@ -525,7 +540,8 @@ struct SubtitleOverlayView: View {
                                         canvas: image.canvasSize,
                                         videoSize: videoSize,
                                         in: size,
-                                        verticalShift: bitmapVerticalShift(in: size))
+                                        verticalShift: bitmapVerticalShift(in: size),
+                                        fillsSurface: pictureMode == .fill)
         return Image(decorative: image.cgImage, scale: 1, orientation: .up)
             .resizable()
             .interpolation(.high)
@@ -541,8 +557,9 @@ struct SubtitleOverlayView: View {
                                            canvas: CGSize,
                                            videoSize: CGSize,
                                            in bounds: CGSize,
-                                           verticalShift: CGFloat = 0) -> CGRect {
-        let videoRect = aspectFitRect(videoSize: videoSize, in: bounds)
+                                           verticalShift: CGFloat = 0,
+                                           fillsSurface: Bool = false) -> CGRect {
+        let videoRect = videoRect(videoSize: videoSize, in: bounds, fillsSurface: fillsSurface)
         let canvasRect: CGRect
         if videoRect.width > 0, canvas.width > 0, canvas.height > 0, videoSize.width > 0 {
             // Scale the canvas so it COVERS the video rect: the video is a crop of the plane
@@ -560,10 +577,50 @@ struct SubtitleOverlayView: View {
             // Unknown dims (pre-load or an older engine cue): the historical full-bounds layout.
             canvasRect = CGRect(origin: .zero, size: bounds)
         }
-        return CGRect(x: canvasRect.minX + position.minX * canvasRect.width,
-                      y: canvasRect.minY + position.minY * canvasRect.height + verticalShift,
-                      width: position.width * canvasRect.width,
-                      height: position.height * canvasRect.height)
+        let frame = CGRect(x: canvasRect.minX + position.minX * canvasRect.width,
+                           y: canvasRect.minY + position.minY * canvasRect.height + verticalShift,
+                           width: position.width * canvasRect.width,
+                           height: position.height * canvasRect.height)
+        return frame.offsetBy(dx: 0, dy: verticalClamp(frame, in: bounds))
+    }
+
+    /// Vertical delta that pulls `frame` back inside `bounds`, 0 when it already fits. Two
+    /// situations push a cue off screen and neither is the cue being wrong:
+    ///
+    /// - The canvas legitimately overhangs the bounds. `bitmapCueFrame` scales the subtitle plane
+    ///   to COVER the video rect so a scope line authored into the 16:9 letterbox bar stays in the
+    ///   bar. On a 16:9 display that canvas is about screen-tall and the authored position lands.
+    ///   On a display narrower than the plane it does not: 3840x1600 inside a 2318x1206 overlay
+    ///   scales a 1920x1080 plane to 1304 pt, overhanging by 98 pt, and a line authored at 0.89 of
+    ///   plane height ends 23 pt past the bottom edge (measured on an iPhone 16 Pro, #120).
+    /// - `.fill` crops the picture, and a cue riding on the cropped part goes with it. On a 4:3
+    ///   title that is most of the lower eighth, so the whole subtitle track would disappear.
+    ///
+    /// Clamping trades authored position for legibility, which is the right way round: a
+    /// subtitle a few points off is readable, one off screen is indistinguishable from missing.
+    /// Top wins when the cue is taller than the bounds, since text is read from the top.
+    nonisolated static func verticalClamp(_ frame: CGRect, in bounds: CGSize) -> CGFloat {
+        guard bounds.height > 0 else { return 0 }
+        var dy: CGFloat = 0
+        if frame.maxY > bounds.height { dy = bounds.height - frame.maxY }
+        if frame.minY + dy < 0 { dy = -frame.minY }
+        return dy
+    }
+
+    /// Rect the picture occupies under the gravity currently on screen: aspect-fit for
+    /// `.original`, aspect-fill for `.fill`, where the picture covers the bounds and overflows
+    /// them on one axis. Cue geometry has to use this rather than the fit rect unconditionally,
+    /// or every cue placed against the picture stays on a band the picture left (#120).
+    nonisolated static func videoRect(videoSize: CGSize, in bounds: CGSize,
+                                      fillsSurface: Bool) -> CGRect {
+        guard fillsSurface else { return aspectFitRect(videoSize: videoSize, in: bounds) }
+        guard videoSize.width > 0, videoSize.height > 0, bounds.width > 0, bounds.height > 0 else {
+            return CGRect(origin: .zero, size: bounds)
+        }
+        let scale = max(bounds.width / videoSize.width, bounds.height / videoSize.height)
+        let w = videoSize.width * scale
+        let h = videoSize.height * scale
+        return CGRect(x: (bounds.width - w) / 2, y: (bounds.height - h) / 2, width: w, height: h)
     }
 
     /// Aspect-fit rect of the video plane within the overlay bounds. Full bounds when the
