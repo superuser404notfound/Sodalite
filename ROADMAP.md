@@ -69,3 +69,18 @@ system keyboard and system focus handling with it. Switching to it was measured 
 before, with a related but different API. It gets measured again on an actual Apple TV, and if
 opening the tab is still slower than it is today, the field stays as it is and the browse screen
 ships anyway.
+
+### Fill the screen on a wide film ([#118](https://github.com/superuser404notfound/Sodalite/issues/118))
+
+Picture Size offers Original and Fill, and Fill only finds something to crop when the video file
+itself is a different shape than the screen. Most wide films arrive as a 16:9 file with the black
+bars painted into the picture, so there is nothing to crop and the option does nothing at all.
+
+It gets a real zoom instead: pick the film's ratio (1.85, 2.00, 2.35, 2.40, 4:3) and the picture
+scales up until the image fills the screen, with the sides running off the edges. Same thing the
+Zoom button on a TV does, on the display layer, so nothing is decoded or encoded a second time.
+Working the ratio out on its own can come later, with the menu kept as the override. And when the
+picture already fills the screen, the setting is greyed out instead of pretending to do something.
+
+Two things you give up on purpose: a 2.39:1 film loses about a quarter of its width, and any
+subtitles burned into the bar area go with it.
