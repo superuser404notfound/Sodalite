@@ -43,9 +43,9 @@ struct AppRouter: View {
     /// Drives the NowPlaying fullScreenCover off the coordinator's nowPlayingPresentationRequest bump.
     @State private var showNowPlaying = false
 
-    #if os(iOS)
+    /// Both platforms: its change callback is an iOS concern, but the path STATUS it snapshots is
+    /// what tells an unreachable server apart from a device with no network (Sodalite#122).
     @State private var pathObserver = NetworkPathObserver()
-    #endif
 
     /// (server, user) identity of the active session. Background music is scoped to it and must stop when it
     /// changes: server switch, same-server profile switch (switchToUser, which does NOT bump serverDidSwitch),
@@ -175,10 +175,13 @@ struct AppRouter: View {
             await restoreSession()
         }
         .task {
+            // The change callback re-resolves the route on a Wi-Fi handoff, which is an iOS
+            // concern. The monitor itself runs on both: NetworkPathSnapshot is what tells an
+            // unreachable server apart from a device with no network at all (Sodalite#122).
             #if os(iOS)
             pathObserver.onPathChange = { dependencies.scheduleRouteResolve() }
-            pathObserver.start()
             #endif
+            pathObserver.start()
         }
         .task(id: appState.pendingDeepLinkItemID) {
             await resolvePendingDeepLink()
@@ -527,15 +530,25 @@ struct AppRouter: View {
         }
         guard syncSeerr else { return }
 
-        // Seerr restore (policy in syncSeerrSession), with legacy fallback for pre-0.3.0 logins. Runs AFTER the AppState flip so TabRootView mounts under the splash and loads concurrently with the probe.
-        let seerrOutcome = await dependencies.syncSeerrSession(
-            forJellyfinUserID: appState.activeUser?.id,
-            jellyfinServerID: appState.activeServer?.id,
-            allowLegacyFallback: true
-        )
-        if case .connected(let seerrServer, let seerrUser) = seerrOutcome {
-            appState.setSeerrConnected(server: seerrServer, user: seerrUser)
-            dependencies.scheduleRouteResolve()
+        // Seerr restore (policy in syncSeerrSession), with legacy fallback for pre-0.3.0 logins. Runs
+        // AFTER the AppState flip so TabRootView mounts under the splash and loads concurrently with
+        // the probe.
+        //
+        // Fire-and-forget, like the StoreKit refresh above and for the same reason (Sodalite#122).
+        // It makes a live request, and a secondary service must never be able to hold the splash for
+        // a primary one's launch: a LAN-only Seerr off the home network used to park the brand
+        // screen for a full thirty second timeout before the tab bar existed. Catalog already reacts
+        // to the connection landing late, since it keys on `appState.isSeerrConnected`.
+        Task { @MainActor in
+            let seerrOutcome = await dependencies.syncSeerrSession(
+                forJellyfinUserID: appState.activeUser?.id,
+                jellyfinServerID: appState.activeServer?.id,
+                allowLegacyFallback: true
+            )
+            if case .connected(let seerrServer, let seerrUser) = seerrOutcome {
+                appState.setSeerrConnected(server: seerrServer, user: seerrUser)
+                dependencies.scheduleRouteResolve()
+            }
         }
     }
 
