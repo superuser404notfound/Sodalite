@@ -313,7 +313,7 @@ struct LaunchProfilePickerView: View {
 
     private func performSelect(_ user: RememberedUser) {
         do {
-            // switchToUser purges the identity-scoped caches (images, filter pages) itself.
+            // switchToUser drops the image cache itself; filter pages need no wipe, they carry the identity that fetched them.
             try dependencies.switchToUser(user, server: server)
             let jf = JellyfinUser(
                 id: user.id,

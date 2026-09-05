@@ -55,7 +55,7 @@ struct CatalogView: View {
                 CatalogDetailView(media: media)
             }
             .detailCover(item: $selectedFilter) { filter in
-                CatalogFilteredGridView(filter: filter)
+                CatalogFilteredGridView(filter: filter, cacheIdentity: appState.cacheIdentity)
             }
         }
         .onAppear(perform: bootstrap)
@@ -115,7 +115,8 @@ struct CatalogView: View {
             let vm = CatalogViewModel(
                 discoverService: dependencies.seerrDiscoverService,
                 requestService: dependencies.seerrRequestService,
-                mediaService: dependencies.seerrMediaService
+                mediaService: dependencies.seerrMediaService,
+                cacheIdentity: appState.cacheIdentity
             )
             viewModel = vm
             Task { await vm.loadDiscover() }

@@ -64,8 +64,8 @@ struct FilteredGridView: View {
     /// TMDB watch-provider id: after the studio filter resolves, augment with Jellyseerr's "streaming now" list so studio-tag-less titles surface under their service (Modern Family on Disney+).
     let smartProviderID: Int?
     let smartProviderRegion: String?
-    /// Stable key for FilterCache, independent of smartProviderID so broadcast nets (ABC/NBC/CBS) still cache and feed the empty-tile-hide pass.
-    let cacheKey: String?
+    /// Where this grid's results are cached: key + the session that fetched them. nil disables caching entirely; the two never travel apart, so a key cannot be written unscoped.
+    let cacheScope: FilterCacheScope?
     /// Where this grid's sort choice is stored (Sodalite#78); nil hides the control. Streaming-provider
     /// tiles pass nil: their list is merged client-side from two phases, so a server sort would only
     /// order half of it.
@@ -81,7 +81,7 @@ struct FilteredGridView: View {
         query: ItemQuery,
         smartProviderID: Int? = nil,
         smartProviderRegion: String? = nil,
-        cacheKey: String? = nil,
+        cacheScope: FilterCacheScope? = nil,
         sortScope: LibrarySortScope? = nil,
         hidesAudioPlaylists: Bool = false
     ) {
@@ -89,7 +89,7 @@ struct FilteredGridView: View {
         self.query = query
         self.smartProviderID = smartProviderID
         self.smartProviderRegion = smartProviderRegion
-        self.cacheKey = cacheKey
+        self.cacheScope = cacheScope
         self.sortScope = sortScope
         self.hidesAudioPlaylists = hidesAudioPlaylists
         let storedSort = sortScope.map(LibrarySortStore.sort) ?? .default
@@ -98,8 +98,8 @@ struct FilteredGridView: View {
         // Only the default sort: the cache holds one order per key, so a custom sort would paint the
         // alphabetical list and then reshuffle it once the fetch lands.
         if storedSort == .default,
-           let key = cacheKey,
-           let cached = FilterCache.shared.homeFilterItems(filterKey: key),
+           let scope = cacheScope,
+           let cached = FilterCache.shared.homeFilterItems(filterKey: scope.key, identity: scope.identity),
            !cached.isEmpty {
             _items = State(initialValue: cached)
             _isLoading = State(initialValue: false)
@@ -418,8 +418,10 @@ struct FilteredGridView: View {
             isLoading = false
             // Cache only the unfiltered default order: it feeds init hydration (always .all, always
             // Title A-Z) + empty-tile-hide counts, both needing the full library in the shipped order.
-            if let key = cacheKey, !isWatchFiltered, sort == .default {
-                FilterCache.shared.setHomeFilterItems(phase1, filterKey: key)
+            if let scope = cacheScope, !isWatchFiltered, sort == .default {
+                FilterCache.shared.setHomeFilterItems(
+                    phase1, filterKey: scope.key, identity: scope.identity
+                )
             }
         }
     }
@@ -495,10 +497,6 @@ struct FilteredGridView: View {
             return
         }
 
-        FilterCache.shared.setSmartFilterIDs(
-            Array(providerTmdbIDs), providerID: providerID, region: region
-        )
-
         let phase2Items = providerTmdbIDs.compactMap { tmdbMap[$0] }
         let merged = ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
         if items.map(\.id) != merged.map(\.id) {
@@ -507,8 +505,10 @@ struct FilteredGridView: View {
         isLoading = false
 
         // Persist the resolved list so the next visit hydrates synchronously, no library fetch or watch-provider roundtrip. Unfiltered default only (phase-1 rationale).
-        if let key = cacheKey, !isWatchFiltered, sort == .default {
-            FilterCache.shared.setHomeFilterItems(merged, filterKey: key)
+        if let scope = cacheScope, !isWatchFiltered, sort == .default {
+            FilterCache.shared.setHomeFilterItems(
+                merged, filterKey: scope.key, identity: scope.identity
+            )
         }
     }
 }

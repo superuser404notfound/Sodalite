@@ -87,7 +87,8 @@ extension HomeViewModel {
             providerItemCounts[providerID] = items.count
             FilterCache.shared.setHomeFilterItems(
                 items,
-                filterKey: FilterCacheKey.Home.provider(id: providerID, region: region)
+                filterKey: FilterCacheKey.Home.provider(id: providerID, region: region),
+                identity: cacheIdentity
             )
             // Backfill the backdrop only if the fast studio pass didn't set one; this resolver includes watch-provider matches, so it finds a sample for studio-tag-less tiles (Paramount+).
             if providerBackdrops[providerID] == nil,
@@ -158,7 +159,7 @@ extension HomeViewModel {
         // MainActor cache writes (the detached closure can't see FilterCache.shared's non-isolation under strict concurrency).
         for (name, items) in resolved where !items.isEmpty {
             FilterCache.shared.setHomeFilterItems(
-                items, filterKey: FilterCacheKey.Home.genre(name: name)
+                items, filterKey: FilterCacheKey.Home.genre(name: name), identity: cacheIdentity
             )
         }
         // Latch at the END: up front, a cancelled run marked the session "computed" with an empty cache.

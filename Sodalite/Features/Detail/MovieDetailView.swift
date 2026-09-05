@@ -258,8 +258,10 @@ struct MovieDetailView: View {
                                 tmdbID: vm.item.tmdbID,
                                 cascadeToArrStack: request.cascadeToArrStack
                             )
-                            // Drop the on-disk filter cache so Library/Home rows don't keep showing the deleted movie until natural eviction.
-                            FilterCache.shared.clearAll()
+                            // Drop the on-disk filter cache so Library/Home rows don't keep showing the deleted movie until natural eviction. Every profile on this server, not just the active one: the file is gone for all of them.
+                            if let serverID = appState.activeServer?.id {
+                                FilterCache.shared.evict(serverID: serverID)
+                            }
                             NotificationCenter.default.post(name: .homeItemDidDelete, object: nil)
                             // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
                             if request.cascadeToArrStack {

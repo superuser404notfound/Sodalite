@@ -1,6 +1,6 @@
 import Foundation
 
-/// Single source of truth for `FilterCache` keys: writers and readers share these factories so a key-format change can't make a reader miss a writer's blob (silent "loading flash on every tap"). Two namespaces (Home → JellyfinItem slice, Catalog → SeerrMedia slice). `nonisolated` throughout so precompute fan-out tasks avoid a MainActor hop.
+/// Single source of truth for `FilterCache` keys: writers and readers share these factories so a key-format change can't make a reader miss a writer's blob (silent "loading flash on every tap"). Two namespaces (Home → JellyfinItem slice, Catalog → SeerrMedia slice). `nonisolated` throughout so precompute fan-out tasks avoid a MainActor hop. The session is NOT in here: `FilterCache` scopes every entry by `CacheIdentity` itself, so these stay pure (`CatalogFilter.cacheKey` doubles as its `Identifiable.id` and must not move when the session does).
 enum FilterCacheKey {
     enum Home {
         /// Streaming-provider tile. Region is in the key: TMDB watch-providers are region-specific (Disney+ DE ≠ US lineup).
@@ -11,11 +11,6 @@ enum FilterCacheKey {
         /// Genre filter keyed by name (Jellyfin queries genres by name, not id).
         nonisolated static func genre(name: String) -> String {
             "home-genre-\(name)"
-        }
-
-        /// Generic tag filter; fallback for HomeRowType cases without a dedicated key.
-        nonisolated static func tag(name: String) -> String {
-            "home-tag-\(name)"
         }
 
         /// My Media library grid. The grouping mode is in the key because it changes the shape of the result (collection tiles vs. single movies); a shared key would repaint the previous shape from cache after the setting flips.
