@@ -5,7 +5,12 @@ final class HomeViewModel {
     var rows: [HomeRowData] = []
     var tagRows: [HomeTagRowData] = []
     var isLoading = true
-    var errorMessage: String?
+    /// Home's own verdict: the fan-out drained and not one row produced anything. Deliberately not
+    /// a message. Home can only know THAT the load failed; WHY comes from
+    /// `AppState.serverReachability`, which is measured once for the whole app and picks the copy
+    /// and the actions (Sodalite#122). A localized `String?` here could carry neither, and could not
+    /// be branched on by the offline-downloads state that becomes the second reader (#81).
+    var loadFailedEntirely = false
     var rowConfigs: [HomeRowConfig] = []
     /// Sample backdrop per provider TMDB id from a one-shot Studios query so each provider tile shows a real library hero; nil falls back to logo-only.
     var providerBackdrops: [Int: URL] = [:]
@@ -91,6 +96,77 @@ final class HomeViewModel {
         }
     }
 
+    /// Outcome of one entry in Home's fan-out.
+    enum RowResult: Sendable {
+        case media(HomeRowData)
+        case tag(HomeTagRowData)
+        /// Fetch succeeded and returned nothing: the row has to go, else it keeps showing what it held before (unfavoriting the last item left the stale card on screen until relaunch).
+        case emptied(id: String, isTag: Bool)
+        /// Fetch failed (loadRow/loadTagRow swallow errors and return nil): leave the on-screen row alone so a transient hiccup doesn't blank Home.
+        case empty
+        /// The server's library list, fetched inside the group rather than in front of it
+        /// (Sodalite#122). It feeds row reconciliation and My Media, and nothing in the fan-out
+        /// waits on it, so awaiting it first bought nothing and cost a full request timeout before
+        /// a single row was even planned. On an unreachable server that was thirty seconds of dead
+        /// time under a bare spinner, every launch. nil = the fetch failed and the stored config
+        /// stands, which is the same fallback as before.
+        case libraries([JellyfinLibrary]?)
+    }
+
+    /// One planned row, with everything the fetch needs already resolved.
+    ///
+    /// `isTag`, `type` and `id` are read while building this, on the MainActor: HomeRowConfig's
+    /// row-type queries are MainActor-isolated under default isolation, so the escaping task body
+    /// cannot reach them itself. A value rather than a prepared closure because the group takes an
+    /// `@isolated(any)` operation, and a closure built here would carry this actor's isolation into
+    /// the fan-out and serialize it.
+    struct RowFetch: Sendable {
+        let config: HomeRowConfig
+        let isTag: Bool
+        let type: HomeRowType
+        let id: String
+    }
+
+    /// The rows this config actually fetches, in display order.
+    ///
+    /// Three kinds drop out: Discover provider rows and My Media render from state the fan-out does
+    /// not produce, and in merged mode Next Up rides inside Continue Watching (see loadRow), so its
+    /// standalone row goes while its config stays enabled and the toggle still restores it.
+    func plannedRows(from configs: [HomeRowConfig]) -> [RowFetch] {
+        configs
+            .filter(\.isEnabled)
+            .sorted { $0.sortOrder < $1.sortOrder }
+            .compactMap { config in
+                if config.type.isDiscoverProviderRow { return nil }
+                if config.type == .myMedia { return nil }
+                if config.type == .nextUp,
+                   HomeRowConfig.mergeContinueWatchingNextUp(serverID: serverID) {
+                    return nil
+                }
+                return RowFetch(
+                    config: config,
+                    isTag: config.type.isTagRow,
+                    type: config.type,
+                    id: config.id
+                )
+            }
+    }
+
+    /// Runs one planned row's fetch. Both scheduling sites go through it so the row added after
+    /// reconciliation gets identical work to the ones planned up front.
+    func fetch(_ entry: RowFetch) async -> RowResult {
+        if entry.isTag {
+            if let tagRow = await loadTagRow(type: entry.type) {
+                return tagRow.tags.isEmpty ? .emptied(id: entry.id, isTag: true) : .tag(tagRow)
+            }
+        } else {
+            if let rowData = await loadRow(config: entry.config) {
+                return rowData.items.isEmpty ? .emptied(id: entry.id, isTag: false) : .media(rowData)
+            }
+        }
+        return .empty
+    }
+
     func loadContent() async {
         loadGeneration += 1
         let myGen = loadGeneration
@@ -107,77 +183,29 @@ final class HomeViewModel {
         if isFirstLoad {
             isLoading = true
         }
-        errorMessage = nil
+        loadFailedEntirely = false
 
-        // Pull the server's libraries for per-library Latest + My Media. Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
-        if let libraries = try? await libraryService.getLibraries(userID: userID) {
-            myMediaLibraries = MyMediaLibraries.browsable(libraries)
-            let reconciled = HomeRowConfig.reconciled(stored: rowConfigs, libraries: libraries)
-            if reconciled != rowConfigs {
-                rowConfigs = reconciled
-                HomeRowConfig.saveToStorage(reconciled, serverID: serverID)
-            }
-        } else {
-            LogTap.shared.note("Home: getLibraries failed, falling back to aggregated Latest rows")
-        }
-
-        let enabledRows = rowConfigs
-            .filter(\.isEnabled)
-            .sorted { $0.sortOrder < $1.sortOrder }
-
-        // Fan out every row's call in parallel (a sequential for-await made a 7-row config take ~7× the slowest call). orderedSections() drives display order from sortOrder, so arrival order only affects paint timing.
-        enum RowResult: Sendable {
-            case media(HomeRowData)
-            case tag(HomeTagRowData)
-            /// Fetch succeeded and returned nothing: the row has to go, else it keeps showing what it held before (unfavoriting the last item left the stale card on screen until relaunch).
-            case emptied(id: String, isTag: Bool)
-            /// Fetch failed (loadRow/loadTagRow swallow errors and return nil): leave the on-screen row alone so a transient hiccup doesn't blank Home.
-            case empty
-        }
-
-        // Precompute isTagRow + carry the full config on MainActor: HomeRowType is MainActor-isolated under default-isolation, so the task-group closures can't read .isTagRow themselves; the full config keeps per-library libraryID/name and unique identity.
-        let plan: [(config: HomeRowConfig, isTag: Bool)] = enabledRows.compactMap { config in
-            if config.type.isDiscoverProviderRow { return nil }
-            // My Media renders from myMediaLibraries directly; nothing to fetch.
-            if config.type == .myMedia { return nil }
-            // Merged mode: Next Up rides inside Continue Watching (see loadRow), so its standalone row drops out while its config stays enabled; flipping the toggle restores it.
-            if config.type == .nextUp,
-               HomeRowConfig.mergeContinueWatchingNextUp(serverID: serverID) {
-                return nil
-            }
-            return (config, config.type.isTagRow)
-        }
-
-        let plannedMediaIDs = Set(plan.filter { !$0.isTag }.map(\.config.id))
-        let plannedTagIDs = Set(plan.filter { $0.isTag }.map(\.config.id))
+        // Row plans are built from the stored config; the server's library list only reconciles it.
+        var plan = plannedRows(from: rowConfigs)
+        var plannedIDs = Set(plan.map(\.id))
 
         // Drop rows disabled since the previous load instantly; still-enabled rows stay and get replaced in place as fresh results land.
-        rows.removeAll { !plannedMediaIDs.contains($0.id) }
-        tagRows.removeAll { !plannedTagIDs.contains($0.id) }
+        rows.removeAll { !plannedIDs.contains($0.id) }
+        tagRows.removeAll { !plannedIDs.contains($0.id) }
 
         var sawAnyResult = false
 
         // Progressive publish: upsert each row as it completes so fast rows paint while the slowest (Latest on a huge library, 10+ s) streams. ForEach diffs by HomeRowData.id, so in-place replace preserves mounted AsyncImage state.
         await withTaskGroup(of: RowResult.self) { group in
+            // The service and the id are lifted out of `self` here for the same reason the row
+            // plan is: the task body runs off this actor and cannot read it.
+            let libraryService = libraryService
+            let userID = userID
+            group.addTask {
+                .libraries(try? await libraryService.getLibraries(userID: userID))
+            }
             for entry in plan {
-                let config = entry.config
-                let isTag = entry.isTag
-                let type = config.type
-                // Resolved here for the same reason as isTag: id reads the MainActor-isolated type.
-                let rowID = config.id
-                group.addTask { [weak self] in
-                    guard let self else { return .empty }
-                    if isTag {
-                        if let tagRow = await self.loadTagRow(type: type) {
-                            return tagRow.tags.isEmpty ? .emptied(id: rowID, isTag: true) : .tag(tagRow)
-                        }
-                    } else {
-                        if let rowData = await self.loadRow(config: config) {
-                            return rowData.items.isEmpty ? .emptied(id: rowID, isTag: false) : .media(rowData)
-                        }
-                    }
-                    return .empty
-                }
+                group.addTask { [weak self] in await self?.fetch(entry) ?? .empty }
             }
             for await result in group {
                 // Stale guard: a newer loadContent superseded this; drop the rest so we don't fight it for the rows array.
@@ -191,7 +219,7 @@ final class HomeViewModel {
                     }
                     sawAnyResult = true
                     isLoading = false
-                    errorMessage = nil
+                    loadFailedEntirely = false
                 case .tag(let row):
                     if let idx = tagRows.firstIndex(where: { $0.id == row.id }) {
                         tagRows[idx] = row
@@ -200,7 +228,7 @@ final class HomeViewModel {
                     }
                     sawAnyResult = true
                     isLoading = false
-                    errorMessage = nil
+                    loadFailedEntirely = false
                 case .emptied(let id, let isTag):
                     if isTag {
                         tagRows.removeAll { $0.id == id }
@@ -211,22 +239,53 @@ final class HomeViewModel {
                     // below. A server whose every row is legitimately empty must not read as offline.
                     sawAnyResult = true
                     isLoading = false
-                    errorMessage = nil
+                    loadFailedEntirely = false
                 case .empty:
                     break
+                case .libraries(let libraries):
+                    guard let libraries else {
+                        LogTap.shared.note("Home: getLibraries failed, falling back to aggregated Latest rows")
+                        break
+                    }
+                    // Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
+                    myMediaLibraries = MyMediaLibraries.browsable(libraries)
+                    let reconciled = HomeRowConfig.reconciled(stored: rowConfigs, libraries: libraries)
+                    guard reconciled != rowConfigs else { break }
+                    rowConfigs = reconciled
+                    HomeRowConfig.saveToStorage(reconciled, serverID: serverID)
+
+                    // Reconciliation can change the enabled set: a per-library row retired for
+                    // redundancy hands its state to the aggregated row, and a row type new in this
+                    // app version arrives with its default. Those rows were not in the plan, so
+                    // fetch them here rather than making the user relaunch for them. Rows it
+                    // dropped fall out of the on-screen set the same way a Customize toggle does.
+                    plan = plannedRows(from: reconciled)
+                    let reconciledIDs = Set(plan.map(\.id))
+                    rows.removeAll { !reconciledIDs.contains($0.id) }
+                    tagRows.removeAll { !reconciledIDs.contains($0.id) }
+                    for entry in plan where !plannedIDs.contains(entry.id) {
+                        group.addTask { [weak self] in await self?.fetch(entry) ?? .empty }
+                    }
+                    plannedIDs = reconciledIDs
                 }
             }
         }
 
         guard loadGeneration == myGen else { return }
 
+        let enabledRows = rowConfigs
+            .filter(\.isEnabled)
+            .sorted { $0.sortOrder < $1.sortOrder }
+
         // Total-failure path: loadRow/loadTagRow swallow errors and return nil, so "all nils" looks like "server unreachable". Surface the retry overlay only on first load; on refresh keep on-screen rows so a transient CDN hiccup doesn't wipe Home.
+        //
+        // This is the slow half of the verdict and it stays the fallback, not the primary: it can
+        // only speak once the last row has given up, which on an unreachable server is one to three
+        // minutes of request timeouts. `AppState.serverReachability` reaches the same conclusion in
+        // about two seconds, and HomeView renders whichever arrives first (Sodalite#122).
         let hadConfiguredFetchableRows = !plan.isEmpty
         if hadConfiguredFetchableRows && !sawAnyResult && isFirstLoad {
-            errorMessage = String(
-                localized: "home.error.unreachable",
-                defaultValue: "Couldn't reach your server. Check the connection and try again."
-            )
+            loadFailedEntirely = true
             isLoading = false
             return
         }
