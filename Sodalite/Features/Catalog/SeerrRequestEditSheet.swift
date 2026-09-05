@@ -96,8 +96,10 @@ struct SeerrRequestEditSheet: View {
             if let model = model {
                 sheetBody(model: model)
             } else {
+                // Fills what the sheet gives it rather than declaring a size of its own: 600x400 is
+                // the tvOS sheet's shape, and on a phone it is a box wider and taller than the sheet.
                 ProgressView()
-                    .frame(minWidth: 600, minHeight: 400)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         // .task on the outer Group, not the ProgressView branch: assigning self.model unmounts ProgressView, which would cancel a task attached to it mid-bootstrap. The Group stays mounted across the swap.
