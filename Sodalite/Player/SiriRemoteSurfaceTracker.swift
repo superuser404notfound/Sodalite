@@ -29,9 +29,7 @@ final class SiriRemoteSurfaceTracker {
     /// surface as well would give a single press two meanings in the band where the two overlap.
     /// The Control Center remote was in this set for one build, on the argument that its virtual surface
     /// has the same shape. Measured on the living room Apple TV: eleven clicks in a row reported exactly
-    /// x=0.00 y=0.00, so it reports no position at all and can never produce an edge click. It stays out,
-    /// and under DEBUG it stays under observation instead, which is where that would show up if it
-    /// ever changes.
+    /// x=0.00 y=0.00, so it reports no position at all and can never produce an edge click. It stays out.
     private static let trackedCategories: Set<String> = [
         GCProductCategorySiriRemote1stGen,
     ]
@@ -74,14 +72,6 @@ final class SiriRemoteSurfaceTracker {
         }
         attachedControllers.removeAll()
         lastLivePosition = nil
-        #if DEBUG
-        for controller in GCController.controllers() where diagnosticControllers.contains(ObjectIdentifier(controller)) {
-            controller.microGamepad?.dpad.valueChangedHandler = nil
-            controller.microGamepad?.buttonA.pressedChangedHandler = nil
-        }
-        diagnosticControllers.removeAll()
-        lastLoggedPosition.removeAll()
-        #endif
         latchedDirection = nil
         latchedAt = nil
     }
@@ -102,12 +92,11 @@ final class SiriRemoteSurfaceTracker {
         let connected = GCController.controllers()
         let live = Set(connected.map(ObjectIdentifier.init))
         for id in attachedControllers.keys where !live.contains(id) {
-            attachedControllers.removeValue(forKey: id)?.microGamepad?.buttonA.pressedChangedHandler = nil
+            let pad = attachedControllers.removeValue(forKey: id)?.microGamepad
+            pad?.buttonA.pressedChangedHandler = nil
+            pad?.dpad.valueChangedHandler = nil
         }
         for controller in connected { attach(controller) }
-        #if DEBUG
-        for controller in connected { observeForDiagnostics(controller) }
-        #endif
         logInventory(connected)
     }
 
@@ -127,46 +116,6 @@ final class SiriRemoteSurfaceTracker {
         }.joined(separator: ", ")
         note("scan: \(connected.count) controller(s): \(inventory)")
     }
-
-    #if DEBUG
-    /// Log-only observation of every OTHER remote, so a dead reading can be told apart from a remote
-    /// that reports no position. The Control Center remote answered every click with an exact 0.00,
-    /// which either means the virtual surface sends no position at all (harmless, it says nothing about
-    /// a real one) or that `reportsAbsoluteDpadValues` delivers nothing anywhere (fatal). The 2021
-    /// remote is a physical touch surface and settles it. Observation only: this never latches, so no
-    /// press changes meaning, and none of it is compiled into a shipping build.
-    private var diagnosticControllers: Set<ObjectIdentifier> = []
-    private var lastLoggedPosition: [ObjectIdentifier: SIMD2<Float>] = [:]
-
-    private func observeForDiagnostics(_ controller: GCController) {
-        let id = ObjectIdentifier(controller)
-        guard !diagnosticControllers.contains(id),
-              attachedControllers[id] == nil,
-              let pad = controller.microGamepad else { return }
-        let category = controller.productCategory
-        pad.reportsAbsoluteDpadValues = true
-        pad.dpad.valueChangedHandler = { [weak self] _, x, y in
-            MainActor.assumeIsolated { self?.noteDiagnosticPosition(id: id, category: category, x: x, y: y) }
-        }
-        pad.buttonA.pressedChangedHandler = { [weak self, weak pad] _, _, pressed in
-            guard pressed, let pad else { return }
-            let x = pad.dpad.xAxis.value
-            let y = pad.dpad.yAxis.value
-            MainActor.assumeIsolated {
-                self?.note(String(format: "OBSERVED click on %@ x=%.2f y=%.2f", category, x, y))
-            }
-        }
-        diagnosticControllers.insert(id)
-    }
-
-    /// Throttled: the dpad fires continuously under a moving thumb, and the ring buffer holds 300 lines.
-    private func noteDiagnosticPosition(id: ObjectIdentifier, category: String, x: Float, y: Float) {
-        let last = lastLoggedPosition[id] ?? SIMD2(999, 999)
-        guard abs(x - last.x) >= 0.15 || abs(y - last.y) >= 0.15 else { return }
-        lastLoggedPosition[id] = SIMD2(x, y)
-        note(String(format: "OBSERVED move on %@ x=%.2f y=%.2f", category, x, y))
-    }
-    #endif
 
     private func attach(_ controller: GCController) {
         guard attachedControllers[ObjectIdentifier(controller)] == nil,
@@ -190,25 +139,9 @@ final class SiriRemoteSurfaceTracker {
         attachedControllers[ObjectIdentifier(controller)] = controller
     }
 
-    /// Every line this class produces goes through here. Besides the ring buffer a DEBUG build also
-    /// appends to the app container, because the 300-line buffer rolls a scan line off within seconds of
-    /// playback starting and these lines have to survive long enough to be pulled off the device.
-    /// `Library/Caches` on purpose: tvOS forbids app writes to `Documents` and swallows the failure.
+    /// Every line this class produces goes through here, so the prefix is written once.
     private func note(_ line: String) {
         LogTap.shared.note("[EdgeClick] \(line)")
-        #if DEBUG
-        guard let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
-        let url = dir.appendingPathComponent("edgeclick.txt")
-        let stamped = "\(Date()) \(line)\n"
-        guard let data = stamped.data(using: .utf8) else { return }
-        if let handle = try? FileHandle(forWritingTo: url) {
-            defer { try? handle.close() }
-            try? handle.seekToEnd()
-            try? handle.write(contentsOf: data)
-        } else {
-            try? data.write(to: url)
-        }
-        #endif
     }
 
     private func latch(x: Float, y: Float) {
