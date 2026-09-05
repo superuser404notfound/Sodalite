@@ -585,9 +585,14 @@ struct RememberedProfileCard: View {
     }
 
     private var profileImageURL: URL? {
+        // Against the card's own server: switchServer returns before it writes jellyfinClient.baseURL
+        // when the target has no token slot on this device, which is exactly when this picker opens,
+        // so the active client can still be pointing at the previous server (Sodalite#119).
         dependencies.jellyfinImageService.userProfileImageURL(
             userID: user.id,
-            tag: user.imageTag
+            tag: user.imageTag,
+            baseURL: dependencies.preferredURL(for: server),
+            token: user.token
         )
     }
 }

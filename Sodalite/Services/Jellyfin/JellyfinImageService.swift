@@ -159,14 +159,28 @@ final class JellyfinImageService {
 
     /// User avatar under `/Users/{id}/Images/Primary` (vs items' `/Items` prefix). Nil when no avatar so the UI falls back to initials.
     func userProfileImageURL(userID: String, tag: String?, maxWidth: Int = 240) -> URL? {
-        guard let base = baseURL(), let tag else { return nil }
+        guard let base = baseURL() else { return nil }
+        return userProfileImageURL(
+            userID: userID, tag: tag, baseURL: base, token: accessToken(), maxWidth: maxWidth
+        )
+    }
+
+    /// Avatar on a named server rather than the active one. The server list and the launch picker draw the remembered profiles of EVERY known server, and the providers above answer for whichever one happens to be active, so those URLs pointed at the wrong host with an id it does not know and answered 404 into the initials placeholder (Sodalite#119). The token belongs to the profile on that server: `AsyncCachedImage` attaches `X-Emby-Token` only for the active host, so a foreign host is served by the `api_key` in the query or not at all.
+    func userProfileImageURL(
+        userID: String,
+        tag: String?,
+        baseURL: URL,
+        token: String?,
+        maxWidth: Int = 240
+    ) -> URL? {
+        guard let tag else { return nil }
         return Self.buildURL(
-            base: base,
+            base: baseURL,
             path: "/Users/\(userID)/Images/Primary",
             tag: tag,
             maxWidth: maxWidth,
             maxHeight: nil,
-            token: accessToken()
+            token: token
         )
     }
 
