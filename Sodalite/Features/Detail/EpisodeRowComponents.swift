@@ -319,3 +319,41 @@ struct EpisodeSynopsisBox: View {
             }
     }
 }
+
+// MARK: - Episode Row Aim
+
+/// Which card the episode row aims at when focus enters it. Three entries read it (a move down from
+/// the season bar, the one-shot redirect that catches a focus arriving from anywhere else, and the
+/// return from the player), so it is one memory and one resolver rather than a rule per entry.
+///
+/// The memory is written on the way OUT of the row, never on the way in, else it would answer the
+/// entry redirect with the card that redirect is still resolving. The player writes it too: an
+/// in-session item switch happens behind the modal, and without that write the row still names the
+/// episode the session was STARTED from, which is what dropped a viewer who binged 10 through 20
+/// back on 10.
+struct EpisodeRowAim: Equatable {
+    private(set) var rememberedID: String?
+
+    /// Focus left the row on `id`.
+    mutating func focusLeft(_ id: String) {
+        rememberedID = id
+    }
+
+    /// The player moved the session onto `id` (auto-advance, queue, season picker) while the row sat behind it.
+    mutating func sessionMoved(to id: String) {
+        rememberedID = id
+    }
+
+    /// The card an entry lands on: the remembered one while the loaded season still holds it (the
+    /// filter is what makes a memory from another season fall through), else the series' current
+    /// episode, else the start of the row.
+    func target(in episodeIDs: [String], currentEpisodeID: String?) -> String? {
+        if let rememberedID, episodeIDs.contains(rememberedID) {
+            return rememberedID
+        }
+        if let currentEpisodeID, episodeIDs.contains(currentEpisodeID) {
+            return currentEpisodeID
+        }
+        return episodeIDs.first
+    }
+}

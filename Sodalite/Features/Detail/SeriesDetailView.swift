@@ -82,8 +82,8 @@ struct SeriesDetailView: View {
     @State private var pendingEpisodeFocus: String?
     /// Bridge episode→season synopsis. Plain @State for the same reason as pendingEpisodeFocus: the box owns its own @FocusState and defers the write itself.
     @State private var pendingSeasonOverviewFocus = false
-    /// The card the viewer left the episode row on, so a return from above lands there instead of scrolling the row back to the start. Written only on the way OUT (focusedEpisodeID going nil), never on the way in, else it would answer the entry redirect with the card that redirect is still resolving.
-    @State private var lastFocusedEpisodeID: String?
+    /// Which card the episode row aims at, so a return from above lands there instead of scrolling the row back to the start. Fed by the way OUT of the row and by the player's in-session item switches; see EpisodeRowAim for why it is never fed on the way in.
+    @State private var episodeAim = EpisodeRowAim()
     /// Horizontal offset of the episode row, so a season switch can return it to the row's real start (its inset included) instead of to the first card's leading edge.
     @State private var episodeRowPosition = ScrollPosition()
     /// Gates the isLoading crossfade so it stays inert during the cover's present transition (the viewModel is built lazily in onAppear, so isLoading flips while the fullScreenCover dissolves in and animating those flips reads as an ugly top-left fly-in). Same fix as MovieDetailView.
@@ -368,10 +368,15 @@ struct SeriesDetailView: View {
                             proxy.scrollTo("episodeRow", anchor: .top)
                         }
                     }
+                    // The session may have walked several episodes past the card it was started
+                    // from, and that card is the one the row is still parked on, so the target is
+                    // off-row and unrendered. A focusedEpisodeID write for an unrendered card is a
+                    // silent no-op, hence the same scroll-then-focus route the season bridge takes.
+                    // The nil write first is the two-step that forces a real transition; its own
+                    // effect on the aim is overwritten on the line below on purpose.
                     focusedEpisodeID = nil
-                    DispatchQueue.main.async {
-                        focusedEpisodeID = ep.id
-                    }
+                    episodeAim.sessionMoved(to: ep.id)
+                    pendingEpisodeFocus = ep.id
                 }
                 playItem = nil
                 playOriginatedFromPlayButton = false
@@ -389,6 +394,10 @@ struct SeriesDetailView: View {
                   episode.seriesId == item.id else { return }
             playItem = episode
             selectedEpisode = episode
+            // The row's memory still names the card the player was started from, ten auto-advances
+            // ago. Move it along with the session, else every entry into the row (the return from
+            // the player included) aims at the episode that was started rather than the one watched.
+            episodeAim.sessionMoved(to: episode.id)
             // Rolled into the next season: its episode row has to be loaded or the focus restore on
             // dismiss has no card to land on.
             if let seasonID = episode.seasonId, viewModel?.selectedSeasonID != seasonID {
@@ -952,17 +961,9 @@ struct SeriesDetailView: View {
         return overview
     }
 
-    /// Where a move down into the episode row lands: the card the viewer left the row on, else the next-up/current episode, else the first. Both entry paths (the focus bridge and the one-shot redirect below it) read this one resolver so they cannot aim at different cards. The season filter is what makes a stale id from another season fall through.
+    /// Where a move down into the episode row lands. Every entry path (the focus bridge, the one-shot redirect below it, the return from the player) reads this one resolver so they cannot aim at different cards.
     private func episodeEntryTarget(vm: DetailViewModel) -> String? {
-        if let last = lastFocusedEpisodeID,
-           vm.episodes.contains(where: { $0.id == last }) {
-            return last
-        }
-        if let current = vm.currentEpisodeID,
-           vm.episodes.contains(where: { $0.id == current }) {
-            return current
-        }
-        return vm.episodes.first?.id
+        episodeAim.target(in: vm.episodes.map(\.id), currentEpisodeID: vm.currentEpisodeID)
     }
 
     /// Up out of the episode row. It used to go straight to the season bar, which skipped the season synopsis sitting between the two (reachable downwards, unreachable upwards). Now the synopsis takes the first stop when there is one, and its own up-move carries on to the season bar.
@@ -1041,7 +1042,7 @@ struct SeriesDetailView: View {
                         episodesHadFocus = true
                         lastFocusedArea = .episode
                     } else if let oldEpisode {
-                        lastFocusedEpisodeID = oldEpisode
+                        episodeAim.focusLeft(oldEpisode)
                     }
                 }
                 .onChange(of: vm.selectedSeasonID) { _, newID in
