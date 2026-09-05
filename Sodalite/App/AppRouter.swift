@@ -43,6 +43,10 @@ struct AppRouter: View {
     /// Drives the NowPlaying fullScreenCover off the coordinator's nowPlayingPresentationRequest bump.
     @State private var showNowPlaying = false
 
+    /// Last requestContentReload this view answered. `.task(id:)` re-fires with the same id on every
+    /// reappear, and re-running the session refresh on each modal dismissal would be pointless traffic.
+    @State private var lastHandledContentReload = 0
+
     /// Both platforms: its change callback is an iOS concern, but the path STATUS it snapshots is
     /// what tells an unreachable server apart from a device with no network (Sodalite#122).
     @State private var pathObserver = NetworkPathObserver()
@@ -182,6 +186,21 @@ struct AppRouter: View {
             pathObserver.onPathChange = { dependencies.scheduleRouteResolve() }
             #endif
             pathObserver.start()
+        }
+        // The server is back within a running session, so re-learn what the launch could not
+        // (Sodalite#122). Home has its own observer for its rows, TabRootView for its optional
+        // tabs; these two are the rest, and without them the recovered session kept a blank profile
+        // picture and a Seerr that claimed it was never set up until the app was force-quit.
+        .task(id: appState.requestContentReload) {
+            let signal = appState.requestContentReload
+            guard signal > 0, signal != lastHandledContentReload else { return }
+            lastHandledContentReload = signal
+            defer {
+                if Task.isCancelled, lastHandledContentReload == signal {
+                    lastHandledContentReload = 0
+                }
+            }
+            await refreshSessionAfterOutage()
         }
         .task(id: appState.pendingDeepLinkItemID) {
             await resolvePendingDeepLink()
@@ -549,6 +568,31 @@ struct AppRouter: View {
                 appState.setSeerrConnected(server: seerrServer, user: seerrUser)
                 dependencies.scheduleRouteResolve()
             }
+        }
+    }
+
+    /// Re-runs the parts of the launch restore that need the server, after an outage made their
+    /// launch-time results wrong (Sodalite#122).
+    ///
+    /// Not the whole restore: the session itself stands, only what it failed to LEARN is missing.
+    /// Both calls are the same ones `performRestore` makes, with the same handling, so a recovered
+    /// session ends up in the state a launch on a healthy network would have produced.
+    private func refreshSessionAfterOutage() async {
+        guard appState.isAuthenticated, let user = appState.activeUser else { return }
+        await refreshActiveUserIdentity(expectedUserID: user.id)
+        guard !Task.isCancelled else { return }
+
+        // allowLegacyFallback matches the launch call: a pre-0.3.0 install whose first launch of the
+        // day happened off the network must still get its Seerr session back here.
+        let outcome = await dependencies.syncSeerrSession(
+            forJellyfinUserID: appState.activeUser?.id,
+            jellyfinServerID: appState.activeServer?.id,
+            allowLegacyFallback: true
+        )
+        guard !Task.isCancelled else { return }
+        if case .connected(let seerrServer, let seerrUser) = outcome {
+            appState.setSeerrConnected(server: seerrServer, user: seerrUser)
+            dependencies.scheduleRouteResolve()
         }
     }
 

@@ -4,6 +4,10 @@ import UIKit
 struct TabRootView: View {
     @State private var selectedTab: AppTab = .home
     @State private var availableTabs: [AppTab] = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
+    /// Last requestContentReload this view answered, so a reappear does not re-probe a signal it
+    /// already handled.
+    @State private var lastHandledContentReload = 0
+
     /// serverDidSwitch value of the last completed tab probe. -1 so the first probe fires; a `.task` re-fire on reappear is a no-op while a real switch re-probes.
     @State private var lastProbedServerSwitch = -1
     /// Re-probe triggered by .loginDidComplete (add-server / add-profile authenticates via setAuthenticated WITHOUT bumping serverDidSwitch, so the serverDidSwitch probe never fires for the new server).
@@ -189,6 +193,21 @@ struct TabRootView: View {
             loginProbeTask?.cancel()
             loginProbeTask = Task { await recomputeOptionalTabsAfterLogin() }
         }
+        // The server is back within a running session (Sodalite#122). Both probes below fail while it
+        // is unreachable, so the launch decided "no Live TV, no Music" and the serverDidSwitch latch
+        // meant it never asked again: the two tabs stayed gone until the app was force-quit. Answered
+        // here rather than by loosening that latch, which guards a device-verified path.
+        .task(id: appState.requestContentReload) {
+            let signal = appState.requestContentReload
+            guard signal > 0, signal != lastHandledContentReload else { return }
+            lastHandledContentReload = signal
+            defer {
+                if Task.isCancelled, lastHandledContentReload == signal {
+                    lastHandledContentReload = 0
+                }
+            }
+            await recoverOptionalTabs()
+        }
         .onAppear {
             configureTabBarItemAppearance()
         }
@@ -231,6 +250,41 @@ struct TabRootView: View {
         if Task.isCancelled { return }
 
         var tabs = base
+        if hasLive, let homeIndex = tabs.firstIndex(of: .home) {
+            tabs.insert(.liveTV, at: homeIndex + 1)
+        }
+        if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
+            tabs.insert(.music, at: settingsIndex)
+        }
+        if tabs != availableTabs {
+            availableTabs = tabs
+        }
+    }
+
+    /// Re-probes the optional tabs after an outage hid them, and publishes only if the answer changed.
+    ///
+    /// Deliberately does NOT clear to the base set first, which is the one thing separating it from
+    /// the login variant above: nothing here is stale, it is missing, and dropping tabs that are
+    /// already showing would flicker the bar for a signal that usually changes nothing. The two
+    /// existing probes are left exactly as they are because both are device-verified against tvOS's
+    /// mid-session icon re-templating (see publishing note in the switch probe).
+    @MainActor
+    private func recoverOptionalTabs() async {
+        guard let userID = dependencies.activeUserID else { return }
+
+        let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+        if Task.isCancelled { return }
+        var hasMusic = false
+        do {
+            hasMusic = try await dependencies.jellyfinMusicService.hasMusicLibrary(userID: userID)
+        } catch {
+            // No music library confirmed; tab stays hidden.
+        }
+        if Task.isCancelled { return }
+
+        // One assignment, for the same reason as the other two: two insertions rebuild the bar twice
+        // and strand the first item on tvOS's gray icon template.
+        var tabs = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
         if hasLive, let homeIndex = tabs.firstIndex(of: .home) {
             tabs.insert(.liveTV, at: homeIndex + 1)
         }

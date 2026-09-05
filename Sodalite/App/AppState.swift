@@ -62,9 +62,17 @@ final class AppState {
     /// drifts from this one.
     var serverReachability: ServerReachability = .unknown
 
-    /// Bumped when something outside a feature has made its last failure obsolete, so the feature
-    /// reloads what it already gave up on. Raised today by the return from a Local Network denial:
-    /// the permission is back, and Home is still showing the error it hit while it was off.
+    /// Bumped when something outside a feature has made its last failure obsolete, so everything
+    /// that gave up while the server was out of reach tries again. Raised by the return from a Local
+    /// Network denial (the permission is back) and by `serverReachability` improving to `.reachable`.
+    ///
+    /// Read by more than Home, and that is the point (Sodalite#122). The session learns three things
+    /// from the server exactly once, at launch, so a launch that happened while the server was
+    /// unreachable never learned them at all: who the token resolves to (profile name, avatar,
+    /// permissions), whether Seerr is connected, and which optional tabs this server offers. Before
+    /// this signal reached them, coming back onto the network reloaded Home and left the profile
+    /// picture blank, Seerr claiming it was never set up, and the Live TV and Music tabs missing
+    /// until the app was force-quit. Measured on both paths, 2026-09-05.
     var requestContentReload: Int = 0
 
     /// True while the fresh-install launch gate is waiting on the first iCloud fetch; SplashView surfaces a status line.
