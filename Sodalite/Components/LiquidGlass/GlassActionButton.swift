@@ -80,8 +80,12 @@ private struct GlassActionButtonLabel: View {
     }
 
     /// Collapsible trailing content (title + optional subtitle); leading-glyph gap baked in so the measured width accounts for it.
+    ///
+    /// Baseline-aligned, not centred: the subtitle is two text styles smaller, and centring two
+    /// boxes of different height puts the smaller one's baseline above the larger one's, which on
+    /// the resume tile reads as the episode label floating.
     private var labelInner: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(title)
                 .font(.callout)
                 .fontWeight(.medium)
