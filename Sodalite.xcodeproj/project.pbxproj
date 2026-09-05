@@ -72,6 +72,7 @@
 		118BC52B1D1724D8C0B43CC7 /* OpenSourceLicenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9FD615D950EA340BB597EF /* OpenSourceLicenses.swift */; };
 		11C77DAE12710DBA70F5DF02 /* NowPlayingWaveIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DDD1EA2510104B724CB32 /* NowPlayingWaveIcon.swift */; };
 		11EFF1D83ECC44327568355F /* EpisodeMetadataFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B19E021DA509D66BA25B68 /* EpisodeMetadataFormatter.swift */; };
+		12597F3BFEA91B5C27EF0CE5 /* SiriRemoteEdgeClick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */; };
 		126F53A76E833C94F6DDCD83 /* LibrarySort.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D870347A5A37B3477481FB /* LibrarySort.swift */; };
 		127AFD07984D6DB0C515566C /* SeerrMediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24C811D70DAAA13454A02EE /* SeerrMediaTests.swift */; };
 		127D4243ADD0CA6DB4B02BC5 /* CheckmarkAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD5596E5ED089CD31B3ADB8 /* CheckmarkAnimation.swift */; };
@@ -190,6 +191,7 @@
 		3007F51D011B031E7A0900DC /* ResumeTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A377CDB4D5AD8C205148883 /* ResumeTimeFormatter.swift */; };
 		301ADFE6A7051BDE1B65A943 /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A555200A5ACA574AF2055E /* AppTab.swift */; };
 		3025683A94FFECD6059355DF /* FilteredGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9E7E3CFDA7723780F5C45F /* FilteredGridView.swift */; };
+		30D13C36366BE66ED056016E /* SiriRemoteSurfaceTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 996502532B626B8B72DC25CF /* SiriRemoteSurfaceTracker.swift */; };
 		30E105534E3FD32AFE3F35CA /* LiveSubtitleTracks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304C4DC2682C86FD33D831C /* LiveSubtitleTracks.swift */; };
 		30FA53AE69FCCD0C55CEDF2F /* GuideEdgeFadeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E1CBDC8FD675B2A490D1A34 /* GuideEdgeFadeTests.swift */; };
 		311F02E5A3915E83DBCC603B /* SeerrImageURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A939025FF52393099530C53 /* SeerrImageURLTests.swift */; };
@@ -283,6 +285,7 @@
 		49F70FF3FE27FF93451738E5 /* RecordingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730C8FB986E1263A255832CC /* RecordingsViewModel.swift */; };
 		4A6DF08C0A681BCBD92E4152 /* LibrarySortSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0EBC152D80BAC2D6FE9AEF /* LibrarySortSheet.swift */; };
 		4AA71C959CAE34521BEC18CD /* OpenSourceLicenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9FD615D950EA340BB597EF /* OpenSourceLicenses.swift */; };
+		4B052E6F415F767C5866AF76 /* SiriRemoteEdgeClickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70AEC623687A44C3603ED57F /* SiriRemoteEdgeClickTests.swift */; };
 		4B37DAABFBDD1D892E41C7E2 /* SeerrRequestEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17821D029EC7EA102611CED0 /* SeerrRequestEditSheet.swift */; };
 		4B60BDFF2E5B5C721F827435 /* Changelog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF85D7F0021838472DCD2F72 /* Changelog.swift */; };
 		4B6E1EB8C9049899156881FD /* CollectionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207C9CF5D296A5A4C32B9C47 /* CollectionGroupingTests.swift */; };
@@ -380,6 +383,7 @@
 		62C2D2CE016A59F5463C508C /* ChangelogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1FB527AFBC2EF233653E73 /* ChangelogListView.swift */; };
 		639035D1B42B23EB0AE17144 /* SystemCaptionWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 150A2052222365E6CEFAF631 /* SystemCaptionWindowTests.swift */; };
 		6443B555E9DEB5192AFE108E /* TopShelfAccent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A76F4E46F2995ECC621AF105 /* TopShelfAccent.swift */; };
+		64913A8514DF05A048AE8406 /* SiriRemoteEdgeClick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */; };
 		64EDED872A2D4749BA6E30FB /* LiveProgramsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BC18D495A4C0E5055CA6A7 /* LiveProgramsView.swift */; };
 		651FBE426B8922FA21570F52 /* JellyfinServerDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8AFD18467EFC7535B275979 /* JellyfinServerDiscovery.swift */; };
 		6540637AAEF6D363C5EC219F /* LicenseText-LGPL-2.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = F49AA15F4541B18B03730DEF /* LicenseText-LGPL-2.1.txt */; };
@@ -604,6 +608,7 @@
 		9D8F177619267AE8785EC722 /* AuthPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00EFF9852627141E97BDC41 /* AuthPreferences.swift */; };
 		9DC870533F1310E04B860672 /* SeerrStatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973E8EC25E9E5BB871AC73E7 /* SeerrStatusBadge.swift */; };
 		9E16B17848E2E6F0E9A2B2F6 /* StoreProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2D94C696BD816FE0622F904 /* StoreProducts.swift */; };
+		9E37FA39B6C864BBFD702D69 /* SiriRemoteSurfaceTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 996502532B626B8B72DC25CF /* SiriRemoteSurfaceTracker.swift */; };
 		9EA3FEA6E0D2F8BDC9424074 /* MusicScrubberInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C0989097FA38E35DE5B355 /* MusicScrubberInput.swift */; };
 		9EB5374F1D8318854E3EE8F7 /* CatalogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F1F9A57DDFC28E9FD37BB2C /* CatalogDetailView.swift */; };
 		9F53F51DE85ABF4F92C68712 /* ParentalGatePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7898264CE9403B38D3FB3A /* ParentalGatePolicy.swift */; };
@@ -1064,6 +1069,7 @@
 		1021036298773AF91C95F8C2 /* GlassActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassActionButton.swift; sourceTree = "<group>"; };
 		105916A43830F66C8297D56D /* SeerrSearchResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrSearchResults.swift; sourceTree = "<group>"; };
 		1080201B0AE5CD8DE258323B /* CloudSyncAccountTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncAccountTransition.swift; sourceTree = "<group>"; };
+		110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteEdgeClick.swift; sourceTree = "<group>"; };
 		112D849959DE17DC6C5CEED2 /* LiveDirectStreamMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveDirectStreamMemory.swift; sourceTree = "<group>"; };
 		116E63A3D0E2D96FFA20EC65 /* LivePlaybackContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlaybackContext.swift; sourceTree = "<group>"; };
 		12C9EC049C02787E96058C21 /* PlayerActionPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerActionPill.swift; sourceTree = "<group>"; };
@@ -1281,6 +1287,7 @@
 		6F1459E3CC3E393249DCF146 /* CloudSyncSessionRetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncSessionRetentionTests.swift; sourceTree = "<group>"; };
 		6F4E0F9206D8B25B7535B9E5 /* LogTimestampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTimestampTests.swift; sourceTree = "<group>"; };
 		701C10265C5C32AA946482DC /* AsyncCachedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncCachedImage.swift; sourceTree = "<group>"; };
+		70AEC623687A44C3603ED57F /* SiriRemoteEdgeClickTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteEdgeClickTests.swift; sourceTree = "<group>"; };
 		7126EDCF2AE6A462DC455824 /* CatalogCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogCollectionView.swift; sourceTree = "<group>"; };
 		7138A1E131E7104ED1881D2B /* MediaSegmentRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSegmentRequestTests.swift; sourceTree = "<group>"; };
 		71A6ACA556526BD955443E10 /* ProfileRepromptPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRepromptPolicyTests.swift; sourceTree = "<group>"; };
@@ -1381,6 +1388,7 @@
 		973E8EC25E9E5BB871AC73E7 /* SeerrStatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrStatusBadge.swift; sourceTree = "<group>"; };
 		97F52845EFD489AE02A52FF2 /* SodaliteIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SodaliteIntents.swift; sourceTree = "<group>"; };
 		98AD611609B558446EBE5DF6 /* AccentButtonContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentButtonContrastTests.swift; sourceTree = "<group>"; };
+		996502532B626B8B72DC25CF /* SiriRemoteSurfaceTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteSurfaceTracker.swift; sourceTree = "<group>"; };
 		99C0FDE1041F3C651DDC2FAE /* PlayerViewModel+NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerViewModel+NowPlaying.swift"; sourceTree = "<group>"; };
 		9A49C90E145510D9212683F8 /* PlayerLockProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLockProgress.swift; sourceTree = "<group>"; };
 		9A86E2E8EDE527526ABF2C0E /* HomeViewModel+Precompute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewModel+Precompute.swift"; sourceTree = "<group>"; };
@@ -1774,6 +1782,8 @@
 				E2F1B3C38E5D186AFF71A7FA /* ReplacedEpisodeResolver.swift */,
 				0C7874FA36B5F9963D5EFFD0 /* ReplacedMovieResolver.swift */,
 				00DD61893C2D9B04065CB8BF /* ScrubPreviewProvider.swift */,
+				110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */,
+				996502532B626B8B72DC25CF /* SiriRemoteSurfaceTracker.swift */,
 				1AB8B7D07A1B990DF0036F63 /* SkipBackSubtitleWindow.swift */,
 				9FC71B2A5D50F33F3F8EC4D7 /* SkipSegmentResolver.swift */,
 				442B310F29B45D8FE16B9A9C /* SourceOutageWatchdog.swift */,
@@ -1955,6 +1965,7 @@
 				2D7691E9CE22321AB0996192 /* ServerURLClassifierTests.swift */,
 				B1B942F0FB15F6423EDCD17B /* ServerURLSlotRetentionTests.swift */,
 				34D5B3810DDB2AD91CD7A5CD /* SessionRestorerTests.swift */,
+				70AEC623687A44C3603ED57F /* SiriRemoteEdgeClickTests.swift */,
 				8CC2B044B670A6CF7B701C10 /* SkipBackSubtitleWindowTests.swift */,
 				6A1AC3DC2967075D0F243004 /* SkipSegmentResolverTests.swift */,
 				ABBA42E7582D1A00BFB35C34 /* SourceOutageTrackerTests.swift */,
@@ -3166,6 +3177,8 @@
 				49E87C6DD53780FE23243F69 /* SessionRestorer.swift in Sources */,
 				26B9667EB72514B1BD400DFF /* SettingsView.swift in Sources */,
 				F6491082B1EF3D9273CA5F79 /* SharedSessionMirror.swift in Sources */,
+				64913A8514DF05A048AE8406 /* SiriRemoteEdgeClick.swift in Sources */,
+				9E37FA39B6C864BBFD702D69 /* SiriRemoteSurfaceTracker.swift in Sources */,
 				AF30CA9DF8793B32973C7C66 /* SkipBackSubtitleWindow.swift in Sources */,
 				DF2F62E83E41EA2B26ACCB92 /* SkipSegmentResolver.swift in Sources */,
 				A254E90ABD1A190287B5ED8E /* SodaliteApp.swift in Sources */,
@@ -3395,6 +3408,7 @@
 				C46B3F125E18CBAD3C030347 /* ServerURLClassifierTests.swift in Sources */,
 				57FF673743802E78AB3CBB72 /* ServerURLSlotRetentionTests.swift in Sources */,
 				7E6A5602AAE2EB1189151A70 /* SessionRestorerTests.swift in Sources */,
+				4B052E6F415F767C5866AF76 /* SiriRemoteEdgeClickTests.swift in Sources */,
 				55E2B3C115B23DC8A05B7830 /* SkipBackSubtitleWindowTests.swift in Sources */,
 				FA71B3DD2FF286D3FF66A930 /* SkipSegmentResolverTests.swift in Sources */,
 				5EEC82CF0CCF3E3E3AD9E30E /* SourceOutageTrackerTests.swift in Sources */,
@@ -3744,6 +3758,8 @@
 				93CB08BD8BDCA634E0CFF328 /* SessionRestorer.swift in Sources */,
 				9981B6E3FE935337DA60E438 /* SettingsView.swift in Sources */,
 				60A3FFF539B9940F9B9F7C2F /* SharedSessionMirror.swift in Sources */,
+				12597F3BFEA91B5C27EF0CE5 /* SiriRemoteEdgeClick.swift in Sources */,
+				30D13C36366BE66ED056016E /* SiriRemoteSurfaceTracker.swift in Sources */,
 				F0CD48A08028A8FBB61A7C1B /* SkipBackSubtitleWindow.swift in Sources */,
 				AFC64535A569B1DC367930CB /* SkipSegmentResolver.swift in Sources */,
 				7C9D74A5A6878C3E11638368 /* SodaliteApp.swift in Sources */,

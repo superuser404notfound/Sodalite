@@ -52,6 +52,13 @@ final class PlayerHostController: AVPlayerViewController {
     /// Our recognizers, so suppressAVKitGestures can disable AVKit's own (arrow→10s skip, select→toggle, pan→scrub) which otherwise fire silently and eat presses before our handlers.
     private var ourGestureRecognizers: [UIGestureRecognizer] = []
 
+    #if os(tvOS)
+    /// Sodalite#115: where on the 1st-generation remote's glass surface the click landed. UIKit reports
+    /// every click as a plain `.select` regardless of thumb position, so the edge click that the button
+    /// remote spells as a left/right press has no other source.
+    private let remoteSurface = SiriRemoteSurfaceTracker()
+    #endif
+
     /// Weak ref to our overlay's hosting view so suppressAVKitChrome's class-name heuristic skips it (it sits among AVKit's chrome views).
     private weak var overlayHostingView: UIView?
 
@@ -743,11 +750,17 @@ final class PlayerHostController: AVPlayerViewController {
         PlayerModalPresence.notifyDidChange()
         suppressAVKitGestures()
         suppressAVKitChrome()
+        #if os(tvOS)
+        remoteSurface.start()
+        #endif
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         PlayerModalPresence.notifyDidChange()
+        #if os(tvOS)
+        remoteSurface.stop()
+        #endif
     }
 
     override func viewDidLayoutSubviews() {
@@ -882,6 +895,19 @@ final class PlayerHostController: AVPlayerViewController {
                 return
             }
         }
+        // Sodalite#115: an edge click on the 1st-generation remote's surface means what a left/right
+        // press means on the button remote. Deliberately narrow: every branch above keeps the click,
+        // so an edge click can never take a button activation, a dropdown confirm or a segment skip.
+        // It sits ABOVE the scrub commit so the second click of a burst reaches seekJump again and
+        // accumulates to +20 instead of committing the first jump (the coalescing from #114).
+        #if os(tvOS)
+        if !viewModel.isDropdownOpen,
+           !viewModel.showControls || viewModel.controlsFocus == .progressBar,
+           let direction = remoteSurface.consumeEdgeDirection() {
+            viewModel.seekJumpByConfiguredInterval(direction: direction)
+            return
+        }
+        #endif
         if viewModel.isDropdownOpen {
             viewModel.confirmDropdownSelection()
         } else if viewModel.showControls && viewModel.controlsFocus != .progressBar {
