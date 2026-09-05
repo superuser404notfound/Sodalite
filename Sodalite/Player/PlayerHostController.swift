@@ -695,17 +695,38 @@ final class PlayerHostController: AVPlayerViewController {
     /// Disable every AVKit-owned recognizer (arrow→10s skip, pan→scrub, select→toggle) except ours; without this the hidden chrome's gestures still fire and eat presses. Idempotent.
     private func suppressAVKitGestures() {
         let ours = Set(ourGestureRecognizers.map { ObjectIdentifier($0) })
-        suppressGestures(on: view, exclude: ours)
+        Self.suppressGestures(on: view, exclude: ours, skippingSubtreesOf: ownedSubtrees)
     }
 
-    private func suppressGestures(on v: UIView, exclude: Set<ObjectIdentifier>) {
+    /// The subtrees this walk must not enter, the same set `suppressAVKitChrome` preserves. They are
+    /// ours: the engine's render surface and the SwiftUI overlay that draws the whole player UI.
+    private var ownedSubtrees: Set<ObjectIdentifier> {
+        var ids: Set<ObjectIdentifier> = [ObjectIdentifier(aetherView)]
+        if let host = overlayHostingView { ids.insert(ObjectIdentifier(host)) }
+        return ids
+    }
+
+    /// Disable every gesture recognizer AVKit owns, without descending into the subtrees we own
+    /// (#121). The walk used to run the entire hierarchy, so each layout pass also switched off the
+    /// recognizers SwiftUI had installed inside our overlay: the stats panel's scroll gesture and
+    /// every button tap in it. That is invisible until something creates a recognizer and no rebuild
+    /// follows to replace it, which is exactly a rotation with the panel already open. The panel
+    /// stayed on screen, correctly laid out and reachable by hit testing, and dead.
+    ///
+    /// `exclude` remains for individual recognizers we install on AVKit's own view; the subtree skip
+    /// is what protects everything SwiftUI creates and re-creates below us, which we can never
+    /// enumerate ahead of time.
+    static func suppressGestures(on v: UIView,
+                                 exclude: Set<ObjectIdentifier>,
+                                 skippingSubtreesOf skip: Set<ObjectIdentifier>) {
+        if skip.contains(ObjectIdentifier(v)) { return }
         if let grs = v.gestureRecognizers {
             for gr in grs where !exclude.contains(ObjectIdentifier(gr)) {
                 gr.isEnabled = false
             }
         }
         for sub in v.subviews {
-            suppressGestures(on: sub, exclude: exclude)
+            suppressGestures(on: sub, exclude: exclude, skippingSubtreesOf: skip)
         }
     }
 
