@@ -467,7 +467,27 @@ private struct TransportIconButton: View {
     var isDisabled: Bool = false
     let action: () -> Void
 
+    /// The primary control needs the accent's ROLES, which the environment `.tint` cannot hand out:
+    /// it is an opaque ShapeStyle. The cover is a plain SwiftUI presentation, so the key propagates.
+    @Environment(\.appearanceTheme) private var appearanceTheme
+
     private var isFocused: Bool { transportFocus == focusKey }
+
+    /// Play/Pause is accent-filled at all times (Sodalite#112), so focus cannot be the difference
+    /// between filled and unfilled. It brightens the fill to the accent itself from a darker resting
+    /// shade instead, and the whole colour decision stays in `AccentPalette`.
+    ///
+    /// On iOS the darker shade would be the ONLY state a user ever sees, since there is no focus
+    /// engine to lift it, so the fill stays the accent there.
+    private var primaryFill: Color {
+        #if os(tvOS)
+        return isFocused
+            ? appearanceTheme.palette.control.color
+            : appearanceTheme.palette.restingControl.color
+        #else
+        return appearanceTheme.palette.control.color
+        #endif
+    }
 
     var body: some View {
         // tvOS scales .title/.title2 to ~76/~57pt, so the glyph filled the frame and the focus circle
@@ -479,21 +499,34 @@ private struct TransportIconButton: View {
         // focus card; our focus look is the tinted circle fill + stroke below.
         Image(systemName: systemImage)
             .font(iconFont)
+            // The glyph sits on the accent, so it takes the accent's own foreground; white is
+            // legible on thirteen of the twenty-three presets and no more (Sodalite#111).
+            .foregroundStyle(isLarge
+                ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
+                : AnyShapeStyle(.primary))
             .frame(width: size, height: size)
             .background(
                 Circle()
-                    .fill(Color.white.opacity(
-                        isFocused
-                            ? (isLarge ? 0.25 : 0.18)
-                            : (isLarge ? 0.12 : 0.07)
-                    ))
+                    .fill(isLarge
+                        ? AnyShapeStyle(primaryFill)
+                        : AnyShapeStyle(Color.white.opacity(isFocused ? 0.18 : 0.07)))
             )
             .overlay(
+                // Previous/Next keep the outline-on-focus look; the filled primary would only get a
+                // ring in its own colour, which is invisible against its own fill.
                 Circle()
                     .strokeBorder(.tint, lineWidth: 3)
-                    .opacity(isFocused ? 1 : 0)
+                    .opacity(isFocused && !isLarge ? 1 : 0)
             )
             .scaleEffect(isFocused ? 1.1 : 1.0)
+            // Second half of the primary's focus lift, and the half that carries the LIGHT accents:
+            // their fill is bright enough that the brightness step alone is the subtler cue, while a
+            // black drop shadow does nothing for them on a near-black backdrop.
+            .shadow(
+                color: appearanceTheme.palette.control.color
+                    .opacity(isLarge && isFocused ? 0.55 : 0),
+                radius: 22
+            )
             .shadow(
                 color: .black.opacity(isFocused ? 0.3 : 0),
                 radius: 10,

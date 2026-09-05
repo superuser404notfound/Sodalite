@@ -71,6 +71,18 @@ struct RGBColor: Equatable, Sendable {
         relativeLuminance >= 0.30 ? .black : .white
     }
 
+    /// The same colour one step darker, still fully opaque. A control that is accent-filled at all
+    /// times has no room for a fill/no-fill focus step, so its resting state wears this and its
+    /// focused state the accent itself. Mixed toward black in the gamma-encoded space the presets
+    /// are authored in, which is where a layer blend would have happened anyway.
+    func darkened(by amount: Double) -> RGBColor {
+        let factor = 1 - amount
+        func channel(_ value: Double) -> UInt32 {
+            UInt32((min(1, max(0, value * factor)) * 255).rounded())
+        }
+        return RGBColor(hex: channel(red) << 16 | channel(green) << 8 | channel(blue))
+    }
+
     private var relativeLuminance: Double {
         func linear(_ value: Double) -> Double {
             value <= 0.04045
@@ -91,6 +103,18 @@ struct AccentPalette: Equatable, Sendable {
     /// What a label or glyph drawn on a `control` fill is painted in. Derived from the fill instead
     /// of authored per preset, so a new accent cannot ship without one.
     var foreground: RGBColor { control.legibleForeground }
+
+    /// What an always-accent-filled control wears while it is NOT focused (Sodalite#112, the Now
+    /// Playing Play/Pause circle). Focus then brightens the fill to `control` itself, which is the
+    /// only safe direction: brightening the FOCUSED state instead would push the dark accents past
+    /// the point where `foreground` still clears 3:1. `focus` is deliberately not used for this,
+    /// it equals `control` on every pastel and every Basic preset. 30% is measured, not tasted:
+    /// the step stays visible down to the darkest preset (Indigo, 1.36:1) while the glyph keeps
+    /// 3.72:1 on the darkened fill for any colour, catalog or not.
+    var restingControl: RGBColor { control.darkened(by: Self.restingDarkening) }
+
+    /// Named so the tests sweep the value the palette actually ships instead of a copy of it.
+    static let restingDarkening: Double = 0.30
 }
 
 enum AccentPreset: String, CaseIterable, Identifiable, Sendable {
