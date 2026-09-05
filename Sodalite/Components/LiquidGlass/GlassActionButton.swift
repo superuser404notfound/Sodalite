@@ -201,6 +201,11 @@ struct GlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(contentColor)
+            // Label and bar read as one block, so the block gets centred rather than the label
+            // alone: without the lift the text keeps the middle and the bar hangs in the bottom
+            // padding, which leaves the top half of the tile looking empty. Layout-neutral, so the
+            // tile stays exactly as tall as its siblings in the action row.
+            .offset(y: -progressReserve / 2)
             .background(
                 ZStack(alignment: .leading) {
                     Capsule()
@@ -229,25 +234,43 @@ struct GlassButtonStyle: ButtonStyle {
     /// and the whole label sits on one known ground.
     private func progressBar(_ fraction: Double) -> some View {
         GeometryReader { geo in
-            let height = max(4, geo.size.height * 0.08)
             Capsule()
                 .fill(contentColor.opacity(0.28))
-                .frame(height: height)
+                .frame(height: Self.barHeight)
                 .overlay(alignment: .leading) {
                     Capsule()
                         .fill(contentColor)
                         .frame(
                             width: (geo.size.width - Self.barInset * 2) * CGFloat(min(1.0, max(0, fraction))),
-                            height: height
+                            height: Self.barHeight
                         )
                 }
                 .padding(.horizontal, Self.barInset)
-                .position(x: geo.size.width / 2, y: geo.size.height - height * 2)
+                // Sits the same distance below the lifted label as the label sits below the top
+                // edge, which is what makes the pair read as centred.
+                .position(x: geo.size.width / 2, y: geo.size.height - Self.labelPadding + progressReserve / 2 - Self.barHeight / 2)
         }
     }
 
-    /// Lines the bar up with the label's own leading edge rather than the capsule's.
+    /// The vertical room the bar and its gap take out of the label's block. Zero without progress,
+    /// so a plain button is untouched.
+    private var progressReserve: CGFloat {
+        (progressFraction ?? 0) > 0 ? Self.barHeight + Self.barGap : 0
+    }
+
+    /// Lines the bar up with the label's own leading edge rather than the capsule's, and matches
+    /// `GlassActionButtonLabel`'s own vertical padding so the two margins can be reasoned about.
     private static let barInset: CGFloat = 24
+    private static let labelPadding: CGFloat = 12
+    /// Fixed rather than a share of the height: tvOS runs the same paddings at roughly twice the
+    /// type size, so a bar sized off the button would be thin on the platform with the big text.
+    #if os(tvOS)
+    private static let barHeight: CGFloat = 7
+    private static let barGap: CGFloat = 7
+    #else
+    private static let barHeight: CGFloat = 4
+    private static let barGap: CGFloat = 5
+    #endif
 
     private var backgroundFill: AnyShapeStyle {
         if isProminent {
