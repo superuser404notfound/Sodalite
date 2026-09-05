@@ -413,6 +413,7 @@
 		6ACA29F7B27620524DDC5931 /* JellyfinUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8C86911CAC2C3C5F103774 /* JellyfinUser.swift */; };
 		6BCB819F92B11AC691B41F3A /* CatalogProviderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58ABF4558D8BC04D3D114DBB /* CatalogProviderRow.swift */; };
 		6C0ADA6EE072933263ED5510 /* LicenseText-MIT.txt in Resources */ = {isa = PBXBuildFile; fileRef = E16CB1DBF0F096E8267D8D08 /* LicenseText-MIT.txt */; };
+		6C15AE80AAA0CD598E6CB620 /* GestureSuppressionScopeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040CAA79FE9A6488843612FD /* GestureSuppressionScopeTests.swift */; };
 		6C4E48585A75CD01B8D1E783 /* LiveProgramsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADAD381D4AEFEF97223E0EA /* LiveProgramsViewModel.swift */; };
 		6C802416D42DA781D78713F2 /* SeerrSurfacePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C8510D4EC67DBC3879D8C8 /* SeerrSurfacePolicy.swift */; };
 		6CD4329A2FF702EFF3A5ECD4 /* LicenseText-AetherEngine.txt in Resources */ = {isa = PBXBuildFile; fileRef = 65525527BDEE7CBB5EC35778 /* LicenseText-AetherEngine.txt */; };
@@ -1029,6 +1030,7 @@
 		0385E1379FFACA0B7CD56111 /* SeerrDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrDecodingTests.swift; sourceTree = "<group>"; };
 		038BBEAE0097DCB4283CD8BD /* PlayerViewModel+SubtitleSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerViewModel+SubtitleSearch.swift"; sourceTree = "<group>"; };
 		03A0444AD166BAEE0F237FBF /* PendingRequestsBackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingRequestsBackgroundRefresh.swift; sourceTree = "<group>"; };
+		040CAA79FE9A6488843612FD /* GestureSuppressionScopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureSuppressionScopeTests.swift; sourceTree = "<group>"; };
 		04547B5AAA8453CDCBF40F1B /* SeerrMediaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrMediaService.swift; sourceTree = "<group>"; };
 		045D26559530D2BA2F3268FF /* ProfileRepromptPreferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRepromptPreferenceTests.swift; sourceTree = "<group>"; };
 		04CA12E8C584EE67B0FB35C7 /* NowPlayingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingView.swift; sourceTree = "<group>"; };
@@ -1877,6 +1879,7 @@
 				4A21F99D17CDC050C5CD490B /* ForcedSubtitleFallbackTests.swift */,
 				EE4C9FBD5F7D9120B46B71E0 /* ForegroundReloadGateTests.swift */,
 				F923494CDFC892548434921A /* ForeignAudioSubtitleRuleTests.swift */,
+				040CAA79FE9A6488843612FD /* GestureSuppressionScopeTests.swift */,
 				EA60D8A55CE7A835EEAB00EF /* GuardianPINRecoveryCandidatesTests.swift */,
 				E14D3464C7E129B3F2C36E08 /* GuideAxisTests.swift */,
 				939138CECC6FB0BF0B9E2B05 /* GuideChannelSearchTests.swift */,
@@ -3322,6 +3325,7 @@
 				87AD6691102764C558EAD457 /* ForcedSubtitleFallbackTests.swift in Sources */,
 				F09184FDC2FFDF2EFDCAF938 /* ForegroundReloadGateTests.swift in Sources */,
 				FDE1CD26CDE9D8B258A4648C /* ForeignAudioSubtitleRuleTests.swift in Sources */,
+				6C15AE80AAA0CD598E6CB620 /* GestureSuppressionScopeTests.swift in Sources */,
 				2567386EADBABB28A6BEBD7B /* GuardianPINRecoveryCandidatesTests.swift in Sources */,
 				01A9AC45054B22178B172FE3 /* GuideAxisTests.swift in Sources */,
 				81037655426C4431ED7C3341 /* GuideChannelSearchTests.swift in Sources */,
