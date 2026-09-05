@@ -312,9 +312,13 @@ private struct ServerManagementRow: View {
 
     @ViewBuilder
     private func avatarCircle(for user: RememberedUser) -> some View {
+        // Against THIS row's server, not the active one: the list draws every known server's
+        // profiles, and the shared image service answers for whichever is active (Sodalite#119).
         let url = dependencies.jellyfinImageService.userProfileImageURL(
             userID: user.id,
-            tag: user.imageTag
+            tag: user.imageTag,
+            baseURL: dependencies.preferredURL(for: server),
+            token: user.token
         )
         ZStack {
             if let url {

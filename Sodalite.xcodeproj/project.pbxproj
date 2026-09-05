@@ -513,6 +513,7 @@
 		81F94693D5DEEC8DB8930088 /* SeerrMediaStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50D44D64EE3E9EBE69B65698 /* SeerrMediaStatus.swift */; };
 		821A148868FEBE29EC8B8E6A /* SeerrAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE35BB1636B33A37F1CE90F5 /* SeerrAuthService.swift */; };
 		82718D52B0B18494B92B9219 /* LicenseText-WTFPL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 51C8ACDBF478C0267CFAE44C /* LicenseText-WTFPL.txt */; };
+		831E282601D859F6DADDD4DD /* UserProfileImageURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15AEDC905956567B1DB3936F /* UserProfileImageURLTests.swift */; };
 		835F7B4A8DB91AFAEF35D098 /* CatalogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40D9293B1394983BF122589 /* CatalogViewModel.swift */; };
 		83E9AADDA44E2347E744A3E2 /* SeerrUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C5DC5A520828B9C0565934A /* SeerrUser.swift */; };
 		844DA47617DA8A5F0B44B281 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 461D97FAF2DA39974658E7F1 /* AppIcon.icon */; };
@@ -1081,6 +1082,7 @@
 		14BCB912099E52F189D68C89 /* PlayerHostController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerHostController.swift; sourceTree = "<group>"; };
 		150A2052222365E6CEFAF631 /* SystemCaptionWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCaptionWindowTests.swift; sourceTree = "<group>"; };
 		156BEF96DC9EC1E45C59CE8B /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
+		15AEDC905956567B1DB3936F /* UserProfileImageURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileImageURLTests.swift; sourceTree = "<group>"; };
 		15D7F74A9A6EF41AB0AAD09C /* CloudSyncPayloadsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncPayloadsTests.swift; sourceTree = "<group>"; };
 		168C9C4EDD234AD97BFA1D96 /* HomeRowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRowConfiguration.swift; sourceTree = "<group>"; };
 		175E298AC582C20244F3BBDC /* JellyfinServerDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinServerDiscoveryTests.swift; sourceTree = "<group>"; };
@@ -1995,6 +1997,7 @@
 				052CEAFD6EA4A3004EC38E52 /* TransportFocusOrderTests.swift */,
 				8F65790C4F34A9AB07D29DAE /* TrickplayScrubSourceTests.swift */,
 				8730A8CE2859D3564EF8CA11 /* TrickplayTileSetTests.swift */,
+				15AEDC905956567B1DB3936F /* UserProfileImageURLTests.swift */,
 				61EDE381DD9B9AF740EADCDF /* WatchedBadgeMetricsTests.swift */,
 			);
 			path = SodaliteTests;
@@ -3437,6 +3440,7 @@
 				FDD6E4BC5039CBB8C3AFBDE7 /* TransportFocusOrderTests.swift in Sources */,
 				234FD6BF76C34011FC978A38 /* TrickplayScrubSourceTests.swift in Sources */,
 				ACBD1C0414C2A351FF486D36 /* TrickplayTileSetTests.swift in Sources */,
+				831E282601D859F6DADDD4DD /* UserProfileImageURLTests.swift in Sources */,
 				89E9AC0A4F7B4C8D895785BE /* WatchedBadgeMetricsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
