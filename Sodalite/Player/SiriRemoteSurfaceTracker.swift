@@ -27,16 +27,23 @@ final class SiriRemoteSurfaceTracker {
     /// The 2021 remote is deliberately absent: its outer ring already delivers real `.leftArrow` and
     /// `.rightArrow` presses, which never reach the select handler, and reading its clickpad as an edge
     /// surface as well would give a single press two meanings in the band where the two overlap.
+    /// The Control Center remote was in this set for one build, on the argument that its virtual surface
+    /// has the same shape. Measured on the living room Apple TV: eleven clicks in a row reported exactly
+    /// x=0.00 y=0.00, so it reports no position at all and can never produce an edge click. It stays out,
+    /// and under DEBUG it stays under observation instead, which is where that would show up if it
+    /// ever changes.
     private static let trackedCategories: Set<String> = [
         GCProductCategorySiriRemote1stGen,
-        // The virtual remote in an iPhone's Control Center has a full-surface touchpad of the same
-        // shape, so the same gesture reads the same way. It also makes the feature testable on hardware
-        // that is actually at hand, which no 1st-generation remote here is.
-        GCProductCategoryControlCenterRemote,
     ]
 
     private var latchedDirection: Int?
     private var latchedAt: Date?
+    /// The last non-centre reading and when it arrived. Diagnostic only, never decides anything: on the
+    /// 2021 remote a click was measured reading x=0.00 soon after the pad had reported x=0.71, so a
+    /// reporter's log has to be able to show whether the click read a live touch or an already recentred
+    /// pad. Deciding FROM it would turn a deliberate centre click into a seek, which is the wrong way to
+    /// be wrong.
+    private var lastLivePosition: (x: Float, y: Float, at: Date)?
     private var observers: [NSObjectProtocol] = []
     private var attachedControllers: [ObjectIdentifier: GCController] = [:]
 
@@ -61,8 +68,12 @@ final class SiriRemoteSurfaceTracker {
     func stop() {
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
         observers.removeAll()
-        for controller in attachedControllers.values { controller.microGamepad?.buttonA.pressedChangedHandler = nil }
+        for controller in attachedControllers.values {
+            controller.microGamepad?.buttonA.pressedChangedHandler = nil
+            controller.microGamepad?.dpad.valueChangedHandler = nil
+        }
         attachedControllers.removeAll()
+        lastLivePosition = nil
         #if DEBUG
         for controller in GCController.controllers() where diagnosticControllers.contains(ObjectIdentifier(controller)) {
             controller.microGamepad?.dpad.valueChangedHandler = nil
@@ -164,6 +175,10 @@ final class SiriRemoteSurfaceTracker {
         // Raw touchpad position instead of a sliding window centred on first contact: the window is the
         // right model for steering, the wrong one for "which part of the glass is under the thumb".
         pad.reportsAbsoluteDpadValues = true
+        pad.dpad.valueChangedHandler = { [weak self] _, x, y in
+            guard x != 0 || y != 0 else { return }
+            MainActor.assumeIsolated { self?.lastLivePosition = (x, y, Date()) }
+        }
         // Fires on button DOWN, which is what makes the reading trustworthy: the `.select` recognizer
         // this pairs with fires on release. `[weak pad]` because the handler is stored ON the pad.
         pad.buttonA.pressedChangedHandler = { [weak self, weak pad] _, _, pressed in
@@ -203,10 +218,17 @@ final class SiriRemoteSurfaceTracker {
         // The threshold is a guess (no 1st-generation remote on this side), so every reading is logged
         // against it. Settings > Diagnostic Log is reachable on an App Store build, which makes a
         // reporter's screenshot the only way this number gets calibrated from real thumbs.
+        let live: String
+        if let last = lastLivePosition {
+            live = String(format: " (last live x=%.2f y=%.2f, %.0f ms ago)",
+                          last.x, last.y, Date().timeIntervalSince(last.at) * 1000)
+        } else {
+            live = " (pad never reported a position)"
+        }
         note(String(
-            format: "surface click x=%.2f y=%.2f threshold=%.2f -> %@",
+            format: "surface click x=%.2f y=%.2f threshold=%.2f -> %@%@",
             x, y, SiriRemoteEdgeClick.edgeThreshold,
-            direction.map { $0 < 0 ? "back" : "forward" } ?? "centre"))
+            direction.map { $0 < 0 ? "back" : "forward" } ?? "centre", live))
     }
 }
 #endif
