@@ -27,34 +27,27 @@ struct HomeView: View {
     /// reload the whole feed on a signal that was already answered.
     @State private var lastHandledContentReload = 0
 
+    /// Presents the single-field sheet that fills the server's empty URL slot (iOS only; tvOS has
+    /// no URL editor).
+    @State private var showAddURLSheet = false
+
     private static let refreshStaleSeconds: TimeInterval = 60
 
     var body: some View {
         ThemeNavigationStack {
             Group {
                 if let vm = viewModel {
-                    if vm.isLoading {
+                    if let state = blockingState(vm: vm) {
+                        ServerUnreachableView(
+                            state: state,
+                            serverName: appState.activeServer?.name ?? "",
+                            onAddExternalAddress: addExternalAddressAction(for: state),
+                            onRetry: { await retry(vm: vm) }
+                        )
+                    } else if vm.isLoading {
                         ProgressView()
                             .tint(spinnerTint)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = vm.errorMessage {
-                        VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 40))
-                                .foregroundStyle(.secondary)
-                            Text(error)
-                                .foregroundStyle(.secondary)
-                            Button {
-                                Task { await vm.loadContent() }
-                            } label: {
-                                Text("home.retry")
-                                    .font(.body)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 12)
-                            }
-                            .buttonStyle(SettingsTileButtonStyle())
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         contentView(vm: vm)
                     }
@@ -177,6 +170,80 @@ struct HomeView: View {
         .onChange(of: viewModel?.rows.flatMap({ $0.items.map(\.id) })) { _, _ in
             if let vm = viewModel { prefetchHomePosters(vm) }
         }
+        #if os(iOS)
+        // The fix for an off-network server, offered where the failure is (Sodalite#122). Same
+        // single-field sheet the post-login prompt uses, so the address is validated and saved by
+        // exactly one path.
+        .sheet(isPresented: $showAddURLSheet) {
+            if let server = appState.activeServer, let slot = server.emptyURLSlot {
+                AddSecondURLSheet(
+                    slot: slot,
+                    knownURL: server.url,
+                    resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                    onSave: { newURL in
+                        let merged = server.urls(filling: slot, with: newURL)
+                        try? dependencies.updateServerURLs(
+                            serverID: server.id,
+                            internalURL: merged.internal,
+                            externalURL: merged.external
+                        )
+                        // Re-probe at once: the new slot is the whole point, and the verdict it
+                        // clears is what put this screen on the display.
+                        dependencies.scheduleRouteResolve()
+                    }
+                )
+            }
+        }
+        #endif
+    }
+
+    /// What Home shows instead of content, or nil to keep loading or keep showing rows.
+    ///
+    /// Two sources, and the fast one is the point of Sodalite#122. The route probe settles the
+    /// question about two seconds into launch; the row fan-out needs thirty seconds to three minutes
+    /// to prove the same thing one request timeout at a time, which nobody waits for. So the probe's
+    /// verdict speaks as soon as it lands, and Home stops sitting on a bare spinner behind it.
+    ///
+    /// Only while nothing has painted. A row that arrives anyway clears the screen: the probe asked
+    /// one endpoint, and a server that is demonstrably answering outranks it. That is also what
+    /// keeps a dual-slot server whose external route is carrying the session from ever seeing this,
+    /// and what keeps the still-loading first seconds from flashing it.
+    private func blockingState(vm: HomeViewModel) -> ServerReachability? {
+        guard vm.rows.isEmpty, vm.tagRows.isEmpty else { return nil }
+        switch appState.serverReachability {
+        case .noNetwork, .offNetwork, .unreachable:
+            return appState.serverReachability
+        case .reachable, .unknown:
+            // No verdict against the server, or none yet: only the fan-out draining empty may speak,
+            // and it cannot say why.
+            return vm.loadFailedEntirely ? .unreachable : nil
+        }
+    }
+
+    /// The add-an-external-address action, where there is both a slot to fill and a sheet to fill
+    /// it in.
+    ///
+    /// tvOS has no URL editor at all, so there it stays nil and the screen offers Retry alone: a
+    /// button that leads nowhere is worse than no button. The sentence above it is true on both.
+    private func addExternalAddressAction(for state: ServerReachability) -> (() -> Void)? {
+        #if os(iOS)
+        guard state == .offNetwork, appState.activeServer?.emptyURLSlot != nil else { return nil }
+        return { showAddURLSheet = true }
+        #else
+        return nil
+        #endif
+    }
+
+    /// Retry re-probes before it re-fetches, else the reload would run against the same stale
+    /// verdict and paint this screen straight back.
+    ///
+    /// Only the probe is awaited. It settles in seconds and it is what decides whether this screen
+    /// stays; the fan-out behind it needs the full round of request timeouts to give up on a server
+    /// that is still down, and a Retry button that spins for three minutes would be the very bug
+    /// this screen exists to remove.
+    private func retry(vm: HomeViewModel) async {
+        await dependencies.resolveActiveRoutes()
+        Task { await vm.loadContent() }
     }
 
     /// Sodalite#66. True for an item the veil would blur while the row is showing show-level art
