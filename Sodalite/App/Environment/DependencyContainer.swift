@@ -191,6 +191,18 @@ final class DependencyContainer {
         migrateLegacyJellyfinPasswords()
         // Latched, and a no-op on any install that never configured parental controls.
         migrateUnmarkedProfilesToEntryLocked()
+        // Sheds the pre-scoping filter-cache files on an install that never switches server or
+        // profile, which no switch-site trim would ever reach.
+        trimFilterCache(keeping: activeSessionIdentity())
+    }
+
+    /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),
+    /// keeping the session being switched to. Doubles as the filename-format migration: it deletes
+    /// what the previous format wrote wherever it runs.
+    private func trimFilterCache(keeping survivor: CacheIdentity?) {
+        Task.detached(priority: .utility) {
+            FilterCache.shared.migrateAndTrim(keeping: survivor)
+        }
     }
 
     /// Connect the pending-requests monitor to the live session. Called once from SodaliteApp.init
@@ -516,8 +528,9 @@ final class DependencyContainer {
         if let resumable {
             sessionNote("switch to \(label(for: server)): no token slot here, resuming remembered profile \(resumable.name).")
             // Adopt the profile's own cached token as this device's session for the target: switchToUser
-            // writes both pointers, re-stamps the name caches and purges the identity-scoped caches, so
-            // the keychain converges on exactly the state a tap in that server's picker would have left.
+            // writes both pointers, re-stamps the name caches and drops the identity-scoped image
+            // cache, so the keychain converges on exactly the state a tap in that server's picker
+            // would have left.
             try switchToUser(resumable, server: server)
             Task { @MainActor in
                 self.appState?.serverDidSwitch &+= 1
@@ -528,14 +541,20 @@ final class DependencyContainer {
         let previousServerID = try? keychainService.loadString(for: KeychainKeys.activeServerID)
         sessionNote("switch \(previousServerID.map { String($0.prefix(8)) } ?? "none") -> \(label(for: server)) on this device's own token.")
         try keychainService.save(serverID, for: KeychainKeys.activeServerID)
-        if previousServerID != serverID {
-            // Identity-scoped caches must die where the identity changes. Doing it in a view's onChange left a hole: TabRootView is .id(activeServer.id), so switching from Settings rebuilds the tab bar without instantiating HomeView, and Catalog/Library then hydrate from the previous server's cached pages.
-            FilterCache.shared.clearAll()
-        }
 
         let sessionURL = preferredURL(for: server)
 
         let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID))
+
+        // No wipe here any more: FilterCache entries carry their own identity, so the target reads
+        // its own and the source keeps its own for the way back. The wipe used to sit in the
+        // container rather than a view's onChange because TabRootView is .id(activeServer.id), so
+        // switching from Settings rebuilds the tab bar without instantiating HomeView and
+        // Catalog/Library would hydrate from the previous server's pages. Scoped keys close that
+        // hole at the source. All that is left is the size bound.
+        if previousServerID != serverID {
+            trimFilterCache(keeping: userID.map { CacheIdentity(serverID: serverID, userID: $0) })
+        }
 
         // activeUserName / activeUserImageTag are global while the identity they describe is per server: re-stamp them from the target's remembered profile, else the next cold launch pairs this server's userID with the previous server's name. Cleared when the target has no remembered entry, so nothing stale outlives the switch.
         let rememberedForTarget = userID.flatMap { id in
@@ -590,6 +609,8 @@ final class DependencyContainer {
         try? keychainService.delete(for: KeychainKeys.rememberedUsers(serverID: serverID))
         // The removal markers go with the server, else re-adding it later holds its profiles out again.
         try? keychainService.delete(for: KeychainKeys.forgottenUsers(serverID: serverID))
+        // Every profile on the box, not just the active one: the whole server is going.
+        FilterCache.shared.evict(serverID: serverID)
 
         let servers = listKnownServers().filter { $0.id != serverID }
         let data = try JSONEncoder().encode(servers)
@@ -617,7 +638,6 @@ final class DependencyContainer {
                     // bump then routes AppRouter to the successor's profile picker.
                     sessionNote("promoted \(label(for: successor)) without a session; routing to its picker.")
                     try? keychainService.save(successor.id, for: KeychainKeys.activeServerID)
-                    FilterCache.shared.clearAll()
                     // The stop switchServer would have done on its way through: the picker route leaves
                     // appState.activeServer standing, so activeSessionIdentity never moves and the
                     // deleted server's track would play on under the successor's picker.
@@ -782,9 +802,14 @@ final class DependencyContainer {
         // neither leak one to the next profile nor lose the one it is switching to.
 
         if previousIdentity?.serverID != server.id || previousIdentity?.userID != remembered.id {
-            // Same reason as switchServer, plus: rows and thumbnails were fetched under the previous profile's token, so they carry its library permissions and watched flags.
-            FilterCache.shared.clearAll()
+            // FilterCache needs no wipe: its entries carry the identity that fetched them, so the
+            // incoming profile reads its own rows, watched flags and library visibility. ImageCache
+            // does, being an in-memory NSCache keyed by URL alone: a poster fetched under the
+            // previous token may be unfetchable under this profile's permissions.
             ImageCache.shared.clear()
+            trimFilterCache(
+                keeping: CacheIdentity(serverID: server.id, userID: remembered.id)
+            )
         }
 
         let sessionURL = preferredURL(for: server)
@@ -1123,11 +1148,11 @@ final class DependencyContainer {
 
     /// The (serverID, userID) of the active session, read from the
     /// keychain pointers so this works before AppState is populated.
-    private func activeSessionIdentity() -> (serverID: String, userID: String)? {
+    private func activeSessionIdentity() -> CacheIdentity? {
         guard let serverID = try? keychainService.loadString(for: KeychainKeys.activeServerID),
               let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID))
         else { return nil }
-        return (serverID, userID)
+        return CacheIdentity(serverID: serverID, userID: userID)
     }
 
     /// The lock role of the active session, or `.open` when there is no session yet.

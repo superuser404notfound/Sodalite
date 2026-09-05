@@ -73,7 +73,7 @@ struct HomeView: View {
                     query: filter.query,
                     smartProviderID: filter.smartProviderID,
                     smartProviderRegion: filter.smartProviderRegion,
-                    cacheKey: filter.cacheKey,
+                    cacheScope: filter.cacheScope,
                     sortScope: filter.sortScope,
                     hidesAudioPlaylists: filter.hidesAudioPlaylists
                 )
@@ -155,7 +155,8 @@ struct HomeView: View {
                     lastHandledServerSwitch = 0
                 }
             }
-            // switchServer already purged FilterCache, before this signal was even bumped.
+            // FilterCache needs no handling here: its entries are scoped per identity, so the
+            // rows this reload fetches and the tile grids on disk cannot cross sessions.
             await viewModel?.reloadAfterServerSwitch()
         }
         // A cause outside Home has made its last failure obsolete (the Local Network permission came
@@ -323,6 +324,11 @@ struct HomeView: View {
         }
     }
 
+    /// Pairs a tile key with the session; nil before a user is resolved, which leaves the grid uncached rather than caching under a guess.
+    private func cacheScope(_ key: String) -> FilterCacheScope? {
+        appState.cacheIdentity.map { FilterCacheScope(key: key, identity: $0) }
+    }
+
     private func makeJellyfinFilter(for provider: CatalogProvider) -> FilterDestination {
         // A provider tile filters the LOCAL library by Studio (pipe-joined aliases catch "Disney+" and "Walt Disney Pictures"), augmented by the smart-provider TMDB watch-provider hint so studio-tag-less titles surface (Modern Family on Disney+, Bluey via Ludo Studio).
         let region = Locale.current.region?.identifier ?? "US"
@@ -341,7 +347,7 @@ struct HomeView: View {
             ),
             smartProviderID: provider.tmdbWatchProviderID,
             smartProviderRegion: region,
-            cacheKey: FilterCacheKey.Home.provider(id: provider.id, region: region)
+            cacheScope: cacheScope(FilterCacheKey.Home.provider(id: provider.id, region: region))
         )
     }
 
@@ -357,8 +363,8 @@ struct HomeView: View {
                 // Mirrors precomputeGenreCaches, which pre-warms this exact cache key.
                 fields: JellyfinEndpoint.homeRowFields
             ),
-            // Without a cacheKey FilteredGridView.init falls to the empty-state branch with isLoading=true on every visit (the brief flash on opening a genre tile). Tag name is a stable enough key.
-            cacheKey: FilterCacheKey.Home.genre(name: tag.name),
+            // Without a cache scope FilteredGridView.init falls to the empty-state branch with isLoading=true on every visit (the brief flash on opening a genre tile). Tag name is a stable enough key, once the session is in the scope: "Action" is the same name on every server.
+            cacheScope: cacheScope(FilterCacheKey.Home.genre(name: tag.name)),
             sortScope: sortServerID.map { LibrarySortScope.genre(name: tag.name, serverID: $0) }
         )
     }
@@ -387,7 +393,7 @@ struct HomeView: View {
         return FilterDestination(
             title: library.name,
             query: query,
-            cacheKey: FilterCacheKey.Home.library(id: library.id, grouping: grouping),
+            cacheScope: cacheScope(FilterCacheKey.Home.library(id: library.id, grouping: grouping)),
             sortScope: sortServerID.map { LibrarySortScope.library(id: library.id, serverID: $0) },
             hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType)
         )
@@ -408,8 +414,8 @@ struct FilterDestination: Identifiable, Hashable {
     var smartProviderID: Int?
     /// ISO 3166-1 alpha-2 region for smartProviderID; TMDB watch-provider data is region-specific (Disney+ DE != US), defaults to Locale.current.
     var smartProviderRegion: String?
-    /// Stable key for FilteredGridView's result cache, independent of smartProviderID so broadcast-only tiles (ABC/NBC/CBS) still cache and feed the empty-tile-hide pass.
-    var cacheKey: String?
+    /// Where FilteredGridView caches this tile's results: the key, independent of smartProviderID so broadcast-only tiles (ABC/NBC/CBS) still cache and feed the empty-tile-hide pass, plus the session that fetched them. nil leaves the tile uncached.
+    var cacheScope: FilterCacheScope?
     /// Where the grid's sort choice is stored (Sodalite#78); nil leaves the tile on Title A-Z without a control.
     var sortScope: LibrarySortScope?
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).

@@ -111,3 +111,11 @@ final class AppState {
         activeSeerrUser = nil
     }
 }
+
+extension AppState {
+    /// Scope for this session's FilterCache entries; nil before a user is resolved, which leaves a grid uncached rather than cached under a guess. The serverID fallback mirrors HomeViewModel's own, so the tile precompute and the grid it pre-warms land on one identity.
+    var cacheIdentity: CacheIdentity? {
+        guard let userID = activeUser?.id else { return nil }
+        return CacheIdentity(serverID: activeServer?.id ?? userID, userID: userID)
+    }
+}

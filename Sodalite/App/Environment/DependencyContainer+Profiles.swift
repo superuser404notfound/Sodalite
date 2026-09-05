@@ -104,9 +104,9 @@ extension DependencyContainer {
         jellyfinClient.accessToken = nil
         SharedSessionMirror.clear()
 
-        // Same reason as a profile switch: rows and thumbnails were fetched under this profile's
-        // token, so they carry its library permissions and watched flags.
-        FilterCache.shared.clearAll()
+        // This profile's rows and thumbnails carry its library permissions and watched flags, and
+        // the profile is gone. Only its own entries: the other profiles on this server keep theirs.
+        FilterCache.shared.evict(identity: CacheIdentity(serverID: serverID, userID: userID))
         ImageCache.shared.clear()
 
         // Background music is scoped to the session, and this one is over.

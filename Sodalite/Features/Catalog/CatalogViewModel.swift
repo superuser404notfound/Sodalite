@@ -69,15 +69,19 @@ final class CatalogViewModel {
     private let discoverService: SeerrDiscoverServiceProtocol
     private let requestService: SeerrRequestServiceProtocol
     private let mediaService: SeerrMediaServiceProtocol
+    /// Scope for the cached discover pages. Seerr's data is TMDB-shaped, but its session is per Jellyfin identity, so the pages belong to one profile like the Home tiles do. nil leaves them uncached.
+    private let cacheIdentity: CacheIdentity?
 
     init(
         discoverService: SeerrDiscoverServiceProtocol,
         requestService: SeerrRequestServiceProtocol,
-        mediaService: SeerrMediaServiceProtocol
+        mediaService: SeerrMediaServiceProtocol,
+        cacheIdentity: CacheIdentity? = nil
     ) {
         self.discoverService = discoverService
         self.requestService = requestService
         self.mediaService = mediaService
+        self.cacheIdentity = cacheIdentity
     }
 
     // MARK: - Request enrichment
@@ -170,7 +174,9 @@ final class CatalogViewModel {
             } else {
                 key = FilterCacheKey.Catalog.tvNetwork(id: provider.id)
             }
-            if let cached = FilterCache.shared.catalogPage(filterKey: key), cached.items.isEmpty {
+            if let identity = cacheIdentity,
+               let cached = FilterCache.shared.catalogPage(filterKey: key, identity: identity),
+               cached.items.isEmpty {
                 hiddenNetworks.insert(provider.id)
             }
         }
@@ -178,7 +184,9 @@ final class CatalogViewModel {
         var hiddenStudios: Set<Int> = []
         for provider in CatalogProviders.studios {
             let key = FilterCacheKey.Catalog.movieStudio(id: provider.id)
-            if let cached = FilterCache.shared.catalogPage(filterKey: key), cached.items.isEmpty {
+            if let identity = cacheIdentity,
+               let cached = FilterCache.shared.catalogPage(filterKey: key, identity: identity),
+               cached.items.isEmpty {
                 hiddenStudios.insert(provider.id)
             }
         }
@@ -260,11 +268,14 @@ final class CatalogViewModel {
         for result in results {
             // A failed fetch must not persist as a valid empty page (would hide the tile until a successful revisit) nor flip the hide sets.
             guard !result.fetchFailed else { continue }
-            FilterCache.shared.setCatalogPage(
-                result.items,
-                totalPages: result.totalPages,
-                filterKey: result.cacheKey
-            )
+            if let identity = cacheIdentity {
+                FilterCache.shared.setCatalogPage(
+                    result.items,
+                    totalPages: result.totalPages,
+                    filterKey: result.cacheKey,
+                    identity: identity
+                )
+            }
             switch result.kind {
             case .network:
                 if result.items.isEmpty {

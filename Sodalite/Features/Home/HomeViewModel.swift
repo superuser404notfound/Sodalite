@@ -40,6 +40,8 @@ final class HomeViewModel {
     let discoverService: SeerrDiscoverServiceProtocol?
     let userID: String
     let serverID: String
+    /// Scope for every FilterCache entry this view model pre-warms; the grids a tile opens read the same one.
+    var cacheIdentity: CacheIdentity { CacheIdentity(serverID: serverID, userID: userID) }
     /// Libraries the My Media row offers: the video ones plus Collections and Playlists, which
     /// Jellyfin serves as views of their own. Populated by loadContent().
     var myMediaLibraries: [JellyfinLibrary] = []

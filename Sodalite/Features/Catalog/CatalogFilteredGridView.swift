@@ -3,6 +3,8 @@ import SwiftUI
 /// Paged vertical grid of SeerrMedia for a single CatalogFilter (genre, network, studio); same pagination pattern as the discover rows.
 struct CatalogFilteredGridView: View {
     let filter: CatalogFilter
+    /// Session the cached page belongs to; nil leaves this grid uncached. Seerr's pages are TMDB-shaped but its session is per Jellyfin identity, so they scope like the Home tiles.
+    let cacheIdentity: CacheIdentity?
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.dismiss) private var dismiss
@@ -22,10 +24,12 @@ struct CatalogFilteredGridView: View {
         [GridItem(.adaptive(minimum: metrics.gridMinimum), spacing: metrics.gridSpacing)]
     }
 
-    init(filter: CatalogFilter) {
+    init(filter: CatalogFilter, cacheIdentity: CacheIdentity?) {
         self.filter = filter
+        self.cacheIdentity = cacheIdentity
         // Hydrate from FilterCache during init so the first body render paints the cached grid; doing it in `.task(id:)` shows one empty frame, read as a loading flash on every tap.
-        if let cached = FilterCache.shared.catalogPage(filterKey: filter.cacheKey) {
+        if let cacheIdentity,
+           let cached = FilterCache.shared.catalogPage(filterKey: filter.cacheKey, identity: cacheIdentity) {
             _items = State(initialValue: cached.items)
             _page = State(initialValue: 1)
             _totalPages = State(initialValue: cached.totalPages)
@@ -132,11 +136,14 @@ struct CatalogFilteredGridView: View {
                 totalPages = result.totalPages
             }
             errorMessage = nil
-            FilterCache.shared.setCatalogPage(
-                result.results,
-                totalPages: result.totalPages,
-                filterKey: filter.cacheKey
-            )
+            if let cacheIdentity {
+                FilterCache.shared.setCatalogPage(
+                    result.results,
+                    totalPages: result.totalPages,
+                    filterKey: filter.cacheKey,
+                    identity: cacheIdentity
+                )
+            }
         } catch {
             // Keep the cache-hydrated grid rather than wiping on a transient network blip.
             if items.isEmpty {
