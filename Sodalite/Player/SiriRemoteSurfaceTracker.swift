@@ -70,6 +70,24 @@ final class SiriRemoteSurfaceTracker {
             attachedControllers.removeValue(forKey: id)?.microGamepad?.buttonA.pressedChangedHandler = nil
         }
         for controller in connected { attach(controller) }
+        logInventory(connected)
+    }
+
+    /// What GameController actually reports, logged on every scan. Without it the ONLY evidence this
+    /// class produces is a line it writes after attaching, so a silent log cannot tell "this remote is
+    /// correctly ignored" from "the tracker never ran". Both readings matter and they look identical.
+    private func logInventory(_ connected: [GCController]) {
+        guard !connected.isEmpty else {
+            LogTap.shared.note("[EdgeClick] scan: GameController reports no controllers at all")
+            return
+        }
+        let inventory = connected.map { controller in
+            let category = controller.productCategory
+            let pad = controller.microGamepad == nil ? "no microGamepad" : "microGamepad"
+            let taken = attachedControllers[ObjectIdentifier(controller)] != nil ? "TRACKED" : "ignored"
+            return "\(category) [\(pad), \(taken)]"
+        }.joined(separator: ", ")
+        LogTap.shared.note("[EdgeClick] scan: \(connected.count) controller(s): \(inventory)")
     }
 
     private func attach(_ controller: GCController) {
