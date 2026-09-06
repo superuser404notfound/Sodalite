@@ -132,7 +132,13 @@ private struct NowPlayingContent: View {
     /// SINGLE-track album with the auto-hide idle, which is deliberate: that album's right column was
     /// only ever the metadata over an empty list, and centering is the look this whole feature is after.
     private var showsQueueColumn: Bool {
-        coordinator.queue.count > 1 && chromeRevealed
+        hasQueue && chromeRevealed
+    }
+
+    /// A queue worth showing, whether or not the chrome is up right now. It decides where the title
+    /// block lives across the auto-hide, and with it whether the chrome needs a reserve behind it.
+    private var hasQueue: Bool {
+        coordinator.queue.count > 1
     }
 
     /// Activity reported by the chrome's OWN controls, which only restarts the countdown, never wakes.
@@ -202,14 +208,8 @@ private struct NowPlayingContent: View {
                 .padding(.vertical, contentVPadding)
             }
         } else {
-            // .top, not .center: the queue column's ScrollView is greedy in the vertical axis, so
-            // that column always fills the container while the cover column stays at its natural
-            // height. Centering therefore lowers only the cover, dropping its top edge ~107pt below
-            // the title on a 1080p screen (more on iPad, where the cover is smaller).
-            //
-            // Without the queue column the HStack shrinks to the cover column, and the enclosing ZStack
-            // centers it: the same single-column look a one-track album gets.
-            HStack(alignment: .top, spacing: NowPlayingMetrics.wideSpacing) {
+            // The queue aligns to the cover, never the reverse: see `NowPlayingWideLayout`.
+            NowPlayingWideLayout(spacing: NowPlayingMetrics.wideSpacing, showsQueue: showsQueueColumn) {
                 VStack(spacing: NowPlayingMetrics.columnSpacing) {
                     albumCover
                     // Metadata belongs to whichever column is on screen. Centered it sits under the
@@ -233,30 +233,27 @@ private struct NowPlayingContent: View {
                         } action: { height in
                             chromeHeight = height
                         }
-                    } else if chromeHeight > 0 {
-                        // Half the chrome's height stays standing, because the two states cannot both
-                        // be had: centring the artwork on the whole band once the controls leave moves
-                        // it 114pt, and reserving the full height parks it a tenth of the screen above
-                        // centre for as long as the ambient state lasts. Half of it lands the artwork
-                        // at the optical centre, ~4% above the geometric one, and quarters the travel.
+                    } else if !hasQueue && chromeHeight > 0 {
+                        // Only where nothing arrives to take the chrome's place. With a queue, the
+                        // title block moves into this column as the chrome leaves and fills the gap
+                        // on its own (8pt of travel, 42 with a wrapped title); reserving half the
+                        // chrome on top of that would push the artwork back up by another 56. A
+                        // single-track album has no queue and no arriving title, so there the half
+                        // height is what keeps the artwork from dropping 85pt (Sodalite#109).
                         Color.clear.frame(height: chromeHeight / 2)
                     }
                 }
                 .frame(width: showsQueueColumn
                        ? NowPlayingMetrics.wideColumnWidth
                        : NowPlayingMetrics.soloColumnWidth)
-
-                if showsQueueColumn {
-                    VStack(alignment: .leading, spacing: 28) {
-                        trackMetadata(centered: false)
+            } queue: {
+                VStack(alignment: .leading, spacing: 28) {
+                    trackMetadata(centered: false)
+                        .padding(.horizontal, Self.focusOverhang)
+                    ScrollView(.vertical, showsIndicators: false) {
+                        queueList
                             .padding(.horizontal, Self.focusOverhang)
-                        ScrollView(.vertical, showsIndicators: false) {
-                            queueList
-                                .padding(.horizontal, Self.focusOverhang)
-                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .transition(.opacity)
                 }
             }
             .padding(.horizontal, contentHPadding)

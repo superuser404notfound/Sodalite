@@ -37,6 +37,23 @@ struct NowPlayingVerticalBudgetTests {
             + NowPlayingMetrics.metadataSpacing + lineHeight(.callout)
     }
 
+    /// Beside the queue the title block lives in the OTHER column, so this one is cover over chrome.
+    private var wideCoverColumn: CGFloat {
+        NowPlayingMetrics.coverSide(compact: false)
+            + NowPlayingMetrics.columnSpacing
+            + chrome
+    }
+
+    /// The same album once the chrome and the queue have gone: the title block has moved in here,
+    /// and nothing is reserved behind the chrome because the title already filled the gap.
+    private func ambientColumn(titleLines: CGFloat) -> CGFloat {
+        NowPlayingMetrics.coverSide(compact: false)
+            + NowPlayingMetrics.columnSpacing
+            + metadata(titleLines: titleLines)
+    }
+
+    /// A SINGLE-track album, the only case with no queue column to give the title block up to. The
+    /// chrome leaves and nothing arrives, so half its height stays reserved.
     private func soloColumn(titleLines: CGFloat, chromeShown: Bool) -> CGFloat {
         NowPlayingMetrics.coverSide(compact: false)
             + NowPlayingMetrics.columnSpacing
@@ -74,11 +91,24 @@ struct NowPlayingVerticalBudgetTests {
 
     // MARK: - The jump
 
-    /// Half the chrome's height stays reserved when it leaves, so the column recentres by a quarter of
-    /// it instead of a half. Reserving nothing was the 114pt jump that was reported; reserving all of
-    /// it would park the artwork a tenth of the screen above centre for the whole ambient state.
-    @Test("The cover settles rather than jumps when the chrome leaves")
+    /// The transition the screen actually makes. The queue never leaves without the chrome and the
+    /// chrome never leaves without the queue, so the old model here (solo column with chrome, then
+    /// the same column without it) described a state an album with a queue never passes through, and
+    /// it read 43pt while the screen was moving 97. Both columns are centred, so the travel is half
+    /// the difference between them.
+    @Test("The cover barely moves when the queue and the chrome leave")
     func coverTravelsLessThanAJump() {
+        for titleLines: CGFloat in [1, 2] {
+            let travel = abs(wideCoverColumn - ambientColumn(titleLines: titleLines)) / 2
+
+            #expect(travel <= 50)
+        }
+    }
+
+    /// A single-track album makes the other transition, and there the reserve is what keeps it small:
+    /// without it the column loses the chrome's full height and the artwork drops 85pt.
+    @Test("A single-track album settles rather than jumps when the chrome leaves")
+    func singleTrackCoverTravelsLessThanAJump() {
         let travel = (soloColumn(titleLines: 1, chromeShown: true)
                       - soloColumn(titleLines: 1, chromeShown: false)) / 2
 
