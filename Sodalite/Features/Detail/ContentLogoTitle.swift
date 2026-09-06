@@ -109,6 +109,12 @@ struct ContentLogoTitle<Fallback: View>: View {
         // Fixed-height slot, bottom-anchored: the mark and the text title share a baseline, so a
         // late-arriving logo cannot move the block's top edge (the pattern ExpandableTextBoxPlaceholder
         // uses for the overview, Sodalite#15). Also the thing that measures the column.
+        //
+        // budget.maxHeight is the CEILING, what a 1:1 mark draws, not the nominal. Reserving it costs
+        // no layout anywhere: every tier hands the hero to an OVERLAY in a fixed band (200pt gradient
+        // on tvOS/iPad/landscape, the artwork band in portrait), and an overlay does not size its
+        // parent. A tall mark simply grows up into the backdrop, which is where the hero already
+        // floats, and the panel below it does not move (rendered at 1920x1080, Sodalite#97 round 2).
         .frame(
             maxWidth: .infinity,
             minHeight: budget.maxHeight,

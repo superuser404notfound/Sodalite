@@ -1,11 +1,17 @@
 import CoreGraphics
 
 /// Two-axis room the detail-page title logo may occupy: a fraction of the column it sits in, and
-/// the tier's height cap. Both bounds are needed. A height cap alone lets the source asset's aspect
-/// ratio decide how much of the page the mark covers (Sodalite#97).
+/// the tier's height. Both bounds are needed. A height alone lets the source asset's aspect ratio
+/// decide how much of the page the mark covers (Sodalite#97).
 struct ContentLogoBudget: Equatable {
+    /// Hard cap. A mark never draws wider than this.
     var maxWidth: CGFloat
-    var maxHeight: CGFloat
+    /// Height a mark at `ContentLogoSizing.areaPivot` draws, NOT a cap: squarer marks draw taller
+    /// so that every mark covers the same area, up to `maxHeight`.
+    var nominalHeight: CGFloat
+
+    /// Tallest any mark can draw, which is what a 1:1 one gets. The slot reserves this.
+    var maxHeight: CGFloat { ContentLogoSizing.ceiling(nominal: nominalHeight) }
 }
 
 /// Where the logo is being drawn. Not `LayoutMetrics`: the phone wants a different budget in
@@ -22,9 +28,10 @@ enum ContentLogoTier: Equatable {
         return portrait ? .phonePortrait : .phoneLandscape
     }
 
-    /// Height cap, per tier. One shared value was the defect: 150pt is 8% of a tvOS column and 15%
-    /// of an iPad one, so no single number can be right on both.
-    var maxHeight: CGFloat {
+    /// Nominal height, per tier: what a mark at the pivot aspect draws. One shared value was the
+    /// defect: 150pt is 8% of a tvOS column and 15% of an iPad one, so no single number can be
+    /// right on both.
+    var nominalHeight: CGFloat {
         switch self {
         case .tv: 165
         case .regular: 130
@@ -60,7 +67,7 @@ enum ContentLogoTier: Equatable {
 
     func budget(columnWidth: CGFloat) -> ContentLogoBudget {
         let column = columnWidth > 0 ? columnWidth : nominalColumn
-        return ContentLogoBudget(maxWidth: column * columnFraction, maxHeight: maxHeight)
+        return ContentLogoBudget(maxWidth: column * columnFraction, nominalHeight: nominalHeight)
     }
 
     /// Box to ask Jellyfin for, in points, per DEVICE FAMILY rather than per tier: the two phone
@@ -71,11 +78,15 @@ enum ContentLogoTier: Equatable {
     /// Constant ON PURPOSE, for the same reason: sizing the request off the measured column or the
     /// decoded aspect would move the URL after the image lands, re-firing AsyncCachedImage's
     /// `task(id:)`.
+    ///
+    /// The height is the tier's CEILING, not its nominal: a squarish mark draws about 1.48x the
+    /// nominal, and asking for the nominal delivers a payload that has to be upscaled by that much
+    /// (Sodalite#97 round 2).
     var requestPoints: CGSize {
         switch self {
-        case .tv: CGSize(width: 1820 * 0.42, height: 165)
-        case .regular: CGSize(width: 1310 * 0.55, height: 130)
-        case .phoneLandscape, .phonePortrait: CGSize(width: 900 * 0.60, height: 88)
+        case .tv: CGSize(width: 1820 * 0.42, height: ContentLogoSizing.ceiling(nominal: 165))
+        case .regular: CGSize(width: 1310 * 0.55, height: ContentLogoSizing.ceiling(nominal: 130))
+        case .phoneLandscape, .phonePortrait: CGSize(width: 900 * 0.60, height: ContentLogoSizing.ceiling(nominal: 88))
         }
     }
 
@@ -95,23 +106,32 @@ enum ContentLogoTier: Equatable {
 ///
 /// Height alone (what shipped before Sodalite#97) makes rendered area a direct function of the
 /// source asset's aspect ratio: a 6:1 wordmark covers six times the ink of a 1:1 stacked mark at
-/// the same cap. Above `areaKnee` the height is pulled back so area stays constant instead, which
-/// leaves the two within about 2x of each other.
+/// the same cap. Constant area instead, across the whole range: the height is pulled back above
+/// `areaPivot` and pushed up below it, so a 6:1, a 3:1 and a 1:1 mark all cover the same box.
+///
+/// Round one held the area constant only ABOVE the pivot and kept a flat height below it, which
+/// left squarish marks reading undersized against wordmarks that a reporter judged correct
+/// (Sodalite#97 round 2). Dropping that branch is what fixes it; nothing about the wide half moves.
 enum ContentLogoSizing {
-    /// Marks up to this aspect are sized by height, as before. Past it, by area.
-    static let areaKnee: CGFloat = 2.2
-    /// Height floor, as a fraction of the budget, so a very long banner does not thin away to a line.
+    /// The aspect that draws its tier's nominal height. Squarer marks draw taller, wider ones
+    /// shorter, and the area is the same at every aspect between the floor and the ceiling.
+    static let areaPivot: CGFloat = 2.2
+    /// Height floor, as a fraction of the nominal, so a very long banner does not thin away to a line.
     static let heightFloor: CGFloat = 0.45
 
+    /// The other end of that clamp: the height of a 1:1 mark. Anything taller than wide stops
+    /// growing here rather than towering over the page, and it is what the slot has to reserve.
+    static func ceiling(nominal: CGFloat) -> CGFloat { nominal * areaPivot.squareRoot() }
+
     static func size(aspect: CGFloat, in budget: ContentLogoBudget) -> CGSize {
-        guard budget.maxWidth > 0, budget.maxHeight > 0 else { return .zero }
+        guard budget.maxWidth > 0, budget.nominalHeight > 0 else { return .zero }
         // A decode that reported nothing usable is drawn square rather than propagating a NaN into
         // a frame modifier.
         let sane = aspect.isFinite && aspect > 0 ? aspect : 1
         let a = min(max(sane, 0.2), 20)
 
-        let normalized = a <= areaKnee ? budget.maxHeight : budget.maxHeight * (areaKnee / a).squareRoot()
-        let height = max(normalized, budget.maxHeight * heightFloor)
+        let normalized = budget.nominalHeight * (areaPivot / a).squareRoot()
+        let height = min(max(normalized, budget.nominalHeight * heightFloor), budget.maxHeight)
         let width = height * a
         guard width > budget.maxWidth else {
             return CGSize(width: width, height: height)
