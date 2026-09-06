@@ -658,6 +658,7 @@
 		A8FE337FDE5B6C496A3C899B /* ResumeCapsuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2B22C59C4AD3A35B162268 /* ResumeCapsuleTests.swift */; };
 		AA66517F0E9AB1705D786F2C /* SeerrAuthResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B88E8CE251D5B15713F56E /* SeerrAuthResponse.swift */; };
 		AA993FFC8F0F4F7CD32FADF7 /* DependencyContainer+CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF7DDFE86971C0AA32E4085 /* DependencyContainer+CloudSync.swift */; };
+		AAD4536E5885B133072F348C /* ContentLogoAvailabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA407D28203BD57515A1970 /* ContentLogoAvailabilityTests.swift */; };
 		AAFA6FD004F90C1D56D8BAF6 /* LicenseText-LGPL-2.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = F49AA15F4541B18B03730DEF /* LicenseText-LGPL-2.1.txt */; };
 		AAFEE9AC082DE2080F12F781 /* MusicPlaybackCoordinator+NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C38FEA18079E81D8B4C567 /* MusicPlaybackCoordinator+NowPlaying.swift */; };
 		AB17CFA9C724C9983D94D393 /* KeyboardTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6332B522C9A0A9E3BD4213 /* KeyboardTransport.swift */; };
@@ -1494,6 +1495,7 @@
 		BD2C8269596D9FE3A636727A /* JellyfinItemsResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinItemsResponseTests.swift; sourceTree = "<group>"; };
 		BD53BBDBE101C207EBE63B9C /* CloudSyncProfileTombstoneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncProfileTombstoneTests.swift; sourceTree = "<group>"; };
 		BE6CBE5D06910923DEFED66F /* CloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncService.swift; sourceTree = "<group>"; };
+		BEA407D28203BD57515A1970 /* ContentLogoAvailabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLogoAvailabilityTests.swift; sourceTree = "<group>"; };
 		C028CB9919E5B1364C676009 /* JellyfinPasswordRetentionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinPasswordRetentionTests.swift; sourceTree = "<group>"; };
 		C06A68BD50E0DF719FEB9553 /* PlayerPiPController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerPiPController.swift; sourceTree = "<group>"; };
 		C0AB08ED3A8353A0C245C2DD /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
@@ -1887,6 +1889,7 @@
 				C8717200624F1E078FA61D8F /* CollectionPlaylistHomeRowTests.swift */,
 				0613EB05E644E087EF39C207 /* CollectionRowLayoutTests.swift */,
 				5449C9D42DCF42D5B36BC21D /* ColorThemeTests.swift */,
+				BEA407D28203BD57515A1970 /* ContentLogoAvailabilityTests.swift */,
 				E7F81009C589A7D985A13C16 /* ContentLogoBudgetTests.swift */,
 				B07E95DC61BDDF80C17F37F5 /* DeepLinkRouteTests.swift */,
 				9369DC581B31CDF29ACEFE58 /* DeletedActiveProfileReconcileTests.swift */,
@@ -3346,6 +3349,7 @@
 				0874CE7220452EB1441192D0 /* CollectionPlaylistHomeRowTests.swift in Sources */,
 				DA952AF59583AAB0848BE23A /* CollectionRowLayoutTests.swift in Sources */,
 				E6877ABBBE49744EBC5E7343 /* ColorThemeTests.swift in Sources */,
+				AAD4536E5885B133072F348C /* ContentLogoAvailabilityTests.swift in Sources */,
 				62444ECC7C955FBAC95BEF87 /* ContentLogoBudgetTests.swift in Sources */,
 				1BACA753B79B7BB7FBC63E29 /* DeepLinkRouteTests.swift in Sources */,
 				092532C8CB08BDDCEC574C53 /* DeletedActiveProfileReconcileTests.swift in Sources */,

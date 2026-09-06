@@ -1,5 +1,30 @@
 import SwiftUI
 
+/// What the item snapshot in hand can say about a Logo image. The third case is the one that a
+/// plain Bool cannot carry: an episode -> series open (Continue Watching, Next Up, "Go to Series",
+/// episode deep links) builds its destination from a stub with no `ImageTags` at all, and reading
+/// that as "no logo" paints a text title that the mark replaces a moment later (Sodalite#125).
+enum ContentLogoAvailability: Equatable {
+    /// The snapshot carries a Logo tag. A mark is on its way.
+    case present
+    /// The snapshot has answered and carries no Logo. Nothing is coming.
+    case absent
+    /// The snapshot cannot say yet.
+    case unknown
+
+    /// A snapshot without `ImageTags` splits on whether the detail fetch has settled: before it the
+    /// item is a stub and knows nothing, after it a server that omitted the key has answered.
+    static func from(imageTags: ImageTags?, hasFullDetail: Bool) -> ContentLogoAvailability {
+        guard let imageTags else { return hasFullDetail ? .absent : .unknown }
+        return imageTags.logo != nil ? .present : .absent
+    }
+
+    /// Whether the title slot stays empty rather than painting a text title a mark would replace.
+    /// `.unknown` reserves for the same reason `.present` does: the tagless logo request is already
+    /// in flight either way.
+    var reservesSlot: Bool { self != .absent }
+}
+
 /// Title-card logo for the detail screens. Renders the logo image at a two-axis budget when the item
 /// has a Logo and logos are enabled; otherwise the caller's text-title fallback (so each surface
 /// keeps its own styling).
@@ -7,11 +32,10 @@ struct ContentLogoTitle<Fallback: View>: View {
 
     /// Item that owns the logo; for episodes this is the SERIES item (no per-episode logo exists).
     let itemID: String
-    /// True when the item's snapshot already carries a Logo tag. The slot then stays empty until the
-    /// mark lands, instead of painting a text title that the mark replaces a moment later
-    /// (Sodalite#97). False keeps the text: items without a logo, and the episode deep-link's series
-    /// stub, which has no imageTags yet.
-    var hasLogo: Bool = false
+    /// What the snapshot knows about a Logo. `.absent` is the only value that paints the text title
+    /// right away; the other two have a request in flight whose mark would replace it (Sodalite#97,
+    /// Sodalite#125). No default on purpose, so a new surface has to answer the question.
+    let logo: ContentLogoAvailability
     @ViewBuilder let fallback: () -> Fallback
 
     @Environment(\.dependencies) private var dependencies
@@ -70,10 +94,12 @@ struct ContentLogoTitle<Fallback: View>: View {
         )
     }
 
-    /// Blank the placeholder only when a mark is actually on its way. With logos switched off there
-    /// is no request at all, so the text has to paint on frame one.
+    /// Blank the placeholder while a mark may still be on its way. Bounded at both ends by state,
+    /// never by a timer: `loadFailed` fires once every candidate has 404'd (the item really has no
+    /// logo), and `.unknown` turns authoritative the moment the detail fetch settles. With logos
+    /// switched off there is no request at all, so the text has to paint on frame one.
     private var reservesSlotSilently: Bool {
-        hasLogo && logoURL != nil && !loadFailed
+        logo.reservesSlot && logoURL != nil && !loadFailed
     }
 
     var body: some View {
@@ -144,7 +170,10 @@ struct DetailHeroLogo: View {
     var body: some View {
         ContentLogoTitle(
             itemID: viewModel.item.id,
-            hasLogo: viewModel.item.imageTags?.logo != nil
+            logo: .from(
+                imageTags: viewModel.item.imageTags,
+                hasFullDetail: viewModel.hasFullDetail
+            )
         ) {
             Text(viewModel.item.name)
                 .font(.largeTitle)
