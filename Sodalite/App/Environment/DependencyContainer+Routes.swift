@@ -127,10 +127,30 @@ extension DependencyContainer {
             return
         }
         lastTransportRecheck = .now
+        LogTap.shared.note("[network] a request died at the transport, re-measuring")
         transportRecheckTask = Task { [weak self] in
             await self?.resolveActiveRoutes()
             self?.transportRecheckTask = nil
         }
+    }
+
+    /// A person just pressed Try Again (Sodalite#126).
+    ///
+    /// Re-measures AND raises the recovery signal unconditionally, instead of leaving the signal to
+    /// the verdict transition in `publishReachability`. That transition only fires where the app had
+    /// correctly recorded the failure first, and a session that LAUNCHED into an outage may never
+    /// have recorded one: what a launch learns once it never learns again, so the optional tabs, the
+    /// profile picture and the Seerr session stayed exactly as the outage left them while Home
+    /// reloaded and made the screen look repaired. Measured on iPhone and on Apple TV alike, which
+    /// is what said the cause was not the trigger set but the signal itself.
+    ///
+    /// A retry is by definition someone saying the last failure is obsolete, which is precisely what
+    /// the signal means, so it does not need the verdict's permission to say it. Raising it while
+    /// the server is still down costs one failed refresh round and no state: an identity refresh
+    /// that cannot reach the server now keeps what it had.
+    func retryAfterFailure() async {
+        await resolveActiveRoutes()
+        appState?.requestContentReload += 1
     }
 
     /// Keeps asking while the answer is bad, and stops as soon as it is not.
@@ -144,20 +164,24 @@ extension DependencyContainer {
     /// answer rather than on a timer.
     func startReachabilityWatch() {
         guard reachabilityWatchTask == nil else { return }
+        LogTap.shared.note("[network] recheck watch armed")
         reachabilityWatchTask = Task { [weak self] in
             var attempt = 0
             while !Task.isCancelled {
                 guard let self, let appState = self.appState,
                       appState.serverReachability.isFailure, self.activeServer != nil
                 else { break }
+                let delay = ReachabilityRecheck.delay(forAttempt: attempt)
                 do {
-                    try await Task.sleep(for: ReachabilityRecheck.delay(forAttempt: attempt))
+                    try await Task.sleep(for: delay)
                 } catch {
                     break
                 }
                 attempt += 1
+                LogTap.shared.note("[network] recheck attempt \(attempt) after \(delay)")
                 await self.resolveActiveRoutes()
             }
+            LogTap.shared.note("[network] recheck watch stopped")
             self?.reachabilityWatchTask = nil
         }
     }

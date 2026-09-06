@@ -210,7 +210,7 @@ struct HomeView: View {
     /// that is still down, and a Retry button that spins for three minutes would be the very bug
     /// this screen exists to remove.
     private func retry(vm: HomeViewModel) async {
-        await dependencies.resolveActiveRoutes()
+        await dependencies.retryAfterFailure()
         Task { await vm.loadContent() }
     }
 

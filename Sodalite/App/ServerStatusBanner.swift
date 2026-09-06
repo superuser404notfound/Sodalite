@@ -144,7 +144,7 @@ private struct ServerStatusBannerModifier: ViewModifier {
     /// the multi-minute spin back that Sodalite#122 removed.
     private var retryAction: (() async -> Void)? {
         #if os(iOS)
-        { await dependencies.resolveActiveRoutes() }
+        { await dependencies.retryAfterFailure() }
         #else
         nil
         #endif

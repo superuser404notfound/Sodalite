@@ -881,14 +881,23 @@ final class DependencyContainer {
         let directTag: String? = (me?.id == userID) ? me?.primaryImageTag : nil
         // /Users/Public fallback when directTag is nil (some Jellyfin versions only populate the tag on the public listing, not the authenticated detail endpoint).
         let fallbackTag: String? = directTag == nil ? await fetchPublicImageTag(for: userID) : nil
-        let tag = directTag ?? fallbackTag
 
+        // Re-read after the awaits: the active profile may have changed under this refresh.
         guard appState?.activeUser?.id == userID,
               let current = appState?.activeUser else { return .kept(nil) }
 
+        // A refresh that could not reach the server keeps what it already had, the same way the
+        // policy and the name below do (Sodalite#126). Without this, a launch that happened while
+        // the server was down wrote the FAILURE into the session: nil reads as "this profile has no
+        // picture", the avatar URL goes away with it, and no amount of retrying an image brings back
+        // a picture the app no longer has an address for. Measured on both platforms, and the tag
+        // stayed gone until the app was force-quit.
+        let reachedServer = (me?.id == userID)
+        let tag = reachedServer ? (directTag ?? fallbackTag) : current.primaryImageTag
+
         // Apply the fetched policy/name when /Users/Me succeeded; else keep the existing values (no-op, not a regression). The server owns the name, so a stale in-memory one never gets written back into the remembered entry.
-        let freshPolicy = (me?.id == userID) ? me?.policy : current.policy
-        let freshName = (me?.id == userID) ? (me?.name ?? current.name) : current.name
+        let freshPolicy = reachedServer ? me?.policy : current.policy
+        let freshName = reachedServer ? (me?.name ?? current.name) : current.name
         let tagChanged = current.primaryImageTag != tag
         let policyChanged = current.policy != freshPolicy
         let nameChanged = current.name != freshName
