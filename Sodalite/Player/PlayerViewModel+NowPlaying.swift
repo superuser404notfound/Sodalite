@@ -42,7 +42,8 @@ extension PlayerViewModel {
             let (data, response) = try await URLSession.shared.data(for: request)
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
             LogTap.shared.note("[NowPlaying] artwork: status=\(status) bytes=\(data.count)")
-            guard let image = UIImage(data: data),
+            guard ImagePayload.isComplete(data),
+                  let image = UIImage(data: data),
                   let jpeg = image.jpegData(compressionQuality: 0.85) else {
                 LogTap.shared.note("[NowPlaying] artwork: decode/re-encode failed")
                 return

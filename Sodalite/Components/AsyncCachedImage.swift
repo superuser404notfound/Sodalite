@@ -1,6 +1,13 @@
 import SwiftUI
 import UIKit
 
+/// Three passes, 250ms and then 500ms apart. Long enough to outlast the server finishing the resize
+/// it served half of, short enough that a caller's own fallback is not held back by much when the
+/// payload never does arrive whole (Sodalite#123). File scope because a generic type cannot hold a
+/// static stored property.
+private let imageLoadAttemptLimit = 3
+private let imageLoadRetryDelayMilliseconds = 250
+
 /// Authenticated, memory-cached AsyncImage replacement: attaches the Jellyfin `X-Emby-Token` header (stock AsyncImage can't inject headers, so auth-gated image endpoints 401), re-issues on URL change via `.task(id:)` (profile switch swaps the token), and keeps a memory-only cache (URLSession's disk cache can serve stale 401s across launches).
 struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     let url: URL?
@@ -59,9 +66,10 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.scenePhase) private var scenePhase
     @State private var loaded: UIImage?
-    /// Connection-level failures (offline blip, iOS local-network permission prompt
-    /// still unanswered) must not latch the placeholder forever. Retry on the next
-    /// scene activation: a dismissed permission alert flips the phase back to active.
+    /// Failures that heal on their own (offline blip, an iOS local-network permission prompt still
+    /// unanswered, a resize the server had not finished writing) must not latch the placeholder
+    /// forever. Retry on the next scene activation: a dismissed permission alert flips the phase
+    /// back to active.
     @State private var retryOnActivate = false
 
     var body: some View {
@@ -100,25 +108,49 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         retryOnActivate = false
         onLoadFailed?(false)
         var sawTransientFailure = false
-        for candidate in [url, fallbackURL] {
-            let result = await loadImage(from: candidate)
-            if let image = result.image {
-                loaded = image
-                onImageLoaded?(image)
+
+        for attempt in 0..<imageLoadAttemptLimit {
+            var sawIncompletePayload = false
+            sawTransientFailure = false
+            for candidate in [url, fallbackURL] {
+                switch await loadImage(from: candidate) {
+                case .image(let image):
+                    loaded = image
+                    onImageLoaded?(image)
+                    return
+                case .incompletePayload:
+                    // Both flags: another try right now, and one more when the scene comes back,
+                    // because a resize that is still being written finishes on its own.
+                    sawIncompletePayload = true
+                    sawTransientFailure = true
+                case .transientFailure:
+                    sawTransientFailure = true
+                case .noImage:
+                    break
+                }
+            }
+            // Only a payload that stopped in the middle is worth another try right away: the server
+            // is still writing the file it just handed us, and it is whole a moment later. A 404 and
+            // a body that is not an image read the same on every attempt, and a lost connection is
+            // what `retryOnActivate` is for.
+            guard sawIncompletePayload, attempt + 1 < imageLoadAttemptLimit else { break }
+            do {
+                try await Task.sleep(for: .milliseconds(imageLoadRetryDelayMilliseconds << attempt))
+            } catch {
                 return
             }
-            sawTransientFailure = sawTransientFailure || result.transientFailure
         }
+
         retryOnActivate = sawTransientFailure
         onLoadFailed?(true)
     }
 
     @MainActor
-    private func loadImage(from url: URL?) async -> (image: UIImage?, transientFailure: Bool) {
-        guard let url else { return (nil, false) }
+    private func loadImage(from url: URL?) async -> ImageLoadOutcome {
+        guard let url else { return .noImage }
 
         if let cached = ImageCache.shared.image(for: url) {
-            return (cached, false)
+            return .image(cached)
         }
 
         // Request built on MainActor to read the MainActor-isolated token; attach auth only for the active Jellyfin host so external URLs (TMDB/CDN posters) don't see our token.
@@ -131,33 +163,53 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
 
-        let result = await Self.fetchAndDecode(request: request)
-        guard let prepared = result.image else { return (nil, result.transientFailure) }
-        // Cache before the cancellation check: a `.task(id:)` invalidation may cancel between decode and @State write, but the bytes are already in memory, so skipping the store would re-pay bandwidth+decode on next mount.
+        let outcome = await Self.fetchAndDecode(request: request)
+        guard case .image(let prepared) = outcome else { return outcome }
+        // Cache before the cancellation check: a `.task(id:)` invalidation may cancel between decode and @State write, but the bytes are already in memory, so skipping the store would re-pay bandwidth+decode on next mount. Only a WHOLE image ever gets here, so a payload that stopped in the middle cannot latch itself into the session (Sodalite#123).
         ImageCache.shared.store(prepared, for: url)
-        guard !Task.isCancelled else { return (nil, false) }
-        return (prepared, false)
+        guard !Task.isCancelled else { return .noImage }
+        return .image(prepared)
     }
 
     /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop; static + `nonisolated` keeps it on the cooperative pool. Cancellation propagates from the enclosing `.task(id:)`.
-    /// transientFailure marks connection-level errors (worth retrying on scene activation), never HTTP errors or undecodable payloads.
-    nonisolated private static func fetchAndDecode(request: URLRequest) async -> (image: UIImage?, transientFailure: Bool) {
+    nonisolated private static func fetchAndDecode(request: URLRequest) async -> ImageLoadOutcome {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode),
-                  let image = UIImage(data: data)
-            else { return (nil, false) }
-            return (image.preparingForDisplay() ?? image, false)
+                  (200...299).contains(http.statusCode)
+            else { return .noImage }
+            // A 200 is not the same as a whole image: Jellyfin serves the half-written file when a
+            // second request lands on a resize it is still encoding, and `UIImage(data:)` turns that
+            // into a full-size image with transparent rows rather than into a failure (Sodalite#123).
+            guard ImagePayload.isComplete(data) else {
+                LogTap.shared.note("[Image] payload stops short at \(data.count) bytes: \(request.url?.absoluteString ?? "")")
+                return .incompletePayload
+            }
+            guard let image = UIImage(data: data) else { return .noImage }
+            return .image(image.preparingForDisplay() ?? image)
         } catch is CancellationError {
-            return (nil, false)
+            return .noImage
         } catch let error as URLError where error.code == .cancelled {
-            return (nil, false)
+            return .noImage
         } catch {
             LogTap.shared.note("[Image] fetch failed \(request.url?.absoluteString ?? ""): \(error)")
-            return (nil, true)
+            return .transientFailure
         }
     }
+}
+
+/// What one candidate URL came back as. Not a bool: "nothing arrived", "the connection dropped" and
+/// "a whole transfer that carried only the front of an image" each want a different second try.
+private enum ImageLoadOutcome {
+    case image(UIImage)
+    /// A complete HTTP response whose body is not a complete image. The server is mid-write, so the
+    /// next attempt is likely to get the whole thing.
+    case incompletePayload
+    /// Connection-level (an offline blip, an unanswered local-network prompt). Worth retrying when
+    /// the scene comes back.
+    case transientFailure
+    /// A 404, a body that is not an image at all, or a cancelled task. Retrying changes nothing.
+    case noImage
 }
 
 extension AsyncCachedImage where Placeholder == ProgressView<EmptyView, EmptyView> {
@@ -250,8 +302,11 @@ extension ImageCache {
         }
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
+            // Same completeness gate as the foreground path: a prefetch must never be the thing
+            // that puts a half-written resize into the cache (Sodalite#123).
             guard let http = response as? HTTPURLResponse,
                   (200...299).contains(http.statusCode),
+                  ImagePayload.isComplete(data),
                   let image = UIImage(data: data)
             else { return }
             let prepared = image.preparingForDisplay() ?? image
