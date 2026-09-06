@@ -356,3 +356,49 @@ struct ReachabilityRecheckTests {
         #expect(ReachabilityRecheck.cooldown <= ReachabilityRecheck.ceiling)
     }
 }
+
+/// Sodalite#126, third device round, and the one finding a log gave up that no amount of reading the
+/// code would have. Measured on 2026-09-06, iPhone, Jellyfin 10.11.11:
+///
+///     17:36:39.380  jelly-arrstack is unreachable
+///     17:36:39.381  recheck watch armed
+///     17:36:44.399  recheck attempt 1 after 5.0 seconds
+///     17:36:51.116  jelly-arrstack is reachable
+///     17:36:51.227  GET /Users/.../Views -> 503: <title>Jellyfin Startup</title>
+///     17:36:54.743  recheck watch stopped
+///
+/// A Jellyfin that is still booting answers every request with 503 and its own startup page for the
+/// better part of a minute. The probe's rule was "any HTTP response proves the host answers", which
+/// is right for choosing between two addresses and wrong for deciding a session can run: the app
+/// called it reachable, cleared the error screen, reloaded everything into 503s, painted the screen
+/// straight back, and stopped watching because the verdict said all was well. The interface flashed
+/// once and then waited for a human to press Try Again.
+@Suite("What counts as the server answering")
+struct ServerProbeAnswerTests {
+    /// The case that was measured. 503 is the server saying it cannot serve, and Jellyfin says it
+    /// for the whole of its startup.
+    @Test("a server that is still booting is not answering")
+    func bootingIsNotAnswering() {
+        #expect(ServerProbe.answers(statusCode: 503) == false)
+    }
+
+    /// The whole family, since a reverse proxy in front of a restarting origin says 502 and 504
+    /// where the origin itself would say 503.
+    @Test("no 5xx is an answer")
+    func noServerErrorIsAnAnswer() {
+        for code in 500...599 {
+            #expect(ServerProbe.answers(statusCode: code) == false)
+        }
+    }
+
+    /// The half of the old rule that was right, and the reason the fix is a narrowing rather than a
+    /// replacement: these come from a server that is up and merely disagreeing, and on some setups
+    /// the status endpoint is behind auth. Calling them unreachable would break a working session,
+    /// which is the more serious failure.
+    @Test("a server that is up and disagreeing is still answering")
+    func disagreementIsStillAnAnswer() {
+        for code in [200, 204, 301, 302, 400, 401, 403, 404, 429] {
+            #expect(ServerProbe.answers(statusCode: code))
+        }
+    }
+}

@@ -107,8 +107,8 @@ extension DependencyContainer {
         if verdict.isFailure { startReachabilityWatch() }
     }
 
-    /// A request just died at the transport, which is the only evidence about the SERVER that
-    /// exists in that moment (Sodalite#126).
+    /// A request just went unserved, which is the only evidence about the SERVER that exists in
+    /// that moment (Sodalite#126).
     ///
     /// Every other trigger is an event about the DEVICE: a path change, a foreground, a server
     /// switch, a login. On a phone the reported case, walking out of the house, is a path change, so
@@ -120,14 +120,14 @@ extension DependencyContainer {
     /// verdict still says the server is fine, since past that the watch below owns the question;
     /// only one re-measure in flight; and not twice inside the cooldown, so a server that answers
     /// the probe while its API keeps failing cannot turn every request into another probe.
-    func noteTransportFailure() {
+    func noteServerDidNotServe() {
         guard let appState, activeServer != nil, !appState.serverReachability.isFailure else { return }
         guard transportRecheckTask == nil else { return }
         if let last = lastTransportRecheck, ContinuousClock.now - last < ReachabilityRecheck.cooldown {
             return
         }
         lastTransportRecheck = .now
-        LogTap.shared.note("[network] a request died at the transport, re-measuring")
+        LogTap.shared.note("[network] a request went unserved, re-measuring")
         transportRecheckTask = Task { [weak self] in
             await self?.resolveActiveRoutes()
             self?.transportRecheckTask = nil
