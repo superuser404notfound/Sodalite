@@ -21,6 +21,9 @@ extension HomeViewModel {
             uniquingKeysWith: { first, _ in first }
         )
 
+        // Fold-local: N episodes of one series map to N copies of that series item. It is NOT the
+        // row's uniqueness guarantee, which lives in HomeRowData's init, because this whole function
+        // returns early when the list carries no episodes at all.
         var seen = Set<String>()
         var folded: [JellyfinItem] = []
         for item in items {
