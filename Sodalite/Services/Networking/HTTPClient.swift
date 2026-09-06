@@ -33,6 +33,19 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
     /// sets it (see `HTTPClient.discovery()`); nil keeps the delegate out of every other request.
     private let transportTiming: (@Sendable (URL, String) -> Void)?
 
+    /// Told whenever a request dies at the transport, so the app can re-measure a server verdict
+    /// that may have gone stale (Sodalite#126).
+    ///
+    /// This is the only evidence that exists when a server dies on an UNCHANGED network. Every other
+    /// re-probe trigger is an event about the DEVICE, a path change, a foreground, a server switch,
+    /// and none of them fires when a NAS goes to sleep behind an Apple TV that never leaves its
+    /// network, which is the only outage an Apple TV can have. Set by the composition root on the
+    /// Jellyfin client alone; a Seerr timeout says nothing about which Jellyfin address answers.
+    ///
+    /// A cancelled request never reaches it: cancellation is answered above, and a request the app
+    /// itself called off is not news about a server.
+    nonisolated(unsafe) var onTransportFailure: (@Sendable () -> Void)?
+
     nonisolated init(
         session: URLSession? = nil,
         transportTiming: (@Sendable (URL, String) -> Void)? = nil
@@ -128,6 +141,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
                     HTTPDiagnostics.transport(method: endpoint.method.rawValue, url: url, error: error)
                 )
             }
+            onTransportFailure?()
             throw await Self.transportFailure(error, url: urlRequest.url)
         }
 

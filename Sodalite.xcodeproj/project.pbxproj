@@ -388,6 +388,7 @@
 		604D021DBE845146A1EBF634 /* ServerURLClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BDE8AC81E42D549C5C602E /* ServerURLClassifier.swift */; };
 		6085881CAE1F0C11FF57087B /* PlayerHostController+SkipDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88577784DD91D770319A3349 /* PlayerHostController+SkipDelegate.swift */; };
 		60A3FFF539B9940F9B9F7C2F /* SharedSessionMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786B359C3F0DB004141A34F1 /* SharedSessionMirror.swift */; };
+		611F718CDE2BEEA86D5AD6A6 /* ReachabilityRecheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714ABB7B9B4445AF509639CE /* ReachabilityRecheck.swift */; };
 		61F0D1FC2AAFDB1C15C59421 /* TopShelfCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D955E208D3CD0779141D95 /* TopShelfCachePolicy.swift */; };
 		61FAA923450C58737A33862F /* LiveAudioSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680E5F6755B5EDFEA1F37C0 /* LiveAudioSwitch.swift */; };
 		62444ECC7C955FBAC95BEF87 /* ContentLogoBudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F81009C589A7D985A13C16 /* ContentLogoBudgetTests.swift */; };
@@ -925,6 +926,7 @@
 		E73A95E567506DCDA467C213 /* SwiftAssRenderer in Frameworks */ = {isa = PBXBuildFile; productRef = F779D9B88DAF51BF2441C24D /* SwiftAssRenderer */; };
 		E75C2DCA1A569285FB112D25 /* FilterCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23273C4A686EC0F9C4C981D /* FilterCache.swift */; };
 		E78867CC660A7C9CE32304F6 /* GuideHeroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 738420967340B61047A9600C /* GuideHeroView.swift */; };
+		E788D20D0951781626AD20D0 /* ReachabilityRecheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714ABB7B9B4445AF509639CE /* ReachabilityRecheck.swift */; };
 		E7D22E770643FDAAA5E6065B /* RememberedSeerrSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E97880F967A329D4C748338 /* RememberedSeerrSession.swift */; };
 		E7E7FF1D6EBE62F34BF66AF6 /* ProfileSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466C8906B6D1952207FC6730 /* ProfileSettingsView.swift */; };
 		E7F75589CE8245FC794F983E /* SeerrMetadataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A918155231B658FE1659325E /* SeerrMetadataRow.swift */; };
@@ -1329,6 +1331,7 @@
 		70AEC623687A44C3603ED57F /* SiriRemoteEdgeClickTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteEdgeClickTests.swift; sourceTree = "<group>"; };
 		7126EDCF2AE6A462DC455824 /* CatalogCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogCollectionView.swift; sourceTree = "<group>"; };
 		7138A1E131E7104ED1881D2B /* MediaSegmentRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSegmentRequestTests.swift; sourceTree = "<group>"; };
+		714ABB7B9B4445AF509639CE /* ReachabilityRecheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityRecheck.swift; sourceTree = "<group>"; };
 		71A6ACA556526BD955443E10 /* ProfileRepromptPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRepromptPolicyTests.swift; sourceTree = "<group>"; };
 		71D7377FE2EE2770A0460BA8 /* StableTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StableTap.swift; sourceTree = "<group>"; };
 		726923509DF667EA95ED1733 /* CloudSyncPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncPayloads.swift; sourceTree = "<group>"; };
@@ -2586,6 +2589,7 @@
 				A8F9685F48162E2D506B820B /* HTTPMethod.swift */,
 				698E68F119A7E37585120CE2 /* LocalNetworkAccess.swift */,
 				4FCC0AD2AA3F895C4DE7EE5F /* NetworkPathObserver.swift */,
+				714ABB7B9B4445AF509639CE /* ReachabilityRecheck.swift */,
 				E1BEA274EA0022F3035946EF /* ServerAddressResolution.swift */,
 				2373CBCBAC4D467C556A8634 /* ServerReachability.swift */,
 				37069EBB512D8095D5F68CED /* ServerRoute.swift */,
@@ -3188,6 +3192,7 @@
 				44C08594C250EBFADF978AA5 /* ProgramInfoPopover.swift in Sources */,
 				80C71577F236846A71438050 /* ProviderMatchMerging.swift in Sources */,
 				103F528C7E8191984B059839 /* QuickConnectModels.swift in Sources */,
+				611F718CDE2BEEA86D5AD6A6 /* ReachabilityRecheck.swift in Sources */,
 				77031B52AEEFCB596CF64DE7 /* RecordingsView.swift in Sources */,
 				49F70FF3FE27FF93451738E5 /* RecordingsViewModel.swift in Sources */,
 				D4182569C71CB902E4A9C825 /* RememberedProfileReconciliation.swift in Sources */,
@@ -3793,6 +3798,7 @@
 				2FCE52B6FC0E4B1BE0DFDA4C /* ProgramInfoPopover.swift in Sources */,
 				F05C42287A7C3CA6A4848696 /* ProviderMatchMerging.swift in Sources */,
 				36BAF82C411A5AF2A35EDD2B /* QuickConnectModels.swift in Sources */,
+				E788D20D0951781626AD20D0 /* ReachabilityRecheck.swift in Sources */,
 				695D36A708F2605A1453B8CB /* RecordingsView.swift in Sources */,
 				5CC1AD49C00E8D6893898AE2 /* RecordingsViewModel.swift in Sources */,
 				0AD5FC01BC00E1CCC42AB6C2 /* RememberedProfileReconciliation.swift in Sources */,

@@ -83,6 +83,11 @@ final class DependencyContainer {
     var activeJellyfinRoute: ServerRoute?
     var activeSeerrRoute: ServerRoute?
     var routeResolveTask: Task<Void, Never>?
+    /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
+    var transportRecheckTask: Task<Void, Never>?
+    var lastTransportRecheck: ContinuousClock.Instant?
+    /// Runs only while the verdict is a failure, and asks again until it is not.
+    var reachabilityWatchTask: Task<Void, Never>?
 
     /// Attach + start cloud sync. Idempotent.
     func attachCloudSync() {
@@ -194,6 +199,13 @@ final class DependencyContainer {
         // Sheds the pre-scoping filter-cache files on an install that never switches server or
         // profile, which no switch-site trim would ever reach.
         trimFilterCache(keeping: activeSessionIdentity())
+
+        // Sodalite#126, and last because it captures self. The Jellyfin client alone: a Seerr
+        // timeout says nothing about which Jellyfin address answers. Concrete client only, since
+        // the hook is a real-transport concern and a mock has no verdict to keep honest.
+        (httpClient as? HTTPClient)?.onTransportFailure = { [weak self] in
+            Task { @MainActor in self?.noteTransportFailure() }
+        }
     }
 
     /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),

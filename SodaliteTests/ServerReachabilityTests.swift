@@ -301,3 +301,58 @@ struct ServerReachabilityBannerStateTests {
         }
     }
 }
+
+/// Sodalite#126, device round. The strip and the player were right and never appeared, because
+/// nothing re-measured the verdict: every trigger the app had was an event about the DEVICE, a path
+/// change, a foreground, a server switch. On a phone the reported case is a path change, so the gap
+/// stayed hidden. On an Apple TV, which never leaves its network, no device event exists for the
+/// only outage it can have, and the app believed its launch measurement for the rest of the session.
+///
+/// Measured on Wohnzimmer, tvOS 26.6, 2026-09-06: stopping the server while the app ran changed
+/// nothing on screen; only relaunching showed the right one.
+@Suite("Re-measuring a verdict that went stale")
+struct ReachabilityRecheckTests {
+    /// The early checks are for a server that was just restarted and is seconds from answering; the
+    /// ceiling is for one that is off for the evening and must not be asked all night.
+    @Test("the schedule backs off and then holds")
+    func schedule() {
+        #expect(ReachabilityRecheck.delay(forAttempt: 0) == .seconds(5))
+        #expect(ReachabilityRecheck.delay(forAttempt: 1) == .seconds(10))
+        #expect(ReachabilityRecheck.delay(forAttempt: 2) == .seconds(20))
+        #expect(ReachabilityRecheck.delay(forAttempt: 3) == ReachabilityRecheck.ceiling)
+    }
+
+    /// Whatever the attempt count reaches over a night, the gap is bounded. An unbounded backoff
+    /// would eventually mean the app has stopped asking without ever saying so.
+    @Test("no attempt is ever asked to wait longer than the ceiling")
+    func bounded() {
+        for attempt in 0...10_000 {
+            #expect(ReachabilityRecheck.delay(forAttempt: attempt) <= ReachabilityRecheck.ceiling)
+        }
+    }
+
+    /// Monotonic, so a later check never comes sooner than an earlier one. A schedule that dipped
+    /// would be a schedule that got busier the longer the server stayed down.
+    @Test("the schedule never gets shorter")
+    func monotonic() {
+        for attempt in 1...20 {
+            #expect(ReachabilityRecheck.delay(forAttempt: attempt) >= ReachabilityRecheck.delay(forAttempt: attempt - 1))
+        }
+    }
+
+    /// A negative attempt is not a real input, but a schedule indexed by a counter should not trap
+    /// on one either.
+    @Test("a nonsense attempt still yields the first delay")
+    func negativeAttempt() {
+        #expect(ReachabilityRecheck.delay(forAttempt: -1) == .seconds(5))
+    }
+
+    /// The cooldown answers a different question from the schedule: not "how long until we ask
+    /// again" but "how many of these failures are one piece of news". A failing session produces
+    /// them by the dozen, and every one of them arrives at the same funnel.
+    @Test("the failure cooldown is shorter than the steady interval and longer than a burst")
+    func cooldown() {
+        #expect(ReachabilityRecheck.cooldown > .seconds(2))
+        #expect(ReachabilityRecheck.cooldown <= ReachabilityRecheck.ceiling)
+    }
+}

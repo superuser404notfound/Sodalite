@@ -20,10 +20,11 @@ import SwiftUI
 struct ServerStatusBanner: View {
     let state: ServerReachability
     let serverName: String
-    /// iOS only, and it earns its place: a server that dies on an UNCHANGED network is never
-    /// re-probed on its own. The probe runs on a path change, a foreground and a server switch, and
-    /// a NAS going to sleep is none of those. tvOS gets no button, because a focusable strip would
-    /// push itself into the row order it exists to annotate.
+    /// Both platforms. The app re-measures on its own now, on a failed request and then on a watch
+    /// that keeps asking while the answer is bad, so this is no longer the only way back; it is the
+    /// way to stop waiting for the next check. On tvOS it does join the focus order below the last
+    /// row, which is the price of having it, and it uses the same tile style the full screen already
+    /// ships there.
     let onRetry: (() async -> Void)?
 
     @State private var isRetrying = false
@@ -138,12 +139,8 @@ private struct ServerStatusBannerModifier: ViewModifier {
     /// Only the probe is awaited. A verdict that improves already bumps `requestContentReload` from
     /// `publishReachability`, so the reload needs no wiring here, and awaiting the fetch would put
     /// the multi-minute spin back that Sodalite#122 removed.
-    private var retryAction: (() async -> Void)? {
-        #if os(iOS)
+    private var retryAction: () async -> Void {
         { await dependencies.resolveActiveRoutes() }
-        #else
-        nil
-        #endif
     }
 }
 

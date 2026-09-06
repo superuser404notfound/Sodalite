@@ -102,6 +102,64 @@ extension DependencyContainer {
         if verdict == .reachable, previous.isFailure {
             appState.requestContentReload += 1
         }
+        // A bad answer starts the watch, a good one lets it fall out on its own next check. Started
+        // here rather than at the failure site because this is the one place the verdict changes.
+        if verdict.isFailure { startReachabilityWatch() }
+    }
+
+    /// A request just died at the transport, which is the only evidence about the SERVER that
+    /// exists in that moment (Sodalite#126).
+    ///
+    /// Every other trigger is an event about the DEVICE: a path change, a foreground, a server
+    /// switch, a login. On a phone the reported case, walking out of the house, is a path change, so
+    /// the gap stayed hidden. On an Apple TV nothing about the device's network moves when the
+    /// server dies, so the app measured once at launch and believed it for the rest of the session,
+    /// which is every outage an Apple TV can have.
+    ///
+    /// Bounded three ways, because a failing session produces failures by the dozen: only while the
+    /// verdict still says the server is fine, since past that the watch below owns the question;
+    /// only one re-measure in flight; and not twice inside the cooldown, so a server that answers
+    /// the probe while its API keeps failing cannot turn every request into another probe.
+    func noteTransportFailure() {
+        guard let appState, activeServer != nil, !appState.serverReachability.isFailure else { return }
+        guard transportRecheckTask == nil else { return }
+        if let last = lastTransportRecheck, ContinuousClock.now - last < ReachabilityRecheck.cooldown {
+            return
+        }
+        lastTransportRecheck = .now
+        transportRecheckTask = Task { [weak self] in
+            await self?.resolveActiveRoutes()
+            self?.transportRecheckTask = nil
+        }
+    }
+
+    /// Keeps asking while the answer is bad, and stops as soon as it is not.
+    ///
+    /// The mirror of the trigger above, and needed for the same reason: nothing on the device
+    /// changes when the server comes BACK either. Without it a session would sit on a stale failure
+    /// until someone pressed a button, which on a screen nobody is looking at is forever.
+    ///
+    /// The probe it drives is an unauthenticated GET capped at two seconds, so the steady state
+    /// costs two requests a minute against a host that is already down, and it stops on the first
+    /// answer rather than on a timer.
+    func startReachabilityWatch() {
+        guard reachabilityWatchTask == nil else { return }
+        reachabilityWatchTask = Task { [weak self] in
+            var attempt = 0
+            while !Task.isCancelled {
+                guard let self, let appState = self.appState,
+                      appState.serverReachability.isFailure, self.activeServer != nil
+                else { break }
+                do {
+                    try await Task.sleep(for: ReachabilityRecheck.delay(forAttempt: attempt))
+                } catch {
+                    break
+                }
+                attempt += 1
+                await self.resolveActiveRoutes()
+            }
+            self?.reachabilityWatchTask = nil
+        }
     }
 
     /// Jellyfin and Seerr ids live in the same store; prefix avoids collisions.
