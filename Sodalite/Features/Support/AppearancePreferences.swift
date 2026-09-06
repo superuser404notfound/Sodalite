@@ -192,7 +192,10 @@ final class AppearancePreferences {
         resolvedTheme(isSupporter: isSupporter).accent
     }
 
-    func effectiveTint(isSupporter: Bool) -> Color? {
+    /// Never nil: it is the resolved theme's own control colour, and the resolver always lands on a
+    /// theme. It used to be Optional, and every consumer's `?? .accentColor` branch stood for a case
+    /// that cannot happen while naming the one colour that must not be drawn.
+    func effectiveTint(isSupporter: Bool) -> Color {
         resolvedTheme(isSupporter: isSupporter).palette.control.color
     }
 }

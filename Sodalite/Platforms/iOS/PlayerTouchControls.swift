@@ -8,7 +8,7 @@ import AetherEngine
 struct PlayerTouchControls: View {
     let viewModel: PlayerViewModel
     let onDismiss: () -> Void
-    var tintColor: Color?
+    let tintColor: Color
     var episodeImageURL: (JellyfinItem) -> URL? = { _ in nil }
     var chapterThumbnail: (Int) async -> CGImage? = { _ in nil }
 
@@ -21,7 +21,7 @@ struct PlayerTouchControls: View {
         var id: Int { hashValue }
     }
 
-    private var tint: Color { tintColor ?? .accentColor }
+    private var tint: Color { tintColor }
 
     /// Window-safe content width minus the given horizontal margin per side; UIKit truth, immune to
     /// the corrupt SwiftUI safe rect (see the fixed-width comment in body). nil (no window yet) lets

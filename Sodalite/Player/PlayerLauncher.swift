@@ -27,9 +27,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     var preferredMediaSourceID: String?
     /// Shuffle / play queue; empty = single-item playback.
     var playQueue: [JellyfinItem] = []
-    /// Overlay tint, threaded through because WindowGroup `.tint(...)` doesn't
-    /// cross into the UIKit modal; nil = asset-catalog default.
-    var tintColor: Color?
+    /// Read here, on the SwiftUI side, because a UIHostingController inside the UIKit modal starts
+    /// from a BLANK environment: every `\.appearanceTheme` read below it silently falls back to
+    /// `ResolvedAppearanceTheme.default`, which is system blue.
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     func makeUIViewController(context: Context) -> PlayerLauncherHostVC {
         PlayerLauncherHostVC()
@@ -58,7 +59,7 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                 )
                 let playerVC = PlayerHostController(
                     viewModel: vm,
-                    tintColor: tintColor,
+                    theme: appearanceTheme,
                     onDismiss: { [weak host] in
                         // Reset the trigger unconditionally and synchronously.
                         // PlayerHostController also self-dismisses on iOS, so a reset

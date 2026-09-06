@@ -73,7 +73,7 @@ struct VersionPickerChoice: Identifiable {
 /// Multi-source version picker (highest quality first, top focused); `onSelect` gets the chosen source, dismissing without one cancels playback.
 struct VersionPickerSheet: View {
     let sources: [MediaSource]
-    let tintColor: Color?
+    let tintColor: Color
     let onSelect: (MediaSource) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -132,7 +132,7 @@ struct VersionPickerSheet: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(isFocused ? (tintColor ?? .accentColor) : Color.Theme.surface)
+                .fill(isFocused ? tintColor : Color.Theme.surface)
         )
         .foregroundStyle(isFocused ? Color.black : Color.primary)
         .focusable(true)

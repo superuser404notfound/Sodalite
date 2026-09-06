@@ -11,7 +11,7 @@ struct HomeView: View {
     private var spinnerTint: Color {
         dependencies.appearancePreferences.effectiveTint(
             isSupporter: dependencies.storeKitService.isSupporter
-        ) ?? Color.accentColor
+        )
     }
 
     /// Which content row holds focus; nil when focus leaves the rows (Up from the top row to the tab bar). Drives auto-scroll-to-top so the tab bar isn't clipped on arrival from below.

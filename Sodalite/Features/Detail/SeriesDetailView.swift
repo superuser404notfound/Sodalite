@@ -314,10 +314,7 @@ struct SeriesDetailView: View {
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
                     preferredMediaSourceID: pendingSourceID,
-                    playQueue: playQueue,
-                    tintColor: dependencies.appearancePreferences.effectiveTint(
-                        isSupporter: dependencies.storeKitService.isSupporter
-                    )
+                    playQueue: playQueue
                 )
                 .allowsHitTesting(false)
             }

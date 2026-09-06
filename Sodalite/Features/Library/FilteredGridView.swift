@@ -259,10 +259,7 @@ struct FilteredGridView: View {
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: nil,
                     preferredMediaSourceID: nil,
-                    playQueue: playQueue,
-                    tintColor: dependencies.appearancePreferences.effectiveTint(
-                        isSupporter: dependencies.storeKitService.isSupporter
-                    )
+                    playQueue: playQueue
                 )
                 .allowsHitTesting(false)
             }

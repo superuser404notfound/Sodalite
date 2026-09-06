@@ -5,7 +5,7 @@ import SwiftUI
 /// while it reloads.
 struct LibrarySortSheet: View {
     let selection: LibrarySort
-    let tintColor: Color?
+    let tintColor: Color
     let onSelect: (LibrarySort) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -60,7 +60,7 @@ struct LibrarySortSheet: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(isFocused ? (tintColor ?? .accentColor) : Color.Theme.surface)
+                .fill(isFocused ? tintColor : Color.Theme.surface)
         )
         .foregroundStyle(isFocused ? Color.black : Color.primary)
         .focusable(true)

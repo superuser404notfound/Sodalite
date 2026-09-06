@@ -8,7 +8,7 @@ struct PlayerOverlayView: View {
     let viewModel: PlayerViewModel
     let onDismiss: () -> Void
     /// Literal player tint (the host's `.tint(...)` value) passed explicitly because the subtitle-search overlay needs a concrete `Color` for focused-row fills, not just the environment tint.
-    var tintColor: Color? = nil
+    let tintColor: Color
 
     var body: some View {
         ZStack {
@@ -35,7 +35,7 @@ struct PlayerOverlayView: View {
                     Color.black
                     ProgressView()
                         // ProgressView doesn't reliably inherit the overlay's `.tint(...)` on tvOS (falls back to white); set it explicitly.
-                        .tint(tintColor ?? .accentColor)
+                        .tint(tintColor)
                 }
                 .ignoresSafeArea()
                 .transition(.opacity)
@@ -151,7 +151,7 @@ struct PlayerOverlayView: View {
             if viewModel.subtitleSearchVisible {
                 SubtitleSearchView(
                     viewModel: viewModel,
-                    tint: tintColor ?? .accentColor
+                    tint: tintColor
                 )
                 .transition(.opacity)
                 .zIndex(50)
@@ -160,7 +160,7 @@ struct PlayerOverlayView: View {
             if viewModel.isSubtitleDeletePromptVisible {
                 SubtitleDeletePromptView(
                     viewModel: viewModel,
-                    tint: tintColor ?? .accentColor
+                    tint: tintColor
                 )
                 .transition(.opacity)
                 .zIndex(51)
@@ -171,7 +171,7 @@ struct PlayerOverlayView: View {
             // controls are already removed above, and pickers/stats/subtitle-search can't be opened
             // while locked, so nothing below can react. Subtitles keep rendering (kid keeps watching).
             if viewModel.isInputLocked {
-                PlayerLockOverlay(viewModel: viewModel, tint: tintColor ?? .accentColor)
+                PlayerLockOverlay(viewModel: viewModel, tint: tintColor)
                     .transition(.opacity)
                     .zIndex(100)
             }

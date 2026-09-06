@@ -47,7 +47,7 @@ struct LiveTVTabView: View {
 
     private var tint: Color {
         dependencies.appearancePreferences.effectiveTint(
-            isSupporter: dependencies.storeKitService.isSupporter) ?? Color.accentColor
+            isSupporter: dependencies.storeKitService.isSupporter)
     }
 
     var body: some View {
@@ -178,8 +178,7 @@ struct LiveTVTabView: View {
                     liveTvService: dependencies.jellyfinLiveTvService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
-                    directStreamMemory: dependencies.liveDirectStreamMemory,
-                    tintColor: tint
+                    directStreamMemory: dependencies.liveDirectStreamMemory
                 )
                 .allowsHitTesting(false)
             }

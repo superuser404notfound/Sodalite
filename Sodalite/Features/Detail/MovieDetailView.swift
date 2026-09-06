@@ -91,10 +91,7 @@ struct MovieDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: pendingSourceID,
-                    tintColor: dependencies.appearancePreferences.effectiveTint(
-                        isSupporter: dependencies.storeKitService.isSupporter
-                    )
+                    preferredMediaSourceID: pendingSourceID
                 )
                 .allowsHitTesting(false)
             }
@@ -113,10 +110,7 @@ struct MovieDetailView: View {
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     // Trailer is a distinct server item; the movie's
                     // cached PlaybackInfo does not apply to it.
-                    cachedPlaybackInfo: nil,
-                    tintColor: dependencies.appearancePreferences.effectiveTint(
-                        isSupporter: dependencies.storeKitService.isSupporter
-                    )
+                    cachedPlaybackInfo: nil
                 )
                 .allowsHitTesting(false)
             }

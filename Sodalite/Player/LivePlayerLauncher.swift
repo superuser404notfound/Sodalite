@@ -13,7 +13,9 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     let userID: String
     let preferences: PlaybackPreferences
     let directStreamMemory: LiveDirectStreamMemory
-    var tintColor: Color?
+    /// Same reason as PlayerLauncher: the theme has to be picked up on the SwiftUI side and carried
+    /// across the UIKit boundary by hand.
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     func makeUIViewController(context: Context) -> PlayerLauncherHostVC {
         PlayerLauncherHostVC()
@@ -87,7 +89,7 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
         )
         let playerVC = PlayerHostController(
             viewModel: vm,
-            tintColor: tintColor,
+            theme: appearanceTheme,
             onDismiss: {
                 host.dismiss(animated: false) { isPresented = false }
             }

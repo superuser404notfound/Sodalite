@@ -21,7 +21,9 @@ import Combine
 final class PlayerHostController: AVPlayerViewController {
     /// `internal` (not `private`) so cross-file extensions (PlayerHostController+SkipDelegate) can reach it.
     let viewModel: PlayerViewModel
-    private let tintColor: Color?
+    /// The whole theme, not just its tint: a UIHostingController mounted from UIKit starts from a
+    /// blank environment, so `\.appearanceTheme` has to be put back by hand below.
+    private let theme: ResolvedAppearanceTheme
     private let onDismiss: () -> Void
 
     private var hasLaunched = false
@@ -97,11 +99,11 @@ final class PlayerHostController: AVPlayerViewController {
 
     init(
         viewModel: PlayerViewModel,
-        tintColor: Color? = nil,
+        theme: ResolvedAppearanceTheme,
         onDismiss: @escaping () -> Void
     ) {
         self.viewModel = viewModel
-        self.tintColor = tintColor
+        self.theme = theme
         self.onDismiss = onDismiss
         super.init(nibName: nil, bundle: nil)
     }
@@ -359,13 +361,19 @@ final class PlayerHostController: AVPlayerViewController {
         }
         #endif
 
-        // `.tint(...)` must be applied here: the UIKit modal never inherits SodaliteApp's WindowGroup tint.
+        // Nothing of SodaliteApp's environment reaches a UIHostingController mounted from UIKit, so
+        // both the tint and the theme are put back here, out of ONE value. The tint alone used to be,
+        // which is how the transport bar's focused chip ended up system blue on a pink accent: it
+        // reads `\.appearanceTheme`, and an unset environment key answers with its default rather
+        // than with nothing.
+        let tint = theme.palette.control.color
         let overlay = PlayerOverlayView(
             viewModel: viewModel,
             onDismiss: { [weak self] in self?.dismissPlayer() },
-            tintColor: tintColor
+            tintColor: tint
         )
-            .tint(tintColor)
+            .tint(tint)
+            .environment(\.appearanceTheme, theme)
         let hosting = UIHostingController(rootView: overlay)
         hosting.view.backgroundColor = .clear
         #if os(iOS)
