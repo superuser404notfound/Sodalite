@@ -8,7 +8,7 @@ import Foundation
 /// the queue's ScrollView, which is greedy in the vertical axis, so it always fills the container's
 /// height while the cover column keeps its natural height. A centered HStack therefore moves only
 /// the cover column, and the drop is half the height difference (measured at 107pt on a 1080p tvOS
-/// screen, and larger on iPad where the cover is 360pt instead of 520pt).
+/// screen, and larger on iPad where the cover is smaller than the tvOS one).
 ///
 /// What is pinned here is that pairing: as long as the queue scrolls, the columns are top-aligned.
 /// Top padding on the metadata column would be the alternative, and it would be a magic number that
@@ -19,8 +19,8 @@ struct NowPlayingColumnAlignmentTests {
     func wideColumnsAreTopAligned() throws {
         let source = try sourceFile("Sodalite/Features/Music/NowPlayingView.swift")
 
-        #expect(source.contains("HStack(alignment: .top, spacing: wideSpacing)"))
-        #expect(!source.contains("HStack(alignment: .center, spacing: wideSpacing)"))
+        #expect(source.contains("HStack(alignment: .top, spacing: NowPlayingMetrics.wideSpacing)"))
+        #expect(!source.contains("HStack(alignment: .center"))
     }
 
     @Test("The queue column is still the greedy one that made the alignment matter")

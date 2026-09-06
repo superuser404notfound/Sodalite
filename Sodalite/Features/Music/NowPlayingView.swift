@@ -38,6 +38,10 @@ private struct NowPlayingContent: View {
     @State private var chromeRevealed = true
     @State private var chromeHideTask: Task<Void, Never>?
 
+    /// Last measured height of the transport + scrubber block, so hiding it can leave half of it
+    /// standing. Measured rather than added up, since the time labels follow the text metrics.
+    @State private var chromeHeight: CGFloat = 0
+
     private static let chromeSwap = Animation.easeInOut(duration: 0.35)
 
     /// Room a focused queue row needs on each side. A `ScrollView` clips to its own bounds, and a row
@@ -205,8 +209,8 @@ private struct NowPlayingContent: View {
             //
             // Without the queue column the HStack shrinks to the cover column, and the enclosing ZStack
             // centers it: the same single-column look a one-track album gets.
-            HStack(alignment: .top, spacing: wideSpacing) {
-                VStack(spacing: 32) {
+            HStack(alignment: .top, spacing: NowPlayingMetrics.wideSpacing) {
+                VStack(spacing: NowPlayingMetrics.columnSpacing) {
                     albumCover
                     // Metadata belongs to whichever column is on screen. Centered it sits under the
                     // cover, Apple Music's arrangement; two-column it heads the queue, as before.
@@ -214,17 +218,33 @@ private struct NowPlayingContent: View {
                         trackMetadata(centered: true)
                             .transition(.opacity)
                     }
-                    // Removed, not faded: an invisible view still takes its space, which pushed the
-                    // artwork off centre. `NowPlayingWakeSink` holds focus in their place.
+                    // Removed, not faded: an invisible view keeps its focus AND its full height,
+                    // which pushed the artwork off centre. `NowPlayingWakeSink` holds the focus in
+                    // their place, and the branch below decides how much of the height is worth
+                    // keeping.
                     if chromeRevealed {
-                        VStack(spacing: 32) {
+                        VStack(spacing: NowPlayingMetrics.chromeSpacing) {
                             transportRow
                             progressRow
                         }
                         .transition(.opacity)
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.size.height
+                        } action: { height in
+                            chromeHeight = height
+                        }
+                    } else if chromeHeight > 0 {
+                        // Half the chrome's height stays standing, because the two states cannot both
+                        // be had: centring the artwork on the whole band once the controls leave moves
+                        // it 114pt, and reserving the full height parks it a tenth of the screen above
+                        // centre for as long as the ambient state lasts. Half of it lands the artwork
+                        // at the optical centre, ~4% above the geometric one, and quarters the travel.
+                        Color.clear.frame(height: chromeHeight / 2)
                     }
                 }
-                .frame(width: wideColumnWidth)
+                .frame(width: showsQueueColumn
+                       ? NowPlayingMetrics.wideColumnWidth
+                       : NowPlayingMetrics.soloColumnWidth)
 
                 if showsQueueColumn {
                     VStack(alignment: .leading, spacing: 28) {
@@ -246,48 +266,13 @@ private struct NowPlayingContent: View {
         }
     }
 
-    private var coverSide: CGFloat {
-        if hSizeClass == .compact { return 280 }
-        #if os(tvOS)
-        return 520
-        #else
-        return 360
-        #endif
-    }
+    private var isCompact: Bool { hSizeClass == .compact }
 
-    private var wideColumnWidth: CGFloat {
-        #if os(tvOS)
-        return 560
-        #else
-        return 400
-        #endif
-    }
+    private var coverSide: CGFloat { NowPlayingMetrics.coverSide(compact: isCompact) }
 
-    private var wideSpacing: CGFloat {
-        #if os(tvOS)
-        return 80
-        #else
-        return 48
-        #endif
-    }
+    private var contentHPadding: CGFloat { NowPlayingMetrics.contentHPadding(compact: isCompact) }
 
-    private var contentHPadding: CGFloat {
-        if hSizeClass == .compact { return 20 }
-        #if os(tvOS)
-        return 80
-        #else
-        return 40
-        #endif
-    }
-
-    private var contentVPadding: CGFloat {
-        if hSizeClass == .compact { return 24 }
-        #if os(tvOS)
-        return 60
-        #else
-        return 40
-        #endif
-    }
+    private var contentVPadding: CGFloat { NowPlayingMetrics.contentVPadding(compact: isCompact) }
 
     // MARK: - Background art
 
@@ -339,7 +324,7 @@ private struct NowPlayingContent: View {
     // MARK: - Track metadata
 
     private func trackMetadata(centered: Bool) -> some View {
-        VStack(alignment: centered ? .center : .leading, spacing: 12) {
+        VStack(alignment: centered ? .center : .leading, spacing: NowPlayingMetrics.metadataSpacing) {
             if let item = coordinator.currentItem {
                 if let context = coordinator.contextTitle, !context.isEmpty {
                     Text(context)
@@ -377,7 +362,7 @@ private struct NowPlayingContent: View {
     // MARK: - Transport row
 
     private var transportRow: some View {
-        HStack(spacing: 28) {
+        HStack(spacing: NowPlayingMetrics.transportSpacing) {
             TransportIconButton(
                 systemImage: "backward.fill",
                 focusKey: TransportButton.previous,
@@ -492,8 +477,8 @@ private struct TransportIconButton: View {
     var body: some View {
         // tvOS scales .title/.title2 to ~76/~57pt, so the glyph filled the frame and the focus circle
         // cut across it; fixed sizes clearly smaller than the circle keep the tint ring around the icon.
-        let size: CGFloat = isLarge ? 96 : 74
-        let iconFont: Font = .system(size: isLarge ? 38 : 28, weight: .semibold)
+        let size: CGFloat = isLarge ? NowPlayingMetrics.transportPrimary : NowPlayingMetrics.transportSecondary
+        let iconFont: Font = .system(size: isLarge ? 34 : 25, weight: .semibold)
 
         // .focusable + stableTap, NOT a Button: a tvOS Button (even .plain) paints the system white
         // focus card; our focus look is the tinted circle fill + stroke below.
@@ -568,7 +553,7 @@ private struct ScrubBar: View {
     }
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: NowPlayingMetrics.scrubLabelSpacing) {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
@@ -601,7 +586,7 @@ private struct ScrubBar: View {
                 )
                 #endif
             }
-            .frame(height: 26)
+            .frame(height: NowPlayingMetrics.scrubTrackHeight)
 
             HStack {
                 Text(MusicTimeFormatter.string(coordinator.displayTime))
