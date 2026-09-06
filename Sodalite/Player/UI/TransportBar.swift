@@ -83,7 +83,7 @@ struct TransportBar: View {
                 Spacer()
 
                 trackButton(
-                    label: String(localized: "player.restart", defaultValue: "From Start"),
+                    label: String(localized: "player.restart", defaultValue: "Restart"),
                     icon: "arrow.counterclockwise",
                     isFocused: controlsFocus == .restartButton,
                     persistsLabel: false,
@@ -119,21 +119,23 @@ struct TransportBar: View {
                         label: episodeButtonLabel,
                         icon: "list.bullet",
                         isFocused: controlsFocus == .episodeButton,
-                        persistsLabel: true,
+                        // No off-state to report, so nothing to pin: focus (and an open menu, which
+                        // holds focus) still reveals "S1, E5". Same rule as Speed at 1x (#124).
+                        persistsLabel: false,
                         dropdown: episodeDropdownItems,
                         isOpen: isEpisodeDropdownOpen
                     )
                 }
 
                 // Gated on chapter data alone. It used to be suppressed on any series episode, which
-                // took chapter navigation away from every remux that carries real ones. A split-bar
-                // glyph and a pinned label keep it apart from the episode list next to it.
+                // took chapter navigation away from every remux that carries real ones. The split-bar
+                // glyph is what keeps it apart from the episode list next to it.
                 if chapters.count > 1 {
                     trackButton(
                         label: chapterButtonLabel,
                         icon: "rectangle.split.3x1",
                         isFocused: controlsFocus == .chapterButton,
-                        persistsLabel: true,
+                        persistsLabel: false,
                         dropdown: chapterDropdownItems,
                         isOpen: isChapterDropdownOpen
                     )
@@ -146,7 +148,7 @@ struct TransportBar: View {
                             ?? String(localized: "player.audio", defaultValue: "Audio"),
                         icon: "speaker.wave.2",
                         isFocused: controlsFocus == .audioButton,
-                        persistsLabel: true,
+                        persistsLabel: false,
                         dropdown: audioDropdownItems,
                         isOpen: isAudioDropdownOpen
                     )
@@ -161,7 +163,11 @@ struct TransportBar: View {
                             ?? String(localized: "player.subtitles.off", defaultValue: "Off"),
                         icon: "captions.bubble",
                         isFocused: controlsFocus == .subtitleButton,
-                        persistsLabel: true,
+                        // Subtitles are the one picker here with an off-state, so this is the chip
+                        // that follows Speed literally: "Off" is the default and needs no words.
+                        // Keyed on the resolved stream, not the index: an index with no stream
+                        // behind it renders "Off", and pinning that would be a lie.
+                        persistsLabel: activeStream != nil,
                         dropdown: {
                             if case .secondarySubtitle = trackDropdown { return secondarySubtitleDropdownItems }
                             return subtitleDropdownItems
@@ -572,7 +578,10 @@ struct TransportBar: View {
     // MARK: - Track Button + Dropdown
 
     private func trackButton(label: String, icon: String, isFocused: Bool, persistsLabel: Bool, dropdown: [DropdownItem], isOpen: Bool, countdownProgress: Double? = nil) -> some View {
-        VStack(spacing: 6) {
+        // 12, not 6: the menu was crammed onto its own chip (#124). The column grows upward from a
+        // fixed bottom, and the tallest menu (six 84pt episode rows) tops out 712pt up at 1080p, so
+        // the extra 6 comes out of 368pt of headroom.
+        VStack(spacing: 12) {
             if isOpen {
                 PlayerTrackDropdownList(items: dropdown, chapterThumbnail: chapterThumbnail)
             }

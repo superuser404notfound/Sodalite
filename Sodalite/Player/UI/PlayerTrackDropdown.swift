@@ -29,6 +29,8 @@ struct DropdownItem {
 /// The chip both transport bars open their menu from. Shared so the live bar reads as the same
 /// player as the VOD bar, which is what a viewer expects when only the content differs.
 struct TransportTrackLabel: View {
+    @Environment(\.appearanceTheme) private var appearanceTheme
+
     let label: String
     let icon: String
     let showsLabel: Bool
@@ -71,7 +73,11 @@ struct TransportTrackLabel: View {
                 .opacity(showsLabel ? 1 : 0)
                 .clipped()
         }
-        .foregroundStyle(isFocused ? .white : .white.opacity(0.6))
+        // Focused, the chip is a filled accent pill, so its glyph and label take the accent's own
+        // paired foreground rather than white (Sodalite#124, the role pair Now Playing already uses).
+        .foregroundStyle(isFocused
+            ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
+            : AnyShapeStyle(.white.opacity(0.6)))
         // Tighter padding for icon-only pills so they read as compact squares, not empty capsules.
         .padding(.horizontal, showsLabel ? 16 : 12)
         .padding(.vertical, 8)
@@ -90,12 +96,13 @@ struct TransportTrackLabel: View {
         .onPreferenceChange(TransportLabelWidthKey.self) { labelWidth = $0 }
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isFocused ? .white.opacity(0.2) : .clear)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .strokeBorder(.tint, lineWidth: 3)
-                .opacity(isFocused ? 1 : 0)
+                // Full strength, not a translucent accent: `foreground` is derived against the solid
+                // fill, and over a bright video frame a see-through pill loses the 3:1 it guarantees.
+                // No focus ring here, an accent stroke on an accent fill is invisible; the fill,
+                // the scale step and the shadow carry the focus on their own.
+                .fill(isFocused
+                    ? AnyShapeStyle(appearanceTheme.palette.control.color)
+                    : AnyShapeStyle(.clear))
         )
         .scaleEffect(isFocused ? 1.08 : 1.0)
         // Depth cue so the focused pill reads as raised, not just tinted.

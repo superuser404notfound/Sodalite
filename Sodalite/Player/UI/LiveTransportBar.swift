@@ -73,6 +73,13 @@ struct LiveTransportBar: View {
         return TrackDisplayFormatter.subtitleShortName(for: stream)
     }
 
+    /// Whether a real subtitle stream is on. Mirrors `activeSubtitleLabel`'s own guard so the chip
+    /// never pins a label that reads "Off".
+    private var hasActiveSubtitle: Bool {
+        guard let idx = viewModel.activeSubtitleIndex else { return false }
+        return viewModel.displaySubtitleStreams.contains(where: { $0.index == idx })
+    }
+
     private var subtitleDropdownItems: [DropdownItem] {
         guard case .subtitle(let highlighted) = viewModel.trackDropdown else { return [] }
         return viewModel.subtitleMenuRows.enumerated().compactMap { index, row in
@@ -125,28 +132,30 @@ struct LiveTransportBar: View {
                 }
 
                 if !viewModel.displayAudioTracks.isEmpty {
-                    VStack(spacing: 6) {
+                    // Same gap and the same label rule as the VOD bar (#124): no off-state, so the
+                    // chip stays a glyph until focus (or its open menu, which holds focus) asks.
+                    VStack(spacing: 12) {
                         if isAudioDropdownOpen {
                             PlayerTrackDropdownList(items: audioDropdownItems)
                         }
                         TransportTrackLabel(
                             label: activeAudioLabel,
                             icon: "speaker.wave.2",
-                            showsLabel: true,
+                            showsLabel: audioFocused,
                             isFocused: audioFocused
                         )
                     }
                 }
 
                 if !viewModel.displaySubtitleStreams.isEmpty {
-                    VStack(spacing: 6) {
+                    VStack(spacing: 12) {
                         if isSubtitleDropdownOpen {
                             PlayerTrackDropdownList(items: subtitleDropdownItems)
                         }
                         TransportTrackLabel(
                             label: activeSubtitleLabel,
                             icon: "captions.bubble",
-                            showsLabel: true,
+                            showsLabel: hasActiveSubtitle || subtitleFocused,
                             isFocused: subtitleFocused
                         )
                     }
