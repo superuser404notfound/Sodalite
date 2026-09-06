@@ -12,7 +12,7 @@ nonisolated struct FilterCacheScope: Hashable, Sendable {
     let identity: CacheIdentity
 }
 
-/// Persistent stale-while-revalidate cache for home + catalog filter-tile result sets (two slices: homeFilterItems, catalogPage), scoped per `CacheIdentity`. Backed by per-key JSON in `Library/Caches/FilterCache/`, NOT UserDefaults: tvOS caps CFPreferences at 1MB/domain and a populated provider tile (50+ JellyfinItem blobs) overflows it, SIGABRT inside `defaults.set` on first write. `nonisolated` + `@unchecked Sendable` (whole-file atomic IO, only the directory pointer is shared) so the trim can run off the main actor and precompute fan-outs can write without a hop; synchronous so views can hydrate `@State` from `init()` in one render pass.
+/// Persistent stale-while-revalidate cache for home + catalog filter-tile result sets plus Home's own row set (three slices: homeFilterItems, catalogPage, homeFeed), scoped per `CacheIdentity`. Backed by per-key JSON in `Library/Caches/FilterCache/`, NOT UserDefaults: tvOS caps CFPreferences at 1MB/domain and a populated provider tile (50+ JellyfinItem blobs) overflows it, SIGABRT inside `defaults.set` on first write. `nonisolated` + `@unchecked Sendable` (whole-file atomic IO, only the directory pointer is shared) so the trim can run off the main actor and precompute fan-outs can write without a hop; synchronous so views can hydrate `@State` from `init()` in one render pass.
 nonisolated final class FilterCache: @unchecked Sendable {
     static let shared = FilterCache()
 
@@ -22,6 +22,9 @@ nonisolated final class FilterCache: @unchecked Sendable {
     private static let format = "v2"
     private static let homeItemsSlice = "homeItems"
     private static let catalogSlice = "catalog"
+    private static let homeFeedSlice = "homeFeed"
+    /// The feed is one entry per identity rather than one per tile, so its key segment is a constant. It still travels through the same filename layout, which is what puts it under the identity trim and both evictions without a line of its own.
+    private static let homeFeedKey = "rows"
 
     /// How many identities keep entries. Removing the bulk wipes means the directory grows per identity instead of being emptied on every switch; one identity is bounded (~20 genre tiles, ~32 provider tiles, a few library grids and catalog pages), so a bound on identities is a bound on the directory. The number is a starting point, not a measurement. A size bound, not an expiry policy: entries stay valid until overwritten.
     static let identityLimit = 10
@@ -29,6 +32,10 @@ nonisolated final class FilterCache: @unchecked Sendable {
     // No timestamps (no expiry policy; refresh replaces wholesale); decode tolerates old files carrying a dropped `lastFetched`.
     private struct HomeItemsEntry: Codable {
         let items: [JellyfinItem]
+    }
+
+    private struct HomeFeedEntry: Codable {
+        let rows: [HomeRowData]
     }
 
     struct CatalogEntry: Codable, Sendable {
@@ -95,6 +102,19 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     func setHomeFilterItems(_ items: [JellyfinItem], filterKey: String, identity: CacheIdentity) {
         write(HomeItemsEntry(items: items), slice: Self.homeItemsSlice, key: filterKey, identity: identity)
+    }
+
+    // MARK: - Home Feed (the row set Home paints)
+
+    /// What Home last showed this identity, so a launch or a switch onto this server paints its own
+    /// shelf instead of a spinner (Sodalite#117). Sized by the row set, roughly 8 rows of 16 items,
+    /// which is an order of magnitude under one populated provider tile.
+    func homeFeed(identity: CacheIdentity) -> [HomeRowData]? {
+        read(HomeFeedEntry.self, slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity)?.rows
+    }
+
+    func setHomeFeed(_ rows: [HomeRowData], identity: CacheIdentity) {
+        write(HomeFeedEntry(rows: rows), slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity)
     }
 
     // MARK: - Catalog Filter Page 1

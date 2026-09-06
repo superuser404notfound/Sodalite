@@ -209,7 +209,10 @@ struct HomeView: View {
     /// keeps a dual-slot server whose external route is carrying the session from ever seeing this,
     /// and what keeps the still-loading first seconds from flashing it.
     private func blockingState(vm: HomeViewModel) -> ServerReachability? {
-        guard vm.rows.isEmpty, vm.tagRows.isEmpty else { return nil }
+        // A feed painted from disk is not evidence that the server answered (Sodalite#117), so the
+        // verdict still speaks over it. Otherwise a cached shelf would stand in front of the
+        // sentence that explains why none of its posters can load.
+        guard vm.rows.isEmpty || vm.isShowingCachedFeed, vm.tagRows.isEmpty else { return nil }
         switch appState.serverReachability {
         case .noNetwork, .offNetwork, .unreachable:
             return appState.serverReachability
