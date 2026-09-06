@@ -321,7 +321,7 @@ struct FilteredGridView: View {
     /// round of request timeouts to give up on a server that is still down, so a Retry that waited
     /// for it would spin for minutes, which is the bug this screen exists to remove.
     private func retry() async {
-        await dependencies.resolveActiveRoutes()
+        await dependencies.retryAfterFailure()
         Task { await loadItems() }
     }
 

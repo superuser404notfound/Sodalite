@@ -42,15 +42,11 @@ struct ServerUnreachableView: View {
         }
     }
 
-    /// Address advice, and only where an address is the problem. Offering it to someone in airplane
-    /// mode is noise, and offering it for a server that already carries a remote address is wrong.
+    /// Address advice, and exactly where the action is. Those two travel together by construction:
+    /// the sentence explains the button, and a button with no explanation, or an explanation with no
+    /// button, is the half that reads as a dead end.
     private var subtitle: Text? {
-        switch state {
-        case .offNetwork where onAddExternalAddress != nil:
-            Text("server.offNetwork.body")
-        default:
-            nil
-        }
+        onAddExternalAddress == nil ? nil : Text("server.offNetwork.body")
     }
 
     var body: some View {
@@ -110,6 +106,8 @@ struct ServerUnreachableView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Tells the tab's status strip to stay quiet: this screen is already saying it (#126).
+        .preference(key: ServerUnreachableScreenKey.self, value: true)
     }
 }
 
@@ -122,13 +120,22 @@ extension ServerUnreachableView {
     ///
     /// Shared with the library grid for the same reason the verdict itself is: two screens saying
     /// one sentence must not grow two answers to when the fix can be offered with it.
+    ///
+    /// The EMPTY SLOT decides, not the verdict's name (Sodalite#126). A server whose external slot
+    /// is free is the one a remote address fixes; a public server that stopped answering has its
+    /// internal slot free instead, and offering to add a LAN address for it is noise. `.unreachable`
+    /// carries the offer alongside `.offNetwork` because the report's matrix rows 5 and 6, a foreign
+    /// Wi-Fi and a phone hotspot, are precisely where the app cannot know why and the fix is still
+    /// the same one.
     static func addExternalAddressAction(
         state: ServerReachability,
         server: JellyfinServer?,
         present: @escaping () -> Void
     ) -> (() -> Void)? {
         #if os(iOS)
-        guard state == .offNetwork, server?.emptyURLSlot != nil else { return nil }
+        guard state == .offNetwork || state == .unreachable,
+              server?.emptyURLSlot == .external
+        else { return nil }
         return present
         #else
         return nil

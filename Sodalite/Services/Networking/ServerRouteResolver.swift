@@ -58,16 +58,51 @@ enum ServerRouteResolver {
     }
 }
 
-/// Reachability probes against unauthenticated status endpoints. Any HTTP
-/// response (including 401/5xx) proves the host answers on this route; only
-/// transport errors count as unreachable. Per-request ephemeral session,
-/// invalidated after use (long-lived sessions retain response data, see the
-/// URLSession task-pool leak note in project memory).
+/// Reachability probes against unauthenticated status endpoints. Per-request ephemeral session,
+/// invalidated after use (long-lived sessions retain response data, see the URLSession task-pool
+/// leak note in project memory).
 enum ServerProbe {
     static let timeout: TimeInterval = 2
 
+    /// Whether this status counts as the server answering FOR THIS SESSION.
+    ///
+    /// It used to be "any HTTP response at all", which is the right rule for picking between two
+    /// addresses (both may sit behind the same proxy, and a 401 from the right host still says the
+    /// host is there) and the wrong one for the question the app now asks of it. Measured on
+    /// 2026-09-06: a Jellyfin that is still booting answers every request with a 503 and its own
+    /// "Jellyfin Startup" page for the better part of a minute. The probe called that reachable, the
+    /// app cleared its error screen, reloaded everything into 503s and painted the screen straight
+    /// back, and the watch had already stopped because the verdict said all was well. The user saw
+    /// the interface flash once and then had to press Try Again by hand.
+    ///
+    /// So 5xx is not an answer: it is the server saying it cannot serve. Everything else stays one,
+    /// 401 and 404 included, because those come from a server that is up and merely disagreeing.
+    static func answers(statusCode: Int) -> Bool {
+        !(500...599).contains(statusCode)
+    }
+
+    /// The endpoint whose answer means a session can run, and it is deliberately NOT
+    /// `System/Info/Public` (Sodalite#126).
+    ///
+    /// Measured on 2026-09-06, Jellyfin 10.11.11, from a log: while the server is booting, its
+    /// startup page answers 503 for the API but `System/Info/Public` is served normally, which is
+    /// reasonable of it (a client asking who you are should get an answer before you are ready to
+    /// work). The consequence here was that the probe asked the one endpoint that cannot show the
+    /// condition it was meant to detect: it reported reachable, the app cleared its error screen,
+    /// every real request came back 503, and the recheck watch stopped because the verdict said all
+    /// was well. Even the 5xx trigger could not save it, because the re-measure it kicked off asked
+    /// the same forgiving endpoint again.
+    ///
+    /// `Users/Public` is the login screen's own endpoint. It is unauthenticated, present on every
+    /// Jellyfin, and behind the startup gate, so its answer means what this probe claims to mean. A
+    /// server that hides its user list answers 403 or an empty list, and both still count.
+    ///
+    /// Server DISCOVERY still asks `System/Info/Public`, and should: identifying a host is exactly
+    /// what that endpoint is for, and it is a different question from whether the host is ready.
+    static let jellyfinReadinessPath = "Users/Public"
+
     static func jellyfin(_ base: URL) async -> Bool {
-        await responds(at: base.appending(path: "System/Info/Public"))
+        await responds(at: base.appending(path: jellyfinReadinessPath))
     }
 
     static func seerr(_ base: URL) async -> Bool {
@@ -83,7 +118,8 @@ enum ServerProbe {
         defer { session.invalidateAndCancel() }
         do {
             let (_, response) = try await session.data(from: url)
-            return response is HTTPURLResponse
+            guard let http = response as? HTTPURLResponse else { return false }
+            return answers(statusCode: http.statusCode)
         } catch {
             return false
         }

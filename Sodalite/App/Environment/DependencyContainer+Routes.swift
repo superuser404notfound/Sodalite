@@ -87,11 +87,13 @@ extension DependencyContainer {
     /// is the same signal the return from a Local Network denial raises, for the same reason.
     private func publishReachability(url: URL, isReachable: Bool, server: JellyfinServer) {
         guard let appState else { return }
+        let reading = NetworkPathSnapshot.shared.current
         let verdict = ServerReachability.classify(
             probedURL: url,
             answered: isReachable,
             hasAlternateSlot: server.internalURL != nil && server.externalURL != nil,
-            pathIsSatisfied: NetworkPathSnapshot.shared.isSatisfied
+            pathIsSatisfied: reading?.isSatisfied,
+            isAttachedToALocalNetwork: reading?.isAttachedToALocalNetwork
         )
         let previous = appState.serverReachability
         guard verdict != previous else { return }
@@ -99,6 +101,97 @@ extension DependencyContainer {
         LogTap.shared.note("[network] \(server.name) is \(verdict) at \(url.host() ?? "?")")
         if verdict == .reachable, previous.isFailure {
             appState.requestContentReload += 1
+        }
+        // A bad answer starts the watch, a good one lets it fall out on its own next check. Started
+        // here rather than at the failure site because this is the one place the verdict changes.
+        if verdict.isFailure { startReachabilityWatch() }
+    }
+
+    /// A request just went unserved, which is the only evidence about the SERVER that exists in
+    /// that moment (Sodalite#126).
+    ///
+    /// Every other trigger is an event about the DEVICE: a path change, a foreground, a server
+    /// switch, a login. On a phone the reported case, walking out of the house, is a path change, so
+    /// the gap stayed hidden. On an Apple TV nothing about the device's network moves when the
+    /// server dies, so the app measured once at launch and believed it for the rest of the session,
+    /// which is every outage an Apple TV can have.
+    ///
+    /// Bounded three ways, because a failing session produces failures by the dozen: only while the
+    /// verdict still says the server is fine, since past that the watch below owns the question;
+    /// only one re-measure in flight; and not twice inside the cooldown, so a server that answers
+    /// the probe while its API keeps failing cannot turn every request into another probe.
+    func noteServerDidNotServe() {
+        guard let appState, activeServer != nil, !appState.serverReachability.isFailure else { return }
+        guard transportRecheckTask == nil else { return }
+        if let last = lastTransportRecheck, ContinuousClock.now - last < ReachabilityRecheck.cooldown {
+            return
+        }
+        lastTransportRecheck = .now
+        LogTap.shared.note("[network] a request went unserved, re-measuring")
+        transportRecheckTask = Task { [weak self] in
+            await self?.resolveActiveRoutes()
+            self?.transportRecheckTask = nil
+        }
+    }
+
+    /// A person just pressed Try Again (Sodalite#126).
+    ///
+    /// Re-measures AND raises the recovery signal unconditionally, instead of leaving the signal to
+    /// the verdict transition in `publishReachability`. That transition only fires where the app had
+    /// correctly recorded the failure first, and a session that LAUNCHED into an outage may never
+    /// have recorded one: what a launch learns once it never learns again, so the optional tabs, the
+    /// profile picture and the Seerr session stayed exactly as the outage left them while Home
+    /// reloaded and made the screen look repaired. Measured on iPhone and on Apple TV alike, which
+    /// is what said the cause was not the trigger set but the signal itself.
+    ///
+    /// A retry is by definition someone saying the last failure is obsolete, which is precisely what
+    /// the signal means, so it does not need the verdict's permission to say it. Raising it while
+    /// the server is still down costs one failed refresh round and no state: an identity refresh
+    /// that cannot reach the server now keeps what it had.
+    func retryAfterFailure() async {
+        await resolveActiveRoutes()
+        appState?.requestContentReload += 1
+    }
+
+    /// Keeps asking while the answer is bad, and stops as soon as it is not.
+    ///
+    /// The mirror of the trigger above, and needed for the same reason: nothing on the device
+    /// changes when the server comes BACK either. Without it a session would sit on a stale failure
+    /// until someone pressed a button, which on a screen nobody is looking at is forever.
+    ///
+    /// The probe it drives is an unauthenticated GET capped at two seconds, so the steady state
+    /// costs two requests a minute against a host that is already down, and it stops on the first
+    /// answer rather than on a timer.
+    func startReachabilityWatch() {
+        guard reachabilityWatchTask == nil else { return }
+        LogTap.shared.note("[network] recheck watch armed")
+        reachabilityWatchTask = Task { [weak self] in
+            var attempt = 0
+            while !Task.isCancelled {
+                guard let self, let appState = self.appState,
+                      appState.serverReachability.isFailure, self.activeServer != nil
+                else { break }
+                let delay = ReachabilityRecheck.delay(forAttempt: attempt)
+                do {
+                    try await Task.sleep(for: delay)
+                } catch {
+                    break
+                }
+                attempt += 1
+                // Only while the schedule is still backing off, plus one line when it settles. The
+                // diagnostic buffer holds 300 lines, so a watch ticking every thirty seconds through
+                // an outage that lasts the evening would flush out the very log that explains it,
+                // and a long outage is exactly when someone reads it. After this the watch is silent
+                // until it stops, and the absence of that line is what says it is still asking.
+                if delay < ReachabilityRecheck.ceiling {
+                    LogTap.shared.note("[network] recheck attempt \(attempt) after \(delay)")
+                } else if attempt == ReachabilityRecheck.attemptsBeforeCeiling {
+                    LogTap.shared.note("[network] recheck settling to one attempt every \(delay), quietly")
+                }
+                await self.resolveActiveRoutes()
+            }
+            LogTap.shared.note("[network] recheck watch stopped")
+            self?.reachabilityWatchTask = nil
         }
     }
 

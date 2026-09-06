@@ -83,6 +83,11 @@ final class DependencyContainer {
     var activeJellyfinRoute: ServerRoute?
     var activeSeerrRoute: ServerRoute?
     var routeResolveTask: Task<Void, Never>?
+    /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
+    var transportRecheckTask: Task<Void, Never>?
+    var lastTransportRecheck: ContinuousClock.Instant?
+    /// Runs only while the verdict is a failure, and asks again until it is not.
+    var reachabilityWatchTask: Task<Void, Never>?
 
     /// Attach + start cloud sync. Idempotent.
     func attachCloudSync() {
@@ -194,6 +199,13 @@ final class DependencyContainer {
         // Sheds the pre-scoping filter-cache files on an install that never switches server or
         // profile, which no switch-site trim would ever reach.
         trimFilterCache(keeping: activeSessionIdentity())
+
+        // Sodalite#126, and last because it captures self. The Jellyfin client alone: a Seerr
+        // timeout says nothing about which Jellyfin address answers. Concrete client only, since
+        // the hook is a real-transport concern and a mock has no verdict to keep honest.
+        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] in
+            Task { @MainActor in self?.noteServerDidNotServe() }
+        }
     }
 
     /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),
@@ -869,14 +881,23 @@ final class DependencyContainer {
         let directTag: String? = (me?.id == userID) ? me?.primaryImageTag : nil
         // /Users/Public fallback when directTag is nil (some Jellyfin versions only populate the tag on the public listing, not the authenticated detail endpoint).
         let fallbackTag: String? = directTag == nil ? await fetchPublicImageTag(for: userID) : nil
-        let tag = directTag ?? fallbackTag
 
+        // Re-read after the awaits: the active profile may have changed under this refresh.
         guard appState?.activeUser?.id == userID,
               let current = appState?.activeUser else { return .kept(nil) }
 
+        // A refresh that could not reach the server keeps what it already had, the same way the
+        // policy and the name below do (Sodalite#126). Without this, a launch that happened while
+        // the server was down wrote the FAILURE into the session: nil reads as "this profile has no
+        // picture", the avatar URL goes away with it, and no amount of retrying an image brings back
+        // a picture the app no longer has an address for. Measured on both platforms, and the tag
+        // stayed gone until the app was force-quit.
+        let reachedServer = (me?.id == userID)
+        let tag = reachedServer ? (directTag ?? fallbackTag) : current.primaryImageTag
+
         // Apply the fetched policy/name when /Users/Me succeeded; else keep the existing values (no-op, not a regression). The server owns the name, so a stale in-memory one never gets written back into the remembered entry.
-        let freshPolicy = (me?.id == userID) ? me?.policy : current.policy
-        let freshName = (me?.id == userID) ? (me?.name ?? current.name) : current.name
+        let freshPolicy = reachedServer ? me?.policy : current.policy
+        let freshName = reachedServer ? (me?.name ?? current.name) : current.name
         let tagChanged = current.primaryImageTag != tag
         let policyChanged = current.policy != freshPolicy
         let nameChanged = current.name != freshName
