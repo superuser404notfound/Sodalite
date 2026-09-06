@@ -146,10 +146,10 @@ extension MusicPlaybackCoordinator {
         guard let url = imageService.musicCoverURL(for: item, maxWidth: 600) else { return }
 
         Task { [weak self] in
-            guard let (data, _) = try? await URLSession.shared.data(from: url),
-                  // A half-written resize decodes into a half-drawn cover rather than into a
-                  // failure, and the lock screen would keep it (Sodalite#123).
-                  ImagePayload.isComplete(data),
+            // A half-written resize decodes into a half-drawn cover rather than into a failure, and
+            // the lock screen would keep it. ImageFetch also drops the refused entry, so the next
+            // track change is not served the same half file out of the HTTP cache (Sodalite#123).
+            guard case .whole(let data) = await ImageFetch.load(URLRequest(url: url)),
                   let image = UIImage(data: data),
                   // Force-decode off-main. A corrupt cover (Jellyfin can serve a truncated embedded image:
                   // "Error -17102 decompressing image -- possibly corrupt") otherwise crashes MediaPlayer when

@@ -38,22 +38,19 @@ extension PlayerViewModel {
         }
         LogTap.shared.note("[NowPlaying] artwork: GET \(url.absoluteString)")
         let request = URLRequest(url: url, timeoutInterval: 5.0)
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            LogTap.shared.note("[NowPlaying] artwork: status=\(status) bytes=\(data.count)")
-            guard ImagePayload.isComplete(data),
-                  let image = UIImage(data: data),
-                  let jpeg = image.jpegData(compressionQuality: 0.85) else {
-                LogTap.shared.note("[NowPlaying] artwork: decode/re-encode failed")
-                return
-            }
-            await MainActor.run {
-                let items = self.buildExternalMetadataItems(artworkData: jpeg)
-                self.player.setExternalMetadata(items)
-            }
-        } catch {
-            LogTap.shared.note("[NowPlaying] artwork: fetch failed: \(error.localizedDescription)")
+        guard case .whole(let data) = await ImageFetch.load(request) else {
+            LogTap.shared.note("[NowPlaying] artwork: no whole payload")
+            return
+        }
+        LogTap.shared.note("[NowPlaying] artwork: bytes=\(data.count)")
+        guard let image = UIImage(data: data),
+              let jpeg = image.jpegData(compressionQuality: 0.85) else {
+            LogTap.shared.note("[NowPlaying] artwork: decode/re-encode failed")
+            return
+        }
+        await MainActor.run {
+            let items = self.buildExternalMetadataItems(artworkData: jpeg)
+            self.player.setExternalMetadata(items)
         }
     }
 

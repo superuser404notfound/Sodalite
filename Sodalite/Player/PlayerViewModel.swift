@@ -475,20 +475,14 @@ final class PlayerViewModel {
         if let cached = ImageCache.shared.image(for: url) { return cached.cgImage }
         var request = URLRequest(url: url)
         request.timeoutInterval = 15
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            // A payload that stops in the middle would be cached as an image and drawn as one
-            // (Sodalite#123).
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode),
-                  ImagePayload.isComplete(data),
-                  let image = UIImage(data: data) else { return nil }
-            let prepared = image.preparingForDisplay() ?? image
-            ImageCache.shared.store(prepared, for: url)
-            return prepared.cgImage
-        } catch {
-            return nil
-        }
+        // Through ImageFetch: a payload that stops in the middle would be cached as an image and
+        // drawn as one, and the HTTP entry it leaves behind would be read again on the next open
+        // (Sodalite#123).
+        guard case .whole(let data) = await ImageFetch.load(request),
+              let image = UIImage(data: data) else { return nil }
+        let prepared = image.preparingForDisplay() ?? image
+        ImageCache.shared.store(prepared, for: url)
+        return prepared.cgImage
     }
 
     /// Fetch a trickplay tile sprite (cached whole, keyed by tile URL) and crop `crop` out of it.
@@ -502,18 +496,11 @@ final class PlayerViewModel {
         } else {
             var request = URLRequest(url: url)
             request.timeoutInterval = 15
-            do {
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let http = response as? HTTPURLResponse,
-                      (200...299).contains(http.statusCode),
-                      ImagePayload.isComplete(data),
-                      let image = UIImage(data: data) else { return nil }
-                let prepared = image.preparingForDisplay() ?? image
-                ImageCache.shared.store(prepared, for: url)
-                tileImage = prepared
-            } catch {
-                return nil
-            }
+            guard case .whole(let data) = await ImageFetch.load(request),
+                  let image = UIImage(data: data) else { return nil }
+            let prepared = image.preparingForDisplay() ?? image
+            ImageCache.shared.store(prepared, for: url)
+            tileImage = prepared
         }
         guard let cg = tileImage.cgImage else { return nil }
         guard crop.maxX <= CGFloat(cg.width), crop.maxY <= CGFloat(cg.height),

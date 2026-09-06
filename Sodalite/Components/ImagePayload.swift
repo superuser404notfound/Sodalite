@@ -81,3 +81,67 @@ private extension Array where Element == UInt8 {
         return false
     }
 }
+
+/// One image request, plus the refusal that has to follow a payload which stopped in the middle.
+///
+/// The gate above was not enough on its own. Jellyfin answers image requests with
+/// `Cache-Control: public` and no `max-age`, a `Last-Modified` at ONE-SECOND granularity and no
+/// ETag (measured against 10.10.7, 2026-09-06), so URLSession stores the half-written body and asks
+/// again with an `If-Modified-Since` that the finished file, written inside the same second, does
+/// not beat. The server answers 304 and URLSession hands back the SAME truncated bytes. Measured
+/// against a server built to that shape: the three-pass ladder and every later visit all read
+/// 73438 bytes of a 367194-byte PNG, for the life of the cache entry, while the file on the server
+/// had been whole since the first pass.
+///
+/// So a refused payload is dropped from the HTTP cache, and a retry asks the server rather than the
+/// cache. Without both halves the ladder is three reads of one answer (Sodalite#123).
+enum ImageFetch {
+
+    enum Outcome {
+        /// A 2xx whose body carries its format's end marker.
+        case whole(Data)
+        /// A complete HTTP response whose body is only the front of an image.
+        case incomplete
+        /// A non-2xx, or a cancelled task. Asking again reads the same.
+        case noImage
+        /// Connection-level. Worth another try when the app or the network comes back.
+        case transientFailure
+    }
+
+    /// The first pass reads the HTTP cache like any other request. Every later one bypasses it: the
+    /// only reason there IS a later one is that the last answer was half a file, and that is exactly
+    /// what the cache would hand back.
+    nonisolated static func cachePolicy(forAttempt attempt: Int) -> URLRequest.CachePolicy {
+        attempt == 0 ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
+    }
+
+    nonisolated static func load(_ request: URLRequest, attempt: Int = 0) async -> Outcome {
+        var request = request
+        request.cachePolicy = cachePolicy(forAttempt: attempt)
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse,
+                  (200...299).contains(http.statusCode)
+            else { return .noImage }
+            guard ImagePayload.isComplete(data) else {
+                forget(request)
+                LogTap.shared.note("[Image] payload stops short at \(data.count) bytes: \(request.url?.absoluteString ?? "")")
+                return .incomplete
+            }
+            return .whole(data)
+        } catch is CancellationError {
+            return .noImage
+        } catch let error as URLError where error.code == .cancelled {
+            return .noImage
+        } catch {
+            LogTap.shared.note("[Image] fetch failed \(request.url?.absoluteString ?? ""): \(error)")
+            return .transientFailure
+        }
+    }
+
+    /// Drops the stored response so the next request is a real one. It runs on the LAST refusal too:
+    /// leaving the entry behind is what made a second visit to the page read the same half file.
+    nonisolated private static func forget(_ request: URLRequest) {
+        URLSession.shared.configuration.urlCache?.removeCachedResponse(for: request)
+    }
+}

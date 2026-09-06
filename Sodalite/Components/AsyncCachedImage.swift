@@ -3,8 +3,9 @@ import UIKit
 
 /// Three passes, 250ms and then 500ms apart. Long enough to outlast the server finishing the resize
 /// it served half of, short enough that a caller's own fallback is not held back by much when the
-/// payload never does arrive whole (Sodalite#123). File scope because a generic type cannot hold a
-/// static stored property.
+/// payload never does arrive whole (Sodalite#123). Passes two and three go to the server rather than
+/// to the HTTP cache, which is what makes them passes at all: the cache answers a refused payload
+/// with itself. File scope because a generic type cannot hold a static stored property.
 private let imageLoadAttemptLimit = 3
 private let imageLoadRetryDelayMilliseconds = 250
 
@@ -127,7 +128,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             var sawIncompletePayload = false
             sawTransientFailure = false
             for candidate in [url, fallbackURL] {
-                switch await loadImage(from: candidate) {
+                switch await loadImage(from: candidate, attempt: attempt) {
                 case .image(let image):
                     loaded = image
                     onImageLoaded?(image)
@@ -160,7 +161,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     }
 
     @MainActor
-    private func loadImage(from url: URL?) async -> ImageLoadOutcome {
+    private func loadImage(from url: URL?, attempt: Int) async -> ImageLoadOutcome {
         guard let url else { return .noImage }
 
         if let cached = ImageCache.shared.image(for: url) {
@@ -177,7 +178,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
 
-        let outcome = await Self.fetchAndDecode(request: request)
+        let outcome = await Self.fetchAndDecode(request: request, attempt: attempt)
         guard case .image(let prepared) = outcome else { return outcome }
         // Cache before the cancellation check: a `.task(id:)` invalidation may cancel between decode and @State write, but the bytes are already in memory, so skipping the store would re-pay bandwidth+decode on next mount. Only a WHOLE image ever gets here, so a payload that stopped in the middle cannot latch itself into the session (Sodalite#123).
         ImageCache.shared.store(prepared, for: url)
@@ -186,27 +187,20 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     }
 
     /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop; static + `nonisolated` keeps it on the cooperative pool. Cancellation propagates from the enclosing `.task(id:)`.
-    nonisolated private static func fetchAndDecode(request: URLRequest) async -> ImageLoadOutcome {
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode)
-            else { return .noImage }
-            // A 200 is not the same as a whole image: Jellyfin serves the half-written file when a
-            // second request lands on a resize it is still encoding, and `UIImage(data:)` turns that
-            // into a full-size image with transparent rows rather than into a failure (Sodalite#123).
-            guard ImagePayload.isComplete(data) else {
-                LogTap.shared.note("[Image] payload stops short at \(data.count) bytes: \(request.url?.absoluteString ?? "")")
-                return .incompletePayload
-            }
+    ///
+    /// `attempt` reaches `ImageFetch` rather than staying here: a 200 is not the same as a whole
+    /// image, and the retry that follows one has to ask the SERVER, not the HTTP cache that just
+    /// stored the half file (Sodalite#123).
+    nonisolated private static func fetchAndDecode(request: URLRequest, attempt: Int) async -> ImageLoadOutcome {
+        switch await ImageFetch.load(request, attempt: attempt) {
+        case .whole(let data):
             guard let image = UIImage(data: data) else { return .noImage }
             return .image(image.preparingForDisplay() ?? image)
-        } catch is CancellationError {
+        case .incomplete:
+            return .incompletePayload
+        case .noImage:
             return .noImage
-        } catch let error as URLError where error.code == .cancelled {
-            return .noImage
-        } catch {
-            LogTap.shared.note("[Image] fetch failed \(request.url?.absoluteString ?? ""): \(error)")
+        case .transientFailure:
             return .transientFailure
         }
     }
@@ -314,19 +308,12 @@ extension ImageCache {
         if let token, !token.isEmpty, url.host == jfHost {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            // Same completeness gate as the foreground path: a prefetch must never be the thing
-            // that puts a half-written resize into the cache (Sodalite#123).
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode),
-                  ImagePayload.isComplete(data),
-                  let image = UIImage(data: data)
-            else { return }
-            let prepared = image.preparingForDisplay() ?? image
-            ImageCache.shared.store(prepared, for: url)
-        } catch {
-            // Best-effort: on failure the AsyncCachedImage pays the round-trip itself on first focus.
-        }
+        // Same funnel as the foreground path: a prefetch must never be the thing that puts a
+        // half-written resize into either cache, and the HTTP entry it would leave behind is what
+        // the first focus would then read (Sodalite#123).
+        guard case .whole(let data) = await ImageFetch.load(request),
+              let image = UIImage(data: data)
+        else { return }
+        ImageCache.shared.store(image.preparingForDisplay() ?? image, for: url)
     }
 }

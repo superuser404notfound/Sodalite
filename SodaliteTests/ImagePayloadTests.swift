@@ -114,4 +114,17 @@ struct ImagePayloadTests {
         #expect(ImagePayload.isComplete(Data()) == false)
         #expect(ImagePayload.isComplete(Data(repeating: 0, count: 8)) == false)
     }
+
+    @Test("a retry asks the server, because the cache answers a refused payload with itself")
+    func retryBypassesTheHTTPCache() {
+        // Jellyfin serves images with a one-second `Last-Modified` and no ETag, so the conditional
+        // GET that follows a half-written body is answered 304 and URLSession hands the SAME bytes
+        // back. Measured against a server built to that shape: the whole ladder and every later
+        // visit read 73438 bytes of a 367194-byte PNG. The first pass may read the cache like any
+        // other request; a later one exists only because the last answer was half a file.
+        #expect(ImageFetch.cachePolicy(forAttempt: 0) == .useProtocolCachePolicy)
+        for attempt in 1...4 {
+            #expect(ImageFetch.cachePolicy(forAttempt: attempt) == .reloadIgnoringLocalCacheData)
+        }
+    }
 }
