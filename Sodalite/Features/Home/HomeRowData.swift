@@ -16,7 +16,7 @@ enum HomeSection: Identifiable {
     }
 }
 
-struct HomeRowData: Identifiable, Sendable {
+struct HomeRowData: Identifiable, Sendable, Codable {
     let type: HomeRowType
     // `var` so HomeViewModel can patch resume progress in place from the playback-stop payload without a full row re-fetch (issue #24). In-place patching keeps the ids, so it cannot break the uniqueness the init establishes.
     var items: [JellyfinItem]
@@ -41,6 +41,20 @@ struct HomeRowData: Identifiable, Sendable {
         self.items = items.filter { seen.insert($0.id).inserted }
         self.libraryID = libraryID
         self.libraryName = libraryName
+    }
+
+    /// Decoding routes through the init above instead of filling the properties directly, so a feed
+    /// read back from disk (Sodalite#117) carries the same uniqueness guarantee as one built from a
+    /// fetch. A persisted entry was written deduped, which is exactly why the guarantee must not
+    /// depend on that having been true.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            type: try container.decode(HomeRowType.self, forKey: .type),
+            items: try container.decode([JellyfinItem].self, forKey: .items),
+            libraryID: try container.decodeIfPresent(String.self, forKey: .libraryID),
+            libraryName: try container.decodeIfPresent(String.self, forKey: .libraryName)
+        )
     }
 
     var id: String {

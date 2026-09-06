@@ -11,6 +11,12 @@ final class HomeViewModel {
     /// and the actions (Sodalite#122). A localized `String?` here could carry neither, and could not
     /// be branched on by the offline-downloads state that becomes the second reader (#81).
     var loadFailedEntirely = false
+
+    /// True while everything on screen came off disk and no fetch has answered yet (Sodalite#117).
+    /// A painted shelf is otherwise indistinguishable from a server that replied, and two readers
+    /// depend on telling those apart: the total-failure verdict below, which a cached feed must not
+    /// silence, and `HomeView.blockingState`, which asks the same question one level up.
+    private(set) var isShowingCachedFeed = false
     var rowConfigs: [HomeRowConfig] = []
     /// Sample backdrop per provider TMDB id from a one-shot Studios query so each provider tile shows a real library hero; nil falls back to logo-only.
     var providerBackdrops: [Int: URL] = [:]
@@ -64,6 +70,30 @@ final class HomeViewModel {
         self.userID = userID
         self.serverID = serverID
         self.rowConfigs = HomeRowConfig.loadFromStorage(serverID: serverID)
+        hydrateFeedFromCache()
+    }
+
+    /// Paints the last feed this identity saw before the first request goes out (Sodalite#117).
+    /// The entry is scoped per identity like every other FilterCache slice, so what lands here can
+    /// only be this profile's own rows on this server, never the ones a switch is leaving behind.
+    ///
+    /// Rows the stored config no longer plans are dropped on the way in. loadContent prunes them
+    /// too, but it does so a runloop turn later, which is long enough for a row disabled in
+    /// Customize to flash on screen once per launch.
+    private func hydrateFeedFromCache() {
+        let usable = cachedFeed()
+        guard !usable.isEmpty else { return }
+        rows = usable
+        isShowingCachedFeed = true
+        isLoading = false
+    }
+
+    /// The persisted feed, minus rows the stored config no longer plans. Empty when there is
+    /// nothing to paint, which both callers read as "behave the way this did before the cache".
+    private func cachedFeed() -> [HomeRowData] {
+        guard let cached = FilterCache.shared.homeFeed(identity: cacheIdentity) else { return [] }
+        let planned = Set(plannedRows(from: rowConfigs).map(\.id))
+        return cached.filter { planned.contains($0.id) }
     }
 
     /// Reload after a config change, coalesced. Deliberately not a flag consumed by the view's onAppear: iOS presents Settings as a sheet over the tab bar, and a sheet dismiss fires no onAppear underneath, so a pending flag survived until relaunch (tvOS Settings is a tab, which did re-appear Home). Same reason the iCloud-sync poster needs this.
@@ -195,6 +225,16 @@ final class HomeViewModel {
 
         var sawAnyResult = false
 
+        // One place for "the server answered", because the three cases that report it differ in
+        // what they do with the payload, not in what the answer means. A cached feed stops being
+        // the only thing on screen here too, which is what lets the verdict below stay honest.
+        func serverAnswered() {
+            sawAnyResult = true
+            isLoading = false
+            loadFailedEntirely = false
+            isShowingCachedFeed = false
+        }
+
         // Progressive publish: upsert each row as it completes so fast rows paint while the slowest (Latest on a huge library, 10+ s) streams. ForEach diffs by HomeRowData.id, so in-place replace preserves mounted AsyncImage state.
         await withTaskGroup(of: RowResult.self) { group in
             // The service and the id are lifted out of `self` here for the same reason the row
@@ -217,18 +257,14 @@ final class HomeViewModel {
                     } else {
                         rows.append(row)
                     }
-                    sawAnyResult = true
-                    isLoading = false
-                    loadFailedEntirely = false
+                    serverAnswered()
                 case .tag(let row):
                     if let idx = tagRows.firstIndex(where: { $0.id == row.id }) {
                         tagRows[idx] = row
                     } else {
                         tagRows.append(row)
                     }
-                    sawAnyResult = true
-                    isLoading = false
-                    loadFailedEntirely = false
+                    serverAnswered()
                 case .emptied(let id, let isTag):
                     if isTag {
                         tagRows.removeAll { $0.id == id }
@@ -237,9 +273,7 @@ final class HomeViewModel {
                     }
                     // Counts as a result: the server answered, so this is not the total-failure case
                     // below. A server whose every row is legitimately empty must not read as offline.
-                    sawAnyResult = true
-                    isLoading = false
-                    loadFailedEntirely = false
+                    serverAnswered()
                 case .empty:
                     break
                 case .libraries(let libraries):
@@ -283,8 +317,12 @@ final class HomeViewModel {
         // only speak once the last row has given up, which on an unreachable server is one to three
         // minutes of request timeouts. `AppState.serverReachability` reaches the same conclusion in
         // about two seconds, and HomeView renders whichever arrives first (Sodalite#122).
+        //
+        // A feed painted from disk is not an answer, so `isShowingCachedFeed` keeps this branch
+        // reachable on a launch that hydrated one (Sodalite#117). Without it Home would sit on last
+        // week's shelf with every poster failing to load and no sentence saying why.
         let hadConfiguredFetchableRows = !plan.isEmpty
-        if hadConfiguredFetchableRows && !sawAnyResult && isFirstLoad {
+        if hadConfiguredFetchableRows && !sawAnyResult && (isFirstLoad || isShowingCachedFeed) {
             loadFailedEntirely = true
             isLoading = false
             return
@@ -292,6 +330,14 @@ final class HomeViewModel {
 
         isLoading = false
         lastLoadedAt = .now
+
+        // Keep the shelf for the next launch and the next switch onto this identity (Sodalite#117).
+        // Only where the server actually answered: the total-failure path returns above, and a
+        // refresh that produced nothing must never replace a good entry with an empty one. On the
+        // main actor like the precompute's writes, so a later read cannot overtake it.
+        if sawAnyResult {
+            FilterCache.shared.setHomeFeed(rows, identity: cacheIdentity)
+        }
 
         // Gate each background pass on its consuming row being enabled: the provider precompute is the heaviest query (one 10 000-item all-library scan + 33 per-provider resolves) and only the Discover row reads it, so hiding that row in Customize genuinely stops the scan (Sodalite#12 backend contention), not just the tiles.
         let providersEnabled = enabledRows.contains { $0.type.isDiscoverProviderRow }
@@ -386,9 +432,15 @@ final class HomeViewModel {
     /// On active-server change: clear in-memory carousels (so the old server's posters don't linger) and reset the throttle guards so precompute reruns for the new library, then reload.
     @MainActor
     func reloadAfterServerSwitch() async {
-        // Flip to loading before clearing rows so HomeView lands in the spinner branch, not the empty no-content branch.
-        isLoading = true
-        rows = []
+        // Repaint from the destination's own cached feed rather than blanking to a spinner
+        // (Sodalite#117). The blanking was there so the outgoing server's posters could not linger
+        // under the new session, and that reason survives intact: the entry is read under this view
+        // model's identity, so what lands is the destination's last shelf and never the one being
+        // left. With nothing cached this behaves exactly as before, spinner included.
+        let cached = cachedFeed()
+        rows = cached
+        isShowingCachedFeed = !cached.isEmpty
+        isLoading = cached.isEmpty
         tagRows = []
         providerBackdrops = [:]
         providerItemCounts = [:]
