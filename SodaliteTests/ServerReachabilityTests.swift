@@ -422,3 +422,24 @@ struct ServerProbeEndpointTests {
         #expect(ServerProbe.jellyfinReadinessPath != "System/Info/Public")
     }
 }
+
+/// The watch's own noise budget. `LogTap` holds 300 lines, and an outage that lasts an evening is
+/// exactly when someone opens the diagnostic log, so a heartbeat every thirty seconds would flush
+/// out the lines that explain what happened.
+@Suite("The recheck watch stays quiet once it settles")
+struct ReachabilityRecheckNoiseTests {
+    @Test("the loud attempts are the ones that are still backing off")
+    func loudAttemptsAreTheBackingOffOnes() {
+        for attempt in 0..<ReachabilityRecheck.attemptsBeforeCeiling {
+            #expect(ReachabilityRecheck.delay(forAttempt: attempt) < ReachabilityRecheck.ceiling)
+        }
+        #expect(ReachabilityRecheck.delay(forAttempt: ReachabilityRecheck.attemptsBeforeCeiling) == ReachabilityRecheck.ceiling)
+    }
+
+    /// A handful of lines per outage, not a heartbeat. The number is small enough that several
+    /// outages fit in the buffer beside everything else worth reading.
+    @Test("an outage costs a handful of lines, however long it lasts")
+    func boundedNoise() {
+        #expect(ReachabilityRecheck.attemptsBeforeCeiling <= 5)
+    }
+}

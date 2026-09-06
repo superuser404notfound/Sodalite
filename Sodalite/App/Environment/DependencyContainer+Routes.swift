@@ -178,7 +178,16 @@ extension DependencyContainer {
                     break
                 }
                 attempt += 1
-                LogTap.shared.note("[network] recheck attempt \(attempt) after \(delay)")
+                // Only while the schedule is still backing off, plus one line when it settles. The
+                // diagnostic buffer holds 300 lines, so a watch ticking every thirty seconds through
+                // an outage that lasts the evening would flush out the very log that explains it,
+                // and a long outage is exactly when someone reads it. After this the watch is silent
+                // until it stops, and the absence of that line is what says it is still asking.
+                if delay < ReachabilityRecheck.ceiling {
+                    LogTap.shared.note("[network] recheck attempt \(attempt) after \(delay)")
+                } else if attempt == ReachabilityRecheck.attemptsBeforeCeiling {
+                    LogTap.shared.note("[network] recheck settling to one attempt every \(delay), quietly")
+                }
                 await self.resolveActiveRoutes()
             }
             LogTap.shared.note("[network] recheck watch stopped")

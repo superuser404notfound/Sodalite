@@ -16,6 +16,11 @@ enum ReachabilityRecheck {
     /// The steady state, once the early checks have not found it.
     static let ceiling: Duration = .seconds(30)
 
+    /// How many attempts run before the schedule reaches its ceiling. The watch logs each of those
+    /// and then goes quiet, so an outage that lasts the evening cannot flush a 300 line diagnostic
+    /// buffer with its own heartbeat.
+    static var attemptsBeforeCeiling: Int { schedule.count - 1 }
+
     static func delay(forAttempt attempt: Int) -> Duration {
         guard attempt >= 0 else { return schedule[0] }
         return attempt < schedule.count ? schedule[attempt] : ceiling
