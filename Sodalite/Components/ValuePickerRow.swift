@@ -2,6 +2,30 @@ import SwiftUI
 
 // MARK: - Value Picker Row
 
+/// How far a step through a `ValuePickerRow`'s options actually gets, kept out of the view so it is
+/// testable. A two-option row is a TOGGLE and wraps in both directions; three or more are an ordered
+/// list and clamp at their ends.
+///
+/// Sodalite#115: the select click is the only gesture that reaches every remote, and it only ever steps
+/// forward. With a clamped step that gave any toggle already sitting on its last option a click that did
+/// nothing, which is how "Stats for Nerds" could be switched on and never off again. Two states are peers,
+/// so there is no end for them to clamp against. For a longer list there is, and the greyed chevron says so.
+enum ValuePickerAdvance {
+
+    /// The index a step lands on. `count` is the number of options.
+    static func index(from current: Int, by step: Int, count: Int) -> Int {
+        guard count > 1 else { return 0 }
+        guard count == 2 else { return max(0, min(count - 1, current + step)) }
+        let wrapped = (current + step) % count
+        return wrapped < 0 ? wrapped + count : wrapped
+    }
+
+    /// Whether that step changes anything, which is what greys a chevron out.
+    static func canMove(from current: Int, by step: Int, count: Int) -> Bool {
+        index(from: current, by: step, count: count) != current
+    }
+}
+
 /// Full-width settings row: left/right cycles options directly (no dropdown), Select also advances forward, chevrons are cues not focus targets.
 struct ValuePickerRow<Value: Hashable>: View {
     let icon: String
@@ -46,7 +70,8 @@ struct ValuePickerRow<Value: Hashable>: View {
                 }
             }
             // tvOS: Select also advances forward (focus-gated). iOS uses the tappable chevrons (both
-            // directions); a tap-anywhere-forward can't reach a lower option or un-toggle a last-option value.
+            // directions); on a list of three or more a forward-only tap still cannot reach a lower option,
+            // which is what the chevrons are for. On a two-option row it wraps, so a click is a full toggle.
             .stableTap(isFocused: focused) {
                 advance(by: 1)
             }
@@ -128,12 +153,15 @@ struct ValuePickerRow<Value: Hashable>: View {
         options.firstIndex(of: selection) ?? 0
     }
 
-    private var canMoveBackward: Bool { currentIndex > 0 }
-    private var canMoveForward: Bool { currentIndex < options.count - 1 }
+    private var canMoveBackward: Bool {
+        ValuePickerAdvance.canMove(from: currentIndex, by: -1, count: options.count)
+    }
+    private var canMoveForward: Bool {
+        ValuePickerAdvance.canMove(from: currentIndex, by: 1, count: options.count)
+    }
 
-    /// Clamps at the ends, no wrap (disorienting for short lists like "Off / 5s / 10s / 15s").
     private func advance(by step: Int) {
-        let newIdx = max(0, min(options.count - 1, currentIndex + step))
+        let newIdx = ValuePickerAdvance.index(from: currentIndex, by: step, count: options.count)
         if newIdx != currentIndex {
             selection = options[newIdx]
         }
