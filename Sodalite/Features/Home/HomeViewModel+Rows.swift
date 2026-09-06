@@ -47,15 +47,23 @@ extension HomeViewModel {
 
             switch type {
             case .continueWatching:
-                let response = try await libraryService.getResumeItems(userID: userID, mediaType: "Video", limit: 16)
                 if HomeRowConfig.mergeContinueWatchingNextUp(serverID: serverID) {
-                    // Combined row: resume items, then Next Up. Next Up already excludes resumables server-side (EnableResumable=false); the id dedupe is belt-and-suspenders. Next Up failing must not take resume items down (try?).
+                    // Combined row: resume items, then Next Up. The two fetches ride concurrently
+                    // (Sodalite#117): every other row in the fan-out issues one call, so a serial
+                    // pair made the row at the TOP of Home the last one to paint, for a full extra
+                    // round trip. Next Up already excludes resumables server-side
+                    // (EnableResumable=false); the id dedupe is belt-and-suspenders. Next Up
+                    // failing must not take resume items down (try?), and resume failing takes the
+                    // row down as before, cancelling the Next Up call on the way out.
                     let rewatching = HomeRowConfig.enableRewatchingNextUp(serverID: serverID)
-                    let nextUp = (try? await libraryService.getNextUp(userID: userID, seriesID: nil, limit: 16, rewatching: rewatching))?.items ?? []
+                    async let resumeResponse = libraryService.getResumeItems(userID: userID, mediaType: "Video", limit: 16)
+                    async let nextUpResponse = libraryService.getNextUp(userID: userID, seriesID: nil, limit: 16, rewatching: rewatching)
+                    let response = try await resumeResponse
+                    let nextUp = (try? await nextUpResponse)?.items ?? []
                     var seen = Set(response.items.map(\.id))
                     items = response.items + nextUp.filter { seen.insert($0.id).inserted }
                 } else {
-                    items = response.items
+                    items = try await libraryService.getResumeItems(userID: userID, mediaType: "Video", limit: 16).items
                 }
 
             case .nextUp:
