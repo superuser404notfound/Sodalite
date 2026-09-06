@@ -402,3 +402,23 @@ struct ServerProbeAnswerTests {
         }
     }
 }
+
+/// Sodalite#126, fourth device round. Pinned because the obvious tidy-up here reintroduces the bug:
+/// `System/Info/Public` reads like the natural thing for a server probe to ask, and it is what
+/// discovery asks, and it is precisely the endpoint that cannot answer this question.
+///
+/// Measured on 2026-09-06 from a log, Jellyfin 10.11.11 mid-boot, one second apart:
+///
+///     GET /Users/.../Views  -> 503 Jellyfin Startup
+///     GET /Users/Public     -> 503 Jellyfin Startup
+///     probe System/Info/Public -> answered, verdict published as reachable
+@Suite("Which endpoint says a session can run")
+struct ServerProbeEndpointTests {
+    /// The startup page covers the API and the login endpoint, and lets the identity endpoint
+    /// through. Only an endpoint on the covered side can tell ready from listening.
+    @Test("readiness is asked of an endpoint the startup page covers")
+    func readinessPathIsBehindTheStartupGate() {
+        #expect(ServerProbe.jellyfinReadinessPath == "Users/Public")
+        #expect(ServerProbe.jellyfinReadinessPath != "System/Info/Public")
+    }
+}
