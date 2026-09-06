@@ -38,6 +38,9 @@ struct FilteredGridView: View {
     /// non-default sort must not paint the cached default order), and .task runs a frame too late.
     @State private var sort: LibrarySort
     @State private var showSortSheet = false
+    /// Presents the single-field sheet that fills the server's empty URL slot (iOS only; tvOS has
+    /// no URL editor).
+    @State private var showAddURLSheet = false
     @FocusState private var focusedItemID: String?
     @Environment(\.dismiss) private var dismiss
 
@@ -178,27 +181,17 @@ struct FilteredGridView: View {
                         .opacity(0)
                 }
                 .frame(maxWidth: .infinity, minHeight: 400)
-            } else if items.isEmpty, loadFailed {
-                VStack(spacing: 12) {
-                    Image(systemName: "wifi.exclamationmark")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.tertiary)
-                    Text("home.error.unreachable")
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 600)
-                    Button {
-                        isLoading = true
-                        loadFailed = false
-                        Task { await loadItems() }
-                    } label: {
-                        Text("home.retry")
-                            .font(.body)
-                            .padding(.horizontal, 32)
-                            .padding(.vertical, 12)
-                    }
-                    .buttonStyle(SettingsTileButtonStyle())
-                }
+            } else if let state = unreachableState {
+                ServerUnreachableView(
+                    state: state,
+                    serverName: appState.activeServer?.name ?? "",
+                    onAddExternalAddress: ServerUnreachableView.addExternalAddressAction(
+                        state: state,
+                        server: appState.activeServer,
+                        present: { showAddURLSheet = true }
+                    ),
+                    onRetry: { await retry() }
+                )
                 .frame(maxWidth: .infinity, minHeight: 400)
             } else if items.isEmpty {
                 VStack(spacing: 12) {
@@ -290,6 +283,8 @@ struct FilteredGridView: View {
                 }
             )
         }
+        // The fix for an off-network server, offered where the failure is (Sodalite#122).
+        .addExternalAddressSheet(isPresented: $showAddURLSheet)
         .onChange(of: reloadKey) { _, _ in
             // Drop the now-mismatched grid immediately (else stale-while-revalidate briefly shows watched items under "Unwatched", or the old order under a new sort); the keyed task refetches.
             items = []
@@ -304,6 +299,30 @@ struct FilteredGridView: View {
             await loadItems()
             // No forced first-item focus: the Picker (always rendered) plus each state's own focusable anchor means back never closes the app. Nudging to item 0 was harmful: a Picker switch clears items, dropping focusedItemID to nil, and this keyed task would yank focus off the Picker mid-browse.
         }
+    }
+
+    /// What the grid shows instead of a grid, off the same verdict Home reads (Sodalite#122).
+    ///
+    /// This screen used to render "Couldn't reach your server. Check the connection and try again.",
+    /// the exact sentence #122 removed from Home and did not reach here. Off Wi-Fi it is not merely
+    /// vague, it is a wrong lead: the connection is fine, the address is the problem, and it sends
+    /// the reader to restart a router they are nowhere near.
+    private var unreachableState: ServerReachability? {
+        appState.serverReachability.blockingState(
+            hasContent: !items.isEmpty,
+            loadFailedEntirely: loadFailed
+        )
+    }
+
+    /// Re-probe before re-fetching, else the reload runs against the same stale verdict and paints
+    /// this screen straight back.
+    ///
+    /// Only the probe is awaited, and no loading flag is raised. The fetch behind it needs the full
+    /// round of request timeouts to give up on a server that is still down, so a Retry that waited
+    /// for it would spin for minutes, which is the bug this screen exists to remove.
+    private func retry() async {
+        await dependencies.resolveActiveRoutes()
+        Task { await loadItems() }
     }
 
     /// Phase-1 (studio match), kept separate from `items` so the augment refresh rebuilds the merged grid without re-running the studio query.

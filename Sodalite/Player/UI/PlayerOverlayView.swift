@@ -79,12 +79,16 @@ struct PlayerOverlayView: View {
                                 ErrorActionButton(
                                     titleKey: "player.error.retry",
                                     isHighlighted: viewModel.errorFocus == .retry,
+                                    isPrimary: true,
                                     action: { viewModel.retryAfterOutage() }
                                 )
                             }
+                            // Primary only where it is alone: with Retry offered, Back is the way
+                            // out of the screen, not the way past the error.
                             ErrorActionButton(
                                 titleKey: "player.error.back",
                                 isHighlighted: viewModel.errorFocus == .back,
+                                isPrimary: !viewModel.canRetryAfterOutage,
                                 action: onDismiss
                             )
                         }
@@ -708,6 +712,11 @@ private struct ConnectionNoticeChip: View {
 private struct ErrorActionButton: View {
     let titleKey: LocalizedStringKey
     let isHighlighted: Bool
+    /// The screen's only way forward wears the accent fill (Sodalite#82). On this backdrop a resting
+    /// tile is a dim white on black, so an error whose single action is a button reads as an error
+    /// with no action at all. tvOS is left alone deliberately: that branch is not a Button, and
+    /// there the tint is already spoken for by the focus highlight, which always marks one of these.
+    var isPrimary: Bool = false
     let action: () -> Void
 
     var body: some View {
@@ -726,7 +735,7 @@ private struct ErrorActionButton: View {
             .animation(.easeInOut(duration: 0.2), value: isHighlighted)
         #else
         Button(action: action) { label }
-            .buttonStyle(SettingsTileButtonStyle())
+            .buttonStyle(SettingsTileButtonStyle(isProminent: isPrimary))
         #endif
     }
 

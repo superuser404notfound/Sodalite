@@ -170,57 +170,23 @@ struct HomeView: View {
         .onChange(of: viewModel?.rows.flatMap({ $0.items.map(\.id) })) { _, _ in
             if let vm = viewModel { prefetchHomePosters(vm) }
         }
-        #if os(iOS)
-        // The fix for an off-network server, offered where the failure is (Sodalite#122). Same
-        // single-field sheet the post-login prompt uses, so the address is validated and saved by
-        // exactly one path.
-        .sheet(isPresented: $showAddURLSheet) {
-            if let server = appState.activeServer, let slot = server.emptyURLSlot {
-                AddSecondURLSheet(
-                    slot: slot,
-                    knownURL: server.url,
-                    resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
-                    onSave: { newURL in
-                        let merged = server.urls(filling: slot, with: newURL)
-                        try? dependencies.updateServerURLs(
-                            serverID: server.id,
-                            internalURL: merged.internal,
-                            externalURL: merged.external
-                        )
-                        // Re-probe at once: the new slot is the whole point, and the verdict it
-                        // clears is what put this screen on the display.
-                        dependencies.scheduleRouteResolve()
-                    }
-                )
-            }
-        }
-        #endif
+        // The fix for an off-network server, offered where the failure is (Sodalite#122).
+        .addExternalAddressSheet(isPresented: $showAddURLSheet)
     }
 
     /// What Home shows instead of content, or nil to keep loading or keep showing rows.
     ///
-    /// Two sources, and the fast one is the point of Sodalite#122. The route probe settles the
-    /// question about two seconds into launch; the row fan-out needs thirty seconds to three minutes
-    /// to prove the same thing one request timeout at a time, which nobody waits for. So the probe's
-    /// verdict speaks as soon as it lands, and Home stops sitting on a bare spinner behind it.
-    ///
-    /// Only while nothing has painted. A row that arrives anyway clears the screen: the probe asked
-    /// one endpoint, and a server that is demonstrably answering outranks it. That is also what
-    /// keeps a dual-slot server whose external route is carrying the session from ever seeing this,
-    /// and what keeps the still-loading first seconds from flashing it.
+    /// The rule is `ServerReachability.blockingState`, shared with the library grid so one question
+    /// keeps one answer. What belongs to Home is only the reading of "has content" below.
     private func blockingState(vm: HomeViewModel) -> ServerReachability? {
         // A feed painted from disk is not evidence that the server answered (Sodalite#117), so the
         // verdict still speaks over it. Otherwise a cached shelf would stand in front of the
         // sentence that explains why none of its posters can load.
-        guard vm.rows.isEmpty || vm.isShowingCachedFeed, vm.tagRows.isEmpty else { return nil }
-        switch appState.serverReachability {
-        case .noNetwork, .offNetwork, .unreachable:
-            return appState.serverReachability
-        case .reachable, .unknown:
-            // No verdict against the server, or none yet: only the fan-out draining empty may speak,
-            // and it cannot say why.
-            return vm.loadFailedEntirely ? .unreachable : nil
-        }
+        let hasContent = !vm.tagRows.isEmpty || (!vm.rows.isEmpty && !vm.isShowingCachedFeed)
+        return appState.serverReachability.blockingState(
+            hasContent: hasContent,
+            loadFailedEntirely: vm.loadFailedEntirely
+        )
     }
 
     /// The add-an-external-address action, where there is both a slot to fill and a sheet to fill
@@ -229,12 +195,11 @@ struct HomeView: View {
     /// tvOS has no URL editor at all, so there it stays nil and the screen offers Retry alone: a
     /// button that leads nowhere is worse than no button. The sentence above it is true on both.
     private func addExternalAddressAction(for state: ServerReachability) -> (() -> Void)? {
-        #if os(iOS)
-        guard state == .offNetwork, appState.activeServer?.emptyURLSlot != nil else { return nil }
-        return { showAddURLSheet = true }
-        #else
-        return nil
-        #endif
+        ServerUnreachableView.addExternalAddressAction(
+            state: state,
+            server: appState.activeServer,
+            present: { showAddURLSheet = true }
+        )
     }
 
     /// Retry re-probes before it re-fetches, else the reload would run against the same stale

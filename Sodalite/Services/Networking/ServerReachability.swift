@@ -68,4 +68,28 @@ extension ServerReachability {
         if !hasAlternateSlot, LocalNetworkAccess.isGoverned(probedURL) { return .offNetwork }
         return .unreachable
     }
+
+    /// What a content screen shows instead of its content, or nil to keep loading and keep whatever
+    /// it already has.
+    ///
+    /// Shared rather than decided per screen. Home and the library grid ask one question, and the
+    /// grid answering it on its own is how it went on rendering "Couldn't reach your server. Check
+    /// the connection and try again." for a release after Home stopped: off Wi-Fi that sentence is
+    /// not merely vague, it sends the reader to restart a router they are nowhere near.
+    ///
+    /// Two sources, and the fast one is the point of Sodalite#122. The route probe settles the
+    /// question about two seconds into launch; a fan-out needs thirty seconds to three minutes to
+    /// prove the same thing one request timeout at a time. So the verdict speaks as soon as it
+    /// lands, and a screen that can only know THAT its load failed still gets to say why.
+    ///
+    /// Only while nothing has painted. Content that arrived anyway outranks the verdict: the probe
+    /// asked one endpoint, and a server that is demonstrably answering is answering. That is what
+    /// keeps a dual-slot server on a working external route from ever seeing the screen.
+    func blockingState(hasContent: Bool, loadFailedEntirely: Bool) -> ServerReachability? {
+        guard !hasContent else { return nil }
+        if isFailure { return self }
+        // No verdict against the server, or none yet: only the fan-out draining empty may speak, and
+        // it cannot say why.
+        return loadFailedEntirely ? .unreachable : nil
+    }
 }

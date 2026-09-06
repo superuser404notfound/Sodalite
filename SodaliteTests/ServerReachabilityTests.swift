@@ -167,3 +167,46 @@ struct LocalNetworkAttachmentTests {
         #expect(reading(satisfied: false, uses: false, has: false).isAttachedToALocalNetwork == false)
     }
 }
+
+/// Sodalite#122, follow-up round. The verdict was measured once for the whole app and then read by
+/// exactly one screen, so the library grid went on rendering the generic "check the connection"
+/// line that #122 exists to delete. The rule is shared now, and it is pinned here rather than left
+/// to two view bodies to agree with each other.
+@Suite("What a screen shows instead of content")
+struct ServerReachabilityBlockingStateTests {
+    /// The fast half: the probe has a verdict long before any fan-out proves the same thing one
+    /// thirty second timeout at a time, and it is the verdict that picks the sentence.
+    @Test("a failed verdict speaks for itself")
+    func failureSpeaks() {
+        for verdict in [ServerReachability.noNetwork, .offNetwork, .unreachable] {
+            #expect(verdict.blockingState(hasContent: false, loadFailedEntirely: false) == verdict)
+        }
+    }
+
+    /// Content that arrived anyway outranks the probe, which asked one endpoint. This is what keeps
+    /// a dual-slot server on a working external route off the screen, and what stops a cached grid
+    /// from being replaced by an apology for something the user can already see.
+    @Test("anything painted outranks every verdict")
+    func contentOutranksTheVerdict() {
+        for verdict in [ServerReachability.noNetwork, .offNetwork, .unreachable, .reachable, .unknown] {
+            #expect(verdict.blockingState(hasContent: true, loadFailedEntirely: true) == nil)
+        }
+    }
+
+    /// The still-loading first seconds. Neither source has anything to say, and a screen that
+    /// flashed an error here would be wrong about a server that is about to answer.
+    @Test("no verdict and no failure keeps loading")
+    func silenceKeepsLoading() {
+        #expect(ServerReachability.unknown.blockingState(hasContent: false, loadFailedEntirely: false) == nil)
+        #expect(ServerReachability.reachable.blockingState(hasContent: false, loadFailedEntirely: false) == nil)
+    }
+
+    /// The slow half, still needed: a load can drain empty against a server the probe reached, and
+    /// then the screen may say THAT it failed but must not claim to know why. `.offNetwork` carries
+    /// advice about addresses and would be a wrong instruction here.
+    @Test("a drained fan-out claims nothing about why")
+    func drainedFanOutStaysVague() {
+        #expect(ServerReachability.reachable.blockingState(hasContent: false, loadFailedEntirely: true) == .unreachable)
+        #expect(ServerReachability.unknown.blockingState(hasContent: false, loadFailedEntirely: true) == .unreachable)
+    }
+}

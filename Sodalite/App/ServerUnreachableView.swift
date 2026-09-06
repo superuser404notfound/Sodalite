@@ -100,11 +100,85 @@ struct ServerUnreachableView: View {
                     .padding(.horizontal, 32)
                     .padding(.vertical, 12)
                 }
-                .buttonStyle(SettingsTileButtonStyle())
+                // Prominent where it stands alone: on this backdrop a resting tile is barely there,
+                // and a screen whose only way forward reads as decoration is the Sodalite#82
+                // complaint one screen over. Where the add-address button is present that one is the
+                // primary and this one must stay under it.
+                .buttonStyle(SettingsTileButtonStyle(isProminent: onAddExternalAddress == nil))
                 .disabled(isRetrying)
             }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+extension ServerUnreachableView {
+    /// The add-an-external-address action, where there is both a slot to fill and a sheet to fill it
+    /// in.
+    ///
+    /// tvOS has no URL editor at all, so there it stays nil and the screen offers Retry alone: a
+    /// button that leads nowhere is worse than no button. The sentence above it is true on both.
+    ///
+    /// Shared with the library grid for the same reason the verdict itself is: two screens saying
+    /// one sentence must not grow two answers to when the fix can be offered with it.
+    static func addExternalAddressAction(
+        state: ServerReachability,
+        server: JellyfinServer?,
+        present: @escaping () -> Void
+    ) -> (() -> Void)? {
+        #if os(iOS)
+        guard state == .offNetwork, server?.emptyURLSlot != nil else { return nil }
+        return present
+        #else
+        return nil
+        #endif
+    }
+}
+
+#if os(iOS)
+/// The fix for an off-network server, attached wherever the failure surfaces (Sodalite#122).
+///
+/// The same single-field sheet the post-login prompt raises, so an address is validated, merged and
+/// saved by exactly one path no matter which screen offered it.
+private struct AddExternalAddressSheetModifier: ViewModifier {
+    @Environment(\.appState) private var appState
+    @Environment(\.dependencies) private var dependencies
+    @Binding var isPresented: Bool
+
+    func body(content: Content) -> some View {
+        content.sheet(isPresented: $isPresented) {
+            if let server = appState.activeServer, let slot = server.emptyURLSlot {
+                AddSecondURLSheet(
+                    slot: slot,
+                    knownURL: server.url,
+                    resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                    onSave: { newURL in
+                        let merged = server.urls(filling: slot, with: newURL)
+                        try? dependencies.updateServerURLs(
+                            serverID: server.id,
+                            internalURL: merged.internal,
+                            externalURL: merged.external
+                        )
+                        // Re-probe at once: the new slot is the whole point, and the verdict it
+                        // clears is what put this screen on the display.
+                        dependencies.scheduleRouteResolve()
+                    }
+                )
+            }
+        }
+    }
+}
+#endif
+
+extension View {
+    /// Presents the single-field sheet that fills the server's empty URL slot. iOS only; tvOS has no
+    /// URL editor, and there this is the identity.
+    func addExternalAddressSheet(isPresented: Binding<Bool>) -> some View {
+        #if os(iOS)
+        modifier(AddExternalAddressSheetModifier(isPresented: isPresented))
+        #else
+        self
+        #endif
     }
 }
