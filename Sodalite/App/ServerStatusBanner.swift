@@ -20,11 +20,14 @@ import SwiftUI
 struct ServerStatusBanner: View {
     let state: ServerReachability
     let serverName: String
-    /// Both platforms. The app re-measures on its own now, on a failed request and then on a watch
-    /// that keeps asking while the answer is bad, so this is no longer the only way back; it is the
-    /// way to stop waiting for the next check. On tvOS it does join the focus order below the last
-    /// row, which is the price of having it, and it uses the same tile style the full screen already
-    /// ships there.
+    /// iOS only, and measured rather than assumed (Wohnzimmer, tvOS 26.6, 2026-09-06): a button in
+    /// a bottom safe-area inset does not take focus there, so on tvOS it rendered as a control that
+    /// could not be reached, which is worse than no control at all.
+    ///
+    /// Nothing is lost by dropping it. The app re-measures on its own now, on a failed request and
+    /// then on a watch that keeps asking while the answer is bad, so this was never the way back,
+    /// only the way to stop waiting for the next check. Anyone tempted to re-add it here should fix
+    /// the reachability first, not the platform check.
     let onRetry: (() async -> Void)?
 
     @State private var isRetrying = false
@@ -139,8 +142,12 @@ private struct ServerStatusBannerModifier: ViewModifier {
     /// Only the probe is awaited. A verdict that improves already bumps `requestContentReload` from
     /// `publishReachability`, so the reload needs no wiring here, and awaiting the fetch would put
     /// the multi-minute spin back that Sodalite#122 removed.
-    private var retryAction: () async -> Void {
+    private var retryAction: (() async -> Void)? {
+        #if os(iOS)
         { await dependencies.resolveActiveRoutes() }
+        #else
+        nil
+        #endif
     }
 }
 

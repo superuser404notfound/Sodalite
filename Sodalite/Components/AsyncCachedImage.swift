@@ -65,11 +65,18 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.appState) private var appState
     @State private var loaded: UIImage?
     /// Failures that heal on their own (offline blip, an iOS local-network permission prompt still
     /// unanswered, a resize the server had not finished writing) must not latch the placeholder
-    /// forever. Retry on the next scene activation: a dismissed permission alert flips the phase
-    /// back to active.
+    /// forever.
+    ///
+    /// Two triggers, and the second one is why (Sodalite#126). Scene activation covers a dismissed
+    /// permission alert, but an Apple TV never leaves `.active` inside a session, so on that device
+    /// the only healing this view had could not fire at all: a profile picture that failed while the
+    /// server was down stayed initials until the app was force-quit, measured on Wohnzimmer,
+    /// tvOS 26.6. `requestContentReload` is the app's "an outside cause made your last failure
+    /// obsolete" signal, and an image that failed transiently is one of the things that gave up.
     @State private var retryOnActivate = false
 
     var body: some View {
@@ -96,6 +103,13 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active, retryOnActivate, loaded == nil {
+                Task { await load() }
+            }
+        }
+        // The server came back, or a permission did. Only the loads that failed in a way that can
+        // heal ask again; a 404 and a body that is not an image read the same however often you try.
+        .onChange(of: appState.requestContentReload) { _, _ in
+            if retryOnActivate, loaded == nil {
                 Task { await load() }
             }
         }
