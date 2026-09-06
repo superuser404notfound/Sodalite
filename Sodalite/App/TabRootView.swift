@@ -367,6 +367,10 @@ struct TabRootView: View {
                 SettingsView()
             }
         }
+        // The verdict is measured once for the whole app, so it is consumed once for the whole app
+        // (Sodalite#126). Inside the tab content, never over the tab bar: the fix for the case that
+        // has one is in Settings, and the bar is the way there.
+        .serverStatusBanner()
         #if os(iOS)
         // Reserve space for the floating settings gear so content never slides under it.
         // padding reliably repositions content, including screens rooted in a NavigationStack

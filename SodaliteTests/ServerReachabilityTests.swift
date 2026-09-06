@@ -27,7 +27,8 @@ struct ServerReachabilityTests {
     @Test("a LAN address that answers is reachable, whatever the path looks like")
     func tunnelledLANAnswers() {
         #expect(ServerReachability.classify(
-            probedURL: lanURL, answered: true, hasAlternateSlot: false, pathIsSatisfied: true
+            probedURL: lanURL, answered: true, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: true
         ) == .reachable)
     }
 
@@ -36,7 +37,8 @@ struct ServerReachabilityTests {
     @Test("an answer wins even against an unsatisfied path")
     func answerBeatsPath() {
         #expect(ServerReachability.classify(
-            probedURL: lanURL, answered: true, hasAlternateSlot: false, pathIsSatisfied: false
+            probedURL: lanURL, answered: true, hasAlternateSlot: false,
+            pathIsSatisfied: false, isAttachedToALocalNetwork: false
         ) == .reachable)
     }
 
@@ -47,10 +49,12 @@ struct ServerReachabilityTests {
     @Test("no path means no network, whatever the address is")
     func unsatisfiedPath() {
         #expect(ServerReachability.classify(
-            probedURL: lanURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: false
+            probedURL: lanURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: false, isAttachedToALocalNetwork: false
         ) == .noNetwork)
         #expect(ServerReachability.classify(
-            probedURL: publicURL, answered: false, hasAlternateSlot: true, pathIsSatisfied: false
+            probedURL: publicURL, answered: false, hasAlternateSlot: true,
+            pathIsSatisfied: false, isAttachedToALocalNetwork: false
         ) == .noNetwork)
     }
 
@@ -59,7 +63,8 @@ struct ServerReachabilityTests {
     @Test("an unknown path never reads as offline")
     func unknownPathIsNotOffline() {
         #expect(ServerReachability.classify(
-            probedURL: publicURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: nil
+            probedURL: publicURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: nil, isAttachedToALocalNetwork: nil
         ) == .unreachable)
     }
 
@@ -70,8 +75,43 @@ struct ServerReachabilityTests {
     @Test("a LAN-only server with no remote slot is off-network")
     func lanOnlyOffNetwork() {
         #expect(ServerReachability.classify(
-            probedURL: lanURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: true
+            probedURL: lanURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: false
         ) == .offNetwork)
+    }
+
+    /// The over-claim this case used to make, and the one an Apple TV would have hit on every
+    /// outage it can have: a device sitting ON a local network whose LAN server does not answer is
+    /// not a device on the wrong network. Its server is off, or asleep, or on a different subnet.
+    /// "Only reachable on your home network" is false there, and the address advice under it is
+    /// worse than useless, since no second URL brings a powered-down server back.
+    @Test("a device attached to a LAN is never told it is off the network")
+    func attachedToALANIsNotOffNetwork() {
+        #expect(ServerReachability.classify(
+            probedURL: lanURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: true
+        ) == .unreachable)
+    }
+
+    /// Matrix rows 5 and 6, foreign Wi-Fi and a phone hotspot. The address might legitimately exist
+    /// on that LAN, so the app does not know, and the report's own matrix asks for the softer claim
+    /// here. Attachment is what separates it from row 1, which is why the classifier reads it.
+    @Test("a foreign network gets the softer claim, not the home-network one")
+    func foreignWiFi() {
+        #expect(ServerReachability.classify(
+            probedURL: mdnsURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: true
+        ) == .unreachable)
+    }
+
+    /// An unknown attachment is a reason to stay vague for the same reason an unknown path is:
+    /// `.offNetwork` is a claim about where the device is standing, and a claim needs a reading.
+    @Test("unknown attachment never yields the claim")
+    func unknownAttachment() {
+        #expect(ServerReachability.classify(
+            probedURL: lanURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: nil, isAttachedToALocalNetwork: nil
+        ) == .unreachable)
     }
 
     /// Matrix row 3: a server that already carries a remote address is not missing one. Telling its
@@ -80,7 +120,8 @@ struct ServerReachabilityTests {
     @Test("a dual-slot server is never told to add an address it has")
     func dualSlotIsNotOffNetwork() {
         #expect(ServerReachability.classify(
-            probedURL: lanURL, answered: false, hasAlternateSlot: true, pathIsSatisfied: true
+            probedURL: lanURL, answered: false, hasAlternateSlot: true,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: false
         ) == .unreachable)
     }
 
@@ -89,7 +130,8 @@ struct ServerReachabilityTests {
     @Test("an mDNS name counts as a LAN address")
     func mdnsIsInternal() {
         #expect(ServerReachability.classify(
-            probedURL: mdnsURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: true
+            probedURL: mdnsURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: false
         ) == .offNetwork)
     }
 
@@ -100,7 +142,8 @@ struct ServerReachabilityTests {
     @Test("loopback is not an off-network server")
     func loopbackIsNotOffNetwork() {
         #expect(ServerReachability.classify(
-            probedURL: loopbackURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: true
+            probedURL: loopbackURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: false
         ) == .unreachable)
     }
 
@@ -111,7 +154,8 @@ struct ServerReachabilityTests {
     @Test("a public address that stopped answering stays unexplained")
     func publicHostDown() {
         #expect(ServerReachability.classify(
-            probedURL: publicURL, answered: false, hasAlternateSlot: false, pathIsSatisfied: true
+            probedURL: publicURL, answered: false, hasAlternateSlot: false,
+            pathIsSatisfied: true, isAttachedToALocalNetwork: true
         ) == .unreachable)
     }
 
@@ -208,5 +252,52 @@ struct ServerReachabilityBlockingStateTests {
     func drainedFanOutStaysVague() {
         #expect(ServerReachability.reachable.blockingState(hasContent: false, loadFailedEntirely: true) == .unreachable)
         #expect(ServerReachability.unknown.blockingState(hasContent: false, loadFailedEntirely: true) == .unreachable)
+    }
+}
+
+/// Sodalite#126. The verdict was consumed at first load and never again, so a session that left the
+/// network mid-browse kept browsing as though nothing had changed and the first hard stop was Play.
+///
+/// The pair pinned here is the fix. `blockingState` speaks where nothing painted; `bannerState`
+/// speaks where something did. Neither was allowed to grow into the other's case: replacing painted
+/// rows with an error screen throws away a feed the reader can still use, undoes the shelf painted
+/// from disk in Sodalite#117, and would put a wall in front of a device holding downloads once #81
+/// lands.
+@Suite("Full screen and status strip divide the verdict")
+struct ServerReachabilityBannerStateTests {
+    private let allVerdicts: [ServerReachability] = [.unknown, .reachable, .noNetwork, .offNetwork, .unreachable]
+
+    /// The invariant that makes the pair a pair: a failing verdict is said exactly once, whether or
+    /// not the tab has anything on screen. Two voices would stack the strip under a screen saying
+    /// the same thing; none would be the bug this issue is about.
+    @Test("a failing verdict is said exactly once")
+    func saidExactlyOnce() {
+        for verdict in allVerdicts where verdict.isFailure {
+            for hasContent in [true, false] {
+                let full = verdict.blockingState(hasContent: hasContent, loadFailedEntirely: false)
+                let strip = verdict.bannerState(fullScreenIsShowing: full != nil)
+                #expect((full == nil) != (strip == nil))
+            }
+        }
+    }
+
+    /// Silence stays silence. A tab whose load simply failed against a server the probe reached gets
+    /// its own screen from `blockingState`; the strip has nothing measured to report and must not
+    /// invent a network story for it.
+    @Test("no verdict means no strip, whatever the screen is doing")
+    func noVerdictNoStrip() {
+        for showing in [true, false] {
+            #expect(ServerReachability.unknown.bannerState(fullScreenIsShowing: showing) == nil)
+            #expect(ServerReachability.reachable.bannerState(fullScreenIsShowing: showing) == nil)
+        }
+    }
+
+    /// The strip carries the verdict itself, so the sentence it draws is the same one the full
+    /// screen would have drawn. One fact, one wording.
+    @Test("the strip says what the screen would have said")
+    func stripCarriesTheVerdict() {
+        for verdict in allVerdicts where verdict.isFailure {
+            #expect(verdict.bannerState(fullScreenIsShowing: false) == verdict)
+        }
     }
 }

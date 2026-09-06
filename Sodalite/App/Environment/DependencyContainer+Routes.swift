@@ -87,11 +87,13 @@ extension DependencyContainer {
     /// is the same signal the return from a Local Network denial raises, for the same reason.
     private func publishReachability(url: URL, isReachable: Bool, server: JellyfinServer) {
         guard let appState else { return }
+        let reading = NetworkPathSnapshot.shared.current
         let verdict = ServerReachability.classify(
             probedURL: url,
             answered: isReachable,
             hasAlternateSlot: server.internalURL != nil && server.externalURL != nil,
-            pathIsSatisfied: NetworkPathSnapshot.shared.isSatisfied
+            pathIsSatisfied: reading?.isSatisfied,
+            isAttachedToALocalNetwork: reading?.isAttachedToALocalNetwork
         )
         let previous = appState.serverReachability
         guard verdict != previous else { return }

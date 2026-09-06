@@ -16,6 +16,15 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     /// Same reason as PlayerLauncher: the theme has to be picked up on the SwiftUI side and carried
     /// across the UIKit boundary by hand.
     @Environment(\.appearanceTheme) private var appearanceTheme
+    /// And the same for the server verdict (Sodalite#126).
+    @Environment(\.appState) private var appState
+
+    private var serverName: String { appState.activeServer?.name ?? "" }
+
+    private var reachability: () -> ServerReachability {
+        let state = appState
+        return { state.serverReachability }
+    }
 
     func makeUIViewController(context: Context) -> PlayerLauncherHostVC {
         PlayerLauncherHostVC()
@@ -85,7 +94,9 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
             liveChannel: liveContext.channel,
             liveProgram: liveContext.program,
             liveTvService: liveTvService,
-            directStreamMemory: directStreamMemory
+            directStreamMemory: directStreamMemory,
+            serverName: serverName,
+            serverReachability: reachability
         )
         let playerVC = PlayerHostController(
             viewModel: vm,

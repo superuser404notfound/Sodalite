@@ -32,6 +32,19 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     /// `ResolvedAppearanceTheme.default`, which is system blue.
     @Environment(\.appearanceTheme) private var appearanceTheme
 
+    /// Read here for the same reason as the theme above: below the UIKit modal there is no
+    /// environment left to read it from (Sodalite#126).
+    @Environment(\.appState) private var appState
+
+    private var serverName: String { appState.activeServer?.name ?? "" }
+
+    /// The reader is handed over, not the value: a server that dies forty minutes into a session is
+    /// exactly the case the player needs this for.
+    private var reachability: () -> ServerReachability {
+        let state = appState
+        return { state.serverReachability }
+    }
+
     func makeUIViewController(context: Context) -> PlayerLauncherHostVC {
         PlayerLauncherHostVC()
     }
@@ -55,7 +68,9 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                     spoilerPolicy: spoilerPolicy,
                     cachedPlaybackInfo: cachedPlaybackInfo,
                     preferredMediaSourceID: preferredMediaSourceID,
-                    playQueue: playQueue
+                    playQueue: playQueue,
+                    serverName: serverName,
+                    serverReachability: reachability
                 )
                 let playerVC = PlayerHostController(
                     viewModel: vm,

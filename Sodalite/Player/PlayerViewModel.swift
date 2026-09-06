@@ -397,6 +397,13 @@ final class PlayerViewModel {
     /// playback service's own season query). Nil where no caller passes one: live, previews.
     let itemService: JellyfinItemServiceProtocol?
     let userID: String
+    /// Name of the server this session runs against, for the error sentences that identify it.
+    let serverName: String
+    /// The app's measured verdict about that server (Sodalite#126). A reader rather than a value,
+    /// because it is consulted when an error is painted, and an outage forty minutes into a session
+    /// is exactly the case it exists for. A closure rather than an environment read, because the
+    /// player is presented from a UIKit modal whose SwiftUI environment starts blank.
+    let serverReachability: () -> ServerReachability
     var startFromBeginning: Bool
     /// Detail-screen prefetch, saving the first round trip. Bound to the id it was fetched for and
     /// consumed only through `matching(item.id)`: the response supplies `MediaSourceId` while the
@@ -713,7 +720,9 @@ final class PlayerViewModel {
         liveChannel: JellyfinChannel? = nil,
         liveProgram: JellyfinProgram? = nil,
         liveTvService: JellyfinLiveTvServiceProtocol? = nil,
-        directStreamMemory: LiveDirectStreamMemory? = nil
+        directStreamMemory: LiveDirectStreamMemory? = nil,
+        serverName: String = "",
+        serverReachability: @escaping () -> ServerReachability = { .unknown }
     ) {
         self.item = item
         self.player = DependencyContainer.playerEngine
@@ -734,6 +743,8 @@ final class PlayerViewModel {
         self.liveProgram = liveProgram
         self.liveTvService = liveTvService
         self.directStreamMemory = directStreamMemory
+        self.serverName = serverName
+        self.serverReachability = serverReachability
     }
 
     // MARK: - Lifecycle
@@ -1800,6 +1811,17 @@ final class PlayerViewModel {
     /// Categorise a playback-start error into an icon + title + body trio for the overlay; body stays
     /// the underlying localizedDescription so the user sees the real reason.
     func setError(from error: Error) {
+        // Where the app already measured why the server does not answer, it says that instead of
+        // guessing at "Connection problem". Narrow by construction: a failure that carries its own
+        // reason is never touched, see `PlayerReachabilityFace`.
+        if let trio = PlayerReachabilityFace.trio(
+            for: error, verdict: serverReachability(), serverName: serverName
+        ) {
+            errorIcon = trio.icon
+            errorTitle = trio.title
+            errorMessage = trio.message
+            return
+        }
         let icon: String
         let title: String
         if let api = error as? APIError {

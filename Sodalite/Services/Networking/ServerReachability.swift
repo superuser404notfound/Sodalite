@@ -55,17 +55,31 @@ extension ServerReachability {
     /// `ServerURLClassifier.isInternal` directly, because the two differ on exactly one address and
     /// it matters here: 127.0.0.1 classifies as internal, and a loopback server that stopped
     /// answering has nothing to do with which network the device is on.
+    ///
+    /// `isAttachedToALocalNetwork` is what keeps `.offNetwork` from over-claiming, and it is the
+    /// same reading the Sodalite#92 denial check takes. A device sitting ON a local network whose
+    /// LAN server does not answer is not a device on the wrong network: its server is off, or
+    /// asleep, or on another subnet. Saying "only reachable on your home network" there is false,
+    /// and the address advice under it is worse than useless, since no second URL brings a
+    /// powered-down server back. On an Apple TV, which never leaves its network, that was every
+    /// outage it can have. Unknown reads as a reason to stay vague, the way an unknown path does:
+    /// `.offNetwork` is a claim about where the device is standing, and a claim needs a reading.
     static func classify(
         probedURL: URL,
         answered: Bool,
         hasAlternateSlot: Bool,
-        pathIsSatisfied: Bool?
+        pathIsSatisfied: Bool?,
+        isAttachedToALocalNetwork: Bool?
     ) -> ServerReachability {
         if answered { return .reachable }
         if pathIsSatisfied == false { return .noNetwork }
         // A server that already carries a remote address is not missing one, so the advice that
         // makes `.offNetwork` worth its own case would be wrong.
-        if !hasAlternateSlot, LocalNetworkAccess.isGoverned(probedURL) { return .offNetwork }
+        if !hasAlternateSlot,
+           isAttachedToALocalNetwork == false,
+           LocalNetworkAccess.isGoverned(probedURL) {
+            return .offNetwork
+        }
         return .unreachable
     }
 
@@ -91,5 +105,18 @@ extension ServerReachability {
         // No verdict against the server, or none yet: only the fan-out draining empty may speak, and
         // it cannot say why.
         return loadFailedEntirely ? .unreachable : nil
+    }
+
+    /// What the tab's status strip says over content that is already on screen, or nil to stay quiet
+    /// (Sodalite#126).
+    ///
+    /// The complement of `blockingState`, and the pair is why the verdict is now consumed after the
+    /// first load instead of only during it. Where nothing painted, the full screen speaks and this
+    /// keeps out from under it; where something did, the strip is the only one that still can say
+    /// anything, because content that arrived outranks the probe and must not be replaced by an
+    /// apology for something the reader can see working.
+    func bannerState(fullScreenIsShowing: Bool) -> ServerReachability? {
+        guard !fullScreenIsShowing, isFailure else { return nil }
+        return self
     }
 }
