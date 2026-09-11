@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// Outside the layout on purpose: `onGeometryChange`'s action closure is nonisolated and sendable,
+/// so an instance property would drag `Self` in with it and the unconstrained `Cover` / `Queue`
+/// metatypes are not Sendable.
+private nonisolated let band = "nowPlayingBand"
+
 /// The two-column geometry of the wide (tvOS / iPad) Now Playing screen, kept out of the screen
 /// itself so it can be hosted and measured in a test without a playback coordinator.
 ///
@@ -20,8 +25,6 @@ struct NowPlayingWideLayout<Cover: View, Queue: View>: View {
     @ViewBuilder let queue: () -> Queue
 
     @State private var coverTop: CGFloat = 0
-
-    private let band = "nowPlayingBand"
 
     var body: some View {
         HStack(alignment: .top, spacing: spacing) {

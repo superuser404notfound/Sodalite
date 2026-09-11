@@ -58,9 +58,16 @@ struct NowPlayingColumnAlignmentTests {
         }
     }
 
-    private func layout(coverHeight: CGFloat, showsQueue: Bool) -> Frames {
+    /// tvOS 26 retired `UIWindow(frame:)`, and the replacement wants a scene. The tests run inside
+    /// the app host, so there is a live one to hang this window on; the frame is then set to the
+    /// band, because a scene-built window starts at the screen's size, not at ours.
+    private func layout(coverHeight: CGFloat, showsQueue: Bool) throws -> Frames {
         let frames = Frames()
-        let window = UIWindow(frame: CGRect(origin: .zero, size: Self.band))
+        let scene = try #require(
+            UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+            "the test host has no window scene to build a window against")
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(origin: .zero, size: Self.band)
         let controller = UIHostingController(
             rootView: Harness(coverHeight: coverHeight, showsQueue: showsQueue, frames: frames)
         )
@@ -74,8 +81,8 @@ struct NowPlayingColumnAlignmentTests {
     }
 
     @Test("The queue's first row starts level with the top of the artwork, not above it")
-    func queueStartsLevelWithTheCover() {
-        let frames = layout(coverHeight: 600, showsQueue: true)
+    func queueStartsLevelWithTheCover() throws {
+        let frames = try layout(coverHeight: 600, showsQueue: true)
 
         #expect(frames.cover.minY == (Self.band.height - 600) / 2)
         #expect(abs(frames.queueTop.minY - frames.cover.minY) <= 1)
@@ -85,8 +92,8 @@ struct NowPlayingColumnAlignmentTests {
     /// above and fails this one: it slides the full-height queue column down instead of shortening
     /// it, and the list then runs 175pt past the bottom of the screen.
     @Test("Coming down to the cover shortens the queue column, it does not push it off the screen")
-    func queueColumnStaysInsideTheBand() {
-        let frames = layout(coverHeight: 600, showsQueue: true)
+    func queueColumnStaysInsideTheBand() throws {
+        let frames = try layout(coverHeight: 600, showsQueue: true)
 
         #expect(frames.queueColumn.maxY <= Self.band.height + 1)
     }
@@ -94,9 +101,9 @@ struct NowPlayingColumnAlignmentTests {
     /// The #110 invariant. The artwork still moves a little between the two states, but only because
     /// the title block moves into its column, never because the queue beside it came or went.
     @Test("The artwork does not move when the queue leaves")
-    func coverHoldsStillWhenTheQueueLeaves() {
-        let withQueue = layout(coverHeight: 600, showsQueue: true)
-        let alone = layout(coverHeight: 600, showsQueue: false)
+    func coverHoldsStillWhenTheQueueLeaves() throws {
+        let withQueue = try layout(coverHeight: 600, showsQueue: true)
+        let alone = try layout(coverHeight: 600, showsQueue: false)
 
         #expect(abs(withQueue.cover.minY - alone.cover.minY) <= 1)
     }

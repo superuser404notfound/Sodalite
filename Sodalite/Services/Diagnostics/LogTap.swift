@@ -84,7 +84,7 @@ final class LogTap: ObservableObject {
     ///     xcrun devicectl device copy from --device <uuid> \
     ///       --domain-type appDataContainer --domain-identifier de.superuser404.Sodalite \
     ///       --user mobile --source Library/Caches/sodalite-log.txt --destination pulled.txt
-    nonisolated(unsafe) private static let fileQueue =
+    private nonisolated static let fileQueue =
         DispatchQueue(label: "de.superuser404.sodalite.logfile")
     private nonisolated static let fileCapBytes = 32 * 1024 * 1024
 
