@@ -6,35 +6,29 @@ import UIKit
 /// One program block. Focus fills tinted with black text, the app's convention for a focused
 /// surface (see PopoverActionButton); an airing program keeps a tinted outline while unfocused so
 /// the live column reads at a glance.
+///
+/// Title only (#137). The block used to carry "8:15 PM - 9:45 PM" under the title, a line the ruler
+/// above and the block's own left edge already state. The window is spelled out where it is asked
+/// for instead: the hero strip carries it for whatever is focused, the info panel for whatever is
+/// opened. The title takes the freed line, so a long name wraps where it used to be scaled down and
+/// cut.
 struct GuideProgramCellContent: View {
     let title: String
-    let timeRange: String?
     let isAiring: Bool
     let hasTimer: Bool
     let isFocused: Bool
     let tint: Color
-    /// Too narrow to carry both lines. A 15-minute block showed "GRI..." over a time the ruler
-    /// already states; the title deserves that room instead.
-    var isNarrow: Bool = false
 
     var body: some View {
         HStack(spacing: 6) {
             if hasTimer {
                 Circle().fill(Color.Theme.recording).frame(width: 10, height: 10)
             }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.headline)
-                    .lineLimit(isNarrow ? 2 : 1)
-                    .minimumScaleFactor(0.85)
-                    .foregroundStyle(isFocused ? Color.black : Color.white)
-                if let timeRange, !isNarrow {
-                    Text(timeRange)
-                        .font(.caption)
-                        .lineLimit(1)
-                        .foregroundStyle(isFocused ? Color.black.opacity(0.7) : Color.secondary)
-                }
-            }
+            Text(title)
+                .font(.headline)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .foregroundStyle(isFocused ? Color.black : Color.white)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
@@ -168,17 +162,15 @@ final class GuideProgramCell: UICollectionViewCell {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func configure(title: String, timeRange: String?, isAiring: Bool, hasTimer: Bool,
-                   tint: Color, isNarrow: Bool, dependencies: DependencyContainer,
-                   theme: ResolvedAppearanceTheme) {
+    func configure(title: String, isAiring: Bool, hasTimer: Bool, tint: Color,
+                   dependencies: DependencyContainer, theme: ResolvedAppearanceTheme) {
         // configurationUpdateHandler reruns on every state change, which is how the focus fill
         // tracks without a manual didUpdateFocus override.
         configurationUpdateHandler = { cell, state in
             cell.contentConfiguration = UIHostingConfiguration {
                 GuideProgramCellContent(
-                    title: title, timeRange: timeRange, isAiring: isAiring,
-                    hasTimer: hasTimer, isFocused: state.isFocused, tint: tint,
-                    isNarrow: isNarrow)
+                    title: title, isAiring: isAiring, hasTimer: hasTimer,
+                    isFocused: state.isFocused, tint: tint)
                     .guideCellEnvironment(dependencies, theme)
             }
             .margins(.all, 0)

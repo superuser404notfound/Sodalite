@@ -518,21 +518,16 @@ final class GuideGridViewController: UIViewController,
         let row = rows[indexPath.section]
         if row.programs.isEmpty {
             cell.configure(title: NSLocalizedString("livetv.noProgramInfo", comment: ""),
-                           timeRange: nil, isAiring: false, hasTimer: false,
-                           tint: tint, isNarrow: false,
+                           isAiring: false, hasTimer: false, tint: tint,
                            dependencies: dependencies, theme: theme)
             return
         }
         guard indexPath.item < row.programs.count else { return }
         let program = row.programs[indexPath.item]
-        // Below three quarters of a slot there is no room for both lines; the ruler already states
-        // the time, so the title takes the space.
-        let width = programXWidth(section: indexPath.section, item: indexPath.item).width
-        cell.configure(title: program.name, timeRange: timeRange(program),
+        cell.configure(title: program.name,
                        isAiring: program.isAiring(at: Date()),
                        hasTimer: model.timers.hasTimer(programID: program.id),
-                       tint: tint, isNarrow: width < metrics.slotWidth * 0.75,
-                       dependencies: dependencies, theme: theme)
+                       tint: tint, dependencies: dependencies, theme: theme)
     }
 
     private func configure(_ cell: GuideChannelCell, at indexPath: IndexPath) {
@@ -559,7 +554,7 @@ final class GuideGridViewController: UIViewController,
 
     // MARK: - Formatting
 
-    // One shared formatter: DateFormatter setup is costly and this runs per program cell.
+    // One shared formatter: DateFormatter setup is costly and this runs per ruler chip.
     // Main-thread only, so there is no thread-safety concern.
     static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -573,12 +568,6 @@ final class GuideGridViewController: UIViewController,
         formatter.setLocalizedDateFormatFromTemplate("EEE")
         return formatter
     }()
-
-    private func timeRange(_ program: JellyfinProgram) -> String? {
-        guard let start = program.startDate, let end = program.endDate else { return nil }
-        let formatter = Self.timeFormatter
-        return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
-    }
 
     /// Placeholder program for a channel with no EPG data. The id does not exist server-side, so
     /// `isSynthesized` keeps the record affordances hidden.
