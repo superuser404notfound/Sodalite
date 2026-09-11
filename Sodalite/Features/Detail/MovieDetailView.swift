@@ -428,30 +428,32 @@ struct MovieDetailView: View {
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
-        if hasProgress(vm: vm) {
-                GlassActionButton(
-                    title: "detail.replay",
-                    systemImage: "arrow.counterclockwise",
-                    action: {
-                        requestPlay(fromBeginning: true)
-                    }
-                )
-            }
-
-            // Next to Play, because it is a play decision: which of the server's versions Play starts.
-            // Only a multi-source item grows it, so its presence is itself the answer to "does this
-            // movie have more than one version" (Sodalite#139).
+            // First after Play, and always labelled: this is a play decision, and a version button
+            // that collapses to a bare glyph hides the one thing it is there to say. Only a
+            // multi-source item grows it, so its presence answers "does this have more than one
+            // version" before it is ever pressed (Sodalite#139).
             if VersionSelection.isOffered(for: vm.item), let sources = vm.item.mediaSources {
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
                     subtitle: versionSelection.resolvedSource(for: vm.item)?.versionLabel,
+                    alwaysShowsLabel: true,
                     action: {
                         versionChoice = VersionPickerChoice(
                             item: vm.item,
                             sources: sources,
                             selectedID: versionSelection.resolvedSource(for: vm.item)?.id
                         )
+                    }
+                )
+            }
+
+            if hasProgress(vm: vm) {
+                GlassActionButton(
+                    title: "detail.replay",
+                    systemImage: "arrow.counterclockwise",
+                    action: {
+                        requestPlay(fromBeginning: true)
                     }
                 )
             }

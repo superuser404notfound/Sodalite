@@ -709,6 +709,28 @@ struct SeriesDetailView: View {
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
+            // First after Play, always labelled, same as movie detail: the version belongs to the
+            // episode Play would start, so it rides with playTarget and disappears with it. Series
+            // roots take their target from the slim episode list, which carries no MediaSources, so
+            // in practice it appears in the episode panel once enrichment lands (Sodalite#139).
+            if let target = playTarget(vm: vm),
+               VersionSelection.isOffered(for: target),
+               let sources = target.mediaSources {
+                GlassActionButton(
+                    title: "detail.version.button",
+                    systemImage: "film.stack",
+                    subtitle: versionSelection.resolvedSource(for: target)?.versionLabel,
+                    alwaysShowsLabel: true,
+                    action: {
+                        versionChoice = VersionPickerChoice(
+                            item: target,
+                            sources: sources,
+                            selectedID: versionSelection.resolvedSource(for: target)?.id
+                        )
+                    }
+                )
+            }
+
             // Shuffle whole series (server SortBy=Random scoped by series id). Hidden in the episode panel.
             if !isShowingEpisode {
                 GlassActionButton(
@@ -748,27 +770,6 @@ struct SeriesDetailView: View {
                     systemImage: "arrow.counterclockwise",
                     action: {
                         requestPlay(target, fromBeginning: true, fromPlayButton: true)
-                    }
-                )
-            }
-
-            // The version belongs to the episode Play would start, so it rides with playTarget and
-            // disappears with it. Series-root targets come from the slim episode list and carry no
-            // MediaSources, so in practice this appears in the episode panel, where the enrichment
-            // fetch has landed (Sodalite#139).
-            if let target = playTarget(vm: vm),
-               VersionSelection.isOffered(for: target),
-               let sources = target.mediaSources {
-                GlassActionButton(
-                    title: "detail.version.button",
-                    systemImage: "film.stack",
-                    subtitle: versionSelection.resolvedSource(for: target)?.versionLabel,
-                    action: {
-                        versionChoice = VersionPickerChoice(
-                            item: target,
-                            sources: sources,
-                            selectedID: versionSelection.resolvedSource(for: target)?.id
-                        )
                     }
                 )
             }
