@@ -63,17 +63,18 @@ struct VersionPickerChoice: Identifiable {
     let id = UUID()
     let item: JellyfinItem
     let sources: [MediaSource]
-    let fromBeginning: Bool
-    /// Series-only focus-restoration origin flag; ignored by movie detail.
-    let fromPlayButton: Bool
+    /// The version the page currently describes, so the sheet opens on it rather than on its own top row.
+    let selectedID: String?
 }
 
 // MARK: - Version picker sheet
 
-/// Multi-source version picker (highest quality first, top focused); `onSelect` gets the chosen source, dismissing without one cancels playback.
+/// Multi-source version picker (highest quality first); `onSelect` gets the chosen source, dismissing without one leaves the page on the version it already showed.
 struct VersionPickerSheet: View {
     let sources: [MediaSource]
     let tintColor: Color
+    /// The version in force, checked and focused on open. A picker that only offers is half an answer: it has to say where the page stands (Sodalite#139).
+    var selectedID: String?
     let onSelect: (MediaSource) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -113,7 +114,7 @@ struct VersionPickerSheet: View {
         #if os(iOS)
         .background(.thinMaterial)
         #endif
-        .onAppear { focusedID = sorted.first?.id }
+        .onAppear { focusedID = selectedID ?? sorted.first?.id }
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
@@ -121,6 +122,7 @@ struct VersionPickerSheet: View {
 
     private func row(_ source: MediaSource) -> some View {
         let isFocused = focusedID == source.id
+        let isSelected = selectedID == source.id
         return HStack {
             Text(source.versionLabel)
                 .font(.body)
@@ -129,7 +131,13 @@ struct VersionPickerSheet: View {
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .font(.body.weight(.semibold))
+                    .padding(.leading, 12)
+            }
         }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .padding(.horizontal, isCompact ? 18 : 32)
         .padding(.vertical, isCompact ? 14 : 22)
         .frame(maxWidth: .infinity)

@@ -10,25 +10,32 @@ private struct TechCardMaxHeightKey: PreferenceKey {
 
 struct TechInfoBox: View {
     let item: JellyfinItem
+    /// The version the page is describing. A multi-version item used to strand these cards on its
+    /// first source, so the strip said 1080p while the viewer had picked the 4K (Sodalite#139).
+    var sourceID: String?
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
     @State private var maxCardHeight: CGFloat = 0
 
+    private var streams: [MediaStream] {
+        item.effectiveMediaStreams(id: sourceID) ?? []
+    }
+
     private var videoStream: MediaStream? {
-        item.mediaStreams?.first { $0.type == .video }
+        streams.first { $0.type == .video }
     }
 
     private var audioStreams: [MediaStream] {
-        item.mediaStreams?.filter { $0.type == .audio } ?? []
+        streams.filter { $0.type == .audio }
     }
 
     private var subtitleStreams: [MediaStream] {
-        item.mediaStreams?.filter { $0.type == .subtitle } ?? []
+        streams.filter { $0.type == .subtitle }
     }
 
     private var mediaSource: MediaSource? {
-        item.mediaSources?.first
+        item.effectiveMediaSource(id: sourceID)
     }
 
     var body: some View {

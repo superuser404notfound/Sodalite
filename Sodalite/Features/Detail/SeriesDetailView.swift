@@ -19,8 +19,8 @@ struct SeriesDetailView: View {
     @State private var playItem: JellyfinItem?
     @State private var playFromBeginning = false
     @State private var versionChoice: VersionPickerChoice?
-    @State private var pendingSourceID: String?
-    @State private var didPickVersion = false
+    /// Which version the play target runs; keyed to that target, so tapping the next episode drops it (Sodalite#139).
+    @State private var versionSelection = VersionSelection()
     /// Play launched from the glass-panel Play button vs an episode card; player-dismiss restores focus to the right control (else Down jumped past the seasons row to cast).
     @State private var playOriginatedFromPlayButton = false
     @State private var isShuffleLoading = false
@@ -122,25 +122,16 @@ struct SeriesDetailView: View {
         requestPlay(target, fromBeginning: false, fromPlayButton: true)
     }
 
-    /// `fromPlayButton` preserves the focus-restoration origin flag the trigger sites set.
+    /// `fromPlayButton` preserves the focus-restoration origin flag the trigger sites set. Play starts
+    /// the version the page shows; the picker is the version button's job now (Sodalite#139).
     private func requestPlay(_ episode: JellyfinItem, fromBeginning: Bool, fromPlayButton: Bool) {
         // Ordinary play is never a shuffle queue; drop any queue a prior
         // shuffle launch left behind so the launcher reuses single-item play.
         playQueue = []
-        if let sources = episode.mediaSources, sources.count > 1 {
-            versionChoice = VersionPickerChoice(
-                item: episode,
-                sources: sources,
-                fromBeginning: fromBeginning,
-                fromPlayButton: fromPlayButton
-            )
-        } else {
-            playItem = episode
-            playFromBeginning = fromBeginning
-            playOriginatedFromPlayButton = fromPlayButton
-            pendingSourceID = nil
-            showPlayer = true
-        }
+        playItem = episode
+        playFromBeginning = fromBeginning
+        playOriginatedFromPlayButton = fromPlayButton
+        showPlayer = true
     }
 
     private var displayItem: JellyfinItem {
@@ -252,7 +243,7 @@ struct SeriesDetailView: View {
                             }
 
                             if displayItem.mediaStreams != nil || displayItem.mediaSources != nil {
-                                TechInfoBox(item: displayItem)
+                                TechInfoBox(item: displayItem, sourceID: versionSelection.preferredSourceID(for: displayItem))
                                     .animation(.easeInOut(duration: 0.3), value: selectedEpisode?.id)
                             }
 
@@ -313,7 +304,7 @@ struct SeriesDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: pendingSourceID,
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: playItem),
                     playQueue: playQueue
                 )
                 .allowsHitTesting(false)
@@ -326,27 +317,15 @@ struct SeriesDetailView: View {
             maybeAutoPlay()
             maybePendingPlay()
         }
-        .menuPresentation(item: $versionChoice, onDismiss: {
-            if didPickVersion {
-                didPickVersion = false
-                // The detail view is itself a fullScreenCover (9ac00b32), so the version-picker sheet and
-                // the player modal share its single presentedViewController slot. PlayerLauncher now waits
-                // for the sheet's dismissal transition to finish before presenting (a fixed delay raced it
-                // on slow hardware, #31), so just request the player here.
-                showPlayer = true
-            }
-        }) { choice in
+        .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
                 tintColor: dependencies.appearancePreferences.effectiveTint(
                     isSupporter: dependencies.storeKitService.isSupporter
-                )
+                ),
+                selectedID: choice.selectedID
             ) { source in
-                playItem = choice.item
-                playFromBeginning = choice.fromBeginning
-                playOriginatedFromPlayButton = choice.fromPlayButton
-                pendingSourceID = source.id
-                didPickVersion = true
+                versionSelection.choose(source, for: choice.item)
                 versionChoice = nil
             }
         }
@@ -754,7 +733,6 @@ struct SeriesDetailView: View {
                             playQueue = queue
                             playFromBeginning = true
                             playOriginatedFromPlayButton = true
-                            pendingSourceID = nil
                             showPlayer = true
                         }
                     }
@@ -770,6 +748,27 @@ struct SeriesDetailView: View {
                     systemImage: "arrow.counterclockwise",
                     action: {
                         requestPlay(target, fromBeginning: true, fromPlayButton: true)
+                    }
+                )
+            }
+
+            // The version belongs to the episode Play would start, so it rides with playTarget and
+            // disappears with it. Series-root targets come from the slim episode list and carry no
+            // MediaSources, so in practice this appears in the episode panel, where the enrichment
+            // fetch has landed (Sodalite#139).
+            if let target = playTarget(vm: vm),
+               VersionSelection.isOffered(for: target),
+               let sources = target.mediaSources {
+                GlassActionButton(
+                    title: "detail.version.button",
+                    systemImage: "film.stack",
+                    subtitle: versionSelection.resolvedSource(for: target)?.versionLabel,
+                    action: {
+                        versionChoice = VersionPickerChoice(
+                            item: target,
+                            sources: sources,
+                            selectedID: versionSelection.resolvedSource(for: target)?.id
+                        )
                     }
                 )
             }

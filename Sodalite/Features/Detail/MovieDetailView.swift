@@ -15,9 +15,8 @@ struct MovieDetailView: View {
     @State private var showPlayer = false
     @State private var playFromBeginning = false
     @State private var versionChoice: VersionPickerChoice?
-    @State private var pendingSourceID: String?
-    /// Latched on an actual version pick so the sheet's onDismiss launches the player on a pick but not a cancel.
-    @State private var didPickVersion = false
+    /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
+    @State private var versionSelection = VersionSelection()
     @State private var showTrailer = false
     @State private var trailerItem: JellyfinItem?
     @State private var isPresentingDeleteSheet: Bool = false
@@ -91,7 +90,7 @@ struct MovieDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: pendingSourceID
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item)
                 )
                 .allowsHitTesting(false)
             }
@@ -121,33 +120,22 @@ struct MovieDetailView: View {
         // task(id:) runs once for the initial value too.
         //
         // hasFullDetail, not isLoading: isLoading flips nil->false->true->false and that first
-        // false precedes the detail round trip, so requestPlay would see mediaSources still nil
-        // and skip the version picker for a multi-version movie.
+        // false precedes the detail round trip, so the autoplay would launch off the navigating
+        // snapshot rather than the fetched item.
         .task(id: viewModel?.hasFullDetail) {
-            guard autoPlay, !didAutoPlay, viewModel?.hasFullDetail == true,
-                  let vm = viewModel else { return }
+            guard autoPlay, !didAutoPlay, viewModel?.hasFullDetail == true else { return }
             didAutoPlay = true
-            requestPlay(fromBeginning: false, vm: vm)
+            requestPlay(fromBeginning: false)
         }
-        .menuPresentation(item: $versionChoice, onDismiss: {
-            if didPickVersion {
-                didPickVersion = false
-                // The detail view is itself a fullScreenCover (9ac00b32), so the version-picker sheet and
-                // the player modal share its single presentedViewController slot. PlayerLauncher now waits
-                // for the sheet's dismissal transition to finish before presenting (a fixed delay raced it
-                // on slow hardware, #31), so just request the player here.
-                showPlayer = true
-            }
-        }) { choice in
+        .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
                 tintColor: dependencies.appearancePreferences.effectiveTint(
                     isSupporter: dependencies.storeKitService.isSupporter
-                )
+                ),
+                selectedID: choice.selectedID
             ) { source in
-                pendingSourceID = source.id
-                playFromBeginning = choice.fromBeginning
-                didPickVersion = true
+                versionSelection.choose(source, for: choice.item)
                 versionChoice = nil
             }
         }
@@ -329,7 +317,7 @@ struct MovieDetailView: View {
                 }
 
                 if vm.item.mediaStreams != nil || vm.item.mediaSources != nil {
-                    TechInfoBox(item: vm.item)
+                    TechInfoBox(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item))
                 }
 
                 if !vm.similarItems.isEmpty {
@@ -391,20 +379,11 @@ struct MovieDetailView: View {
         )
     }
 
-    /// Version picker vs direct start; movies carry their media sources from the detail fetch, so the count check is reliable.
-    private func requestPlay(fromBeginning: Bool, vm: DetailViewModel) {
-        if let sources = vm.item.mediaSources, sources.count > 1 {
-            versionChoice = VersionPickerChoice(
-                item: vm.item,
-                sources: sources,
-                fromBeginning: fromBeginning,
-                fromPlayButton: false
-            )
-        } else {
-            playFromBeginning = fromBeginning
-            pendingSourceID = nil
-            showPlayer = true
-        }
+    /// Play starts the version the page shows. It used to open the picker instead, which put a
+    /// question between the viewer and every start and told nobody it was coming (Sodalite#139).
+    private func requestPlay(fromBeginning: Bool) {
+        playFromBeginning = fromBeginning
+        showPlayer = true
     }
 
     // MARK: - Action Buttons
@@ -441,7 +420,7 @@ struct MovieDetailView: View {
             subtitle: resumeTimestamp(vm: vm),
             progressFraction: playProgressFraction(vm: vm),
             action: {
-                requestPlay(fromBeginning: false, vm: vm)
+                requestPlay(fromBeginning: false)
             }
         )
         .focused($playButtonFocused)
@@ -454,7 +433,25 @@ struct MovieDetailView: View {
                     title: "detail.replay",
                     systemImage: "arrow.counterclockwise",
                     action: {
-                        requestPlay(fromBeginning: true, vm: vm)
+                        requestPlay(fromBeginning: true)
+                    }
+                )
+            }
+
+            // Next to Play, because it is a play decision: which of the server's versions Play starts.
+            // Only a multi-source item grows it, so its presence is itself the answer to "does this
+            // movie have more than one version" (Sodalite#139).
+            if VersionSelection.isOffered(for: vm.item), let sources = vm.item.mediaSources {
+                GlassActionButton(
+                    title: "detail.version.button",
+                    systemImage: "film.stack",
+                    subtitle: versionSelection.resolvedSource(for: vm.item)?.versionLabel,
+                    action: {
+                        versionChoice = VersionPickerChoice(
+                            item: vm.item,
+                            sources: sources,
+                            selectedID: versionSelection.resolvedSource(for: vm.item)?.id
+                        )
                     }
                 )
             }
