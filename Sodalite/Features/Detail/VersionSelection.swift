@@ -9,21 +9,28 @@ import Foundation
 /// and answers for that one: a source id is meaningless against a different item, and Jellyfin can
 /// drop a version between fetches (an unmerge, a deleted file).
 ///
-/// Nothing chosen means nothing preferred, deliberately: playback keeps the fallback it always had
-/// (`PlaybackInfo`'s first source) rather than being handed an id the page derived from a second,
-/// possibly differently ordered list.
+/// Untouched, the page stands on the BEST version the item offers, not on the server's first. That
+/// is a deliberate deviation: Jellyfin sorts an item's own file ahead of its linked alternates "so
+/// it is the default the client plays" (`BaseItem.GetMediaSources`), but which file became the item
+/// is an accident of which one the scanner met first, not a statement about quality. On a 4K Apple
+/// TV, a merged 4K version that only plays after a detour through a menu is a 4K version nobody
+/// watches.
 struct VersionSelection: Equatable {
     private var targetID: String?
     private var chosenID: String?
 
-    /// The id playback should prefer, or nil when the viewer has not chosen for this item.
+    /// The id playback must prefer: the pick while it still holds, the best version otherwise. Nil
+    /// only where there is nothing to choose, so a single-source item keeps the exact path it had
+    /// before any of this existed.
     func preferredSourceID(for item: JellyfinItem?) -> String? {
-        guard let item, targetID == item.id, let chosenID,
-              item.mediaSources?.contains(where: { $0.id == chosenID }) == true else { return nil }
-        return chosenID
+        guard let item, let sources = item.mediaSources, sources.count > 1 else { return nil }
+        if targetID == item.id, let chosenID, sources.contains(where: { $0.id == chosenID }) {
+            return chosenID
+        }
+        return sources.rankedByQuality().first?.id
     }
 
-    /// The source the page describes: the pick when it still holds, the server's first otherwise.
+    /// The source the page describes, which is by construction the one Play starts.
     func resolvedSource(for item: JellyfinItem) -> MediaSource? {
         item.effectiveMediaSource(id: preferredSourceID(for: item))
     }

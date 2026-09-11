@@ -78,3 +78,44 @@ struct DetailActionRowWidthTests {
         #expect(withStamp > without, "stamp added \(withStamp - without) pt")
     }
 }
+
+/// The row's other geometry: the focus lift is a SCALE, so the distance it moves an edge grows with
+/// the control it is applied to. A row of siblings 16 pt apart can only afford so much of that, and
+/// Sodalite#139 put a pill in it whose width a server-written label decides (Sodalite#139: at the
+/// role's 1.08 a 723 pt version pill grew 29 pt per side and sat on both neighbours).
+@MainActor
+struct DetailActionRowFocusLiftTests {
+
+    private var rowSpacing: CGFloat { DetailActionRow { EmptyView() }.spacing }
+
+    /// The two numbers that must not drift apart: a lift wider than the gap covers the neighbour.
+    @Test func theCeilingFitsInsideTheRowsSpacing() {
+        #expect(GlassButtonStyle.liftCeiling <= rowSpacing)
+    }
+
+    /// Measured widths from the suite above: the version pill runs to 723 pt with a file name on it.
+    @Test func aWidePillLiftsNoFurtherThanTheCeiling() {
+        for width in [495.0, 723.0, 1149.0] as [CGFloat] {
+            let response = FocusResponse.pill.capped(toLift: GlassButtonStyle.liftCeiling, width: width)
+            let perSide = width * (response.scale - 1) / 2
+            #expect(perSide <= GlassButtonStyle.liftCeiling + 0.001,
+                    "a \(width) pt pill grows \(perSide) pt per side")
+        }
+    }
+
+    /// Everything the row had before the version button is narrow enough that the cap cannot reach
+    /// it: the gesture on an icon pill and on Play is the one it always was.
+    @Test func aNarrowPillKeepsTheRolesOwnScale() {
+        for width in [80.0, 230.0, 330.0] as [CGFloat] {
+            #expect(FocusResponse.pill.capped(toLift: GlassButtonStyle.liftCeiling, width: width).scale
+                    == FocusResponse.pill.scale, "at \(width) pt")
+        }
+    }
+
+    /// Before the control has measured itself there is nothing to cap against, and a lift of zero
+    /// would read as a pill that ignores the first focus it gets.
+    @Test func anUnmeasuredPillKeepsTheRolesOwnScale() {
+        #expect(FocusResponse.pill.capped(toLift: GlassButtonStyle.liftCeiling, width: 0).scale
+                == FocusResponse.pill.scale)
+    }
+}

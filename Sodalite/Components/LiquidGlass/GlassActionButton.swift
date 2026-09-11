@@ -163,6 +163,40 @@ private struct ActionLabelWidthKey: PreferenceKey {
     }
 }
 
+
+
+/// Applies the pill lift against the control's measured width, because the distance a scale moves
+/// an edge depends on the width it is applied to. `scaleEffect` is a render-time transform, so the
+/// measurement it feeds is the layout width and cannot chase its own tail.
+private struct CappedPillLift: ViewModifier {
+    let isFocused: Bool
+    let isPressed: Bool
+    @State private var width: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: PillWidthKey.self, value: geo.size.width)
+                }
+            )
+            .onPreferenceChange(PillWidthKey.self) { width = $0 }
+            .focusResponse(
+                .pill.capped(toLift: GlassButtonStyle.liftCeiling, width: width),
+                isFocused: isFocused,
+                isPressed: isPressed,
+                pressedScale: 0.95
+            )
+    }
+}
+
+private struct PillWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
 // MARK: - Collapse opt-in environment
 
 private struct CollapsesActionButtonLabelKey: EnvironmentKey {
@@ -238,10 +272,17 @@ struct GlassButtonStyle: ButtonStyle {
             )
             .focusStroke(Capsule(), isFocused: isFocused)
             // The role's curve matches the label-reveal spring here, so scale, border and
-            // icon->label expansion move together.
-            .focusResponse(.pill, isFocused: isFocused,
-                           isPressed: configuration.isPressed, pressedScale: 0.95)
+            // icon->label expansion move together. Capped, and therefore measured: see liftCeiling.
+            .modifier(CappedPillLift(isFocused: isFocused, isPressed: configuration.isPressed))
     }
+
+    /// How far a pill may grow on one side when focus lifts it. `DetailActionRow` sets its buttons
+    /// `spacing` apart, so a lift wider than that puts the focused control over its neighbour, and
+    /// with a server-written label on one of them (Sodalite#139) no fixed scale can promise that.
+    /// Two points under the row's 16 leaves the gesture as large as the row allows, and visibly
+    /// unchanged on every pill the app had before: the widest of those measures ~350 pt, whose 8%
+    /// is 14 pt anyway. `DetailActionRowFocusLiftTests` holds the two numbers together.
+    static let liftCeiling: CGFloat = 14
 
     /// Progress used to be an accent capsule filling the tile from the leading edge, which forced
     /// the tile to drop its accent fill (accent on accent does not read) and put half the label on

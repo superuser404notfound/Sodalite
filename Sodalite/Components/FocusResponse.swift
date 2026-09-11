@@ -88,6 +88,26 @@ extension FocusResponse {
         shadow: Shadow(opacity: 0.3, radius: 10, y: 5),
         animation: .smooth(duration: 0.32)
     )
+
+    /// The same response, but never growing the control by more than `maxPerSide` points on a side.
+    ///
+    /// The file's thesis, applied inside a single role: a scale is one gesture only among controls
+    /// of one width, because it grows a control by half its growth on each edge. That holds across
+    /// roles, and it holds within a role as soon as one of its sites is free to be any width. The
+    /// action row's version button carries a label the SERVER writes, and at 1.08 a 723 pt pill grew
+    /// 29 pt per side into a row that sets its siblings 16 pt apart, so focus put it over both
+    /// neighbours (Sodalite#139). Capped, the wide control lifts the same DISTANCE as the narrow
+    /// one instead of the same percentage, which is the comparison this file says to make.
+    ///
+    /// A width of zero (before the control has measured itself) keeps the role's own scale.
+    func capped(toLift maxPerSide: CGFloat, width: CGFloat) -> FocusResponse {
+        guard width > 0 else { return self }
+        return FocusResponse(
+            scale: min(scale, 1 + (2 * maxPerSide) / width),
+            shadow: shadow,
+            animation: animation
+        )
+    }
 }
 
 extension View {

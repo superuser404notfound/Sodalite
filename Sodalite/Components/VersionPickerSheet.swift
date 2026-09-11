@@ -48,11 +48,30 @@ extension MediaSource {
         return parts.joined(separator: " · ")
     }
 
-    /// Sort key for "highest quality first": bitrate, else pixel count.
-    var qualityRank: Int {
-        if let bitrate, bitrate > 0 { return bitrate }
+    /// Sort key for "highest quality first": frame size, then bitrate.
+    ///
+    /// Frame size leads, and bitrate only breaks its ties. Bitrate alone ranks a 1080p remux at
+    /// 30 Mbit above a 4K encode at 12, which is the opposite of what someone who keeps two versions
+    /// of a film means by the better one (Sodalite#139).
+    var qualityRank: (pixels: Int, bitrate: Int) {
         let v = primaryVideoStream
-        return (v?.width ?? 0) * (v?.height ?? 0)
+        return ((v?.width ?? 0) * (v?.height ?? 0), bitrate ?? 0)
+    }
+}
+
+extension Array where Element == MediaSource {
+    /// Best first, ties settled by the server's own order rather than by chance: Jellyfin sorts the
+    /// item's own file first, "so it is the default the client plays" (`BaseItem.GetMediaSources`),
+    /// and `sorted(by:)` is not stable, so two equal-ranking versions would otherwise swap places
+    /// between renders.
+    func rankedByQuality() -> [MediaSource] {
+        enumerated()
+            .sorted { a, b in
+                a.element.qualityRank == b.element.qualityRank
+                    ? a.offset < b.offset
+                    : a.element.qualityRank > b.element.qualityRank
+            }
+            .map(\.element)
     }
 }
 
@@ -84,7 +103,7 @@ struct VersionPickerSheet: View {
     private var isCompact: Bool { hSizeClass == .compact }
 
     private var sorted: [MediaSource] {
-        sources.sorted { $0.qualityRank > $1.qualityRank }
+        sources.rankedByQuality()
     }
 
     var body: some View {

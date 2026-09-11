@@ -5,11 +5,11 @@ import Foundation
 /// Sodalite#139: the version choice existed but only behind the Play press, so a merged multi-version
 /// movie looked single-version on the page. The affordance is now a button, which means the choice has
 /// to outlive the sheet, and a choice that outlives its sheet can outlive its item too. These pin the
-/// four rules that keep it honest.
+/// rules that keep it honest: which version stands by default, and the two ways a pick goes stale.
 struct VersionSelectionTests {
 
-    /// Two versions of one movie, the original first (that is the order the server sends, and the one
-    /// playback falls back to).
+    /// Two versions of one movie in the order Jellyfin sends them: the item's own file first (1080p),
+    /// the linked 4K alternate second.
     private static let twoVersionJSON = #"""
     {"Id":"movie-1","Name":"Captain America","Type":"Movie",
      "MediaSources":[
@@ -34,24 +34,60 @@ struct VersionSelectionTests {
 
     // MARK: - The default
 
-    /// Untouched, the page describes the server's first source and hands playback nothing, so the
-    /// player keeps the exact fallback it had before the button existed.
-    @Test func defaultsToTheServersFirstSourceAndPrefersNothing() throws {
+    /// Untouched, the page stands on the best version, not on the server's primary. Jellyfin sorts
+    /// the item's own file first (here the 1080p original), which says which file the scanner met
+    /// first, not which one a 4K Apple TV should play.
+    @Test func defaultsToTheBestVersionRatherThanTheServersPrimary() throws {
         let item = try decode(Self.twoVersionJSON)
         let selection = VersionSelection()
-        #expect(selection.preferredSourceID(for: item) == nil)
-        #expect(selection.resolvedSource(for: item)?.id == "src-original")
+        #expect(selection.preferredSourceID(for: item) == "src-transcode")
+        #expect(selection.resolvedSource(for: item)?.id == "src-transcode")
+    }
+
+    /// Frame size leads and bitrate only breaks ties: a fat 1080p remux is not the better version of
+    /// a 4K encode, however many bits it spends.
+    @Test func frameSizeOutranksBitrate() throws {
+        let item = try decode(#"""
+        {"Id":"m","Name":"M","Type":"Movie",
+         "MediaSources":[
+           {"Id":"remux-1080","Name":"Remux","Bitrate":38000000,
+            "MediaStreams":[{"Index":0,"Type":"Video","Codec":"h264","Width":1920,"Height":1080}]},
+           {"Id":"encode-4k","Name":"4K","Bitrate":12000000,
+            "MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc","Width":3840,"Height":2160}]}
+         ]}
+        """#)
+        #expect(VersionSelection().preferredSourceID(for: item) == "encode-4k")
+    }
+
+    /// Two versions the app cannot tell apart keep the server's order, and keep it across reads:
+    /// `sorted(by:)` is not stable, so an unranked pair would otherwise swap between renders.
+    @Test func equalVersionsKeepTheServersOrder() throws {
+        let item = try decode(Self.otherEpisodeJSON)
+        let sources = try #require(item.mediaSources)
+        #expect(sources.rankedByQuality().map(\.id) == ["ep2-a", "ep2-b"])
+        #expect(VersionSelection().preferredSourceID(for: item) == "ep2-a")
+    }
+
+    /// One version is not a choice, so nothing is preferred and playback keeps the path it had
+    /// before any of this: `PlaybackInfo`'s own first source.
+    @Test func aSingleVersionPrefersNothing() throws {
+        let item = try decode(#"""
+        {"Id":"m","Name":"M","Type":"Movie","MediaSources":[{"Id":"only","Name":"Only"}]}
+        """#)
+        #expect(VersionSelection().preferredSourceID(for: item) == nil)
+        #expect(VersionSelection().resolvedSource(for: item)?.id == "only")
     }
 
     // MARK: - The choice
 
+    /// Picking the lesser version is a real choice too, and the one the default cannot express.
     @Test func aChoiceSurvivesTheSheetAndDrivesPlayback() throws {
         let item = try decode(Self.twoVersionJSON)
         var selection = VersionSelection()
-        let picked = try #require(item.mediaSources?.last)
+        let picked = try #require(item.mediaSources?.first)
         selection.choose(picked, for: item)
-        #expect(selection.preferredSourceID(for: item) == "src-transcode")
-        #expect(selection.resolvedSource(for: item)?.id == "src-transcode")
+        #expect(selection.preferredSourceID(for: item) == "src-original")
+        #expect(selection.resolvedSource(for: item)?.id == "src-original")
     }
 
     // MARK: - The two ways a choice goes stale
@@ -62,8 +98,8 @@ struct VersionSelectionTests {
         let movie = try decode(Self.twoVersionJSON)
         let episode = try decode(Self.otherEpisodeJSON)
         var selection = VersionSelection()
-        selection.choose(try #require(movie.mediaSources?.last), for: movie)
-        #expect(selection.preferredSourceID(for: episode) == nil)
+        selection.choose(try #require(movie.mediaSources?.first), for: movie)
+        #expect(selection.preferredSourceID(for: episode) == "ep2-a")
         #expect(selection.resolvedSource(for: episode)?.id == "ep2-a")
     }
 
@@ -72,7 +108,7 @@ struct VersionSelectionTests {
     @Test func aChoiceThatTheItemNoLongerCarriesFallsBackToTheDefault() throws {
         let item = try decode(Self.twoVersionJSON)
         var selection = VersionSelection()
-        selection.choose(try #require(item.mediaSources?.last), for: item)
+        selection.choose(try #require(item.mediaSources?.first), for: item)
 
         let unmerged = try decode(#"""
         {"Id":"movie-1","Name":"Captain America","Type":"Movie",
@@ -101,7 +137,7 @@ struct VersionSelectionTests {
     @Test func anAbsentItemPrefersNothing() throws {
         let item = try decode(Self.twoVersionJSON)
         var selection = VersionSelection()
-        selection.choose(try #require(item.mediaSources?.last), for: item)
+        selection.choose(try #require(item.mediaSources?.first), for: item)
         #expect(selection.preferredSourceID(for: nil) == nil)
     }
 }
