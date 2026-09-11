@@ -67,6 +67,9 @@ final class GuideGridViewController: UIViewController,
     var lastVetoedMove: (previous: IndexPath, next: IndexPath)?
 
     private var nowLineTimer: Timer?
+    /// Set when the window wanted to move while the guide held focus. Reloading out from under a
+    /// focused cell is worth avoiding, so the move waits for the next focus change instead.
+    private var axisRefreshPending = false
     private var didInitialScroll = false
     private var lastScrollRequestVersion = 0
     var lastFocusRequest = 0
@@ -102,6 +105,9 @@ final class GuideGridViewController: UIViewController,
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Nothing is cached from the axis yet, so a controller built hours into the session simply
+        // starts from the current window instead of inheriting the one the model was born with.
+        model.refreshAxis()
         slots = model.axis.slots
         lastScrollRequestVersion = model.scrollRequestVersion
 
@@ -179,6 +185,20 @@ final class GuideGridViewController: UIViewController,
         observeTimerState()
         observeScrollRequests()
         installGestures()
+
+        // The now-line timer does not fire while the app is suspended, and the guide is a screen
+        // people leave running. Without this the window stays on the old half hour for up to a
+        // minute after the app comes back, which is the symptom itself.
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    /// The one route that does not wait for focus to move: coming back from suspension the screen
+    /// is being re-established and focus with it, so there is no settled focus to disturb.
+    @objc private func appDidBecomeActive() {
+        refreshAxisIfNeeded(deferWhileFocused: false)
+        refreshNow()
     }
 
     /// The grid, not the ruler or the column. Paired with indexPathForPreferredFocusedView, which
@@ -308,12 +328,82 @@ final class GuideGridViewController: UIViewController,
     }
 
     private func refreshNow() {
+        refreshAxisIfNeeded()
         gridLayout.nowX = max(0, model.axis.x(for: Date()))
         let context = UICollectionViewLayoutInvalidationContext()
         context.invalidateDecorationElements(
             ofKind: GuideGridLayout.nowLineKind, at: [IndexPath(item: 0, section: 0)])
         gridLayout.invalidateLayout(with: context)
         reloadVisibleCells()
+    }
+
+    // MARK: - Moving window
+
+    /// Sodalite#138: the axis is a snapshot of "now", and this controller caches geometry derived
+    /// from it (`slots`, the content width, the gridlines). Re-derive both, together, so the left
+    /// edge cannot part company with the now line.
+    private func refreshAxisIfNeeded(deferWhileFocused: Bool = true) {
+        guard !(deferWhileFocused && guideHoldsFocus) else {
+            axisRefreshPending = true
+            return
+        }
+        axisRefreshPending = false
+        let previous = model.axis
+        guard model.refreshAxis() else { return }
+        applyAxisChange(from: previous)
+    }
+
+    private func applyAxisChange(from previous: GuideAxis) {
+        // The wall clock under the viewport's left edge, taken before the axis moves. Keeping it is
+        // what makes the move invisible: the window slides, the programs do not.
+        let leading = previous.date(atX: gridView.contentOffset.x)
+        slots = model.axis.slots
+        gridLayout.totalWidth = model.axis.totalWidth
+        gridLayout.gridlineXs = slots.map { model.axis.x(for: $0) }
+        gridLayout.nowX = max(0, model.axis.x(for: Date()))
+        rebuildRows()
+        gridLayout.invalidateLayout()
+        UIView.performWithoutAnimation {
+            gridView.reloadData()
+            rulerView.reloadData()
+            gridView.layoutIfNeeded()
+        }
+        let offset = Self.preservedOffset(date: leading, axis: model.axis,
+                                          viewportWidth: gridView.bounds.width)
+        rulerView.setContentOffset(CGPoint(x: offset, y: 0), animated: false)
+        gridView.setContentOffset(CGPoint(x: offset, y: gridView.contentOffset.y), animated: false)
+        // Once per half hour at most, and it is what a retest can point at: Settings > Diagnostic
+        // Log says whether the window ever moved, without a Mac in the room.
+        LogTap.shared.note("[guide] window moved to \(model.axis.start.ISO8601Format()), "
+                           + "was \(previous.start.ISO8601Format())")
+    }
+
+    /// Content offset that puts `date` back under the viewport's left edge, clamped to the new axis.
+    static func preservedOffset(date: Date, axis: GuideAxis, viewportWidth: CGFloat) -> CGFloat {
+        let maxOffset = max(0, axis.totalWidth - viewportWidth)
+        return min(max(0, axis.x(for: date)), maxOffset)
+    }
+
+    /// True while the focused item is inside the guide. `UIFocusSystem` rather than a flag kept in
+    /// `didUpdateFocus`: focus also leaves through routes this controller never hears about.
+    private var guideHoldsFocus: Bool {
+        guard let focused = UIFocusSystem.focusSystem(for: view)?.focusedItem as? UIView
+        else { return false }
+        return focused.isDescendant(of: view)
+    }
+
+    /// Focus moved somewhere in this subtree, or out of it. Either way it is worth asking again
+    /// whether the deferred move can happen now.
+    override func didUpdateFocus(in context: UIFocusUpdateContext,
+                                 with coordinator: UIFocusAnimationCoordinator) {
+        super.didUpdateFocus(in: context, with: coordinator)
+        guard axisRefreshPending else { return }
+        // Applied whether focus left the guide or only moved inside it. Waiting for it to leave
+        // would keep the stale window for as long as someone is navigating the grid, which is the
+        // report's own scenario; a move is also the moment the screen is changing anyway, and the
+        // anchor puts focus back on the same channel at the same time. Next turn of the loop: the
+        // focus system still reports the old item during the update.
+        Task { @MainActor [weak self] in self?.refreshAxisIfNeeded(deferWhileFocused: false) }
     }
 
     // MARK: - Model observation

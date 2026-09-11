@@ -54,6 +54,8 @@ final class GuideViewModel {
     private var requestedProgramChannelIDs: Set<String> = []
     private var loadGeneration = 0
     private var didLoad = false
+    /// The server's EPG horizon, kept because every later axis rebuild has to honour it too.
+    private var guideEnd: Date?
 
     init(service: JellyfinLiveTvServiceProtocol,
          userID: String,
@@ -85,11 +87,40 @@ final class GuideViewModel {
 
         // The axis is rebuilt once the server's horizon is known, BEFORE any program fetch: a 12h
         // guide should not render 36h of empty canvas, and the ruler's chip count comes off the axis.
-        if let guideEnd = (await infoTask)?.endDate {
-            axis = GuideAxis(now: Date(), pointsPerMinute: metrics.pointsPerMinute, guideEnd: guideEnd)
+        if let end = (await infoTask)?.endDate {
+            guideEnd = end
+            refreshAxis()
         }
         hasRadioChannels = !((await radioTask)?.items.isEmpty ?? true)
         await fetchChannels()
+    }
+
+    // MARK: - Time
+
+    /// Re-derive the window from the current moment.
+    ///
+    /// Sodalite#138: the axis is a snapshot of "now" and the guide outlives it. The cells are placed
+    /// by absolute time and the now line ticks, so an hours-old axis is wrong and right about the
+    /// clock in the same frame: the left edge stays on the half hour in which Live TV was opened
+    /// while the airing outlines sit correctly further right. Returns true when the window moved, so
+    /// the caller knows the geometry cached from it is stale.
+    @discardableResult
+    func refreshAxis(now: Date = Date()) -> Bool {
+        let rebuilt = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute, guideEnd: guideEnd)
+        guard rebuilt != axis else { return false }
+        axis = rebuilt
+        // A program that ended before the new left edge has no width left (GuideAxis.width answers
+        // 0 and GuideRowMath.spans clamps x to 0), and a zero-width cell is invisible while staying
+        // focusable. It leaves with the window rather than piling up at x = 0.
+        programsByChannel = programsByChannel.mapValues { programs in
+            programs.filter { ($0.endDate ?? .distantFuture) > rebuilt.start }
+        }
+        // The rows were fetched for the OLD window, which no longer covers this one: re-open them so
+        // they are requested again as they come into view. That is also the only thing that brings a
+        // long-running guide a fresh EPG.
+        requestedProgramChannelIDs = []
+        anchorTime = min(max(anchorTime, rebuilt.start), rebuilt.end)
+        return true
     }
 
     /// One-item Radio query. Without it the Radio chip would be offered on the majority of servers
@@ -186,10 +217,16 @@ final class GuideViewModel {
             let programs = try await service.getPrograms(
                 channelIDs: missing, userID: userID, start: axis.start, end: axis.end)
             var grouped = programsByChannel
+            // A row can be requested a second time after the window moved. Replace it: appending
+            // would leave the old and the new copy of a program side by side, and two entries that
+            // overlap without covering each other both survive GuideRowMath.
+            missing.forEach { grouped[$0] = [] }
             for program in programs {
                 guard let channelID = program.channelId else { continue }
                 // The MinEndDate overlap query is inclusive, so a program ending exactly at the axis
-                // start has zero span and would render as a one-point sliver.
+                // start has zero span and would render as a one-point sliver. Read live, after the
+                // await, which is also what keeps a response that was requested for the PREVIOUS
+                // window from putting its expired programs back into a row.
                 if let end = program.endDate, end <= axis.start { continue }
                 grouped[channelID, default: []].append(program)
             }
