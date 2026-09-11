@@ -6,6 +6,18 @@ enum AccentPickerLayout {
     /// full row width instead of the 219pt an adaptive grid settles on.
     static let tvOSColumnCount = 5
 
+    /// Room for the focus lift of a category chip, INSIDE the strip's scroll view and taken back
+    /// outside it, so it buys clip room without moving the strip. A ScrollView clips its content,
+    /// and `FocusResponse.chip` scales by 5%: without this the first chip loses its left edge and
+    /// every chip its top and bottom. Measured on the tvOS simulator: a 58.6pt chip grows 1.5pt per
+    /// side, and the widest chip any locale can produce (Russian "Кинематографические" plus the
+    /// crown, 382pt) 9.6pt. iOS carries no lift on these chips, so it reserves nothing.
+    #if os(tvOS)
+    static let chipLiftMargin: CGFloat = 14
+    #else
+    static let chipLiftMargin: CGFloat = 0
+    #endif
+
     #if os(tvOS)
     static let columnSpacing: CGFloat = 24
     static let swatchSize: CGFloat = 80
@@ -88,7 +100,9 @@ struct AccentColorPickerView: View {
                                 .id(candidate)
                             }
                         }
+                        .padding(AccentPickerLayout.chipLiftMargin)
                     }
+                    .padding(-AccentPickerLayout.chipLiftMargin)
                     .focusSectionCompat()
                     #if os(iOS)
                     // The strip scrolls off screen on a phone, so an active
