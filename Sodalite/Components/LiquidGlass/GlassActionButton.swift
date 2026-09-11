@@ -16,6 +16,10 @@ struct GlassActionButton: View {
     var isLoading: Bool = false
     /// A disabled button leaves the focus engine, so on tvOS the row's auto-focus lands on the next button instead and a `@FocusState` push at that button is silently dropped. Set false where the button must keep focus through its loading spell; the host then has to make a press during loading meaningful.
     var disablesWhileLoading: Bool = true
+    /// Keeps the label out of the row's icon-only collapse. For an action whose label IS its
+    /// information (the version button names the version in force), a bare glyph hides the very
+    /// thing that says the choice exists, and nobody presses a pill to find out (Sodalite#139).
+    var alwaysShowsLabel: Bool = false
     let action: () -> Void
 
     /// When set via `.collapsesActionButtonLabel(true)`, secondary buttons collapse to an icon-only pill revealing the title on focus, so a crowded row (Bluey: 8 actions) fits.
@@ -38,7 +42,7 @@ struct GlassActionButton: View {
                 subtitle: subtitle,
                 isProminent: isProminent,
                 isLoading: isLoading,
-                collapsesLabel: collapsesLabel,
+                collapsesLabel: collapsesLabel && !alwaysShowsLabel,
                 contentColor: contentColor
             )
         }
@@ -68,6 +72,20 @@ private struct GlassActionButtonLabel: View {
     /// Measured intrinsic width of the trailing title/subtitle (leading gap baked in); the visible copy animates its frame 0→this so text fades in step with the growing width.
     @State private var labelWidth: CGFloat = 0
 
+    /// Ceiling for the trailing subtitle. Resume stamps are a handful of digits, but the version
+    /// button carries a label the SERVER writes (a media source name is a file name), and the tvOS
+    /// action row is a plain HStack of fixed-size pills: it cannot scroll, wrap or compress, so an
+    /// unbounded label walks the row off the screen. Measured in DetailActionRowWidthTests: a scene
+    /// release name took the row to 2421 pt of the 1820 the title-safe width allows; at this ceiling
+    /// it stays around 1440 (Sodalite#139).
+    private static var subtitleCeiling: CGFloat {
+        #if os(tvOS)
+        500
+        #else
+        240
+        #endif
+    }
+
     /// Prominent buttons always show the title; secondary ones only when the row hasn't opted into collapsing, or while focused.
     private var showsLabel: Bool {
         !collapsesLabel || isProminent || isFocused
@@ -96,6 +114,8 @@ private struct GlassActionButtonLabel: View {
                     .foregroundStyle(contentColor.opacity(0.75))
                     .monospacedDigit()
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: Self.subtitleCeiling, alignment: .leading)
             }
         }
         .padding(.leading, 10)
@@ -137,6 +157,40 @@ private struct GlassActionButtonLabel: View {
 }
 
 private struct ActionLabelWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+
+
+/// Applies the pill lift against the control's measured width, because the distance a scale moves
+/// an edge depends on the width it is applied to. `scaleEffect` is a render-time transform, so the
+/// measurement it feeds is the layout width and cannot chase its own tail.
+private struct CappedPillLift: ViewModifier {
+    let isFocused: Bool
+    let isPressed: Bool
+    @State private var width: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: PillWidthKey.self, value: geo.size.width)
+                }
+            )
+            .onPreferenceChange(PillWidthKey.self) { width = $0 }
+            .focusResponse(
+                .pill.capped(toLift: GlassButtonStyle.liftCeiling, width: width),
+                isFocused: isFocused,
+                isPressed: isPressed,
+                pressedScale: 0.95
+            )
+    }
+}
+
+private struct PillWidthKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())
@@ -218,10 +272,17 @@ struct GlassButtonStyle: ButtonStyle {
             )
             .focusStroke(Capsule(), isFocused: isFocused)
             // The role's curve matches the label-reveal spring here, so scale, border and
-            // icon->label expansion move together.
-            .focusResponse(.pill, isFocused: isFocused,
-                           isPressed: configuration.isPressed, pressedScale: 0.95)
+            // icon->label expansion move together. Capped, and therefore measured: see liftCeiling.
+            .modifier(CappedPillLift(isFocused: isFocused, isPressed: configuration.isPressed))
     }
+
+    /// How far a pill may grow on one side when focus lifts it. `DetailActionRow` sets its buttons
+    /// `spacing` apart, so a lift wider than that puts the focused control over its neighbour, and
+    /// with a server-written label on one of them (Sodalite#139) no fixed scale can promise that.
+    /// Two points under the row's 16 leaves the gesture as large as the row allows, and visibly
+    /// unchanged on every pill the app had before: the widest of those measures ~350 pt, whose 8%
+    /// is 14 pt anyway. `DetailActionRowFocusLiftTests` holds the two numbers together.
+    static let liftCeiling: CGFloat = 14
 
     /// Progress used to be an accent capsule filling the tile from the leading edge, which forced
     /// the tile to drop its accent fill (accent on accent does not read) and put half the label on

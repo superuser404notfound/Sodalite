@@ -48,11 +48,30 @@ extension MediaSource {
         return parts.joined(separator: " · ")
     }
 
-    /// Sort key for "highest quality first": bitrate, else pixel count.
-    var qualityRank: Int {
-        if let bitrate, bitrate > 0 { return bitrate }
+    /// Sort key for "highest quality first": frame size, then bitrate.
+    ///
+    /// Frame size leads, and bitrate only breaks its ties. Bitrate alone ranks a 1080p remux at
+    /// 30 Mbit above a 4K encode at 12, which is the opposite of what someone who keeps two versions
+    /// of a film means by the better one (Sodalite#139).
+    var qualityRank: (pixels: Int, bitrate: Int) {
         let v = primaryVideoStream
-        return (v?.width ?? 0) * (v?.height ?? 0)
+        return ((v?.width ?? 0) * (v?.height ?? 0), bitrate ?? 0)
+    }
+}
+
+extension Array where Element == MediaSource {
+    /// Best first, ties settled by the server's own order rather than by chance: Jellyfin sorts the
+    /// item's own file first, "so it is the default the client plays" (`BaseItem.GetMediaSources`),
+    /// and `sorted(by:)` is not stable, so two equal-ranking versions would otherwise swap places
+    /// between renders.
+    func rankedByQuality() -> [MediaSource] {
+        enumerated()
+            .sorted { a, b in
+                a.element.qualityRank == b.element.qualityRank
+                    ? a.offset < b.offset
+                    : a.element.qualityRank > b.element.qualityRank
+            }
+            .map(\.element)
     }
 }
 
@@ -63,17 +82,18 @@ struct VersionPickerChoice: Identifiable {
     let id = UUID()
     let item: JellyfinItem
     let sources: [MediaSource]
-    let fromBeginning: Bool
-    /// Series-only focus-restoration origin flag; ignored by movie detail.
-    let fromPlayButton: Bool
+    /// The version the page currently describes, so the sheet opens on it rather than on its own top row.
+    let selectedID: String?
 }
 
 // MARK: - Version picker sheet
 
-/// Multi-source version picker (highest quality first, top focused); `onSelect` gets the chosen source, dismissing without one cancels playback.
+/// Multi-source version picker (highest quality first); `onSelect` gets the chosen source, dismissing without one leaves the page on the version it already showed.
 struct VersionPickerSheet: View {
     let sources: [MediaSource]
     let tintColor: Color
+    /// The version in force, checked and focused on open. A picker that only offers is half an answer: it has to say where the page stands (Sodalite#139).
+    var selectedID: String?
     let onSelect: (MediaSource) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -83,7 +103,7 @@ struct VersionPickerSheet: View {
     private var isCompact: Bool { hSizeClass == .compact }
 
     private var sorted: [MediaSource] {
-        sources.sorted { $0.qualityRank > $1.qualityRank }
+        sources.rankedByQuality()
     }
 
     var body: some View {
@@ -113,7 +133,7 @@ struct VersionPickerSheet: View {
         #if os(iOS)
         .background(.thinMaterial)
         #endif
-        .onAppear { focusedID = sorted.first?.id }
+        .onAppear { focusedID = selectedID ?? sorted.first?.id }
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
@@ -121,6 +141,7 @@ struct VersionPickerSheet: View {
 
     private func row(_ source: MediaSource) -> some View {
         let isFocused = focusedID == source.id
+        let isSelected = selectedID == source.id
         return HStack {
             Text(source.versionLabel)
                 .font(.body)
@@ -129,7 +150,13 @@ struct VersionPickerSheet: View {
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .font(.body.weight(.semibold))
+                    .padding(.leading, 12)
+            }
         }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .padding(.horizontal, isCompact ? 18 : 32)
         .padding(.vertical, isCompact ? 14 : 22)
         .frame(maxWidth: .infinity)
