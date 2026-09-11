@@ -169,6 +169,18 @@ struct PlaybackSettingsView: View {
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
 
+                ValuePickerRow(
+                    icon: "backward.circle",
+                    title: "settings.playback.liveBuffer",
+                    subtitle: "settings.playback.liveBuffer.subtitle",
+                    options: PlaybackPreferences.LiveBufferDepth.allCases,
+                    selection: Binding(
+                        get: { prefs.liveBufferDepth },
+                        set: { prefs.liveBufferDepth = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
                 sectionHeader("settings.playback.section.languages")
 
                 languageRow(
@@ -265,18 +277,6 @@ struct PlaybackSettingsView: View {
                     selection: Binding(
                         get: { prefs.subtitleColor },
                         set: { prefs.subtitleColor = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "backward.circle",
-                    title: "settings.playback.liveBuffer",
-                    subtitle: "settings.playback.liveBuffer.subtitle",
-                    options: PlaybackPreferences.LiveBufferDepth.allCases,
-                    selection: Binding(
-                        get: { prefs.liveBufferDepth },
-                        set: { prefs.liveBufferDepth = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
