@@ -41,6 +41,25 @@ struct ResumeBarFileTests {
         #expect(name() != name(remote: reimaged))
     }
 
+    /// The one that bit: a Jellyfin tag is per item and image type, so a series whose Thumb and
+    /// Backdrop share a tag is ordinary, and they are two different pictures. Keyed on the tag
+    /// alone, switching between those two settings served the cell the other one's artwork.
+    @Test("the image kind moves the name")
+    func imageKindIsPartOfTheKey() {
+        let thumb = URL(string: "https://jf.example.com/Items/show/Images/Thumb?tag=t1&api_key=k1")!
+        let backdrop = URL(string: "https://jf.example.com/Items/show/Images/Backdrop?tag=t1&api_key=k1")!
+        #expect(name(remote: thumb) != name(remote: backdrop))
+    }
+
+    /// Parent artwork hangs on the series or the season, so the same tag can arrive on a different
+    /// owner than the cell's own item.
+    @Test("the item the picture hangs on moves the name")
+    func pictureOwnerIsPartOfTheKey() {
+        let series = URL(string: "https://jf.example.com/Items/series/Images/Backdrop?tag=t1&api_key=k1")!
+        let season = URL(string: "https://jf.example.com/Items/season/Images/Backdrop?tag=t1&api_key=k1")!
+        #expect(name(remote: series) != name(remote: season))
+    }
+
     @Test("two items never share a file")
     func itemIsPartOfTheKey() {
         #expect(name(itemID: "abc") != name(itemID: "def"))
