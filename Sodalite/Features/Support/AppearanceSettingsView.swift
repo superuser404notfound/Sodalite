@@ -126,7 +126,7 @@ struct AppearanceSettingsView: View {
             )
 
             // Its own choice rather than a reader of the Continue Watching row above: a shelf cell
-            // is about three times the width of a card, and an episode still is capped at the
+            // is around 800pt wide against a 360pt card, and an episode still is capped at the
             // server's image-extraction width, so the two surfaces do not want the same answer.
             ValuePickerRow(
                 icon: "photo.on.rectangle",

@@ -105,7 +105,7 @@ final class AppearancePreferences {
     }
 
     /// Picture on a Top Shelf cell. Its own setting rather than a reader of the row above, because
-    /// a shelf cell is roughly three times the width of a card: a still that holds up in Continue
+    /// a shelf cell is around 800pt wide against a 360pt card: a still that holds up in Continue
     /// Watching can be visibly soft up there, and a server's episode stills are capped at its
     /// image-extraction width. Defaults to the episode image, which is what the shelf always drew.
     var topShelfImage: ContinueWatchingImage {

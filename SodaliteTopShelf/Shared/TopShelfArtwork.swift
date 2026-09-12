@@ -5,9 +5,9 @@ import Foundation
 ///
 /// The choice is mirrored into the shared container the way `TopShelfAccent` is, because the
 /// extension cannot read the app's preferences. It is a separate setting from the home screen's
-/// Continue Watching image on purpose: a shelf cell is roughly three times the width of a card, so
-/// an episode still that holds up in a row can be visibly soft up there, and the answer for one
-/// surface is not automatically the answer for the other.
+/// Continue Watching image on purpose: two cells and a bit fill the screen on tvOS 26, so a cell
+/// runs around 800pt against a 360pt card, and an episode still that holds up in a row can be
+/// visibly soft up there. The answer for one surface is not automatically the answer for the other.
 ///
 /// `nonisolated` throughout for the same reason as `TopShelfProgress`: the app targets default to
 /// MainActor isolation, the extension defaults to nonisolated, and both compile this file.
