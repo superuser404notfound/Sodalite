@@ -77,6 +77,47 @@ enum NowPlayingMetrics {
     /// Track to the time labels.
     static let scrubLabelSpacing: CGFloat = 10
 
+    // MARK: - Wide-tier fit (Sodalite#142)
+
+    /// Narrowest queue column still worth showing beside the cover. Under this the rows are all
+    /// ellipsis, and the stacked layout says more with the same pixels.
+    static let queueMinimumWidth: CGFloat = 200
+
+    /// Transport row plus scrubber, the block the wide column carries under the cover. The label line
+    /// is reserved generously on purpose: this figure decides whether the column FITS, and a column
+    /// that overflows takes the close button off the screen with it.
+    static var chromeBlockHeight: CGFloat {
+        transportPrimary + chromeSpacing + scrubTrackHeight + scrubLabelSpacing + scrubLabelReserve
+    }
+
+    /// Room kept for the elapsed / remaining line under the scrubber.
+    static let scrubLabelReserve: CGFloat = 30
+
+    /// Smallest container the wide two-column layout fits in, summed from the metrics the layout
+    /// itself uses.
+    ///
+    /// The wide tier is chosen by SIZE, not by size class. An iPhone Plus / Max in landscape reports a
+    /// REGULAR width class with 440pt of height, 185 short of the column, and the page then grows past
+    /// the screen: the ZStack centres the overflow and the close button, an overlay on that same
+    /// stack, leaves the screen with it. That is Sodalite#142, "no way out of Now Playing".
+    static func wideMinimumSize(coverSide: CGFloat,
+                                columnWidth: CGFloat,
+                                spacing: CGFloat,
+                                hPadding: CGFloat,
+                                vPadding: CGFloat) -> CGSize {
+        CGSize(width: 2 * hPadding + columnWidth + spacing + queueMinimumWidth,
+               height: 2 * vPadding + coverSide + columnSpacing + chromeBlockHeight)
+    }
+
+    /// The running platform's own minimum, from the same numbers the layout reads.
+    static var wideMinimumSize: CGSize {
+        wideMinimumSize(coverSide: coverSide(compact: false),
+                        columnWidth: wideColumnWidth,
+                        spacing: wideSpacing,
+                        hPadding: contentHPadding(compact: false),
+                        vPadding: contentVPadding(compact: false))
+    }
+
     // MARK: - Page insets
 
     static func contentHPadding(compact: Bool) -> CGFloat {

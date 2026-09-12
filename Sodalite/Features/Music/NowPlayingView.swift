@@ -52,48 +52,7 @@ private struct NowPlayingContent: View {
     private static let focusOverhang: CGFloat = 20
 
     var body: some View {
-        ZStack {
-            // Opaque base: the cover must never show the tab UI, and the blurred-art layer isn't
-            // opaque (transparent placeholder while loading; the 0.65 dim + heavy blur stay
-            // see-through). Solid black guarantees full cover.
-            Color.black
-                .ignoresSafeArea()
-
-            backgroundArt
-
-            contentLayout
-        }
-        #if os(tvOS)
-        // The chrome takes every focusable view with it, so something has to stay behind to read the
-        // press or swipe that brings it back. See `NowPlayingWakeSink` for why being alone is the point.
-        .overlay {
-            if !chromeRevealed {
-                NowPlayingWakeSink(wake: { revealChrome() })
-                    .ignoresSafeArea()
-            }
-        }
-        #endif
-        // tvOS overscans behind the system safe area (manual padding handles the margin); on a phone
-        // the content must respect the safe area so the cover/transport clear the notch and home bar.
-        .modifier(FullBleedSafeArea(active: hSizeClass != .compact))
-        #if os(iOS)
-        // tvOS dismisses via the Menu button; iOS needs a visible touch close so playing
-        // music (which suppresses the auto-dismiss-on-stop) is never a dead-end.
-        .overlay(alignment: .topLeading) {
-            Button {
-                close()
-            } label: {
-                Image(systemName: "chevron.down")
-                    .font(.title2.weight(.semibold))
-                    .padding(14)
-                    .glassEffect(.regular, in: Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .padding(.leading, 16)
-            .padding(.top, 8)
-        }
-        #endif
+        layoutHost
         // Foreground, the Siri Remote play/pause arrives as a UIPress on the responder chain, NOT via
         // MPRemoteCommandCenter (that fires only from Control Center / background). Handle it here.
         .onPlayPauseCommandCompat {
@@ -125,6 +84,81 @@ private struct NowPlayingContent: View {
         .onChange(of: coordinator.currentItem?.id) { _, _ in revealChrome() }
         .onChange(of: coordinator.isPlaying) { _, _ in revealChrome() }
     }
+
+    // MARK: - Hosting
+
+    /// tvOS lays out against its fixed band; iOS measures the container it actually got.
+    ///
+    /// Two things hang on that measurement. The tier is picked by SIZE, not by size class
+    /// (`NowPlayingMetrics.wideMinimumSize`), and the screen is CLAMPED to the container, so a column
+    /// that still outgrows it can no longer drag the whole page sideways or upwards. The close button
+    /// is an overlay on that clamped frame and therefore stays where the user can reach it, inside the
+    /// safe area, whatever the content does (Sodalite#142).
+    @ViewBuilder
+    private var layoutHost: some View {
+        #if os(tvOS)
+        screen(compact: false)
+            .ignoresSafeArea()
+        #else
+        GeometryReader { proxy in
+            screen(compact: usesStackedLayout(container: proxy.size))
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                // tvOS dismisses via the Menu button; iOS needs a visible touch close so playing
+                // music (which suppresses the auto-dismiss-on-stop) is never a dead-end.
+                .overlay(alignment: .topLeading) { closeControl }
+        }
+        #endif
+    }
+
+    private func screen(compact: Bool) -> some View {
+        ZStack {
+            // Opaque base: the cover must never show the tab UI, and the blurred-art layer isn't
+            // opaque (transparent placeholder while loading; the 0.65 dim + heavy blur stay
+            // see-through). Solid black guarantees full cover.
+            Color.black
+                .ignoresSafeArea()
+
+            backgroundArt
+
+            contentLayout(compact: compact)
+        }
+        #if os(tvOS)
+        // The chrome takes every focusable view with it, so something has to stay behind to read the
+        // press or swipe that brings it back. See `NowPlayingWakeSink` for why being alone is the point.
+        .overlay {
+            if !chromeRevealed {
+                NowPlayingWakeSink(wake: { revealChrome() })
+                    .ignoresSafeArea()
+            }
+        }
+        #endif
+    }
+
+    #if os(iOS)
+    private var closeControl: some View {
+        Button {
+            close()
+        } label: {
+            Image(systemName: "chevron.down")
+                .font(.title2.weight(.semibold))
+                .padding(14)
+                .glassEffect(.regular, in: Circle())
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(.leading, 16)
+        .padding(.top, 8)
+    }
+
+    /// The stacked layout is the answer to a compact width AND to a container the wide column does not
+    /// fit in. An iPhone Plus / Max in landscape reports a regular width class with ~420pt of height,
+    /// where the cover, the title block and the chrome need 638 (Sodalite#142).
+    private func usesStackedLayout(container: CGSize) -> Bool {
+        if hSizeClass == .compact { return true }
+        let minimum = NowPlayingMetrics.wideMinimumSize
+        return container.width < minimum.width || container.height < minimum.height
+    }
+    #endif
 
     // MARK: - Chrome auto-hide (Sodalite#110)
 
@@ -190,28 +224,28 @@ private struct NowPlayingContent: View {
 
     // MARK: - Layout
 
-    /// Compact (iPhone) stacks everything in one vertical scroll so nothing is cut off; the regular
-    /// (tvOS / iPad) tier keeps the side-by-side cover + queue layout.
+    /// Compact stacks everything in one vertical scroll so nothing is cut off; the wide (tvOS / iPad)
+    /// tier keeps the side-by-side cover + queue layout. Which one applies is `usesStackedLayout`.
     @ViewBuilder
-    private var contentLayout: some View {
-        if hSizeClass == .compact {
+    private func contentLayout(compact: Bool) -> some View {
+        if compact {
             ScrollView {
                 VStack(spacing: 28) {
-                    albumCover
+                    albumCover(compact: compact)
                     trackMetadata(centered: false)
                     progressRow
                     transportRow
                     queueList
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, contentHPadding)
-                .padding(.vertical, contentVPadding)
+                .padding(.horizontal, NowPlayingMetrics.contentHPadding(compact: compact))
+                .padding(.vertical, NowPlayingMetrics.contentVPadding(compact: compact))
             }
         } else {
             // The queue aligns to the cover, never the reverse: see `NowPlayingWideLayout`.
             NowPlayingWideLayout(spacing: NowPlayingMetrics.wideSpacing, showsQueue: showsQueueColumn) {
                 VStack(spacing: NowPlayingMetrics.columnSpacing) {
-                    albumCover
+                    albumCover(compact: compact)
                     // Metadata belongs to whichever column is on screen. Centered it sits under the
                     // cover, Apple Music's arrangement; two-column it heads the queue, as before.
                     if !showsQueueColumn {
@@ -256,20 +290,12 @@ private struct NowPlayingContent: View {
                     }
                 }
             }
-            .padding(.horizontal, contentHPadding)
-            .padding(.vertical, contentVPadding)
+            .padding(.horizontal, NowPlayingMetrics.contentHPadding(compact: compact))
+            .padding(.vertical, NowPlayingMetrics.contentVPadding(compact: compact))
             .animation(Self.chromeSwap, value: showsQueueColumn)
             .animation(Self.chromeSwap, value: chromeRevealed)
         }
     }
-
-    private var isCompact: Bool { hSizeClass == .compact }
-
-    private var coverSide: CGFloat { NowPlayingMetrics.coverSide(compact: isCompact) }
-
-    private var contentHPadding: CGFloat { NowPlayingMetrics.contentHPadding(compact: isCompact) }
-
-    private var contentVPadding: CGFloat { NowPlayingMetrics.contentVPadding(compact: isCompact) }
 
     // MARK: - Background art
 
@@ -295,7 +321,7 @@ private struct NowPlayingContent: View {
 
     // MARK: - Album cover
 
-    private var albumCover: some View {
+    private func albumCover(compact: Bool) -> some View {
         let coverURL = coordinator.currentItem.flatMap {
             dependencies.jellyfinImageService.musicCoverURL(for: $0, maxWidth: ImageWidth.cover)
         }
@@ -313,7 +339,7 @@ private struct NowPlayingContent: View {
                         .foregroundStyle(.tertiary)
                 )
         }
-        .frame(width: coverSide, height: coverSide)
+        .frame(width: NowPlayingMetrics.coverSide(compact: compact), height: NowPlayingMetrics.coverSide(compact: compact))
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .shadow(color: .black.opacity(0.55), radius: 40, y: 16)
     }
@@ -694,22 +720,6 @@ private struct QueueTrackNameStyle: ViewModifier {
             content.foregroundStyle(.tint)
         } else {
             content.foregroundStyle(focused ? Color.white : Color.primary)
-        }
-    }
-}
-
-// MARK: - FullBleedSafeArea
-
-/// Applies `.ignoresSafeArea()` only when active, so the regular tier keeps its full-bleed overscan
-/// layout while compact lets the scroll content sit inside the safe area.
-private struct FullBleedSafeArea: ViewModifier {
-    let active: Bool
-
-    func body(content: Content) -> some View {
-        if active {
-            content.ignoresSafeArea()
-        } else {
-            content
         }
     }
 }
