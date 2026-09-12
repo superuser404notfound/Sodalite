@@ -2,13 +2,24 @@ import SwiftUI
 
 /// Pill geometry, sized off the tier's poster width rather than the card the pill sits on.
 ///
-/// Measured with NSFont at the tvOS text sizes rather than guessed at the TV: 0.09 of the poster
-/// width is 19.8pt on Apple TV, just under the 25pt title beneath the card, 14.4pt on iPad and
-/// 10.8pt on iPhone, which is caption2 there. Sizing a pill off its own card would put a 32pt pill
-/// on a landscape card next to a 20pt one on the poster beside it.
+/// Sizing a pill off its own card would put a 32pt pill on a landscape card next to a 20pt one on
+/// the poster beside it, so every mark on artwork reads the tier's poster width instead.
 enum PosterBadgeMetrics {
+    /// The size of every piece of TEXT drawn on artwork: the corner pills and the remaining-time
+    /// label beside the resume capsule.
+    ///
+    /// This shipped at 0.09, which is 19.8pt on the TV, and the reporter who asked for the pills
+    /// came back with "slightly too big, reduce by about a third" (Sodalite#79). 0.06 is that third:
+    /// 13.2pt on Apple TV, about half the 25pt card title under the poster, against 40 percent of
+    /// the card width for the widest pill before and 27 after. Rendered on the tvOS simulator at
+    /// 0.09, 0.08, 0.07 and 0.06 over a bright, busy still, with the watched disc and the resume row
+    /// in frame, because the corner is judged as an ensemble and not one pill at a time.
+    ///
+    /// The floor is the smaller tiers: the same third would put the phone at 7.2pt, which is below
+    /// anything readable at arm's length, so iPad and iPhone stop at 10pt (the phone barely moves,
+    /// from 10.8, while the iPad loses its third and finally sits under its own 12pt card title).
     static func fontSize(posterWidth: CGFloat, scale: CGFloat) -> CGFloat {
-        posterWidth * 0.09 * scale
+        max(10, posterWidth * 0.06 * scale)
     }
 
     /// Diameter of the watched check opposite the pills (Sodalite#89). Every comparable client
@@ -40,13 +51,16 @@ enum PosterBadgeMetrics {
         posterWidth * 0.036 * scale
     }
 
-    /// The remaining-time label beside the resume capsule, deliberately smaller than `fontSize`.
-    /// The quality pills carry a scrim and a hairline, so they hold their own at 0.09; a bare number
-    /// at that size dominates the poster. Rendered at 0.09, 0.08, 0.075, 0.07 and 0.065 over a
-    /// bright and a busy still, 0.075 is the largest that still reads as an annotation, and it is
-    /// 16.5pt on the TV, 12 on iPad and 9 on iPhone.
+    /// The remaining-time label beside the resume capsule: the same size as the pills, not a step
+    /// below them.
+    ///
+    /// It used to be 0.075 against their 0.09, because a bare number as loud as a scrimmed pill
+    /// dominates the poster. That step was measured against the pill it stood next to, so shrinking
+    /// the pill and leaving the number at 16.5pt turned the annotation into the loudest mark on the
+    /// card (rendered, Sodalite#79 round 2). What separates the two marks is the pill's scrim and
+    /// hairline, which a number set at the same point size still reads as quieter than.
     static func remainingLabelSize(posterWidth: CGFloat, scale: CGFloat) -> CGFloat {
-        posterWidth * 0.075 * scale
+        fontSize(posterWidth: posterWidth, scale: scale)
     }
 
     /// Below this share of the card the meter stops reading as a meter, so the label is dropped and

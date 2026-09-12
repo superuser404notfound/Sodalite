@@ -53,15 +53,18 @@ struct ResumeCapsuleTests {
         }
     }
 
-    /// The label sits beside a meter with nothing behind it, so it is deliberately smaller than the
-    /// quality pills, which carry their own scrim. Rendered side by side, 0.09 dominated the poster.
-    @Test func theLabelIsSmallerThanThePills() {
+    /// One size for both text marks on artwork, not two. The old step (label 0.075 against a 0.09
+    /// pill) was measured against the pill it stands next to, so when Sodalite#79 round 2 cut the
+    /// pill to 0.06 the bare number would have become the loudest mark on the card. What separates
+    /// them is the pill's scrim and hairline, not a point size.
+    @Test func theLabelMatchesThePillBesideIt() {
         for tier in tiers {
-            let width = tier.metrics.posterSize.width
-            let label = PosterBadgeMetrics.remainingLabelSize(posterWidth: width, scale: 1)
-            let pill = PosterBadgeMetrics.fontSize(posterWidth: width, scale: 1)
-            #expect(label < pill)
-            #expect(label / width >= 0.07, "\(tier.name) label is \(label / width * 100)% of the poster")
+            for scale in scales {
+                let width = tier.metrics.posterSize.width
+                let label = PosterBadgeMetrics.remainingLabelSize(posterWidth: width, scale: scale)
+                #expect(label == PosterBadgeMetrics.fontSize(posterWidth: width, scale: scale))
+                #expect(label >= 10, "\(tier.name) at \(scale) is \(label)pt, below reading size")
+            }
         }
     }
 

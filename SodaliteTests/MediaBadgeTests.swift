@@ -172,15 +172,17 @@ struct MediaBadgeTests {
 
     // MARK: - Pill geometry
 
-    /// Measured, not guessed (NSFont at the tvOS text sizes): 0.09 of the tier's poster width puts
-    /// the pill at 19.8pt on Apple TV, just under the 25pt card title next to it, 14.4pt on iPad
-    /// and 10.8pt on iPhone, which is caption2 there. A pill sized off its own card would be 32pt
-    /// on a landscape card, bigger than the poster's title.
+    /// Measured on the tvOS simulator, not guessed at the TV: 0.06 of the tier's poster width puts
+    /// the pill at 13.2pt on Apple TV, about half the 25pt card title next to it, and on the floor
+    /// at 10pt on iPad and iPhone. It shipped at 0.09 and the reporter asked for a third off
+    /// (Sodalite#79). A pill sized off its own card would be 21.6pt on a landscape card, so a row
+    /// that mixes the two styles would wear two pill sizes.
     @Test("a landscape card carries the same pill as the poster beside it")
     func pillSizeIsTierWideNotCardWide() {
         let poster = PosterBadgeMetrics.fontSize(posterWidth: 220, scale: 1.0)
-        #expect(poster == PosterBadgeMetrics.fontSize(posterWidth: 220, scale: 1.0))
-        #expect(poster > 19 && poster < 21, "tvOS pill lands just under the card title")
+        #expect(poster > 13 && poster < 14, "tvOS pill lands at about half the card title")
+        #expect(poster < LayoutMetrics.tv.landscapeSize.width * 0.06,
+                "the pill reads the tier's poster width, not the card it sits on")
     }
 
     @Test("the pill follows the card-size setting")
@@ -194,6 +196,9 @@ struct MediaBadgeTests {
     @Test("the iPhone tier stays at a readable size rather than shrinking to nothing")
     func pillStaysReadableOnPhone() {
         #expect(PosterBadgeMetrics.fontSize(posterWidth: 120, scale: 1.0) >= 10)
+        #expect(PosterBadgeMetrics.fontSize(posterWidth: 120, scale: 1.0) == 10,
+                "below the TV the floor sets the pill, not the ratio")
+        #expect(PosterBadgeMetrics.fontSize(posterWidth: 160, scale: 1.0) == 10)
     }
 
     // MARK: - Shape

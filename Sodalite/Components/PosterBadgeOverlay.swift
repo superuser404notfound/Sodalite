@@ -15,21 +15,8 @@ struct PosterBadgeOverlay: View {
         if dependencies.appearancePreferences.showPosterBadges {
             let pills = dependencies.posterBadgeStore.badges(for: item).pills
             if !pills.isEmpty {
-                VStack(alignment: .leading, spacing: fontSize * 0.2) {
-                    ForEach(pills, id: \.self, content: pill)
-                }
-                .padding(fontSize * 0.35)
+                PosterBadgePills(pills: pills, fontSize: fontSize)
             }
         }
-    }
-
-    private func pill(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: fontSize, weight: .semibold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, fontSize * 0.42)
-            .padding(.vertical, fontSize * 0.18)
-            .background(Color.Theme.scrim, in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.Theme.hairline, lineWidth: 1))
     }
 }

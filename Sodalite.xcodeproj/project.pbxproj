@@ -174,6 +174,7 @@
 		269AF9D33D1C76B4383C199F /* ChannelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD885BBC0D55B662283D12 /* ChannelListView.swift */; };
 		26B5D4E903FC69F5D686FEF7 /* LicenseText-dav1d.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FC57C0434B0E5A844A312 /* LicenseText-dav1d.txt */; };
 		26B9667EB72514B1BD400DFF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB64AA91C881200F98F790D /* SettingsView.swift */; };
+		26CA5A6223360376F1953DA0 /* PosterBadgePills.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41CC34A5033919CFB58E092 /* PosterBadgePills.swift */; };
 		26E40A8AB1576E2509A228DB /* SeerrPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0D3AF30D46C46DE8DFA /* SeerrPermissions.swift */; };
 		26E7B56FD677DF67930576DE /* HomeRowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168C9C4EDD234AD97BFA1D96 /* HomeRowConfiguration.swift */; };
 		2707A7F7EDBB9D8DE8E44152 /* AuthDefaultProfilePinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319871CEDEF5EBA6EFCF4C63 /* AuthDefaultProfilePinTests.swift */; };
@@ -505,6 +506,7 @@
 		775BBAF5D41A64C724329161 /* CloudSyncPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3D6C7CCA64C8BDECE6C729 /* CloudSyncPreferencesTests.swift */; };
 		77BDB66D7B8BB9E41E00773A /* GuideCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6733091F24DDFD26F129BDD6 /* GuideCells.swift */; };
 		77D8F9D6494F41AE4EB9FD5A /* StoreProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2D94C696BD816FE0622F904 /* StoreProducts.swift */; };
+		77F13F9DBBB9A2C1078FCA03 /* PosterBadgePills.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41CC34A5033919CFB58E092 /* PosterBadgePills.swift */; };
 		781B95A3B0450C882D073616 /* AppearancePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DBDEEBE73D05D216A079E1 /* AppearancePreferences.swift */; };
 		782234557E66892E08CDC2E0 /* SeerrMediaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04547B5AAA8453CDCBF40F1B /* SeerrMediaService.swift */; };
 		786EB68202EC1C54268967BF /* CollectionGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB95370490A2D1F444028A11 /* CollectionGrouping.swift */; };
@@ -1614,6 +1616,7 @@
 		C1118E47E5B52924CC5C4CBF /* MediaCastRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCastRow.swift; sourceTree = "<group>"; };
 		C2080A79A7BCF42A714B4B67 /* JellyfinClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinClient.swift; sourceTree = "<group>"; };
 		C26ACDA3C53D401F750A2743 /* MyMediaLibrariesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyMediaLibrariesTests.swift; sourceTree = "<group>"; };
+		C41CC34A5033919CFB58E092 /* PosterBadgePills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosterBadgePills.swift; sourceTree = "<group>"; };
 		C4C48991F0DF61EC9BFAC208 /* ServerAddressEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAddressEntryView.swift; sourceTree = "<group>"; };
 		C4D870347A5A37B3477481FB /* LibrarySort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySort.swift; sourceTree = "<group>"; };
 		C4FB40C07FFEE9A5267F2892 /* SeerrSeasonStatusResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrSeasonStatusResolver.swift; sourceTree = "<group>"; };
@@ -1881,6 +1884,7 @@
 				309E61267DD57F84D370456E /* PosterBadgeEnrichment.swift */,
 				5EB05864EA1D0988DF5BF302 /* PosterBadgeMetrics.swift */,
 				F01696A03EAD1FC14EEA5F35 /* PosterBadgeOverlay.swift */,
+				C41CC34A5033919CFB58E092 /* PosterBadgePills.swift */,
 				85CE19D6478133AFC7FCAA46 /* ResumeProgressBar.swift */,
 				DD2EECA0E08019603F8449BB /* ScrollHintChevron.swift */,
 				73C70C69CE2B4D51320E884C /* SeerrMediaCard.swift */,
@@ -3334,6 +3338,7 @@
 				F610614426258955F2A3AC46 /* PosterBadgeEnrichment.swift in Sources */,
 				57A9A1D192DFD61243EE1AD8 /* PosterBadgeMetrics.swift in Sources */,
 				2092BC14F3DF9CFC0E8E9BCF /* PosterBadgeOverlay.swift in Sources */,
+				26CA5A6223360376F1953DA0 /* PosterBadgePills.swift in Sources */,
 				B2E0860859A63714DE6A536D /* PosterBadgeStore.swift in Sources */,
 				BE2B9CDC9431A49D317ABCCC /* ProfilePickerOrdering.swift in Sources */,
 				F379FB58FADBED778F1CF1E6 /* ProfileRepromptPolicy.swift in Sources */,
@@ -3984,6 +3989,7 @@
 				459C0F637B0778E0067D6FCD /* PosterBadgeEnrichment.swift in Sources */,
 				E03C9B7ABCDC7F801DD8E0F0 /* PosterBadgeMetrics.swift in Sources */,
 				F517D12411E0A5F7484EF17F /* PosterBadgeOverlay.swift in Sources */,
+				77F13F9DBBB9A2C1078FCA03 /* PosterBadgePills.swift in Sources */,
 				3C3D0B611951A4F020CE7211 /* PosterBadgeStore.swift in Sources */,
 				068E7969370C5ED933944046 /* ProfilePickerOrdering.swift in Sources */,
 				442D887582ABCE1C166F7745 /* ProfileRepromptPolicy.swift in Sources */,
