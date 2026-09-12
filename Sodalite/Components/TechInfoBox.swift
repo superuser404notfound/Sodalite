@@ -38,12 +38,39 @@ struct TechInfoBox: View {
         item.effectiveMediaSource(id: sourceID)
     }
 
+    /// The version these cards describe, for the line under the heading. Nil unless the item offers
+    /// a choice: one file needs no caption, and a caption that can only ever repeat itself is noise.
+    ///
+    /// The server's version name carries the line where there is one. The derived specs do not
+    /// repeat here (resolution, codec and size are spelled out in the cards an inch below), they are
+    /// the fallback for a source the server never named, so the line is never blank (Sodalite#139).
+    static func versionSubtitle(for item: JellyfinItem, sourceID: String?) -> String? {
+        guard VersionSelection.isOffered(for: item),
+              let source = item.effectiveMediaSource(id: sourceID) else { return nil }
+        let name = source.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let line = name.isEmpty ? source.versionLabel : name
+        return line.isEmpty ? nil : line
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("detail.techInfo")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .padding(.horizontal, metrics.rowInset)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("detail.techInfo")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                // The cards follow the chosen version, which without this line is a silent change:
+                // only someone who memorised the numbers sees the strip turn over (Sodalite#139).
+                // A server-written name has no ceiling, so it takes one line and truncates.
+                if let versionSubtitle = Self.versionSubtitle(for: item, sourceID: sourceID) {
+                    Text(versionSubtitle)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            }
+            .padding(.horizontal, metrics.rowInset)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 16) {
