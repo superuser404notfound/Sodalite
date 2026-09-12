@@ -29,9 +29,9 @@ enum ResumeBarRenderer {
         nonisolated static let jpegQuality = 0.9
     }
 
-    /// `maxPixelSize` caps the decode: the shelf cell is far narrower than the 1280px artwork the
-    /// app requests, and decoding full size would put ~3.7MB per cell through an extension with a
-    /// hard memory ceiling. ImageIO downsamples during decode, so the full bitmap never exists.
+    /// `maxPixelSize` caps the decode at the width the cell draws. ImageIO downsamples during the
+    /// decode, so a picture larger than the cell never becomes a full-size bitmap in an extension
+    /// with a hard memory ceiling.
     nonisolated static func render(source: Data,
                                    fraction: Double,
                                    accent: UInt32,

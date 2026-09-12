@@ -25,8 +25,7 @@ struct ImageWidthTests {
         #expect(ImageWidth.cover == 960)
         #expect(ImageWidth.avatar == 480)
         #expect(ImageWidth.fullBleed == 1920)
-        #expect(ImageWidth.topShelfCell == 1280)
-        #expect(ImageWidth.topShelfDecode == 1024)
+        #expect(ImageWidth.topShelfCell == 1600)
     }
 
     @Test func cardCoversPosterAndSquareOnEveryTierAtLargeCards() {
@@ -80,9 +79,11 @@ struct ImageWidthTests {
         #expect(ImageWidth.cover >= ImageWidth.card)
     }
 
-    /// The shelf decodes smaller than it downloads, and never smaller than the cell it draws.
-    @Test func topShelfDecodesUnderItsDownload() {
-        #expect(ImageWidth.topShelfDecode < ImageWidth.topShelfCell)
-        #expect(ImageWidth.topShelfDecode >= 820)
+    /// The shelf asks for what the cell draws: about 800pt at 2x, measured off the screen rather
+    /// than off Apple's documented 404pt, which tvOS 26 no longer matches. The burn-in decodes at
+    /// this same width, so no cell on the shelf is softer than the one beside it (Sodalite#128).
+    @Test func topShelfCoversTheCellItDraws() {
+        #expect(ImageWidth.topShelfCell >= Int((800.0 * 2).rounded(.up)))
+        #expect(ImageWidth.topShelfCell <= ImageWidth.fullBleed)
     }
 }

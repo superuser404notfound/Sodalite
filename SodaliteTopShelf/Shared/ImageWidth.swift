@@ -68,12 +68,16 @@ enum ImageWidth {
     /// asking for more only makes the server upscale.
     static let fullBleed = 1920
 
-    /// Top Shelf cell art. The shelf is not one of our tiers: tvOS fixes the cell, a sectioned `.hdtv`
-    /// cell is around 820px at 2x, and the focus zoom goes past that.
-    static let topShelfCell = 1280
-
-    /// Decode cap for the burned-in resume bar. Below the download because the bitmap is what costs
-    /// memory in the extension's budget, above the cell because decoding under it handed the shelf an
-    /// image to upscale (Sodalite#128).
-    static let topShelfDecode = 1024
+    /// Top Shelf cell art, download AND decode. The shelf is not one of our tiers, tvOS fixes the
+    /// cell, so the size comes from the screen: on tvOS 26 two cells and a bit fill the 1920pt row,
+    /// which puts one at around 800pt, or 1600px at the 2x the TV renders. That is twice the 404pt
+    /// Apple documents for a sectioned `.hdtv` cell, and the earlier 1280 here came from the
+    /// documented figure rather than from the screen.
+    ///
+    /// One number, not a download plus a lower decode cap. Decoding under the cell hands the shelf
+    /// an image to upscale, which is what made a burned-in cell visibly softer than its remote
+    /// neighbour and put two resolutions in one row (Sodalite#128). The cost lands in the
+    /// extension's memory: a 1600x900 bitmap is 5.8MB, and the compositing pass holds two of them
+    /// at once, which is why it stays serial.
+    static let topShelfCell = 1600
 }

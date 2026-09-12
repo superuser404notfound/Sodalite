@@ -1,4 +1,5 @@
 import Foundation
+import os
 import os.log
 
 private let log = Logger(subsystem: "de.superuser404.Sodalite.TopShelf", category: "ResumeBar")
@@ -14,12 +15,11 @@ private let log = Logger(subsystem: "de.superuser404.Sodalite.TopShelf", categor
 /// rendered before any of this existed.
 enum ResumeBarArtwork {
 
-    /// Decode cap. Below what `JellyfinItem.imageURL` downloads because the bitmap is what costs
-    /// memory here: decoding at 640 handed the shelf an image it had to upscale, which is what made
-    /// a burned-in cell visibly softer than its remote neighbour, while the full-size decode is
-    /// ~3.7MB a bitmap and trips "-17102 decompressing image" when several cells decode at once.
-    /// 1024 covers the zoomed cell at roughly 2.4MB.
-    private static let maxPixelSize = ImageWidth.topShelfDecode
+    /// Decode cap, the same width the artwork was downloaded at: anything under the cell hands the
+    /// shelf an image to upscale, which is what made a burned-in cell visibly softer than its remote
+    /// neighbour (Sodalite#128). The bitmap is what costs memory here, 5.8MB at this width with two
+    /// alive during a composite, which is why compositing stays serial.
+    private static let maxPixelSize = ImageWidth.topShelfCell
 
     /// Both queries ask for ten items, so this is the shelf at its fullest. Past it a pass cannot
     /// promise a uniform shelf inside its budget, so it does not start one.
@@ -137,6 +137,10 @@ enum ResumeBarArtwork {
                 }
             }
         }
+        // The one number this pass cannot reason about from here. A composite holds two bitmaps of
+        // `maxPixelSize`, so raising that width trades sharpness against an extension's hard
+        // ceiling, and the headroom left at the end is what says whether there is room to go on.
+        log.info("composited \(done.count) cells, \(os_proc_available_memory() / 1_048_576)MB left")
         return done
     }
 

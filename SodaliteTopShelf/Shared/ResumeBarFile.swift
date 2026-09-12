@@ -8,7 +8,7 @@ enum ResumeBarFile {
     /// Bump whenever the drawn pixels change, resolution included. It rides in the file name, so
     /// old artwork stops matching, gets swept, and re-renders; without it a look change is
     /// invisible on every cell whose progress and accent happen to be unchanged.
-    nonisolated static let renderVersion = 5
+    nonisolated static let renderVersion = 6
 
     /// The progress and the accent are part of the name on purpose. The home screen caches by
     /// URL, so rewriting the same path with new pixels leaves the old bar on screen.
