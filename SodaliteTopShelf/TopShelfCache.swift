@@ -10,8 +10,8 @@ private let log = Logger(subsystem: "de.superuser404.Sodalite.TopShelf", categor
 struct TopShelfCache: Codable, Sendable {
     let serverURL: String
     let userID: String
-    let resume: [JellyfinItem]
-    let nextUp: [JellyfinItem]
+    let resume: [TopShelfItem]
+    let nextUp: [TopShelfItem]
 
     /// Best-effort throughout: an unwritable container or an undecodable file behaves exactly
     /// like no cache at all, which is the pre-cache behaviour.

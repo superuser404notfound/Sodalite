@@ -1,7 +1,7 @@
 import Foundation
 
 /// Lean Jellyfin client for the TopShelf (/Items/Resume, /Shows/NextUp). Not the main app's client: pulling in its DI graph would blow the extension's tight memory budget for one or two GETs.
-struct JellyfinAPI: Sendable {
+nonisolated struct TopShelfAPI: Sendable {
     let session: SharedSession
 
     private static let deviceID: String = {
@@ -14,7 +14,7 @@ struct JellyfinAPI: Sendable {
         return new
     }()
 
-    func resumeItems(limit: Int = 10) async throws -> [JellyfinItem] {
+    func resumeItems(limit: Int = 10) async throws -> [TopShelfItem] {
         let url = endpoint(
             path: "/Users/\(session.userID)/Items/Resume",
             query: [
@@ -27,7 +27,7 @@ struct JellyfinAPI: Sendable {
         return response.items ?? []
     }
 
-    func nextUp(limit: Int = 10) async throws -> [JellyfinItem] {
+    func nextUp(limit: Int = 10) async throws -> [TopShelfItem] {
         let url = endpoint(
             path: "/Shows/NextUp",
             query: [
@@ -77,8 +77,8 @@ struct JellyfinAPI: Sendable {
     private static let fields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,ParentThumbImageTag"
 }
 
-private struct ItemsResponse: Decodable {
-    let items: [JellyfinItem]?
+nonisolated private struct ItemsResponse: Decodable {
+    let items: [TopShelfItem]?
     enum CodingKeys: String, CodingKey {
         case items = "Items"
     }

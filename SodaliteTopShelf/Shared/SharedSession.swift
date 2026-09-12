@@ -2,10 +2,10 @@ import Foundation
 import os.log
 import Security
 
-private let log = Logger(subsystem: "de.superuser404.Sodalite.TopShelf", category: "SharedSession")
+nonisolated private let log = Logger(subsystem: "de.superuser404.Sodalite.TopShelf", category: "SharedSession")
 
 /// Reads the active Jellyfin session from the shared keychain access group the main app mirrors into via SharedSessionMirror. Read-only; missing/undecodable slot is treated as no session (shelf renders empty).
-struct SharedSession: Sendable {
+nonisolated struct SharedSession: Sendable {
     let baseURL: URL
     let userID: String
     let accessToken: String
@@ -37,14 +37,14 @@ struct SharedSession: Sendable {
 }
 
 /// Mirrors KeychainKeys.sharedSession; duplicated so the extension stays source-independent from the main target.
-private let sharedSessionSlot = "tvOSSession_default"
+nonisolated private let sharedSessionSlot = "tvOSSession_default"
 
-enum SharedSessionKeys {
+nonisolated enum SharedSessionKeys {
     static let service = "de.superuser404.Sodalite.shared"
     static let accessGroup = "$(AppIdentifierPrefix)de.superuser404.Sodalite.shared"
 }
 
-private func readSharedKeychainData(account: String) -> Data? {
+nonisolated private func readSharedKeychainData(account: String) -> Data? {
     let query: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
         kSecAttrService as String: SharedSessionKeys.service,
@@ -60,7 +60,7 @@ private func readSharedKeychainData(account: String) -> Data? {
 }
 
 /// `$(AppIdentifierPrefix)` only expands in entitlement plists; at runtime recover the team-ID prefix by reading kSecAttrAccessGroup off any visible keychain item. Falls back to the raw entitlement value for a brand-new install with an empty keychain.
-private let resolvedAccessGroup: String = {
+nonisolated private let resolvedAccessGroup: String = {
     let query: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
         kSecMatchLimit as String: kSecMatchLimitOne,

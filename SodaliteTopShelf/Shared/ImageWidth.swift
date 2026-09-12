@@ -37,7 +37,9 @@
 ///
 /// Cast portraits keep their own per-tier `LayoutMetrics.castImageWidth`: a circle diameter, no
 /// `cardScale`, and it already derived itself correctly before any of this.
-enum ImageWidth {
+/// `nonisolated` for the same reason as the other members of `Shared/`: the app targets default to
+/// MainActor isolation, the extension defaults to nonisolated, and both compile this file.
+nonisolated enum ImageWidth {
 
     /// Thumbnail-sized art: the list rows on collection, playlist and Watch Stats
     /// (`LayoutMetrics.listPosterSize`, 140pt on tvOS), the player's episode and chapter dropdown
@@ -80,4 +82,14 @@ enum ImageWidth {
     /// extension's memory: a 1600x900 bitmap is 5.8MB, and the compositing pass holds two of them
     /// at once, which is why it stays serial.
     static let topShelfCell = 1600
+
+    /// What the shelf ASKS THE SERVER FOR, which is not what it draws. Jellyfin hands the stored
+    /// file over unresized when the requested width is not below the source, `format=Jpg` and
+    /// `quality` included, and resizes only above it. Measured against 10.10 on one 1920x1080
+    /// still: 196KB in 23ms passed through, against 604KB in 280ms for a 1600px resize of the same
+    /// picture, which is more bytes on the wire AND a Skia decode-resize-encode per image for a
+    /// result with fewer pixels. So the request is a safety cap against an oversized original
+    /// rather than a size we want, and the downscale to `topShelfCell` happens in our own decode,
+    /// where ImageIO does it without ever building the full bitmap.
+    static let topShelfSource = fullBleed
 }

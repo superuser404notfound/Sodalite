@@ -63,6 +63,43 @@ struct ResumeBarRendererTests {
         #expect(track.b < 90 && track.r < 90)
     }
 
+    /// A Next Up cell is rendered so the row is local files at one resolution, and for no other
+    /// reason: it has nothing to resume, so it must come back with bare artwork.
+    @Test("no fraction draws no bar")
+    func noFractionDrawsNoBar() throws {
+        let rendered = try #require(ResumeBarRenderer.render(source: Self.whiteJPEG(width: 400, height: 300),
+                                                             fraction: nil,
+                                                             accent: 0x00_7A_FF,
+                                                             maxPixelSize: 1024))
+        let image = try #require(Self.decode(rendered))
+        #expect(image.width == 400)
+        #expect(image.height == 225)
+
+        let bitmap = try #require(Self.bitmap(image))
+        let row = image.height - 15
+        for x in [60, 300] {
+            let pixel = bitmap.at(x, row)
+            #expect(pixel.r > 200 && pixel.g > 200 && pixel.b > 200)
+        }
+    }
+
+    /// The accent is in a cell's file name so a recolour re-renders it. A cell without a bar has no
+    /// accent in its pixels, so putting one in its name would re-render the whole Next Up row for a
+    /// colour it never draws.
+    @Test("only a cell with a bar is keyed on the accent")
+    func accentKeysOnlyBarredCells() throws {
+        let remote = try #require(URL(string: "https://example.invalid/Items/x/Images/Primary?tag=abc"))
+        let barred = ResumeBarArtwork.Cell(itemID: "x", remote: remote, fraction: 0.4)
+        let bare = ResumeBarArtwork.Cell(itemID: "x", remote: remote, fraction: nil)
+
+        #expect(ResumeBarArtwork.name(for: barred, accent: 0x00_7A_FF)
+            != ResumeBarArtwork.name(for: barred, accent: 0xEE_91_AD))
+        #expect(ResumeBarArtwork.name(for: bare, accent: 0x00_7A_FF)
+            == ResumeBarArtwork.name(for: bare, accent: 0xEE_91_AD))
+        #expect(ResumeBarArtwork.name(for: barred, accent: 0x00_7A_FF)
+            != ResumeBarArtwork.name(for: bare, accent: 0x00_7A_FF))
+    }
+
     @Test("16:9 artwork comes back at its own size")
     func sixteenNineRendersAtSourceSize() throws {
         let rendered = try #require(ResumeBarRenderer.render(source: Self.whiteJPEG(width: 1024, height: 576),

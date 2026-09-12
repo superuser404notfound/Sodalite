@@ -1,21 +1,21 @@
 import Foundation
 
 /// Subset of Jellyfin's item DTO the TopShelf renders; PascalCase keys so the same JSON the main app receives decodes here unmassaged. Codable (not just Decodable) so TopShelfCache can persist items for the offline fallback.
-struct JellyfinItem: Codable, Sendable {
+nonisolated struct TopShelfItem: Codable, Sendable {
     let id: String
     let name: String
-    let type: ItemType
+    let type: TopShelfItemType
     let seriesName: String?
     let seriesId: String?
     let parentIndexNumber: Int?
     let indexNumber: Int?
-    let imageTags: ImageTags?
+    let imageTags: TopShelfImageTags?
     let backdropImageTags: [String]?
     let parentBackdropImageTags: [String]?
     let parentThumbImageTag: String?
     let parentThumbItemId: String?
     let runTimeTicks: Int64?
-    let userData: UserData?
+    let userData: TopShelfUserData?
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -35,7 +35,7 @@ struct JellyfinItem: Codable, Sendable {
     }
 }
 
-enum ItemType: String, Codable, Sendable {
+nonisolated enum TopShelfItemType: String, Codable, Sendable {
     case movie = "Movie"
     case series = "Series"
     case episode = "Episode"
@@ -43,11 +43,11 @@ enum ItemType: String, Codable, Sendable {
 
     init(from decoder: Decoder) throws {
         let raw = try decoder.singleValueContainer().decode(String.self)
-        self = ItemType(rawValue: raw) ?? .unknown
+        self = TopShelfItemType(rawValue: raw) ?? .unknown
     }
 }
 
-struct ImageTags: Codable, Sendable {
+nonisolated struct TopShelfImageTags: Codable, Sendable {
     let primary: String?
     let thumb: String?
 
@@ -58,7 +58,7 @@ struct ImageTags: Codable, Sendable {
 }
 
 /// Per-user playback state; feeds the cell's resume bar.
-struct UserData: Codable, Sendable {
+nonisolated struct TopShelfUserData: Codable, Sendable {
     let playedPercentage: Double?
     let playbackPositionTicks: Int64?
 
@@ -68,7 +68,7 @@ struct UserData: Codable, Sendable {
     }
 }
 
-extension JellyfinItem {
+nonisolated extension TopShelfItem {
     /// Wide thumbnail for the carousel cell, along whichever chain the viewer picked in Settings
     /// (`TopShelfArtwork`). Episode resolution is capped at the server's image-extraction-width
     /// setting (320 old default, can't upscale client-side), which is the reason the choice exists:
@@ -94,6 +94,18 @@ extension JellyfinItem {
                                   parentThumbID: parentThumbItemId)
     }
 
+    /// The cell as the artwork renderer wants it. Both callers go through this: the extension when
+    /// it has to render on the spot, and the app when it renders ahead of time. Two mappings would
+    /// be two chances to pick a different picture, and the file names would then miss each other.
+    nonisolated func artworkCell(session: SharedSession,
+                                 artwork: TopShelfArtwork.Choice) -> ResumeBarArtwork.Cell? {
+        guard let remote = topShelfImageURL(baseURL: session.baseURL,
+                                            token: session.accessToken,
+                                            artwork: artwork)
+        else { return nil }
+        return ResumeBarArtwork.Cell(itemID: id, remote: remote, fraction: topShelfProgress)
+    }
+
     /// Resume bar for the cell. Percentage first (what /Items/Resume returns), ticks as the
     /// fallback for anything that only carries a position.
     var topShelfProgress: Double? {
@@ -111,11 +123,15 @@ extension JellyfinItem {
                                               title: name)
     }
 
-    /// format=Jpg so the image-cache daemon never hits a WebP/AVIF response ImageIO can choke on in the tight extension budget. The width is `ImageWidth.topShelfCell`, in the table the app asks from too (Sodalite#129). enableImageEnhancers=false skips a downscaling server transform; quality=100 avoids stacking JPEG loss on an already-thumbnail episode still.
+    /// format=Jpg so the image-cache daemon never hits a WebP/AVIF response ImageIO can choke on in
+    /// the tight extension budget, and it costs nothing on a JPEG source, which Jellyfin passes
+    /// through unconverted. The width is `ImageWidth.topShelfSource`, a cap rather than a request,
+    /// and no `quality`: both exist to stop the server re-encoding a file it could hand over as it
+    /// is. enableImageEnhancers=false skips a downscaling server transform.
     private func imageURL(baseURL: URL, itemID: String, kind: String, tag: String, token: String) -> URL? {
         var base = baseURL.absoluteString
         while base.hasSuffix("/") { base.removeLast() }
-        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfCell)&quality=100&format=Jpg&enableImageEnhancers=false&api_key=\(token)"
+        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfSource)&format=Jpg&enableImageEnhancers=false&api_key=\(token)"
         return URL(string: raw)
     }
 }

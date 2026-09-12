@@ -17,7 +17,7 @@ final class ContentProvider: TVTopShelfContentProvider {
             log.notice("No shared session in keychain; TopShelf will render empty.")
             return nil
         }
-        let api = JellyfinAPI(session: session)
+        let api = TopShelfAPI(session: session)
 
         async let resume = Self.fetch("resume") { try await api.resumeItems() }
         async let nextUp = Self.fetch("nextUp") { try await api.nextUp() }
@@ -45,19 +45,18 @@ final class ContentProvider: TVTopShelfContentProvider {
                           nextUp: nextUpItems).write()
         }
 
-        // Both rows. Next Up should hold nothing part-watched now that the query sends
-        // EnableResumable=false, but older servers ignore that parameter, and one row on the
-        // accent bar while the other keeps the white system bar looks worse than either alone.
-        // Items without progress are skipped before the cap, so on a current server this is free.
-        // The pass answers for the whole shelf or for none of it, so `bars` is either empty or
-        // covers every cell that has progress; a partial map is what put two bar styles and two
-        // resolutions in one row (Sodalite#128).
+        // Every cell of both rows, bar or no bar. The pass answers for the whole shelf or for none
+        // of it, so `bars` is either empty or covers every cell; a partial map is what put two bar
+        // styles and two resolutions in one row (Sodalite#128).
+        //
+        // Warm in the normal case: the app renders these when it has a reason to, so what happens
+        // here is a directory listing. The pass stays as the fallback for a shelf whose items
+        // changed while the app was closed, and it is the reason this can still cost seconds.
         let artwork = TopShelfArtwork.read()
-        let bars = await ResumeBarArtwork.prepare(items: resumeItems + nextUpItems,
-                                                  session: session,
-                                                  accent: TopShelfAccent.read(),
-                                                  artwork: artwork)
-        log.info("resume bars rendered=\(bars.count)")
+        let bars = await ResumeBarArtwork.prepare(cells: (resumeItems + nextUpItems)
+                                                      .compactMap { $0.artworkCell(session: session, artwork: artwork) },
+                                                  accent: TopShelfAccent.read())
+        log.info("shelf artwork rendered=\(bars.count)")
 
         var sections: [TVTopShelfItemCollection<TVTopShelfSectionedItem>] = []
 
@@ -90,7 +89,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
     /// `barURL` is artwork with the resume bar already drawn in. When it exists the system's own
     /// `playbackProgress` stays unset, otherwise the shelf stacks two bars on the same cell.
-    private func makeItem(item: JellyfinItem,
+    private func makeItem(item: TopShelfItem,
                           session: SharedSession,
                           barURL: URL?,
                           artwork: TopShelfArtwork.Choice) -> TVTopShelfSectionedItem {
@@ -119,7 +118,7 @@ final class ContentProvider: TVTopShelfContentProvider {
     }
 
     /// `sodalite://play/{id}`: the main app's `onOpenURL` opens the item's detail route and starts playback on arrival. The app still understands `sodalite://item/{id}` (detail without playing), the shelf just has no use for it.
-    private func playLink(for item: JellyfinItem) -> URL {
+    private func playLink(for item: TopShelfItem) -> URL {
         URL(string: "sodalite://play/\(item.id)")!
     }
 
@@ -139,7 +138,7 @@ final class ContentProvider: TVTopShelfContentProvider {
     }
 
     /// nil is a failed fetch, [] is a genuinely empty section; the cache fallback needs to tell them apart.
-    private static func fetch(_ label: String, _ work: () async throws -> [JellyfinItem]) async -> [JellyfinItem]? {
+    private static func fetch(_ label: String, _ work: () async throws -> [TopShelfItem]) async -> [TopShelfItem]? {
         do {
             return try await work()
         } catch {

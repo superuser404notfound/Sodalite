@@ -32,8 +32,10 @@ enum ResumeBarRenderer {
     /// `maxPixelSize` caps the decode at the width the cell draws. ImageIO downsamples during the
     /// decode, so a picture larger than the cell never becomes a full-size bitmap in an extension
     /// with a hard memory ceiling.
+    /// `fraction` nil renders the artwork alone: a Next Up cell has nothing to resume, and it is
+    /// rendered only so the whole row is local files at one resolution.
     nonisolated static func render(source: Data,
-                                   fraction: Double,
+                                   fraction: Double?,
                                    accent: UInt32,
                                    maxPixelSize: Int) -> Data? {
         guard let image = decode(source, maxPixelSize: maxPixelSize),
@@ -54,7 +56,9 @@ enum ResumeBarRenderer {
                                        y: canvas.originY,
                                        width: image.width,
                                        height: image.height))
-        drawBar(in: context, bounds: bounds, fraction: fraction, accent: accent)
+        if let fraction {
+            drawBar(in: context, bounds: bounds, fraction: fraction, accent: accent)
+        }
 
         guard let composited = context.makeImage() else { return nil }
         return encodeJPEG(composited)

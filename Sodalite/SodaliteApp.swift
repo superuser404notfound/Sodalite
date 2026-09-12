@@ -118,6 +118,9 @@ struct SodaliteApp: App {
                 // shelf back to a free accent along with the rest of the app.
                 .task(id: theme.palette.control.hex) {
                     TopShelfAccent.write(theme.palette.control.hex)
+                    // The accent is part of every rendered cell's file name, so a change leaves the
+                    // shelf holding artwork nothing will ask for again.
+                    TopShelfRefresher.invalidate()
                 }
                 // Same bridge, same reason: the extension cannot read the app's preferences.
                 .task(id: dependencies.appearancePreferences.showTopShelfRow) {
