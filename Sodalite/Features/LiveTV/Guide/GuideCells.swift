@@ -24,10 +24,7 @@ struct GuideProgramCellContent: View {
             if hasTimer {
                 Circle().fill(Color.Theme.recording).frame(width: 10, height: 10)
             }
-            Text(title)
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
+            titleLabel
                 .foregroundStyle(isFocused ? Color.black : Color.white)
             Spacer(minLength: 0)
         }
@@ -46,6 +43,27 @@ struct GuideProgramCellContent: View {
         // A three-minute program is a cell a few points wide. Clipping beats letting the label push
         // the block's own geometry around.
         .clipped()
+    }
+
+    /// Two sizes, never a continuum (#137 round 2). This used to be `minimumScaleFactor(0.85)`,
+    /// which is not a second size but a floor: SwiftUI shrinks each cell by whatever fraction makes
+    /// it fit, and it does that per cell, so the band from 32.3 to 38pt was open and a sample row
+    /// measured three line pitches in it. Two neighbours with the same line count sat at different
+    /// sizes, and since the type moves the baselines with it, at different apparent padding. The
+    /// floor also failed at its own job, a title too long even at 0.85 coming back shrunk AND cut.
+    ///
+    /// The step keeps the weight (headline is semibold) so that it reads as the same label one size
+    /// down rather than as a different kind of text.
+    ///
+    /// The first branch carries no `lineLimit` on purpose: that is the measurement. A clamped label
+    /// reports the height of its clamp rather than of its text, so it always "fits" and the step
+    /// never engages. Unclamped, it is chosen exactly when the title wraps inside the row (one or
+    /// two headline lines), and a longer title falls to the step below, where it truncates.
+    @ViewBuilder private var titleLabel: some View {
+        ViewThatFits(in: .vertical) {
+            Text(title).font(.headline)
+            Text(title).font(.subheadline.weight(.semibold)).lineLimit(2)
+        }
     }
 }
 
@@ -75,23 +93,8 @@ struct GuideChannelCellContent: View {
             }
             .frame(width: metrics.channelLogoSize, height: metrics.channelLogoSize)
 
-            VStack(alignment: .leading, spacing: 2) {
-                // Two lines and a scale floor: IPTV providers suffix names with "(1080p)" and
-                // similar, and one line at headline size truncated them to about six characters,
-                // which made neighbouring channels indistinguishable on the device.
-                Text(name)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
-                    .foregroundStyle(isFocused ? Color.black : Color.white)
-                if let number {
-                    Text(number)
-                        .font(.caption)
-                        .foregroundStyle(isFocused ? AnyShapeStyle(Color.black.opacity(0.7))
-                                                   : AnyShapeStyle(.secondary))
-                }
-            }
-            Spacer(minLength: 0)
+            nameBlock
+                .frame(maxWidth: .infinity, alignment: .leading)
             if isFavorite {
                 Image(systemName: "star.fill")
                     .resizable()
@@ -103,6 +106,51 @@ struct GuideChannelCellContent: View {
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(isFocused ? AnyShapeStyle(tint) : AnyShapeStyle(Color.Theme.surface))
+    }
+
+    /// The second line IPTV names need (they are suffixed "(1080p)" and similar, and one line at
+    /// headline size cut them down to about six characters, 8ecf6f39), paid for this time.
+    ///
+    /// `lineLimit(2)` plus `minimumScaleFactor(0.8)` promised it and delivered neither half as soon
+    /// as the channel carried a number, which is the normal case: two headline lines (90.70) over
+    /// the number (29.83) want 122.53 of a 100pt row, and SwiftUI pays a vertical overflow with a
+    /// TEXT LINE, so every long name came back on ONE truncated line ("Sky Sport Bun..."). The floor
+    /// never engaged either, because a label shrinks only when shrinking makes it fit, and at a
+    /// width that holds 13 characters it does not. With the number absent the two lines do appear,
+    /// which is why this read as working.
+    ///
+    /// Stepped down the block measures 98.5 of the 100 hosted. The number moved from caption to
+    /// caption2 to get there: at caption it came to 101 and spent the second line on the overflow
+    /// again, one point short.
+    @ViewBuilder private var nameBlock: some View {
+        ViewThatFits(in: .vertical) {
+            nameAndNumber(font: .headline, spacing: 2, lineLimit: nil)
+                .fixedSize(horizontal: false, vertical: true)
+            nameAndNumber(font: .subheadline.weight(.semibold), spacing: 0, lineLimit: 2)
+        }
+    }
+
+    /// Two things make the measurement honest, and without either one the step never engages and
+    /// the name silently truncates instead.
+    ///
+    /// The candidate is unclamped, because a label clamped to two lines reports the height of its
+    /// clamp rather than of its text and therefore always fits. And it is fixed vertically, because
+    /// a STACK asked for a height it cannot meet compresses its text instead and reports the height
+    /// it was given: measured here, the block wants 167pt and answers "100" without it. A bare
+    /// `Text` answers 136 and needs no such help, which is why the program block above has none.
+    private func nameAndNumber(font: Font, spacing: CGFloat, lineLimit: Int?) -> some View {
+        VStack(alignment: .leading, spacing: spacing) {
+            Text(name)
+                .font(font)
+                .lineLimit(lineLimit)
+                .foregroundStyle(isFocused ? Color.black : Color.white)
+            if let number {
+                Text(number)
+                    .font(.caption2)
+                    .foregroundStyle(isFocused ? AnyShapeStyle(Color.black.opacity(0.7))
+                                               : AnyShapeStyle(.secondary))
+            }
+        }
     }
 }
 
