@@ -122,21 +122,28 @@ enum ResumeBarArtwork {
     }
 
     nonisolated private struct Download: Sendable {
-        let candidate: Candidate
+        let url: URL
         let data: Data?
     }
 
     /// Downloads overlap, compositing stays serial: the network is what makes a pass slow, and
     /// CoreGraphics is what the memory ceiling cares about.
+    ///
+    /// One download per PICTURE, not per cell. Under the Thumb and Backdrop options every episode
+    /// of a show points at the same show-level artwork, so a shelf with four episodes of one series
+    /// asked for the same file four times; the cells still differ, because each burns in its own
+    /// resume bar.
     nonisolated private static func render(_ pending: [Candidate], accent: UInt32) async -> [String: URL] {
         let started = Date()
         var done: [String: URL] = [:]
+        let sources = Dictionary(grouping: pending, by: { $0.cell.remote })
+        let urls = Array(sources.keys)
 
         await withTaskGroup(of: Download.self) { group in
             var next = 0
-            while next < pending.count, next < maxConcurrentDownloads {
-                let candidate = pending[next]
-                group.addTask { Download(candidate: candidate, data: await download(candidate.cell.remote)) }
+            while next < urls.count, next < maxConcurrentDownloads {
+                let url = urls[next]
+                group.addTask { Download(url: url, data: await download(url)) }
                 next += 1
             }
 
@@ -146,14 +153,14 @@ enum ResumeBarArtwork {
                     group.cancelAll()
                     continue
                 }
-                if next < pending.count {
-                    let candidate = pending[next]
-                    group.addTask { Download(candidate: candidate, data: await download(candidate.cell.remote)) }
+                if next < urls.count {
+                    let url = urls[next]
+                    group.addTask { Download(url: url, data: await download(url)) }
                     next += 1
                 }
                 guard let data = outcome.data else { continue }
-                if persist(data, for: outcome.candidate, accent: accent) {
-                    done[outcome.candidate.cell.itemID] = outcome.candidate.destination
+                for candidate in sources[outcome.url] ?? [] where persist(data, for: candidate, accent: accent) {
+                    done[candidate.cell.itemID] = candidate.destination
                 }
             }
         }
