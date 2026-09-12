@@ -44,3 +44,28 @@ enum AppTab: String, CaseIterable, Sendable {
         }
     }
 }
+
+// MARK: - Optional tabs
+
+/// Live TV and Music exist only on servers that offer them, so the tab set is probed per server
+/// and assembled here. One function, because the three probe sites (server switch, login
+/// completion, outage recovery) each carried their own copy of the same assembly and drifted
+/// apart (Sodalite#141).
+extension AppTab {
+    /// The tabs every server has. The probed set is built by inserting into this.
+    static var baseTabs: [AppTab] {
+        allCases.filter { $0 != .music && $0 != .liveTV }
+    }
+
+    /// Order: Home, [Live TV,] Catalog, Search, [Music,] Settings.
+    static func probedTabs(hasLiveTV: Bool, hasMusic: Bool) -> [AppTab] {
+        var tabs = baseTabs
+        if hasLiveTV, let homeIndex = tabs.firstIndex(of: .home) {
+            tabs.insert(.liveTV, at: homeIndex + 1)
+        }
+        if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
+            tabs.insert(.music, at: settingsIndex)
+        }
+        return tabs
+    }
+}

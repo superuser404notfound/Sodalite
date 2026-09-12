@@ -3,7 +3,7 @@ import UIKit
 
 struct TabRootView: View {
     @State private var selectedTab: AppTab = .home
-    @State private var availableTabs: [AppTab] = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
+    @State private var availableTabs: [AppTab] = AppTab.baseTabs
     /// Last requestContentReload this view answered, so a reappear does not re-probe a signal it
     /// already handled.
     @State private var lastHandledContentReload = 0
@@ -12,6 +12,10 @@ struct TabRootView: View {
     @State private var lastProbedServerSwitch = -1
     /// Re-probe triggered by .loginDidComplete (add-server / add-profile authenticates via setAuthenticated WITHOUT bumping serverDidSwitch, so the serverDidSwitch probe never fires for the new server).
     @State private var loginProbeTask: Task<Void, Never>?
+    /// Server the tabs currently on screen were probed for. Lets a login completion tell "another
+    /// profile on THIS server" (nothing stale, leave the bar alone) from "another server" (the
+    /// visible Live TV tab points at a backend that is gone). Sodalite#141.
+    @State private var tabsProbedForServerID: String?
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
     @Environment(\.appearanceTheme) private var appearanceTheme
@@ -154,7 +158,7 @@ struct TabRootView: View {
                 }
             }
             if isServerSwitch {
-                let base = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
+                let base = AppTab.baseTabs
                 availableTabs = base
                 if !base.contains(selectedTab) {
                     selectedTab = .home
@@ -176,15 +180,12 @@ struct TabRootView: View {
             }
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
-            // Order: Home, [Live TV,] Catalog, Search, [Music,] Settings.
-            var tabs = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
-            if hasLive, let homeIndex = tabs.firstIndex(of: .home) {
-                tabs.insert(.liveTV, at: homeIndex + 1)
-            }
-            if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
-                tabs.insert(.music, at: settingsIndex)
-            }
-            if tabs != availableTabs {
+            tabsProbedForServerID = appState.activeServer?.id
+            if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
+                onScreen: availableTabs,
+                hasLiveTV: hasLive,
+                hasMusic: hasMusic
+            ) {
                 availableTabs = tabs
             }
         }
@@ -229,13 +230,26 @@ struct TabRootView: View {
         }
     }
 
-    /// Re-evaluates the optional Live TV / Music tabs for the now-active server after a login completion. Drops the previous server's optional tabs first (so a stale, crash-prone Live TV tab is gone immediately), then probes the new backend and republishes. Mirrors the serverDidSwitch probe; kept separate so that device-verified path stays untouched.
+    /// Re-evaluates the optional Live TV / Music tabs for the now-active server after a login completion, then publishes only a real change.
+    ///
+    /// The stale-tab drop is conditional, and that is the whole point of Sodalite#141: it costs the
+    /// Settings tab its navigation stack (device-verified in Sodalite#62), so it is paid only where
+    /// it buys something. Adding a SERVER leaves a Live TV tab pointing at a backend that is gone,
+    /// and tapping it crashes the EPG stack, so there the teardown is worth the stack. Adding
+    /// another PROFILE on the same server has nothing stale to drop, and the teardown stranded the
+    /// user on the settings root instead, after the add-profile focus push had already aimed at the
+    /// screen it removed.
     @MainActor
     private func recomputeOptionalTabsAfterLogin() async {
-        let base = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
-        availableTabs = base
-        if !base.contains(selectedTab) {
-            selectedTab = .home
+        if let base = OptionalTabPolicy.setToPublishBeforeLoginProbe(
+            onScreen: availableTabs,
+            probedServerID: tabsProbedForServerID,
+            activeServerID: appState.activeServer?.id
+        ) {
+            availableTabs = base
+            if !base.contains(selectedTab) {
+                selectedTab = .home
+            }
         }
         guard let userID = dependencies.activeUserID else { return }
 
@@ -249,25 +263,23 @@ struct TabRootView: View {
         }
         if Task.isCancelled { return }
 
-        var tabs = base
-        if hasLive, let homeIndex = tabs.firstIndex(of: .home) {
-            tabs.insert(.liveTV, at: homeIndex + 1)
-        }
-        if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
-            tabs.insert(.music, at: settingsIndex)
-        }
-        if tabs != availableTabs {
+        tabsProbedForServerID = appState.activeServer?.id
+        if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
+            onScreen: availableTabs,
+            hasLiveTV: hasLive,
+            hasMusic: hasMusic
+        ) {
             availableTabs = tabs
         }
     }
 
     /// Re-probes the optional tabs after an outage hid them, and publishes only if the answer changed.
     ///
-    /// Deliberately does NOT clear to the base set first, which is the one thing separating it from
-    /// the login variant above: nothing here is stale, it is missing, and dropping tabs that are
-    /// already showing would flicker the bar for a signal that usually changes nothing. The two
-    /// existing probes are left exactly as they are because both are device-verified against tvOS's
-    /// mid-session icon re-templating (see publishing note in the switch probe).
+    /// Never clears to the base set first: nothing here is stale, it is missing, and dropping tabs
+    /// that are already showing would rebuild the bar for a signal that usually changes nothing
+    /// (Sodalite#122). The login probe now makes the same trade for the same reason whenever the
+    /// server did not change (Sodalite#141); the server switch is the one site that still clears
+    /// unconditionally, because there the tabs on screen belong to a backend that is gone.
     @MainActor
     private func recoverOptionalTabs() async {
         guard let userID = dependencies.activeUserID else { return }
@@ -282,16 +294,12 @@ struct TabRootView: View {
         }
         if Task.isCancelled { return }
 
-        // One assignment, for the same reason as the other two: two insertions rebuild the bar twice
-        // and strand the first item on tvOS's gray icon template.
-        var tabs = AppTab.allCases.filter { $0 != .music && $0 != .liveTV }
-        if hasLive, let homeIndex = tabs.firstIndex(of: .home) {
-            tabs.insert(.liveTV, at: homeIndex + 1)
-        }
-        if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
-            tabs.insert(.music, at: settingsIndex)
-        }
-        if tabs != availableTabs {
+        tabsProbedForServerID = appState.activeServer?.id
+        if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
+            onScreen: availableTabs,
+            hasLiveTV: hasLive,
+            hasMusic: hasMusic
+        ) {
             availableTabs = tabs
         }
     }
