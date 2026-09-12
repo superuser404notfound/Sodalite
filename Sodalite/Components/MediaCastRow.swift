@@ -11,6 +11,53 @@ struct CastMember: Identifiable, Hashable, Sendable {
     let jellyfinPersonID: String?
 }
 
+extension CastMember {
+    /// The same person's next credit folded into this one: the jobs join, the first entry keeps the
+    /// rest, and a portrait that hangs on the later credit is picked up rather than dropped.
+    func mergingCredit(_ other: CastMember) -> CastMember {
+        var jobs: [String] = []
+        for job in [role, other.role] {
+            let trimmed = job?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            guard !trimmed.isEmpty,
+                  !jobs.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame })
+            else { continue }
+            jobs.append(trimmed)
+        }
+        return CastMember(
+            id: id,
+            name: name,
+            role: jobs.isEmpty ? nil : jobs.joined(separator: ", "),
+            imageURL: imageURL ?? other.imageURL,
+            personID: personID ?? other.personID,
+            jellyfinPersonID: jellyfinPersonID ?? other.jellyfinPersonID
+        )
+    }
+}
+
+extension Array where Element == CastMember {
+    /// One card per person. The row identifies its cards by person id, and a repeated id makes
+    /// SwiftUI's ForEach "give undefined results", measured on tvOS 26 as a slot that holds its
+    /// space and draws nothing (Big Buck Bunny, whose writer also directed it, so Jellyfin sends
+    /// him twice under one id). Other update paths break differently: the row keeping the previous
+    /// item's cast, or staying empty. TMDB does the same for an actor credited with two characters.
+    ///
+    /// Caps, filters and the server's order stay the caller's business, so this only folds the
+    /// repeats into the place their first credit already holds.
+    func mergingDuplicatePeople() -> [CastMember] {
+        var merged: [CastMember] = []
+        var positionByID: [String: Int] = [:]
+        for member in self {
+            if let position = positionByID[member.id] {
+                merged[position] = merged[position].mergingCredit(member)
+            } else {
+                positionByID[member.id] = merged.count
+                merged.append(member)
+            }
+        }
+        return merged
+    }
+}
+
 /// Horizontal strip of cast portraits; `onSelect` nil makes the cards non-interactive.
 struct MediaCastRow: View {
     /// nil suppresses the built-in heading, for callers that draw their own section header.
@@ -37,7 +84,7 @@ struct MediaCastRow: View {
                 // Top-aligned: a two-line role (or a member with no role at all) makes cards
                 // differ in height, and centering would push their portraits out of line.
                 LazyHStack(alignment: .top, spacing: metrics.itemSpacing) {
-                    ForEach(members) { member in
+                    ForEach(members.mergingDuplicatePeople()) { member in
                         MediaCastCard(
                             member: member,
                             portrait: metrics.castPortrait,
