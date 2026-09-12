@@ -21,8 +21,10 @@ enum TopShelfArtwork {
         case thumb
     }
 
-    /// What the shelf drew before there was a choice, so an untouched install keeps its picture.
-    nonisolated static let fallback: Choice = .still
+    /// Read before the app has ever written a value. Has to agree with the app's own default, or a
+    /// viewer who never opens the setting gets one picture until the first launch and another after
+    /// it; `TopShelfArtworkTests` pins the pair.
+    nonisolated static let fallback: Choice = .thumb
 
     nonisolated static let defaultsKey = "topshelf.artwork"
 

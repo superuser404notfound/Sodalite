@@ -189,8 +189,8 @@ struct AppearanceSettingsPayload: Codable, Equatable {
     /// nil from a build without the Top Shelf switch. Defaults to TRUE, not false: absent means
     /// "that build had no opinion", and the row was on for everyone before the switch existed.
     var showTopShelfRow: Bool
-    /// nil from a build without the Top Shelf artwork choice. Defaults to the episode image, which
-    /// is what those builds drew.
+    /// nil from a build without the Top Shelf artwork choice. Defaults to the same value a fresh
+    /// install picks, so an older record cannot quietly move a receiver off the current default.
     var topShelfImage: String
     /// nil from a build without the library name switch (Sodalite#84); false is what those builds
     /// drew, so a plain default matches what the sender was actually showing.
@@ -219,7 +219,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         spoilerHideMovies: Bool = false,
         showPosterBadges: Bool = false,
         showTopShelfRow: Bool = true,
-        topShelfImage: String = "still",
+        topShelfImage: String = "thumb",
         showLibraryNames: Bool = false,
         showPosterProgress: Bool = false,
         showCommunityRating: Bool = true,
@@ -288,7 +288,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         spoilerHideMovies = try values.decodeIfPresent(Bool.self, forKey: .spoilerHideMovies) ?? false
         showPosterBadges = try values.decodeIfPresent(Bool.self, forKey: .showPosterBadges) ?? false
         showTopShelfRow = try values.decodeIfPresent(Bool.self, forKey: .showTopShelfRow) ?? true
-        topShelfImage = try values.decodeIfPresent(String.self, forKey: .topShelfImage) ?? "still"
+        topShelfImage = try values.decodeIfPresent(String.self, forKey: .topShelfImage) ?? "thumb"
         showLibraryNames = try values.decodeIfPresent(Bool.self, forKey: .showLibraryNames) ?? false
         showPosterProgress = try values.decodeIfPresent(Bool.self, forKey: .showPosterProgress) ?? false
         showCommunityRating = try values.decodeIfPresent(Bool.self, forKey: .showCommunityRating) ?? true

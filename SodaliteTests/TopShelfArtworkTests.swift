@@ -109,6 +109,25 @@ struct TopShelfArtworkTests {
             == TopShelfArtwork.Source(itemID: "ep", kind: .primary, tag: "still-tag"))
     }
 
+    /// The extension reads its own fallback until the app has written the mirror once, which on a
+    /// fresh install is the whole first launch. Two defaults that disagree would change the shelf's
+    /// picture under a viewer who never opened the setting.
+    @Test("both sides default to the show's Thumb")
+    func defaultsAgree() {
+        let scratch = UserDefaults(suiteName: "topShelfArtwork.\(UUID().uuidString)")!
+        #expect(AppearancePreferences(store: scratch).topShelfImage.rawValue
+            == TopShelfArtwork.fallback.rawValue)
+        #expect(TopShelfArtwork.fallback == .thumb)
+        #expect(AppearanceSettingsPayload(updatedAt: .distantPast,
+                                          accentChoice: "systemBlue",
+                                          backgroundStyle: "graphiteGlass",
+                                          showContentLogos: true,
+                                          continueWatchingImage: "still",
+                                          largeCards: false,
+                                          nowPlayingUsesSeriesPoster: false).topShelfImage
+            == TopShelfArtwork.fallback.rawValue)
+    }
+
     @Test("an item with no artwork at all resolves to nothing")
     func noArtworkAtAll() {
         let bare = TopShelfArtwork.Available(isEpisode: true, itemID: "ep")
