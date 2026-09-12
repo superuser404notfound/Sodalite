@@ -154,6 +154,7 @@
 		21F6A56F0A2B20C0B254A484 /* JellyfinEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E5CFBC331D8C9C23D2D0A4 /* JellyfinEndpoints.swift */; };
 		22056DCC1DEEAD590A13DF92 /* DiagnosticLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84FFA0F16CB71960B207129 /* DiagnosticLogView.swift */; };
 		220ECFD0EA61845A4CC696A8 /* MusicPlaybackCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B5EC01B133010A8DEF1159 /* MusicPlaybackCoordinator.swift */; };
+		227B5F023BAFAFFE1E090E3F /* CastMemberMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEE370557AF1BA212E3AC52 /* CastMemberMergeTests.swift */; };
 		22D9FD8D81022DDD3C29A28E /* PrefetchedPlaybackInfoIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CB9C10891323BE82F624A1 /* PrefetchedPlaybackInfoIdentityTests.swift */; };
 		22EFDA502DA9F1A03824876C /* AccentColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367B00A12CB554D4C5961786 /* AccentColorPickerView.swift */; };
 		2335E7F547AA09125FE5DB98 /* LiveTransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F5CE78EAB9F5BC71D0CF0B /* LiveTransportBar.swift */; };
@@ -1447,6 +1448,7 @@
 		7B64F1EE31169C532CA8B766 /* TopShelfCachePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfCachePolicyTests.swift; sourceTree = "<group>"; };
 		7BC0FFB550FE99D21023289B /* PlayerThemeBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerThemeBoundaryTests.swift; sourceTree = "<group>"; };
 		7BDEC2C2F2CA5E9291CBB42D /* JellyfinServer+DualURLPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JellyfinServer+DualURLPrompt.swift"; sourceTree = "<group>"; };
+		7BEE370557AF1BA212E3AC52 /* CastMemberMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastMemberMergeTests.swift; sourceTree = "<group>"; };
 		7BF8E24A5047D7DB3C84A8EF /* TrickplayTileSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrickplayTileSet.swift; sourceTree = "<group>"; };
 		7C1986FAE23765CA9C8B1537 /* TopShelfProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfProgress.swift; sourceTree = "<group>"; };
 		7C4B32323A24B19AED9B590D /* LiveSubtitleTracksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSubtitleTracksTests.swift; sourceTree = "<group>"; };
@@ -1994,6 +1996,7 @@
 				34D645BDAC050F8D2C30C5A3 /* BackgroundRendererMotionTests.swift */,
 				AEA2CF2E69FD9FD5D5D8E747 /* BitmapSubtitleCanvasTests.swift */,
 				55F3667ADD69A9E32E9CF83B /* BufferedProgressTests.swift */,
+				7BEE370557AF1BA212E3AC52 /* CastMemberMergeTests.swift */,
 				DFB899A50BF5D75B69C96FD3 /* CertificateErrorClassificationTests.swift */,
 				8E9945D8F314B35B5FCF63E8 /* CertificateTrustPromptTests.swift */,
 				1ABB54BA5E94C8A309B6849A /* ChannelListRowTests.swift */,
@@ -3519,6 +3522,7 @@
 				28F6E65D5A04655537B7A03B /* BackgroundRendererMotionTests.swift in Sources */,
 				AEB8A371368F211C25D33840 /* BitmapSubtitleCanvasTests.swift in Sources */,
 				4C1CFA98092A985FCF100E60 /* BufferedProgressTests.swift in Sources */,
+				227B5F023BAFAFFE1E090E3F /* CastMemberMergeTests.swift in Sources */,
 				70388189FBF4CEDCC82248D9 /* CertificateErrorClassificationTests.swift in Sources */,
 				11E852706E2B76F8A508A45E /* CertificateTrustPromptTests.swift in Sources */,
 				F68119DB72333EA512C8C7D6 /* ChannelListRowTests.swift in Sources */,
