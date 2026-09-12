@@ -16,11 +16,22 @@ struct HomeFeedPersistenceTests {
     /// must not read as a failure.
     final class FeedService: JellyfinLibraryServiceProtocol, @unchecked Sendable {
         let resumeItems: [JellyfinItem]
+        let libraries: [JellyfinLibrary]
         let failsEverything: Bool
+        /// The library list alone failing, with the rows still answering: the case that decides
+        /// whether a stored My Media row survives a load it could not refresh.
+        let failsLibraries: Bool
 
-        init(resumeItems: [JellyfinItem], failsEverything: Bool = false) {
+        init(
+            resumeItems: [JellyfinItem],
+            libraries: [JellyfinLibrary] = [],
+            failsEverything: Bool = false,
+            failsLibraries: Bool = false
+        ) {
             self.resumeItems = resumeItems
+            self.libraries = libraries
             self.failsEverything = failsEverything
+            self.failsLibraries = failsLibraries
         }
 
         struct Unused: Error {}
@@ -31,8 +42,8 @@ struct HomeFeedPersistenceTests {
         }
 
         func getLibraries(userID: String) async throws -> [JellyfinLibrary] {
-            if failsEverything { throw Unused() }
-            return []
+            if failsEverything || failsLibraries { throw Unused() }
+            return libraries
         }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] {
             throw Unused()
@@ -90,13 +101,17 @@ struct HomeFeedPersistenceTests {
         let neighbour = CacheIdentity(serverID: identity.serverID, userID: "other-\(UUID().uuidString)")
         defer { forget(identity); forget(neighbour) }
 
-        let first = makeViewModel(service: FeedService(resumeItems: [item("m1")]), identity: identity)
+        let first = makeViewModel(
+            service: FeedService(resumeItems: [item("m1")], libraries: [Self.movies]),
+            identity: identity
+        )
         await first.loadContent()
 
         let otherProfile = makeViewModel(service: FeedService(resumeItems: []), identity: neighbour)
         #expect(otherProfile.rows.isEmpty)
         #expect(otherProfile.isLoading)
         #expect(!otherProfile.isShowingCachedFeed)
+        #expect(otherProfile.myMediaLibraries.isEmpty, "another profile's library list is not this one's")
     }
 
     /// The trap the grid path documents: a load that answered nothing must not replace a good entry
@@ -173,6 +188,79 @@ struct HomeFeedPersistenceTests {
         await switched.reloadAfterServerSwitch()
 
         #expect(switched.rows.first?.items.map(\.id) == ["m1"], "the switch blanked a cached feed")
+    }
+
+    /// A library a viewer can browse, so the My Media row has something to paint.
+    static let movies = JellyfinLibrary(
+        id: "lib-movies", name: "Movies", collectionType: "movies", imageTags: nil
+    )
+
+    /// The gap the first retest of the shipped cache found (classicjazz, Sodalite#117): every row
+    /// paints from disk, so My Media was left as the one section still waiting a round trip, about
+    /// a second behind the shelf above it. The library list has no fetched row behind it, so it has
+    /// to travel in the feed entry or it cannot be painted early at all.
+    @Test("My Media paints from disk before the library list answers")
+    func libraryListSurvivesIntoTheNextViewModel() async {
+        let identity = makeIdentity()
+        defer { forget(identity) }
+
+        let first = makeViewModel(
+            service: FeedService(resumeItems: [item("m1")], libraries: [Self.movies]),
+            identity: identity
+        )
+        await first.loadContent()
+        #expect(first.myMediaLibraries.map(\.id) == ["lib-movies"], "precondition: the fetch filled it")
+
+        // A second view model on the same identity, before it is allowed to fetch anything.
+        let second = makeViewModel(service: FeedService(resumeItems: []), identity: identity)
+        #expect(second.myMediaLibraries.map(\.id) == ["lib-movies"])
+    }
+
+    /// Same trap as the rows: a load whose library fetch failed must not replace a good entry with
+    /// an empty one, on screen or on disk.
+    @Test("a failed library fetch leaves the stored library list alone")
+    func failedLibraryFetchDoesNotWipeMyMedia() async {
+        let identity = makeIdentity()
+        defer { forget(identity) }
+
+        let first = makeViewModel(
+            service: FeedService(resumeItems: [item("m1")], libraries: [Self.movies]),
+            identity: identity
+        )
+        await first.loadContent()
+
+        let degraded = makeViewModel(
+            service: FeedService(resumeItems: [item("m1")], failsLibraries: true),
+            identity: identity
+        )
+        await degraded.loadContent()
+        #expect(degraded.myMediaLibraries.map(\.id) == ["lib-movies"], "a transient failure blanked My Media")
+
+        let afterwards = makeViewModel(service: FeedService(resumeItems: []), identity: identity)
+        #expect(afterwards.myMediaLibraries.map(\.id) == ["lib-movies"], "it was written away as empty")
+    }
+
+    /// The library list is in-memory only and the switch never cleared it, which the blanking used
+    /// to hide. A shelf that repaints has to answer the same question the rows do: what is on screen
+    /// belongs to the identity being switched TO, never to the one being left.
+    @Test("a server switch repaints My Media from the destination, not from the server being left")
+    func serverSwitchReplacesTheLibraryList() async {
+        let destination = makeIdentity()
+        defer { forget(destination) }
+
+        let outgoing = JellyfinLibrary(
+            id: "lib-outgoing", name: "Other server", collectionType: "movies", imageTags: nil
+        )
+        let switched = makeViewModel(
+            service: FeedService(resumeItems: [], failsEverything: true), identity: destination
+        )
+        switched.myMediaLibraries = [outgoing]
+        await switched.reloadAfterServerSwitch()
+
+        #expect(
+            switched.myMediaLibraries.isEmpty,
+            "the outgoing server's libraries stayed on screen, tappable under the new session"
+        )
     }
 
     /// The uniqueness guarantee is the row's, not the writer's, so it has to hold on the way back in

@@ -86,19 +86,30 @@ final class HomeViewModel {
     /// too, but it does so a runloop turn later, which is long enough for a row disabled in
     /// Customize to flash on screen once per launch.
     private func hydrateFeedFromCache() {
-        let usable = cachedFeed()
-        guard !usable.isEmpty else { return }
-        rows = usable
+        let cached = cachedFeed()
+        // My Media is the one section with no fetched row behind it, so without the stored list it
+        // was the only one still waiting a round trip while everything above it came off disk
+        // (about a second behind the shelf, measured by classicjazz on the first build to carry the
+        // cache). It is not evidence of anything: a list alone paints nothing, because Home is
+        // still behind the spinner until a row lands.
+        myMediaLibraries = cached.libraries
+        guard !cached.rows.isEmpty else { return }
+        rows = cached.rows
         isShowingCachedFeed = true
         isLoading = false
     }
 
     /// The persisted feed, minus rows the stored config no longer plans. Empty when there is
     /// nothing to paint, which both callers read as "behave the way this did before the cache".
-    private func cachedFeed() -> [HomeRowData] {
-        guard let cached = FilterCache.shared.homeFeed(identity: cacheIdentity) else { return [] }
+    private func cachedFeed() -> FilterCache.HomeFeed {
+        guard let cached = FilterCache.shared.homeFeed(identity: cacheIdentity) else {
+            return FilterCache.HomeFeed(rows: [], libraries: [])
+        }
         let planned = Set(plannedRows(from: rowConfigs).map(\.id))
-        return cached.filter { planned.contains($0.id) }
+        return FilterCache.HomeFeed(
+            rows: cached.rows.filter { planned.contains($0.id) },
+            libraries: cached.libraries
+        )
     }
 
     /// Reload after a config change, coalesced. Deliberately not a flag consumed by the view's onAppear: iOS presents Settings as a sheet over the tab bar, and a sheet dismiss fires no onAppear underneath, so a pending flag survived until relaunch (tvOS Settings is a tab, which did re-appear Home). Same reason the iCloud-sync poster needs this.
@@ -355,7 +366,10 @@ final class HomeViewModel {
         // refresh that produced nothing must never replace a good entry with an empty one. On the
         // main actor like the precompute's writes, so a later read cannot overtake it.
         if sawAnyResult {
-            FilterCache.shared.setHomeFeed(rows, identity: cacheIdentity)
+            // `myMediaLibraries` is whatever is on screen: the list this load fetched, or the
+            // hydrated one where the library fetch alone failed. So a degraded load writes the
+            // shelf back unchanged rather than emptying it.
+            FilterCache.shared.setHomeFeed(rows, libraries: myMediaLibraries, identity: cacheIdentity)
         }
 
         // Gate each background pass on its consuming row being enabled: the provider precompute is the heaviest query (one 10 000-item all-library scan + 33 per-provider resolves) and only the Discover row reads it, so hiding that row in Customize genuinely stops the scan (Sodalite#12 backend contention), not just the tiles.
@@ -462,9 +476,14 @@ final class HomeViewModel {
         // model's identity, so what lands is the destination's last shelf and never the one being
         // left. With nothing cached this behaves exactly as before, spinner included.
         let cached = cachedFeed()
-        rows = cached
-        isShowingCachedFeed = !cached.isEmpty
-        isLoading = cached.isEmpty
+        rows = cached.rows
+        // The library list travels with them, and it is the half that had to be said out loud: it
+        // lives in memory only, so a switch that kept it would leave the outgoing server's
+        // libraries on screen and tappable under the new session, which is the exact thing the
+        // blanking was there to prevent.
+        myMediaLibraries = cached.libraries
+        isShowingCachedFeed = !cached.rows.isEmpty
+        isLoading = cached.rows.isEmpty
         tagRows = []
         providerBackdrops = [:]
         providerItemCounts = [:]

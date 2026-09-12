@@ -36,6 +36,10 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     private struct HomeFeedEntry: Codable {
         let rows: [HomeRowData]
+        /// Optional because entries written before the library list joined the feed carry no such
+        /// key, and a required one would throw the whole shelf away on the first launch after an
+        /// update, which is the one launch this cache exists for.
+        let libraries: [JellyfinLibrary]?
     }
 
     struct CatalogEntry: Codable, Sendable {
@@ -106,15 +110,30 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     // MARK: - Home Feed (the row set Home paints)
 
-    /// What Home last showed this identity, so a launch or a switch onto this server paints its own
-    /// shelf instead of a spinner (Sodalite#117). Sized by the row set, roughly 8 rows of 16 items,
-    /// which is an order of magnitude under one populated provider tile.
-    func homeFeed(identity: CacheIdentity) -> [HomeRowData]? {
-        read(HomeFeedEntry.self, slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity)?.rows
+    /// One identity's whole shelf: the fetched rows and the library list the My Media row offers.
+    /// They travel together because they are painted together, and the list is the only part with
+    /// no row of its own to carry it.
+    nonisolated struct HomeFeed: Sendable {
+        let rows: [HomeRowData]
+        let libraries: [JellyfinLibrary]
     }
 
-    func setHomeFeed(_ rows: [HomeRowData], identity: CacheIdentity) {
-        write(HomeFeedEntry(rows: rows), slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity)
+    /// What Home last showed this identity, so a launch or a switch onto this server paints its own
+    /// shelf instead of a spinner (Sodalite#117). Sized by the row set, roughly 8 rows of 16 items,
+    /// which is an order of magnitude under one populated provider tile; the library list adds a
+    /// few hundred bytes.
+    func homeFeed(identity: CacheIdentity) -> HomeFeed? {
+        guard let entry = read(
+            HomeFeedEntry.self, slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity
+        ) else { return nil }
+        return HomeFeed(rows: entry.rows, libraries: entry.libraries ?? [])
+    }
+
+    func setHomeFeed(_ rows: [HomeRowData], libraries: [JellyfinLibrary], identity: CacheIdentity) {
+        write(
+            HomeFeedEntry(rows: rows, libraries: libraries),
+            slice: Self.homeFeedSlice, key: Self.homeFeedKey, identity: identity
+        )
     }
 
     // MARK: - Catalog Filter Page 1
