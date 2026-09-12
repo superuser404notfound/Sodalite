@@ -46,6 +46,7 @@ final class AppearancePreferences {
         static let hiddenTabs = "appearance.hiddenTabs"
         static let showPosterBadges = "appearance.showPosterBadges"
         static let showTopShelfRow = "appearance.showTopShelfRow"
+        static let topShelfImage = "appearance.topShelfImage"
         static let showLibraryNames = "appearance.showLibraryNames"
         static let showPosterProgress = "appearance.showPosterProgress"
         static let showCommunityRating = "appearance.showCommunityRating"
@@ -101,6 +102,14 @@ final class AppearancePreferences {
     /// tvOS Top Shelf row. On by default; see TopShelfEnabled for why it can be turned off at all.
     var showTopShelfRow: Bool {
         didSet { store.set(showTopShelfRow, forKey: Keys.showTopShelfRow) }
+    }
+
+    /// Picture on a Top Shelf cell. Its own setting rather than a reader of the row above, because
+    /// a shelf cell is roughly three times the width of a card: a still that holds up in Continue
+    /// Watching can be visibly soft up there, and a server's episode stills are capped at its
+    /// image-extraction width. Defaults to the episode image, which is what the shelf always drew.
+    var topShelfImage: ContinueWatchingImage {
+        didSet { store.set(topShelfImage.rawValue, forKey: Keys.topShelfImage) }
     }
     var showPosterBadges: Bool {
         didSet { store.set(showPosterBadges, forKey: Keys.showPosterBadges) }
@@ -199,6 +208,8 @@ final class AppearancePreferences {
         self.spoilerHideMovies = store.object(forKey: Keys.spoilerHideMovies) as? Bool ?? false
         self.showPosterBadges = store.object(forKey: Keys.showPosterBadges) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
+        self.topShelfImage = store.string(forKey: Keys.topShelfImage)
+            .flatMap(ContinueWatchingImage.init(rawValue:)) ?? .still
         self.showLibraryNames = store.object(forKey: Keys.showLibraryNames) as? Bool ?? false
         self.showPosterProgress = store.object(forKey: Keys.showPosterProgress) as? Bool ?? false
         self.showCommunityRating = store.object(forKey: Keys.showCommunityRating) as? Bool ?? true

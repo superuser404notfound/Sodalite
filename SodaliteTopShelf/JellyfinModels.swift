@@ -12,6 +12,8 @@ struct JellyfinItem: Codable, Sendable {
     let imageTags: ImageTags?
     let backdropImageTags: [String]?
     let parentBackdropImageTags: [String]?
+    let parentThumbImageTag: String?
+    let parentThumbItemId: String?
     let runTimeTicks: Int64?
     let userData: UserData?
 
@@ -26,6 +28,8 @@ struct JellyfinItem: Codable, Sendable {
         case imageTags = "ImageTags"
         case backdropImageTags = "BackdropImageTags"
         case parentBackdropImageTags = "ParentBackdropImageTags"
+        case parentThumbImageTag = "ParentThumbImageTag"
+        case parentThumbItemId = "ParentThumbItemId"
         case runTimeTicks = "RunTimeTicks"
         case userData = "UserData"
     }
@@ -65,26 +69,29 @@ struct UserData: Codable, Sendable {
 }
 
 extension JellyfinItem {
-    /// Wide thumbnail for the carousel cell: episodes prefer their own Primary still (parent series backdrop fallback for orphans), movies use their backdrop. Episode resolution is capped at the server's image-extraction-width setting (320 old default, can't upscale client-side); requests enableImageEnhancers=false to dodge a downscaling enhancer.
-    func topShelfImageURL(baseURL: URL, token: String) -> URL? {
-        if type == .episode {
-            if let tag = imageTags?.primary {
-                return imageURL(baseURL: baseURL, itemID: id, kind: "Primary", tag: tag, token: token)
-            }
-            if let tag = imageTags?.thumb {
-                return imageURL(baseURL: baseURL, itemID: id, kind: "Thumb", tag: tag, token: token)
-            }
-            if let seriesId, let tag = parentBackdropImageTags?.first {
-                return imageURL(baseURL: baseURL, itemID: seriesId, kind: "Backdrop", tag: tag, token: token)
-            }
-        }
-        if let tag = backdropImageTags?.first {
-            return imageURL(baseURL: baseURL, itemID: id, kind: "Backdrop", tag: tag, token: token)
-        }
-        if let tag = imageTags?.primary {
-            return imageURL(baseURL: baseURL, itemID: id, kind: "Primary", tag: tag, token: token)
-        }
-        return nil
+    /// Wide thumbnail for the carousel cell, along whichever chain the viewer picked in Settings
+    /// (`TopShelfArtwork`). Episode resolution is capped at the server's image-extraction-width
+    /// setting (320 old default, can't upscale client-side), which is the reason the choice exists:
+    /// a still that reads fine on a card can be soft on a cell three times its width.
+    func topShelfImageURL(baseURL: URL, token: String, artwork: TopShelfArtwork.Choice) -> URL? {
+        guard let source = TopShelfArtwork.source(for: artwork, available) else { return nil }
+        return imageURL(baseURL: baseURL,
+                        itemID: source.itemID,
+                        kind: source.kind.rawValue,
+                        tag: source.tag,
+                        token: token)
+    }
+
+    private var available: TopShelfArtwork.Available {
+        TopShelfArtwork.Available(isEpisode: type == .episode,
+                                  itemID: id,
+                                  seriesID: seriesId,
+                                  primary: imageTags?.primary,
+                                  thumb: imageTags?.thumb,
+                                  backdrop: backdropImageTags?.first,
+                                  parentBackdrop: parentBackdropImageTags?.first,
+                                  parentThumb: parentThumbImageTag,
+                                  parentThumbID: parentThumbItemId)
     }
 
     /// Resume bar for the cell. Percentage first (what /Items/Resume returns), ticks as the

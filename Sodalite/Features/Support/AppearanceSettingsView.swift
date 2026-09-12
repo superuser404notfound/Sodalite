@@ -124,6 +124,19 @@ struct AppearanceSettingsView: View {
                 value: Binding(get: { appearance.showTopShelfRow },
                                set: { appearance.showTopShelfRow = $0 })
             )
+
+            // Its own choice rather than a reader of the Continue Watching row above: a shelf cell
+            // is about three times the width of a card, and an episode still is capped at the
+            // server's image-extraction width, so the two surfaces do not want the same answer.
+            ValuePickerRow(
+                icon: "photo.on.rectangle",
+                title: "settings.appearance.topShelfImage",
+                subtitle: "settings.appearance.topShelfImage.subtitle",
+                options: AppearancePreferences.ContinueWatchingImage.allCases,
+                selection: Binding(get: { appearance.topShelfImage },
+                                   set: { appearance.topShelfImage = $0 }),
+                label: { $0.title }
+            )
             #endif
 
             boolRow(

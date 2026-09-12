@@ -123,6 +123,12 @@ struct SodaliteApp: App {
                 .task(id: dependencies.appearancePreferences.showTopShelfRow) {
                     TopShelfEnabled.write(dependencies.appearancePreferences.showTopShelfRow)
                 }
+                // Third crossing of the same bridge. The shelf is redrawn afterwards because the
+                // cells it is holding were built from the old choice and nothing else will ask.
+                .task(id: dependencies.appearancePreferences.topShelfImage) {
+                    TopShelfArtwork.write(rawValue: dependencies.appearancePreferences.topShelfImage.rawValue)
+                    TopShelfRefresher.invalidate()
+                }
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }

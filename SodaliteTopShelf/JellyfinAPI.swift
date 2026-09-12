@@ -72,7 +72,9 @@ struct JellyfinAPI: Sendable {
         return "MediaBrowser " + parts.joined(separator: ", ")
     }
 
-    private static let fields = "ImageTags,BackdropImageTags,ParentBackdropImageTags"
+    /// `ParentThumbImageTag` rides along for the Thumb artwork option; a server that does not fill
+    /// it simply leaves that chain empty and the cell falls through to the backdrop.
+    private static let fields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,ParentThumbImageTag"
 }
 
 private struct ItemsResponse: Decodable {

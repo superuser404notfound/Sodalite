@@ -52,16 +52,18 @@ final class ContentProvider: TVTopShelfContentProvider {
         // The pass answers for the whole shelf or for none of it, so `bars` is either empty or
         // covers every cell that has progress; a partial map is what put two bar styles and two
         // resolutions in one row (Sodalite#128).
+        let artwork = TopShelfArtwork.read()
         let bars = await ResumeBarArtwork.prepare(items: resumeItems + nextUpItems,
                                                   session: session,
-                                                  accent: TopShelfAccent.read())
+                                                  accent: TopShelfAccent.read(),
+                                                  artwork: artwork)
         log.info("resume bars rendered=\(bars.count)")
 
         var sections: [TVTopShelfItemCollection<TVTopShelfSectionedItem>] = []
 
         if !resumeItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: resumeItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id])
+                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork)
             })
             collection.title = String(
                 localized: "TopShelf.ContinueWatching",
@@ -72,7 +74,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
         if !nextUpItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: nextUpItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id])
+                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork)
             })
             collection.title = String(
                 localized: "TopShelf.NextUp",
@@ -90,7 +92,8 @@ final class ContentProvider: TVTopShelfContentProvider {
     /// `playbackProgress` stays unset, otherwise the shelf stacks two bars on the same cell.
     private func makeItem(item: JellyfinItem,
                           session: SharedSession,
-                          barURL: URL?) -> TVTopShelfSectionedItem {
+                          barURL: URL?,
+                          artwork: TopShelfArtwork.Choice) -> TVTopShelfSectionedItem {
         let cell = TVTopShelfSectionedItem(identifier: item.id)
         cell.title = item.topShelfTitle
         cell.imageShape = .hdtv
@@ -103,7 +106,9 @@ final class ContentProvider: TVTopShelfContentProvider {
             cell.playbackProgress = progress
         }
 
-        let remote = item.topShelfImageURL(baseURL: session.baseURL, token: session.accessToken)
+        let remote = item.topShelfImageURL(baseURL: session.baseURL,
+                                           token: session.accessToken,
+                                           artwork: artwork)
         if let url = barURL ?? remote {
             // 2x is the only scale Apple TV renders; setting both 1x and 2x doubles the daemon's fetch work and trips memory pressure surfacing as "-17102 decompressing image" when cells race to decode.
             cell.setImageURL(url, for: .screenScale2x)

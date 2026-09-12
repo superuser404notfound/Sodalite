@@ -39,7 +39,8 @@ enum ResumeBarArtwork {
     /// returned; see the type's note.
     static func prepare(items: [JellyfinItem],
                         session: SharedSession,
-                        accent: UInt32) async -> [String: URL] {
+                        accent: UInt32,
+                        artwork: TopShelfArtwork.Choice) async -> [String: URL] {
         guard let directory = containerDirectory() else {
             log.notice("no shared container; resume bars disabled")
             return [:]
@@ -47,7 +48,9 @@ enum ResumeBarArtwork {
 
         let candidates = items.compactMap { item -> Candidate? in
             guard let fraction = item.topShelfProgress,
-                  let remote = item.topShelfImageURL(baseURL: session.baseURL, token: session.accessToken)
+                  let remote = item.topShelfImageURL(baseURL: session.baseURL,
+                                                     token: session.accessToken,
+                                                     artwork: artwork)
             else { return nil }
             let name = ResumeBarFile.name(itemID: item.id, remote: remote, fraction: fraction, accent: accent)
             return Candidate(itemID: item.id,

@@ -336,6 +336,7 @@ extension DependencyContainer {
                 spoilerHideMovies: a.spoilerHideMovies,
                 showPosterBadges: a.showPosterBadges,
                 showTopShelfRow: a.showTopShelfRow,
+                topShelfImage: a.topShelfImage.rawValue,
                 showLibraryNames: a.showLibraryNames,
                 showPosterProgress: a.showPosterProgress,
                 showCommunityRating: a.showCommunityRating,
@@ -444,6 +445,7 @@ extension DependencyContainer {
             }
             store.showContentLogos = a.showContentLogos
             store.continueWatchingImage = AppearancePreferences.ContinueWatchingImage(rawValue: a.continueWatchingImage) ?? store.continueWatchingImage
+            store.topShelfImage = AppearancePreferences.ContinueWatchingImage(rawValue: a.topShelfImage) ?? store.topShelfImage
             store.largeCards = a.largeCards
             store.nowPlayingUsesSeriesPoster = a.nowPlayingUsesSeriesPoster
             store.spoilerProtectionEnabled = a.spoilerProtectionEnabled

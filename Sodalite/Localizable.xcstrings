@@ -139398,6 +139398,328 @@
         }
       }
     },
+    "settings.appearance.topShelfImage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obrázek v řádku na domovské obrazovce"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Billede i rækken på hjemmeskærmen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild in der Zeile auf dem Startbildschirm"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εικόνα στη γραμμή της αρχικής οθόνης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image in the Home Screen Row"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imagen en la fila de la pantalla de inicio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuva aloitusnäytön rivillä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image dans la rangée de l’écran d’accueil"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slika u retku na početnom zaslonu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kép a kezdőképernyő sorában"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Immagine nella riga della schermata Home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面の列の画像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 화면 행의 이미지"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilde i raden på hjemmeskjermen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afbeelding in de rij op het beginscherm"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obraz w wierszu na ekranie głównym"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imagem na linha da tela de início"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imagem na linha do ecrã principal"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imagine în rândul de pe ecranul principal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изображение в строке на главном экране"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obrázok v riadku na domovskej obrazovke"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild i raden på hemskärmen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana ekran satırındaki görsel"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зображення в рядку на головному екрані"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主屏幕行中的图像"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主畫面列中的影像"
+          }
+        }
+      }
+    },
+    "settings.appearance.topShelfImage.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Který obrázek použijí dlaždice nad aplikací. Jsou širší než karta, takže snímek z epizody na nich může působit rozmazaně."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvilket billede felterne over appen bruger. De er bredere end et kort, så et afsnitsbillede kan se sløret ud."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welches Bild die Kacheln über der App verwenden. Sie sind breiter als eine Karte, dort kann ein Episodenbild unscharf wirken."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ποια εικόνα χρησιμοποιούν τα πλακίδια πάνω από την εφαρμογή. Είναι πιο φαρδιά από μια κάρτα, γι’ αυτό ένα στιγμιότυπο επεισοδίου μπορεί να φαίνεται θολό."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which image the cells above the app use. They are wider than a card, so an episode still can look soft there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué imagen usan las celdas sobre la app. Son más anchas que una tarjeta, así que un fotograma del episodio puede verse borroso."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitä kuvaa sovelluksen yläpuolella olevat ruudut käyttävät. Ne ovat korttia leveämpiä, joten jakson kuva voi näyttää epätarkalta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle image utilisent les vignettes au-dessus de l’app. Elles sont plus larges qu’une carte, une image d’épisode peut donc y paraître floue."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koju sliku koriste pločice iznad aplikacije. Šire su od kartice, pa slika epizode ondje može izgledati mutno."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melyik képet használják az alkalmazás feletti csempék. Szélesebbek egy kártyánál, így egy epizódkép ott homályosnak tűnhet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quale immagine usano le celle sopra l’app. Sono più larghe di una scheda, quindi un fotogramma dell’episodio può apparire sfocato."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリの上に並ぶセルで使う画像です。カードより横幅が広いため、エピソードの静止画はぼやけて見えることがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱 위에 있는 셀이 사용할 이미지입니다. 카드보다 넓어서 에피소드 스틸은 흐릿하게 보일 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvilket bilde feltene over appen bruker. De er bredere enn et kort, så et episodebilde kan se uskarpt ut."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welke afbeelding de tegels boven de app gebruiken. Ze zijn breder dan een kaart, dus een afleveringsbeeld kan er wazig uitzien."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Który obraz mają używać kafelki nad aplikacją. Są szersze niż karta, więc kadr z odcinka może wyglądać nieostro."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qual imagem as células acima do app usam. Elas são mais largas que um card, então um quadro do episódio pode ficar borrado."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que imagem usam os blocos acima da app. São mais largos do que um cartão, pelo que uma imagem do episódio pode ficar desfocada."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce imagine folosesc celulele de deasupra aplicației. Sunt mai late decât un card, așa că un cadru din episod poate părea neclar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Какое изображение используют плитки над приложением. Они шире карточки, поэтому кадр из серии может выглядеть размытым."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ktorý obrázok použijú dlaždice nad aplikáciou. Sú širšie než karta, takže záber z epizódy tam môže pôsobiť rozmazane."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vilken bild rutorna ovanför appen använder. De är bredare än ett kort, så en avsnittsbild kan se suddig ut."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamanın üstündeki hücrelerin kullanacağı görsel. Bir karttan daha geniştirler, bu yüzden bölüm karesi bulanık görünebilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Яке зображення використовують плитки над програмою. Вони ширші за картку, тому кадр із серії може виглядати розмитим."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用上方的图块使用哪张图片。它们比卡片更宽，剧集截图在那里可能显得模糊。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 上方的圖塊要使用哪張圖片。它們比卡片更寬，單集劇照在那裡可能顯得模糊。"
+          }
+        }
+      }
+    },
     "settings.changelog.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
