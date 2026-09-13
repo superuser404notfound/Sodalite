@@ -341,7 +341,8 @@ extension DependencyContainer {
                 showPosterProgress: a.showPosterProgress,
                 showCommunityRating: a.showCommunityRating,
                 showCriticRating: a.showCriticRating,
-                hiddenTabs: a.hiddenTabs.map(\.rawValue).sorted()
+                hiddenTabs: a.hiddenTabs.map(\.rawValue).sorted(),
+                navigationStyle: a.navigationStyle.rawValue
             ))
         case .auth:
             return .auth(AuthSettingsPayload(
@@ -460,6 +461,11 @@ extension DependencyContainer {
             // Absent field = sender predates tab visibility, so it carries no opinion; applying an empty set would silently unhide the receiver's tabs (Sodalite#62).
             if let tabs = a.hiddenTabs {
                 store.hiddenTabs = Set(tabs.compactMap(AppTab.init(rawValue:)).filter(\.isHideable))
+            }
+            // Same shape (Sodalite#140): absent means the sender has no navigation style to offer,
+            // and a default applied here would move the receiver's whole shell out from under it.
+            if let style = a.navigationStyle.flatMap(AppearancePreferences.NavigationStyle.init(rawValue:)) {
+                store.navigationStyle = style
             }
         case .auth(let a):
             authPreferences.launchBehavior = AuthPreferences.LaunchBehavior(rawValue: a.launchBehavior) ?? authPreferences.launchBehavior

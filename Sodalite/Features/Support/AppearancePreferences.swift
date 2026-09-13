@@ -31,6 +31,30 @@ final class AppearancePreferences {
         }
     }
 
+    // MARK: - Navigation style
+
+    /// Sodalite#140. tvOS only: the shell navigates either from the bar across the top or from the
+    /// collapsing sidebar tvOS 26 uses in Apple TV, Music and Podcasts. iOS and iPadOS are on the
+    /// sidebar unconditionally and ignore this. It still rides the appearance payload, so a second
+    /// Apple TV inherits the choice; iPhone and iPad only carry the value rather than forming an
+    /// opinion of their own, which is why the payload field is optional (see CloudSyncPayloads).
+    enum NavigationStyle: String, CaseIterable, Identifiable, Sendable {
+        case topBar
+        case sidebar
+
+        var id: String { rawValue }
+
+        /// Literal keys/defaults so `String(localized:defaultValue:)` compile-time-literal requirement holds.
+        var title: String {
+            switch self {
+            case .topBar:
+                String(localized: "settings.tabs.navigation.topBar", defaultValue: "Top bar")
+            case .sidebar:
+                String(localized: "settings.tabs.navigation.sidebar", defaultValue: "Sidebar")
+            }
+        }
+    }
+
     // MARK: - Keys
 
     private enum Keys {
@@ -44,6 +68,7 @@ final class AppearancePreferences {
         static let spoilerHideEpisodes = "appearance.spoilerHideEpisodes"
         static let spoilerHideMovies = "appearance.spoilerHideMovies"
         static let hiddenTabs = "appearance.hiddenTabs"
+        static let navigationStyle = "appearance.navigationStyle"
         static let showPosterBadges = "appearance.showPosterBadges"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
@@ -153,6 +178,12 @@ final class AppearancePreferences {
         didSet { store.set(hiddenTabs.map(\.rawValue).sorted(), forKey: Keys.hiddenTabs) }
     }
 
+    /// Sodalite#140. Read only by the tvOS shell; switching it rebuilds the TabView, so the
+    /// settings screen commits it on the way out rather than under the focused row.
+    var navigationStyle: NavigationStyle {
+        didSet { store.set(navigationStyle.rawValue, forKey: Keys.navigationStyle) }
+    }
+
     var cardScale: CGFloat {
         largeCards ? Self.largeCardScale : 1.0
     }
@@ -217,6 +248,8 @@ final class AppearancePreferences {
         self.showPosterProgress = store.object(forKey: Keys.showPosterProgress) as? Bool ?? false
         self.showCommunityRating = store.object(forKey: Keys.showCommunityRating) as? Bool ?? true
         self.showCriticRating = store.object(forKey: Keys.showCriticRating) as? Bool ?? true
+        self.navigationStyle = store.string(forKey: Keys.navigationStyle)
+            .flatMap(NavigationStyle.init(rawValue:)) ?? .topBar
         let storedTabs = store.array(forKey: Keys.hiddenTabs) as? [String] ?? []
         self.hiddenTabs = Set(storedTabs.compactMap(AppTab.init(rawValue:)).filter(\.isHideable))
     }

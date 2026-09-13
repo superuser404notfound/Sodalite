@@ -204,6 +204,10 @@ struct AppearanceSettingsPayload: Codable, Equatable {
     /// nil from a device on a build without tab visibility (Sodalite#62); applying nil would reset
     /// the receiver's hidden tabs, so it means "no opinion", not "nothing hidden".
     var hiddenTabs: [String]?
+    /// nil from a build without the navigation style (Sodalite#140), and nil is the whole point:
+    /// applying a default here would move a viewer's shell, so absent means "no opinion". iPhone
+    /// and iPad have no way to hold one either, they just carry the value between Apple TVs.
+    var navigationStyle: String?
 
     init(
         schemaVersion: Int = 4,
@@ -224,7 +228,8 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         showPosterProgress: Bool = false,
         showCommunityRating: Bool = true,
         showCriticRating: Bool = true,
-        hiddenTabs: [String]? = nil
+        hiddenTabs: [String]? = nil,
+        navigationStyle: String? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.updatedAt = updatedAt
@@ -245,6 +250,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         self.showCommunityRating = showCommunityRating
         self.showCriticRating = showCriticRating
         self.hiddenTabs = hiddenTabs
+        self.navigationStyle = navigationStyle
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -267,6 +273,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         case showCommunityRating
         case showCriticRating
         case hiddenTabs
+        case navigationStyle
     }
 
     init(from decoder: Decoder) throws {
@@ -294,6 +301,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         showCommunityRating = try values.decodeIfPresent(Bool.self, forKey: .showCommunityRating) ?? true
         showCriticRating = try values.decodeIfPresent(Bool.self, forKey: .showCriticRating) ?? true
         hiddenTabs = try values.decodeIfPresent([String].self, forKey: .hiddenTabs)
+        navigationStyle = try values.decodeIfPresent(String.self, forKey: .navigationStyle)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -317,6 +325,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         try values.encode(showCommunityRating, forKey: .showCommunityRating)
         try values.encode(showCriticRating, forKey: .showCriticRating)
         try values.encodeIfPresent(hiddenTabs, forKey: .hiddenTabs)
+        try values.encodeIfPresent(navigationStyle, forKey: .navigationStyle)
     }
 }
 

@@ -66,7 +66,7 @@ struct TabRootView: View {
         return tabs
     }
 
-    var body: some View {
+    private var tabShell: some View {
         TabView(selection: $selectedTab) {
             ForEach(displayedTabs, id: \.self) { tab in
                 #if os(iOS)
@@ -93,13 +93,35 @@ struct TabRootView: View {
                 #endif
             }
         }
+    }
+
+    /// Sodalite#140. iOS and iPadOS are on the adaptive sidebar unconditionally. tvOS asks the
+    /// viewer, because the two styles are a different shell rather than a different skin: the
+    /// sidebar hands its screens the full height the top bar reserves for itself. Flipping the
+    /// choice changes this view's type, so the whole TabView is rebuilt and every tab page starts
+    /// fresh. That is why the settings screen commits the change on the way out, not under focus.
+    @ViewBuilder
+    private var styledTabShell: some View {
         #if os(iOS)
-        .tabViewStyle(.sidebarAdaptable)
+        tabShell
+            .tabViewStyle(.sidebarAdaptable)
         #else
+        Group {
+            if appearance.navigationStyle == .sidebar {
+                tabShell
+                    .tabViewStyle(.sidebarAdaptable)
+            } else {
+                tabShell
+            }
+        }
         .background {
             AppBackgroundView(theme: appearanceTheme, mode: .automatic)
         }
         #endif
+    }
+
+    var body: some View {
+        styledTabShell
         // Fresh TabView (fresh UITabBar) when the active server changes while TabRootView stays mounted (deleting the active server auto-promotes a survivor; isAuthenticated never drops, so the view isn't recreated). A fresh bar reads the tinted appearance at creation. NOT bumped on detail return: detail immersion now alpha-hides the bar instead of removing it, so the bar is never re-templated gray and never needs a rebuild.
         .id(appState.activeServer?.id)
         // Display-only active-profile badge; non-focusable, below the player cover, hidden unless the server has multiple profiles.

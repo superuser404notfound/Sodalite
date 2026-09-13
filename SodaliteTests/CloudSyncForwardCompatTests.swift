@@ -122,7 +122,8 @@ struct CloudSyncForwardCompatTests {
             return .appearance(AppearanceSettingsPayload(
                 updatedAt: stamp, accentChoice: "orange", backgroundStyle: "graphiteGlass",
                 showContentLogos: true, continueWatchingImage: "thumb", largeCards: false,
-                nowPlayingUsesSeriesPoster: false, hiddenTabs: ["catalog"]
+                nowPlayingUsesSeriesPoster: false, hiddenTabs: ["catalog"],
+                navigationStyle: "sidebar"
             ))
         case .auth:
             return .auth(AuthSettingsPayload(
