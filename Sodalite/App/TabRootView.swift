@@ -326,6 +326,16 @@ struct TabRootView: View {
         }
     }
 
+    /// TOP BAR ONLY, and that is not a gap to close (Sodalite#140). A sidebar cannot be tinted:
+    /// measured on tvOS 26.5, `.tint`, `.foregroundStyle` on the label, `window.tintColor`,
+    /// `tintColor` on every view in the hierarchy and a baked `.alwaysOriginal` image all leave the
+    /// icons alone, the baked one even forces them black. There is no `UITabBar` under a sidebar to
+    /// begin with: the hierarchy is `_UIHostingView` plus `_UIInheritedView` and layers, so this
+    /// appearance proxy has nothing to reach. Apple DTS states it outright, "that's currently not
+    /// supported, navigation controls are monochromatic" (developer.apple.com/forums/thread/795226).
+    /// The viewer who wants the accent over the height keeps the top bar, which is what the switch
+    /// in Settings > Tabs is for.
+    ///
     /// Tints tab-bar icons + titles via UITabBarAppearance.iconColor at bar creation. NOT per-item .alwaysOriginal images: tvOS re-templates mid-session-inserted items (Live TV / Music) gray and discards baked images, but iconColor tells it which color to template TO. (The gray-on-detail-RETURN is a separate tvOS 26 issue, addressed by presenting details as a full-screen cover so the bar is never hidden/removed.)
     private func configureTabBarItemAppearance() {
         #if os(tvOS)
