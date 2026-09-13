@@ -110696,157 +110696,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tento člen obsazení nemá na serveru TMDB ID, takže není co zobrazit."
+            "value" : "Tuto osobu se nepodařilo spárovat s TMDB, takže není k dispozici žádná filmografie."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Denne medvirkende har intet TMDB-id på serveren, så der er ingen personside at vise."
+            "value" : "Denne person kunne ikke matches med TMDB, så der er ingen filmografi at vise."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für dieses Besetzungsmitglied ist auf dem Server keine TMDB-ID hinterlegt, deshalb gibt es keine Personenseite."
+            "value" : "Diese Person ließ sich TMDB nicht zuordnen, deshalb gibt es keine Filmografie."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Αυτό το μέλος του καστ δεν έχει TMDB ID στον διακομιστή, επομένως δεν υπάρχει σελίδα προσώπου."
+            "value" : "Δεν ήταν δυνατή η αντιστοίχιση αυτού του προσώπου με το TMDB, επομένως δεν υπάρχει φιλμογραφία."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This cast member has no TMDB id on the server, so there is no person page to show."
+            "value" : "This person could not be matched to TMDB, so there is no filmography to show."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este miembro del reparto no tiene un ID de TMDB en el servidor, así que no hay página de persona que mostrar."
+            "value" : "No se ha podido asociar a esta persona con TMDB, así que no hay filmografía que mostrar."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tällä näyttelijällä ei ole TMDB-tunnusta palvelimella, joten henkilösivua ei ole näytettäväksi."
+            "value" : "Tätä henkilöä ei voitu yhdistää TMDB:hen, joten filmografiaa ei ole näytettäväksi."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce membre de la distribution n'a pas d'identifiant TMDB sur le serveur, il n'y a donc aucune page de personne à afficher."
+            "value" : "Cette personne n'a pas pu être associée à TMDB, il n'y a donc aucune filmographie à afficher."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ovaj član glumačke postave nema TMDB ID na poslužitelju, pa nema stranice osobe za prikaz."
+            "value" : "Ovu osobu nije bilo moguće povezati s TMDB-om, pa nema filmografije za prikaz."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ehhez a szereplőhöz nincs TMDB-azonosító a kiszolgálón, ezért nincs megjeleníthető személyoldal."
+            "value" : "Ezt a személyt nem sikerült TMDB-hez társítani, ezért nincs megjeleníthető filmográfia."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Questo membro del cast non ha un ID TMDB sul server, quindi non c'è una pagina della persona da mostrare."
+            "value" : "Non è stato possibile associare questa persona a TMDB, quindi non c'è alcuna filmografia da mostrare."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このキャストにはサーバー上に TMDB ID がないため、表示できる人物ページがありません。"
+            "value" : "この人物を TMDB と照合できなかったため、表示できるフィルモグラフィーがありません。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 출연자는 서버에 TMDB ID가 없어 표시할 인물 페이지가 없습니다."
+            "value" : "이 인물을 TMDB와 연결하지 못해 표시할 필모그래피가 없습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dette medlemmet av rollebesetningen har ingen TMDB-ID på serveren, så det finnes ingen personside å vise."
+            "value" : "Denne personen kunne ikke kobles til TMDB, så det finnes ingen filmografi å vise."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dit castlid heeft geen TMDB-id op de server, dus er is geen personenpagina om te tonen."
+            "value" : "Deze persoon kon niet aan TMDB worden gekoppeld, dus er is geen filmografie om te tonen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ten członek obsady nie ma identyfikatora TMDB na serwerze, więc nie ma strony osoby do wyświetlenia."
+            "value" : "Nie udało się dopasować tej osoby do TMDB, więc nie ma filmografii do wyświetlenia."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este membro do elenco não tem um ID do TMDB no servidor, portanto não há página de pessoa para exibir."
+            "value" : "Não foi possível associar esta pessoa ao TMDB, portanto não há filmografia para exibir."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este membro do elenco não tem um ID do TMDB no servidor, por isso não há página de pessoa para mostrar."
+            "value" : "Não foi possível associar esta pessoa ao TMDB, por isso não há filmografia para mostrar."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Acest membru al distribuției nu are un ID TMDB pe server, așa că nu există o pagină de persoană de afișat."
+            "value" : "Această persoană nu a putut fi asociată cu TMDB, așa că nu există o filmografie de afișat."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У этого актёра нет идентификатора TMDB на сервере, поэтому страницу человека показать нельзя."
+            "value" : "Этого человека не удалось сопоставить с TMDB, поэтому фильмографию показать нельзя."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tento člen obsadenia nemá na serveri TMDB ID, takže neexistuje stránka osoby na zobrazenie."
+            "value" : "Túto osobu sa nepodarilo priradiť k TMDB, takže neexistuje filmografia na zobrazenie."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Den här skådespelaren har inget TMDB-id på servern, så det finns ingen personsida att visa."
+            "value" : "Den här personen kunde inte matchas mot TMDB, så det finns ingen filmografi att visa."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu oyuncunun sunucuda TMDB kimliği yok, bu yüzden gösterilecek bir kişi sayfası bulunmuyor."
+            "value" : "Bu kişi TMDB ile eşleştirilemedi, bu yüzden gösterilecek bir filmografi yok."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У цього актора немає ідентифікатора TMDB на сервері, тому сторінку особи показати неможливо."
+            "value" : "Цю особу не вдалося зіставити з TMDB, тому фільмографію показати неможливо."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器上没有该演员的 TMDB ID，因此无法显示人物页面。"
+            "value" : "无法将该人物与 TMDB 匹配，因此没有可显示的影视作品。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "伺服器上沒有這位演員的 TMDB ID，因此無法顯示人物頁面。"
+            "value" : "無法將這位人物與 TMDB 配對，因此沒有可顯示的影視作品。"
           }
         }
       }

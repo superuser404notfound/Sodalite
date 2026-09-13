@@ -10,12 +10,14 @@ struct PersonDetailViewModelTests {
     private func makeViewModel(
         items: PersonLibraryTests.ItemsSpy,
         media: MediaSpy = MediaSpy(),
+        search: SearchSpy = SearchSpy(),
         seerrConnected: Bool = true,
         userID: String? = "u"
     ) -> PersonDetailViewModel {
         PersonDetailViewModel(
             itemService: items,
             mediaService: media,
+            searchService: search,
             isSeerrConnected: seerrConnected,
             userID: userID
         )
@@ -42,8 +44,8 @@ struct PersonDetailViewModelTests {
         #expect(vm.profile?.jellyfinPersonID == "p1")
         #expect(vm.library.movies.map(\.id) == ["m1"])
         #expect(vm.errorMessage == nil)
-        // No Seerr means no filmography to report as empty.
-        #expect(vm.filmographyUnavailable)
+        // No Seerr means no filmography to report as empty, so the section goes without a word.
+        #expect(vm.filmographyState == .hidden)
         #expect(vm.filmography.isEmpty)
     }
 
@@ -72,6 +74,9 @@ struct PersonDetailViewModelTests {
         #expect(vm.library.episodes.map(\.id) == ["e1"])
         #expect(vm.errorMessage == nil)
         #expect(vm.profile?.jellyfinPersonID == "p1")
+        // Seerr was asked and failed, which the page says rather than hides.
+        #expect(vm.filmographyState != .hidden)
+        #expect(vm.filmographyState != .loaded)
     }
 
     @Test func withSeerrTheProfileAndFilmographyComeFromTMDB() async throws {
@@ -97,7 +102,7 @@ struct PersonDetailViewModelTests {
         #expect(vm.profile?.biography == "From TMDB")
         #expect(vm.profile?.tmdbProfilePath == "/mk.jpg")
         #expect(vm.filmography.map(\.id) == [1])
-        #expect(!vm.filmographyUnavailable)
+        #expect(vm.filmographyState == .loaded)
         // The page came from Seerr, so the library rows had to resolve the person by name.
         #expect(vm.library.movies.map(\.id) == ["m1"])
     }
@@ -135,6 +140,81 @@ struct PersonDetailViewModelTests {
 
         // Same numeric id across types stays two entries; newest first; the posterless one is gone.
         #expect(result.map(\.stableKey) == ["tv-1", "movie-1"])
+    }
+
+    /// A library built from local metadata holds people with no provider id at all. Before
+    /// Sodalite#143 that ended the page at the library rows: no filmography, no reason given.
+    @Test func aPersonWithoutAProviderIDIsResolvedByName() async throws {
+        let spy = PersonLibraryTests.ItemsSpy()
+        spy.details = ["p1": try item("p1", name: "Mindy Kaling", type: "Person")]
+        let search = SearchSpy()
+        search.people = [SeerrPersonSearchResult(id: 55638, name: "Mindy Kaling")]
+        let media = MediaSpy()
+        media.detail = try JSONDecoder().decode(
+            SeerrPersonDetail.self,
+            from: Data(#"{"id":55638,"name":"Mindy Kaling","biography":"From TMDB"}"#.utf8)
+        )
+        media.credits = try JSONDecoder().decode(
+            SeerrPersonCredits.self,
+            from: Data(#"{"cast":[{"id":1,"mediaType":"movie","title":"Late Night","posterPath":"/a.jpg"}]}"#.utf8)
+        )
+
+        let vm = makeViewModel(items: spy, media: media, search: search)
+        await vm.load(tmdbID: nil, jellyfinPersonID: "p1", name: "Mindy Kaling")
+
+        #expect(search.queries == ["Mindy Kaling"])
+        #expect(vm.filmography.map(\.id) == [1])
+        #expect(vm.filmographyState == .loaded)
+    }
+
+    /// The name search is the fallback, not the first move: a person the server did identify must
+    /// not cost a search request.
+    @Test func aProviderIDOnTheServerSkipsTheNameSearch() async throws {
+        let spy = PersonLibraryTests.ItemsSpy()
+        spy.details = ["p1": try JSONDecoder().decode(
+            JellyfinItem.self,
+            from: Data(#"{"Id":"p1","Name":"Mindy Kaling","Type":"Person","ProviderIds":{"Tmdb":"55638"}}"#.utf8)
+        )]
+        let search = SearchSpy()
+        let media = MediaSpy()
+        media.detail = try JSONDecoder().decode(
+            SeerrPersonDetail.self,
+            from: Data(#"{"id":55638,"name":"Mindy Kaling"}"#.utf8)
+        )
+        media.credits = try JSONDecoder().decode(SeerrPersonCredits.self, from: Data("{}".utf8))
+
+        let vm = makeViewModel(items: spy, media: media, search: search)
+        await vm.load(tmdbID: nil, jellyfinPersonID: "p1", name: "Mindy Kaling")
+
+        #expect(search.queries.isEmpty)
+        #expect(vm.filmographyState == .loaded)
+    }
+
+    /// Unresolvable with Seerr switched on is a different thing from Seerr switched off, and the
+    /// page owes the viewer the difference rather than a silently missing section.
+    @Test func anUnresolvablePersonExplainsTheMissingFilmography() async throws {
+        let spy = PersonLibraryTests.ItemsSpy()
+        spy.details = ["p1": try item("p1", name: "Mindy Kaling", type: "Person")]
+        spy.itemsByType = [.movie: [try item("m1", name: "Late Night", type: "Movie")]]
+
+        let vm = makeViewModel(items: spy, search: SearchSpy())
+        await vm.load(tmdbID: nil, jellyfinPersonID: "p1", name: "Mindy Kaling")
+
+        #expect(vm.filmographyState != .hidden)
+        #expect(vm.filmographyState != .loaded)
+        #expect(vm.library.movies.map(\.id) == ["m1"])
+        // The library half carried the page, so nothing escalates to the error screen.
+        #expect(vm.errorMessage == nil)
+    }
+
+    final class SearchSpy: SeerrSearchServiceProtocol, @unchecked Sendable {
+        var people: [SeerrPersonSearchResult] = []
+        private(set) var queries: [String] = []
+
+        func search(query: String, page: Int) async throws -> SeerrSearchResults {
+            queries.append(query)
+            return SeerrSearchResults(people: people)
+        }
     }
 
     final class MediaSpy: SeerrMediaServiceProtocol, @unchecked Sendable {

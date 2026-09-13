@@ -10,11 +10,15 @@ struct PersonDetailView: View {
     let jellyfinPersonID: String?
     /// Shown in the header until the detail fetch lands; pass "" if unknown.
     let personName: String
+    /// TMDB id of the title the tap came from. Only used to tell two same-named TMDB people apart
+    /// when the person has to be resolved by name (Sodalite#143).
+    let sourceTMDBID: Int?
 
-    init(personID: Int?, jellyfinPersonID: String? = nil, personName: String) {
+    init(personID: Int?, jellyfinPersonID: String? = nil, personName: String, sourceTMDBID: Int? = nil) {
         self.personID = personID
         self.jellyfinPersonID = jellyfinPersonID
         self.personName = personName
+        self.sourceTMDBID = sourceTMDBID
     }
 
     @Environment(\.appState) private var appState
@@ -100,11 +104,17 @@ struct PersonDetailView: View {
                 // focused card can grow into the margin instead of being clipped by it.
                 librarySections(viewModel.library)
 
-                // With no Seerr there is no filmography to be missing, so the heading goes too
-                // rather than reporting an empty one.
-                if !viewModel.filmographyUnavailable {
+                switch viewModel.filmographyState {
+                case .loaded:
                     filmographySection(viewModel.filmography)
                         .padding(.horizontal, contentInset)
+                case .unavailable(let message):
+                    filmographyNotice(message)
+                        .padding(.horizontal, contentInset)
+                // With no Seerr there is no filmography to be missing, so the heading goes too
+                // rather than reporting an empty one.
+                case .hidden:
+                    EmptyView()
                 }
             }
             .padding(.vertical, hSizeClass == .compact ? 24 : 60)
@@ -234,6 +244,19 @@ struct PersonDetailView: View {
         }
     }
 
+    /// Seerr is connected and still had nothing to give. Naming the reason keeps the page from
+    /// reading like an app that cannot show a filmography at all (Sodalite#143).
+    private func filmographyNotice(_ message: String) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("person.filmography")
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text(message)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func errorState(message: String) -> some View {
         VStack(spacing: 20) {
             Image(systemName: "exclamationmark.triangle")
@@ -299,6 +322,7 @@ struct PersonDetailView: View {
         let vm = PersonDetailViewModel(
             itemService: dependencies.jellyfinItemService,
             mediaService: dependencies.seerrMediaService,
+            searchService: dependencies.seerrSearchService,
             // Follows the Catalog tab: with it hidden, the filmography would be the same catalog one level deeper (Sodalite#62).
             isSeerrConnected: SeerrSurfacePolicy.browsingEnabled(
                 appState: appState,
@@ -314,7 +338,8 @@ struct PersonDetailView: View {
         await viewModel?.load(
             tmdbID: personID,
             jellyfinPersonID: jellyfinPersonID,
-            name: personName
+            name: personName,
+            sourceTMDBID: sourceTMDBID
         )
     }
 

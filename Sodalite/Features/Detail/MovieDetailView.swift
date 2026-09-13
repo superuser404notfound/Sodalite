@@ -204,7 +204,8 @@ struct MovieDetailView: View {
             PersonDetailView(
                 personID: route.tmdbID,
                 jellyfinPersonID: route.jellyfinPersonID,
-                personName: route.name
+                personName: route.name,
+                sourceTMDBID: route.sourceTMDBID
             )
                 .detailCoverPush()
         }
@@ -549,8 +550,12 @@ struct MovieDetailView: View {
                                        title: nil)
     }
 
-    /// Resolve a cast member to a TMDB person id and open the person page; inert when the server has no TMDB id.
+    /// Open the person page. Jellyfin cast carries no TMDB id, so the page resolves one itself and
+    /// gets this movie's id along for the same-name tie-break (Sodalite#143).
     private func handlePersonTap(_ member: CastMember) {
-        navigateToPerson = PersonRoute(member: member)
+        navigateToPerson = PersonRoute(
+            member: member,
+            sourceTMDBID: viewModel?.item.tmdbID ?? item.tmdbID
+        )
     }
 }

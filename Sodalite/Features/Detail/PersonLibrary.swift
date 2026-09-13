@@ -116,7 +116,8 @@ enum PersonLibrary {
         items.filter { !$0.isVirtual }
     }
 
-    private static func normalized(_ value: String) -> String {
+    /// Shared with PersonTMDBMatch so a Jellyfin person and a TMDB one are compared by the same rule.
+    static func normalized(_ value: String) -> String {
         value
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .folding(options: [.diacriticInsensitive, .caseInsensitive, .widthInsensitive], locale: nil)

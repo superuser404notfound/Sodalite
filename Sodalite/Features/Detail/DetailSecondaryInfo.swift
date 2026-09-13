@@ -8,20 +8,25 @@ struct PersonRoute: Identifiable, Hashable {
     let tmdbID: Int?
     let jellyfinPersonID: String?
     let name: String
+    /// TMDB id of the title the tap came from. Not part of the identity, it only helps the person
+    /// page tell two same-named TMDB people apart when it has to resolve by name (Sodalite#143).
+    let sourceTMDBID: Int?
     var id: String { jellyfinPersonID ?? tmdbID.map(String.init) ?? name }
 
-    init(tmdbID: Int? = nil, jellyfinPersonID: String? = nil, name: String) {
+    init(tmdbID: Int? = nil, jellyfinPersonID: String? = nil, name: String, sourceTMDBID: Int? = nil) {
         self.tmdbID = tmdbID
         self.jellyfinPersonID = jellyfinPersonID
         self.name = name
+        self.sourceTMDBID = sourceTMDBID
     }
 
     /// Route for a cast-row tap, keeping whichever id the source knows.
-    init(member: CastMember) {
+    init(member: CastMember, sourceTMDBID: Int? = nil) {
         self.init(
             tmdbID: member.personID,
             jellyfinPersonID: member.jellyfinPersonID,
-            name: member.name
+            name: member.name,
+            sourceTMDBID: sourceTMDBID
         )
     }
 }
