@@ -35,6 +35,16 @@ struct PersonRouteTests {
         #expect(a.id != b.id)
     }
 
+    /// The source title is a hint for the name resolve, not part of who the person is: the same
+    /// cast member reached from two titles must not push two different pages (Sodalite#143).
+    @Test func theSourceTitleTravelsWithoutChangingIdentity() {
+        let m = member(personID: nil, jellyfinPersonID: "abc123")
+        let fromMovie = PersonRoute(member: m, sourceTMDBID: 920)
+        let fromSeries = PersonRoute(member: m, sourceTMDBID: 1399)
+        #expect(fromMovie.sourceTMDBID == 920)
+        #expect(fromMovie.id == fromSeries.id)
+    }
+
     /// Neither id present (a source that only knows a name) still yields a usable identity
     /// rather than an empty string every member would share.
     @Test func nameCarriesIdentityAsALastResort() {

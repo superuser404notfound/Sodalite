@@ -415,7 +415,8 @@ struct SeriesDetailView: View {
             PersonDetailView(
                 personID: route.tmdbID,
                 jellyfinPersonID: route.jellyfinPersonID,
-                personName: route.name
+                personName: route.name,
+                sourceTMDBID: route.sourceTMDBID
             )
                 .detailCoverPush()
         }
@@ -945,8 +946,12 @@ struct SeriesDetailView: View {
     }
 
     /// Resolve a cast member to a TMDB person id and open the person page; inert when the server has no TMDB id.
+    /// The series id, not the selected episode's: TMDB credits a person on the show (Sodalite#143).
     private func handlePersonTap(_ member: CastMember) {
-        navigateToPerson = PersonRoute(member: member)
+        navigateToPerson = PersonRoute(
+            member: member,
+            sourceTMDBID: viewModel?.item.tmdbID ?? item.tmdbID
+        )
     }
 
     // MARK: - Season Section
