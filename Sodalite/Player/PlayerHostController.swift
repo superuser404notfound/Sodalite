@@ -3,6 +3,7 @@ import AetherEngine
 import AVFoundation
 import AVKit
 import Combine
+import ObjectiveC
 
 // MARK: - Player View Controller
 
@@ -811,6 +812,9 @@ final class PlayerHostController: AVPlayerViewController {
         #if os(tvOS)
         remoteSurface.start()
         #endif
+        #if DEBUG
+        noteNowPlayingState("didAppear")
+        #endif
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -849,7 +853,73 @@ final class PlayerHostController: AVPlayerViewController {
         viewModel.stopPlayback()
     }
 
+    #if DEBUG
+    /// Sodalite#149 measurement, debug builds only: what the Now-Playing chain looks like at a
+    /// background seam. The engine fix (AE#559) preserves the AVPlayer instance across the reload,
+    /// so if the card is still dead afterwards the break is somewhere else, and the two halves of
+    /// "somewhere else" read differently here: a changed player pointer means the preservation did
+    /// not take on this path, an unchanged one with AVKit's MediaRemote ivars gone means AVKit
+    /// dropped its own registration over the suspension and never took it back.
+    private static var avkitNowPlayingIvarNames: [String] = {
+        var names: [String] = []
+        var cls: AnyClass? = AVPlayerViewController.self
+        while let current = cls {
+            var count: UInt32 = 0
+            if let list = class_copyIvarList(current, &count) {
+                for index in 0..<Int(count) {
+                    guard let raw = ivar_getName(list[index]) else { continue }
+                    let name = String(cString: raw)
+                    let lowered = name.lowercased()
+                    guard lowered.contains("remote") || lowered.contains("nowplaying") else { continue }
+                    // object_getIvar is only safe on an object-typed ivar.
+                    guard let encoding = ivar_getTypeEncoding(list[index]),
+                          encoding.pointee == UInt8(ascii: "@") else { continue }
+                    names.append(name)
+                }
+                free(list)
+            }
+            cls = class_getSuperclass(current)
+        }
+        return names
+    }()
+
+    private func avkitNowPlayingIvarState() -> String {
+        let states: [String] = Self.avkitNowPlayingIvarNames.compactMap { name in
+            var cls: AnyClass? = type(of: self)
+            while let current = cls {
+                if let ivar = class_getInstanceVariable(current, name) {
+                    let value = object_getIvar(self, ivar) as AnyObject?
+                    return "\(name)=\(value == nil ? "nil" : "set")"
+                }
+                cls = class_getSuperclass(current)
+            }
+            return nil
+        }
+        return states.isEmpty ? "none" : states.joined(separator: " ")
+    }
+
+    private func noteNowPlayingState(_ tag: String) {
+        func pointer(_ object: AnyObject?) -> String {
+            guard let object else { return "nil" }
+            return String(UInt(bitPattern: Unmanaged.passUnretained(object).toOpaque().hashValue) & 0xffffff, radix: 16)
+        }
+        let vcPlayer = self.player
+        let enginePlayer = viewModel.player.currentAVPlayer
+        let item = vcPlayer?.currentItem
+        LogTap.shared.note(
+            "[NowPlaying] #149 \(tag): vcPlayer=\(pointer(vcPlayer)) enginePlayer=\(pointer(enginePlayer)) "
+            + "same=\(vcPlayer === enginePlayer) item=\(pointer(item)) "
+            + "meta=\(item?.externalMetadata.count ?? -1) "
+            + "tcs=\(vcPlayer.map { String($0.timeControlStatus.rawValue) } ?? "-") "
+            + "backend=\(viewModel.player.playbackBackend) state=\(viewModel.player.state) "
+            + "| \(avkitNowPlayingIvarState())")
+    }
+    #endif
+
     @objc private func appDidEnterBackground() {
+        #if DEBUG
+        noteNowPlayingState("background")
+        #endif
         wasFullyBackgrounded = true
         // Sodalite#104: what the session looked like on the way out, so the return can tell one that
         // kept playing from one that was suspended. See `liveForegroundReturn`.
@@ -966,6 +1036,9 @@ final class PlayerHostController: AVPlayerViewController {
         // Before every early return below: the watchdog is armed by the engine phase, not by this routine,
         // and it must resume probing on any return to the foreground.
         viewModel.setAppActive(true)
+        #if DEBUG
+        noteNowPlayingState("foreground")
+        #endif
         // Cancels the WAIT only (#147). A release already past that point owns its own close, and the
         // flag it set is what the live branch below reads.
         liveSuspensionRelease?.cancel()
@@ -1040,6 +1113,9 @@ final class PlayerHostController: AVPlayerViewController {
         Task { @MainActor in
             try? await viewModel.player.reloadAtCurrentPosition()
             viewModel.finishBackgroundReload()
+            #if DEBUG
+            noteNowPlayingState("afterReload")
+            #endif
         }
     }
 
@@ -1156,6 +1232,12 @@ final class PlayerHostController: AVPlayerViewController {
         case .toggle:
             viewModel.togglePlayPause()
         }
+        #if DEBUG
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            noteNowPlayingState("afterTransport")
+        }
+        #endif
     }
 
     @objc private func menuPressed() {
