@@ -5,14 +5,14 @@ import UIKit
 /// Sodalite#168: the transport's two scrims, faded by Core Animation instead of SwiftUI.
 ///
 /// A SwiftUI opacity animation is stepped on the main thread, and hiding the controls tears the
-/// whole transport down 0.3 s into the scrim's 0.7 s fade-out, so the scrim stood still for a
+/// whole transport down 0.3 s into the scrim's longer fade-out, so the scrim stood still for a
 /// frame or two exactly there (seen on device at 23.976 Hz). A `CABasicAnimation` runs in the
 /// render server and does not care what the main thread is doing.
 struct ControlScrimLayer: UIViewRepresentable {
     let visible: Bool
 
     static let fadeInDuration: CFTimeInterval = 0.5
-    static let fadeOutDuration: CFTimeInterval = 0.7
+    static let fadeOutDuration: CFTimeInterval = 0.5
 
     func makeUIView(context: Context) -> ControlScrimView {
         ControlScrimView()

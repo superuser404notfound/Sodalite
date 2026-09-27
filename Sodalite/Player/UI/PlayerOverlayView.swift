@@ -603,12 +603,12 @@ struct PlayerOverlayView: View {
     }
 
     #if os(tvOS)
-    /// Sodalite#168: the scrims fade on their own clock, linear, 0.5 s in and 0.7 s out.
+    /// Sodalite#168: the scrims fade on their own clock, linear over 0.5 s both ways (0.7 s out was tried and felt long on device).
     ///
     /// With Match Frame Rate on, tvOS draws the interface at the content's 23.976 Hz, and the
     /// controls' 0.3 s ease-in-out left the scrim about 7 frames, up to 21% opacity per frame at
     /// its 0.88 edge mid-fade: a band that large visibly steps. Linear at these lengths keeps every
-    /// step near 7% in and 5% out, which is below what the old fade managed at 60 Hz, so one value
+    /// step near 7%, which is below what the old fade managed at 60 Hz, so one value
     /// serves every refresh rate. The scrims therefore stay mounted and only change opacity; inside
     /// the controls' insert/remove they could never outlast the 0.3 s transition.
     ///
