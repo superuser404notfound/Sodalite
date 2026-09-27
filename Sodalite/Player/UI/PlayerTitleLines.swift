@@ -15,7 +15,7 @@ nonisolated struct PlayerTitleLines: Equatable, Sendable {
     init(item: JellyfinItem) {
         header = item.seriesName ?? item.name
         guard item.seriesName != nil else {
-            // Live items carry no production year, so this line belongs to stored media only.
+            // A movie, stored or live (Sodalite#159): its name over its year.
             subtitle = item.productionYear.map { String($0) }
             return
         }

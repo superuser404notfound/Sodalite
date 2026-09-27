@@ -94,7 +94,7 @@ struct GuideHeroView: View {
     /// rather than leaving an empty separator behind.
     private func subtitleLine(for program: JellyfinProgram) -> String? {
         var parts: [String] = []
-        if let episode = episodeLabel(for: program) { parts.append(episode) }
+        if let identity = program.identityLabel { parts.append(identity) }
         if let name = channel?.name ?? program.channelName { parts.append(name) }
         if let start = program.startDate, let end = program.endDate {
             let formatter = DateFormatter.guideShortTime
@@ -102,16 +102,6 @@ struct GuideHeroView: View {
         }
         if let first = program.genres?.first { parts.append(first) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    /// Same cascade as `ProgramInfoPopover.episodeLabel`: episode title, then series name, then bare
-    /// season and episode numbers, dropping anything that just repeats the title.
-    private func episodeLabel(for program: JellyfinProgram) -> String? {
-        EpisodeMetadataFormatter.programLabel(season: program.parentIndexNumber,
-                                              episode: program.indexNumber,
-                                              episodeTitle: program.episodeTitle,
-                                              seriesName: program.seriesName,
-                                              header: program.name)
     }
 
     private var programImageURL: URL? {

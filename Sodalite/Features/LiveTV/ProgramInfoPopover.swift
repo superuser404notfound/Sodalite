@@ -95,15 +95,8 @@ struct ProgramInfoPopover: View {
         }
     }
 
-    /// Builds the episode-identity label with cascading priority:
-    /// episodeTitle > seriesName > S/E numbers alone.
-    var episodeLabel: String? {
-        EpisodeMetadataFormatter.programLabel(season: program.parentIndexNumber,
-                                              episode: program.indexNumber,
-                                              episodeTitle: program.episodeTitle,
-                                              seriesName: program.seriesName,
-                                              header: program.name)
-    }
+    /// Episode title > series name > S/E numbers alone, and a movie's year where none apply.
+    var episodeLabel: String? { program.identityLabel }
 
     @ViewBuilder
     private func actionButtons(at now: Date) -> some View {

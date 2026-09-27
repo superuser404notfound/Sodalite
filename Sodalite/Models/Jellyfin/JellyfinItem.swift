@@ -249,14 +249,17 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         // (NOVA, and every sports broadcast) lost the programme name entirely: `name` above has
         // already been overwritten with the episode title, and the `?? program?.name` fallback
         // there is unreachable in exactly that case.
-        self.seriesName = program?.seriesName ?? program?.name
+        // A movie keeps no header of its own, so it takes the branch a stored movie does: its name
+        // over its year.
+        let isMovie = program?.isMovie == true
+        self.seriesName = isMovie ? program?.seriesName : program?.seriesName ?? program?.name
         self.seriesId = nil
         self.seasonId = nil
         // Both halves or neither: a lone "S4" beside a programme name identifies nothing, and the
         // guide already refuses to draw one (`EpisodeMetadataFormatter.programLabel`).
         self.parentIndexNumber = program?.indexNumber == nil ? nil : program?.parentIndexNumber
         self.indexNumber = program?.parentIndexNumber == nil ? nil : program?.indexNumber
-        self.productionYear = nil
+        self.productionYear = program?.movieYear
         self.communityRating = nil
         self.criticRating = nil
         self.officialRating = nil

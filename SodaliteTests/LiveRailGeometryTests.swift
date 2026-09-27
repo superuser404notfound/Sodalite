@@ -359,6 +359,37 @@ struct LiveProgramMetadataTests {
         #expect(lines.header == "NOVA Science")
         #expect(lines.subtitle == "S52, E3 · Chasing Carbon")
     }
+
+    private func decodedProgram(_ fields: String) throws -> JellyfinProgram {
+        let json = "{\"Id\":\"p\",\"Name\":\"Heat\",\(fields)}"
+        return try JSONDecoder().decode(JellyfinProgram.self, from: Data(json.utf8))
+    }
+
+    @Test("a live movie reads name over year, like a stored one (Sodalite#159)")
+    func aliveMovieCarriesItsYear() throws {
+        let program = try decodedProgram("\"IsMovie\":true,\"ProductionYear\":1995")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == "1995")
+        #expect(program.identityLabel == "1995")
+    }
+
+    @Test("the year of anything but a movie is an air date and stays off screen (Sodalite#159)")
+    func anonMovieYearIsIgnored() throws {
+        let program = try decodedProgram("\"IsSeries\":true,\"ProductionYear\":2024")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == nil)
+        #expect(program.identityLabel == nil)
+    }
+
+    @Test("a movie with no year in the guide still reads as itself (Sodalite#159)")
+    func amovieWithoutAYearIsOneLine() throws {
+        let program = try decodedProgram("\"IsMovie\":true")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == nil)
+    }
 }
 
 /// Sodalite#159: the player draws its title on three surfaces, and only one of them ran the second

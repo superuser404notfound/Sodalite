@@ -65,6 +65,9 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
     let timerId: String?
     /// Set when a series timer covers this program.
     let seriesTimerId: String?
+    /// The film's year for a movie; for anything else Jellyfin derives it from the original air
+    /// date, which identifies nothing on a guide entry, so only `movieYear` reads it.
+    var productionYear: Int? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -88,9 +91,24 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
         case episodeTitle = "EpisodeTitle"
         case timerId = "TimerId"
         case seriesTimerId = "SeriesTimerId"
+        case productionYear = "ProductionYear"
     }
 
     var primaryImageTag: String? { imageTags?["Primary"] }
+
+    /// Sodalite#159: the line a stored movie draws under its title.
+    var movieYear: Int? { isMovie == true ? productionYear : nil }
+
+    /// The identity line both guide surfaces draw under the program name: the episode cascade, and
+    /// for a movie, which has none, its year.
+    var identityLabel: String? {
+        EpisodeMetadataFormatter.programLabel(season: parentIndexNumber,
+                                              episode: indexNumber,
+                                              episodeTitle: episodeTitle,
+                                              seriesName: seriesName,
+                                              header: name)
+            ?? movieYear.map { String($0) }
+    }
 
     /// Guide placeholder for channels without EPG data ("live-<channelID>"); id doesn't exist server-side, so don't offer record affordances.
     var isSynthesized: Bool { id.hasPrefix("live-") }
