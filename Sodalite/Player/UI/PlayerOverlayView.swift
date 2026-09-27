@@ -586,6 +586,7 @@ struct PlayerOverlayView: View {
         viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked
     }
 
+    #if os(tvOS)
     /// Sodalite#168: the scrims fade on their own clock, linear, 0.5 s in and 0.7 s out.
     ///
     /// With Match Frame Rate on, tvOS draws the interface at the content's 23.976 Hz, and the
@@ -600,30 +601,14 @@ struct PlayerOverlayView: View {
         let screen = UIApplication.shared.connectedScenes
             .lazy.compactMap { $0 as? UIWindowScene }
             .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
-        let visible = controlsOverlayVisible
-        return ZStack {
-            VStack {
-                Spacer()
-                LinearGradient(stops: Self.controlScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.controlScrimHeight(playerHeight: screen.height))
-            }
-
-            VStack {
-                LinearGradient(stops: Self.titleScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.titleScrimHeight(playerHeight: screen.height))
-                Spacer()
-            }
-        }
-        .frame(width: screen.width, height: screen.height)
-        .position(x: screen.width / 2, y: screen.height / 2)
-        .ignoresSafeArea()
-        .opacity(visible ? 1 : 0)
-        .animation(.linear(duration: visible ? 0.5 : 0.7), value: visible)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
+        return ControlScrimLayer(visible: controlsOverlayVisible)
+            .frame(width: screen.width, height: screen.height)
+            .position(x: screen.width / 2, y: screen.height / 2)
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
+    #endif
 
     private var tvOSControlsOverlay: some View {
         // Pin to scene-screen bounds (same fix as the next-episode card): an audio-track switch reloads AVKit and transiently collapses its container frame, so a Spacer/alignment-anchored controls block jumps up while fading. Absolute screen-sized frame + center position removes the dependency on the churning AVKit parent.
