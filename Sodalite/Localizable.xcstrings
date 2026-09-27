@@ -63667,6 +63667,654 @@
         }
       }
     },
+    "changelog.1_1_0.durations.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Délky a zbývající čas teď vypadají všude stejně, ve vašem jazyce. Zbývající čas se zaokrouhluje nahoru, takže nikdy neslibuje méně, než kolik zbývá."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spilletider og resterende tid ser nu ens ud overalt, på dit sprog. Resterende tid rundes op, så den aldrig lover mindre, end der er tilbage."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laufzeiten und Restzeiten sehen jetzt überall gleich aus, in deiner Sprache. Die Restzeit wird aufgerundet und verspricht so nie weniger, als noch kommt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι διάρκειες και ο υπολειπόμενος χρόνος εμφανίζονται πλέον παντού ίδια, στη γλώσσα σας. Ο υπολειπόμενος χρόνος στρογγυλοποιείται προς τα πάνω, ώστε να μην υπόσχεται ποτέ λιγότερο από όσο μένει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtimes and time left now read the same everywhere, in your language. Time left rounds up, so it never promises less than there is."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las duraciones y el tiempo restante se ven ahora igual en todas partes, en tu idioma. El tiempo restante se redondea hacia arriba, así nunca promete menos de lo que queda."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kestot ja jäljellä oleva aika näyttävät nyt kaikkialla samalta, omalla kielelläsi. Jäljellä oleva aika pyöristetään ylöspäin, joten se ei koskaan lupaa vähemmän kuin on jäljellä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les durées et le temps restant s’affichent désormais partout de la même façon, dans votre langue. Le temps restant est arrondi au supérieur et n’annonce jamais moins que ce qui reste."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trajanja i preostalo vrijeme sada svugdje izgledaju isto, na vašem jeziku. Preostalo vrijeme zaokružuje se prema gore, pa nikad ne obećava manje nego što ostaje."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A játékidő és a hátralévő idő most mindenhol egyformán jelenik meg, a te nyelveden. A hátralévő időt felfelé kerekítjük, így sosem ígér kevesebbet, mint amennyi hátravan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durate e tempo rimanente ora appaiono ovunque allo stesso modo, nella tua lingua. Il tempo rimanente viene arrotondato per eccesso, così non promette mai meno di quanto resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生時間と残り時間の表示がアプリ全体で統一され、お使いの言語で表示されます。残り時間は切り上げるので、実際より短く表示されることはありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 시간과 남은 시간이 이제 어디서나 같은 형식으로, 사용하는 언어로 표시됩니다. 남은 시간은 올림 처리되어 실제보다 짧게 표시되지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spilletid og gjenværende tid ser nå like ut overalt, på ditt språk. Gjenværende tid rundes opp, så den aldri lover mindre enn det som er igjen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speelduur en resterende tijd zien er nu overal hetzelfde uit, in jouw taal. Resterende tijd wordt naar boven afgerond en belooft dus nooit minder dan er over is."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Czas trwania i pozostały czas wyglądają teraz wszędzie tak samo, w Twoim języku. Pozostały czas jest zaokrąglany w górę, więc nigdy nie obiecuje mniej, niż zostało."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durações e tempo restante agora aparecem iguais em todo lugar, no seu idioma. O tempo restante é arredondado para cima, então nunca promete menos do que falta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As durações e o tempo restante aparecem agora iguais em todo o lado, no seu idioma. O tempo restante é arredondado para cima, por isso nunca promete menos do que falta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duratele și timpul rămas arată acum la fel peste tot, în limba ta. Timpul rămas este rotunjit în sus, deci nu promite niciodată mai puțin decât a mai rămas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длительность и оставшееся время теперь везде выглядят одинаково, на вашем языке. Оставшееся время округляется вверх и никогда не обещает меньше, чем осталось."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dĺžky a zostávajúci čas teraz vyzerajú všade rovnako, vo vašom jazyku. Zostávajúci čas sa zaokrúhľuje nahor, takže nikdy nesľubuje menej, než zostáva."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speltid och återstående tid ser nu likadana ut överallt, på ditt språk. Återstående tid avrundas uppåt, så den lovar aldrig mindre än vad som är kvar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süreler ve kalan süre artık her yerde aynı biçimde ve senin dilinde görünüyor. Kalan süre yukarı yuvarlanır, böylece kalandan daha azını vaat etmez."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тривалість і залишок часу тепер усюди виглядають однаково, вашою мовою. Залишок часу округлюється вгору, тож ніколи не обіцяє менше, ніж лишилося."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时长和剩余时间现在在各处以相同的格式、用你的语言显示。剩余时间向上取整，绝不会比实际剩余的少。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片長和剩餘時間現在在各處以相同格式、用你的語言顯示。剩餘時間無條件進位，絕不會比實際剩餘的少。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.durations.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden způsob, jak ukázat čas"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én måde at vise tid på"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Zeitangabe für alles"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένας τρόπος για τον χρόνο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One way to tell time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sola forma de mostrar el tiempo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yksi tapa näyttää aika"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une seule façon d’afficher le temps"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedan način prikaza vremena"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egységes időkijelzés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un solo modo di indicare il tempo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間表示をひとつに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하나로 통일된 시간 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én måte å vise tid på"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén manier om tijd te tonen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden sposób podawania czasu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma só forma de mostrar o tempo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma só forma de mostrar o tempo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un singur mod de a afișa timpul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Единый формат времени"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden spôsob, ako ukázať čas"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ett sätt att visa tid"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre tek biçimde"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Єдиний формат часу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "统一的时间显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統一的時間顯示"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.statusPill.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Štítky serverů teď ukazují vaši barvu zvýraznění naplno, stejně jako tlačítka kolem nich."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servermærkerne viser nu din accentfarve fuldt ud, ligesom knapperne omkring dem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Server-Marken zeigen deine Akzentfarbe jetzt voll, wie die Tasten um sie herum."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι ετικέτες διακομιστή δείχνουν πλέον πλήρως το χρώμα έμφασής σας, όπως τα κουμπιά γύρω τους."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server badges now show your accent colour in full, like the buttons around them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las etiquetas de servidor muestran ahora tu color de acento completo, como los botones que las rodean."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palvelinmerkit näyttävät nyt korostusvärisi täysin, kuten niiden ympärillä olevat painikkeet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les badges des serveurs affichent désormais votre couleur d’accent en entier, comme les boutons qui les entourent."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oznake poslužitelja sada u potpunosti prikazuju vašu boju isticanja, kao i gumbi oko njih."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A szerverjelzők most teljes egészében a kiemelőszínedet mutatják, akárcsak a körülöttük lévő gombok."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I badge dei server ora mostrano il tuo colore d’accento pieno, come i pulsanti intorno."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーのバッジが、周囲のボタンと同じくアクセントカラーで塗りつぶされるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 배지가 이제 주변 버튼처럼 강조 색상으로 가득 채워집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servermerkene viser nå aksentfargen din fullt ut, som knappene rundt dem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De serverlabels tonen je accentkleur nu volledig, net als de knoppen eromheen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakietki serwerów pokazują teraz Twój kolor akcentu w pełni, jak przyciski wokół nich."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os selos de servidor agora mostram sua cor de destaque por inteiro, como os botões ao redor."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As etiquetas dos servidores mostram agora a sua cor de destaque por inteiro, como os botões à volta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etichetele serverelor afișează acum culoarea ta de accent din plin, ca butoanele din jur."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Значки серверов теперь полностью окрашены в ваш акцентный цвет, как и кнопки рядом."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Štítky serverov teraz ukazujú vašu farbu zvýraznenia naplno, rovnako ako tlačidlá okolo nich."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servermärkena visar nu din accentfärg fullt ut, precis som knapparna runt dem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu rozetleri artık çevresindeki düğmeler gibi vurgu renginle tamamen dolu görünüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Значки серверів тепер повністю забарвлені у ваш акцентний колір, як і кнопки поруч."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器标签现在与周围的按钮一样，完整显示你的强调色。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器標籤現在與周圍的按鈕一樣，完整顯示你的強調色。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.statusPill.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stavové štítky ve vaší barvě zvýraznění"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statusmærker i din accentfarve"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statusmarken in deiner Akzentfarbe"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ετικέτες κατάστασης στο χρώμα έμφασής σας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status badges in your accent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etiquetas de estado en tu color de acento"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilamerkit korostusvärilläsi"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges d’état dans votre couleur d’accent"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oznake statusa u vašoj boji isticanja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Állapotjelzők a kiemelőszínedben"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badge di stato nel tuo colore d’accento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ステータスバッジをアクセントカラーで"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "강조 색상으로 표시되는 상태 배지"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statusmerker i din aksentfarge"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statuslabels in je accentkleur"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakietki stanu w Twoim kolorze akcentu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selos de status na sua cor de destaque"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etiquetas de estado na sua cor de destaque"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etichete de stare în culoarea ta de accent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Значки статуса в вашем акцентном цвете"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stavové štítky vo vašej farbe zvýraznenia"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statusmärken i din accentfärg"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vurgu renginde durum rozetleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Значки стану у вашому акцентному кольорі"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "状态标签采用你的强调色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "狀態標籤採用你的強調色"
+          }
+        }
+      }
+    },
     "changelog.modal.dismiss" : {
       "extractionState" : "manual",
       "localizations" : {

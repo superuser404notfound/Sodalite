@@ -4,6 +4,24 @@ import Foundation
 /// WhatsNewView fires once on first launch after update; group highlights by kind (.new / .improve / .fix).
 enum Changelog {
     static let entries: [ChangelogEntry] = [
+        // MARK: 1.1.0
+        ChangelogEntry(
+            version: "1.1.0",
+            highlights: [
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.durations.title",
+                    "changelog.1_1_0.durations.body",
+                    icon: "clock.fill"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.statusPill.title",
+                    "changelog.1_1_0.statusPill.body",
+                    icon: "paintpalette.fill"
+                ),
+            ]
+        ),
         // MARK: 1.0.0
         ChangelogEntry(
             version: "1.0.0",
