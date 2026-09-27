@@ -9,6 +9,12 @@ enum Changelog {
             version: "1.1.0",
             highlights: [
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.restingTouch.title",
+                    "changelog.1_1_0.restingTouch.body",
+                    icon: "hand.tap.fill"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",
