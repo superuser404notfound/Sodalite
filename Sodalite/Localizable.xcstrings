@@ -63991,6 +63991,330 @@
         }
       }
     },
+    "changelog.1_1_0.restingTouch.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Položte palec na klikací plochu Siri Remote a zobrazí se ovládání s uplynulým a zbývajícím časem, stejně jako při stisku nahoru. Přehrávání pokračuje."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvil tommelfingeren på Siri Remote-klikfladen, og afspilningslinjen vises med forløbet og resterende tid, ligesom når du trykker op. Afspilningen fortsætter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den Daumen auf das Clickpad der Siri Remote legen, und die Steuerleiste zeigt vergangene und verbleibende Zeit, genau wie beim Drücken nach oben. Die Wiedergabe läuft weiter."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ακουμπήστε τον αντίχειρα στην επιφάνεια κλικ του Siri Remote και εμφανίζεται η γραμμή ελέγχου με τον χρόνο που πέρασε και τον χρόνο που απομένει, όπως με το πάνω. Η αναπαραγωγή συνεχίζεται."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rest a thumb on the Siri Remote clickpad and the transport bar shows elapsed and remaining time, just like pressing Up. Playback keeps running."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoya el pulgar en el clickpad del Siri Remote y la barra de reproducción muestra el tiempo transcurrido y el restante, igual que al pulsar arriba. La reproducción continúa."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lepuuta peukaloa Siri Remoten klikkauslevyllä, niin toistopalkki näyttää kuluneen ja jäljellä olevan ajan, kuten ylös painamalla. Toisto jatkuu."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posez le pouce sur le pavé cliquable de la Siri Remote et la barre de lecture affiche le temps écoulé et restant, comme en appuyant vers le haut. La lecture continue."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Položite palac na klikajuću površinu Siri Remotea i traka za reprodukciju prikazuje proteklo i preostalo vrijeme, kao pritisak prema gore. Reprodukcija se nastavlja."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tegye a hüvelykujját a Siri Remote kattintópadjára, és a lejátszósáv mutatja az eltelt és a hátralévő időt, akárcsak a felfelé gomb. A lejátszás folytatódik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appoggia il pollice sul clickpad del Siri Remote e la barra di riproduzione mostra il tempo trascorso e rimanente, come premendo su. La riproduzione continua."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siri Remote のクリックパッドに親指を置くと、上を押したときと同じように経過時間と残り時間を表示するコントロールバーが現れます。再生は止まりません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siri Remote 클릭패드에 엄지를 올려 두면 위쪽을 누를 때처럼 경과 시간과 남은 시간이 표시된 재생 막대가 나타납니다. 재생은 계속됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvil tommelen på klikkflaten på Siri Remote, så viser avspillingslinjen medgått og gjenstående tid, akkurat som når du trykker opp. Avspillingen fortsetter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg een duim op het klikvlak van de Siri Remote en de afspeelbalk toont de verstreken en resterende tijd, net als bij omhoog drukken. Het afspelen gaat door."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połóż kciuk na klikalnym gładziku Siri Remote, a pasek odtwarzania pokaże czas, który upłynął i pozostały, tak jak po naciśnięciu w górę. Odtwarzanie trwa dalej."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoie o polegar no clickpad do Siri Remote e a barra de reprodução mostra o tempo decorrido e o restante, como ao pressionar para cima. A reprodução continua."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pouse o polegar no clickpad do Siri Remote e a barra de reprodução mostra o tempo decorrido e o restante, tal como ao premir para cima. A reprodução continua."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprijiniți degetul mare pe clickpadul Siri Remote și bara de redare arată timpul scurs și cel rămas, la fel ca la apăsarea în sus. Redarea continuă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите большой палец на кликпад Siri Remote, и панель воспроизведения покажет прошедшее и оставшееся время, как при нажатии вверх. Воспроизведение продолжается."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Položte palec na klikaciu plochu Siri Remote a ovládací panel ukáže uplynulý a zostávajúci čas, rovnako ako pri stlačení nahor. Prehrávanie pokračuje."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vila tummen på klickytan på Siri Remote så visar uppspelningsfältet förfluten och återstående tid, precis som när du trycker uppåt. Uppspelningen fortsätter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başparmağınızı Siri Remote tıklama yüzeyine koyun, oynatma çubuğu yukarı basmakla olduğu gibi geçen ve kalan süreyi gösterir. Oynatma devam eder."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покладіть великий палець на клікпад Siri Remote, і панель відтворення покаже минулий і залишений час, як після натискання вгору. Відтворення триває."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将拇指放在 Siri Remote 的触控板上，播放控制栏就会显示已播放和剩余时间，与按上键一样。播放不会中断。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將拇指放在 Siri Remote 的觸控板上，播放控制列就會顯示已播放和剩餘時間，與按上鍵一樣。播放不會中斷。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.restingTouch.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čas jedním dotykem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiden med ét tryk af tommelfingeren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zeit mit aufgelegtem Daumen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ο χρόνος με ένα άγγιγμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The time at a touch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tiempo con un toque"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aika yhdellä kosketuksella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le temps d’un simple contact"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vrijeme jednim dodirom"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az idő egy érintéssel"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tempo con un tocco"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触れるだけで時間を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "손을 대기만 하면 시간 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiden med ett trykk av tommelen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De tijd met één aanraking"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Czas jednym dotknięciem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O tempo com um toque"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O tempo com um toque"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timpul la o atingere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время одним касанием"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čas jedným dotykom"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiden med en tumme på ytan"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tek dokunuşla süre"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Час одним дотиком"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻触即可查看时间"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輕觸即可查看時間"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.statusPill.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

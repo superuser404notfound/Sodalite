@@ -419,6 +419,10 @@ final class PlayerHostController: AVPlayerViewController {
         pan.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirect.rawValue)]
         view.addGestureRecognizer(pan)
         ourGestureRecognizers.append(pan)
+
+        let rest = RestingTouchGestureRecognizer { [weak self] in self?.surfaceRested() }
+        view.addGestureRecognizer(rest)
+        ourGestureRecognizers.append(rest)
         #else
         // iOS touch transport: screen gestures live in the SwiftUI overlay (PlayerGestureCatcher),
         // below the controls, so they coexist with the tappable widgets. Nothing to attach here.
@@ -1400,6 +1404,19 @@ final class PlayerHostController: AVPlayerViewController {
             viewModel.showControlsTemporarily()
         }
     }
+
+    #if os(tvOS)
+    /// Sodalite#167: a thumb resting on the clickpad lands on Up's reveal from hidden.
+    private func surfaceRested() {
+        guard SiriRemoteRestingTouch.revealsTransport(
+            showControls: viewModel.showControls,
+            overlayCapturesInput: viewModel.isSubtitleDeletePromptVisible || viewModel.subtitleSearchVisible
+                || viewModel.errorMessage != nil || statsOverlayCapturesPresses || viewModel.isDropdownOpen,
+            nextEpisodePromptVisible: viewModel.showNextEpisodeOverlay
+        ) else { return }
+        viewModel.showControlsTemporarily()
+    }
+    #endif
 
     @objc private func downPressed() {
         if viewModel.isSubtitleDeletePromptVisible { return }
