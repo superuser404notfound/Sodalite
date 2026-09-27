@@ -117,7 +117,11 @@ struct PlayerOverlayView: View {
                 .transition(.opacity)
             }
 
-            if viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked {
+            #if os(tvOS)
+            tvOSControlScrims
+            #endif
+
+            if controlsOverlayVisible {
                 // iOS swipe hints live INSIDE controlsOverlay's absolute-geometry wrapper (Sodalite#15 portrait clip).
                 controlsOverlay
             }
@@ -578,11 +582,25 @@ struct PlayerOverlayView: View {
     static func controlScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.34 }
     static func titleScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.22 }
 
-    private var tvOSControlsOverlay: some View {
-        // Pin to scene-screen bounds (same fix as the next-episode card): an audio-track switch reloads AVKit and transiently collapses its container frame, so a Spacer/alignment-anchored controls block jumps up while fading. Absolute screen-sized frame + center position removes the dependency on the churning AVKit parent.
+    private var controlsOverlayVisible: Bool {
+        viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked
+    }
+
+    /// Sodalite#168: the scrims fade on their own clock, linear, 0.5 s in and 0.7 s out.
+    ///
+    /// With Match Frame Rate on, tvOS draws the interface at the content's 23.976 Hz, and the
+    /// controls' 0.3 s ease-in-out left the scrim about 7 frames, up to 21% opacity per frame at
+    /// its 0.88 edge mid-fade: a band that large visibly steps. Linear at these lengths keeps every
+    /// step near 7% in and 5% out, which is below what the old fade managed at 60 Hz, so one value
+    /// serves every refresh rate. The scrims therefore stay mounted and only change opacity; inside
+    /// the controls' insert/remove they could never outlast the 0.3 s transition.
+    ///
+    /// The cost: on appear the controls are fully in while the scrim is about 60% of the way there.
+    private var tvOSControlScrims: some View {
         let screen = UIApplication.shared.connectedScenes
             .lazy.compactMap { $0 as? UIWindowScene }
             .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
+        let visible = controlsOverlayVisible
         return ZStack {
             VStack {
                 Spacer()
@@ -590,7 +608,6 @@ struct PlayerOverlayView: View {
                                startPoint: .top, endPoint: .bottom)
                     .frame(height: Self.controlScrimHeight(playerHeight: screen.height))
             }
-            .ignoresSafeArea()
 
             VStack {
                 LinearGradient(stops: Self.titleScrimStops,
@@ -598,8 +615,22 @@ struct PlayerOverlayView: View {
                     .frame(height: Self.titleScrimHeight(playerHeight: screen.height))
                 Spacer()
             }
-            .ignoresSafeArea()
+        }
+        .frame(width: screen.width, height: screen.height)
+        .position(x: screen.width / 2, y: screen.height / 2)
+        .ignoresSafeArea()
+        .opacity(visible ? 1 : 0)
+        .animation(.linear(duration: visible ? 0.5 : 0.7), value: visible)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
 
+    private var tvOSControlsOverlay: some View {
+        // Pin to scene-screen bounds (same fix as the next-episode card): an audio-track switch reloads AVKit and transiently collapses its container frame, so a Spacer/alignment-anchored controls block jumps up while fading. Absolute screen-sized frame + center position removes the dependency on the churning AVKit parent.
+        let screen = UIApplication.shared.connectedScenes
+            .lazy.compactMap { $0 as? UIWindowScene }
+            .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
+        return ZStack {
             // Title (top left); HDR + Speed badges live in topRightInfoColumn so the speed badge can persist after the transport hides.
             VStack {
                 HStack(alignment: .top) {

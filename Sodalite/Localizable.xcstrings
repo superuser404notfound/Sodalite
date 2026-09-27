@@ -64315,6 +64315,330 @@
         }
       }
     },
+    "changelog.1_1_0.scrimFade.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ztmavení za ovládacími prvky přehrávání se nyní objevuje a mizí pomalu a rovnoměrně, takže už nepůsobí trhaně, když funkce Shoda snímkové frekvence přepne televizor na 24 Hz."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skyggen bag afspilningsknapperne toner nu ind og ud roligt og jævnt, så den ikke længere ser hakket ud, når Match billedfrekvens skifter tv'et til 24 Hz."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Abdunklung hinter der Wiedergabesteuerung blendet jetzt ruhig und gleichmäßig ein und aus, sodass sie nicht mehr stufig wirkt, wenn „Bildrate anpassen“ den Fernseher auf 24 Hz umschaltet."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η σκίαση πίσω από τα χειριστήρια αναπαραγωγής εμφανίζεται και σβήνει πλέον ήρεμα και ομοιόμορφα, ώστε να μη φαίνεται σκαλωτή όταν η Αντιστοίχιση ρυθμού καρέ αλλάζει την τηλεόραση στα 24 Hz."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The shading behind the playback controls now fades in and out slowly and evenly, so it no longer looks stepped when Match Frame Rate switches the TV to 24 Hz."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El sombreado tras los controles de reproducción ahora aparece y desaparece de forma pausada y uniforme, así que ya no se ve a saltos cuando Igualar frecuencia de fotogramas cambia el televisor a 24 Hz."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toistosäätimien takana oleva varjostus häivyttyy nyt esiin ja pois rauhallisesti ja tasaisesti, joten se ei enää näytä portaittaiselta, kun Sovita kuvataajuus vaihtaa television 24 Hz:iin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’ombrage derrière les commandes de lecture apparaît et disparaît désormais lentement et régulièrement, et ne paraît plus saccadé lorsque Adapter la fréquence d’images passe le téléviseur en 24 Hz."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zatamnjenje iza kontrola reprodukcije sada se pojavljuje i nestaje polako i ravnomjerno, pa više ne izgleda stepenasto kad Usklađivanje brzine sličica prebaci televizor na 24 Hz."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszásvezérlők mögötti sötétítés most lassan és egyenletesen jelenik meg és tűnik el, így már nem lépcsőzetes, amikor a Képkockasebesség egyeztetése 24 Hz-re vált a tévén."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’ombreggiatura dietro i controlli di riproduzione ora appare e scompare in modo lento e uniforme, quindi non sembra più a scatti quando Adatta frequenza fotogrammi porta il televisore a 24 Hz."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生コントロールの背景の陰影がゆっくり均一にフェードするようになり、「フレームレートを一致」でテレビが24 Hzに切り替わっても段差が目立たなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 컨트롤 뒤의 음영이 이제 천천히 고르게 나타나고 사라져서, 프레임률 일치가 TV를 24Hz로 전환해도 계단처럼 보이지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skyggen bak avspillingskontrollene tones nå inn og ut rolig og jevnt, så den ikke lenger ser hakkete ut når Samsvar bildefrekvens setter TV-en til 24 Hz."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De schaduw achter de afspeelbediening vervaagt nu rustig en gelijkmatig in en uit, zodat die niet meer schokkerig oogt wanneer Stem framesnelheid af de tv naar 24 Hz schakelt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przyciemnienie pod elementami sterowania odtwarzaniem pojawia się i znika teraz powoli i równomiernie, więc nie wygląda już skokowo, gdy Dopasuj liczbę klatek przełącza telewizor na 24 Hz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O sombreamento atrás dos controles de reprodução agora aparece e some de forma lenta e uniforme, sem parecer em degraus quando Igualar Taxa de Quadros muda a TV para 24 Hz."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O sombreado atrás dos controlos de reprodução aparece e desaparece agora de forma lenta e uniforme, sem parecer aos solavancos quando Corresponder taxa de fotogramas muda o televisor para 24 Hz."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umbrirea din spatele comenzilor de redare apare și dispare acum lent și uniform, așa că nu mai pare în trepte când Potrivire frecvență cadre comută televizorul la 24 Hz."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затемнение под элементами управления воспроизведением теперь появляется и исчезает медленно и равномерно, без ступенек, когда «Соответствие частоты кадров» переключает телевизор на 24 Гц."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stmavenie za ovládacími prvkami prehrávania sa teraz objavuje a mizne pomaly a rovnomerne, takže už nepôsobí trhane, keď Zhoda snímkovej frekvencie prepne televízor na 24 Hz."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skuggningen bakom uppspelningskontrollerna tonas nu in och ut lugnt och jämnt, så den ser inte längre hackig ut när Matcha bildfrekvens ställer om tv:n till 24 Hz."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma kontrollerinin arkasındaki gölgelendirme artık yavaş ve düzgün biçimde belirip kayboluyor; Kare Hızını Eşleştir televizyonu 24 Hz’e geçirdiğinde basamaklı görünmüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затемнення під елементами керування відтворенням тепер з’являється й зникає повільно та рівномірно, без сходинок, коли «Відповідність частоти кадрів» перемикає телевізор на 24 Гц."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放控件背后的阴影现在会缓慢均匀地淡入淡出，“匹配帧速率”将电视切换到 24 Hz 时不再显得一顿一顿。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放控制項背後的陰影現在會緩慢均勻地淡入淡出，「符合影格速率」將電視切換至 24 Hz 時不再顯得一格一格。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.scrimFade.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plynulejší stmívání ovládání"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blødere toning bag afspilningsknapperne"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weichere Blende hinter der Steuerung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πιο ομαλή εναλλαγή πίσω από τα χειριστήρια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smoother fades behind the controls"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fundidos más suaves tras los controles"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pehmeämpi häivytys säätimien takana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fondus plus doux derrière les commandes"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glađe zatamnjenje iza kontrola"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egyenletesebb áttűnés a vezérlők mögött"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dissolvenze più morbide dietro i controlli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作パネル背景のフェードがなめらかに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "컨트롤 뒤 페이드가 더 부드럽게"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mykere toning bak kontrollene"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vloeiender vervagen achter de bediening"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Płynniejsze przyciemnianie pod sterowaniem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transições mais suaves atrás dos controles"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transições mais suaves atrás dos controlos"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tranziții mai line în spatele comenzilor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более плавное затемнение под элементами управления"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plynulejšie stmievanie ovládania"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mjukare tonning bakom kontrollerna"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerin arkasında daha yumuşak geçiş"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плавніше затемнення під елементами керування"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "控件背景淡入淡出更顺滑"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "控制項背景淡入淡出更順暢"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.statusPill.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
