@@ -297,7 +297,36 @@ struct StatsOverlayView: View {
                 row("detail.tech.bitrate", value: Self.formatBitrate(bps))
             }
             row("player.stats.dynamicRange", value: videoRangeLabel)
+            if let format = videoStreamFormat {
+                if let pixelFormat = format.pixelFormat {
+                    row("player.stats.pixelFormat", value: pixelFormat)
+                }
+                if let depth = format.bitDepth {
+                    row("player.stats.bitDepth", value: "\(depth)-bit")
+                }
+                if let primaries = format.colorPrimariesLabel {
+                    row("player.stats.colorPrimaries", value: primaries)
+                }
+                if let transfer = format.transferLabel {
+                    row("player.stats.colorTransfer", value: transfer)
+                }
+                if let matrix = format.matrixLabel {
+                    row("player.stats.colorMatrix", value: matrix)
+                }
+                if let range = format.rangeLabel {
+                    row("player.stats.colorRange", value: range)
+                }
+            }
+            if let decoded = player.decodedVideoFormat {
+                row("player.stats.displayBuffer", value: decoded.pixelBufferLabel)
+            }
         }
+    }
+
+    /// AE#658: what the engine's own decoder produced where it decodes (software path), the source's
+    /// declaration otherwise. On the native path AVPlayer decodes and the frames never reach the engine.
+    private var videoStreamFormat: VideoStreamFormat? {
+        player.decodedVideoFormat?.frame ?? player.sourceVideoStreamFormat
     }
 
     /// Prefer the engine's TrackInfo (live Atmos flag + channel count); the Jellyfin MediaStream fills the
@@ -308,7 +337,7 @@ struct StatsOverlayView: View {
         return section("detail.tech.audio") {
             if let codec = engineTrack?.codec.uppercased()
                 ?? activeAudioStream?.codec?.uppercased() {
-                row("detail.tech.codec", value: codec)
+                row("detail.tech.codec", value: engineTrack?.profile.map { "\(codec) · \($0)" } ?? codec)
             }
             let channels = engineTrack?.channels ?? activeAudioStream?.channels ?? 0
             let isAtmos = engineTrack?.isAtmos ?? false
@@ -319,6 +348,15 @@ struct StatsOverlayView: View {
                         ? "\(Self.channelLayoutLabel(channels)) · Atmos"
                         : Self.channelLayoutLabel(channels)
                 )
+            }
+            if let rate = engineTrack?.sampleRate, rate > 0 {
+                row("player.stats.sampleRate", value: Self.formatSampleRate(rate))
+            }
+            if let bits = engineTrack?.bitsPerSample, bits > 0 {
+                row("player.stats.bitDepth", value: "\(bits)-bit")
+            }
+            if let sampleFormat = engineTrack?.sampleFormat {
+                row("player.stats.sampleFormat", value: sampleFormat)
             }
             let bitrate = activeAudioStream?.bitRate.map(Int64.init)
                 ?? engineTrack.map(\.bitrate)
@@ -580,6 +618,10 @@ struct StatsOverlayView: View {
         case 8: return "7.1"
         default: return "\(channels)ch"
         }
+    }
+
+    static func formatSampleRate(_ hz: Int) -> String {
+        hz % 1000 == 0 ? "\(hz / 1000) kHz" : String(format: "%.1f kHz", Double(hz) / 1000)
     }
 
     private static func formatBitrate(_ bps: Int) -> String {
