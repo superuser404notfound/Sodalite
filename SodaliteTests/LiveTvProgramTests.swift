@@ -49,6 +49,24 @@ struct LiveTvProgramTests {
         let fields = endpoint.queryItems?.first(where: { $0.name == "Fields" })?.value
         #expect(fields?.contains("ChannelInfo") == true)
         #expect(fields?.contains("SeriesName") == true)
-        #expect(fields?.contains("EpisodeTitle") == true)
+                #expect(fields?.contains("EpisodeTitle") == true)
+    }
+
+    // #170: without IsAiring the server runs a plain program query, which returns programs that ended since the last guide refresh.
+    @Test(arguments: LiveProgramCategory.allCases)
+    func recommendedProgramsQueryExcludesEndedPrograms(category: LiveProgramCategory) {
+        let items = JellyfinEndpoint.liveTvRecommendedPrograms(userID: "u1", category: category, limit: 20).queryItems ?? []
+        let hasAired = items.first(where: { $0.name == "HasAired" })?.value
+        #expect(hasAired == (category == .airing ? nil : "false"))
+    }
+
+    @Test func seriesRowExcludesOtherCategoriesLikeJellyfinWebEpisodes() {
+        let items = JellyfinEndpoint.liveTvRecommendedPrograms(userID: "u1", category: .series, limit: 20).queryItems ?? []
+        let value = { (name: String) in items.first(where: { $0.name == name })?.value }
+        #expect(value("IsSeries") == "true")
+        #expect(value("IsMovie") == "false")
+        #expect(value("IsSports") == "false")
+        #expect(value("IsKids") == "false")
+        #expect(value("IsNews") == "false")
     }
 }

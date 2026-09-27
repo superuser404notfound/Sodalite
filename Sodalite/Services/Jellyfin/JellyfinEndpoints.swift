@@ -400,17 +400,26 @@ enum JellyfinEndpoint: APIEndpoint {
             ]
 
         case .liveTvRecommendedPrograms(let userID, let category, let limit):
-            let flag: URLQueryItem = switch category {
-            case .airing: URLQueryItem(name: "IsAiring", value: "true")
-            case .series: URLQueryItem(name: "IsSeries", value: "true")
-            case .movies: URLQueryItem(name: "IsMovie", value: "true")
-            case .sports: URLQueryItem(name: "IsSports", value: "true")
-            case .kids:   URLQueryItem(name: "IsKids", value: "true")
-            case .news:   URLQueryItem(name: "IsNews", value: "true")
+            let flags: [URLQueryItem] = switch category {
+            case .airing: [URLQueryItem(name: "IsAiring", value: "true")]
+            // Same exclusions as jellyfin-web's Episodes row, so a sports broadcast flagged as a series stays in Sports.
+            case .series: [
+                URLQueryItem(name: "IsSeries", value: "true"),
+                URLQueryItem(name: "IsMovie", value: "false"),
+                URLQueryItem(name: "IsSports", value: "false"),
+                URLQueryItem(name: "IsKids", value: "false"),
+                URLQueryItem(name: "IsNews", value: "false"),
+            ]
+            case .movies: [URLQueryItem(name: "IsMovie", value: "true")]
+            case .sports: [URLQueryItem(name: "IsSports", value: "true")]
+            case .kids:   [URLQueryItem(name: "IsKids", value: "true")]
+            case .news:   [URLQueryItem(name: "IsNews", value: "true")]
             }
+            // Without IsAiring the server runs a plain program query with no time filter, so rows led with programs that ended since the last guide refresh (#170).
+            let upcoming = category == .airing ? [] : [URLQueryItem(name: "HasAired", value: "false")]
             return [
                 URLQueryItem(name: "UserId", value: userID),
-                flag,
+            ] + flags + upcoming + [
                 URLQueryItem(name: "EnableImages", value: "true"),
                 // ChannelInfo populates ChannelName so the card subtitle + synthesized JellyfinChannel have a name without a channel fetch.
                 URLQueryItem(name: "Fields", value: "ChannelInfo,Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle"),
