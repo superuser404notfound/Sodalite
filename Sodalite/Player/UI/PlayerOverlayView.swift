@@ -121,10 +121,26 @@ struct PlayerOverlayView: View {
             tvOSControlScrims
             #endif
 
+            #if os(tvOS)
+            // Sodalite#168: its own container, so leaving can run on the scrim's clock without the
+            // subtitles and the skip pill, which also follow showControls, changing speed. Measured:
+            // under only the parent's animation the removal was a one-frame cut, which next to the
+            // slow scrim read as the controls snapping away. Appearing keeps the quick 0.3 s.
+            ZStack {
+                if controlsOverlayVisible {
+                    controlsOverlay
+                }
+            }
+            .animation(controlsOverlayVisible
+                       ? .easeInOut(duration: 0.3)
+                       : .linear(duration: ControlScrimLayer.fadeOutDuration),
+                       value: controlsOverlayVisible)
+            #else
             if controlsOverlayVisible {
                 // iOS swipe hints live INSIDE controlsOverlay's absolute-geometry wrapper (Sodalite#15 portrait clip).
                 controlsOverlay
             }
+            #endif
 
             // Stats-for-nerds panel mounted above the controls overlay so it stays readable when the transport's auto-hide fires.
             if viewModel.showStatsOverlay && viewModel.errorMessage == nil {
