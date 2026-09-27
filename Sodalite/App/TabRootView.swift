@@ -26,7 +26,7 @@ struct TabRootView: View {
     /// stays gone until the viewer leaves the tab and comes back (measured on the tvOS 27 simulator,
     /// the same switch published in one update lands intact). nil until the first change.
     @State private var presentedTabs: [AppTab]?
-    /// Identity of the Settings content, bumped by a profile switch that pops its stack.
+    /// Identity of the Settings content, bumped by a profile switch that pops its stack or lands on Home.
     @State private var settingsEpoch = 0
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
@@ -296,6 +296,13 @@ struct TabRootView: View {
             presentedTabs = new.tabs
             if landing != selectedTab {
                 selectedTab = landing
+            }
+            // The Settings stack is kept across a switch so a viewer who stays in Settings returns to
+            // the screen they started from (#141). A switch that lands on Home has taken them out of
+            // it, and the profile list they left open greeted them on the next visit instead of the
+            // Settings root (Sodalite#169).
+            if result.landsOnHome {
+                settingsEpoch &+= 1
             }
             if old.tabs != new.tabs {
                 // Async Live TV / Music insertion rebuilds the UITabBar; re-apply the tint next tick once the new bar exists.
