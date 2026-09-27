@@ -20,6 +20,12 @@ struct TabRootView: View {
     /// arriving from the login probe one or more updates later is still judged against it. Dropped
     /// once the viewer navigates: after that a tab appearing is their own doing.
     @State private var switchOrigin: ProfileShellLayout?
+    /// The tab set the bar is showing, published together with the selection that goes with it
+    /// (Sodalite#169). A bar that gains tabs in one update and moves its selection in the next leaves
+    /// the newly selected page blank on tvOS: its content appears and disappears in the same pass and
+    /// stays gone until the viewer leaves the tab and comes back (measured on the tvOS 27 simulator,
+    /// the same switch published in one update lands intact). nil until the first change.
+    @State private var presentedTabs: [AppTab]?
     /// Identity of the Settings content, bumped by a profile switch that pops its stack.
     @State private var settingsEpoch = 0
     @Environment(\.dependencies) private var dependencies
@@ -72,13 +78,17 @@ struct TabRootView: View {
         return tabs
     }
 
+    private var tabsOnScreen: [AppTab] {
+        presentedTabs ?? displayedTabs
+    }
+
     private var shellLayout: ProfileShellLayout {
         ProfileShellLayout(profile: appState.profileKey, tabs: displayedTabs, style: appearance.navigationStyle)
     }
 
     private var tabShell: some View {
         TabView(selection: $selectedTab) {
-            ForEach(displayedTabs, id: \.self) { tab in
+            ForEach(tabsOnScreen, id: \.self) { tab in
                 #if os(iOS)
                 if tab == .search {
                     Tab(value: tab, role: .search) {
@@ -122,7 +132,7 @@ struct TabRootView: View {
             if appearance.navigationStyle == .sidebar {
                 // Ours, not the system's. The system sidebar cannot be tinted at all (see the note
                 // on configureTabBarItemAppearance) and it covers the content instead of pushing it.
-                SidebarShell(tabs: displayedTabs, selectedTab: $selectedTab) { tab in
+                SidebarShell(tabs: tabsOnScreen, selectedTab: $selectedTab) { tab in
                     tabContent(for: tab)
                 }
             } else {
@@ -259,22 +269,26 @@ struct TabRootView: View {
             // Re-apply on accent change; UITabBarItem.appearance() reads at configure time, not live.
             configureTabBarItemAppearance()
         }
-        // Keyed on the DISPLAYED set, not the probed one: a tab the user switched off changes no bar,
-        // and switching one back on inserts an item that needs the same re-tint as a probed insertion.
-        .onChange(of: displayedTabs) { _, tabs in
-            // Hiding the tab you are standing on has to land somewhere that still exists.
-            if !tabs.contains(selectedTab) {
-                selectedTab = .home
-            }
-            // Async Live TV / Music insertion rebuilds the UITabBar; re-apply the tint next tick once the new bar exists.
-            DispatchQueue.main.async {
-                configureTabBarItemAppearance()
-            }
-        }
+        // One handler for the tab set and the selection, so both reach the bar in the same update
+        // (see presentedTabs). Keyed on the DISPLAYED set, not the probed one: a tab the user switched
+        // off changes no bar, and switching one back on inserts an item that needs the same re-tint as
+        // a probed insertion.
         .onChange(of: shellLayout) { old, new in
             let armed = switchOrigin
             let result = ProfileShellLayout.resolveSwitch(previous: old, current: new, armedOrigin: armed)
             switchOrigin = result.origin
+            let landing = ProfileShellLayout.landingTab(
+                current: selectedTab, tabs: new.tabs, landsOnHome: result.landsOnHome)
+            presentedTabs = new.tabs
+            if landing != selectedTab {
+                selectedTab = landing
+            }
+            if old.tabs != new.tabs {
+                // Async Live TV / Music insertion rebuilds the UITabBar; re-apply the tint next tick once the new bar exists.
+                DispatchQueue.main.async {
+                    configureTabBarItemAppearance()
+                }
+            }
             if let before = old.profile, let after = new.profile, old.profile != new.profile {
                 LogTap.shared.note(
                     "[ProfileSettings] switch \(before.fingerprint) -> \(after.fingerprint), "
@@ -282,9 +296,6 @@ struct TabRootView: View {
             } else if result.landsOnHome, let origin = armed?.profile {
                 LogTap.shared.note(
                     "[ProfileSettings] the shell changed after the switch from \(origin.fingerprint), landing on Home")
-            }
-            if result.landsOnHome {
-                selectedTab = .home
             }
         }
         .onChange(of: selectedTab) { _, _ in

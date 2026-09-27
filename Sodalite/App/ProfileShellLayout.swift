@@ -31,6 +31,12 @@ struct ProfileShellLayout: Equatable {
         return old.tabs != new.tabs || old.style != new.style
     }
 
+    /// The tab to select once a shell change is published. A switch that changed the shell lands on
+    /// Home, and hiding the tab the viewer is standing on has to land somewhere that still exists.
+    static func landingTab(current: AppTab, tabs: [AppTab], landsOnHome: Bool) -> AppTab {
+        landsOnHome || !tabs.contains(current) ? .home : current
+    }
+
     /// One `shellLayout` change, resolved into whether to land on Home and which layout to keep
     /// comparing later changes against.
     ///
