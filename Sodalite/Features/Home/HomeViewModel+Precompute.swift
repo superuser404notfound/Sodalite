@@ -4,15 +4,27 @@ import SwiftUI
 
 extension HomeViewModel {
 
-    /// Resolves every CatalogProviders.networks tile against the local library + TMDB watch-providers in the background so the home filter can drop empty tiles, and writes each result list to FilterCache for a synchronous tap. Throttled to one run per session (re-running each Home appearance is ~110 Seerr calls for no perceptible gain).
+    // Every pass below is split in three: read its inputs off the view model, do the network work
+    // with no reference to it, then write back only if it still exists and was not cancelled. A pass
+    // that ran as a method on the view model held it for its whole multi-second runtime, and that
+    // postponed the deinit that cancels it: after a profile switch the old pass kept going under the
+    // next profile's token (403s on the previous user's id) and wrote shrunken provider lists into the
+    // previous profile's FilterCache (Sodalite#169). The `owner` closure hands out the view model for
+    // one statement at a time, so nothing holds it across an await.
+
     func precomputeProviderCounts() async {
-        if providerCountsComputedAt != nil { return }
+        await Self.runProviderCounts { self }
+    }
+
+    /// Resolves every CatalogProviders.networks tile against the local library + TMDB watch-providers in the background so the home filter can drop empty tiles, and writes each result list to FilterCache for a synchronous tap. Throttled to one run per session (re-running each Home appearance is ~110 Seerr calls for no perceptible gain).
+    static func runProviderCounts(_ owner: () -> HomeViewModel?) async {
         // Latch set at the END, not here: latching up front meant a cancelled/failed run (loadContent re-entry during the multi-second runtime is common) left the latch set and the replacement bailed, ending the session with partial counts.
+        guard let inputs = owner()?.providerPassInputs(), inputs.pending else { return }
 
         let region = Locale.current.region?.identifier ?? "US"
-        let lib = libraryService
-        let disc = discoverService
-        let uid = userID
+        let lib = inputs.libraryService
+        let disc = inputs.discoverService
+        let uid = inputs.userID
 
         // Build the TMDB map on MainActor first (tmdbID + CatalogProviders.networks are MainActor-isolated under default isolation). Slim fields on this 10 000-item all-library scan: only tmdbID + image tags are read, so homeRowFields + ProviderIds is all we need; defaultFields would pull People/MediaStreams/Chapters for the whole library, by far the biggest Home download (Sodalite#12).
         let allItemsQuery = ItemQuery(
@@ -23,8 +35,8 @@ extension HomeViewModel {
             fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
         )
         // A failed/cancelled scan must NOT proceed with an empty tmdbMap: the resolve pass would then find only studio matches and overwrite good FilterCache with shrunken lists (TMDB-augment-only providers like Paramount+ would count 0 and hide for the session).
-        guard let allItems = try? await libraryService.getItems(
-            userID: userID, query: allItemsQuery
+        guard let allItems = try? await lib.getItems(
+            userID: uid, query: allItemsQuery
         ).items, !Task.isCancelled else { return }
 
         var tmdbMap: [String: JellyfinItem] = [:]
@@ -91,8 +103,23 @@ extension HomeViewModel {
 
         // A cancelled precompute must not write superseded results over the replacement run's.
         guard !Task.isCancelled else { return }
+        owner()?.applyProviderCounts(resolved, region: region)
+    }
 
-        // MainActor: write counts + cache + sample backdrop per provider.
+    private struct PassInputs {
+        let pending: Bool
+        let libraryService: JellyfinLibraryServiceProtocol
+        let discoverService: SeerrDiscoverServiceProtocol?
+        let userID: String
+    }
+
+    private func providerPassInputs() -> PassInputs {
+        PassInputs(pending: providerCountsComputedAt == nil, libraryService: libraryService,
+                   discoverService: discoverService, userID: userID)
+    }
+
+    /// MainActor: write counts + cache + sample backdrop per provider.
+    private func applyProviderCounts(_ resolved: [(Int, [JellyfinItem])], region: String) {
         for (providerID, items) in resolved {
             providerItemCounts[providerID] = items.count
             FilterCache.shared.setHomeFilterItems(
@@ -113,17 +140,16 @@ extension HomeViewModel {
         providerCountsComputedAt = Date()
     }
 
-    /// Pre-warms FilterCache for every on-screen genre tile so the first tap renders from disk. Mirrors the provider precompute (detached, capped, one run per session); grids still revalidate on open.
     func precomputeGenreCaches() async {
-        if genreCachesComputedAt != nil { return }
-        // Empty-bail lets the next Home appearance retry if the genres row genuinely had nothing yet.
-        let genreNames: [String] = tagRows
-            .filter { $0.type == .genres }
-            .flatMap { $0.tags.map(\.name) }
-        if genreNames.isEmpty { return }
+        await Self.runGenreCaches { self }
+    }
 
-        let lib = libraryService
-        let uid = userID
+    /// Pre-warms FilterCache for every on-screen genre tile so the first tap renders from disk. Mirrors the provider precompute (detached, capped, one run per session); grids still revalidate on open.
+    static func runGenreCaches(_ owner: () -> HomeViewModel?) async {
+        guard let inputs = owner()?.genrePassInputs() else { return }
+        let genreNames = inputs.genreNames
+        let lib = inputs.libraryService
+        let uid = inputs.userID
 
         let resolveTask = Task.detached(priority: .utility) {
             await withTaskGroup(
@@ -172,7 +198,26 @@ extension HomeViewModel {
 
         // A cancelled pass must not persist stale results or latch; leaving genreCachesComputedAt nil lets the next appearance run to completion.
         guard !Task.isCancelled else { return }
+        owner()?.applyGenreCaches(resolved)
+    }
 
+    private struct GenrePassInputs {
+        let genreNames: [String]
+        let libraryService: JellyfinLibraryServiceProtocol
+        let userID: String
+    }
+
+    private func genrePassInputs() -> GenrePassInputs? {
+        if genreCachesComputedAt != nil { return nil }
+        // Empty-bail lets the next Home appearance retry if the genres row genuinely had nothing yet.
+        let genreNames: [String] = tagRows
+            .filter { $0.type == .genres }
+            .flatMap { $0.tags.map(\.name) }
+        if genreNames.isEmpty { return nil }
+        return GenrePassInputs(genreNames: genreNames, libraryService: libraryService, userID: userID)
+    }
+
+    private func applyGenreCaches(_ resolved: [(String, [JellyfinItem])]) {
         // MainActor cache writes (the detached closure can't see FilterCache.shared's non-isolation under strict concurrency).
         for (name, items) in resolved where !items.isEmpty {
             FilterCache.shared.setHomeFilterItems(
@@ -223,8 +268,16 @@ extension HomeViewModel {
     }
 
     func loadProviderBackdrops() async {
+        await Self.runProviderBackdrops { self }
+    }
+
+    static func runProviderBackdrops(_ owner: () -> HomeViewModel?) async {
+        guard let inputs = owner()?.providerPassInputs() else { return }
+        let lib = inputs.libraryService
+        let uid = inputs.userID
         // Only providers without a resolved backdrop (this pass has no per-session throttle, so without the filter it re-ran ~33 random-sample queries each loadContent just to overwrite already-resolved heroes).
-        let providers = CatalogProviders.networks.filter { providerBackdrops[$0.id] == nil }
+        guard let resolvedIDs = owner().map({ Set($0.providerBackdrops.keys) }) else { return }
+        let providers = CatalogProviders.networks.filter { !resolvedIDs.contains($0.id) }
         guard !providers.isEmpty else { return }
         // Stage 1 collects a Sendable sample item per provider; URL construction (imageService isn't Sendable) happens on MainActor in stage 2.
         let pairs: [(Int, JellyfinItem)] = await withTaskGroup(
@@ -236,7 +289,7 @@ extension HomeViewModel {
             let maxConcurrent = 6
 
             func enqueue(_ provider: CatalogProvider) {
-                group.addTask { [libraryService, userID] in
+                group.addTask {
                     let query = ItemQuery(
                         includeItemTypes: [.movie, .series],
                         sortBy: "Random",
@@ -244,7 +297,7 @@ extension HomeViewModel {
                         studioNames: provider.jellyfinStudioNames,
                         fields: JellyfinEndpoint.homeRowFields
                     )
-                    let item = try? await libraryService.getItems(userID: userID, query: query).items.first
+                    let item = try? await lib.getItems(userID: uid, query: query).items.first
                     return (provider.id, item)
                 }
             }
@@ -260,6 +313,11 @@ extension HomeViewModel {
             }
             return collected
         }
+        guard !Task.isCancelled else { return }
+        owner()?.applyProviderBackdrops(pairs)
+    }
+
+    private func applyProviderBackdrops(_ pairs: [(Int, JellyfinItem)]) {
         for (id, item) in pairs {
             if let url = imageService.backdropURL(for: item, maxWidth: ImageWidth.wideCard)
                 ?? imageService.posterURL(for: item, maxWidth: ImageWidth.wideCard) {

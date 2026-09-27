@@ -208,7 +208,7 @@ final class HomeViewModel {
     }
 
     isolated deinit {
-        // Fan-outs hold self weakly, but a deferred-sleep task would linger up to 13 s after the VM is gone (profile switch); cancel flips Task.isCancelled so the next checkpoint stops early.
+        // Fan-outs hold self weakly, also while their network work runs (see +Precompute), so this deinit is reached mid-pass; cancel flips Task.isCancelled so the next checkpoint stops early.
         configReloadTask?.cancel()
         backdropTask?.cancel()
         providerCountsTask?.cancel()
@@ -466,28 +466,34 @@ final class HomeViewModel {
         // All three deferred + .utility so secondary queries don't compete with the user's first detail navigation; staggered (3s/8s/13s) so the two heaviest don't land on the HTTPClient limiter at once and starve each other on a slow CDN (Sodalite#12).
 
         // One Studios query per provider for a sample backdrop; gaps tolerated (tile falls back to logo-only).
-        if providersEnabled {
-            backdropTask = Task(priority: .utility) { [weak self] in
-                try? await Task.sleep(for: .seconds(3))
-                if Task.isCancelled { return }
-                await self?.loadProviderBackdrops()
-            }
-        }
+        if providersEnabled { scheduleProviderBackdrops(after: .seconds(3)) }
         // Pre-resolve provider tiles so the empty-tile-hide pass has data before the user taps each one. One run per session, heaviest of the three (10 000-item query + per-provider studio/TMDB matches), deferred longest.
-        if providersEnabled {
-            providerCountsTask = Task(priority: .utility) { [weak self] in
-                try? await Task.sleep(for: .seconds(8))
-                if Task.isCancelled { return }
-                await self?.precomputeProviderCounts()
-            }
-        }
+        if providersEnabled { scheduleProviderCounts(after: .seconds(8)) }
         // Pre-warm genre grids so the first tap renders from cache.
-        if genresEnabled {
-            genreCachesTask = Task(priority: .utility) { [weak self] in
-                try? await Task.sleep(for: .seconds(13))
-                if Task.isCancelled { return }
-                await self?.precomputeGenreCaches()
-            }
+        if genresEnabled { scheduleGenreCaches(after: .seconds(13)) }
+    }
+
+    func scheduleProviderBackdrops(after delay: Duration) {
+        backdropTask = Task(priority: .utility) { [weak self] in
+            try? await Task.sleep(for: delay)
+            if Task.isCancelled { return }
+            await HomeViewModel.runProviderBackdrops { self }
+        }
+    }
+
+    func scheduleProviderCounts(after delay: Duration) {
+        providerCountsTask = Task(priority: .utility) { [weak self] in
+            try? await Task.sleep(for: delay)
+            if Task.isCancelled { return }
+            await HomeViewModel.runProviderCounts { self }
+        }
+    }
+
+    func scheduleGenreCaches(after delay: Duration) {
+        genreCachesTask = Task(priority: .utility) { [weak self] in
+            try? await Task.sleep(for: delay)
+            if Task.isCancelled { return }
+            await HomeViewModel.runGenreCaches { self }
         }
     }
 
