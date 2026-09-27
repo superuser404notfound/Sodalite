@@ -300,9 +300,13 @@ struct TabRootView: View {
             // The Settings stack is kept across a switch so a viewer who stays in Settings returns to
             // the screen they started from (#141). A switch that lands on Home has taken them out of
             // it, and the profile list they left open greeted them on the next visit instead of the
-            // Settings root (Sodalite#169).
+            // Settings root (Sodalite#169). One update later, not in this one: rebuilding the page
+            // the bar is leaving in the same update as the landing left the bar's selection on the
+            // old index, Catalog lit while Home was on screen (reproduced on the tvOS 27 simulator).
             if result.landsOnHome {
-                settingsEpoch &+= 1
+                DispatchQueue.main.async {
+                    settingsEpoch &+= 1
+                }
             }
             if old.tabs != new.tabs {
                 // Async Live TV / Music insertion rebuilds the UITabBar; re-apply the tint next tick once the new bar exists.
