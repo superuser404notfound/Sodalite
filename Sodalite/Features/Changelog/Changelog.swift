@@ -22,6 +22,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
+                    "changelog.1_1_0.scrimFade.title",
+                    "changelog.1_1_0.scrimFade.body",
+                    icon: "circle.lefthalf.filled"
+                ),
+                ChangelogHighlight(
+                    .improve,
                     "changelog.1_1_0.statusPill.title",
                     "changelog.1_1_0.statusPill.body",
                     icon: "paintpalette.fill"

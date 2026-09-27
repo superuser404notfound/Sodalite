@@ -117,10 +117,30 @@ struct PlayerOverlayView: View {
                 .transition(.opacity)
             }
 
-            if viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked {
+            #if os(tvOS)
+            tvOSControlScrims
+            #endif
+
+            #if os(tvOS)
+            // Sodalite#168: its own container, so leaving can run on the scrim's clock without the
+            // subtitles and the skip pill, which also follow showControls, changing speed. Measured:
+            // under only the parent's animation the removal was a one-frame cut, which next to the
+            // slow scrim read as the controls snapping away. Appearing keeps the quick 0.3 s.
+            ZStack {
+                if controlsOverlayVisible {
+                    controlsOverlay
+                }
+            }
+            .animation(controlsOverlayVisible
+                       ? .easeInOut(duration: 0.3)
+                       : .linear(duration: ControlScrimLayer.fadeOutDuration),
+                       value: controlsOverlayVisible)
+            #else
+            if controlsOverlayVisible {
                 // iOS swipe hints live INSIDE controlsOverlay's absolute-geometry wrapper (Sodalite#15 portrait clip).
                 controlsOverlay
             }
+            #endif
 
             // Stats-for-nerds panel mounted above the controls overlay so it stays readable when the transport's auto-hide fires.
             if viewModel.showStatsOverlay && viewModel.errorMessage == nil {
@@ -578,28 +598,40 @@ struct PlayerOverlayView: View {
     static func controlScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.34 }
     static func titleScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.22 }
 
+    private var controlsOverlayVisible: Bool {
+        viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked
+    }
+
+    #if os(tvOS)
+    /// Sodalite#168: the scrims fade on their own clock, linear over 0.5 s both ways (0.7 s out was tried and felt long on device).
+    ///
+    /// With Match Frame Rate on, tvOS draws the interface at the content's 23.976 Hz, and the
+    /// controls' 0.3 s ease-in-out left the scrim about 7 frames, up to 21% opacity per frame at
+    /// its 0.88 edge mid-fade: a band that large visibly steps. Linear at these lengths keeps every
+    /// step near 7%, which is below what the old fade managed at 60 Hz, so one value
+    /// serves every refresh rate. The scrims therefore stay mounted and only change opacity; inside
+    /// the controls' insert/remove they could never outlast the 0.3 s transition.
+    ///
+    /// The cost: on appear the controls are fully in while the scrim is about 60% of the way there.
+    private var tvOSControlScrims: some View {
+        let screen = UIApplication.shared.connectedScenes
+            .lazy.compactMap { $0 as? UIWindowScene }
+            .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
+        return ControlScrimLayer(visible: controlsOverlayVisible)
+            .frame(width: screen.width, height: screen.height)
+            .position(x: screen.width / 2, y: screen.height / 2)
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+    #endif
+
     private var tvOSControlsOverlay: some View {
         // Pin to scene-screen bounds (same fix as the next-episode card): an audio-track switch reloads AVKit and transiently collapses its container frame, so a Spacer/alignment-anchored controls block jumps up while fading. Absolute screen-sized frame + center position removes the dependency on the churning AVKit parent.
         let screen = UIApplication.shared.connectedScenes
             .lazy.compactMap { $0 as? UIWindowScene }
             .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
         return ZStack {
-            VStack {
-                Spacer()
-                LinearGradient(stops: Self.controlScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.controlScrimHeight(playerHeight: screen.height))
-            }
-            .ignoresSafeArea()
-
-            VStack {
-                LinearGradient(stops: Self.titleScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.titleScrimHeight(playerHeight: screen.height))
-                Spacer()
-            }
-            .ignoresSafeArea()
-
             // Title (top left); HDR + Speed badges live in topRightInfoColumn so the speed badge can persist after the transport hides.
             VStack {
                 HStack(alignment: .top) {
