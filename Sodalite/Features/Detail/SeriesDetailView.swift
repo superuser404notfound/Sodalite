@@ -822,7 +822,7 @@ struct SeriesDetailView: View {
     /// runtime, so the line collapses rather than drawing empty.
     private func episodeMetadataLine(vm: DetailViewModel) -> String? {
         guard let runtime = selectedEpisode?.runTimeTicks, runtime > 0 else { return nil }
-        return runtime.ticksToDisplay
+        return runtime.ticksToDurationDisplay
     }
 
     // MARK: - Action Buttons
@@ -1172,7 +1172,7 @@ struct SeriesDetailView: View {
         if !episodeLabel.isEmpty {
             parts.append(episodeLabel)
         }
-        if let remaining = target.resumeRemainingTicks?.ticksToCompactDisplay {
+        if let remaining = target.resumeRemainingTicks?.ticksToDurationDisplay {
             parts.append(remaining)
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")

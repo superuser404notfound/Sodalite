@@ -75,11 +75,8 @@ struct SeerrMetadataRow: View {
         Text("·").foregroundStyle(.tertiary)
     }
 
-    /// "1h 47m" / "47m". Minutes-based (TMDB runtime is in minutes).
+    /// TMDB runtime is in minutes.
     private func runtimeLabel(_ minutes: Int) -> String {
-        let h = minutes / 60
-        let m = minutes % 60
-        if h > 0 { return "\(h)h \(m)m" }
-        return "\(m)m"
+        TimeInterval(minutes * 60).durationDisplay
     }
 }

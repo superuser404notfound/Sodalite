@@ -131,7 +131,7 @@ struct GuideHeroView: View {
     }
 }
 
-/// Progress and remaining minutes for an airing program. Its own view with its own clock, so the
+/// Progress and time remaining for an airing program. Its own view with its own clock, so the
 /// minute tick invalidates this bar and nothing above it.
 private struct GuideHeroProgressBar: View {
     let program: JellyfinProgram
@@ -149,8 +149,8 @@ private struct GuideHeroProgressBar: View {
                 }
                 .frame(width: 160, height: 5)
 
-                if let remaining = remainingMinutes(at: context.date) {
-                    Text("livetv.guide.hero.remaining \(remaining)")
+                if let remaining = remaining(at: context.date) {
+                    Text(verbatim: remaining)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -168,9 +168,10 @@ private struct GuideHeroProgressBar: View {
         return CGFloat(min(1, max(0, now.timeIntervalSince(start) / total)))
     }
 
-    private func remainingMinutes(at now: Date) -> Int? {
+    /// The bar beside it says what the number counts, so no "left" (Sodalite#146, #165).
+    private func remaining(at now: Date) -> String? {
         guard let end = program.endDate, end > now else { return nil }
-        return max(1, Int(end.timeIntervalSince(now) / 60))
+        return end.timeIntervalSince(now).durationDisplay
     }
 }
 

@@ -156,7 +156,7 @@ struct MediaCard: View {
     private var progressOverlay: some View {
         if let resumeFraction {
             ResumeProgressBar(fraction: resumeFraction,
-                              remaining: item.resumeRemainingTicks?.ticksToCompactDisplay,
+                              remaining: item.resumeRemainingTicks?.ticksToDurationDisplay,
                               posterWidth: tierPosterWidth,
                               scale: scale)
         }
@@ -180,7 +180,7 @@ struct MediaCard: View {
     private var accessibilityProgress: String {
         guard let resumeFraction else { return "" }
         let percent = resumeFraction.formatted(.percent.precision(.fractionLength(0)))
-        guard let remaining = item.resumeRemainingTicks?.ticksToCompactDisplay else { return percent }
+        guard let remaining = item.resumeRemainingTicks?.ticksToDurationDisplay else { return percent }
         return "\(percent), \(remaining)"
     }
 

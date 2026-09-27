@@ -254,7 +254,7 @@ struct EpisodeLandscapeCard: View {
                     // would be a second number on one card saying something else (Sodalite#99).
                     // Blank, not absent: the strip keeps even card heights that way, the same
                     // reason MediaCard always renders its subtitle slot.
-                    Text(remainingLabel == nil ? runtime.ticksToDisplay : " ")
+                    Text(remainingLabel == nil ? runtime.ticksToDurationDisplay : " ")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -276,7 +276,7 @@ struct EpisodeLandscapeCard: View {
 
     private var remainingLabel: String? {
         guard !justMarkedPlayed else { return nil }
-        return episode.resumeRemainingTicks?.ticksToCompactDisplay
+        return episode.resumeRemainingTicks?.ticksToDurationDisplay
     }
 
     private var stroke: EpisodeCardStroke {

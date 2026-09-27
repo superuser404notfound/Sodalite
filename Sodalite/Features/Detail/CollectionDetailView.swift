@@ -322,7 +322,7 @@ struct CollectionItemRow: View {
                                 .lineLimit(1)
                         }
                         if let runtime = item.runTimeTicks {
-                            Text(runtime.ticksToDisplay)
+                            Text(runtime.ticksToDurationDisplay)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)

@@ -1,34 +1,26 @@
 import Foundation
 
-extension Int64 {
-    /// Convert Jellyfin ticks (100ns units) to a display string like "1h 42m"
-    var ticksToDisplay: String {
-        let totalSeconds = self / 10_000_000
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-
-        if hours > 0 {
-            let h = String(localized: "duration.hours.short", defaultValue: "h")
-            let m = String(localized: "duration.minutes.short", defaultValue: "m")
-            return "\(hours)\(h) \(minutes)\(m)"
-        }
-        let m = String(localized: "duration.minutes.short", defaultValue: "m")
-        return "\(minutes)\(m)"
-    }
-
-    /// Compact form for the resume capsule's label, e.g. "23m" / "1h 48m" (en), "23min" /
-    /// "1h 48min" (de). CLDR's narrow units, not `ticksToDisplay`'s own suffixes: measured across
-    /// all 26 catalogue locales at the label sizes this is drawn at, our "Std."/"Min." spelling puts
-    /// German at 69.9pt against narrow's 51.1pt and Polish at 74.5 against 51.1, which is the
-    /// difference between a label that fits beside the meter on a phone poster and one that gets
-    /// dropped (Sodalite#99). It also handles the edges by itself: an exact hour is "1h" rather than
-    /// "1h 0m", and anything under a minute rounds up to "1m" rather than showing "0m".
+extension TimeInterval {
+    /// The one spelling of a duration in the app, a runtime, a time remaining and a countdown alike:
+    /// "52m" / "1h 48m" / "2h" (en), "1h 48min" (de), "1sa 48d" (tr) (Sodalite#165). CLDR's narrow
+    /// units rather than suffixes of our own: those put German at 69.9pt against 51.1 and Polish at
+    /// 74.5 against 51.1 on the resume label (Sodalite#99), and five languages never had theirs
+    /// translated at all.
     ///
-    /// `ticksToDisplay` keeps its own spelling for the metadata rows, where the line has room and
-    /// the longer form reads better.
-    var ticksToCompactDisplay: String {
-        Duration.seconds(ticksToSeconds)
-            .formatted(.units(allowed: [.hours, .minutes], width: .narrow))
+    /// Always rounded UP, so a time left never promises less than there is and "0m" cannot appear
+    /// for anything longer than zero. A runtime takes the same rounding, or a film of 1h 47m 10s
+    /// would list 1h 47m and show 1h 48m left five seconds in.
+    var durationDisplay: String {
+        Duration.seconds(Swift.max(0, self))
+            .formatted(.units(allowed: [.hours, .minutes], width: .narrow,
+                              fractionalPart: .hide(rounded: .up)))
+    }
+}
+
+extension Int64 {
+    /// Jellyfin ticks (100ns units) as `durationDisplay`.
+    var ticksToDurationDisplay: String {
+        ticksToSeconds.durationDisplay
     }
 
     /// Convert Jellyfin ticks to TimeInterval (seconds)

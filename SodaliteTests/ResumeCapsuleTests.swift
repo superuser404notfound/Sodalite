@@ -215,16 +215,22 @@ struct ResumeCapsuleTests {
         #expect(item.resumeRemainingTicks == nil)
     }
 
-    /// The reason the label uses CLDR's narrow units instead of the catalogue's own suffixes: in the
-    /// languages that spell them out (de "Std."/"Min.", pl "godz.") our form is half again as wide
-    /// as narrow at the same size, which is the difference between a label that fits beside the
-    /// meter on a phone poster and one the guard drops. Narrow is never the longer of the two.
-    @Test func theCompactFormIsNeverLongerThanTheMetadataForm() {
-        for minutes in [1, 23, 59, 60, 61, 108, 228] {
-            let ticks = Int64(minutes) * 60 * 10_000_000
-            #expect(ticks.ticksToCompactDisplay.count <= ticks.ticksToDisplay.count,
-                    "\(minutes)m: \(ticks.ticksToCompactDisplay) vs \(ticks.ticksToDisplay)")
-            #expect(!ticks.ticksToCompactDisplay.isEmpty)
+    /// Sodalite#165: a time left never promises less than there is. Rounding to the nearest minute
+    /// drew "0m" for anything under thirty seconds and "1h 47m" with 1h 47m 10s to go.
+    @Test func aDurationRoundsUpToTheNextMinute() {
+        for seconds: TimeInterval in [1, 5, 30, 59] {
+            let text = seconds.durationDisplay
+            #expect(text.contains("1") && !text.contains("0"), "\(seconds)s: \(text)")
         }
+        #expect(TimeInterval(61).durationDisplay.contains("2"))
+        let text = TimeInterval(6421).durationDisplay
+        #expect(text.contains("48") && !text.contains("47"), "\(text)")
+    }
+
+    /// An exact hour is "2h", not "2h 0m", and nothing at all is not a negative duration.
+    @Test func anExactHourCarriesNoZeroMinutes() {
+        #expect(!TimeInterval(7200).durationDisplay.contains("0"))
+        #expect(TimeInterval(-30).durationDisplay == TimeInterval(0).durationDisplay)
+        #expect(Int64(7200 * 10_000_000).ticksToDurationDisplay == TimeInterval(7200).durationDisplay)
     }
 }

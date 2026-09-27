@@ -186,12 +186,10 @@ private struct RecordingCard: View {
         hSizeClass == .compact ? LayoutMetrics.current(hSizeClass).landscapeSize.height : 180
     }
 
-    /// "92 min" runtime; JellyfinItem has no display-ready date (premiereDate is a raw string), so runtime stands in.
+    /// "1h 32m" runtime; JellyfinItem has no display-ready date (premiereDate is a raw string), so runtime stands in.
     private var runtimeLabel: String? {
         guard let ticks = item.runTimeTicks, ticks > 0 else { return nil }
-        let minutes = Int(ticks / 600_000_000)
-        guard minutes > 0 else { return nil }
-        return "\(minutes) min"
+        return ticks.ticksToDurationDisplay
     }
 
     var body: some View {

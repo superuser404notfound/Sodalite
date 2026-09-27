@@ -701,7 +701,7 @@ struct MovieDetailView: View {
     /// Sodalite#99, so a timestamp here was the one place answering a different question. No "left"
     /// wrapper for the same reason the cards carry none: the bar says what the number counts.
     private func resumeRemaining(vm: DetailViewModel) -> String? {
-        vm.item.resumeRemainingTicks?.ticksToCompactDisplay
+        vm.item.resumeRemainingTicks?.ticksToDurationDisplay
     }
 
     /// 0…1 progress for the play button's overlay; nil when fresh or no run-time metadata.

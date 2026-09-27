@@ -542,19 +542,29 @@ struct LiveNextUpTests {
 
     @Test("a programme still to come is named with how long until it starts")
     func aprogrammeIsCounted() {
-        // Spelled the way the locale spells a duration, which past an hour is hours AND minutes
-        // rather than a hundred-odd minutes ("In 1 hour and 41 minutes: The OT").
+        // Spelled like every duration in the app, which past an hour is hours AND minutes rather
+        // than a hundred-odd minutes ("In 1h 41m: The OT", Sodalite#165).
         let text = LiveNextUpLine.text(name: "The OT", startsIn: 101 * 60)
         #expect(text.contains("The OT"))
         #expect(text.contains("1"))
         #expect(text.contains("41"))
     }
 
-    @Test("a programme about to start drops the countdown rather than saying zero")
-    func aboutToStartIsNamedWithoutANumber() {
+    @Test("the last minute of the countdown reads one minute, never zero")
+    func aboutToStartCountsItsLastMinute() {
         let text = LiveNextUpLine.text(name: "The OT", startsIn: 20)
         #expect(text.contains("The OT"))
-        #expect(!text.contains("0 "))
+        #expect(text.contains("1") && !text.contains("0"))
+    }
+
+    @Test("a programme that has started is named without a number")
+    func startedIsNamedWithoutANumber() {
+        for seconds: TimeInterval in [0, -5] {
+            let text = LiveNextUpLine.text(name: "The OT", startsIn: seconds)
+            #expect(text.contains("The OT"))
+            let hasDigit = text.contains { $0.isNumber }
+            #expect(!hasDigit, "\(text)")
+        }
     }
 }
 

@@ -96,17 +96,15 @@ struct LiveNextUpLine: View {
         }
     }
 
-    /// "In 101 minutes: The OT", or the name alone once the countdown would read as zero.
+    /// "In 1h 41m: The OT", or the name alone once it has started. The countdown rounds up like
+    /// every duration, so its last minute reads "In 1m" and never "In 0m" (Sodalite#165).
     static func text(name: String, startsIn seconds: TimeInterval) -> String {
-        let minutes = Int((seconds / 60).rounded())
-        guard minutes >= 1 else {
+        guard seconds > 0 else {
             return String(format: String(localized: "livetv.nextUp.now",
                                          defaultValue: "Next: %@"), name)
         }
-        let inWords = Duration.seconds(minutes * 60)
-            .formatted(.units(allowed: [.hours, .minutes], width: .wide))
         return String(format: String(localized: "livetv.nextUp",
-                                     defaultValue: "In %1$@: %2$@"), inWords, name)
+                                     defaultValue: "In %1$@: %2$@"), seconds.durationDisplay, name)
     }
 }
 
