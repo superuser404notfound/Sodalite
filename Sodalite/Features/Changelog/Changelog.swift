@@ -32,6 +32,12 @@ enum Changelog {
                     "changelog.1_1_0.statusPill.body",
                     icon: "paintpalette.fill"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.streamFormat.title",
+                    "changelog.1_1_0.streamFormat.body",
+                    icon: "waveform.path.ecg"
+                ),
             ]
         ),
         // MARK: 1.0.0
