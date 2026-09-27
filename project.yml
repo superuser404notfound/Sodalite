@@ -8,7 +8,7 @@ options:
   groupSortPosition: top
 settings:
   base:
-    MARKETING_VERSION: "1.0.0"
+    MARKETING_VERSION: "1.1.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "6.0"
     # Xcode's project template sets this, XcodeGen does not, so without it the build-setting
