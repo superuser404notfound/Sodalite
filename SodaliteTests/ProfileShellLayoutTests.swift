@@ -22,7 +22,19 @@ struct ProfileShellLayoutTests {
         #expect(ProfileShellLayout.switchLandsOnHome(from: layout(alice, [.home], .topBar), to: layout(bob, [.home], .sidebar)))
     }
 
-    /// Hiding a tab inside one profile is the existing onChange's job, and signing in or out is not a switch.
+    /// Hiding a tab inside one profile is landingTab's job, and signing in or out is not a switch.
+    @Test func aSwitchThatChangesTheShellLandsOnHome() {
+        #expect(ProfileShellLayout.landingTab(current: .settings, tabs: [.home, .liveTV, .catalog, .settings], landsOnHome: true) == .home)
+    }
+
+    @Test func hidingTheTabOnScreenLandsOnHome() {
+        #expect(ProfileShellLayout.landingTab(current: .catalog, tabs: [.home, .settings], landsOnHome: false) == .home)
+    }
+
+    @Test func aChangeThatKeepsTheTabOnScreenStays() {
+        #expect(ProfileShellLayout.landingTab(current: .settings, tabs: [.home, .settings], landsOnHome: false) == .settings)
+    }
+
     @Test func onlyAChangeOfProfileCounts() {
         #expect(!ProfileShellLayout.switchLandsOnHome(from: layout(alice, [.home, .catalog]), to: layout(alice, [.home])))
         #expect(!ProfileShellLayout.switchLandsOnHome(from: layout(nil, [.home]), to: layout(alice, [.home, .catalog])))

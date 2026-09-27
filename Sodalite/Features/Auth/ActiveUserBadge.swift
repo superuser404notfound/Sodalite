@@ -1,12 +1,15 @@
 import SwiftUI
 
 /// Display-only badge: non-focusable (`allowsHitTesting(false)`, no `.focusable`) so an up-press lands on the Home tab (issue #25). Only renders when the active server has >1 remembered profile.
+///
+/// The count is handed in, not read here (Sodalite#169). This view is empty until it knows the count,
+/// and behind the shell's `if` an empty view is never started: its `.task` never ran, so the count
+/// stayed 0 and the badge never showed (measured on device and reproduced on the tvOS 27 simulator).
 struct ActiveUserBadge: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
 
-    /// Recomputed only on identity changes (below), not per frame, to keep the keychain read cheap.
-    @State private var rememberedCount = 0
+    let rememberedCount: Int
 
     private let diameter: CGFloat = 36
 
@@ -19,24 +22,6 @@ struct ActiveUserBadge: View {
         }
         .animation(.easeInOut(duration: 0.2), value: rememberedCount)
         .animation(.easeInOut(duration: 0.2), value: appState.activeUser?.id)
-        // serverDidSwitch folded into the identity so a same-user server change still re-reads.
-        .task(id: badgeIdentity) {
-            recomputeCount()
-        }
-    }
-
-    private var badgeIdentity: String {
-        let serverID = appState.activeServer?.id ?? ""
-        let userID = appState.activeUser?.id ?? ""
-        return "\(serverID)|\(userID)|\(appState.serverDidSwitch)"
-    }
-
-    private func recomputeCount() {
-        guard let serverID = appState.activeServer?.id else {
-            rememberedCount = 0
-            return
-        }
-        rememberedCount = dependencies.listRememberedUsers(serverID: serverID).count
     }
 
     // MARK: - Content
