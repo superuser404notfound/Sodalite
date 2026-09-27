@@ -33,6 +33,9 @@ struct TabRootView: View {
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var showSettings = false
+    /// Profiles remembered for the active server, for ActiveUserBadge. Read here because this view is
+    /// always on screen and the badge is not until it knows the count (Sodalite#169).
+    @State private var rememberedProfileCount = 0
 
     private var iconColor: Color {
         appearanceTheme.palette.navigation.color
@@ -80,6 +83,10 @@ struct TabRootView: View {
 
     private var tabsOnScreen: [AppTab] {
         presentedTabs ?? displayedTabs
+    }
+
+    private var profileCountIdentity: String {
+        "\(appState.activeServer?.id ?? "")|\(appState.activeUser?.id ?? "")|\(appState.serverDidSwitch)"
     }
 
     private var shellLayout: ProfileShellLayout {
@@ -156,20 +163,20 @@ struct TabRootView: View {
                 // Floating gear + badge in the corner; each tab page reserves space for it
                 // via .padding(.top, gearChromeHeight) so content never slides under it.
                 HStack(spacing: 8) {
-                    ActiveUserBadge()
+                    ActiveUserBadge(rememberedCount: rememberedProfileCount)
                     settingsGearButton
                 }
                 .padding(.trailing, 16)
                 .padding(.top, 6)
             } else {
-                ActiveUserBadge()
+                ActiveUserBadge(rememberedCount: rememberedProfileCount)
             }
             #else
             // Not in sidebar mode: the rail carries the profile as its header, so a second badge in
             // the corner is both a duplicate and, without a top bar under it, a thing that lands on
             // top of whatever the screen puts up there (the Live TV and Catalog pickers do).
             if appearance.navigationStyle == .topBar {
-                ActiveUserBadge()
+                ActiveUserBadge(rememberedCount: rememberedProfileCount)
             }
             #endif
         }
@@ -196,6 +203,13 @@ struct TabRootView: View {
                 LogTap.shared.note("[NowPlaying] onPlayPauseCommand (tab bar, in-app)")
                 coordinator.togglePlayPause()
             }
+        }
+        // Keyed on identity changes, not read per body, to keep the keychain read cheap. serverDidSwitch
+        // is folded in so a same-user server change still re-reads.
+        .task(id: profileCountIdentity) {
+            rememberedProfileCount = appState.activeServer.map {
+                dependencies.listRememberedUsers(serverID: $0.id).count
+            } ?? 0
         }
         .task(id: appState.serverDidSwitch) {
             // TabRootView stays mounted across a switch, so recompute the optional Live TV / Music tabs per server, else the old server's Live TV lingers (wrong backend) and a new server's Music never appears until relaunch.
