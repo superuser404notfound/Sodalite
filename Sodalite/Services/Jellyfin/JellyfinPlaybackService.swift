@@ -53,7 +53,8 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil) async throws -> PlaybackInfoResponse {
-        try await postPlaybackInfo(profile: profile) { payload in
+        try await postPlaybackInfo(profile: profile,
+                                   maxStreamingBitrate: profile?["MaxStreamingBitrate"] as? Int) { payload in
             JellyfinEndpoint.playbackInfo(itemID: itemID, userID: userID, payload: payload)
         }
     }
@@ -69,9 +70,25 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         }
     }
 
+    /// The PlaybackInfo body. For VOD the rung also travels as the top-level `MaxStreamingBitrate`,
+    /// the PlaybackInfoDto field (Sodalite#87). Live passes nil: it sends its cap as a query item, and
+    /// a second value in the body could contradict the 12 Mbit/s re-encode pass.
+    ///
+    /// `EnableDirectPlay` is sent only when it is false. The field defaults to true on every Jellyfin
+    /// that has it, and a body that names it on every request would carry a flag most servers never
+    /// needed to read.
+    static func playbackInfoBody(profile: [String: Any], maxStreamingBitrate: Int?,
+                                 enableDirectPlay: Bool) -> [String: Any] {
+        var body: [String: Any] = ["DeviceProfile": profile]
+        if let maxStreamingBitrate { body["MaxStreamingBitrate"] = maxStreamingBitrate }
+        if !enableDirectPlay { body["EnableDirectPlay"] = false }
+        return body
+    }
+
     /// Routes through the shared HTTPClient (limiter, timeouts, APIError, cookie-free) not URLSession.shared; uses requestData + manual decode because DEBUG codec diagnostics need raw data.
     private func postPlaybackInfo(
         profile: [String: Any]?,
+        maxStreamingBitrate: Int? = nil,
         enableDirectPlay: Bool = true,
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
@@ -86,12 +103,8 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         }
         #endif
 
-        // Sent only when it is false. The field defaults to true on every Jellyfin that has it, and a
-        // body that names it on every request would carry a flag most servers never needed to read.
-        var body: [String: Any] = ["DeviceProfile": deviceProfile]
-        if !enableDirectPlay {
-            body["EnableDirectPlay"] = false
-        }
+        let body = Self.playbackInfoBody(profile: deviceProfile, maxStreamingBitrate: maxStreamingBitrate,
+                                         enableDirectPlay: enableDirectPlay)
         let payload = try JSONValue(jsonObject: body)
         let headers = [
             "Authorization": client.buildAuthHeader(),

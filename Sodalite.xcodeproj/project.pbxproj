@@ -1166,6 +1166,7 @@
 		E7E7FF1D6EBE62F34BF66AF6 /* ProfileSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466C8906B6D1952207FC6730 /* ProfileSettingsView.swift */; };
 		E7F75589CE8245FC794F983E /* SeerrMetadataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A918155231B658FE1659325E /* SeerrMetadataRow.swift */; };
 		E81E846148784FCA0D0DB816 /* StreamingQualityPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A636E04148D24E9F440F29 /* StreamingQualityPreferencesTests.swift */; };
+		E85B32E23C3DD0EDAEEB42C2 /* DirectPlayProfileQualityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412848ED5EF36F00EE44D340 /* DirectPlayProfileQualityTests.swift */; };
 		E86A99F73AD1632A8319B642 /* AlbumHeaderCenteringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E687D18AF11372EF4F514D /* AlbumHeaderCenteringTests.swift */; };
 		E91914DA3E060AC82E5DECF9 /* WatchStatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCED8EC83C97130D38152C3 /* WatchStatsViewModel.swift */; };
 		E92B0EE03A7E026A399E22AF /* SeerrRequestFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25735BA0AC72D8D8AEE8984 /* SeerrRequestFilter.swift */; };
@@ -1517,6 +1518,7 @@
 		40FA4E8988F5939A08FE9BBC /* ErrorTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorTextTests.swift; sourceTree = "<group>"; };
 		41193FED9B2D75A4F8826F18 /* SeerrWatchProvidersRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrWatchProvidersRow.swift; sourceTree = "<group>"; };
 		411E095BC369E72F67123676 /* NowPlayingMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingMetrics.swift; sourceTree = "<group>"; };
+		412848ED5EF36F00EE44D340 /* DirectPlayProfileQualityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectPlayProfileQualityTests.swift; sourceTree = "<group>"; };
 		414B2AE1B054BE8DA8E5EC4D /* SignOutEverywhereTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutEverywhereTests.swift; sourceTree = "<group>"; };
 		418106DEDECD6A1D03537314 /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		4181D40E9EA28EA46C7DF639 /* MovieDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailView.swift; sourceTree = "<group>"; };
@@ -2391,6 +2393,7 @@
 				2FF9138B1225684AC22A4085 /* DiagnosticEnvironmentLineTests.swift */,
 				A641A9A662A520E77ACD9FB7 /* DiagnosticLogSequenceTests.swift */,
 				6DE4A0B39B2874B8A75A704C /* DirectPlayProfileFLVTests.swift */,
+				412848ED5EF36F00EE44D340 /* DirectPlayProfileQualityTests.swift */,
 				E100E7790E4C6B1A845813C4 /* DirectPlayProfileWMVTests.swift */,
 				E9E3BF97D18324FFA9D4E64D /* DiscoveryProbeRaceTests.swift */,
 				D56D9C510CDDF570489238BA /* DualURLPromptLatchTests.swift */,
@@ -4105,6 +4108,7 @@
 				00E94CF081BDFBF065B3BA8C /* DiagnosticEnvironmentLineTests.swift in Sources */,
 				77A5E1AA74C30085F2E24B2F /* DiagnosticLogSequenceTests.swift in Sources */,
 				9B501F0207C05DF015B23D83 /* DirectPlayProfileFLVTests.swift in Sources */,
+				E85B32E23C3DD0EDAEEB42C2 /* DirectPlayProfileQualityTests.swift in Sources */,
 				A1DA3C2787809FF62EF5E9F4 /* DirectPlayProfileWMVTests.swift in Sources */,
 				57BFD4311521443D0BD154B8 /* DiscoveryProbeRaceTests.swift in Sources */,
 				F79D26C973ABE2B9E5DDF233 /* DualURLPromptLatchTests.swift in Sources */,
