@@ -148,7 +148,7 @@ struct ServerManagementView: View {
     }
 
     private func remove(_ server: JellyfinServer) {
-        dependencies.purgeDownloads(.server(server.id))
+        Task { await dependencies.purgeDownloads(.server(server.id)) }
         try? dependencies.removeServer(id: server.id)
         load()
     }

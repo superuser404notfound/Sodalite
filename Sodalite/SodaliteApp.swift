@@ -18,8 +18,8 @@ final class OrientationAppDelegate: NSObject, UIApplicationDelegate {
     /// event has been delivered.
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
                      completionHandler: @escaping () -> Void) {
-        guard identifier == DownloadSessionDelegate.identifier else { completionHandler(); return }
-        DownloadRelaunch.pendingCompletionHandler = completionHandler
+        guard DownloadSessionDelegate.identifiers.contains(identifier) else { completionHandler(); return }
+        DownloadRelaunch.store(completionHandler, for: identifier)
     }
 }
 #endif

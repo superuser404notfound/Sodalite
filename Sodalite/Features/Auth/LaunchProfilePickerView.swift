@@ -465,7 +465,7 @@ struct LaunchProfilePickerView: View {
     }
 
     private func commitForget(_ user: RememberedUser) {
-        dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
+        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
         do {
             try dependencies.forgetUser(id: user.id, serverID: server.id)
             reloadProfiles()

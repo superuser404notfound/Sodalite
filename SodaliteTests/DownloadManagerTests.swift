@@ -158,6 +158,7 @@ final class FakeDownloadBackend: DownloadBackend {
     let preferredAudioLanguage: String? = nil
 
     func playbackInfo(itemID: String, profile: [String: Any], mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        if yieldsInPlaybackInfo { try await Task.sleep(for: .milliseconds(20)) }
         let tc = transcodingUrl.map { #","TranscodingUrl":"\#($0)""# } ?? ""
         let json = #"{"PlaySessionId":"ps-\#(itemID)","MediaSources":[{"Id":"src-\#(itemID)","Container":"mkv","Size":1000,"Bitrate":\#(sourceBitrate)\#(tc),"MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc"},{"Index":1,"Type":"Audio","Codec":"aac"}]}]}"#
         return try JSONDecoder().decode(PlaybackInfoResponse.self, from: Data(json.utf8))
@@ -175,19 +176,22 @@ final class FakeDownloadBackend: DownloadBackend {
     func fetch(_ request: URLRequest) async throws -> Data { Data() }
     func availableCapacity() -> Int64? { available }
     func stopEncoding(playSessionID: String) async { killedSessions.append(playSessionID) }
-    var allowsCellular: Bool { false }
+    var allowsCellular = false
+    var probedDuration: Double?
+    var yieldsInPlaybackInfo = false
+    func mediaDuration(of url: URL) async -> Double? { probedDuration }
 }
 
 @MainActor
 final class FakeDownloadTransport: DownloadTransport {
-    struct Start { let request: URLRequest; let resumeData: Data?; let tag: DownloadTaskTag }
+    struct Start { let request: URLRequest; let resumeData: Data?; let tag: DownloadTaskTag; let allowsCellular: Bool }
     var started: [Start] = []
     var live: [DownloadTaskTag: Int] = [:]
     var resumeDataOnCancel: Data?
     private var nextID = 1
 
     func start(request: URLRequest, resumeData: Data?, tag: DownloadTaskTag, allowsCellular: Bool) -> Int {
-        started.append(Start(request: request, resumeData: resumeData, tag: tag))
+        started.append(Start(request: request, resumeData: resumeData, tag: tag, allowsCellular: allowsCellular))
         nextID += 1
         live[tag] = nextID
         return nextID
@@ -197,4 +201,7 @@ final class FakeDownloadTransport: DownloadTransport {
         return producingResumeData ? resumeDataOnCancel : nil
     }
     func liveTags() async -> Set<DownloadTaskTag> { Set(live.keys) }
+    func cancelAll(where matches: @escaping @Sendable (DownloadTaskTag) -> Bool) async {
+        for tag in live.keys where matches(tag) { live[tag] = nil }
+    }
 }

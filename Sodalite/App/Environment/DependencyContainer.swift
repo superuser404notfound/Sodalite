@@ -60,6 +60,8 @@ final class DependencyContainer {
     let downloadPreferences: DownloadPreferences
     /// Nil on tvOS. Created last in init because its backend reads the session through the container.
     private(set) var downloadManager: DownloadManager?
+    /// The progress sync in flight, so a second trigger joins it instead of racing it.
+    var downloadSyncTask: Task<Void, Never>?
 
     let seerrClient: SeerrClient
     let seerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol

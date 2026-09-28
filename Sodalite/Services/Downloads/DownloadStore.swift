@@ -48,6 +48,35 @@ final class DownloadStore {
         items[itemID] = item
     }
 
+    /// The manifest of any profile's item, read from disk. Background session events arrive for
+    /// whichever profile started the task, and often while no profile is active at all (a relaunch
+    /// in the background has no scene), so they resolve by path, never through `items`.
+    func manifest(serverID: String, userID: String, itemID: String) -> DownloadManifest? {
+        let dir = paths.itemDirectory(serverID: serverID, userID: userID, itemID: itemID)
+        guard let data = try? Data(contentsOf: dir.appendingPathComponent(DownloadPaths.manifestName)) else { return nil }
+        return try? JSONDecoder().decode(DownloadManifest.self, from: data)
+    }
+
+    /// Read-modify-write of any profile's manifest on disk; the in-memory copy follows when that
+    /// profile is the active one.
+    func updateManifest(serverID: String, userID: String, itemID: String, _ mutate: (inout DownloadManifest) -> Void) throws {
+        let dir = paths.itemDirectory(serverID: serverID, userID: userID, itemID: itemID)
+        guard var manifest = manifest(serverID: serverID, userID: userID, itemID: itemID) else { return }
+        mutate(&manifest)
+        try write(manifest, to: dir)
+        if activeProfile?.serverID == serverID, activeProfile?.userID == userID, var item = items[itemID] {
+            item.manifest = manifest
+            items[itemID] = item
+        }
+    }
+
+    /// The finished media file of an item, whatever its extension, if it arrived.
+    func mediaFile(serverID: String, userID: String, itemID: String) -> URL? {
+        let dir = paths.itemDirectory(serverID: serverID, userID: userID, itemID: itemID)
+        let children = (try? fileManager.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? []
+        return children.first { $0.deletingPathExtension().lastPathComponent == "media" }
+    }
+
     func delete(itemID: String) throws {
         guard let item = items.removeValue(forKey: itemID) else { return }
         try removeIfPresent(item.directory)

@@ -5,6 +5,8 @@ import SwiftUI
 struct DownloadsView: View {
     @Environment(\.dependencies) private var dependencies
     @State private var confirmsDeleteAll = false
+    /// Measured off the render path: a directory walk per body pass would run on every progress tick.
+    @State private var usageText = ""
 
     private var store: DownloadStore { dependencies.downloadStore }
 
@@ -56,6 +58,7 @@ struct DownloadsView: View {
             }
             .scrollContentBackground(.hidden)
             .navigationTitle("tab.downloads")
+            .task(id: usageKey) { measureUsage() }
             .alert("downloads.deleteAll.confirm.title", isPresented: $confirmsDeleteAll) {
                 Button("downloads.deleteAll", role: .destructive) { Task { await deleteAll() } }
                 Button("common.cancel", role: .cancel) {}
@@ -65,9 +68,14 @@ struct DownloadsView: View {
         }
     }
 
-    private var usageText: String {
-        guard let profile = store.activeProfile else { return "" }
-        return store.usage(serverID: profile.serverID, userID: profile.userID).bytes.formatted(.byteCount(style: .file))
+    /// Changes when an item arrives, leaves or finishes, not on progress.
+    private var usageKey: String {
+        store.items.values.map { "\($0.id):\($0.manifest.state.rawValue)" }.sorted().joined(separator: ",")
+    }
+
+    private func measureUsage() {
+        guard let profile = store.activeProfile else { usageText = ""; return }
+        usageText = store.usage(serverID: profile.serverID, userID: profile.userID).bytes.formatted(.byteCount(style: .file))
     }
 
     private func deleteButton(ids: [String]) -> some View {
@@ -155,12 +163,21 @@ private struct SeriesRow: View {
     }
 }
 
-/// A downloaded image, read straight off the disk.
+/// A downloaded image, read off the disk once and kept: rows re-render on every progress tick.
 struct LocalArtwork: View {
     let url: URL?
 
+    private static let cache = NSCache<NSURL, UIImage>()
+
+    private static func image(at url: URL) -> UIImage? {
+        if let cached = cache.object(forKey: url as NSURL) { return cached }
+        guard let image = UIImage(contentsOfFile: url.path) else { return nil }
+        cache.setObject(image, forKey: url as NSURL)
+        return image
+    }
+
     var body: some View {
-        if let url, let image = UIImage(contentsOfFile: url.path) {
+        if let url, let image = Self.image(at: url) {
             Image(uiImage: image).resizable().aspectRatio(contentMode: .fill)
         } else {
             Rectangle().fill(Color.Theme.restFill)

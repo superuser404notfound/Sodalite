@@ -45,6 +45,8 @@ struct DownloadManifest: Codable, Sendable, Equatable {
     /// Stream index to sidecar file name inside the item directory.
     var subtitleFiles: [Int: String] = [:]
     var expectedBytes: Int64?
+    /// The item's runtime, so a transcode that ended early can be told from a whole one.
+    var runtimeTicks: Int64?
     var receivedBytes: Int64 = 0
     private(set) var state: DownloadState
     var failure: DownloadFailure?
@@ -68,6 +70,15 @@ struct DownloadManifest: Codable, Sendable, Equatable {
 
     /// Moves the state along an allowed edge and reports whether it did. A complete download never
     /// goes back into the queue: re-downloading is delete plus a new download.
+    /// A finished file is finished, whatever the queue thought meanwhile: a pause or a requeue that
+    /// raced the last bytes must not throw the file away.
+    mutating func complete() {
+        if state == .paused || state == .failed { transition(to: .queued) }
+        if state == .queued { transition(to: .downloading) }
+        transition(to: .complete)
+        failure = nil
+    }
+
     @discardableResult
     mutating func transition(to next: DownloadState) -> Bool {
         let allowed: Set<DownloadState> = switch state {

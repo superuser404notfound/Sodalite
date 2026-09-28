@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 
 /// `DownloadBackend` over the live session (Sodalite#81). Reads everything through the container at
@@ -84,5 +85,11 @@ final class JellyfinDownloadBackend: DownloadBackend {
 
     func stopEncoding(playSessionID: String) async {
         try? await container?.jellyfinPlaybackService.stopActiveEncodings(playSessionID: playSessionID)
+    }
+
+    /// A transcode download is a fragmented mp4, which AVFoundation reads the length of.
+    func mediaDuration(of url: URL) async -> Double? {
+        guard let duration = try? await AVURLAsset(url: url).load(.duration), duration.isNumeric else { return nil }
+        return duration.seconds
     }
 }

@@ -488,8 +488,6 @@ final class PlayerViewModel {
     var localDownload: DownloadedItem?
     /// Where a local session writes its progress; nil for sessions that never play a download.
     let downloadStore: DownloadStore?
-    /// A downloaded successor found for the next-episode seam, adopted by `resetSessionState`.
-    var pendingLocalSuccessor: DownloadedItem?
     var isLocalSession: Bool { localDownload != nil }
 
     /// Scrub-preview thumbnail provider over the session FrameExtractor; configured in startPlayback,
@@ -660,6 +658,12 @@ final class PlayerViewModel {
     var activePlaybackSource: PlaybackMediaSource?
     var playSessionID: String?
     var activePlayMethod: PlayMethod = .directPlay
+    /// Sodalite#81: the route that decides which subtitle tracks are sidecars. The play method for a
+    /// stream; for a download, the route the FILE came from (a transcoded file keeps its text tracks
+    /// only as sidecars, while it is reported and loaded as direct play).
+    var subtitlePlayMethod: PlayMethod { localSubtitleMethod ?? activePlayMethod }
+    /// Set only by a local session; every other session maps subtitles by its play method, as before.
+    var localSubtitleMethod: PlayMethod?
     /// The rung this player session streams at (Sodalite#87). Resolved once, on the first
     /// startPlayback, and then kept across retries and auto-advance, so a network change mid-film
     /// does not move it and an in-player pick holds for the rest of the binge.
@@ -1040,7 +1044,6 @@ final class PlayerViewModel {
             // Sodalite#81: a downloaded file needs no PlaybackInfo. Its subtitles map by the route the
             // FILE came from: a transcode's text tracks exist only as sidecars, as when it streamed.
             var localStartTicks: Int64?
-            var subtitlePlayMethod: PlayMethod?
             if let local = localDownload {
                 guard let plan = LocalPlaybackPlan.make(local, startFromBeginning: startFromBeginning) else {
                     throw LocalPlaybackError.fileMissing
@@ -1048,7 +1051,7 @@ final class PlayerViewModel {
                 source = plan.source
                 url = plan.url
                 localStartTicks = plan.startTicks
-                subtitlePlayMethod = plan.subtitleMethod
+                localSubtitleMethod = plan.subtitleMethod
                 playSessionID = nil
                 mediaSourceID = source.id
                 activePlaybackSource = source
@@ -1059,7 +1062,7 @@ final class PlayerViewModel {
                 let resolved = try await resolveServerSource()
                 source = resolved.source
                 url = resolved.url
-                subtitlePlayMethod = activePlayMethod
+                localSubtitleMethod = nil
             }
 
             // Scrub preview + chapter thumbnails decode stills from the original file (isStatic:true)
@@ -2680,7 +2683,7 @@ final class PlayerViewModel {
             switch mode {
             case .forcedTrack(let index):
                 if let stream = subtitleStreams.first(where: { $0.index == index }),
-                   Self.servedAsSidecar(stream, playMethod: activePlayMethod) { break }
+                   Self.servedAsSidecar(stream, playMethod: subtitlePlayMethod) { break }
                 mode = .none
             case .cueFilter:
                 // Reads cues out of the played stream, which a transcode renumbers.
@@ -2693,7 +2696,7 @@ final class PlayerViewModel {
         switch mode {
         case .forcedTrack(let index):
             let stream = subtitleStreams.first(where: { $0.index == index })
-            if let stream, Self.servedAsSidecar(stream, playMethod: activePlayMethod) {
+            if let stream, Self.servedAsSidecar(stream, playMethod: subtitlePlayMethod) {
                 if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: index) {
                     player.selectSubtitleTrack(index: engineID)
                 } else {
@@ -3081,7 +3084,7 @@ final class PlayerViewModel {
         }
         let stream = subtitleStreams.first(where: { $0.index == id })
         activeSubtitleCodec = stream?.codec?.lowercased()
-        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: subtitlePlayMethod) } ?? false
 
         if isExternal {
             deactivateASSRendering()
@@ -3303,7 +3306,7 @@ final class PlayerViewModel {
         }
         activeSecondarySubtitleIndex = id
         let stream = subtitleStreams.first(where: { $0.index == id })
-        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: subtitlePlayMethod) } ?? false
 
         if isExternal {
             if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: id) {

@@ -19,9 +19,17 @@ enum DownloadCleanup {
     }
 
     static func perform(_ scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?) async {
-        if let manager, let active = store.activeProfile, covers(scope, active) {
-            for item in store.items.values where item.manifest.state != .complete && item.manifest.state != .missingOnServer {
-                await manager.cancel(itemID: item.id)
+        if let manager {
+            if let active = store.activeProfile, covers(scope, active) {
+                for item in store.items.values where item.manifest.state != .complete && item.manifest.state != .missingOnServer {
+                    await manager.cancel(itemID: item.id)
+                }
+            }
+            // Profiles that are not active have nothing in `items`, but their tasks still run.
+            switch scope {
+            case .everything: await manager.cancelTasks(serverID: nil, userID: nil)
+            case .server(let id): await manager.cancelTasks(serverID: id, userID: nil)
+            case .profile(let serverID, let userID): await manager.cancelTasks(serverID: serverID, userID: userID)
             }
         }
         switch scope {
@@ -50,10 +58,8 @@ extension DependencyContainer {
     /// out everywhere, reset), never from `removeServer` / `forgetUser` themselves: iCloud applies a
     /// removal made on another device through those, and a token the server rejected drops the
     /// profile through them too, and neither may take a phone's downloads with it.
-    func purgeDownloads(_ scope: DownloadCleanupScope) {
-        let store = downloadStore
-        let manager = downloadManager
-        Task { await DownloadCleanup.perform(scope, store: store, manager: manager) }
+    func purgeDownloads(_ scope: DownloadCleanupScope) async {
+        await DownloadCleanup.perform(scope, store: downloadStore, manager: downloadManager)
     }
 
     /// The confirmation text with the downloads that go along, when there are any.

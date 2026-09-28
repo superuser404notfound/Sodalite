@@ -61,13 +61,33 @@ struct LocalPlaybackTests {
         vm.stopPlayback()
     }
 
-    @Test func nextDownloadedEpisodeCrossesSeasons() {
+    @Test func nextDownloadedEpisodeStaysInItsSeason() {
         let current = downloaded(route: .original, id: "e1", season: 1, index: 9)
         let pool = [downloaded(route: .original, id: "e2", season: 2, index: 1),
                     downloaded(route: .original, id: "e0", season: 1, index: 8),
                     downloaded(route: .original, id: "e3", season: 2, index: 2)]
-        #expect(PlayerViewModel.nextDownloadedEpisode(after: current.snapshot.item, in: pool)?.id == "e2")
-        #expect(PlayerViewModel.nextDownloadedEpisode(after: pool[2].snapshot.item, in: pool) == nil)
+        // Offline nothing says S1 ends at E9, so the season boundary is not crossed.
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: current.snapshot.item, in: pool) == nil)
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: pool[0].snapshot.item, in: pool)?.id == "e3")
+    }
+
+    @Test func onlyTheImmediateSuccessorIsTaken() {
+        let current = downloaded(route: .original, id: "e1", season: 1, index: 1)
+        let gap = [downloaded(route: .original, id: "e5", season: 1, index: 5)]
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: current.snapshot.item, in: gap) == nil)
+        let next = [downloaded(route: .original, id: "e2", season: 1, index: 2)]
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: current.snapshot.item, in: next)?.id == "e2")
+    }
+
+    @Test func aTranscodedDownloadSelectsSubtitlesAsSidecars() async {
+        let d = downloaded(route: .transcode)
+        let vm = PlayerViewModel(item: d.snapshot.item, startFromBeginning: false, playbackService: RecordingPlaybackService(), userID: "u",
+                                 preferences: PlaybackPreferences(store: UserDefaults(suiteName: "local-\(UUID())")!),
+                                 localDownload: d)
+        await vm.startPlayback()
+        #expect(vm.subtitlePlayMethod == .transcode)
+        #expect(vm.activePlayMethod == .directPlay)
+        vm.stopPlayback()
     }
 
     @Test func progressLandsInTheManifest() throws {

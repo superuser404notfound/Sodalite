@@ -38,6 +38,8 @@ protocol DownloadBackend: AnyObject {
     func fetch(_ request: URLRequest) async throws -> Data
     func availableCapacity() -> Int64?
     func stopEncoding(playSessionID: String) async
+    /// Seconds of media in a finished file, nil when it cannot be read.
+    func mediaDuration(of url: URL) async -> Double?
 }
 
 /// The background session; production is `DownloadSessionDelegate`'s session.
@@ -47,6 +49,7 @@ protocol DownloadTransport: AnyObject {
     func start(request: URLRequest, resumeData: Data?, tag: DownloadTaskTag, allowsCellular: Bool) -> Int
     func cancel(tag: DownloadTaskTag, producingResumeData: Bool) async -> Data?
     func liveTags() async -> Set<DownloadTaskTag>
+    func cancelAll(where matches: @escaping @Sendable (DownloadTaskTag) -> Bool) async
 }
 
 /// Queue and lifecycle of the downloads (Sodalite#81). The store is the truth; this class only moves
@@ -58,8 +61,6 @@ final class DownloadManager {
     @ObservationIgnored private let transport: any DownloadTransport
     /// itemID to a 0...1 fraction while a task runs; not persisted.
     private(set) var liveProgress: [String: Double] = [:]
-    @ObservationIgnored var backgroundCompletionHandler: (() -> Void)?
-    @ObservationIgnored private var resumeData: [String: Data] = [:]
 
     init(store: DownloadStore, backend: any DownloadBackend, transport: any DownloadTransport) {
         self.store = store
@@ -105,6 +106,10 @@ final class DownloadManager {
         manifest.progress.positionTicks = detail.userData?.playbackPositionTicks ?? 0
         manifest.progress.played = detail.userData?.played ?? false
         manifest.progress.lastPlayed = JellyfinDate.parse(detail.userData?.lastPlayedDate)
+        manifest.runtimeTicks = detail.runTimeTicks
+        // Checked again after the awaits above: a second tap, or a season overlapping a single
+        // episode, must not create the item twice and start a second task on the same file.
+        guard store.item(item.id) == nil, store.activeProfile == profile else { return }
         let created = try store.create(manifest, snapshot: DownloadSnapshot(item: detail, series: series, season: season, source: plan.localSource))
 
         await fetchSidecars(plan: plan, item: created, profile: profile)
@@ -124,7 +129,7 @@ final class DownloadManager {
         guard let item = store.item(itemID), item.manifest.state == .downloading || item.manifest.state == .queued,
               let tag = tag(for: item) else { return }
         let data = await transport.cancel(tag: tag, producingResumeData: item.manifest.route == .original)
-        if let data { resumeData[itemID] = data; try? data.write(to: resumeURL(item)) }
+        if let data { try? data.write(to: resumeURL(tag)) }
         try? store.update(itemID: itemID) { $0.transition(to: .paused) }
         liveProgress[itemID] = nil
         pumpQueue()
@@ -146,56 +151,113 @@ final class DownloadManager {
         if item.manifest.route == .transcode, item.manifest.state != .complete, let session = item.manifest.playSessionID {
             await backend.stopEncoding(playSessionID: session)
         }
-        resumeData[itemID] = nil
         liveProgress[itemID] = nil
         try? store.delete(itemID: itemID)
         pumpQueue()
     }
 
-    /// Relaunch: a manifest still `downloading` without a live task is an orphan and goes back to the
-    /// queue; one with a live task keeps it, so the same file is never fetched twice.
+    /// Stops every task a server, or one profile on it, still runs: a purge of a profile that is not
+    /// the active one has nothing in `items` to walk, and its tasks would keep downloading.
+    func cancelTasks(serverID: String?, userID: String?) async {
+        await transport.cancelAll { tag in
+            (serverID == nil || tag.serverID == serverID) && (userID == nil || tag.userID == userID)
+        }
+    }
+
+    /// Relaunch: a manifest still `downloading` without a live task finished while the app was gone
+    /// (its file is there) or is an orphan (back to the queue); one with a live task keeps it, so the
+    /// same file is never fetched twice.
     func reattach() async {
         let live = await transport.liveTags()
         for item in store.items.values where item.manifest.state == .downloading {
             guard let tag = tag(for: item), !live.contains(tag) else { continue }
-            try? store.update(itemID: item.id) { $0.transition(to: .queued) }
+            if let file = store.mediaFile(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                await finish(tag, file: file)
+            } else {
+                try? store.update(itemID: item.id) { $0.transition(to: .queued) }
+            }
         }
         pumpQueue()
     }
 
+    /// The Wi-Fi only switch changed: a running task keeps the network access it was created with,
+    /// so it is restarted under the new one (an original from where it was).
+    func applyNetworkPolicy() async {
+        for item in store.items.values where item.manifest.state == .downloading {
+            guard let tag = tag(for: item) else { continue }
+            let data = await transport.cancel(tag: tag, producingResumeData: item.manifest.route == .original)
+            if let data { try? data.write(to: resumeURL(tag)) }
+            start(itemID: item.id)
+        }
+    }
+
     // MARK: Events
 
+    /// Resolves every event through the tag's own directory, never through `items`: iOS delivers a
+    /// finished download after relaunching the app in the background, where no scene exists and no
+    /// profile is active, and a tag can belong to a profile that is not the active one.
     func handle(event: DownloadEvent) async {
         switch event {
         case let .progress(tag, written, expected):
-            guard let item = store.item(tag.itemID) else { return }
+            guard isActive(tag), let item = store.item(tag.itemID) else { return }
             let total = expected > 0 ? expected : (item.manifest.expectedBytes ?? 0)
             liveProgress[tag.itemID] = total > 0 ? min(Double(written) / Double(total), 0.99) : nil
         case let .finished(tag, status, movedTo):
             liveProgress[tag.itemID] = nil
             if let failure = DownloadPlanner.failure(forStatus: status) {
                 if let movedTo { try? FileManager.default.removeItem(at: movedTo) }
-                try? store.update(itemID: tag.itemID) { $0.failure = failure; $0.transition(to: .failed) }
-            } else if let movedTo {
-                let size = (try? movedTo.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init)
-                try? store.update(itemID: tag.itemID) {
-                    $0.mediaFileName = movedTo.lastPathComponent
-                    $0.receivedBytes = size ?? 0
-                    $0.transition(to: .complete)
+                // Resume data carries the old request, header included: after any HTTP answer it is
+                // worth nothing and would replay a dead token forever.
+                try? FileManager.default.removeItem(at: resumeURL(tag))
+                try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                    $0.failure = failure
+                    $0.transition(to: .failed)
                 }
-                if let item = store.item(tag.itemID) { try? FileManager.default.removeItem(at: resumeURL(item)) }
+            } else if let movedTo {
+                await finish(tag, file: movedTo)
             }
             pumpQueue()
         case let .failed(tag, data, cancelled):
             liveProgress[tag.itemID] = nil
-            guard !cancelled, let item = store.item(tag.itemID) else { return }
-            if item.manifest.route == .original, let data {
-                resumeData[tag.itemID] = data
-                try? data.write(to: resumeURL(item))
+            guard !cancelled,
+                  let manifest = store.manifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) else { return }
+            if manifest.route == .original, let data { try? data.write(to: resumeURL(tag)) }
+            try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                $0.failure = .network
+                $0.transition(to: .failed)
             }
-            try? store.update(itemID: tag.itemID) { $0.failure = .network; $0.transition(to: .failed) }
             pumpQueue()
         }
+    }
+
+    /// A file arrived. A transcode has no length to check against, so a stream that ended early
+    /// (ffmpeg died) would look whole; its duration is compared with the runtime instead.
+    private func finish(_ tag: DownloadTaskTag, file: URL) async {
+        guard let manifest = store.manifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) else { return }
+        if manifest.route == .transcode, let runtime = manifest.runtimeTicks,
+           let duration = await backend.mediaDuration(of: file),
+           Self.isTruncated(duration: duration, runtimeTicks: runtime) {
+            try? FileManager.default.removeItem(at: file)
+            try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                $0.failure = .server
+                $0.transition(to: .failed)
+            }
+            return
+        }
+        let size = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init)
+        try? FileManager.default.removeItem(at: resumeURL(tag))
+        try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+            $0.mediaFileName = file.lastPathComponent
+            $0.receivedBytes = size ?? 0
+            $0.complete()
+        }
+    }
+
+    /// More than a minute or five percent short of the runtime, whichever is larger.
+    static func isTruncated(duration: Double, runtimeTicks: Int64) -> Bool {
+        let runtime = Double(runtimeTicks) / 10_000_000
+        guard runtime > 0 else { return false }
+        return duration < runtime - max(60, runtime * 0.05)
     }
 
     // MARK: Private
@@ -220,8 +282,10 @@ final class DownloadManager {
             guard let relative = item.manifest.transcodeURL, let built = URL(string: relative, relativeTo: baseURL)?.absoluteURL else { return }
             url = built
         }
-        let data = item.manifest.route == .original ? (resumeData[itemID] ?? (try? Data(contentsOf: resumeURL(item)))) : nil
-        resumeData[itemID] = nil
+        // Consumed once: a resumed task keeps the request it was created with, so resume data
+        // must never be replayed after it has been tried.
+        let data = item.manifest.route == .original ? (try? Data(contentsOf: resumeURL(tag))) : nil
+        try? FileManager.default.removeItem(at: resumeURL(tag))
         try? store.update(itemID: itemID) { $0.transition(to: .downloading) }
         transport.start(request: DownloadPlanner.authorizedRequest(url: url, authorization: backend.authorization),
                         resumeData: data, tag: tag, allowsCellular: backend.allowsCellular)
@@ -234,8 +298,13 @@ final class DownloadManager {
                                fileExtension: ext == "matroska" ? "mkv" : ext)
     }
 
-    private func resumeURL(_ item: DownloadedItem) -> URL {
-        item.directory.appendingPathComponent("resume.data")
+    private func resumeURL(_ tag: DownloadTaskTag) -> URL {
+        store.paths.itemDirectory(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID)
+            .appendingPathComponent("resume.data")
+    }
+
+    private func isActive(_ tag: DownloadTaskTag) -> Bool {
+        store.activeProfile?.serverID == tag.serverID && store.activeProfile?.userID == tag.userID
     }
 
     private func fetchSidecars(plan: DownloadPlanner.Plan, item: DownloadedItem, profile: ProfileKey) async {

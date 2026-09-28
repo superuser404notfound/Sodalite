@@ -456,11 +456,14 @@ struct SettingsView: View {
     }
 
     private func finishLogout() {
-        // Log Out drops every server and profile on the device, so every download goes with them.
-        dependencies.purgeDownloads(.everything)
-        try? dependencies.clearSession()
-        dependencies.clearSessionResidue()
-        appState.logout()
+        // Log Out drops every server and profile on the device, so every download goes with them;
+        // awaited first, while the session can still tell the server to stop a running transcode.
+        Task {
+            await dependencies.purgeDownloads(.everything)
+            try? dependencies.clearSession()
+            dependencies.clearSessionResidue()
+            appState.logout()
+        }
     }
 
     // MARK: - Reset

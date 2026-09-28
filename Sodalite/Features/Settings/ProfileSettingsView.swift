@@ -445,7 +445,7 @@ struct ProfileSettingsView: View {
             defer { isSigningOutEverywhere = false }
             do {
                 _ = try await dependencies.signOutEverywhere(user, server: server)
-                dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
+                await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
                 refresh()
             } catch is CancellationError {
                 return
@@ -469,7 +469,7 @@ struct ProfileSettingsView: View {
 
     private func commitForget(_ user: RememberedUser) {
         guard let server = appState.activeServer else { return }
-        dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
+        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
         do {
             // forgetUser clears a default pin naming this profile itself, so no path can forget to.
             try dependencies.forgetUser(id: user.id, serverID: server.id)
