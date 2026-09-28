@@ -48,6 +48,7 @@ struct DirectPlayProfileQualityTests {
             profile: DirectPlayProfile.baseProfile(maxStreamingBitrate: 10_000_000),
             maxStreamingBitrate: 10_000_000, enableDirectPlay: true)
         #expect(body["MaxStreamingBitrate"] as? Int == 10_000_000)
+        #expect(body["AudioStreamIndex"] == nil)
         #expect(body["EnableDirectPlay"] == nil)
         #expect(body["DeviceProfile"] != nil)
     }
@@ -57,6 +58,13 @@ struct DirectPlayProfileQualityTests {
         let body = JellyfinPlaybackService.playbackInfoBody(
             profile: DirectPlayProfile.liveProfile(), maxStreamingBitrate: nil, enableDirectPlay: true)
         #expect(body["MaxStreamingBitrate"] == nil)
+    }
+
+    /// A capped transcode muxes one audio stream; this names which one (final review #4).
+    @Test func theBodyNamesTheAudioStreamWhenGiven() {
+        let body = JellyfinPlaybackService.playbackInfoBody(
+            profile: [:], maxStreamingBitrate: 4_000_000, audioStreamIndex: 2, enableDirectPlay: true)
+        #expect(body["AudioStreamIndex"] as? Int == 2)
     }
 
     @Test func theBodyOmitsDirectPlayOnlyWhenFalse() {

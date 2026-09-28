@@ -8,6 +8,10 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     /// because the tuner sweep has to tell our own session apart from every other client's (#147).
     var deviceID: String { get }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse
+    /// Same request naming the audio stream a transcode should carry. A capped transcode muxes a
+    /// single audio stream, so a rung switch names the one the viewer had (Sodalite#87).
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse
     /// Live PlaybackInfo: AutoOpenLiveStream probes the stream (known codecs → DirectStream/copy, real LiveStreamId for tuner release); maxStreamingBitrate caps a transcode.
     ///
     /// `enableDirectPlay` is true for every ordinary tune and false only on the second pass a channel
@@ -41,6 +45,13 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     func buildLiveStreamFileURL(sourcePath: String) -> URL?
 }
 
+extension JellyfinPlaybackServiceProtocol {
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile)
+    }
+}
+
 final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     let client: JellyfinClient
 
@@ -53,8 +64,14 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil) async throws -> PlaybackInfoResponse {
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile, audioStreamIndex: nil)
+    }
+
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         try await postPlaybackInfo(profile: profile,
-                                   maxStreamingBitrate: profile?["MaxStreamingBitrate"] as? Int) { payload in
+                                   maxStreamingBitrate: profile?["MaxStreamingBitrate"] as? Int,
+                                   audioStreamIndex: audioStreamIndex) { payload in
             JellyfinEndpoint.playbackInfo(itemID: itemID, userID: userID, payload: payload)
         }
     }
@@ -78,9 +95,11 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// that has it, and a body that names it on every request would carry a flag most servers never
     /// needed to read.
     static func playbackInfoBody(profile: [String: Any], maxStreamingBitrate: Int?,
+                                 audioStreamIndex: Int? = nil,
                                  enableDirectPlay: Bool) -> [String: Any] {
         var body: [String: Any] = ["DeviceProfile": profile]
         if let maxStreamingBitrate { body["MaxStreamingBitrate"] = maxStreamingBitrate }
+        if let audioStreamIndex { body["AudioStreamIndex"] = audioStreamIndex }
         if !enableDirectPlay { body["EnableDirectPlay"] = false }
         return body
     }
@@ -89,6 +108,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     private func postPlaybackInfo(
         profile: [String: Any]?,
         maxStreamingBitrate: Int? = nil,
+        audioStreamIndex: Int? = nil,
         enableDirectPlay: Bool = true,
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
@@ -104,7 +124,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         #endif
 
         let body = Self.playbackInfoBody(profile: deviceProfile, maxStreamingBitrate: maxStreamingBitrate,
-                                         enableDirectPlay: enableDirectPlay)
+                                         audioStreamIndex: audioStreamIndex, enableDirectPlay: enableDirectPlay)
         let payload = try JSONValue(jsonObject: body)
         let headers = [
             "Authorization": client.buildAuthHeader(),

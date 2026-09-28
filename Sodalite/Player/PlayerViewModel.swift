@@ -486,7 +486,7 @@ final class PlayerViewModel {
     /// server-side progress report (which is up to 10s stale, and a dead server never received the last one).
     @ObservationIgnored private var outageResumeSeconds: Double?
     /// Set by a retry; overrides the resume position `startPlayback()` would take from `item.userData`.
-    @ObservationIgnored private var resumeOverrideSeconds: Double?
+    @ObservationIgnored private(set) var resumeOverrideSeconds: Double?
     /// Stall time before the connection chip appears. Long enough that an ordinary segment-boundary
     /// hiccup never shows it.
     @ObservationIgnored static let connectionNoticeDelay: Double = 2
@@ -642,6 +642,9 @@ final class PlayerViewModel {
     /// does not move it and an in-player pick holds for the rest of the binge.
     var streamingQuality: StreamingQuality?
     var effectiveStreamingQuality: StreamingQuality { streamingQuality ?? .original }
+    /// The Jellyfin audio stream the next PlaybackInfo names, set by a rung switch and consumed by
+    /// the load it causes (Sodalite#87).
+    @ObservationIgnored var pendingAudioStreamIndex: Int?
     var subtitleStreams: [MediaStream] = []
     /// Lowercased Jellyfin codec of the active subtitle ("ass"/"ssa"/"subrip"/...), nil when off.
     /// The overlay reads it to gate the raw-ASS-event-line stripper.
@@ -1012,11 +1015,14 @@ final class PlayerViewModel {
                !cached.mediaSources.isEmpty {
                 info = cached
             } else {
+                let audioStreamIndex = pendingAudioStreamIndex
+                pendingAudioStreamIndex = nil
                 info = try await playbackService.getPlaybackInfo(
                     itemID: item.id,
                     userID: userID,
                     profile: DirectPlayProfile.current(
-                        maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
+                        maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate),
+                    audioStreamIndex: audioStreamIndex
                 )
             }
             playSessionID = info.playSessionId
@@ -2223,9 +2229,22 @@ final class PlayerViewModel {
     /// `retryAfterOutage`; the prefetch is dropped because it was fetched at the old rung.
     func selectStreamingQuality(_ quality: StreamingQuality) {
         guard supportsQualityChoice, quality != effectiveStreamingQuality else { return }
-        let resumeAt = playbackTime
+        // A reload that has not started yet still holds the second the viewer was at; the clock
+        // reads zero until the new session plays.
+        let resumeAt = resumeOverrideSeconds ?? playbackTime
         LogTap.shared.note("[Quality] \(effectiveStreamingQuality.rawValue) -> \(quality.rawValue) at \(String(format: "%.1f", resumeAt))s")
         let closeServerSession = makeServerSessionClose(positionTicks: Int64(resumeAt * 10_000_000))
+        // The engine stop below zeroes its clock; sinks left armed would copy that into the transport
+        // bar. startPlayback arms them again for the new session.
+        cancellables.removeAll()
+        stopProgressReporting()
+        // A countdown left running would advance while the reload is in flight.
+        resetNextEpisodeOverlayState()
+        hasWarmedSuccessor = false
+        let activeAudio = player.audioTracks.first { $0.id == activeAudioIndex }
+        pendingAudioStreamIndex = Self.jellyfinAudioStreamIndex(
+            language: activeAudio?.language, channels: activeAudio?.channels, codec: activeAudio?.codec,
+            in: activePlaybackSource?.mediaStreams)
         // The next session reports its own start; the closed one must not be closed again by a
         // later stopPlayback.
         hasReportedStart = false
@@ -2237,6 +2256,21 @@ final class PlayerViewModel {
         player.stop()
         closeServerSession()
         beginPlayback()
+    }
+
+    /// The Jellyfin audio stream behind an engine audio track, matched by language, then channels,
+    /// then codec. Engine ids are not Jellyfin indexes (on an HLS transcode they are renumbered), so
+    /// the match goes by what the stream is. nil when the language is unknown or not in the source.
+    static func jellyfinAudioStreamIndex(language: String?, channels: Int?, codec: String?,
+                                         in streams: [MediaStream]?) -> Int? {
+        guard let language = language?.lowercased(), let streams else { return nil }
+        let candidates = streams.filter {
+            $0.type == .audio && $0.isExternal != true && $0.language?.lowercased() == language
+        }
+        guard candidates.count > 1 else { return candidates.first?.index }
+        let byChannels = candidates.filter { $0.channels == channels }
+        let pool = byChannels.isEmpty ? candidates : byChannels
+        return (pool.first { $0.codec?.lowercased() == codec?.lowercased() } ?? pool.first)?.index
     }
 
     /// Apply `pictureMode` to whichever layer is on screen: writes to the engine AND fires

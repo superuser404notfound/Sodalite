@@ -102,16 +102,19 @@ extension PlayerViewModel {
         Task { [weak self] in await self?.warmSuccessor(next) }
     }
 
-    private func warmSuccessor(_ next: JellyfinItem) async {
+    func warmSuccessor(_ next: JellyfinItem) async {
+        // Read once, before the await: a rung picked while this is in flight must not relabel a
+        // response fetched at the old cap.
+        let quality = effectiveStreamingQuality
         guard let info = try? await playbackService.getPlaybackInfo(
             itemID: next.id, userID: userID,
-            profile: DirectPlayProfile.current(maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
+            profile: DirectPlayProfile.current(maxStreamingBitrate: quality.maxStreamingBitrate)
         ) else { return }
         // Minutes pass at most, but the successor can still move underneath this: an episode picked
         // from the season list replaces it, and a response naming the old one would then put its
         // source id under the new item's path, which the server answers with a 400 (Sodalite#71).
         guard nextEpisode?.id == next.id else { return }
-        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, quality: effectiveStreamingQuality, response: info)
+        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, quality: quality, response: info)
         guard let source = PlaybackStreamSelection.defaultSource(in: info) else { return }
         await PlaybackStreamSelection.warm(itemID: next.id, source: source, using: playbackService)
     }

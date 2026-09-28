@@ -102,6 +102,9 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _killedEncodings: [String] = []
     private var _playbackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
+    private var _requestedAudioIndexes: [Int?] = []
+    /// Item ids whose PlaybackInfo answers only after a short delay, so a test can act in between.
+    var delayedItemIDs: Set<String> = []
     /// Item ids whose PlaybackInfo never answers (until the caller's task is cancelled).
     var hangingItemIDs: Set<String> = []
 
@@ -110,6 +113,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
+    var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
 
     var baseURL: URL? { nil }
     var deviceID: String { "device" }
@@ -121,10 +125,18 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         lock.withLock { _killedEncodings.append(playSessionID) }
     }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse {
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile, audioStreamIndex: nil)
+    }
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         let cap = profile?["MaxStreamingBitrate"] as? Int
         lock.withLock {
             _playbackInfoRequests.append(itemID)
             _requestedCaps.append(cap)
+            _requestedAudioIndexes.append(audioStreamIndex)
+        }
+        if delayedItemIDs.contains(itemID) {
+            try await Task.sleep(for: .milliseconds(150))
         }
         if hangingItemIDs.contains(itemID) {
             try await Task.sleep(for: .seconds(60))
