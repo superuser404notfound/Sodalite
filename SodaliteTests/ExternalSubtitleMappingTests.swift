@@ -35,7 +35,7 @@ struct ExternalSubtitleMappingTests {
         let streams = [stream(index: 2, external: false),
                        stream(index: 5, external: true),
                        stream(index: 9, external: true)]
-        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams) { s in
+        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .directPlay) { s in
             URL(string: "https://jf/subs/\(s.index).srt")
         }
         #expect(result.descriptors.count == 2)
@@ -47,7 +47,7 @@ struct ExternalSubtitleMappingTests {
     @Test("a stream whose URL cannot be built is skipped and does not shift later ids")
     func urlFailureSkips() {
         let streams = [stream(index: 5, external: true), stream(index: 9, external: true)]
-        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams) { s in
+        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .directPlay) { s in
             s.index == 5 ? nil : URL(string: "https://jf/subs/9.srt")
         }
         #expect(result.descriptors.count == 1)
@@ -59,7 +59,7 @@ struct ExternalSubtitleMappingTests {
     func descriptorMetadata() throws {
         let streams = [stream(index: 5, external: true, codec: "ass", lang: "de",
                               title: "German (SDH)", forced: true)]
-        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams) { _ in
+        let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .directPlay) { _ in
             URL(string: "https://jf/subs/5.ass")
         }
         let d = try #require(result.descriptors.first)

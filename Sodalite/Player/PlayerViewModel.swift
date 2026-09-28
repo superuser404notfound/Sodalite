@@ -266,12 +266,26 @@ final class PlayerViewModel {
     /// Streams eligible as SECONDARY track: text codecs only (bitmap can't stack as a companion line),
     /// never the active primary. Picker order matches `displaySubtitleStreams`.
     var secondarySubtitleCandidates: [MediaStream] {
-        let bitmapCodecs: Set<String> = ["pgssub", "hdmv_pgs_subtitle", "dvbsub", "dvb_subtitle", "dvdsub", "dvd_subtitle", "xsub"]
-        return displaySubtitleStreams.filter { stream in
-            if stream.index == activeSubtitleIndex { return false }
-            let codec = stream.codec?.lowercased() ?? ""
-            return !bitmapCodecs.contains(codec)
+        displaySubtitleStreams.filter { stream in
+            stream.index != activeSubtitleIndex && !Self.isBitmapSubtitle(stream)
         }
+    }
+
+    static let bitmapSubtitleCodecs: Set<String> = [
+        "pgssub", "hdmv_pgs_subtitle", "dvbsub", "dvb_subtitle", "dvdsub", "dvd_subtitle", "xsub",
+    ]
+
+    static func isBitmapSubtitle(_ stream: MediaStream) -> Bool {
+        bitmapSubtitleCodecs.contains(stream.codec?.lowercased() ?? "")
+    }
+
+    /// Whether a subtitle stream reaches the engine as a file of its own rather than out of the played
+    /// stream. An external one always does. Under a transcode an embedded TEXT track does too
+    /// (Sodalite#87): the transcode renumbers the streams, and Jellyfin serves every text track as its
+    /// own file, so it goes the way an external one goes. A bitmap track Jellyfin can only burn in.
+    static func servedAsSidecar(_ stream: MediaStream, playMethod: PlayMethod?) -> Bool {
+        if stream.isExternal == true { return true }
+        return playMethod == .transcode && !isBitmapSubtitle(stream)
     }
 
     /// Current season's episodes sorted by indexNumber, populated lazily after startPlayback for
@@ -1149,7 +1163,8 @@ final class PlayerViewModel {
             let preferredAudio = rememberedAudioLanguage ?? effectivePreferredAudioLanguage()
             // AE#88: declare external Jellyfin subs at load so they list in engine.subtitleTracks
             // and join the native WebVTT renditions (PiP / external display); the map routes UI selections to engine ids.
-            let externalSubs = Self.externalSubtitleDescriptors(streams: subtitleStreams) { stream in
+            let externalSubs = Self.externalSubtitleDescriptors(
+                streams: subtitleStreams, playMethod: activePlayMethod) { stream in
                 playbackService.buildSubtitleURL(
                     itemID: item.id, mediaSourceID: mediaSourceID,
                     streamIndex: stream.index, format: stream.codec ?? "srt")
@@ -2406,11 +2421,12 @@ final class PlayerViewModel {
     /// gets id externalSubtitleTrackIDBase + i.
     static func externalSubtitleDescriptors(
         streams: [MediaStream],
+        playMethod: PlayMethod?,
         urlBuilder: (MediaStream) -> URL?
     ) -> (descriptors: [ExternalSubtitleTrack], mapping: [Int: Int]) {
         var descriptors: [ExternalSubtitleTrack] = []
         var mapping: [Int: Int] = [:]
-        for stream in streams where stream.isExternal == true {
+        for stream in streams where servedAsSidecar(stream, playMethod: playMethod) {
             guard let url = urlBuilder(stream) else { continue }
             mapping[stream.index] = AetherEngine.externalSubtitleTrackIDBase + descriptors.count
             descriptors.append(ExternalSubtitleTrack(
@@ -2496,11 +2512,12 @@ final class PlayerViewModel {
     /// captions (signs, foreign dialogue) still show, like a disc player would. Engine-silent by
     /// design: `activeSubtitleIndex` stays nil (picker keeps "Off"), reporting is untouched, only
     /// `activeSubtitleCodec` is set so a forced ASS track still gets its markup stripped. Re-run
-    /// after every subtitle/audio resolution; a no-op when a subtitle is user-selected. Skipped on
-    /// transcode (HLS rewrites stream indices; the legacy loader owns cues there).
+    /// after every subtitle/audio resolution; a no-op when a subtitle is user-selected. Under a
+    /// transcode only a track served as a sidecar can be fed (Sodalite#87); the played stream's own
+    /// indices are renumbered there.
     private func applyForcedSubtitleFallback(audioLanguageOverride: String? = nil) {
         let previous = forcedSubtitleFallback
-        guard activeSubtitleIndex == nil, activePlayMethod != .transcode else {
+        guard activeSubtitleIndex == nil else {
             forcedSubtitleFallback = .none
             return
         }
@@ -2512,10 +2529,24 @@ final class PlayerViewModel {
             enabled: preferences.autoForcedSubtitles
         )
 
+        if activePlayMethod == .transcode {
+            switch mode {
+            case .forcedTrack(let index):
+                if let stream = subtitleStreams.first(where: { $0.index == index }),
+                   Self.servedAsSidecar(stream, playMethod: activePlayMethod) { break }
+                mode = .none
+            case .cueFilter:
+                // Reads cues out of the played stream, which a transcode renumbers.
+                mode = .none
+            case .none:
+                break
+            }
+        }
+
         switch mode {
         case .forcedTrack(let index):
             let stream = subtitleStreams.first(where: { $0.index == index })
-            if stream?.isExternal == true {
+            if let stream, Self.servedAsSidecar(stream, playMethod: activePlayMethod) {
                 if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: index) {
                     player.selectSubtitleTrack(index: engineID)
                 } else {
@@ -2896,7 +2927,7 @@ final class PlayerViewModel {
         }
         let stream = subtitleStreams.first(where: { $0.index == id })
         activeSubtitleCodec = stream?.codec?.lowercased()
-        let isExternal = stream?.isExternal == true
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
 
         if isExternal {
             deactivateASSRendering()
@@ -3116,7 +3147,7 @@ final class PlayerViewModel {
         }
         activeSecondarySubtitleIndex = id
         let stream = subtitleStreams.first(where: { $0.index == id })
-        let isExternal = stream?.isExternal == true
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
 
         if isExternal {
             if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: id) {
