@@ -15,6 +15,12 @@ enum Changelog {
                     icon: "hand.tap.fill"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.streamingQuality.title",
+                    "changelog.1_1_0.streamingQuality.body",
+                    icon: "dial.medium"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

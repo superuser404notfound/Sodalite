@@ -65287,6 +65287,328 @@
         }
       }
     },
+    "changelog.1_1_0.streamingQuality.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omezte, co server posílá: jednou jako výchozí hodnotu v nastavení přehrávání (na iPhonu a iPadu zvlášť pro Wi-Fi a mobilní data) a jednou přímo v přehrávači. Soubory pod limitem se přehrají beze změny, vše nad ním server překóduje a výběr to uvádí."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begræns, hvad serveren sender: én gang som standard i afspilningsindstillingerne (Wi-Fi og mobildata hver for sig på iPhone og iPad) og én gang i afspilleren. Filer under grænsen afspilles uændret, alt over den omkoder serveren, og vælgeren siger det."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrenze, was der Server schickt: einmal als Standard in den Wiedergabe-Einstellungen (auf iPhone und iPad getrennt für WLAN und mobil) und einmal im Player. Dateien unter der Grenze laufen unverändert, alles darüber rechnet der Server neu, und die Auswahl sagt das dazu."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Περιορίστε ό,τι στέλνει ο διακομιστής: μία φορά ως προεπιλογή στις ρυθμίσεις αναπαραγωγής (χωριστά για Wi-Fi και δεδομένα κινητής σε iPhone και iPad) και μία φορά μέσα στο πρόγραμμα αναπαραγωγής. Τα αρχεία κάτω από το όριο παίζουν αυτούσια, ό,τι το ξεπερνά επανακωδικοποιείται από τον διακομιστή, και η επιλογή το αναφέρει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cap what the server sends, once as a default in Playback settings (Wi-Fi and cellular apart on iPhone and iPad) and once in the player. Files under the cap still play untouched; anything above is re-encoded by the server, and the picker says so."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limita lo que envía el servidor: una vez como valor predeterminado en los ajustes de reproducción (Wi-Fi y datos móviles por separado en iPhone y iPad) y otra en el reproductor. Los archivos por debajo del límite se reproducen sin cambios; lo que lo supere lo recodifica el servidor, y el selector lo indica."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rajoita, mitä palvelin lähettää: kerran oletuksena toistoasetuksissa (iPhonessa ja iPadissa erikseen Wi-Fille ja mobiiliverkolle) ja kerran soittimessa. Rajan alittavat tiedostot toistetaan sellaisenaan, sen ylittävät palvelin koodaa uudelleen, ja valinta kertoo sen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limitez ce que le serveur envoie : une fois comme valeur par défaut dans les réglages de lecture (Wi-Fi et données cellulaires séparément sur iPhone et iPad) et une fois dans le lecteur. Les fichiers sous la limite sont lus tels quels ; tout ce qui la dépasse est réencodé par le serveur, et le sélecteur l’indique."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ograničite što poslužitelj šalje: jednom kao zadanu vrijednost u postavkama reprodukcije (na iPhoneu i iPadu zasebno za Wi-Fi i mobilnu mrežu) i jednom u playeru. Datoteke ispod granice reproduciraju se nepromijenjene, sve iznad poslužitelj ponovno kodira, a izbornik to navodi."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korlátozd, mit küld a szerver: egyszer alapértékként a lejátszási beállításokban (iPhone-on és iPaden külön Wi-Fi-re és mobilhálózatra), egyszer pedig a lejátszóban. A korlát alatti fájlok változatlanul játszódnak le, a fölöttieket a szerver újrakódolja, és a választó ezt jelzi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limita ciò che invia il server: una volta come valore predefinito nelle impostazioni di riproduzione (Wi-Fi e rete cellulare separati su iPhone e iPad) e una volta nel player. I file sotto il limite vengono riprodotti invariati; ciò che lo supera viene ricodificato dal server, e il selettore lo segnala."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーから送られるデータの上限を、再生設定のデフォルト（iPhoneとiPadではWi-Fiとモバイル通信を別々に）とプレーヤー内の両方で設定できます。上限以下のファイルはそのまま再生され、超えるものはサーバーで再エンコードされ、選択肢にもそう表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버가 보내는 데이터의 상한을 재생 설정의 기본값(iPhone과 iPad에서는 Wi-Fi와 셀룰러를 따로)과 플레이어 안에서 정할 수 있습니다. 상한 이하의 파일은 그대로 재생되고, 그보다 높은 파일은 서버에서 재인코딩되며 선택 목록에 그렇게 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrens hva serveren sender: én gang som standard i avspillingsinnstillingene (Wi-Fi og mobildata hver for seg på iPhone og iPad) og én gang i avspilleren. Filer under grensen spilles av uendret, alt over den omkoder serveren, og velgeren sier fra."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beperk wat de server verstuurt: één keer als standaard in de afspeelinstellingen (wifi en mobiel apart op iPhone en iPad) en één keer in de speler. Bestanden onder de limiet spelen ongewijzigd af; alles daarboven hercodeert de server, en de keuzelijst vermeldt dat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ogranicz to, co wysyła serwer: raz jako domyślną wartość w ustawieniach odtwarzania (na iPhonie i iPadzie osobno dla Wi-Fi i sieci komórkowej) i raz w odtwarzaczu. Pliki poniżej limitu odtwarzają się bez zmian, wszystko powyżej serwer transkoduje, a lista wyboru to zaznacza."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limite o que o servidor envia: uma vez como padrão nos ajustes de reprodução (Wi-Fi e dados móveis separados no iPhone e no iPad) e uma vez no player. Arquivos abaixo do limite são reproduzidos sem alteração; o que passar dele é recodificado pelo servidor, e o seletor avisa."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limite o que o servidor envia: uma vez como predefinição nas definições de reprodução (Wi-Fi e dados móveis em separado no iPhone e no iPad) e uma vez no leitor. Os ficheiros abaixo do limite são reproduzidos sem alterações; o que o ultrapassar é recodificado pelo servidor, e o seletor indica-o."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limitează ce trimite serverul: o dată ca valoare implicită în setările de redare (Wi-Fi și date mobile separat pe iPhone și iPad) și o dată în player. Fișierele sub limită se redau neschimbate, tot ce o depășește este recodat de server, iar selectorul o spune."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ограничьте то, что отправляет сервер: один раз как значение по умолчанию в настройках воспроизведения (на iPhone и iPad отдельно для Wi-Fi и сотовой сети) и один раз в плеере. Файлы ниже порога воспроизводятся без изменений, всё, что выше, сервер перекодирует, и список выбора об этом сообщает."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obmedzte, čo server posiela: raz ako predvolenú hodnotu v nastaveniach prehrávania (na iPhone a iPade zvlášť pre Wi-Fi a mobilné dáta) a raz priamo v prehrávači. Súbory pod limitom sa prehrajú bez zmeny, všetko nad ním server prekóduje a výber to uvádza."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begränsa vad servern skickar: en gång som standard i uppspelningsinställningarna (wifi och mobildata var för sig på iPhone och iPad) och en gång i spelaren. Filer under gränsen spelas upp oförändrade, allt över den kodar servern om, och väljaren säger det."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun gönderdiğini sınırlayın: bir kez oynatma ayarlarında varsayılan olarak (iPhone ve iPad'de Wi-Fi ve hücresel veri için ayrı ayrı) ve bir kez oynatıcıda. Sınırın altındaki dosyalar olduğu gibi oynatılır; üstündekiler sunucu tarafından yeniden kodlanır ve seçici bunu belirtir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обмежте те, що надсилає сервер: один раз як типове значення в налаштуваннях відтворення (на iPhone та iPad окремо для Wi-Fi і мобільної мережі) і один раз у плеєрі. Файли нижче порогу відтворюються без змін, усе, що вище, сервер перекодовує, і список вибору про це повідомляє."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "限制服务器发送的数据：在播放设置中设为默认值（iPhone 和 iPad 上可分别设置无线局域网和蜂窝网络），也可在播放器中随时调整。低于上限的文件原样播放，高于上限的由服务器重新编码，选项中会注明这一点。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "限制伺服器傳送的資料：在播放設定中設為預設值（iPhone 和 iPad 上可分別設定 Wi-Fi 與行動網路），也可在播放器中隨時調整。低於上限的檔案原樣播放，高於上限的由伺服器重新編碼，選項中會註明這一點。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.streamingQuality.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volba kvality streamu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg en streamingkvalitet"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streaming-Qualität wählen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιλογή ποιότητας ροής"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a streaming quality"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige la calidad de streaming"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitse suoratoiston laatu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir la qualité du streaming"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odaberite kvalitetu streaminga"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streamelési minőség választása"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la qualità di streaming"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストリーミング画質を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스트리밍 화질 선택"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velg strømmekvalitet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies een streamingkwaliteit"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz jakość streamingu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha a qualidade do streaming"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha a qualidade de streaming"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alege calitatea streamingului"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбор качества потока"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výber kvality streamovania"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj streamingkvalitet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akış kalitesini seçin"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибір якості потоку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择串流画质"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇串流畫質"
+          }
+        }
+      }
+    },
     "changelog.modal.dismiss" : {
       "extractionState" : "manual",
       "localizations" : {

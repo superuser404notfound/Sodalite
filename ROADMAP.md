@@ -44,17 +44,6 @@ lands on the first title starting with P instead of coasting past ninety-five po
 this on Apple TV and almost no other Jellyfin client does. It only means anything while a library
 is sorted by title, so it appears with that sort and stays out of the way otherwise.
 
-### Pick a quality ([#87](https://github.com/superuser404notfound/Sodalite/issues/87))
-
-Choose what leaves the server: the original file, or a smaller stream when the connection cannot
-carry it. Once as a default in the playback settings, and once in the player itself for the times
-the default is wrong. When downloads land, the same choice decides what gets stored, because a
-phone has less room than a NAS.
-
-The original file stays the default. A lower rung means the server re-encodes, which is exactly
-what Sodalite avoids by default, so it is a trade you make on purpose rather than a slider that
-quietly costs nothing.
-
 ### Something to browse before you type ([#107](https://github.com/superuser404notfound/Sodalite/issues/107))
 
 Search is the only tab that shows nothing at all until you start typing, which on a remote is the
