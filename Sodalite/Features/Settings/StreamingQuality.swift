@@ -79,7 +79,7 @@ enum TranscodeCodecProbe {
 /// `MaxStreamingBitrate`, so a file already under it still direct-plays and only a file above it is
 /// re-encoded. A fixed list of rungs rather than a slider, because that is what a server can deliver
 /// and what a viewer can reason about.
-enum StreamingQuality: String, CaseIterable, Sendable, Identifiable {
+enum StreamingQuality: String, CaseIterable, Codable, Sendable, Identifiable {
     case original, mbps40, mbps20, mbps10, mbps4, mbps2
 
     var id: String { rawValue }
