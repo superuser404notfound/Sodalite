@@ -442,6 +442,29 @@ final class PlaybackPreferences {
         set { device.liveBufferDepth = newValue }
     }
 
+    var streamingQualityWifi: StreamingQuality {
+        get { device.streamingQualityWifi }
+        set { device.streamingQualityWifi = newValue }
+    }
+
+    var streamingQualityCellular: StreamingQuality {
+        get { device.streamingQualityCellular }
+        set { device.streamingQualityCellular = newValue }
+    }
+
+    /// The rung a new session starts on, read once at session start (Sodalite#87).
+    func defaultStreamingQuality(
+        reading: NetworkPathSnapshot.Reading? = NetworkPathSnapshot.shared.current
+    ) -> StreamingQuality {
+        #if os(tvOS)
+        let platformHasCellular = false
+        #else
+        let platformHasCellular = true
+        #endif
+        return StreamingQuality.resolve(wifi: streamingQualityWifi, cellular: streamingQualityCellular,
+                                        reading: reading, platformHasCellular: platformHasCellular)
+    }
+
     var liveTeletextPage: LiveTeletextPage {
         get { device.liveTeletextPage }
         set { device.liveTeletextPage = newValue }
