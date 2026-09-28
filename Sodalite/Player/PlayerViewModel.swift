@@ -1830,8 +1830,7 @@ final class PlayerViewModel {
                 // LoadOptions language list it could not have been expressed at all.
                 guard !mapped.isEmpty, !self.didAutoSelectLiveSubtitle else { return }
                 self.didAutoSelectLiveSubtitle = true
-                let audioLanguage = self.player.audioTracks
-                    .first(where: { $0.id == self.player.activeAudioTrackIndex })?.language
+                let audioLanguage = self.heardAudioLanguage
                 self.applyPreferredSubtitle(forAudioLanguage: audioLanguage)
             }
             .store(in: &cancellables)
@@ -2290,6 +2289,27 @@ final class PlayerViewModel {
         beginPlayback()
     }
 
+    /// The language being heard: the engine's, and under a transcode, where Jellyfin drops the stream
+    /// metadata and the engine can name none, the language of the Jellyfin audio stream the transcode
+    /// carries (Sodalite#87).
+    var heardAudioLanguage: String? {
+        if let language = player.audioTracks.first(where: { $0.id == player.activeAudioTrackIndex })?.language {
+            return language
+        }
+        guard activePlayMethod == .transcode else { return nil }
+        return Self.transcodeAudioLanguage(transcodingURL: activePlaybackSource?.transcodingUrl,
+                                           streams: activePlaybackSource?.mediaStreams)
+    }
+
+    /// The language of the audio stream a Jellyfin transcode URL names in `AudioStreamIndex`.
+    static func transcodeAudioLanguage(transcodingURL: String?, streams: [MediaStream]?) -> String? {
+        guard let transcodingURL,
+              let value = URLComponents(string: transcodingURL)?.queryItems?
+                .first(where: { $0.name.caseInsensitiveCompare("AudioStreamIndex") == .orderedSame })?.value,
+              let index = Int(value) else { return nil }
+        return streams?.first { $0.type == .audio && $0.index == index }?.language
+    }
+
     /// Whether a Jellyfin transcode URL burns a subtitle into the picture. `SubtitleMethod=Encode` alone
     /// says nothing: Jellyfin writes it into every transcode URL, Encode being its enum's default. Only a
     /// subtitle stream named next to it is burned in.
@@ -2521,8 +2541,7 @@ final class PlayerViewModel {
             forcedSubtitleFallback = .none
             return
         }
-        let audioLanguage = audioLanguageOverride ?? player.audioTracks
-            .first(where: { $0.id == player.activeAudioTrackIndex })?.language
+        let audioLanguage = audioLanguageOverride ?? heardAudioLanguage
         var mode = ForcedSubtitleFallback.resolve(
             streams: subtitleStreams,
             audioLanguage: audioLanguage,
@@ -3021,14 +3040,17 @@ final class PlayerViewModel {
             enabled: preferences.subtitlesOnSkipBack
         ) else { return }
 
-        let audioLanguage = player.audioTracks
-            .first(where: { $0.id == player.activeAudioTrackIndex })?.language
+        let audioLanguage = heardAudioLanguage
         guard let streamIndex = SkipBackSubtitleWindow.resolveTrack(
             streams: subtitleStreams,
             preferredSubtitleLanguage: preferences.preferredSubtitleLanguage,
             audioLanguage: audioLanguage,
             unlabelledCountsAsHeard: isLiveSession
-        ) else { return }
+        ) else {
+            LogTap.shared.note("[SkipBackSubs] no track for audio=\(audioLanguage ?? "nil") preferred=\(preferences.preferredSubtitleLanguage ?? "nil")")
+            return
+        }
+        LogTap.shared.note("[SkipBackSubs] open stream=\(streamIndex) from \(String(format: "%.1f", pendingOrigin))s to \(String(format: "%.1f", targetTime))s audio=\(audioLanguage ?? "nil")")
 
         // userInitiated stays false: this is an automatic pick, and recording it would bake a
         // temporary track into the remembered selection (Sodalite#46).
@@ -3062,8 +3084,7 @@ final class PlayerViewModel {
             volume: volume
         ) else { return }
 
-        let audioLanguage = player.audioTracks
-            .first(where: { $0.id == player.activeAudioTrackIndex })?.language
+        let audioLanguage = heardAudioLanguage
         guard let streamIndex = SystemCaptionWindow.resolveTrack(
             streams: subtitleStreams,
             requestedLanguage: request.language,
