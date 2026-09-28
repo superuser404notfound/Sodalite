@@ -124839,157 +124839,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server překódovává"
+            "value" : "Překódování"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serveren omkoder"
+            "value" : "Omkodning"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server rechnet neu"
+            "value" : "Transkodieren"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ο διακομιστής επανακωδικοποιεί"
+            "value" : "Διακωδικοποίηση"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server re-encodes"
+            "value" : "Transcode"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El servidor recodifica"
+            "value" : "Transcodificación"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Palvelin koodaa uudelleen"
+            "value" : "Transkoodaus"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le serveur réencode"
+            "value" : "Transcodage"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poslužitelj ponovno kodira"
+            "value" : "Transkodiranje"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A szerver újrakódol"
+            "value" : "Átkódolás"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il server ricodifica"
+            "value" : "Transcodifica"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "サーバーで再エンコード"
+            "value" : "トランスコード"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "서버에서 재인코딩"
+            "value" : "트랜스코딩"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serveren omkoder"
+            "value" : "Omkoding"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server hercodeert"
+            "value" : "Transcoderen"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serwer transkoduje"
+            "value" : "Transkodowanie"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O servidor recodifica"
+            "value" : "Transcodificação"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O servidor recodifica"
+            "value" : "Transcodificação"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serverul recodează"
+            "value" : "Transcodare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сервер перекодирует"
+            "value" : "Перекодирование"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Server prekódováva"
+            "value" : "Prekódovanie"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Servern kodar om"
+            "value" : "Omkodning"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunucu yeniden kodlar"
+            "value" : "Dönüştürme"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сервер перекодовує"
+            "value" : "Перекодування"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器重新编码"
+            "value" : "转码"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "伺服器重新編碼"
+            "value" : "轉碼"
           }
         }
       }

@@ -41,7 +41,7 @@ enum StreamingQuality: String, CaseIterable, Sendable, Identifiable {
     /// The picker row's trailing caption, present only where the rung actually costs a re-encode.
     func pickerHint(sourceBitrate: Int?) -> String? {
         bites(sourceBitrate: sourceBitrate)
-            ? String(localized: "player.quality.reencodes", defaultValue: "Server re-encodes")
+            ? String(localized: "player.quality.reencodes", defaultValue: "Transcode")
             : nil
     }
 
