@@ -274,6 +274,7 @@
 		33D616554964B1890780EB2D /* TopShelfCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 602D5AFF859F3E9604F56EEE /* TopShelfCache.swift */; };
 		33E1C150090FAA494E9C6A61 /* JellyfinImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3922C20A201F47D136223B20 /* JellyfinImageService.swift */; };
 		343951C741A10B80D7A15FEF /* LiveProgramsFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF2E79C20604BD9758A6906 /* LiveProgramsFreshnessTests.swift */; };
+		34428EB1333BFFA4602046E7 /* DownloadProgressSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68621CA001FBB0A2D5931D17 /* DownloadProgressSync.swift */; };
 		34AD492EDFD9D01B3DA34543 /* TabRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD9103B219AFCAC73A8836A /* TabRootView.swift */; };
 		3503E9CE420E81837D9C2F6B /* CloudSyncAccountChangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FA16DDAB1D7CA2F328E986 /* CloudSyncAccountChangeTests.swift */; };
 		3504F676D057874686B4385C /* NeutralLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81FAB94B2753F4D099D4088 /* NeutralLevel.swift */; };
@@ -361,6 +362,7 @@
 		45747BFDA8037D4C6E9C6C69 /* EpisodeRowComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6476801A57CD47661C981732 /* EpisodeRowComponents.swift */; };
 		459C0F637B0778E0067D6FCD /* PosterBadgeEnrichment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 309E61267DD57F84D370456E /* PosterBadgeEnrichment.swift */; };
 		45A9E601A7F5BE0E379B4173 /* SeerrEpisodeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77412030533E48E44E837CAC /* SeerrEpisodeCard.swift */; };
+		45E0636AC78135E3C7BCFC96 /* DownloadProgressSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6B7F03C535D6F6B0D26191 /* DownloadProgressSyncTests.swift */; };
 		46103C78CD81689F46A6724B /* LiveRailChromeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C22420A548F6C0072EBCC1 /* LiveRailChromeTests.swift */; };
 		468B22E1EFCF84F499141858 /* PlayerSessionTeardownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3A695C1E39263E5D9C3C48A /* PlayerSessionTeardownTests.swift */; };
 		4695794C1C8AA6962FF7E382 /* LegacySettingsRecordCompatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C314F1E3B32FC980FB6F7A /* LegacySettingsRecordCompatTests.swift */; };
@@ -945,6 +947,7 @@
 		B840F6D43B75698FFCD3A954 /* TabBarImmersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3997F1A421DEEA00C9DA66C7 /* TabBarImmersion.swift */; };
 		B8859E83555491FE39146112 /* DetailSecondaryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AB0E8D4D9D9CE9852E8DF8 /* DetailSecondaryInfo.swift */; };
 		B8B8BE7AF0731BDEA6F41505 /* SeriesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540616280719D6E5695E427C /* SeriesDetailView.swift */; };
+		B8C4258C078E78AB70AC4EEA /* DownloadProgressSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68621CA001FBB0A2D5931D17 /* DownloadProgressSync.swift */; };
 		B923868DFA2EB3D5EDDC0DFE /* ExternalSubtitleWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB6B1F1E5D901FEE42A9B84 /* ExternalSubtitleWindowController.swift */; };
 		B943A2C97149DDAB3DC39FA1 /* PlayerThemeBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC0FFB550FE99D21023289B /* PlayerThemeBoundaryTests.swift */; };
 		BA618B2C2BBE096F27D9FDC9 /* SeerrMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8F02ACD2153F7A0D898E74 /* SeerrMedia.swift */; };
@@ -1668,6 +1671,7 @@
 		67C2B7AED1B1E7DFFFFFC4AA /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		67D6A7AD036621FEFA8A6173 /* RecentlyReleasedRowsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentlyReleasedRowsTests.swift; sourceTree = "<group>"; };
 		6830A3E115B8115485AA5ACB /* SeerrRequestOptionsForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequestOptionsForm.swift; sourceTree = "<group>"; };
+		68621CA001FBB0A2D5931D17 /* DownloadProgressSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadProgressSync.swift; sourceTree = "<group>"; };
 		692B7E4CD50725E7A3D82A62 /* LiveTunerLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTunerLedger.swift; sourceTree = "<group>"; };
 		692D56E426F3EB7EE53F29F2 /* SpoilerRevealMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoilerRevealMemoryTests.swift; sourceTree = "<group>"; };
 		698E68F119A7E37585120CE2 /* LocalNetworkAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNetworkAccess.swift; sourceTree = "<group>"; };
@@ -1934,6 +1938,7 @@
 		BCF3A9D8BE6DD4C682266627 /* PlayerViewModel+ItemRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerViewModel+ItemRecovery.swift"; sourceTree = "<group>"; };
 		BD2C8269596D9FE3A636727A /* JellyfinItemsResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinItemsResponseTests.swift; sourceTree = "<group>"; };
 		BD53BBDBE101C207EBE63B9C /* CloudSyncProfileTombstoneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncProfileTombstoneTests.swift; sourceTree = "<group>"; };
+		BE6B7F03C535D6F6B0D26191 /* DownloadProgressSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadProgressSyncTests.swift; sourceTree = "<group>"; };
 		BE6CBE5D06910923DEFED66F /* CloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncService.swift; sourceTree = "<group>"; };
 		BEA407D28203BD57515A1970 /* ContentLogoAvailabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLogoAvailabilityTests.swift; sourceTree = "<group>"; };
 		BFA3813F4C278D463624A9F6 /* ControlScrimLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlScrimLayer.swift; sourceTree = "<group>"; };
@@ -2440,6 +2445,7 @@
 				E100E7790E4C6B1A845813C4 /* DirectPlayProfileWMVTests.swift */,
 				E9E3BF97D18324FFA9D4E64D /* DiscoveryProbeRaceTests.swift */,
 				DB42E287471EAA0238A86EA3 /* DownloadPlannerTests.swift */,
+				BE6B7F03C535D6F6B0D26191 /* DownloadProgressSyncTests.swift */,
 				9B789ADE3514AD7876F03B18 /* DownloadStoreTests.swift */,
 				D56D9C510CDDF570489238BA /* DualURLPromptLatchTests.swift */,
 				9E5A48971ECB0079A8C8B5E2 /* EpisodeCardStrokeTests.swift */,
@@ -2717,6 +2723,7 @@
 				B29A5C0AF54C666C2B3C3152 /* DownloadManifest.swift */,
 				170BE20821DBB67619496713 /* DownloadPaths.swift */,
 				3512C10C68809E763C731719 /* DownloadPlanner.swift */,
+				68621CA001FBB0A2D5931D17 /* DownloadProgressSync.swift */,
 				B0A33F40F1C70F60F303515E /* DownloadStore.swift */,
 			);
 			path = Downloads;
@@ -3713,6 +3720,7 @@
 				B4DBCAD4B2EEE20ACABB777A /* DownloadManifest.swift in Sources */,
 				FE99694F442C54EF1D800871 /* DownloadPaths.swift in Sources */,
 				ABED7BB106AC2036FFC13CE8 /* DownloadPlanner.swift in Sources */,
+				34428EB1333BFFA4602046E7 /* DownloadProgressSync.swift in Sources */,
 				FB11FAC2D8CF17C8EDA78F81 /* DownloadStore.swift in Sources */,
 				68641A144E8EFBB4B8322B29 /* DualURLEditSheet.swift in Sources */,
 				AB8AE7DFAFF15B02B0C603BA /* DualURLPromptLatch.swift in Sources */,
@@ -4187,6 +4195,7 @@
 				A1DA3C2787809FF62EF5E9F4 /* DirectPlayProfileWMVTests.swift in Sources */,
 				57BFD4311521443D0BD154B8 /* DiscoveryProbeRaceTests.swift in Sources */,
 				7F1A91284E3D643B808FC8B1 /* DownloadPlannerTests.swift in Sources */,
+				45E0636AC78135E3C7BCFC96 /* DownloadProgressSyncTests.swift in Sources */,
 				934776DF40AF2E920D4B877D /* DownloadStoreTests.swift in Sources */,
 				F79D26C973ABE2B9E5DDF233 /* DualURLPromptLatchTests.swift in Sources */,
 				AEC007FCA88889D7763BBA5F /* EpisodeCardStrokeTests.swift in Sources */,
@@ -4536,6 +4545,7 @@
 				385E022EBF6540855432C2C4 /* DownloadManifest.swift in Sources */,
 				AB73BC31E7221CD3D7D56A20 /* DownloadPaths.swift in Sources */,
 				EF9BC41E68A2C4AE0D329FF0 /* DownloadPlanner.swift in Sources */,
+				B8C4258C078E78AB70AC4EEA /* DownloadProgressSync.swift in Sources */,
 				21197281FB94876E09188D77 /* DownloadStore.swift in Sources */,
 				BB88994715B1682477A2A2AE /* DualURLEditSheet.swift in Sources */,
 				FCA259ADE6D33830760E65FA /* DualURLPromptLatch.swift in Sources */,
