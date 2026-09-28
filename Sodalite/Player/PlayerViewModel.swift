@@ -2606,7 +2606,7 @@ final class PlayerViewModel {
     /// the result was an empty grey box over the frame: invisible text inside a box nobody had styled.
     func setNativeSubtitleRenditionVisible(_ visible: Bool) {
         guard Self.nativeSubtitleRenditionEnabled, let item = player.currentAVPlayer?.currentItem else { return }
-        if visible {
+        if Self.renditionShowsText(requested: visible, route: player.videoRoute) {
             item.textStyleRules = nil
         } else if let transparent = AVTextStyleRule(textMarkupAttributes: [
             kCMTextMarkupAttribute_ForegroundColorARGB as String: [0.0, 0.0, 0.0, 0.0],
@@ -2615,6 +2615,13 @@ final class PlayerViewModel {
         ]) {
             item.textStyleRules = [transparent]
         }
+    }
+
+    /// Whether the native rendition's text is drawn. On the remote-HLS bypass it always is: the engine
+    /// hands subtitles to AVPlayer as injected renditions there and publishes no cues for an overlay
+    /// (AE#316), so an invisible style left an empty caption box and no text (Sodalite#87).
+    static func renditionShowsText(requested: Bool, route: VideoRoute) -> Bool {
+        requested || route == .remoteBypass
     }
 
     /// #32: true once the native rendition has been selected this session. The select (deselect/reselect dance)
