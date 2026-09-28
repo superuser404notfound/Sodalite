@@ -545,10 +545,9 @@ struct PlayerTouchControls: View {
             }
             return rows
         case .quality:
-            let sourceBitrate = viewModel.activePlaybackSource?.bitrate
             return StreamingQuality.allCases.map { quality in
                 let title = String(localized: String.LocalizationValue(quality.titleKey))
-                let label = quality.pickerHint(sourceBitrate: sourceBitrate).map { "\(title) · \($0)" } ?? title
+                let label = viewModel.qualityPickerHint(quality).map { "\(title) · \($0)" } ?? title
                 return PickerRow(label: label, isActive: quality == viewModel.effectiveStreamingQuality) {
                     viewModel.selectStreamingQuality(quality)
                 }

@@ -669,13 +669,12 @@ struct TransportBar: View {
 
     private var qualityDropdownItems: [DropdownItem] {
         guard case .quality(let highlighted) = trackDropdown else { return [] }
-        let sourceBitrate = viewModel.activePlaybackSource?.bitrate
         return StreamingQuality.allCases.enumerated().map { idx, quality in
             DropdownItem(
                 title: String(localized: String.LocalizationValue(quality.titleKey)),
                 isActive: quality == viewModel.effectiveStreamingQuality,
                 isHighlighted: idx == highlighted,
-                hint: quality.pickerHint(sourceBitrate: sourceBitrate)
+                hint: viewModel.qualityPickerHint(quality)
             )
         }
     }

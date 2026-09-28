@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Sodalite
 
@@ -44,10 +45,29 @@ struct StreamingQualityTests {
                                          reading: nil, platformHasCellular: true) == .mbps20)
     }
 
-    @Test func theHintNamesTheReencodeOnlyWhenItBites() {
-        #expect(StreamingQuality.mbps10.pickerHint(sourceBitrate: 30_000_000) != nil)
-        #expect(StreamingQuality.mbps10.pickerHint(sourceBitrate: 5_000_000) == nil)
-        #expect(StreamingQuality.original.pickerHint(sourceBitrate: 30_000_000) == nil)
+    private let cars = TranscodeSourceFacts(bitrate: 17_000_000, width: 3840, frameRate: 23.976)
+    /// The simulator may run in any language, so the caption is compared in the one it resolves to.
+    private let transcode = String(localized: "player.quality.reencodes")
+    private let original = String(localized: "player.quality.short.original")
+
+    /// Sodalite#87: the row says what the rung produces for the file on screen.
+    @Test func originalNamesTheFilesResolution() {
+        #expect(StreamingQuality.original.pickerHint(source: cars, serverEncodesHEVC: false) == "4K")
+    }
+
+    @Test func aRungTheFileFitsUnderPlaysTheOriginal() {
+        #expect(StreamingQuality.mbps20.pickerHint(source: cars, serverEncodesHEVC: false) == "4K · \(original)")
+    }
+
+    @Test func aRungThatBitesNamesWhatTheServerWillMake() {
+        #expect(StreamingQuality.mbps4.pickerHint(source: cars, serverEncodesHEVC: false) == "720p · \(transcode)")
+        #expect(StreamingQuality.mbps4.pickerHint(source: cars, serverEncodesHEVC: true) == "1080p · \(transcode)")
+    }
+
+    @Test func withoutSourceFactsTheRowStillSaysWhatHappens() {
+        let unknown = TranscodeSourceFacts(bitrate: nil, width: nil, frameRate: nil)
+        #expect(StreamingQuality.original.pickerHint(source: unknown, serverEncodesHEVC: false) == nil)
+        #expect(StreamingQuality.mbps10.pickerHint(source: unknown, serverEncodesHEVC: false) == "1080p · \(transcode)")
     }
 
     /// tvOS has one setting; a metered reading there (an Apple TV on a phone hotspot) changes nothing.

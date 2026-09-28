@@ -1452,6 +1452,16 @@ final class PlayerViewModel {
     // MARK: - State Observation (Combine)
 
     private func startObserving() {
+        // Sodalite#87: a delivered transcode tells which codec this server encodes, which the quality
+        // picker needs for its estimate and cannot read from the server's settings.
+        player.$sourceVideoCodecName
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] codec in
+                guard let self, let codec, self.activePlayMethod == .transcode,
+                      self.player.videoRoute == .remoteBypass else { return }
+                self.transcodeCodecMemory.record(server: self.playbackService.baseURL?.host(), deliveredCodec: codec)
+            }
+            .store(in: &cancellables)
         player.$state
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
@@ -2287,6 +2297,21 @@ final class PlayerViewModel {
         player.stop()
         closeServerSession()
         beginPlayback()
+    }
+
+    /// The library file's facts the quality picker estimates from (Sodalite#87). Under a transcode
+    /// Jellyfin's source still describes the file, which is what an estimate needs.
+    var transcodeSourceFacts: TranscodeSourceFacts {
+        let video = activePlaybackSource?.mediaStreams?.first { $0.type == .video }
+        return TranscodeSourceFacts(bitrate: activePlaybackSource?.bitrate, width: video?.width,
+                                    frameRate: video?.realFrameRate ?? video?.averageFrameRate)
+    }
+
+    @ObservationIgnored let transcodeCodecMemory = TranscodeCodecMemory(defaults: .standard)
+
+    func qualityPickerHint(_ quality: StreamingQuality) -> String? {
+        quality.pickerHint(source: transcodeSourceFacts,
+                           serverEncodesHEVC: transcodeCodecMemory.encodesHEVC(server: playbackService.baseURL?.host()))
     }
 
     /// The language being heard: the engine's, and under a transcode, where Jellyfin drops the stream
