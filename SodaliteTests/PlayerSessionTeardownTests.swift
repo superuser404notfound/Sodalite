@@ -101,12 +101,15 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _stoppedReports: [PlaybackStopReport] = []
     private var _killedEncodings: [String] = []
     private var _playbackInfoRequests: [String] = []
+    private var _requestedCaps: [Int?] = []
     /// Item ids whose PlaybackInfo never answers (until the caller's task is cancelled).
     var hangingItemIDs: Set<String> = []
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
+    /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
+    var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
 
     var baseURL: URL? { nil }
     var deviceID: String { "device" }
@@ -118,7 +121,11 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         lock.withLock { _killedEncodings.append(playSessionID) }
     }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse {
-        lock.withLock { _playbackInfoRequests.append(itemID) }
+        let cap = profile?["MaxStreamingBitrate"] as? Int
+        lock.withLock {
+            _playbackInfoRequests.append(itemID)
+            _requestedCaps.append(cap)
+        }
         if hangingItemIDs.contains(itemID) {
             try await Task.sleep(for: .seconds(60))
         }

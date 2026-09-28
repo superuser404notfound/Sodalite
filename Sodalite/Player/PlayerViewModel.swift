@@ -1320,6 +1320,18 @@ final class PlayerViewModel {
         // so leaving by hand during the credits files the episode as watched instead of parking it on
         // the Continue Watching shelf with a nearly full bar.
         let finalTicks = completionAwarePositionTicks
+        let closeServerSession = makeServerSessionClose(positionTicks: finalTicks)
+        // Engine does native teardown + HLS server shutdown + AVDisplayManager criteria reset in stopInternal().
+        player.stop()
+        // Tuner-release safety net: frees the server-side tuner even if the stop report fails to deliver. No-op for VOD.
+        releaseLiveTunerIfNeeded()
+        closeServerSession()
+    }
+
+    /// The server half of ending a session: the stop report (only if a start went out) and the
+    /// explicit encode kill. Captures every value now and dispatches when called, because
+    /// `player.stop()` and the tuner release in between clear what the report needs.
+    func makeServerSessionClose(positionTicks finalTicks: Int64) -> () -> Void {
         // Snapshot the payload + service and detach with a STRONG capture: a [weak self] task could be
         // deallocated by PlayerHostController's dismissal before the @MainActor hop ran, silently dropping
         // the position write.
@@ -1331,10 +1343,6 @@ final class PlayerViewModel {
             positionTicks: finalTicks,
             liveStreamId: activeLiveStreamID
         )
-        // Engine does native teardown + HLS server shutdown + AVDisplayManager criteria reset in stopInternal().
-        player.stop()
-        // Tuner-release safety net: frees the server-side tuner even if the stop report fails to deliver. No-op for VOD.
-        releaseLiveTunerIfNeeded()
         // Fire-and-forget so the caller can start the dismiss animation without waiting on PlaybackStopped.
         // Tracked by LiveTunerGate when it carries a live stream id, because Jellyfin closes that stream
         // on PlaybackStopped too: an untracked closer is one the next tune of the same channel can
@@ -1369,10 +1377,12 @@ final class PlayerViewModel {
                 try? await svc.stopActiveEncodings(playSessionID: sessionToKill)
             }
         }
-        if stopReport.liveStreamId != nil {
-            LiveTunerGate.shared.close(reportWork)
-        } else {
-            Task.detached { await reportWork() }
+        return {
+            if stopReport.liveStreamId != nil {
+                LiveTunerGate.shared.close(reportWork)
+            } else {
+                Task.detached { await reportWork() }
+            }
         }
     }
 
@@ -2200,6 +2210,30 @@ final class PlayerViewModel {
         resumeOverrideSeconds = seconds
         clearError()
         player.stop()
+        beginPlayback()
+    }
+
+    /// Whether this session offers a rung choice. Live has its own ladder (Sodalite#87 non-goal).
+    var supportsQualityChoice: Bool { !isLiveSession }
+
+    /// In-player rung pick (Sodalite#87). A new rung is a new stream: close the server session so
+    /// no ffmpeg outlives it, then run the session again from the same second. Same shape as
+    /// `retryAfterOutage`; the prefetch is dropped because it was fetched at the old rung.
+    func selectStreamingQuality(_ quality: StreamingQuality) {
+        guard supportsQualityChoice, quality != effectiveStreamingQuality else { return }
+        let resumeAt = playbackTime
+        LogTap.shared.note("[Quality] \(effectiveStreamingQuality.rawValue) -> \(quality.rawValue) at \(String(format: "%.1f", resumeAt))s")
+        let closeServerSession = makeServerSessionClose(positionTicks: Int64(resumeAt * 10_000_000))
+        // The next session reports its own start; the closed one must not be closed again by a
+        // later stopPlayback.
+        hasReportedStart = false
+        playSessionID = nil
+        streamingQuality = quality
+        cachedPlaybackInfo = nil
+        resumeOverrideSeconds = resumeAt > 0 ? resumeAt : nil
+        clearError()
+        player.stop()
+        closeServerSession()
         beginPlayback()
     }
 
