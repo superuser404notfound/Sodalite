@@ -121,13 +121,15 @@ enum DirectPlayProfile {
             // route, so a seek fetches segments instead of restarting a progressive encode. fMP4, not
             // TS: AVFoundation plays HEVC over HLS only in fMP4. av1 and vp9 are left out because
             // AVPlayer, which plays this route, does not decode them over HLS on every device
-            // (Sodalite#87).
+            // (Sodalite#87). HEVC first: Jellyfin encodes the first listed codec the server may encode
+            // and moves hevc to the end itself when HEVC encoding is off, so this buys the better picture
+            // per bit at the low rungs where allowed and changes nothing elsewhere.
             "TranscodingProfiles": [
                 [
                     "Type": "Video",
                     "Container": "mp4",
                     "Protocol": "hls",
-                    "VideoCodec": "h264,hevc",
+                    "VideoCodec": "hevc,h264",
                     "AudioCodec": "aac,ac3,eac3",
                     "Context": "Streaming",
                 ],

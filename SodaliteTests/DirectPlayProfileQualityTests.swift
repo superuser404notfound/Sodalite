@@ -36,6 +36,14 @@ struct DirectPlayProfileQualityTests {
         #expect(audio == ["aac", "ac3", "eac3"])
     }
 
+    /// Jellyfin encodes the first codec the list names that the server may encode (it shifts `hevc` to
+    /// the end itself when HEVC encoding is off), so leading with HEVC buys the better picture per bit at
+    /// the low rungs wherever the server allows it, and changes nothing where it does not.
+    @Test func transcodesAskForHEVCFirst() {
+        let video = videoTranscoding(DirectPlayProfile.baseProfile())
+        #expect(video["VideoCodec"] as? String == "hevc,h264")
+    }
+
     /// Live keeps its own progressive TS profile; a VOD change must not leak into it.
     @Test func liveKeepsItsOwnTranscodingProfile() {
         let video = videoTranscoding(DirectPlayProfile.liveProfile())
