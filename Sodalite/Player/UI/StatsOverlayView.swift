@@ -50,6 +50,17 @@ struct StatsOverlayView: View {
         facts.stream(ofType: .video)
     }
 
+    /// Jellyfin's video stream where it describes what plays, nil under a transcode (Sodalite#87).
+    private var fileVideoStream: MediaStream? {
+        Self.fileFactsDescribePlayback(playMethod: playMethod) ? videoStream : nil
+    }
+
+    /// Whether the library file's own facts describe the video on screen. Under a transcode they describe
+    /// the file the server re-encodes, not the stream that arrives.
+    static func fileFactsDescribePlayback(playMethod: PlayMethod?) -> Bool {
+        playMethod != .transcode
+    }
+
     private var activeAudioStream: MediaStream? {
         facts.stream(ofType: .audio, index: player.activeAudioTrackIndex)
     }
@@ -290,7 +301,7 @@ struct StatsOverlayView: View {
                 row("detail.tech.resolution", value: resolution)
             }
             if let fps = player.sourceVideoFrameRate
-                ?? videoStream?.realFrameRate ?? videoStream?.averageFrameRate {
+                ?? fileVideoStream?.realFrameRate ?? fileVideoStream?.averageFrameRate {
                 row("detail.tech.framerate", value: String(format: "%.3g fps", fps))
             }
             if let bps = videoBitrate {
@@ -523,20 +534,31 @@ struct StatsOverlayView: View {
 
     // MARK: - Derived video labels
 
-    /// Engine spelling ("HEVC"), with the container's profile appended when it has one. The Jellyfin codec
-    /// stands in only until the engine has probed.
     private var videoCodecLabel: String? {
-        guard let name = player.sourceVideoCodecName?.uppercased()
-            ?? videoStream?.codec?.uppercased() else { return nil }
-        let profile = videoStream?.profile ?? ""
+        Self.videoCodecLabel(engineName: player.sourceVideoCodecName,
+                             engineProfile: player.sourceVideoStreamFormat?.profile,
+                             file: fileVideoStream)
+    }
+
+    /// Engine spelling ("HEVC") with the profile appended when one is known, the engine's first. The file's
+    /// codec and profile stand in only until the engine has probed, and never under a transcode.
+    static func videoCodecLabel(engineName: String?, engineProfile: String?, file: MediaStream?) -> String? {
+        guard let name = engineName?.uppercased() ?? file?.codec?.uppercased() else { return nil }
+        let profile = engineProfile ?? file?.profile ?? ""
         return profile.isEmpty ? name : "\(name) \(profile)"
     }
 
     private var resolutionLabel: String? {
-        if player.sourceVideoWidth > 0, player.sourceVideoHeight > 0 {
-            return "\(player.sourceVideoWidth)×\(player.sourceVideoHeight)"
+        Self.resolutionLabel(engineWidth: Int(player.sourceVideoWidth),
+                             engineHeight: Int(player.sourceVideoHeight),
+                             file: fileVideoStream)
+    }
+
+    static func resolutionLabel(engineWidth: Int, engineHeight: Int, file: MediaStream?) -> String? {
+        if engineWidth > 0, engineHeight > 0 {
+            return "\(engineWidth)×\(engineHeight)"
         }
-        if let w = videoStream?.width, let h = videoStream?.height {
+        if let w = file?.width, let h = file?.height {
             return "\(w)×\(h)"
         }
         return nil
@@ -546,7 +568,8 @@ struct StatsOverlayView: View {
     /// Jellyfin otherwise, which is what this row showed before and is close enough to be worth keeping.
     private var videoBitrate: Int? {
         if player.sourceVideoBitrate > 0 { return Int(player.sourceVideoBitrate) }
-        return facts.bitrate
+        // Under a transcode the file's figure is not the stream's; the live section carries what arrives.
+        return Self.fileFactsDescribePlayback(playMethod: playMethod) ? facts.bitrate : nil
     }
 
     /// Source video range refined with the DV profile. When the engine clamps `videoFormat` to `.sdr`
@@ -556,7 +579,7 @@ struct StatsOverlayView: View {
         Self.videoRangeLabel(
             source: player.sourceVideoFormat,
             presented: player.videoFormat,
-            dvProfile: player.sourceDVProfile ?? videoStream?.dvProfile,
+            dvProfile: player.sourceDVProfile ?? fileVideoStream?.dvProfile,
             conversion: player.dolbyVisionConversion)
     }
 
