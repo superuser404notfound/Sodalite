@@ -14,6 +14,10 @@ struct MovieDetailView: View {
     @State private var navigateToSeerrRequest: SeerrMedia?
     @State private var showPlayer = false
     @State private var playFromBeginning = false
+    /// Sodalite#81: the item whose download rung is being asked for.
+    @State private var downloadTarget: DownloadTarget?
+    /// Sodalite#81: one launch that streams a downloaded item instead of playing the file.
+    @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
     /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
     @State private var versionSelection = VersionSelection()
@@ -92,6 +96,10 @@ struct MovieDetailView: View {
         // bar; the backdrop keeps its own .ignoresSafeArea() to stay full-bleed. tvOS/iPad full-bleed.
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
+        .downloadRungDialog(target: $downloadTarget)
+        .onChange(of: showPlayer) { _, isShowing in
+            if !isShowing { streamFromServer = false }
+        }
         .overlay {
             if let userID = appState.activeUser?.id {
                 PlayerLauncher(
@@ -105,7 +113,9 @@ struct MovieDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item)
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item),
+                    localDownload: streamFromServer ? nil : dependencies.downloadStore.completedItem((viewModel?.item ?? item).id),
+                    downloadStore: dependencies.downloadStore
                 )
                 .allowsHitTesting(false)
             }
@@ -559,6 +569,16 @@ struct MovieDetailView: View {
         )
         .focused($focusedAction, equals: .play)
         .focused($playButtonFocused)
+        #if os(iOS)
+        .contextMenu {
+            if dependencies.downloadStore.completedItem(vm.item.id) != nil {
+                Button("downloads.action.streamFromServer", systemImage: "network") {
+                    streamFromServer = true
+                    requestPlay(fromBeginning: false)
+                }
+            }
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -642,6 +662,10 @@ struct MovieDetailView: View {
                 action: { Task { await vm.togglePlayed() } }
             )
             .focused($focusedAction, equals: .watched)
+
+            #if os(iOS)
+            DownloadActionButton(item: vm.item, target: $downloadTarget)
+            #endif
 
             // Last of the informational controls, and the page's only route to the full synopsis
             // and the technical detail (Sodalite#146).

@@ -18,6 +18,10 @@ struct SeriesDetailView: View {
     @State private var playQueue: [JellyfinItem] = []
     @State private var playItem: JellyfinItem?
     @State private var playFromBeginning = false
+    /// Sodalite#81: the episode or season whose download rung is being asked for.
+    @State private var downloadTarget: DownloadTarget?
+    /// Sodalite#81: one launch that streams a downloaded episode instead of playing the file.
+    @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
     /// Which version the play target runs; keyed to that target, so tapping the next episode drops it (Sodalite#139).
     @State private var versionSelection = VersionSelection()
@@ -235,6 +239,10 @@ struct SeriesDetailView: View {
         // bar; the backdrop keeps its own .ignoresSafeArea() to stay full-bleed. tvOS/iPad full-bleed.
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
+        .downloadRungDialog(target: $downloadTarget)
+        .onChange(of: showPlayer) { _, isShowing in
+            if !isShowing { streamFromServer = false }
+        }
         .overlay {
             if let userID = appState.activeUser?.id {
                 PlayerLauncher(
@@ -249,7 +257,9 @@ struct SeriesDetailView: View {
                     spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
                     preferredMediaSourceID: versionSelection.preferredSourceID(for: playItem),
-                    playQueue: playQueue
+                    playQueue: playQueue,
+                    localDownload: streamFromServer ? nil : playItem.flatMap { dependencies.downloadStore.completedItem($0.id) },
+                    downloadStore: dependencies.downloadStore
                 )
                 .allowsHitTesting(false)
             }
@@ -1078,6 +1088,10 @@ struct SeriesDetailView: View {
                     }
                 )
                 .focused($focusedAction, equals: .watched)
+
+                #if os(iOS)
+                DownloadActionButton(item: ep, target: $downloadTarget)
+                #endif
             }
 
             if !isShowingEpisode,
@@ -1284,6 +1298,33 @@ struct SeriesDetailView: View {
             }
         }
 
+        #if os(iOS)
+        if dependencies.downloadManager != nil {
+            if dependencies.downloadStore.completedItem(episode.id) != nil {
+                Button {
+                    streamFromServer = true
+                    requestPlay(episode, fromBeginning: false, fromPlayButton: false)
+                } label: {
+                    Label("downloads.action.streamFromServer", systemImage: "network")
+                }
+            }
+            if dependencies.downloadStore.item(episode.id) == nil {
+                Button {
+                    downloadTarget = .item(episode)
+                } label: {
+                    Label("downloads.action.download", systemImage: "arrow.down.circle")
+                }
+            } else if let manager = dependencies.downloadManager {
+                Button(role: .destructive) {
+                    Task { await manager.cancel(itemID: episode.id) }
+                } label: {
+                    Label(dependencies.downloadStore.completedItem(episode.id) != nil
+                          ? "downloads.action.remove" : "downloads.action.cancel", systemImage: "trash")
+                }
+            }
+        }
+        #endif
+
         Button {
             let target = !vm.isPlayed(episode)
             Task { await vm.setEpisodePlayed(episode, isPlayed: target) }
@@ -1383,6 +1424,17 @@ struct SeriesDetailView: View {
                                         systemImage: vm.isPlayed(season) ? "checkmark.circle.fill" : "checkmark.circle"
                                     )
                                 }
+                                #if os(iOS)
+                                if dependencies.downloadManager != nil {
+                                    Button {
+                                        downloadTarget = .season(
+                                            seriesID: vm.item.id, seasonID: season.id,
+                                            episodes: vm.selectedSeasonID == season.id ? vm.episodes : [])
+                                    } label: {
+                                        Label("downloads.action.downloadSeason", systemImage: "arrow.down.circle")
+                                    }
+                                }
+                                #endif
                                 Divider()
                                 // Reachable from the lower half of the page too. These set the
                                 // SERIES rule, which is what their titles say.
