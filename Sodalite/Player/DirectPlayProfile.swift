@@ -35,6 +35,20 @@ enum DirectPlayProfile {
     /// HTTP 500 (device-verified on "Infomercial"). 12 Mbps = sane 1080p H.264.
     static let liveReencodeCapBitrate = 12_000_000
 
+    /// Sodalite#81: what a download asks for. The cap is the rung; a source above it comes back as a
+    /// PROGRESSIVE mp4 transcode. Context stays Streaming on purpose: Jellyfin matches transcoding
+    /// profiles by the request's context (PlaybackInfo's is Streaming), and only a Streaming mp4 is
+    /// written with `frag_keyframe+empty_moov`, which a file served while ffmpeg still writes it
+    /// needs. Audio is AAC alone so the one track a transcode keeps plays on every output.
+    static func downloadProfile(maxStreamingBitrate: Int?) -> [String: Any] {
+        var profile = baseProfile(maxStreamingBitrate: maxStreamingBitrate)
+        profile["TranscodingProfiles"] = [
+            ["Type": "Video", "Container": "mp4", "Protocol": "http",
+             "VideoCodec": "hevc,h264", "AudioCodec": "aac", "Context": "Streaming"],
+        ] as [[String: Any]]
+        return profile
+    }
+
     /// Live TV profile. Protocol=http/Container=ts: progressive MPEG-TS (not
     /// HLS) consumed by AetherEngine's AVIOReader; engine demuxes + dispatches
     /// every live codec with no server re-encode. Full copy codec list + high
