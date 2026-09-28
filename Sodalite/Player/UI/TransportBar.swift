@@ -182,6 +182,18 @@ struct TransportBar: View {
                     )
                 }
 
+                if viewModel.supportsQualityChoice {
+                    trackButton(
+                        label: viewModel.displayedStreamingQuality.shortLabel,
+                        icon: "dial.medium",
+                        isFocused: controlsFocus == .qualityButton,
+                        // Pinned off Original, like Speed off 1x: a capped session should say so.
+                        persistsLabel: viewModel.displayedStreamingQuality != .original,
+                        dropdown: qualityDropdownItems,
+                        isOpen: isQualityDropdownOpen
+                    )
+                }
+
                 trackButton(
                     label: TransportBar.speedLabel(for: activeSpeedIndex),
                     icon: "gauge.with.needle",
@@ -648,6 +660,23 @@ struct TransportBar: View {
             )
         }
         return items
+    }
+
+    private var isQualityDropdownOpen: Bool {
+        if case .quality = trackDropdown { return true }
+        return false
+    }
+
+    private var qualityDropdownItems: [DropdownItem] {
+        guard case .quality(let highlighted) = trackDropdown else { return [] }
+        return viewModel.pickerQualities.enumerated().map { idx, quality in
+            DropdownItem(
+                title: String(localized: String.LocalizationValue(quality.titleKey)),
+                isActive: quality == viewModel.displayedStreamingQuality,
+                isHighlighted: idx == highlighted,
+                hint: viewModel.qualityPickerHint(quality)
+            )
+        }
     }
 
     private var speedDropdownItems: [DropdownItem] {

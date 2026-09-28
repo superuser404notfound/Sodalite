@@ -144,8 +144,8 @@ struct PrefetchedPlaybackInfoIdentityTests {
         vm.prefetchPlaybackInfo(for: "e5")
         await awaitPrefetch(vm)
 
-        #expect(vm.cachedPlaybackInfo?.matching("e5")?.mediaSources.first?.id == "e5")
-        #expect(vm.cachedPlaybackInfo?.matching("e6") == nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e5", quality: .original)?.mediaSources.first?.id == "e5")
+        #expect(vm.cachedPlaybackInfo?.matching("e6", quality: .original) == nil)
     }
 
     /// The reported failure: watched past the played threshold, so leaving the player rolls Next Up to
@@ -164,7 +164,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
 
         #expect(vm.currentEpisodeID == "e6")
         // What the launcher hands the player for the play target it now shows.
-        #expect(vm.cachedPlaybackInfo?.matching("e6") == nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e6", quality: .original) == nil)
     }
 
     /// The other half of the same rule: a replaced item is a new file, so the response prefetched for
@@ -189,7 +189,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
 
         vm.prefetchPlaybackInfo(for: "e5")
         await awaitPrefetch(vm)
-        #expect(vm.cachedPlaybackInfo?.matching("e5") != nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e5", quality: .original) != nil)
 
         vm.prefetchPlaybackInfo(for: "e6")
         #expect(vm.cachedPlaybackInfo == nil)

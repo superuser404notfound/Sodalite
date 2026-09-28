@@ -101,12 +101,24 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _stoppedReports: [PlaybackStopReport] = []
     private var _killedEncodings: [String] = []
     private var _playbackInfoRequests: [String] = []
+    private var _requestedCaps: [Int?] = []
+    private var _requestedAudioIndexes: [Int?] = []
+    private var _requestedMediaSourceIDs: [String?] = []
+    /// A TranscodingUrl the server answers with while the request pins no source, to stand in for a
+    /// server that picked and burns in a subtitle of its own.
+    var transcodingURLWhenUnpinned: String?
+    /// Item ids whose PlaybackInfo answers only after a short delay, so a test can act in between.
+    var delayedItemIDs: Set<String> = []
     /// Item ids whose PlaybackInfo never answers (until the caller's task is cancelled).
     var hangingItemIDs: Set<String> = []
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
+    /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
+    var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
+    var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
+    var requestedMediaSourceIDs: [String?] { lock.withLock { _requestedMediaSourceIDs } }
 
     var baseURL: URL? { nil }
     var deviceID: String { "device" }
@@ -118,13 +130,28 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         lock.withLock { _killedEncodings.append(playSessionID) }
     }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse {
-        lock.withLock { _playbackInfoRequests.append(itemID) }
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile,
+                                  mediaSourceID: nil, audioStreamIndex: nil)
+    }
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        let cap = profile?["MaxStreamingBitrate"] as? Int
+        lock.withLock {
+            _playbackInfoRequests.append(itemID)
+            _requestedCaps.append(cap)
+            _requestedAudioIndexes.append(audioStreamIndex)
+            _requestedMediaSourceIDs.append(mediaSourceID)
+        }
+        if delayedItemIDs.contains(itemID) {
+            try await Task.sleep(for: .milliseconds(150))
+        }
         if hangingItemIDs.contains(itemID) {
             try await Task.sleep(for: .seconds(60))
         }
+        let transcoding = mediaSourceID == nil ? transcodingURLWhenUnpinned.map { #","TranscodingUrl":"\#($0)""# } ?? "" : ""
         return try JSONDecoder().decode(
             PlaybackInfoResponse.self,
-            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"flac"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"flac"\#(transcoding)}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
         )
     }
 

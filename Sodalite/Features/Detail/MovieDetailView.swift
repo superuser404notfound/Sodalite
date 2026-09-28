@@ -245,7 +245,8 @@ struct MovieDetailView: View {
                     userID: userID,
                     libraryService: dependencies.jellyfinLibraryService,
                     playbackService: dependencies.jellyfinPlaybackService,
-                    seerrMediaService: catalogSimilarService
+                    seerrMediaService: catalogSimilarService,
+                    streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
                 Task { await viewModel?.loadFullDetail() }
             }

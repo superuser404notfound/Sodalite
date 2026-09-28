@@ -10,13 +10,17 @@ import AetherEngine
 @MainActor
 enum DirectPlayProfile {
 
-    static func current() -> [String: Any] {
+    /// The VOD profile. `maxStreamingBitrate` is the viewer's rung (Sodalite#87); nil keeps the
+    /// direct-play ceiling.
+    static func current(maxStreamingBitrate: Int? = nil) -> [String: Any] {
         #if DEBUG
         let caps = AetherEngine.displayCapabilities
         print("[Profile] Display: HDR=\(caps.supportsHDR) DV=\(caps.supportsDolbyVision) HDR10=\(caps.supportsHDR10) HLG=\(caps.supportsHLG)")
         #endif
-        return baseProfile()
+        return baseProfile(maxStreamingBitrate: maxStreamingBitrate)
     }
+
+    static let directPlayCeilingBitrate = 200_000_000
 
     /// Live stream-copy ceiling: kept at the VOD direct-play ceiling so any
     /// broadcast H.264/HEVC stays under it and Jellyfin copies the bitstream.
@@ -61,10 +65,10 @@ enum DirectPlayProfile {
 
     // MARK: - Base profile
 
-    static func baseProfile() -> [String: Any] {
+    static func baseProfile(maxStreamingBitrate: Int? = nil) -> [String: Any] {
         [
-            "MaxStreamingBitrate": 200_000_000,
-            "MaxStaticBitrate": 200_000_000,
+            "MaxStreamingBitrate": maxStreamingBitrate ?? directPlayCeilingBitrate,
+            "MaxStaticBitrate": directPlayCeilingBitrate,
             "MusicStreamingTranscodingBitrate": 384_000,
 
             // VideoCodec list mirrors what FFmpegBuild compiles a decoder for,
@@ -113,14 +117,19 @@ enum DirectPlayProfile {
                 ],
             ] as [[String: Any]],
 
-            // Fallback: progressive MP4 over HTTP (not HLS): engine's custom
-            // AVIO/URLSession context doesn't support HLS playlists.
+            // A transcode is Jellyfin HLS, played by AVPlayer through the engine's nativeRemoteHLS
+            // route, so a seek fetches segments instead of restarting a progressive encode. fMP4, not
+            // TS: AVFoundation plays HEVC over HLS only in fMP4. av1 and vp9 are left out because
+            // AVPlayer, which plays this route, does not decode them over HLS on every device
+            // (Sodalite#87). HEVC first: Jellyfin encodes the first listed codec the server may encode
+            // and moves hevc to the end itself when HEVC encoding is off, so this buys the better picture
+            // per bit at the low rungs where allowed and changes nothing elsewhere.
             "TranscodingProfiles": [
                 [
                     "Type": "Video",
                     "Container": "mp4",
-                    "Protocol": "http",
-                    "VideoCodec": "h264,hevc,av1,vp9",
+                    "Protocol": "hls",
+                    "VideoCodec": "hevc,h264",
                     "AudioCodec": "aac,ac3,eac3",
                     "Context": "Streaming",
                 ],

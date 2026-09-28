@@ -1397,7 +1397,7 @@ final class PlayerHostController: AVPlayerViewController {
                 viewModel.controlsFocus = viewModel.transportFocusOrder
                     .first(where: { $0 != .restartButton }) ?? .speedButton
                 viewModel.scheduleControlsHide()
-            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .speedButton, .pictureButton, .pipButton, .infoButton, .returnToLiveButton:
+            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()
             }
         } else {
@@ -1474,6 +1474,10 @@ final class PlayerHostController: AVPlayerViewController {
             let count = PlayerViewModel.speedOptions.count
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .speed(highlighted: newIdx)
+        case .quality(let idx):
+            let count = viewModel.pickerQualities.count
+            let newIdx = max(0, min(count - 1, idx + offset))
+            viewModel.trackDropdown = .quality(highlighted: newIdx)
         case .picture(let idx):
             let count = PlaybackPreferences.PictureMode.allCases.count
             let newIdx = max(0, min(count - 1, idx + offset))

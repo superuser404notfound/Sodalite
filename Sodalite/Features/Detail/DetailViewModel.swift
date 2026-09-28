@@ -44,6 +44,9 @@ final class DetailViewModel {
     private let itemService: JellyfinItemServiceProtocol
     private let libraryService: JellyfinLibraryServiceProtocol?
     private let playbackService: JellyfinPlaybackServiceProtocol?
+    /// The rung a play from this page would start on (Sodalite#87), read per prefetch so a network
+    /// change between two prefetches is followed.
+    private let streamingQuality: @MainActor () -> StreamingQuality
     private let imageService: JellyfinImageService
     /// nil when Seerr is not connected, or when the caller does not want a catalog row (collections, playlists).
     private let seerrMediaService: SeerrMediaServiceProtocol?
@@ -74,8 +77,10 @@ final class DetailViewModel {
         libraryService: JellyfinLibraryServiceProtocol? = nil,
         playbackService: JellyfinPlaybackServiceProtocol? = nil,
         seerrMediaService: SeerrMediaServiceProtocol? = nil,
-        initialEpisode: JellyfinItem? = nil
+        initialEpisode: JellyfinItem? = nil,
+        streamingQuality: @escaping @MainActor () -> StreamingQuality = { .original }
     ) {
+        self.streamingQuality = streamingQuality
         self.item = item
         self.isFavorite = item.userData?.isFavorite ?? false
         self.isPlayed = item.userData?.played ?? false
@@ -604,13 +609,14 @@ final class DetailViewModel {
         cachedPlaybackInfo = nil
         playbackInfoPrefetchTask = Task { [weak self] in
             guard let self else { return }
+            let quality = self.streamingQuality()
             let response = try? await playbackService.getPlaybackInfo(
                 itemID: itemID, userID: self.userID,
-                profile: DirectPlayProfile.current()
+                profile: DirectPlayProfile.current(maxStreamingBitrate: quality.maxStreamingBitrate)
             )
             if Task.isCancelled { return }
             self.cachedPlaybackInfo = response.map {
-                PrefetchedPlaybackInfo(itemID: itemID, response: $0)
+                PrefetchedPlaybackInfo(itemID: itemID, quality: quality, response: $0)
             }
             // AetherEngine#551: the response is already in hand and the URL builders are pure, so
             // warming the source the play button would open costs no further round trip. This is the

@@ -159,12 +159,24 @@ struct PlayerTrackDropdownList: View {
                 }
                 ScrollViewReader { proxy in
                     ScrollView {
-                        // Lazy: a chapter or episode row loads its image on appear, and an eager
-                        // stack mounted all of them at once, queueing every still of the file.
-                        LazyVStack(spacing: 0) {
-                            ForEach(scrollIndexed, id: \.offset) { idx, item in
-                                dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
-                                    .id(idx)
+                        // Lazy only for image rows: a chapter or episode row loads its image on appear,
+                        // and an eager stack mounted all of them at once, queueing every still of the
+                        // file. A lazy stack measures only the rows it has made, though, so a text list
+                        // took its FIRST row's width and clipped every longer one below it (Sodalite#87:
+                        // "Bis..." under "Original"). Text rows are cheap, so they all count.
+                        if hasImages {
+                            LazyVStack(spacing: 0) {
+                                ForEach(scrollIndexed, id: \.offset) { idx, item in
+                                    dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
+                                        .id(idx)
+                                }
+                            }
+                        } else {
+                            VStack(spacing: 0) {
+                                ForEach(scrollIndexed, id: \.offset) { idx, item in
+                                    dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
+                                        .id(idx)
+                                }
                             }
                         }
                     }

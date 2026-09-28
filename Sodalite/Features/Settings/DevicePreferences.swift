@@ -18,6 +18,8 @@ final class DevicePreferences {
         static let networkBufferDepth = "playback.networkBufferDepth"
         static let liveBufferDepth = "playback.liveBufferDepth"
         static let liveTeletextPage = "playback.liveTeletextPage"
+        static let streamingQualityWifi = "playback.streamingQualityWifi"
+        static let streamingQualityCellular = "playback.streamingQualityCellular"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
@@ -55,6 +57,17 @@ final class DevicePreferences {
 
     var liveTeletextPage: PlaybackPreferences.LiveTeletextPage {
         didSet { store.set(liveTeletextPage.rawValue, forKey: Keys.liveTeletextPage) }
+    }
+
+    /// Sodalite#87: the rung a VOD session starts on over Wi-Fi or Ethernet. On tvOS this is the only
+    /// quality setting. A device value because it describes this box's line, not the viewer.
+    var streamingQualityWifi: StreamingQuality {
+        didSet { store.set(streamingQualityWifi.rawValue, forKey: Keys.streamingQualityWifi) }
+    }
+
+    /// Sodalite#87: the rung a VOD session starts on over cellular or an expensive path. iOS only in the UI.
+    var streamingQualityCellular: StreamingQuality {
+        didSet { store.set(streamingQualityCellular.rawValue, forKey: Keys.streamingQualityCellular) }
     }
 
     /// AetherEngine#455, experimental, default OFF. On a display that reports no Dolby Vision, serve a
@@ -95,6 +108,10 @@ final class DevicePreferences {
             .flatMap(PlaybackPreferences.LiveBufferDepth.init(rawValue:)) ?? .ninetyMinutes
         self.liveTeletextPage = store.string(forKey: Keys.liveTeletextPage)
             .flatMap(PlaybackPreferences.LiveTeletextPage.init(rawValue:)) ?? .auto
+        self.streamingQualityWifi = store.string(forKey: Keys.streamingQualityWifi)
+            .flatMap(StreamingQuality.init(rawValue:)) ?? .original
+        self.streamingQualityCellular = store.string(forKey: Keys.streamingQualityCellular)
+            .flatMap(StreamingQuality.init(rawValue:)) ?? .original
         self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
@@ -116,6 +133,8 @@ final class DevicePreferences {
         update(\.networkBufferDepth)
         update(\.liveBufferDepth)
         update(\.liveTeletextPage)
+        update(\.streamingQualityWifi)
+        update(\.streamingQualityCellular)
         update(\.forceDolbyVisionOnNonDVDisplay)
         update(\.showTopShelfRow)
         update(\.topShelfImage)

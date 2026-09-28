@@ -398,7 +398,8 @@ struct SeriesDetailView: View {
                     libraryService: dependencies.jellyfinLibraryService,
                     playbackService: dependencies.jellyfinPlaybackService,
                     seerrMediaService: catalogSimilarService,
-                    initialEpisode: initialEpisode
+                    initialEpisode: initialEpisode,
+                    streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
                 Task {
                     await viewModel?.loadFullDetail()

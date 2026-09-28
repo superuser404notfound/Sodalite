@@ -17,7 +17,7 @@ struct PlayerTouchControls: View {
     private var isPad: Bool { hSizeClass == .regular }
 
     private enum PickerKind: Identifiable {
-        case audio, subtitle, secondarySubtitle, speed, picture, episodes, chapters
+        case audio, subtitle, secondarySubtitle, quality, speed, picture, episodes, chapters
         var id: Int { hashValue }
     }
 
@@ -263,6 +263,9 @@ struct PlayerTouchControls: View {
             }
             if !viewModel.displaySubtitleStreams.isEmpty || viewModel.supportsSubtitleSearch {
                 iconButton("captions.bubble") { activePicker = .subtitle }
+            }
+            if viewModel.supportsQualityChoice {
+                iconButton("dial.medium") { activePicker = .quality }
             }
             iconButton("gauge.with.needle") { activePicker = .speed }
             // Sodalite#156: picture mode sets videoGravity on this device's layer, which nobody is
@@ -541,6 +544,14 @@ struct PlayerTouchControls: View {
                 }
             }
             return rows
+        case .quality:
+            return viewModel.pickerQualities.map { quality in
+                let title = String(localized: String.LocalizationValue(quality.titleKey))
+                let label = viewModel.qualityPickerHint(quality).map { "\(title) · \($0)" } ?? title
+                return PickerRow(label: label, isActive: quality == viewModel.displayedStreamingQuality) {
+                    viewModel.selectStreamingQuality(quality)
+                }
+            }
         case .speed:
             return PlayerViewModel.speedOptions.indices.map { idx in
                 PickerRow(label: TransportBar.speedLabel(for: idx),

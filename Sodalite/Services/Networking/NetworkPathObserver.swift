@@ -82,6 +82,10 @@ nonisolated final class NetworkPathSnapshot: @unchecked Sendable {
         /// generous OR is the safe side: it can only ever fail to suppress a denial, never suppress
         /// a real one.
         var isAttachedToALocalNetwork: Bool { usesLocalInterface || hasLocalInterface }
+
+        /// Cellular, or a path the system marks expensive (a phone hotspot). Picks the cellular
+        /// streaming rung on iOS (Sodalite#87).
+        var isMetered: Bool = false
     }
 
     private let lock = NSLock()
@@ -108,7 +112,8 @@ extension NetworkPathSnapshot.Reading {
         self.init(
             isSatisfied: path.status == .satisfied,
             usesLocalInterface: localTypes.contains(where: path.usesInterfaceType),
-            hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) }
+            hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) },
+            isMetered: path.usesInterfaceType(.cellular) || path.isExpensive
         )
     }
 }
