@@ -10,6 +10,8 @@ struct ProfileSettingsView: View {
     @State private var navigateToAddProfile = false
     @State private var actionError: String?
     @State private var pendingSignOutEverywhere: RememberedUser?
+    /// Sodalite#81: a profile with downloads on this device, waiting for the viewer to confirm.
+    @State private var pendingForget: RememberedUser?
     @State private var signOutEverywhereError: String?
     /// Latches the action while the revocation is on its way to the server.
     @State private var isSigningOutEverywhere = false
@@ -76,11 +78,11 @@ struct ProfileSettingsView: View {
                 signOutEverywhere(user)
             }
             Button("common.cancel", role: .cancel) {}
-        } message: { _ in
-            Text(String(
+        } message: { user in
+            Text(verbatim: dependencies.messageWithDownloadWarning(String(
                 localized: "profile.signOutEverywhere.confirm.message",
                 defaultValue: "The profile is signed out on every Apple TV, iPhone and iPad that shares it and has to sign in again there."
-            ))
+            ), scope: .profile(serverID: user.serverID, userID: user.id)))
         }
         .alert(
             String(localized: "profile.signOutEverywhere.failed.title",
@@ -97,6 +99,11 @@ struct ProfileSettingsView: View {
         } message: { message in
             Text(message)
         }
+        .confirmsForgettingDownloads($pendingForget, message: { user in
+            dependencies.messageWithDownloadWarning(
+                "", scope: .profile(serverID: user.serverID, userID: user.id))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }, perform: commitForget)
         .onAppear(perform: refresh)
         // Hold the cards against the server's own user table, so a profile deleted on the server
         // stops being offered here (Sodalite#90).
@@ -438,6 +445,7 @@ struct ProfileSettingsView: View {
             defer { isSigningOutEverywhere = false }
             do {
                 _ = try await dependencies.signOutEverywhere(user, server: server)
+                dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
                 refresh()
             } catch is CancellationError {
                 return
@@ -452,6 +460,16 @@ struct ProfileSettingsView: View {
 
     private func forget(_ user: RememberedUser) {
         guard let server = appState.activeServer else { return }
+        if DownloadCleanup.usage(.profile(serverID: server.id, userID: user.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = user
+            return
+        }
+        commitForget(user)
+    }
+
+    private func commitForget(_ user: RememberedUser) {
+        guard let server = appState.activeServer else { return }
+        dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
         do {
             // forgetUser clears a default pin naming this profile itself, so no path can forget to.
             try dependencies.forgetUser(id: user.id, serverID: server.id)

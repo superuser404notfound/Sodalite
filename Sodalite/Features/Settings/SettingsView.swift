@@ -49,7 +49,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.logout.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.logout.confirm.message"), scope: .everything))
         }
         .alert(
             Text("settings.reset.confirm.title", bundle: .main),
@@ -67,7 +68,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.reset.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.reset.confirm.message"), scope: .everything))
         }
         // Settings is the only surface showing server version; refresh on appear so an upgrade since login is picked up.
         .task {
@@ -454,6 +456,8 @@ struct SettingsView: View {
     }
 
     private func finishLogout() {
+        // Log Out drops every server and profile on the device, so every download goes with them.
+        dependencies.purgeDownloads(.everything)
         try? dependencies.clearSession()
         dependencies.clearSessionResidue()
         appState.logout()

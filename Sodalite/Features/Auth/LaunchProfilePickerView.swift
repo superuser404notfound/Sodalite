@@ -25,6 +25,8 @@ struct LaunchProfilePickerView: View {
     @State private var rememberedUsers: [RememberedUser] = []
     @State private var navigateToAddProfile = false
     @State private var switchError: String?
+    /// Sodalite#81: a profile with downloads on this device, waiting for the viewer to confirm.
+    @State private var pendingForget: RememberedUser?
     /// Set when this picker is the screen a refused profile landed on; its own alert, because the
     /// switch-failed title would be describing something the user never did (Sodalite#90).
     @State private var rejectionNotice: String?
@@ -87,6 +89,11 @@ struct LaunchProfilePickerView: View {
             } message: { message in
                 Text(message)
             }
+            .confirmsForgettingDownloads($pendingForget, message: { user in
+                dependencies.messageWithDownloadWarning(
+                    "", scope: .profile(serverID: user.serverID, userID: user.id))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }, perform: commitForget)
             .onAppear {
                 reloadProfiles()
                 showRejectionNoticeIfAny()
@@ -450,6 +457,15 @@ struct LaunchProfilePickerView: View {
     }
 
     private func performForget(_ user: RememberedUser) {
+        if DownloadCleanup.usage(.profile(serverID: server.id, userID: user.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = user
+            return
+        }
+        commitForget(user)
+    }
+
+    private func commitForget(_ user: RememberedUser) {
+        dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id))
         do {
             try dependencies.forgetUser(id: user.id, serverID: server.id)
             reloadProfiles()
