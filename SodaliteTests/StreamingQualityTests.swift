@@ -44,6 +44,12 @@ struct StreamingQualityTests {
                                          reading: nil, platformHasCellular: true) == .mbps20)
     }
 
+    @Test func theHintNamesTheReencodeOnlyWhenItBites() {
+        #expect(StreamingQuality.mbps10.pickerHint(sourceBitrate: 30_000_000) != nil)
+        #expect(StreamingQuality.mbps10.pickerHint(sourceBitrate: 5_000_000) == nil)
+        #expect(StreamingQuality.original.pickerHint(sourceBitrate: 30_000_000) == nil)
+    }
+
     /// tvOS has one setting; a metered reading there (an Apple TV on a phone hotspot) changes nothing.
     @Test func aPlatformWithoutCellularAlwaysTakesTheWifiRung() {
         #expect(StreamingQuality.resolve(wifi: .mbps10, cellular: .mbps2,

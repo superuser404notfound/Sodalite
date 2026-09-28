@@ -132,6 +132,7 @@ final class PlayerViewModel {
         case episodeButton
         case audioButton
         case subtitleButton
+        case qualityButton
         case speedButton
         case pictureButton
         case pipButton
@@ -201,6 +202,7 @@ final class PlayerViewModel {
         case subtitle(highlighted: Int) // index into subtitle items (0=Off, 1..=displaySubtitleStreams)
         case secondarySubtitle(highlighted: Int) // 0=Off, 1..=secondarySubtitleCandidates
         case speed(highlighted: Int)    // index into PlayerViewModel.speedOptions
+        case quality(highlighted: Int)  // index into StreamingQuality.allCases
         case picture(highlighted: Int)  // index into PlaybackPreferences.PictureMode.allCases
     }
 
@@ -3390,6 +3392,7 @@ final class PlayerViewModel {
         case .episodeButton: openEpisodeDropdown()
         case .audioButton: openAudioDropdown()
         case .subtitleButton: openSubtitleDropdown()
+        case .qualityButton: openQualityDropdown()
         case .speedButton: openSpeedDropdown()
         case .pictureButton: openPictureDropdown()
         case .pipButton: requestPictureInPicture()
@@ -3424,6 +3427,13 @@ final class PlayerViewModel {
     func openSpeedDropdown() {
         controlsTimer?.cancel()
         trackDropdown = .speed(highlighted: activeSpeedIndex)
+    }
+
+    func openQualityDropdown() {
+        guard supportsQualityChoice else { return }
+        controlsTimer?.cancel()
+        let idx = StreamingQuality.allCases.firstIndex(of: effectiveStreamingQuality) ?? 0
+        trackDropdown = .quality(highlighted: idx)
     }
 
     func openPictureDropdown() {
@@ -3511,6 +3521,12 @@ final class PlayerViewModel {
             selectSpeed(index: idx)
             trackDropdown = .none
             scheduleControlsHide()
+        case .quality(let idx):
+            trackDropdown = .none
+            if StreamingQuality.allCases.indices.contains(idx) {
+                selectStreamingQuality(StreamingQuality.allCases[idx])
+            }
+            scheduleControlsHide()
         case .picture(let idx):
             let modes = PlaybackPreferences.PictureMode.allCases
             if modes.indices.contains(idx) { selectPictureMode(modes[idx]) }
@@ -3528,6 +3544,7 @@ final class PlayerViewModel {
         case .subtitle: trackDropdown = .subtitle(highlighted: index)
         case .secondarySubtitle: trackDropdown = .secondarySubtitle(highlighted: index)
         case .speed: trackDropdown = .speed(highlighted: index)
+        case .quality: trackDropdown = .quality(highlighted: index)
         case .picture: trackDropdown = .picture(highlighted: index)
         case .episode: trackDropdown = .episode(highlighted: index)
         case .chapter: trackDropdown = .chapter(highlighted: index)

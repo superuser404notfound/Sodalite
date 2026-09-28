@@ -171,6 +171,47 @@ struct PlaybackSettingsView: View {
 
                 sectionHeader("settings.playback.section.streaming")
 
+                #if os(tvOS)
+                ValuePickerRow(
+                    icon: "dial.medium",
+                    title: "settings.playback.quality",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityWifi },
+                        set: { prefs.streamingQualityWifi = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+                #else
+                ValuePickerRow(
+                    icon: "wifi",
+                    title: "settings.playback.qualityWifi",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityWifi },
+                        set: { prefs.streamingQualityWifi = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "antenna.radiowaves.left.and.right",
+                    title: "settings.playback.qualityCellular",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityCellular },
+                        set: { prefs.streamingQualityCellular = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+                #endif
+
                 ValuePickerRow(
                     icon: "arrow.down.circle",
                     title: "settings.playback.buffer",

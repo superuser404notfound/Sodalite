@@ -29,6 +29,22 @@ enum StreamingQuality: String, CaseIterable, Sendable, Identifiable {
         return sourceBitrate > cap
     }
 
+    /// Chip text on the transport bar: "Original" or "10 Mbit/s".
+    var shortLabel: String {
+        guard let cap = maxStreamingBitrate else {
+            return String(localized: "player.quality.short.original", defaultValue: "Original")
+        }
+        return String(format: String(localized: "player.quality.short.mbps", defaultValue: "%lld Mbit/s"),
+                      Int64(cap / 1_000_000))
+    }
+
+    /// The picker row's trailing caption, present only where the rung actually costs a re-encode.
+    func pickerHint(sourceBitrate: Int?) -> String? {
+        bites(sourceBitrate: sourceBitrate)
+            ? String(localized: "player.quality.reencodes", defaultValue: "Server re-encodes")
+            : nil
+    }
+
     /// The rung a new session starts on. An unknown path counts as Wi-Fi, so a missing first
     /// NWPathMonitor callback never silently downgrades a session.
     static func resolve(wifi: StreamingQuality, cellular: StreamingQuality,

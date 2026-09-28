@@ -12,6 +12,7 @@ extension PlayerViewModel {
         chapterCount: Int,
         hasAudioTracks: Bool,
         hasSubtitles: Bool,
+        hasQualityChoice: Bool,
         isPiPAvailable: Bool,
         showsStats: Bool
     ) -> [ControlsFocus] {
@@ -24,6 +25,7 @@ extension PlayerViewModel {
         if chapterCount > 1 { order.append(.chapterButton) }
         if hasAudioTracks { order.append(.audioButton) }
         if hasSubtitles { order.append(.subtitleButton) }
+        if hasQualityChoice { order.append(.qualityButton) }
         order.append(.speedButton)
         order.append(.pictureButton)
         if isPiPAvailable { order.append(.pipButton) }
@@ -62,6 +64,7 @@ extension PlayerViewModel {
             chapterCount: chapters.count,
             hasAudioTracks: !player.audioTracks.isEmpty,
             hasSubtitles: !subtitleStreams.isEmpty || supportsSubtitleSearch,
+            hasQualityChoice: supportsQualityChoice,
             isPiPAvailable: isPiPAvailable,
             showsStats: preferences.showStatsForNerds)
     }

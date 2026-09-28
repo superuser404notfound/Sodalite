@@ -7,12 +7,21 @@ struct TransportFocusOrderTests {
     private func order(hasSkippableSegment: Bool = false, hasNextEpisodePrompt: Bool = false,
                        episodeCount: Int = 1, chapterCount: Int = 0,
                        hasAudioTracks: Bool = true, hasSubtitles: Bool = true,
+                       hasQualityChoice: Bool = false,
                        isPiPAvailable: Bool = false, showsStats: Bool = false) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.transportFocusOrder(
             hasSkippableSegment: hasSkippableSegment, hasNextEpisodePrompt: hasNextEpisodePrompt,
             episodeCount: episodeCount, chapterCount: chapterCount,
             hasAudioTracks: hasAudioTracks, hasSubtitles: hasSubtitles,
+            hasQualityChoice: hasQualityChoice,
             isPiPAvailable: isPiPAvailable, showsStats: showsStats)
+    }
+
+    /// Sodalite#87: the rung sits with the stream choices, after subtitles and before speed.
+    @Test("the quality button follows subtitles")
+    func qualityPosition() {
+        #expect(order(hasQualityChoice: true)
+                == [.restartButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton])
     }
 
     @Test("restart leads the order and is always present")
