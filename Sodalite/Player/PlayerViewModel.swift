@@ -635,6 +635,11 @@ final class PlayerViewModel {
     var activePlaybackSource: PlaybackMediaSource?
     var playSessionID: String?
     var activePlayMethod: PlayMethod = .directPlay
+    /// The rung this player session streams at (Sodalite#87). Resolved once, on the first
+    /// startPlayback, and then kept across retries and auto-advance, so a network change mid-film
+    /// does not move it and an in-player pick holds for the rest of the binge.
+    var streamingQuality: StreamingQuality?
+    var effectiveStreamingQuality: StreamingQuality { streamingQuality ?? .original }
     var subtitleStreams: [MediaStream] = []
     /// Lowercased Jellyfin codec of the active subtitle ("ass"/"ssa"/"subrip"/...), nil when off.
     /// The overlay reads it to gate the raw-ASS-event-line stripper.
@@ -939,6 +944,9 @@ final class PlayerViewModel {
         hasLiveEdgeObservers = false
         stopProgressReporting()
         hasReportedStart = false
+        if streamingQuality == nil, !isLiveSession {
+            streamingQuality = preferences.defaultStreamingQuality()
+        }
         hostLoadActive = true
         clearError()
         // Cleared before the load, not after it: an auto-advance swaps `item` first, and a source left
@@ -998,13 +1006,15 @@ final class PlayerViewModel {
             // the launch (Next Up rolling forward as the player exits, an auto-advance, a replaced item),
             // and a response from the previous target would put its source id in MediaSourceId under this
             // item's path, which Jellyfin refuses with HTTP 400.
-            if let cached = cachedPlaybackInfo?.matching(item.id), !cached.mediaSources.isEmpty {
+            if let cached = cachedPlaybackInfo?.matching(item.id, quality: effectiveStreamingQuality),
+               !cached.mediaSources.isEmpty {
                 info = cached
             } else {
                 info = try await playbackService.getPlaybackInfo(
                     itemID: item.id,
                     userID: userID,
-                    profile: DirectPlayProfile.current()
+                    profile: DirectPlayProfile.current(
+                        maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
                 )
             }
             playSessionID = info.playSessionId
@@ -1130,6 +1140,9 @@ final class PlayerViewModel {
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,
+                    // A transcode is a Jellyfin HLS master (Sodalite#87): AVPlayer plays it directly,
+                    // no probe of a playlist the demuxer would only hand back.
+                    nativeRemoteHLS: activePlayMethod == .transcode,
                     // Raw ASS event lines for the styled path; only affects ASS/SSA cue content.
                     preserveASSMarkup: true,
                     // Sodalite#32 / #34: serve a WebVTT rendition with eager readers so a real legible track

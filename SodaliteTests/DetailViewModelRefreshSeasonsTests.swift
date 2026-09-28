@@ -72,7 +72,7 @@ struct DetailViewModelRefreshSeasonsTests {
         vm.nextUpEpisode = nextUp
         vm.currentEpisodeID = nextUp.id
         vm.cachedPlaybackInfo = PrefetchedPlaybackInfo(
-            itemID: nextUp.id, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
+            itemID: nextUp.id, quality: .original, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
         )
         vm.selectedSeasonID = "s2"
 
@@ -96,7 +96,7 @@ struct DetailViewModelRefreshSeasonsTests {
         vm.nextUpEpisode = nextUp
         vm.currentEpisodeID = nextUp.id
         vm.cachedPlaybackInfo = PrefetchedPlaybackInfo(
-            itemID: nextUp.id, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
+            itemID: nextUp.id, quality: .original, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
         )
 
         // Season 3 was deleted; Next Up's own season (2) survives.

@@ -104,13 +104,14 @@ extension PlayerViewModel {
 
     private func warmSuccessor(_ next: JellyfinItem) async {
         guard let info = try? await playbackService.getPlaybackInfo(
-            itemID: next.id, userID: userID, profile: DirectPlayProfile.current()
+            itemID: next.id, userID: userID,
+            profile: DirectPlayProfile.current(maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
         ) else { return }
         // Minutes pass at most, but the successor can still move underneath this: an episode picked
         // from the season list replaces it, and a response naming the old one would then put its
         // source id under the new item's path, which the server answers with a 400 (Sodalite#71).
         guard nextEpisode?.id == next.id else { return }
-        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, response: info)
+        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, quality: effectiveStreamingQuality, response: info)
         guard let source = PlaybackStreamSelection.defaultSource(in: info) else { return }
         await PlaybackStreamSelection.warm(itemID: next.id, source: source, using: playbackService)
     }
@@ -247,7 +248,7 @@ extension PlayerViewModel {
         // the switch: it is exactly what the seam would otherwise ask the server for again while the
         // viewer waits on a black screen. Anything naming another item still goes, for the reason
         // `startPlayback` states where it reads this.
-        if cachedPlaybackInfo?.matching(newItem.id) == nil {
+        if cachedPlaybackInfo?.matching(newItem.id, quality: effectiveStreamingQuality) == nil {
             cachedPlaybackInfo = nil
         }
         errorMessage = nil

@@ -95,7 +95,8 @@ struct CollectionDetailView: View {
                     itemService: dependencies.jellyfinItemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    playbackService: dependencies.jellyfinPlaybackService
+                    playbackService: dependencies.jellyfinPlaybackService,
+                    streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
                 Task {
                     // loadFullDetail loads collection items internally for .boxSet; a separate loadCollectionItems would be a redundant round trip.

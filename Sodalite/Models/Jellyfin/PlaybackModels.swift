@@ -22,12 +22,15 @@ struct PlaybackInfoResponse: Codable, Sendable {
 /// (`currentEpisodeID`) rather than the response's own identity.
 struct PrefetchedPlaybackInfo: Sendable {
     let itemID: String
+    /// The rung the response was fetched at (Sodalite#87). A response at another rung describes
+    /// another stream: its TranscodingUrl, or its direct-play verdict, belongs to that cap.
+    let quality: StreamingQuality
     let response: PlaybackInfoResponse
 
-    /// The response if it describes `itemID`, else nil. A caller that cannot say which item it is
-    /// launching has no business using a prefetch.
-    func matching(_ itemID: String) -> PlaybackInfoResponse? {
-        self.itemID == itemID ? response : nil
+    /// The response if it describes `itemID` at `quality`, else nil. A caller that cannot say which
+    /// item it is launching has no business using a prefetch.
+    func matching(_ itemID: String, quality: StreamingQuality) -> PlaybackInfoResponse? {
+        self.itemID == itemID && self.quality == quality ? response : nil
     }
 }
 
