@@ -151,6 +151,9 @@ extension DependencyContainer {
         if verdict == .reachable, previous.isFailure {
             appState.requestContentReload += 1
         }
+        // Sodalite#81: first contact after launch, and every return after an outage, hands the
+        // progress made offline back to the server.
+        if verdict == .reachable { runDownloadSync() }
         // A bad answer starts the watch, a good one lets it fall out on its own next check. Started
         // here rather than at the failure site because this is the one place the verdict changes.
         if verdict.isFailure { startReachabilityWatch() }

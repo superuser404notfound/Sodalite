@@ -265,6 +265,10 @@ struct TabRootView: View {
         // is unreachable, so the launch decided "no Live TV, no Music" and the serverDidSwitch latch
         // meant it never asked again: the two tabs stayed gone until the app was force-quit. Answered
         // here rather than by loosening that latch, which guards a device-verified path.
+        // Sodalite#81: the Downloads a profile sees are its own, so the store follows every switch.
+        .task(id: appState.profileKey) {
+            dependencies.activateDownloads()
+        }
         .task(id: appState.requestContentReload) {
             let signal = appState.requestContentReload
             guard signal > 0, signal != lastHandledContentReload else { return }
