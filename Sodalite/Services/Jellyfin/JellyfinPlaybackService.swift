@@ -8,10 +8,11 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     /// because the tuner sweep has to tell our own session apart from every other client's (#147).
     var deviceID: String { get }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse
-    /// Same request naming the audio stream a transcode should carry. A capped transcode muxes a
-    /// single audio stream, so a rung switch names the one the viewer had (Sodalite#87).
+    /// Same request pinned to one media source, naming the audio stream a transcode should carry.
+    /// Jellyfin applies a stream index only to the source the request names, and then answers with
+    /// that source alone (Sodalite#87).
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
-                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse
     /// Live PlaybackInfo: AutoOpenLiveStream probes the stream (known codecs → DirectStream/copy, real LiveStreamId for tuner release); maxStreamingBitrate caps a transcode.
     ///
     /// `enableDirectPlay` is true for every ordinary tune and false only on the second pass a channel
@@ -47,7 +48,7 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
 
 extension JellyfinPlaybackServiceProtocol {
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
-                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile)
     }
 }
@@ -64,12 +65,14 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil) async throws -> PlaybackInfoResponse {
-        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile, audioStreamIndex: nil)
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile,
+                                  mediaSourceID: nil, audioStreamIndex: nil)
     }
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
-                         audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
-        let body = Self.vodPlaybackInfoBody(profile: profile ?? [:], audioStreamIndex: audioStreamIndex)
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        let body = Self.vodPlaybackInfoBody(profile: profile ?? [:], mediaSourceID: mediaSourceID,
+                                            audioStreamIndex: audioStreamIndex)
         return try await postPlaybackInfo(profile: profile, body: body) { payload in
             JellyfinEndpoint.playbackInfo(itemID: itemID, userID: userID, payload: payload)
         }
@@ -79,12 +82,15 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// `SubtitleStreamIndex` is -1, "none". Sodalite draws every subtitle itself; a stream the server
     /// picked would be burned into a transcode, which Jellyfin prepares by extracting every subtitle
     /// from the whole file first (a minute on a 15 GB remux, measured 2026-09-28), and would then
-    /// show twice.
-    static func vodPlaybackInfoBody(profile: [String: Any], audioStreamIndex: Int?) -> [String: Any] {
+    /// show twice. Both indexes count only with `MediaSourceId` set, and only a source id the server
+    /// gave out may go there: one that matches no source makes it answer with no source at all.
+    static func vodPlaybackInfoBody(profile: [String: Any], mediaSourceID: String?,
+                                    audioStreamIndex: Int?) -> [String: Any] {
         var body = playbackInfoBody(profile: profile,
                                     maxStreamingBitrate: profile["MaxStreamingBitrate"] as? Int,
                                     audioStreamIndex: audioStreamIndex, enableDirectPlay: true)
         body["SubtitleStreamIndex"] = -1
+        if let mediaSourceID { body["MediaSourceId"] = mediaSourceID }
         return body
     }
 

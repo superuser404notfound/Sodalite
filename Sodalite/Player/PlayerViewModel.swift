@@ -645,6 +645,8 @@ final class PlayerViewModel {
     /// The Jellyfin audio stream the next PlaybackInfo names, set by a rung switch and consumed by
     /// the load it causes (Sodalite#87).
     @ObservationIgnored var pendingAudioStreamIndex: Int?
+    /// The source a rung switch reopens, so the stream indexes above apply to it (Sodalite#87).
+    @ObservationIgnored var pendingMediaSourceID: String?
     var subtitleStreams: [MediaStream] = []
     /// Lowercased Jellyfin codec of the active subtitle ("ass"/"ssa"/"subrip"/...), nil when off.
     /// The overlay reads it to gate the raw-ASS-event-line stripper.
@@ -1006,32 +1008,46 @@ final class PlayerViewModel {
                 return
             }
 
-            let info: PlaybackInfoResponse
+            var info: PlaybackInfoResponse
+            // Only a source id the server gave out is pinned: a guessed one that matches no source makes
+            // Jellyfin answer with none.
+            let switchSourceID = pendingMediaSourceID
+            let pinnedSourceID = switchSourceID ?? preferredMediaSourceID
+            let audioStreamIndex = pendingAudioStreamIndex
+            pendingMediaSourceID = nil
+            pendingAudioStreamIndex = nil
+            let profile = DirectPlayProfile.current(
+                maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
             // Only a prefetch that names THIS item: the play target can move between the prefetch and
             // the launch (Next Up rolling forward as the player exits, an auto-advance, a replaced item),
             // and a response from the previous target would put its source id in MediaSourceId under this
             // item's path, which Jellyfin refuses with HTTP 400.
             if let cached = cachedPlaybackInfo?.matching(item.id, quality: effectiveStreamingQuality),
-               !cached.mediaSources.isEmpty {
+               !cached.mediaSources.isEmpty, switchSourceID == nil {
                 info = cached
             } else {
-                let audioStreamIndex = pendingAudioStreamIndex
-                pendingAudioStreamIndex = nil
                 info = try await playbackService.getPlaybackInfo(
-                    itemID: item.id,
-                    userID: userID,
-                    profile: DirectPlayProfile.current(
-                        maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate),
-                    audioStreamIndex: audioStreamIndex
-                )
+                    itemID: item.id, userID: userID, profile: profile,
+                    mediaSourceID: pinnedSourceID, audioStreamIndex: audioStreamIndex)
             }
-            playSessionID = info.playSessionId
 
-            let source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
-                ?? info.mediaSources.first
-            guard let source else {
+            guard var source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
+                ?? info.mediaSources.first else {
                 throw PlayerEngineError.noSource
             }
+            // A subtitle the server picked itself is burned into a transcode, and Jellyfin prepares that
+            // by extracting every subtitle from the whole file first: a minute on a 15 GB remux, past
+            // AVPlayer's patience (Sodalite#87). Sodalite draws subtitles itself, so ask once more with
+            // the source now known, which lets the request's "no subtitle" count.
+            if Self.serverBurnsInSubtitle(source.transcodingUrl) {
+                LogTap.shared.note("[Quality] server burns in a subtitle; asking again pinned to \(source.id)")
+                info = try await playbackService.getPlaybackInfo(
+                    itemID: item.id, userID: userID, profile: profile,
+                    mediaSourceID: source.id, audioStreamIndex: audioStreamIndex)
+                guard let pinned = info.mediaSources.first else { throw PlayerEngineError.noSource }
+                source = pinned
+            }
+            playSessionID = info.playSessionId
             mediaSourceID = source.id
             activePlaybackSource = source
 
@@ -2242,6 +2258,7 @@ final class PlayerViewModel {
         resetNextEpisodeOverlayState()
         hasWarmedSuccessor = false
         let activeAudio = player.audioTracks.first { $0.id == activeAudioIndex }
+        pendingMediaSourceID = mediaSourceID
         pendingAudioStreamIndex = Self.jellyfinAudioStreamIndex(
             language: activeAudio?.language, channels: activeAudio?.channels, codec: activeAudio?.codec,
             in: activePlaybackSource?.mediaStreams)
@@ -2256,6 +2273,11 @@ final class PlayerViewModel {
         player.stop()
         closeServerSession()
         beginPlayback()
+    }
+
+    /// Whether a Jellyfin transcode URL burns a subtitle into the picture.
+    static func serverBurnsInSubtitle(_ transcodingURL: String?) -> Bool {
+        transcodingURL?.range(of: "SubtitleMethod=Encode", options: .caseInsensitive) != nil
     }
 
     /// The Jellyfin audio stream behind an engine audio track, matched by language, then channels,

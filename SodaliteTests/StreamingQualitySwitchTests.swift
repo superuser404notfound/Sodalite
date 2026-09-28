@@ -151,6 +151,49 @@ struct StreamingQualitySwitchTests {
         #expect(!vm.hasWarmedSuccessor)
     }
 
+    /// The indexes only count for the source the request names, so a switch pins the one it played.
+    @Test func aSwitchPinsTheSourceItWasPlaying() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.streamingQuality = .original
+        vm.mediaSourceID = "src-1"
+
+        vm.selectStreamingQuality(.mbps4)
+        await settle(service, kills: 0, infos: 1)
+
+        #expect(service.requestedMediaSourceIDs.first == "src-1")
+    }
+
+    /// A server that picked a subtitle of its own burns it in, and prepares that by extracting every
+    /// subtitle from the whole file first. The start asks once more, now naming the source it got.
+    @Test func aServerBurnInIsAskedAgainWithTheSourcePinned() async throws {
+        let service = RecordingPlaybackService()
+        service.transcodingURLWhenUnpinned = "/videos/ep-1/master.m3u8?SubtitleStreamIndex=3&SubtitleMethod=Encode"
+        let vm = try makeViewModel(service)
+        vm.streamingQuality = .mbps4
+
+        await vm.startPlayback()
+
+        #expect(service.requestedMediaSourceIDs == [nil, "src-ep-1"])
+    }
+
+    @Test func noBurnInMeansOneRequest() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.streamingQuality = .mbps4
+
+        await vm.startPlayback()
+
+        #expect(service.requestedMediaSourceIDs == [nil])
+    }
+
+    @Test func aBurnInIsReadOffTheTranscodeURL() {
+        #expect(PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?SubtitleStreamIndex=3&SubtitleMethod=Encode"))
+        #expect(PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?subtitlemethod=encode"))
+        #expect(!PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?SubtitleMethod=External"))
+        #expect(!PlayerViewModel.serverBurnsInSubtitle(nil))
+    }
+
     /// A capped stream carries one audio track, so the reopen names the one the viewer had.
     @Test func theReopenAsksForThePendingAudioStream() async throws {
         let service = RecordingPlaybackService()

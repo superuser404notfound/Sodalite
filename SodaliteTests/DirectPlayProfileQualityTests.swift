@@ -73,11 +73,21 @@ struct DirectPlayProfileQualityTests {
     /// ever arrives. So a VOD request names no subtitle stream at all.
     @Test func aVODRequestAsksTheServerForNoSubtitle() {
         let body = JellyfinPlaybackService.vodPlaybackInfoBody(
-            profile: DirectPlayProfile.baseProfile(maxStreamingBitrate: 4_000_000), audioStreamIndex: 1)
+            profile: DirectPlayProfile.baseProfile(maxStreamingBitrate: 4_000_000),
+            mediaSourceID: "src-1", audioStreamIndex: 1)
         #expect(body["SubtitleStreamIndex"] as? Int == -1)
+        // Jellyfin applies both indexes only to the source the request names (MediaInfoHelper).
+        #expect(body["MediaSourceId"] as? String == "src-1")
         #expect(body["MaxStreamingBitrate"] as? Int == 4_000_000)
         #expect(body["AudioStreamIndex"] as? Int == 1)
         #expect(body["EnableDirectPlay"] == nil)
+    }
+
+    /// Without a known source the request names none: a guessed id that matches no source makes the
+    /// server answer with no source at all.
+    @Test func aVODRequestWithoutASourceNamesNone() {
+        let body = JellyfinPlaybackService.vodPlaybackInfoBody(profile: [:], mediaSourceID: nil, audioStreamIndex: nil)
+        #expect(body["MediaSourceId"] == nil)
     }
 
     /// Live keeps the server's subtitle choice; its path was not part of this change.
