@@ -665,10 +665,12 @@ struct StatsOverlayView: View {
         return "\(inst)  ·  avg \(avg) Mbps"
     }
 
-    private static func formatBufferPair(seconds: Double?, cachedBytes: Int64?) -> String {
+    /// The cache half only where the engine keeps one: the remote-HLS bypass has AVPlayer's buffer and no
+    /// engine cache, and a half that can never fill reads as broken (Sodalite#87).
+    static func formatBufferPair(seconds: Double?, cachedBytes: Int64?) -> String {
         let sec = seconds.map { String(format: "+%.1f s", $0) } ?? "—"
-        let mb = cachedBytes.map { String(format: "%d MB", $0 / 1_048_576) } ?? "—"
-        return "\(sec)  ·  \(mb) cached"
+        guard let cachedBytes else { return sec }
+        return "\(sec)  ·  \(String(format: "%d MB", cachedBytes / 1_048_576)) cached"
     }
 
     private static func formatNetworkPair(mbps: Double?, transferred: Int64?) -> String {
