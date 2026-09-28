@@ -7,24 +7,71 @@ struct TranscodeSourceFacts: Equatable, Sendable {
     let frameRate: Double?
 }
 
-/// Whether a server encodes transcodes in HEVC, an admin setting a client cannot read. The first
-/// transcode a server delivers answers it, so it is kept per server (Sodalite#87). Unknown reads as
-/// H.264, Jellyfin's default.
+/// Whether a server encodes transcodes in HEVC, an admin setting a client cannot read. A probe or a
+/// delivered transcode answers it, so it is kept per server (Sodalite#87). Unknown reads as H.264,
+/// Jellyfin's default.
 struct TranscodeCodecMemory {
     let defaults: UserDefaults
 
-    private func key(_ server: String) -> String { "playback.transcodeEncodesHEVC.\(server)" }
+    private func key(_ server: String) -> String { "playback.transcodeVideoCodec.\(server)" }
+
+    /// "hevc" or "h264", nil until a probe or a transcode has said.
+    func knownCodec(server: String?) -> String? {
+        guard let server else { return nil }
+        return defaults.string(forKey: key(server))
+    }
 
     func encodesHEVC(server: String?) -> Bool {
-        guard let server else { return false }
-        return defaults.bool(forKey: key(server))
+        knownCodec(server: server) == "hevc"
     }
 
     func record(server: String?, deliveredCodec: String) {
         guard let server else { return }
         let codec = deliveredCodec.lowercased()
         guard codec == "hevc" || codec == "h264" else { return }
-        defaults.set(codec == "hevc", forKey: key(server))
+        defaults.set(codec, forKey: key(server))
+    }
+}
+
+/// Asks a server once which codec it transcodes in, before any transcode has run (Sodalite#87). The
+/// master playlist of a transcode names it in CODECS, and Jellyfin builds that playlist from the
+/// computed streaming state without starting ffmpeg, which only starts on a segment request.
+enum TranscodeCodecProbe {
+    /// Low enough that practically every source is transcoded, so the answer carries a transcode URL.
+    static let probeCap = 1_000_000
+
+    static func videoCodec(fromMaster master: String) -> String? {
+        guard let start = master.range(of: "CODECS=\""),
+              let end = master[start.upperBound...].firstIndex(of: "\"") else { return nil }
+        for token in master[start.upperBound..<end].split(separator: ",") {
+            let codec = token.trimmingCharacters(in: .whitespaces).lowercased()
+            if codec.hasPrefix("hvc1") || codec.hasPrefix("hev1") { return "hevc" }
+            if codec.hasPrefix("avc1") || codec.hasPrefix("avc3") { return "h264" }
+        }
+        return nil
+    }
+
+    /// Probes and records, unless the server is already known. Returns what it found, nil when it
+    /// could not tell (no transcode URL for this item, the fetch failed).
+    @MainActor
+    @discardableResult
+    static func run(itemID: String, userID: String, server: String?, mediaSourceID: String? = nil,
+                    service: JellyfinPlaybackServiceProtocol, memory: TranscodeCodecMemory,
+                    resolve: (String) -> URL?, fetch: (URL) async -> String?) async -> String? {
+        guard let server, memory.knownCodec(server: server) == nil else { return nil }
+        // Pinned to the source being played so the server picks no subtitle to burn in (see
+        // `vodPlaybackInfoBody`).
+        guard let info = try? await service.getPlaybackInfo(
+                itemID: itemID, userID: userID,
+                profile: DirectPlayProfile.current(maxStreamingBitrate: probeCap),
+                mediaSourceID: mediaSourceID, audioStreamIndex: nil),
+              let path = info.mediaSources.first?.transcodingUrl,
+              let url = resolve(path),
+              let master = await fetch(url),
+              let codec = videoCodec(fromMaster: master) else { return nil }
+        memory.record(server: server, deliveredCodec: codec)
+        LogTap.shared.note("[Quality] \(server) transcodes in \(codec) (probed)")
+        return codec
     }
 }
 

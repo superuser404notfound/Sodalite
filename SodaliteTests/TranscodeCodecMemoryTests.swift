@@ -13,6 +13,7 @@ struct TranscodeCodecMemoryTests {
     @Test func anUnknownServerIsAssumedToEncodeH264() {
         #expect(!memory().encodesHEVC(server: "jf.local"))
         #expect(!memory().encodesHEVC(server: nil))
+        #expect(memory().knownCodec(server: "jf.local") == nil)
     }
 
     @Test func aDeliveredHEVCTranscodeIsRemembered() {
