@@ -2275,9 +2275,17 @@ final class PlayerViewModel {
         beginPlayback()
     }
 
-    /// Whether a Jellyfin transcode URL burns a subtitle into the picture.
+    /// Whether a Jellyfin transcode URL burns a subtitle into the picture. `SubtitleMethod=Encode` alone
+    /// says nothing: Jellyfin writes it into every transcode URL, Encode being its enum's default. Only a
+    /// subtitle stream named next to it is burned in.
     static func serverBurnsInSubtitle(_ transcodingURL: String?) -> Bool {
-        transcodingURL?.range(of: "SubtitleMethod=Encode", options: .caseInsensitive) != nil
+        guard let transcodingURL, let items = URLComponents(string: transcodingURL)?.queryItems else { return false }
+        func value(_ name: String) -> String? {
+            items.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.value
+        }
+        guard value("SubtitleMethod")?.caseInsensitiveCompare("Encode") == .orderedSame,
+              let index = value("SubtitleStreamIndex").flatMap(Int.init) else { return false }
+        return index >= 0
     }
 
     /// The Jellyfin audio stream behind an engine audio track, matched by language, then channels,

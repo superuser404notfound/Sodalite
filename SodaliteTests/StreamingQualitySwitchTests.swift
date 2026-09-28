@@ -189,9 +189,16 @@ struct StreamingQualitySwitchTests {
 
     @Test func aBurnInIsReadOffTheTranscodeURL() {
         #expect(PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?SubtitleStreamIndex=3&SubtitleMethod=Encode"))
-        #expect(PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?subtitlemethod=encode"))
+        #expect(PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?subtitlestreamindex=0&subtitlemethod=encode"))
         #expect(!PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?SubtitleMethod=External"))
         #expect(!PlayerViewModel.serverBurnsInSubtitle(nil))
+    }
+
+    /// Jellyfin writes `SubtitleMethod=Encode` into every transcode URL, subtitle or not: Encode is its
+    /// enum's default (device log 2026-09-28). Only a named subtitle stream is a burn-in.
+    @Test func encodeWithoutASubtitleStreamIsNoBurnIn() {
+        #expect(!PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?AudioStreamIndex=1&SubtitleMethod=Encode"))
+        #expect(!PlayerViewModel.serverBurnsInSubtitle("/master.m3u8?SubtitleStreamIndex=-1&SubtitleMethod=Encode"))
     }
 
     /// A capped stream carries one audio track, so the reopen names the one the viewer had.
