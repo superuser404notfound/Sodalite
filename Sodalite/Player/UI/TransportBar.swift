@@ -184,11 +184,11 @@ struct TransportBar: View {
 
                 if viewModel.supportsQualityChoice {
                     trackButton(
-                        label: viewModel.effectiveStreamingQuality.shortLabel,
+                        label: viewModel.displayedStreamingQuality.shortLabel,
                         icon: "dial.medium",
                         isFocused: controlsFocus == .qualityButton,
                         // Pinned off Original, like Speed off 1x: a capped session should say so.
-                        persistsLabel: viewModel.effectiveStreamingQuality != .original,
+                        persistsLabel: viewModel.displayedStreamingQuality != .original,
                         dropdown: qualityDropdownItems,
                         isOpen: isQualityDropdownOpen
                     )
@@ -669,10 +669,10 @@ struct TransportBar: View {
 
     private var qualityDropdownItems: [DropdownItem] {
         guard case .quality(let highlighted) = trackDropdown else { return [] }
-        return StreamingQuality.allCases.enumerated().map { idx, quality in
+        return viewModel.pickerQualities.enumerated().map { idx, quality in
             DropdownItem(
                 title: String(localized: String.LocalizationValue(quality.titleKey)),
-                isActive: quality == viewModel.effectiveStreamingQuality,
+                isActive: quality == viewModel.displayedStreamingQuality,
                 isHighlighted: idx == highlighted,
                 hint: viewModel.qualityPickerHint(quality)
             )

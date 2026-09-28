@@ -202,7 +202,7 @@ final class PlayerViewModel {
         case subtitle(highlighted: Int) // index into subtitle items (0=Off, 1..=displaySubtitleStreams)
         case secondarySubtitle(highlighted: Int) // 0=Off, 1..=secondarySubtitleCandidates
         case speed(highlighted: Int)    // index into PlayerViewModel.speedOptions
-        case quality(highlighted: Int)  // index into StreamingQuality.allCases
+        case quality(highlighted: Int)  // index into PlayerViewModel.pickerQualities
         case picture(highlighted: Int)  // index into PlaybackPreferences.PictureMode.allCases
     }
 
@@ -2263,14 +2263,41 @@ final class PlayerViewModel {
         beginPlayback()
     }
 
-    /// Whether this session offers a rung choice. Live has its own ladder (Sodalite#87 non-goal).
-    var supportsQualityChoice: Bool { !isLiveSession }
+    /// Whether this session offers a rung choice: not on live, which has its own ladder, and not on a
+    /// file every rung already fits (Sodalite#87).
+    var supportsQualityChoice: Bool { !isLiveSession && pickerQualities.count > 1 }
+
+    /// The rungs the player's picker offers for the file on screen: Original, and only the rungs that
+    /// actually transcode it. A rung the file fits under plays the original, so choosing it changes
+    /// nothing (Sodalite#87).
+    var pickerQualities: [StreamingQuality] {
+        Self.pickerQualities(sourceBitrate: activePlaybackSource?.bitrate)
+    }
+
+    static func pickerQualities(sourceBitrate: Int?) -> [StreamingQuality] {
+        StreamingQuality.allCases.filter { $0 == .original || $0.bites(sourceBitrate: sourceBitrate) }
+    }
+
+    /// The row the picker marks: a rung that does not bite plays the original, so Original is what runs.
+    var displayedStreamingQuality: StreamingQuality {
+        Self.displayedQuality(effective: effectiveStreamingQuality, sourceBitrate: activePlaybackSource?.bitrate)
+    }
+
+    static func displayedQuality(effective: StreamingQuality, sourceBitrate: Int?) -> StreamingQuality {
+        effective.bites(sourceBitrate: sourceBitrate) ? effective : .original
+    }
 
     /// In-player rung pick (Sodalite#87). A new rung is a new stream: close the server session so
     /// no ffmpeg outlives it, then run the session again from the same second. Same shape as
     /// `retryAfterOutage`; the prefetch is dropped because it was fetched at the old rung.
     func selectStreamingQuality(_ quality: StreamingQuality) {
         guard supportsQualityChoice, quality != effectiveStreamingQuality else { return }
+        // Neither rung transcodes this file: both play the original, so there is nothing to reopen.
+        if activePlayMethod != .transcode, let bitrate = activePlaybackSource?.bitrate,
+           !effectiveStreamingQuality.bites(sourceBitrate: bitrate), !quality.bites(sourceBitrate: bitrate) {
+            streamingQuality = quality
+            return
+        }
         // A reload that has not started yet still holds the second the viewer was at; the clock
         // reads zero until the new session plays.
         let resumeAt = resumeOverrideSeconds ?? playbackTime
@@ -3597,7 +3624,7 @@ final class PlayerViewModel {
     func openQualityDropdown() {
         guard supportsQualityChoice else { return }
         controlsTimer?.cancel()
-        let idx = StreamingQuality.allCases.firstIndex(of: effectiveStreamingQuality) ?? 0
+        let idx = pickerQualities.firstIndex(of: displayedStreamingQuality) ?? 0
         trackDropdown = .quality(highlighted: idx)
     }
 
@@ -3688,8 +3715,9 @@ final class PlayerViewModel {
             scheduleControlsHide()
         case .quality(let idx):
             trackDropdown = .none
-            if StreamingQuality.allCases.indices.contains(idx) {
-                selectStreamingQuality(StreamingQuality.allCases[idx])
+            let qualities = pickerQualities
+            if qualities.indices.contains(idx) {
+                selectStreamingQuality(qualities[idx])
             }
             scheduleControlsHide()
         case .picture(let idx):

@@ -1475,7 +1475,7 @@ final class PlayerHostController: AVPlayerViewController {
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .speed(highlighted: newIdx)
         case .quality(let idx):
-            let count = StreamingQuality.allCases.count
+            let count = viewModel.pickerQualities.count
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .quality(highlighted: newIdx)
         case .picture(let idx):
