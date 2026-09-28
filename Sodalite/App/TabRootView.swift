@@ -74,7 +74,8 @@ struct TabRootView: View {
     /// the iOS "More" tab, whose nested navigation controller skips the Settings root on back.
     /// Settings is reached via the gear overlay instead. tvOS + iPad keep it as a tab/sidebar item.
     private var displayedTabs: [AppTab] {
-        var tabs = availableTabs.filter { !appearance.isTabHidden($0) }
+        var tabs = AppTab.withDownloads(availableTabs, hasDownloads: !dependencies.downloadStore.items.isEmpty)
+            .filter { !appearance.isTabHidden($0) }
         #if os(iOS)
         if hSizeClass == .compact { tabs = tabs.filter { $0 != .settings } }
         #endif
@@ -291,6 +292,11 @@ struct TabRootView: View {
         // (see presentedTabs). Keyed on the DISPLAYED set, not the probed one: a tab the user switched
         // off changes no bar, and switching one back on inserts an item that needs the same re-tint as
         // a probed insertion.
+        .onChange(of: appState.requestedTab) { _, requested in
+            guard let requested else { return }
+            appState.requestedTab = nil
+            if tabsOnScreen.contains(requested) { selectedTab = requested }
+        }
         .onChange(of: shellLayout) { old, new in
             let armed = switchOrigin
             let result = ProfileShellLayout.resolveSwitch(previous: old, current: new, armedOrigin: armed)
@@ -506,6 +512,12 @@ struct TabRootView: View {
                 SearchView()
             case .music:
                 MusicHomeView()
+            case .downloads:
+                #if os(iOS)
+                DownloadsView()
+                #else
+                EmptyView()
+                #endif
             case .settings:
                 SettingsView()
             }

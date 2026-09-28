@@ -239,6 +239,16 @@ struct SettingsView: View {
                 PlaybackSettingsView()
             }
 
+            #if os(iOS)
+            SettingsTile(
+                icon: "arrow.down.circle",
+                title: "settings.downloads.title",
+                subtitle: "settings.downloads.subtitle"
+            ) {
+                DownloadSettingsView()
+            }
+            #endif
+
             SettingsTile(
                 icon: "paintpalette",
                 title: "settings.appearance.title",

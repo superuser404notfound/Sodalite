@@ -42,7 +42,8 @@ struct HomeView: View {
                             state: state,
                             serverName: appState.activeServer?.name ?? "",
                             onAddExternalAddress: addExternalAddressAction(for: state),
-                            onRetry: { await retry(vm: vm) }
+                            onRetry: { await retry(vm: vm) },
+                            onOpenDownloads: dependencies.downloadStore.items.isEmpty ? nil : { appState.requestedTab = .downloads }
                         )
                     } else if vm.isLoading {
                         ProgressView()
