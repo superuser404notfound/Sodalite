@@ -63991,6 +63991,330 @@
         }
       }
     },
+    "changelog.1_1_0.offlineDownloads.body" : {
+      "comment" : "What's New 1.1.0: offline downloads body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu a iPadu si stáhněte filmy, epizody nebo celé série v originále nebo v menší verzi a sledujte je bez připojení. Co zhlédnete offline, se při příštím spojení přenese na server."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad kan du downloade film, afsnit eller hele sæsoner i original eller en mindre version og se dem uden forbindelse. Det, du ser offline, når frem til din server, næste gang den kan nås."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf iPhone und iPad Filme, Folgen oder ganze Staffeln laden, im Original oder kleiner, und ohne Verbindung ansehen. Was du offline schaust, landet beim nächsten Kontakt auf deinem Server."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone και iPad, κατεβάστε ταινίες, επεισόδια ή ολόκληρες σεζόν, στο πρωτότυπο ή σε μικρότερη έκδοση, και δείτε τα χωρίς σύνδεση. Ό,τι βλέπετε εκτός σύνδεσης φτάνει στον διακομιστή σας την επόμενη φορά που θα είναι διαθέσιμος."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone and iPad, download movies, episodes or whole seasons, in the original or a smaller version, and watch them without a connection. What you watch offline reaches your server the next time it is in reach."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iPhone y iPad, descarga películas, episodios o temporadas completas, en el original o en una versión más pequeña, y míralos sin conexión. Lo que veas sin conexión llega a tu servidor la próxima vez que esté disponible."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lataa iPhonessa ja iPadissa elokuvia, jaksoja tai kokonaisia kausia alkuperäisinä tai pienempinä versioina ja katso niitä ilman yhteyttä. Se, mitä katsot offline-tilassa, päivittyy palvelimelle, kun se on seuraavan kerran tavoitettavissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone et iPad, téléchargez films, épisodes ou saisons entières, en original ou dans une version plus légère, et regardez-les sans connexion. Ce que vous regardez hors ligne est transmis à votre serveur dès qu'il est de nouveau accessible."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhoneu i iPadu preuzmite filmove, epizode ili cijele sezone, u izvorniku ili manjoj verziji, i gledajte ih bez veze. Ono što pogledate izvanmrežno stiže na vaš poslužitelj čim ponovno bude dostupan."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-on és iPaden filmeket, epizódokat vagy teljes évadokat tölthet le eredetiben vagy kisebb változatban, és kapcsolat nélkül nézheti őket. Amit offline néz, a szerverre kerül, amint az újra elérhető."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su iPhone e iPad scarica film, episodi o intere stagioni, nell'originale o in una versione più leggera, e guardali senza connessione. Ciò che guardi offline arriva al tuo server non appena è di nuovo raggiungibile."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneとiPadで、映画やエピソード、シーズン全体をオリジナルまたは小さいバージョンでダウンロードし、接続なしで視聴できます。オフラインで視聴した内容は、次にサーバーに接続したときに反映されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone과 iPad에서 영화, 에피소드 또는 시즌 전체를 원본이나 작은 버전으로 다운로드하여 연결 없이 시청하세요. 오프라인으로 시청한 내용은 다음에 서버에 연결될 때 반영됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad kan du laste ned filmer, episoder eller hele sesonger, i original eller en mindre versjon, og se dem uten tilkobling. Det du ser uten nett, når serveren din neste gang den er tilgjengelig."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download op iPhone en iPad films, afleveringen of hele seizoenen, in het origineel of een kleinere versie, en kijk ze zonder verbinding. Wat je offline kijkt, komt bij je server aan zodra die weer bereikbaar is."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie i iPadzie pobieraj filmy, odcinki lub całe sezony, w oryginale lub mniejszej wersji, i oglądaj je bez połączenia. To, co obejrzysz offline, trafi na serwer, gdy tylko będzie znowu dostępny."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e iPad, baixe filmes, episódios ou temporadas inteiras, no original ou em uma versão menor, e assista sem conexão. O que você assistir offline chega ao seu servidor na próxima vez que ele estiver acessível."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e iPad, transfira filmes, episódios ou temporadas completas, no original ou numa versão mais pequena, e veja-os sem ligação. O que vir offline chega ao seu servidor da próxima vez que estiver acessível."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe iPhone și iPad, descarcă filme, episoade sau sezoane întregi, în original sau într-o versiune mai mică, și urmărește-le fără conexiune. Ce urmărești offline ajunge pe server data viitoare când este accesibil."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone и iPad скачивайте фильмы, эпизоды или целые сезоны в оригинале или в уменьшенной версии и смотрите их без подключения. Всё, что вы посмотрели офлайн, попадёт на сервер при следующем подключении."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone a iPade si stiahnite filmy, epizódy alebo celé série v origináli alebo v menšej verzii a pozerajte ich bez pripojenia. Čo pozriete offline, sa pri ďalšom spojení prenesie na server."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone och iPad kan du ladda ned filmer, avsnitt eller hela säsonger, i original eller en mindre version, och se dem utan anslutning. Det du ser offline når din server nästa gång den går att nå."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone ve iPad'de filmleri, bölümleri veya sezonların tamamını orijinal ya da daha küçük bir sürümde indirip bağlantı olmadan izleyin. Çevrimdışı izledikleriniz, sunucuya bir sonraki bağlantıda aktarılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone та iPad завантажуйте фільми, епізоди чи цілі сезони в оригіналі або меншій версії та дивіться їх без підключення. Те, що ви переглянули офлайн, потрапить на сервер під час наступного підключення."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上下载电影、剧集或整季内容，可选择原始版本或较小的版本，无需联网即可观看。离线观看的进度会在下次连接服务器时同步。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上下載電影、劇集或整季內容，可選擇原始版本或較小的版本，無需連網即可觀看。離線觀看的進度會在下次連線伺服器時同步。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.offlineDownloads.title" : {
+      "comment" : "What's New 1.1.0: offline downloads title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stahování offline"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline-downloads"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline-Downloads"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λήψεις εκτός σύνδεσης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline Downloads"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargas sin conexión"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline-lataukset"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargements hors ligne"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izvanmrežna preuzimanja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline letöltések"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download offline"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフラインダウンロード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오프라인 다운로드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nedlastinger for bruk uten nett"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline downloads"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pobieranie offline"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads offline"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferências offline"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descărcări offline"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Офлайн-загрузки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sťahovanie offline"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offlinenedladdningar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevrimdışı indirmeler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Офлайн-завантаження"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "离线下载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "離線下載"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.restingTouch.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
