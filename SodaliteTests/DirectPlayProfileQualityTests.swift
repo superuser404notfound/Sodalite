@@ -67,6 +67,26 @@ struct DirectPlayProfileQualityTests {
         #expect(body["AudioStreamIndex"] as? Int == 2)
     }
 
+    /// Sodalite draws every subtitle itself. A server-chosen subtitle on a capped transcode is burned
+    /// in, and Jellyfin first extracts every subtitle from the whole file to do it: a minute on a
+    /// 15 GB remux, long after AVPlayer gave up (device log 2026-09-28), and a doubled line if it
+    /// ever arrives. So a VOD request names no subtitle stream at all.
+    @Test func aVODRequestAsksTheServerForNoSubtitle() {
+        let body = JellyfinPlaybackService.vodPlaybackInfoBody(
+            profile: DirectPlayProfile.baseProfile(maxStreamingBitrate: 4_000_000), audioStreamIndex: 1)
+        #expect(body["SubtitleStreamIndex"] as? Int == -1)
+        #expect(body["MaxStreamingBitrate"] as? Int == 4_000_000)
+        #expect(body["AudioStreamIndex"] as? Int == 1)
+        #expect(body["EnableDirectPlay"] == nil)
+    }
+
+    /// Live keeps the server's subtitle choice; its path was not part of this change.
+    @Test func aLiveBodyNamesNoSubtitleStream() {
+        let body = JellyfinPlaybackService.playbackInfoBody(
+            profile: DirectPlayProfile.liveProfile(), maxStreamingBitrate: nil, enableDirectPlay: true)
+        #expect(body["SubtitleStreamIndex"] == nil)
+    }
+
     @Test func theBodyOmitsDirectPlayOnlyWhenFalse() {
         let body = JellyfinPlaybackService.playbackInfoBody(profile: [:], maxStreamingBitrate: nil,
                                                             enableDirectPlay: false)

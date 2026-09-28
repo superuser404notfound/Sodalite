@@ -69,15 +69,29 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
                          audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
-        try await postPlaybackInfo(profile: profile,
-                                   maxStreamingBitrate: profile?["MaxStreamingBitrate"] as? Int,
-                                   audioStreamIndex: audioStreamIndex) { payload in
+        let body = Self.vodPlaybackInfoBody(profile: profile ?? [:], audioStreamIndex: audioStreamIndex)
+        return try await postPlaybackInfo(profile: profile, body: body) { payload in
             JellyfinEndpoint.playbackInfo(itemID: itemID, userID: userID, payload: payload)
         }
     }
 
+    /// The VOD body: the rung travels as the top-level `MaxStreamingBitrate` too (Sodalite#87), and
+    /// `SubtitleStreamIndex` is -1, "none". Sodalite draws every subtitle itself; a stream the server
+    /// picked would be burned into a transcode, which Jellyfin prepares by extracting every subtitle
+    /// from the whole file first (a minute on a 15 GB remux, measured 2026-09-28), and would then
+    /// show twice.
+    static func vodPlaybackInfoBody(profile: [String: Any], audioStreamIndex: Int?) -> [String: Any] {
+        var body = playbackInfoBody(profile: profile,
+                                    maxStreamingBitrate: profile["MaxStreamingBitrate"] as? Int,
+                                    audioStreamIndex: audioStreamIndex, enableDirectPlay: true)
+        body["SubtitleStreamIndex"] = -1
+        return body
+    }
+
     func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil, maxStreamingBitrate: Int, enableDirectPlay: Bool = true) async throws -> PlaybackInfoResponse {
-        try await postPlaybackInfo(profile: profile, enableDirectPlay: enableDirectPlay) { payload in
+        let body = Self.playbackInfoBody(profile: profile ?? [:], maxStreamingBitrate: nil,
+                                         enableDirectPlay: enableDirectPlay)
+        return try await postPlaybackInfo(profile: profile, body: body) { payload in
             JellyfinEndpoint.livePlaybackInfo(
                 itemID: itemID,
                 userID: userID,
@@ -107,9 +121,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// Routes through the shared HTTPClient (limiter, timeouts, APIError, cookie-free) not URLSession.shared; uses requestData + manual decode because DEBUG codec diagnostics need raw data.
     private func postPlaybackInfo(
         profile: [String: Any]?,
-        maxStreamingBitrate: Int? = nil,
-        audioStreamIndex: Int? = nil,
-        enableDirectPlay: Bool = true,
+        body: [String: Any],
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
         guard let baseURL = client.baseURL else { throw APIError.invalidURL }
@@ -123,8 +135,6 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         }
         #endif
 
-        let body = Self.playbackInfoBody(profile: deviceProfile, maxStreamingBitrate: maxStreamingBitrate,
-                                         audioStreamIndex: audioStreamIndex, enableDirectPlay: enableDirectPlay)
         let payload = try JSONValue(jsonObject: body)
         let headers = [
             "Authorization": client.buildAuthHeader(),
