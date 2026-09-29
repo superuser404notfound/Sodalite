@@ -15,37 +15,49 @@ extension PlayerViewModel {
     }
 
     func loadZapLineupIfNeeded() {
-        guard isLiveSession, zapLineup == nil, zapLineupTask == nil,
+        guard isLiveSession, !isTearingDown, zapLineup == nil, zapLineupTask == nil,
               let service = liveTvService, let current = liveChannel?.id else { return }
         let filter = zapFilter
         let user = userID
         zapLineupTask = Task { [weak self] in
-            var lineup = await Self.fetchLineup(service: service, userID: user, filter: filter)
             let all = GuideFilter(favoritesOnly: false, category: nil, kind: filter.kind)
-            if let fetched = lineup, !fetched.contains(current), filter != all {
-                lineup = await Self.fetchLineup(service: service, userID: user, filter: all)
+            var used = filter
+            var result = await Self.fetchLineup(service: service, userID: user, filter: filter)
+            if case .success(let fetched) = result, !fetched.contains(current), filter != all {
+                used = all
+                result = await Self.fetchLineup(service: service, userID: user, filter: all)
             }
-            guard let self else { return lineup }
+            let lineup = try? result.get()
+            guard !Task.isCancelled, let self else { return lineup }
             self.zapLineup = lineup
             self.zapLineupTask = nil
-            LogTap.shared.note("[Zap] lineup=\(lineup?.channels.count.description ?? "failed") "
-                + "filter=\(filter.favoritesOnly ? "fav" : "all")")
+            let scope = used.favoritesOnly ? "fav" : "all"
+            switch result {
+            case .success(let fetched):
+                LogTap.shared.note("[Zap] lineup=\(fetched.channels.count) filter=\(scope)")
+            case .failure(let error):
+                LogTap.shared.note("[Zap] lineup failed filter=\(scope) error=\(error)")
+            }
             self.refreshZapBanner()
             return lineup
         }
     }
 
     private static func fetchLineup(service: JellyfinLiveTvServiceProtocol, userID: String,
-                                    filter: GuideFilter) async -> LiveChannelLineup? {
+                                    filter: GuideFilter) async -> Result<LiveChannelLineup, Error> {
         var channels: [JellyfinChannel] = []
         while channels.count < GuideViewModel.channelHardCap {
-            guard let page = try? await service.getChannels(
-                userID: userID, startIndex: channels.count,
-                limit: GuideViewModel.pageSize, filter: filter) else { return nil }
-            channels += page.items
-            if page.items.count < GuideViewModel.pageSize { break }
+            do {
+                let page = try await service.getChannels(
+                    userID: userID, startIndex: channels.count,
+                    limit: GuideViewModel.pageSize, filter: filter)
+                channels += page.items
+                if page.items.count < GuideViewModel.pageSize { break }
+            } catch {
+                return .failure(error)
+            }
         }
-        return LiveChannelLineup(channels: channels)
+        return .success(LiveChannelLineup(channels: channels))
     }
 
     func requestZap(by delta: Int) {

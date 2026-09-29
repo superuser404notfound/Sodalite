@@ -65,6 +65,8 @@ struct LiveZapRequestTests {
         _ = await load?.value
         vm.requestZap(by: 1)
         #expect(vm.zapTarget == nil)
+        #expect(vm.zapLineup == nil)
+        #expect(vm.zapBanner == LiveZapBanner(channel: nil, direction: 1))
         vm.zapSettleTask?.cancel()
     }
 }
