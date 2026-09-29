@@ -87,6 +87,13 @@ extension PlayerViewModel {
     /// flight, so a newer press never closes a tuner something else is still closing; it cancels the
     /// previous commit's tune instead.
     func commitZap() async {
+        // A press made before the lineup arrived resolves against it once it lands; a newer press
+        // that cancelled this settle commits the sum itself.
+        if zapLineup == nil {
+            loadZapLineupIfNeeded()
+            if let load = zapLineupTask { _ = await load.value }
+            guard !Task.isCancelled else { return }
+        }
         let offset = zapPendingOffset
         zapPendingOffset = 0
         guard neighbourChannel(offset: offset) != nil else {
