@@ -781,7 +781,7 @@ final class PlayerViewModel {
     var isAtLiveEdge: Bool = true
     var behindLiveSeconds: Double = 0
     /// Channel for live sessions. Nil for VOD.
-    let liveChannel: JellyfinChannel?
+    var liveChannel: JellyfinChannel?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.
@@ -815,6 +815,8 @@ final class PlayerViewModel {
     var didAbandonLiveTunerFile = false
     /// Remembered upstream URLs, so a repeat tune of a direct channel skips Jellyfin entirely. Nil for VOD.
     let directStreamMemory: LiveDirectStreamMemory?
+    /// The guide filter the zap lineup is built from; `.default` for a launch outside the guide (#173).
+    let zapFilter: GuideFilter
     /// Which of the four live routes carried this tune, nil for VOD and until one is chosen. It mirrors the
     /// `[LiveDirect] route=` line, which lives in a ring buffer only a diagnostic build's in-player HUD can
     /// render; a reporter cannot reach it. In the stats panel the same fact is a screenshot (Sodalite#70,
@@ -842,6 +844,7 @@ final class PlayerViewModel {
         liveProgram: JellyfinProgram? = nil,
         liveTvService: JellyfinLiveTvServiceProtocol? = nil,
         directStreamMemory: LiveDirectStreamMemory? = nil,
+        zapFilter: GuideFilter = .default,
         serverName: String = "",
         serverReachability: @escaping () -> ServerReachability = { .unknown },
         localDownload: DownloadedItem? = nil,
@@ -866,6 +869,7 @@ final class PlayerViewModel {
         self.liveProgram = liveProgram
         self.liveTvService = liveTvService
         self.directStreamMemory = directStreamMemory
+        self.zapFilter = zapFilter
         self.serverName = serverName
         self.serverReachability = serverReachability
         self.localDownload = localDownload

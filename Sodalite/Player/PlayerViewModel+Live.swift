@@ -992,9 +992,8 @@ extension PlayerViewModel {
         }
     }
 
-    /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.
-    func retuneLiveStream() async {
-        // Close the dead session server-side BEFORE opening the new one: stop report (with tuner handle), explicit transcode kill (orphan ffmpeg writes a growing stream.ts and fills server disk), tuner release.
+    /// Close the session on the server: stop report with the tuner handle, the orphan-transcode kill, the tuner release. Shared by the recovery retune and the channel zap.
+    func closeLiveSessionServerSide() async {
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
         await reportStop(liveStreamID: deadTuner)
@@ -1004,6 +1003,13 @@ extension PlayerViewModel {
         }
         hasReportedStart = false
         releaseLiveTunerIfNeeded()
+    }
+
+    /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.
+    func retuneLiveStream() async {
+        // Close the dead session server-side BEFORE opening the new one, so an orphan ffmpeg cannot fill the server disk.
+        let deadSession = playSessionID
+        await closeLiveSessionServerSide()
         // Not loadTask, so stopPlayback cannot cancel this: a Back during the stop report or the new
         // tune has to be read off the latch, or the tune plays on behind a dismissed player.
         guard !isTearingDown else { return }

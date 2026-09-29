@@ -100,6 +100,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private let lock = NSLock()
     private var _stoppedReports: [PlaybackStopReport] = []
     private var _killedEncodings: [String] = []
+    private var _closedLiveStreams: [String] = []
     private var _playbackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
     private var _requestedAudioIndexes: [Int?] = []
@@ -117,6 +118,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
+    var closedLiveStreams: [String] { lock.withLock { _closedLiveStreams } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
@@ -167,7 +169,9 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
-    func closeLiveStream(liveStreamID: String) async throws {}
+    func closeLiveStream(liveStreamID: String) async throws {
+        lock.withLock { _closedLiveStreams.append(liveStreamID) }
+    }
     func getSessions() async throws -> [JellyfinSessionInfo] { [] }
     func getSeasons(seriesID: String, userID: String) async throws -> [JellyfinItem] { [] }
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> [JellyfinItem] { [] }
