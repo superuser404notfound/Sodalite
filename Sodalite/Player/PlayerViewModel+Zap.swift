@@ -67,6 +67,7 @@ extension PlayerViewModel {
     func requestZap(by delta: Int) {
         guard isLiveSession, !isTearingDown else { return }
         loadZapLineupIfNeeded()
+        hideControls()
         zapPendingOffset += delta
         refreshZapBanner(direction: delta)
         zapSettleTask?.cancel()
