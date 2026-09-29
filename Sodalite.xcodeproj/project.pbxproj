@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0001CDE344911930777F1A10 /* NetworkPathObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCC0AD2AA3F895C4DE7EE5F /* NetworkPathObserver.swift */; };
+		002F175BA07B7CA0BD48B402 /* LiveZapBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66BEFA7876EE946CAB071AA /* LiveZapBannerView.swift */; };
 		003B0BEE0184D0E9BD87B6FD /* AppearanceSurfaceStructureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26759DA613140EAA06B3B468 /* AppearanceSurfaceStructureTests.swift */; };
 		008E7FDF9FB52DE6FA162617 /* ServerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92F70D67DC2DE192A24567 /* ServerManagementView.swift */; };
 		009C8D5D1E16862D5EB9E993 /* GuideGridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1880A3F02893B1FBE1825FB /* GuideGridLayout.swift */; };
@@ -29,6 +30,7 @@
 		03363E571E831BB939FB78A6 /* SpoilerRevealMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692D56E426F3EB7EE53F29F2 /* SpoilerRevealMemoryTests.swift */; };
 		03376AF52AD5EC8D5688232A /* GuideControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5633624A3EA3F64C0B47CD /* GuideControlsView.swift */; };
 		033A79626102B964502B4752 /* DownloadCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8250566C8B98F2644E3CB6 /* DownloadCleanup.swift */; };
+		033E55DD0B896DE5D8BFEC4E /* LiveZapBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66BEFA7876EE946CAB071AA /* LiveZapBannerView.swift */; };
 		035198691F64A130E4F9BD52 /* ErrorText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D260C52619403D730EF4F564 /* ErrorText.swift */; };
 		03582EC6BADFC4B06664259B /* SubtitlesOnSkipBackPreferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0985DCFAB677410753AE9644 /* SubtitlesOnSkipBackPreferenceTests.swift */; };
 		0368E6E01D3545255E065560 /* DetailRouterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0BD9A994EB62F1AC2E7558 /* DetailRouterView.swift */; };
@@ -1959,6 +1961,7 @@
 		A6126C121E572C4D0C18004B /* ProfileSyncPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSyncPayloads.swift; sourceTree = "<group>"; };
 		A62F1DBB63B1D0EDCBAA87A2 /* AppearanceTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceTheme.swift; sourceTree = "<group>"; };
 		A641A9A662A520E77ACD9FB7 /* DiagnosticLogSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogSequenceTests.swift; sourceTree = "<group>"; };
+		A66BEFA7876EE946CAB071AA /* LiveZapBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveZapBannerView.swift; sourceTree = "<group>"; };
 		A6F4A4C45FFE43AA85F2A678 /* ProfileSettingsContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSettingsContainerTests.swift; sourceTree = "<group>"; };
 		A6F5CE78EAB9F5BC71D0CF0B /* LiveTransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTransportBar.swift; sourceTree = "<group>"; };
 		A76F4E46F2995ECC621AF105 /* TopShelfAccent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfAccent.swift; sourceTree = "<group>"; };
@@ -3437,6 +3440,7 @@
 				BFA3813F4C278D463624A9F6 /* ControlScrimLayer.swift */,
 				25E0D841BD4BA1B55994E038 /* LiveRailLabels.swift */,
 				A6F5CE78EAB9F5BC71D0CF0B /* LiveTransportBar.swift */,
+				A66BEFA7876EE946CAB071AA /* LiveZapBannerView.swift */,
 				12C9EC049C02787E96058C21 /* PlayerActionPill.swift */,
 				1B9A5495C7680F383A85DFE5 /* PlayerNoticeBanner.swift */,
 				44AD184DF6BCAAD832065C41 /* PlayerOverlayView.swift */,
@@ -3990,6 +3994,7 @@
 				C79A0C3A7C7A685CFBA2F8E5 /* LiveTunerGate.swift in Sources */,
 				8DB08BF8794EC8EBFDB4021A /* LiveTunerLedger.swift in Sources */,
 				20BE98904C5EE8F95DF336E6 /* LiveTvModels.swift in Sources */,
+				002F175BA07B7CA0BD48B402 /* LiveZapBannerView.swift in Sources */,
 				425610C9703C301A13C3D301 /* LiveZapInput.swift in Sources */,
 				F308FC530AE2973519596CF3 /* LocalNetworkAccess.swift in Sources */,
 				BB101AAB874DE0DB84A5EFBE /* LocalNetworkDeniedView.swift in Sources */,
@@ -4853,6 +4858,7 @@
 				1E294628EF88DCBB0D1A300E /* LiveTunerGate.swift in Sources */,
 				69AD8DC57B1F03E32299C02A /* LiveTunerLedger.swift in Sources */,
 				9386B628FBDA74425E611ABB /* LiveTvModels.swift in Sources */,
+				033E55DD0B896DE5D8BFEC4E /* LiveZapBannerView.swift in Sources */,
 				FAB938A51B59C63EC4F41136 /* LiveZapInput.swift in Sources */,
 				4FD948A718ED0781F0938364 /* LocalNetworkAccess.swift in Sources */,
 				928071FA0F2A6B2BAADD9F27 /* LocalNetworkDeniedView.swift in Sources */,

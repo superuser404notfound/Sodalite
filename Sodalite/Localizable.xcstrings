@@ -63667,6 +63667,330 @@
         }
       }
     },
+    "changelog.1_1_0.channelZap.body" : {
+      "comment" : "What's New 1.1.0: channel zap body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačítka nahoru a dolů na ovladači přepnou na další nebo předchozí kanál bez návratu do programu. Stejně fungují i tlačítka kanálů na ovladači televizoru. Když máte v programu zapnuté oblíbené, listujete jen oblíbenými kanály."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op og Ned på fjernbetjeningen skifter til næste eller forrige kanal uden at gå tilbage til guiden. Kanalknapperne på en tv-fjernbetjening gør det samme. Har du slået favoritter til i guiden, bladrer du gennem dine favoritter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oben und Unten auf der Fernbedienung schalten zum nächsten oder vorherigen Sender, ohne Umweg über den Guide. Die Kanaltasten einer TV-Fernbedienung tun dasselbe. Sind im Guide die Favoriten an, blätterst du durch deine Favoriten."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα πλήκτρα Πάνω και Κάτω στο τηλεχειριστήριο αλλάζουν στο επόμενο ή στο προηγούμενο κανάλι χωρίς επιστροφή στον Οδηγό. Τα κουμπιά καναλιών ενός τηλεχειριστηρίου τηλεόρασης κάνουν το ίδιο. Με τα Αγαπημένα ενεργά στον Οδηγό, περνάτε μόνο από τα αγαπημένα σας."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up and Down on the remote switch to the next or previous channel without going back to the guide. The channel buttons on a TV remote do the same. With favourites on in the guide, you flip through your favourites."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arriba y Abajo en el mando pasan al canal siguiente o anterior sin volver a la guía. Los botones de canal del mando de un televisor hacen lo mismo. Con los favoritos activados en la guía, recorres solo tus favoritos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaukosäätimen ylös- ja alas-painikkeet vaihtavat seuraavalle tai edelliselle kanavalle palaamatta oppaaseen. Television kaukosäätimen kanavapainikkeet toimivat samoin. Kun suosikit ovat oppaassa päällä, selaat vain suosikkejasi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haut et Bas sur la télécommande passent à la chaîne suivante ou précédente sans revenir au guide. Les touches de chaîne d'une télécommande de téléviseur font de même. Avec les favoris activés dans le guide, vous parcourez vos favoris."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gore i Dolje na daljinskom upravljaču prebacuju na sljedeći ili prethodni kanal bez povratka u vodič. Tipke za kanale na daljinskom upravljaču televizora rade isto. Kada su u vodiču uključeni favoriti, prolazite samo kroz svoje favorite."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A távirányító Fel és Le gombja a következő vagy az előző csatornára vált, anélkül hogy vissza kellene lépnie a műsorújságba. A tévé távirányítójának csatornagombjai ugyanígy működnek. Ha a műsorújságban be vannak kapcsolva a kedvencek, a kedvencei között lapozhat."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su e Giù sul telecomando passano al canale successivo o precedente senza tornare alla guida. I tasti dei canali di un telecomando TV fanno lo stesso. Con i preferiti attivi nella guida, scorri solo i tuoi preferiti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リモコンの上下で、番組表に戻らずに次または前のチャンネルに切り替えられます。テレビのリモコンのチャンネルボタンでも同じように操作できます。番組表でお気に入りをオンにしている場合は、お気に入りのチャンネルだけを順に切り替えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리모컨의 위아래 버튼으로 편성표로 돌아가지 않고 다음 또는 이전 채널로 전환합니다. TV 리모컨의 채널 버튼도 똑같이 작동합니다. 편성표에서 즐겨찾기를 켜 두면 즐겨찾기 채널만 차례로 넘겨 봅니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opp og Ned på fjernkontrollen bytter til neste eller forrige kanal uten å gå tilbake til guiden. Kanalknappene på en TV-fjernkontroll gjør det samme. Med favoritter slått på i guiden blar du gjennom favorittene dine."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omhoog en Omlaag op de afstandsbediening schakelen naar het volgende of vorige kanaal zonder terug te gaan naar de gids. De kanaalknoppen op een tv-afstandsbediening doen hetzelfde. Met favorieten aan in de gids blader je door je favorieten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przyciski w górę i w dół na pilocie przełączają na następny lub poprzedni kanał bez powrotu do przewodnika. Przyciski kanałów na pilocie telewizora działają tak samo. Gdy w przewodniku włączone są ulubione, przełączasz się tylko między ulubionymi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para cima e Para baixo no controle remoto mudam para o próximo canal ou o anterior sem voltar ao guia. Os botões de canal do controle de uma TV fazem o mesmo. Com os favoritos ativados no guia, você passa só pelos seus favoritos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cima e Baixo no comando passam para o canal seguinte ou anterior sem voltar ao guia. Os botões de canal do comando de um televisor fazem o mesmo. Com os favoritos ativados no guia, percorre apenas os seus favoritos."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sus și Jos pe telecomandă trec la canalul următor sau anterior fără să revii la ghid. Butoanele de canal ale unei telecomenzi TV fac același lucru. Cu favoritele activate în ghid, treci doar prin favoritele tale."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки «Вверх» и «Вниз» на пульте переключают на следующий или предыдущий канал без возврата в телегид. Кнопки каналов на пульте телевизора работают так же. Если в телегиде включено избранное, вы листаете только избранные каналы."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačidlá hore a dole na ovládači prepnú na ďalší alebo predchádzajúci kanál bez návratu do programu. Rovnako fungujú aj tlačidlá kanálov na ovládači televízora. Keď máte v programe zapnuté obľúbené, listujete len obľúbenými kanálmi."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upp och Ned på fjärrkontrollen byter till nästa eller föregående kanal utan att gå tillbaka till guiden. Kanalknapparna på en tv-fjärrkontroll gör detsamma. Med favoriter påslagna i guiden bläddrar du bland dina favoriter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kumandadaki Yukarı ve Aşağı tuşları, rehbere dönmeden bir sonraki veya önceki kanala geçer. TV kumandasındaki kanal tuşları da aynısını yapar. Rehberde favoriler açıksa yalnızca favorileriniz arasında geçiş yaparsınız."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки «Вгору» і «Вниз» на пульті перемикають на наступний або попередній канал без повернення до телегіда. Кнопки каналів на пульті телевізора працюють так само. Якщо в телегіді ввімкнено обране, ви гортаєте лише обрані канали."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按遥控器的上下键即可切换到下一个或上一个频道，无需返回节目表。电视遥控器的频道键也有同样的作用。在节目表中开启收藏筛选后，只会在收藏的频道之间切换。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按遙控器的上下鍵即可切換到下一個或上一個頻道，無需返回節目表。電視遙控器的頻道鍵也有同樣的作用。在節目表中開啟收藏篩選後，只會在收藏的頻道之間切換。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.channelZap.title" : {
+      "comment" : "What's New 1.1.0: channel zap title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přepínání kanálů během sledování"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skift kanal, mens du ser"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sender wechseln beim Zuschauen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αλλαγή καναλιού ενώ βλέπετε"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change channels while watching"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia de canal mientras ves"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaihda kanavaa katsellessa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer de chaîne en regardant"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijenjanje kanala tijekom gledanja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Csatornaváltás nézés közben"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia canale mentre guardi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視聴中にチャンネルを切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시청 중 채널 전환"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bytt kanal mens du ser"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zappen tijdens het kijken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmiana kanału podczas oglądania"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troque de canal enquanto assiste"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mude de canal enquanto vê"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schimbă canalul în timp ce urmărești"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переключение каналов во время просмотра"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepínanie kanálov počas pozerania"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Byt kanal medan du tittar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzlerken kanal değiştirin"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемикання каналів під час перегляду"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "观看时切换频道"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "觀看時切換頻道"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.durations.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

@@ -162,6 +162,10 @@ struct PlayerOverlayView: View {
 
             topRightInfoColumn
 
+            #if os(tvOS)
+            liveZapBannerLayer
+            #endif
+
             // Floating skip hint (intro or recap), only while controls are hidden; once they open, the skip action is a focusable button inside TransportBar instead.
             if let skipSegment = viewModel.activeSkipSegment,
                !viewModel.showControls,
@@ -726,6 +730,28 @@ private extension PlayerOverlayView {
         .allowsHitTesting(false)
     }
 }
+
+#if os(tvOS)
+private extension PlayerOverlayView {
+    /// Sodalite#173: top left, where the transport title sits. A zap hides the controls, so the two do not meet.
+    var liveZapBannerLayer: some View {
+        VStack {
+            HStack {
+                if let banner = viewModel.zapBanner {
+                    LiveZapBannerView(banner: banner)
+                        .transition(.opacity)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 80)
+            .padding(.top, 68)
+            Spacer()
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.zapBanner)
+        .allowsHitTesting(false)
+    }
+}
+#endif
 
 // MARK: - Speed Badge
 
