@@ -47,3 +47,10 @@ struct GuideFilter: Equatable, Sendable {
         return items
     }
 }
+
+extension GuideFilter {
+    /// Favourites are a lasting choice, a category is a snapshot of what airs now (Sodalite#173).
+    var zapLineup: GuideFilter {
+        GuideFilter(favoritesOnly: favoritesOnly, category: nil, kind: kind)
+    }
+}

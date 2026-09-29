@@ -44,6 +44,12 @@ struct GuideView: View {
 
     @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
 
+    private func watchLive(_ context: LivePlaybackContext) {
+        var stamped = context
+        stamped.zapFilter = model.filter.zapLineup
+        onWatchLive?(stamped)
+    }
+
     var body: some View {
         content
             .task { await model.load() }
@@ -52,7 +58,7 @@ struct GuideView: View {
             .detailCover(item: $selection) { selected in
                 ProgramInfoPopover(
                     program: selected.program, channel: selected.channel, tint: tint,
-                    onWatchLive: onWatchLive,
+                    onWatchLive: onWatchLive == nil ? nil : { watchLive($0) },
                     channelIsFavorite: model.timers.isFavorite(selected.channel.id),
                     onToggleFavorite: { model.timers.toggleFavorite(channelID: selected.channel.id) },
                     hasTimer: model.timers.effectiveTimerState(for: selected.program).timerId != nil,
@@ -137,7 +143,7 @@ struct GuideView: View {
                 onPlayChannel: { channel, program in
                     // LivePlaybackContext.program is optional: a channel with no EPG data simply
                     // launches without program metadata.
-                    onWatchLive?(LivePlaybackContext(channel: channel, program: program))
+                    watchLive(LivePlaybackContext(channel: channel, program: program))
                 },
                 onToggleFavorite: { channel in
                     model.timers.toggleFavorite(channelID: channel.id)
