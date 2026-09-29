@@ -101,9 +101,9 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
 
     /// tvOS fold marker state. The offset feeds off the same scroll-geometry hook as scrollDim.
     @State private var scrollOffset: CGFloat = 0
-    /// Whether the artwork (the portrait band, or the first page's clear hero window elsewhere) has
-    /// mostly left the top, so the system's soft top edge may blur what scrolls under the status bar
-    /// and the close button (as on Home and the genre pages). iOS only; tvOS has no such chrome.
+    /// iPhone portrait: whether the band has mostly left the top, so the system's soft top edge may
+    /// blur what scrolls under the Dynamic Island and the close button (as on Home and the genre
+    /// pages). Only there: landscape and iPad have no island for rows to run under.
     @State private var bandHasLeftTop = false
     /// Viewport height, which is also the first page's height (it is `containerRelativeFrame`).
     /// Read rather than assumed, so the pinned mark arrives with the fold on every tier.
@@ -318,16 +318,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             // Linear ramp over the clear hero window, capped at 0.3.
             scrollDim = min(max(offset / heroWindow, 0), 1) * 0.3
             scrollOffset = offset
-            bandHasLeftTop = offset > heroWindow * 0.6
         }
-        #if os(iOS)
-        // Same as the portrait page (see there): the soft top edge only once the first page has
-        // scrolled well up, and a bar the height of the close button's row so it covers that too.
-        .safeAreaBar(edge: .top) {
-            Color.clear.frame(height: 56)
-        }
-        .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
-        #endif
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.containerSize.height
         } action: { _, height in
