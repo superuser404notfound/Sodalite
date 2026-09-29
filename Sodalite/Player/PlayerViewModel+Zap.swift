@@ -137,6 +137,9 @@ extension PlayerViewModel {
         } else {
             zapBanner = LiveZapBanner(channel: target, direction: offset.signum())
         }
+        // The in-place load keeps the old pipeline alive until the new one mounts (#15), so without a
+        // pause its sound runs on under the spinner. A pause, not a stop: the load's autoplay resumes.
+        player.pause()
         let start = zapStartPlayback
         let task = Task<Void, Never> { [weak self] in
             guard !Task.isCancelled else { return }
