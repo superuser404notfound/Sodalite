@@ -159,6 +159,7 @@ final class FakeDownloadBackend: DownloadBackend {
 
     func playbackInfo(itemID: String, profile: [String: Any], mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         if yieldsInPlaybackInfo { try await Task.sleep(for: .milliseconds(20)) }
+        if failingItemIDs.contains(itemID) { throw Refused() }
         let tc = transcodingUrl.map { #","TranscodingUrl":"\#($0)""# } ?? ""
         let json = #"{"PlaySessionId":"ps-\#(itemID)","MediaSources":[{"Id":"src-\#(itemID)","Container":"mkv","Size":1000,"Bitrate":\#(sourceBitrate)\#(tc),"MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc"},{"Index":1,"Type":"Audio","Codec":"aac"}]}]}"#
         return try JSONDecoder().decode(PlaybackInfoResponse.self, from: Data(json.utf8))
@@ -179,6 +180,8 @@ final class FakeDownloadBackend: DownloadBackend {
     var allowsCellular = false
     var probedDuration: Double?
     var yieldsInPlaybackInfo = false
+    var failingItemIDs: Set<String> = []
+    struct Refused: Error {}
     func mediaDuration(of url: URL) async -> Double? { probedDuration }
 }
 
