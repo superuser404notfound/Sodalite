@@ -1391,6 +1391,10 @@ final class PlayerHostController: AVPlayerViewController {
         #if os(tvOS)
         if routeLiveZap(.up) { return }
         #endif
+        upNavigate()
+    }
+
+    private func upNavigate() {
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveUp(); return }
         if viewModel.errorMessage != nil { return }
@@ -1445,6 +1449,10 @@ final class PlayerHostController: AVPlayerViewController {
         #if os(tvOS)
         if routeLiveZap(.down) { return }
         #endif
+        downNavigate()
+    }
+
+    private func downNavigate() {
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveDown(); return }
         if viewModel.errorMessage != nil { return }
@@ -1584,7 +1592,7 @@ final class PlayerHostController: AVPlayerViewController {
                         if panAxis == .horizontal {
                             forward ? rightPressed() : leftPressed()
                         } else {
-                            forward ? downPressed() : upPressed()
+                            forward ? downNavigate() : upNavigate()
                         }
                     }
                     lastDropdownStep = currentStep
@@ -1618,7 +1626,7 @@ final class PlayerHostController: AVPlayerViewController {
                     if abs(t.y) >= Self.verticalFireThreshold,
                        abs(v.y) >= Self.stepMinVelocity {
                         verticalStepFired = true
-                        if t.y < 0 { upPressed() } else { downPressed() }
+                        if t.y < 0 { upNavigate() } else { downNavigate() }
                     }
                 }
                 // Horizontal axis swallowed: overlay has no left/right nav.
@@ -1710,7 +1718,7 @@ final class PlayerHostController: AVPlayerViewController {
                       abs(v.y) >= Self.stepMinVelocity
                 else { return }
                 verticalStepFired = true
-                if t.y < 0 { upPressed() } else { downPressed() }
+                if t.y < 0 { upNavigate() } else { downNavigate() }
             case .undetermined:
                 break
             }

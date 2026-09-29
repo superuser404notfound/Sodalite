@@ -1,5 +1,7 @@
-/// Which channel keys change the live channel (Sodalite#173). Up and Down only while nothing else owns
-/// them; the channel keys of a TV remote mean nothing else, so they zap over the bar too.
+/// Which button presses change the live channel (Sodalite#173). Up and Down zap only while nothing else
+/// owns them and the bar is hidden (they pass through while it is visible); only the page keys, which
+/// mean nothing else on a TV remote, zap over the bar. Swipes never reach this: the pan path calls the
+/// host's navigate handlers directly.
 enum LiveZapInput {
     enum Key { case up, down, pageUp, pageDown }
     enum Action: Equatable { case zap(Int), passThrough, ignore }
