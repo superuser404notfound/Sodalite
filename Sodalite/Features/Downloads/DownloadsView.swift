@@ -4,6 +4,8 @@ import SwiftUI
 /// The Downloads tab (Sodalite#81). Reads only the store, so it works with no server at all.
 struct DownloadsView: View {
     @Environment(\.dependencies) private var dependencies
+    /// Set when the view is a sheet (compact iPhone, opened from the button beside the gear).
+    var onClose: (() -> Void)? = nil
     @State private var confirmsDeleteAll = false
     /// Measured off the render path: a directory walk per body pass would run on every progress tick.
     @State private var usageText = ""
@@ -59,6 +61,13 @@ struct DownloadsView: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("tab.downloads")
             .task(id: usageKey) { measureUsage() }
+            .toolbar {
+                if let onClose {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .close, action: onClose)
+                    }
+                }
+            }
             .alert("downloads.deleteAll.confirm.title", isPresented: $confirmsDeleteAll) {
                 Button("downloads.deleteAll", role: .destructive) { Task { await deleteAll() } }
                 Button("common.cancel", role: .cancel) {}

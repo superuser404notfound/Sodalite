@@ -33,6 +33,9 @@ struct TabRootView: View {
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var showSettings = false
+    /// Sodalite#81: on a compact iPhone the downloads open from a button beside the gear instead of
+    /// a tab. A sixth tab sends the bar into iOS's "More" list, which hid Search and crashed on Music.
+    @State private var showDownloads = false
     /// Profiles remembered for the active server, for ActiveUserBadge. Read here because this view is
     /// always on screen and the badge is not until it knows the count (Sodalite#169).
     @State private var rememberedProfileCount = 0
@@ -74,7 +77,7 @@ struct TabRootView: View {
     /// the iOS "More" tab, whose nested navigation controller skips the Settings root on back.
     /// Settings is reached via the gear overlay instead. tvOS + iPad keep it as a tab/sidebar item.
     private var displayedTabs: [AppTab] {
-        var tabs = AppTab.withDownloads(availableTabs, hasDownloads: !dependencies.downloadStore.items.isEmpty)
+        var tabs = AppTab.withDownloads(availableTabs, hasDownloads: showsDownloadsTab)
             .filter { !appearance.isTabHidden($0) }
         #if os(iOS)
         if hSizeClass == .compact { tabs = tabs.filter { $0 != .settings } }
@@ -165,6 +168,9 @@ struct TabRootView: View {
                 // via .padding(.top, gearChromeHeight) so content never slides under it.
                 HStack(spacing: 8) {
                     ActiveUserBadge(rememberedCount: rememberedProfileCount)
+                    if !dependencies.downloadStore.items.isEmpty {
+                        downloadsButton
+                    }
                     settingsGearButton
                 }
                 .padding(.trailing, 16)
@@ -182,6 +188,10 @@ struct TabRootView: View {
             #endif
         }
         #if os(iOS)
+        .sheet(isPresented: $showDownloads) {
+            DownloadsView(onClose: { showDownloads = false })
+                .themedPresentationBackground()
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(onClose: { showSettings = false })
                 .themedPresentationBackground()
@@ -295,7 +305,13 @@ struct TabRootView: View {
         .onChange(of: appState.requestedTab) { _, requested in
             guard let requested else { return }
             appState.requestedTab = nil
-            if tabsOnScreen.contains(requested) { selectedTab = requested }
+            if tabsOnScreen.contains(requested) {
+                selectedTab = requested
+            } else if requested == .downloads {
+                #if os(iOS)
+                showDownloads = true
+                #endif
+            }
         }
         .onChange(of: shellLayout) { old, new in
             let armed = switchOrigin
@@ -544,21 +560,46 @@ struct TabRootView: View {
         #endif
     }
 
+    /// A tab only where the bar has room for it: the iPad sidebar. See `showDownloads`.
+    private var showsDownloadsTab: Bool {
+        #if os(iOS)
+        hSizeClass != .compact && !dependencies.downloadStore.items.isEmpty
+        #else
+        false
+        #endif
+    }
+
     #if os(iOS)
     static let gearChromeHeight: CGFloat = 56
 
+    private var downloadsButton: some View {
+        chromeCircleButton(systemImage: "arrow.down.circle", label: "tab.downloads") { showDownloads = true }
+    }
+
     private var settingsGearButton: some View {
-        Button { showSettings = true } label: {
-            Image(systemName: "gearshape")
+        chromeCircleButton(systemImage: "gearshape", label: "tab.settings") { showSettings = true }
+    }
+
+    /// Dressed, sized and lifted like `ActiveUserBadge` beside it (36 pt avatar plus 6 pt insets,
+    /// the same material, edge and shadow, raised by 4 pt), so the corner reads as one strip of
+    /// controls rather than a pill next to larger, lower circles of another material.
+    private func chromeCircleButton(systemImage: String, label: LocalizedStringKey,
+                                    action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
                 .font(.title3)
-                .frame(width: 28, height: 28)
-                .padding(11)
-                .glassEffect(.regular, in: Circle())
+                .foregroundStyle(.white)
+                .frame(width: 36, height: 36)
+                .padding(6)
+                .background(Circle().fill(.ultraThinMaterial))
+                .overlay(Circle().strokeBorder(Color.Theme.panelEdge, lineWidth: 1))
+                .shadow(color: .black.opacity(0.15), radius: 6, y: 3)
                 // Make the whole circle the hit target, not just the rendered glyph.
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("tab.settings"))
+        .offset(y: -4)
+        .accessibilityLabel(Text(label))
     }
     #endif
 }

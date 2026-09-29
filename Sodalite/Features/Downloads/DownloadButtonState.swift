@@ -37,7 +37,8 @@ enum DownloadButtonState: Equatable {
         case .downloading: "arrow.down.circle.dotted"
         case .paused: "pause.circle"
         case .failed: "exclamationmark.circle"
-        case .downloaded: "checkmark.circle"
+        // Filled, not a checkmark: the checkmark is the watched state one button over.
+        case .downloaded: "arrow.down.circle.fill"
         }
     }
 }
@@ -48,11 +49,9 @@ struct DownloadRungOption: Identifiable, Equatable {
     var id: String { quality.rawValue }
 
     /// The same filter as the player picker (#87): a rung that would not transcode this file is the
-    /// original under another name.
-    static func options(sourceBitrate: Int?, sourceSize: Int64?, runtimeTicks: Int64?, lastUsed: StreamingQuality) -> [DownloadRungOption] {
-        let rungs = StreamingQuality.allCases.filter { $0 == .original || $0.bites(sourceBitrate: sourceBitrate) }
-        let ordered = rungs.contains(lastUsed) ? [lastUsed] + rungs.filter { $0 != lastUsed } : rungs
-        return ordered.map {
+    /// original under another name. Always best first, so the list reads the same every time.
+    static func options(sourceBitrate: Int?, sourceSize: Int64?, runtimeTicks: Int64?) -> [DownloadRungOption] {
+        StreamingQuality.allCases.filter { $0 == .original || $0.bites(sourceBitrate: sourceBitrate) }.map {
             DownloadRungOption(quality: $0, estimatedBytes: DownloadPlanner.estimatedBytes(
                 quality: $0, sourceBitrate: sourceBitrate, sourceSize: sourceSize, runtimeTicks: runtimeTicks))
         }

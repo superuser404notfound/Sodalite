@@ -7,16 +7,13 @@ import Observation
 final class DownloadPreferences {
     private enum Keys {
         static let wifiOnly = "downloads.wifiOnly"
-        static let lastQuality = "downloads.lastQuality"
     }
     @ObservationIgnored private let store: UserDefaults
 
     var wifiOnly: Bool { didSet { store.set(wifiOnly, forKey: Keys.wifiOnly) } }
-    var lastQuality: StreamingQuality { didSet { store.set(lastQuality.rawValue, forKey: Keys.lastQuality) } }
 
     init(store: UserDefaults = .standard) {
         self.store = store
         wifiOnly = store.object(forKey: Keys.wifiOnly) as? Bool ?? true
-        lastQuality = store.string(forKey: Keys.lastQuality).flatMap(StreamingQuality.init(rawValue:)) ?? .original
     }
 }

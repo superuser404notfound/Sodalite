@@ -92,8 +92,7 @@ private struct DownloadRungDialog: ViewModifier {
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
         let facts = target.facts
         return DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size,
-                                          runtimeTicks: facts.runtimeTicks,
-                                          lastUsed: dependencies.downloadPreferences.lastQuality)
+                                          runtimeTicks: facts.runtimeTicks)
     }
 
     private func label(for option: DownloadRungOption) -> String {
@@ -105,7 +104,6 @@ private struct DownloadRungDialog: ViewModifier {
 
     private func start(_ target: DownloadTarget, quality: StreamingQuality) {
         guard let manager = dependencies.downloadManager else { return }
-        dependencies.downloadPreferences.lastQuality = quality
         Task {
             do {
                 switch target {

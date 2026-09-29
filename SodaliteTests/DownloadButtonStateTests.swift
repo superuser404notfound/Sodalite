@@ -20,6 +20,11 @@ struct DownloadButtonStateTests {
         return DownloadedItem(manifest: m, snapshot: DownloadSnapshot(item: try! JSONDecoder().decode(JellyfinItem.self, from: Data(json.utf8)), series: nil, season: nil, source: src), directory: URL(fileURLWithPath: "/x"))
     }
 
+    /// Vincent, device round 2026-09-29: the finished download wore the watched checkmark.
+    @Test func aFinishedDownloadDoesNotLookWatched() {
+        #expect(!DownloadButtonState.downloaded.systemImage.contains("checkmark"))
+    }
+
     @Test func states() {
         #expect(DownloadButtonState.from(nil, liveProgress: nil) == .available)
         #expect(DownloadButtonState.from(item(.queued), liveProgress: nil) == .queued)
