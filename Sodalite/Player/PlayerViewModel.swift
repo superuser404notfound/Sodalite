@@ -782,6 +782,13 @@ final class PlayerViewModel {
     var behindLiveSeconds: Double = 0
     /// Channel for live sessions. Nil for VOD. `resetLiveSessionState` is its only writer.
     var liveChannel: JellyfinChannel?
+    /// Sodalite#173: the channels Up/Down steps through, fetched in the background per live session.
+    var zapLineup: LiveChannelLineup?
+    /// Net presses since the last tune; 0 when idle.
+    var zapPendingOffset = 0
+    var zapBanner: LiveZapBanner?
+    @ObservationIgnored var zapSettleTask: Task<Void, Never>?
+    @ObservationIgnored var zapLineupTask: Task<LiveChannelLineup?, Never>?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.
@@ -1058,6 +1065,7 @@ final class PlayerViewModel {
                 Task { [weak self] in await self?.refreshExternalMetadataWithArtwork() }
                 await reportStart()
                 startProgressReporting()
+                loadZapLineupIfNeeded()
                 return
             }
 
@@ -1440,6 +1448,10 @@ final class PlayerViewModel {
         nextEpisodeTimer = nil
         liveProgramFollow?.cancel()
         liveProgramFollow = nil
+        zapSettleTask?.cancel()
+        zapSettleTask = nil
+        zapLineupTask?.cancel()
+        zapLineupTask = nil
         controlsTimer?.cancel()
         controlsTimer = nil
         continuousSeekTask?.cancel()
