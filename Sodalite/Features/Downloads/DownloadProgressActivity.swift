@@ -77,20 +77,31 @@ final class DownloadProgressActivity {
     /// Pushes the current numbers; false once the batch is done and the task was completed.
     private func update() -> Bool {
         guard let task else { return false }
-        guard let summary = summary(), !summary.isDone else {
+        guard let summary = summary() else {
             end(success: true)
             return false
         }
+        show(summary, on: task)
+        // The final numbers go out BEFORE completing: the system keeps the last subtitle on the
+        // finished activity, which otherwise read "0 of 1" under the checkmark.
+        if summary.isDone {
+            end(success: true)
+            return false
+        }
+        return true
+    }
+
+    private func show(_ summary: DownloadActivitySummary, on task: BGContinuedProcessingTask) {
         // Bytes where the sizes are known, items otherwise: a transcode has no size until it ends.
         if summary.totalBytes > 0 {
             task.progress.totalUnitCount = summary.totalBytes
-            task.progress.completedUnitCount = min(summary.receivedBytes, summary.totalBytes)
+            task.progress.completedUnitCount = summary.isDone
+                ? summary.totalBytes : min(summary.receivedBytes, summary.totalBytes)
         } else {
             task.progress.totalUnitCount = Int64(summary.total)
             task.progress.completedUnitCount = Int64(summary.finished)
         }
         task.updateTitle(String(localized: "tab.downloads"), subtitle: subtitle(for: summary))
-        return true
     }
 
     private func end(success: Bool) {
