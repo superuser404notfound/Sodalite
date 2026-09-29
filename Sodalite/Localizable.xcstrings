@@ -65933,6 +65933,330 @@
         }
       }
     },
+    "changelog.1_1_0.versionLabel.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U filmů a epizod s více verzemi nyní tlačítko Verze ukazuje jen tu část názvu, která verzi odlišuje, například „2160p Remux“, místo useknutého názvu souboru. Na Apple TV se s tímto popiskem rozbalí, když získá fokus."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På film og afsnit med flere versioner viser Version-knappen nu kun den del af navnet, der adskiller versionen, f.eks. \"2160p Remux\", i stedet for et afkortet filnavn. På Apple TV folder den sig ud til den tekst, når den får fokus."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei Filmen und Folgen mit mehreren Versionen zeigt der Versionsknopf jetzt nur den Teil des Namens, der die Version unterscheidet, etwa „2160p Remux“, statt eines abgeschnittenen Dateinamens. Auf dem Apple TV klappt er dieses Label auf, sobald er den Fokus bekommt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε ταινίες και επεισόδια με πολλές εκδόσεις, το κουμπί Έκδοση δείχνει πλέον μόνο το τμήμα του ονόματος που ξεχωρίζει την έκδοση, π.χ. «2160p Remux», αντί για ένα κομμένο όνομα αρχείου. Στο Apple TV ανοίγει με αυτή την ετικέτα όταν αποκτά εστίαση."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On movies and episodes with several versions, the Version button now shows just the part of the name that sets the version apart, such as \"2160p Remux\", instead of a cut-off file name. On Apple TV it opens to that label when it gets focus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En películas y episodios con varias versiones, el botón Versión ahora muestra solo la parte del nombre que distingue la versión, como «2160p Remux», en lugar de un nombre de archivo cortado. En Apple TV se despliega con esa etiqueta al recibir el foco."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elokuvissa ja jaksoissa, joilla on useita versioita, Versio-painike näyttää nyt vain sen osan nimestä, joka erottaa version muista, esimerkiksi ”2160p Remux”, katkaistun tiedostonimen sijaan. Apple TV:ssä se avautuu tähän tekstiin saadessaan kohdistuksen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur les films et épisodes disponibles en plusieurs versions, le bouton Version n’affiche plus que la partie du nom qui distingue la version, par exemple « 2160p Remux », au lieu d’un nom de fichier tronqué. Sur Apple TV, il s’ouvre sur ce libellé lorsqu’il reçoit le focus."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kod filmova i epizoda s više verzija gumb Verzija sada prikazuje samo dio naziva po kojem se verzija razlikuje, npr. „2160p Remux”, umjesto odrezanog naziva datoteke. Na Apple TV-u otvara se s tom oznakom kada dobije fokus."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A több verzióban elérhető filmeknél és epizódoknál a Verzió gomb mostantól csak a név azon részét mutatja, amely megkülönbözteti a verziót, például „2160p Remux”, levágott fájlnév helyett. Apple TV-n fókuszba kerülve ezzel a felirattal nyílik ki."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su film ed episodi con più versioni, il pulsante Versione ora mostra solo la parte del nome che distingue la versione, ad esempio «2160p Remux», invece di un nome file troncato. Su Apple TV si espande con questa etichetta quando riceve il focus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数のバージョンがある映画やエピソードでは、バージョンボタンに途中で切れたファイル名ではなく、「2160p Remux」のようにそのバージョンを区別する部分だけが表示されるようになりました。Apple TV ではフォーカスが当たるとこのラベルが開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여러 버전이 있는 영화와 에피소드에서 버전 버튼은 이제 잘린 파일 이름 대신 \"2160p Remux\"처럼 해당 버전을 구분하는 부분만 표시합니다. Apple TV에서는 포커스를 받으면 이 레이블이 펼쳐집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På filmer og episoder med flere versjoner viser Versjon-knappen nå bare den delen av navnet som skiller versjonen fra de andre, for eksempel «2160p Remux», i stedet for et avkortet filnavn. På Apple TV folder den seg ut til denne teksten når den får fokus."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bij films en afleveringen met meerdere versies toont de knop Versie nu alleen het deel van de naam dat de versie onderscheidt, zoals ‘2160p Remux’, in plaats van een afgekapte bestandsnaam. Op Apple TV klapt hij met dat label open zodra hij focus krijgt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W filmach i odcinkach z kilkoma wersjami przycisk Wersja pokazuje teraz tylko tę część nazwy, która odróżnia wersję, np. „2160p Remux”, zamiast uciętej nazwy pliku. Na Apple TV rozwija się do tej etykiety, gdy otrzyma fokus."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em filmes e episódios com várias versões, o botão Versão agora mostra apenas a parte do nome que distingue a versão, como “2160p Remux”, em vez de um nome de arquivo cortado. Na Apple TV, ele se expande com esse rótulo ao receber o foco."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em filmes e episódios com várias versões, o botão Versão mostra agora apenas a parte do nome que distingue a versão, como “2160p Remux”, em vez de um nome de ficheiro cortado. Na Apple TV, expande-se com essa etiqueta ao receber o foco."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La filmele și episoadele cu mai multe versiuni, butonul Versiune afișează acum doar partea din nume care deosebește versiunea, de exemplu „2160p Remux”, în locul unui nume de fișier tăiat. Pe Apple TV se deschide cu această etichetă când primește focusul."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У фильмов и эпизодов с несколькими версиями кнопка «Версия» теперь показывает только ту часть названия, которая отличает версию, например «2160p Remux», вместо обрезанного имени файла. На Apple TV она раскрывается с этой подписью при получении фокуса."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri filmoch a epizódach s viacerými verziami tlačidlo Verzia teraz ukazuje len tú časť názvu, ktorá verziu odlišuje, napríklad „2160p Remux“, namiesto odrezaného názvu súboru. Na Apple TV sa s týmto popisom rozbalí, keď získa fokus."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "För filmer och avsnitt med flera versioner visar knappen Version nu bara den del av namnet som skiljer versionen åt, till exempel ”2160p Remux”, i stället för ett avkortat filnamn. På Apple TV fälls den ut med den texten när den får fokus."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla sürümü olan film ve bölümlerde Sürüm düğmesi artık kesilmiş bir dosya adı yerine yalnızca sürümü ayıran kısmı, örneğin \"2160p Remux\", gösterir. Apple TV'de odak aldığında bu etiketle açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У фільмах та епізодах із кількома версіями кнопка «Версія» тепер показує лише ту частину назви, що відрізняє версію, наприклад «2160p Remux», замість обрізаної назви файлу. На Apple TV вона розгортається з цим підписом, коли отримує фокус."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对于有多个版本的电影和剧集，版本按钮现在只显示名称中区分该版本的部分（例如“2160p Remux”），而不是被截断的文件名。在 Apple TV 上，按钮获得焦点时会展开显示此标签。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "對於有多個版本的電影和劇集，版本按鈕現在只顯示名稱中區分該版本的部分（例如「2160p Remux」），而不是被截斷的檔案名稱。在 Apple TV 上，按鈕取得焦點時會展開顯示此標籤。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.versionLabel.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačítko verze ukazuje jen rozdíl"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsknappen viser kun forskellen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsknopf nennt nur den Unterschied"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το κουμπί έκδοσης δείχνει μόνο τη διαφορά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version button names only the difference"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El botón de versión muestra solo la diferencia"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versiopainike näyttää vain eron"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le bouton Version n’affiche que la différence"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gumb verzije prikazuje samo razliku"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A verziógomb csak a különbséget mutatja"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il pulsante Versione mostra solo la differenza"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョンボタンは違いだけを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 버튼에 차이점만 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versjonsknappen viser bare forskjellen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versieknop toont alleen het verschil"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przycisk wersji pokazuje tylko różnicę"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Botão de versão mostra só a diferença"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Botão de versão mostra só a diferença"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butonul de versiune arată doar diferența"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка версии показывает только разницу"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačidlo verzie ukazuje len rozdiel"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsknappen visar bara skillnaden"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürüm düğmesi yalnızca farkı gösterir"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка версії показує лише різницю"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本按钮只显示差异"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本按鈕只顯示差異"
+          }
+        }
+      }
+    },
     "changelog.modal.dismiss" : {
       "extractionState" : "manual",
       "localizations" : {

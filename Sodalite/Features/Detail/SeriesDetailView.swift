@@ -933,7 +933,7 @@ struct SeriesDetailView: View {
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
-            // First after Play, always labelled, same as movie detail: the version belongs to the
+            // First after Play, same as movie detail: the version belongs to the
             // episode Play would start, so it rides with playTarget and disappears with it. Series
             // roots take their target from the slim episode list, which carries no MediaSources, so
             // in practice it appears in the episode panel once enrichment lands (Sodalite#139).
@@ -943,8 +943,8 @@ struct SeriesDetailView: View {
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
-                    subtitle: versionSelection.resolvedSource(for: target)?.versionLabel,
-                    alwaysShowsLabel: true,
+                    subtitle: versionSelection.resolvedSource(for: target).map(sources.distinguishingLabel),
+                    alwaysShowsLabel: VersionSelection.labelStaysOpen,
                     action: {
                         versionChoice = VersionPickerChoice(
                             item: target,

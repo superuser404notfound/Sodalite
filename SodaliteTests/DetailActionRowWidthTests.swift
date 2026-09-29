@@ -23,47 +23,64 @@ struct DetailActionRowWidthTests {
                                             height: CGFloat.greatestFiniteMagnitude)).width
     }
 
-    /// The row a resumed multi-version movie draws: Play and Version labelled, the rest icon-only.
-    private func movieRow(versionLabel: String) -> CGFloat {
+    /// The row a resumed multi-version movie draws, as finished by Sodalite#146 (More Details after
+    /// Watched). Play is labelled, the rest icon-only. The version pill collapses with them at rest
+    /// and opens on focus (Sodalite#172); `versionFocused` stands in for that focus, which a hosted
+    /// view never receives, by lifting the row's collapse off that one pill.
+    private func movieRow(versionLabel: String, versionFocused: Bool) -> CGFloat {
         width(Group {
             GlassActionButton(title: "detail.resume", systemImage: "play.fill",
                               isProminent: true, subtitle: "1:23:45", action: {})
             GlassActionButton(title: "detail.version.button", systemImage: "film.stack",
-                              subtitle: versionLabel, alwaysShowsLabel: true, action: {})
+                              subtitle: versionLabel, action: {})
+                .environment(\.collapsesActionButtonLabel, !versionFocused)
             GlassActionButton(title: "detail.replay", systemImage: "arrow.counterclockwise", action: {})
             GlassActionButton(title: "detail.favorite", systemImage: "heart", action: {})
             GlassActionButton(title: "detail.markWatched", systemImage: "checkmark.circle", action: {})
+            GlassActionButton(title: "detail.moreDetails", systemImage: "info.circle", action: {})
             GlassActionButton(title: "detail.delete.button", systemImage: "trash",
                               isDestructive: true, action: {})
         })
     }
 
-    /// Specs only, which is what a source without a server-side name falls back to. 1166 pt measured.
+    /// At rest the version pill is a glyph like its neighbours, so what the server named the
+    /// version costs the row nothing until the pill has focus.
+    @Test func atRestTheVersionLabelCostsTheRowNothing() {
+        let short = movieRow(versionLabel: "1080p", versionFocused: false)
+        let long = movieRow(versionLabel: String(repeating: "Very Long Version Name ", count: 8),
+                            versionFocused: false)
+        #expect(short == long, "resting row grew from \(short) to \(long) pt")
+        #expect(short <= budget, "row is \(short) pt of \(budget)")
+    }
+
+    /// What the pill carries on focus in the common case: the words the versions do not share.
+    @Test func theRowFitsWithADistinguishingLabel() {
+        let w = movieRow(versionLabel: "2160p Remux", versionFocused: true)
+        #expect(w <= budget, "row is \(w) pt of \(budget)")
+    }
+
+    /// Specs only, which is what versions without telling names fall back to.
     @Test func theRowFitsWithADerivedVersionLabel() {
-        let w = movieRow(versionLabel: "1080p · H264 · 38,9 MB")
+        let w = movieRow(versionLabel: "1080p · H264 · 38,9 MB", versionFocused: true)
         #expect(w <= budget, "row is \(w) pt of \(budget)")
     }
 
-    /// What the Merge Versions plugin produces: the version's name is the file's name, and long
-    /// (Sodalite#139's own report: "Captain America The Winter Soldier (2014)"). 1394 pt measured.
-    @Test func theRowFitsWithAFileNameAsTheVersionLabel() {
-        let w = movieRow(versionLabel: "Captain America The Winter Soldier (2014) · 1080p · H264 · 12,4 GB")
-        #expect(w <= budget, "row is \(w) pt of \(budget)")
-    }
-
-    /// A server-written label has no ceiling of its own, and a scene release name is the realistic
-    /// long end of it. Unbounded that measured 2421 pt, 600 past the screen; the subtitle ceiling in
-    /// `GlassActionButton` is what brings it back.
+    /// The last fallback is the full label, and a server-written label has no ceiling of its own.
+    /// A scene release name is the realistic long end; unbounded it measured 2421 pt, 600 past the
+    /// screen, and the subtitle ceiling in `GlassActionButton` is what brings it back.
     @Test func theRowFitsWithAReleaseNameAsTheVersionLabel() {
-        let w = movieRow(versionLabel: "Captain.America.The.Winter.Soldier.2014.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-FraMeSToR · 4K · HEVC · 78,4 GB")
+        let w = movieRow(versionLabel: "Captain.America.The.Winter.Soldier.2014.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.TrueHD.7.1.Atmos-FraMeSToR · 4K · HEVC · 78,4 GB",
+                         versionFocused: true)
         #expect(w <= budget, "row is \(w) pt of \(budget)")
     }
 
-    /// However long the label grows, the row has to stop growing with it, or the actions behind it
-    /// (watched, delete) walk off the right edge, where no remote press reaches them.
+    /// However long the label grows, the focused row has to stop growing with it, or the actions
+    /// behind it (watched, delete) walk off the right edge, where no remote press reaches them.
     @Test func theRowStopsGrowingWithTheLabel() {
-        let long = movieRow(versionLabel: String(repeating: "Very Long Version Name ", count: 8))
-        let longer = movieRow(versionLabel: String(repeating: "Very Long Version Name ", count: 40))
+        let long = movieRow(versionLabel: String(repeating: "Very Long Version Name ", count: 8),
+                            versionFocused: true)
+        let longer = movieRow(versionLabel: String(repeating: "Very Long Version Name ", count: 40),
+                              versionFocused: true)
         #expect(long == longer, "row grew from \(long) to \(longer) pt")
         #expect(long <= budget, "row is \(long) pt of \(budget)")
     }

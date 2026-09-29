@@ -583,16 +583,16 @@ struct MovieDetailView: View {
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
-            // First after Play, and always labelled: this is a play decision, and a version button
-            // that collapses to a bare glyph hides the one thing it is there to say. Only a
-            // multi-source item grows it, so its presence answers "does this have more than one
-            // version" before it is ever pressed (Sodalite#139).
+            // First after Play: this is a play decision. Only a multi-source item grows it, so its
+            // presence answers "does this have more than one version" before it is ever pressed
+            // (Sodalite#139). Its label is the part of the version's name the others do not share,
+            // since the shared start is what a truncation keeps (Sodalite#172).
             if VersionSelection.isOffered(for: vm.item), let sources = vm.item.mediaSources {
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
-                    subtitle: versionSelection.resolvedSource(for: vm.item)?.versionLabel,
-                    alwaysShowsLabel: true,
+                    subtitle: versionSelection.resolvedSource(for: vm.item).map(sources.distinguishingLabel),
+                    alwaysShowsLabel: VersionSelection.labelStaysOpen,
                     action: {
                         versionChoice = VersionPickerChoice(
                             item: vm.item,

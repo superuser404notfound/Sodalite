@@ -50,6 +50,12 @@ enum Changelog {
                     "changelog.1_1_0.streamFormat.body",
                     icon: "waveform.path.ecg"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.versionLabel.title",
+                    "changelog.1_1_0.versionLabel.body",
+                    icon: "film.stack"
+                ),
             ]
         ),
         // MARK: 1.0.0
