@@ -40,6 +40,17 @@ struct VersionSelection: Equatable {
         chosenID = source.id
     }
 
+    /// Whether the version pill keeps its label at rest. On tvOS it collapses with the rest of the
+    /// row and opens on focus (Sodalite#172); a touch screen has no focus to open it on, so there it
+    /// would never say which version is in force (Sodalite#139).
+    static var labelStaysOpen: Bool {
+        #if os(tvOS)
+        false
+        #else
+        true
+        #endif
+    }
+
     /// Two sources are what makes a choice; one, or a slim item whose query never asked for
     /// `MediaSources`, gets no button.
     static func isOffered(for item: JellyfinItem) -> Bool {

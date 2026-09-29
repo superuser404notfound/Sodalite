@@ -16,9 +16,8 @@ struct GlassActionButton: View {
     var isLoading: Bool = false
     /// A disabled button leaves the focus engine, so on tvOS the row's auto-focus lands on the next button instead and a `@FocusState` push at that button is silently dropped. Set false where the button must keep focus through its loading spell; the host then has to make a press during loading meaningful.
     var disablesWhileLoading: Bool = true
-    /// Keeps the label out of the row's icon-only collapse. For an action whose label IS its
-    /// information (the version button names the version in force), a bare glyph hides the very
-    /// thing that says the choice exists, and nobody presses a pill to find out (Sodalite#139).
+    /// Keeps the label out of the row's icon-only collapse, for an action whose label IS its
+    /// information where no focus exists to reveal it (the version button on a touch screen).
     var alwaysShowsLabel: Bool = false
     let action: () -> Void
 
