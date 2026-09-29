@@ -20,15 +20,12 @@ struct FormatBadgeRow: View {
         HStack(spacing: 6) {
             ForEach(pills, id: \.self) { pill in
                 Text(pill)
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(.secondary.opacity(0.5), lineWidth: 1)
-                    )
+                    .metadataBox()
             }
         }
+        // Sodalite#171: set here and not inherited, because the episode panel and the phone-portrait
+        // movie page place the row outside `ItemMetadataRow`.
+        .foregroundStyle(.primary)
     }
 
     /// The row as a metadata-line segment, or no segment at all when there is nothing to say or the
