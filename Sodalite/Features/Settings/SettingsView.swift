@@ -81,14 +81,7 @@ struct SettingsView: View {
 
     #if os(iOS)
     private func closeButton(_ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark")
-                .font(.title3.weight(.semibold))
-                .padding(12)
-                .glassEffect(.regular, in: Circle())
-                .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
+        GlassCloseButton(action: action)
         .padding(.trailing, 16)
         .padding(.top, 8)
     }

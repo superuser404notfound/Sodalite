@@ -72,14 +72,7 @@ private struct DetailCoverHost<Content: View>: View {
         // Top-trailing glass circle (matching the settings gear) so it never sits on the
         // leading page title.
         .overlay(alignment: .topTrailing) {
-            Button(action: dismiss) {
-                Image(systemName: "xmark")
-                    .font(.title3.weight(.semibold))
-                    .padding(12)
-                    .glassEffect(.regular, in: Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
+            GlassCloseButton(action: dismiss)
             .padding(.trailing, 16)
             .padding(.top, 8)
             // Hidden, not removed: the stack's own back arrow is the way out of a pushed page,

@@ -452,6 +452,7 @@
 		562E60255DDCE4EE0975E7D6 /* ReplacedEpisodeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F1B3C38E5D186AFF71A7FA /* ReplacedEpisodeResolver.swift */; };
 		5660BB884247FC00820E5B0E /* GlassActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1021036298773AF91C95F8C2 /* GlassActionButton.swift */; };
 		566A6533F1235493C7543F70 /* ContentLogoTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 896F7D4A24F4824487750AC9 /* ContentLogoTitle.swift */; };
+		567975CB7427B2AFCD5EE8AB /* GlassCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8495C754B2E88CFF244BE0F /* GlassCloseButton.swift */; };
 		567E1BA5EDE3563ADD708A7E /* LaunchProfilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E81D87A395406880D1F11F /* LaunchProfilePickerView.swift */; };
 		568102BCBD323D73B1DC5806 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD612B8B5146AAF6925E6A3 /* StoreKitService.swift */; };
 		571281CBAC69E4893F7AD868 /* TagRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9422C27A917981DB27265203 /* TagRow.swift */; };
@@ -944,6 +945,7 @@
 		B15BD657EC8E91B6B1AD33C0 /* TranscodeResolutionEstimateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E543EC567CFB5B7C0B39D3 /* TranscodeResolutionEstimateTests.swift */; };
 		B165E41379689993F2CACDCE /* LogExportServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6FB14078544984DC2BB89B /* LogExportServerTests.swift */; };
 		B1B636032192CD5EAD5A0B2B /* SeerrLibraryDedupeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961E6A3B7932ED4F14791880 /* SeerrLibraryDedupeTests.swift */; };
+		B21F0A12E382406AB5C46C7D /* GlassCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8495C754B2E88CFF244BE0F /* GlassCloseButton.swift */; };
 		B285F98E58C222B90F4630F1 /* TransportFocusOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 772524EDA57946DC3B36172D /* TransportFocusOrder.swift */; };
 		B289489D9F110E3B1DA7C480 /* PlayerViewModel+SessionReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB5764AB40106CA965930C0 /* PlayerViewModel+SessionReporting.swift */; };
 		B2B290419C51F96537C066FC /* SeerrRequestOptionsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6830A3E115B8115485AA5ACB /* SeerrRequestOptionsForm.swift */; };
@@ -1936,6 +1938,7 @@
 		A6F4A4C45FFE43AA85F2A678 /* ProfileSettingsContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSettingsContainerTests.swift; sourceTree = "<group>"; };
 		A6F5CE78EAB9F5BC71D0CF0B /* LiveTransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTransportBar.swift; sourceTree = "<group>"; };
 		A76F4E46F2995ECC621AF105 /* TopShelfAccent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfAccent.swift; sourceTree = "<group>"; };
+		A8495C754B2E88CFF244BE0F /* GlassCloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCloseButton.swift; sourceTree = "<group>"; };
 		A84FFA0F16CB71960B207129 /* DiagnosticLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogView.swift; sourceTree = "<group>"; };
 		A8915E7229A24538FA098A0D /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		A8CA384FE492804EF1782A65 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -2330,6 +2333,7 @@
 				C631A6EC153641E1CAF0F5A3 /* FocusableCard.swift */,
 				5175FE305BAC890D98161B48 /* FocusResponse.swift */,
 				A3A3733E54C8B83503AFBE52 /* FormatBadgeRow.swift */,
+				A8495C754B2E88CFF244BE0F /* GlassCloseButton.swift */,
 				7501601A2864C83A34FEEB88 /* HorizontalMediaRow.swift */,
 				25616C805E9164F8CE0B0F61 /* ImageLoadLadder.swift */,
 				FC2D2345AE7229DA9886E005 /* ImagePayload.swift */,
@@ -3866,6 +3870,7 @@
 				811FD08A20D77820D6848B92 /* GenreFilter.swift in Sources */,
 				5660BB884247FC00820E5B0E /* GlassActionButton.swift in Sources */,
 				D22B52A7471C7AB924B4B5A6 /* GlassBackground.swift in Sources */,
+				B21F0A12E382406AB5C46C7D /* GlassCloseButton.swift in Sources */,
 				5135BB5FABAEAD27031166C6 /* GuardianPINCrypto.swift in Sources */,
 				24A23FB39A9EB29464FDD985 /* GuardianPINRecoveryCandidates.swift in Sources */,
 				57A99162E968F403D66F8F9D /* GuideAxis.swift in Sources */,
@@ -4715,6 +4720,7 @@
 				32E90092EF199E8EF002F0DE /* GenreFilter.swift in Sources */,
 				A4D535231D2DEAF8FD49722B /* GlassActionButton.swift in Sources */,
 				D601261EBA6F4571F9D2B138 /* GlassBackground.swift in Sources */,
+				567975CB7427B2AFCD5EE8AB /* GlassCloseButton.swift in Sources */,
 				D36F4A87CC36115958693DD5 /* GuardianPINCrypto.swift in Sources */,
 				F3FAB17E58CBC268E7603C64 /* GuardianPINRecoveryCandidates.swift in Sources */,
 				955FE9E5B37AAE0E81E1C594 /* GuideAxis.swift in Sources */,

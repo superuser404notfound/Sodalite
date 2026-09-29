@@ -101,6 +101,10 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
 
     /// tvOS fold marker state. The offset feeds off the same scroll-geometry hook as scrollDim.
     @State private var scrollOffset: CGFloat = 0
+    /// Whether the artwork (the portrait band, or the first page's clear hero window elsewhere) has
+    /// mostly left the top, so the system's soft top edge may blur what scrolls under the status bar
+    /// and the close button (as on Home and the genre pages). iOS only; tvOS has no such chrome.
+    @State private var bandHasLeftTop = false
     /// Viewport height, which is also the first page's height (it is `containerRelativeFrame`).
     /// Read rather than assumed, so the pinned mark arrives with the fold on every tier.
     @State private var containerHeight: CGFloat = 0
@@ -314,7 +318,16 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             // Linear ramp over the clear hero window, capped at 0.3.
             scrollDim = min(max(offset / heroWindow, 0), 1) * 0.3
             scrollOffset = offset
+            bandHasLeftTop = offset > heroWindow * 0.6
         }
+        #if os(iOS)
+        // Same as the portrait page (see there): the soft top edge only once the first page has
+        // scrolled well up, and a bar the height of the close button's row so it covers that too.
+        .safeAreaBar(edge: .top) {
+            Color.clear.frame(height: 56)
+        }
+        .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
+        #endif
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.containerSize.height
         } action: { _, height in
@@ -412,9 +425,21 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         .ignoresSafeArea(edges: [.top, .bottom])
         // iOS 26 lays its own effect over a scroll view's top edge, on top of the band, and it is a
         // separate thing from the navigation bar's background: hiding that background left the top of
-        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). This page draws its
-        // own top edge and wants neither.
-        .scrollEdgeEffectHidden(true, for: .top)
+        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). So it stays off
+        // while the band is up there, and comes on once the band has mostly scrolled away: from then
+        // on the page's rows pass under the status bar and the close button, and they blur out there
+        // like everywhere else instead of running under them sharp.
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > bandHeight * 0.6
+        } action: { _, hasLeft in
+            bandHasLeftTop = hasLeft
+        }
+        .safeAreaBar(edge: .top) {
+            // Only the height of the close button's row, for the edge effect to cover it too. The
+            // page ignores the top safe area, so this moves nothing on it.
+            Color.clear.frame(height: 56)
+        }
+        .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
         .animation(.easeInOut(duration: 0.4), value: artworkPalette)
     }
 

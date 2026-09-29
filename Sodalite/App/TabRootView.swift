@@ -601,7 +601,9 @@ struct TabRootView: View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.title3)
-                .foregroundStyle(.white)
+                // The accent, like every close button: these are the app's controls, the badge
+                // beside them is a name.
+                .foregroundStyle(.tint)
                 .frame(width: 36, height: 36)
                 .padding(6)
                 .background(Circle().fill(.ultraThinMaterial))
