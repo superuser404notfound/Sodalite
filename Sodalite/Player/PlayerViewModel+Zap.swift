@@ -83,8 +83,9 @@ extension PlayerViewModel {
         zapBanner = LiveZapBanner(channel: zapTarget, direction: dir)
     }
 
-    /// Turns the settled presses into a retune. Commits run one after another, so a newer press never
-    /// closes a tuner the previous commit is still closing; it cancels that commit's tune instead.
+    /// Turns the settled presses into a retune. Commits run one after another and after any retune in
+    /// flight, so a newer press never closes a tuner something else is still closing; it cancels the
+    /// previous commit's tune instead.
     func commitZap() async {
         let offset = zapPendingOffset
         zapPendingOffset = 0
@@ -97,8 +98,10 @@ extension PlayerViewModel {
         zapBannerHideTask?.cancel()
         loadTask?.cancel()
         let prior = zapCommitTask
+        let retune = liveRetuneTask
         let commit = Task { [weak self] in
             await prior?.value
+            await retune?.value
             await self?.performZap(offset: offset, generation: generation)
         }
         zapCommitTask = commit

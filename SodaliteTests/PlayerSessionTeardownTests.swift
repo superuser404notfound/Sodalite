@@ -116,8 +116,8 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     /// Item ids whose PlaybackInfo answers late and ignores cancellation, like a request already on
     /// the wire when the session is torn down.
     var uncancellableDelayItemIDs: Set<String> = []
-    /// Holds every stop report this long before recording it, so a test can act while one is on the wire.
-    var stopReportDelay: Duration?
+    /// Holds every stop report at this gate before recording it, so a test can act while one is on the wire.
+    var stopReportGate: TestGate?
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
@@ -134,7 +134,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var deviceID: String { "device" }
 
     func reportPlaybackStopped(_ report: PlaybackStopReport) async throws {
-        if let stopReportDelay { try? await Task.sleep(for: stopReportDelay) }
+        await stopReportGate?.pass()
         lock.withLock {
             _stoppedReports.append(report)
             _events.append("stop:\(report.liveStreamId ?? "-")")

@@ -996,7 +996,9 @@ extension PlayerViewModel {
     func closeLiveSessionServerSide() async {
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
-        await reportStop(liveStreamID: deadTuner)
+        if hasReportedStart || deadTuner != nil {
+            await reportStop(liveStreamID: deadTuner)
+        }
         if let deadSession {
             let svc = playbackService
             Task.detached { try? await svc.stopActiveEncodings(playSessionID: deadSession) }
@@ -1007,12 +1009,27 @@ extension PlayerViewModel {
 
     /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.
     func retuneLiveStream() async {
+        let channelID = liveChannel?.id
+        let priorRetune = liveRetuneTask
+        let pendingZap = zapCommitTask
+        let retune = Task { [weak self] in
+            await priorRetune?.value
+            await pendingZap?.value
+            await self?.performLiveRetune(channelID: channelID)
+        }
+        liveRetuneTask = retune
+        await retune.value
+    }
+
+    private func performLiveRetune(channelID: String?) async {
+        // A zap landed while this waited: the channel it was asked for is gone, and so is its session.
+        guard liveChannel?.id == channelID else { return }
         // Close the dead session server-side BEFORE opening the new one, so an orphan ffmpeg cannot fill the server disk.
         let deadSession = playSessionID
         await closeLiveSessionServerSide()
         // Not loadTask, so stopPlayback cannot cancel this: a Back during the stop report or the new
         // tune has to be read off the latch, or the tune plays on behind a dismissed player.
-        guard !isTearingDown else { return }
+        guard !isTearingDown, liveChannel?.id == channelID else { return }
         do {
             try await loadLiveStream()
             if isTearingDown {

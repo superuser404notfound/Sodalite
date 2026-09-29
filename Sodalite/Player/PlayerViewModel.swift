@@ -793,6 +793,9 @@ final class PlayerViewModel {
     /// The commit in flight; the next one waits for it so two never close the same tuner.
     @ObservationIgnored var zapCommitTask: Task<Void, Never>?
     @ObservationIgnored var zapCommitGeneration = 0
+    /// The retune in flight (recovery, audio switch, foreground return). Zap commits and retunes wait
+    /// for each other, so the two never close or open a tuner side by side.
+    @ObservationIgnored var liveRetuneTask: Task<Void, Never>?
     /// Test seam: nil in production, which means `startPlayback()`.
     @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
@@ -1050,7 +1053,9 @@ final class PlayerViewModel {
                 didAbandonLiveTunerFile = false
                 try await loadLiveStream()
                 if Task.isCancelled || isTearingDown {
-                    player.stop()
+                    // A superseded load (channel zap) leaves the engine to its successor's in-place load;
+                    // stopping here would drop the AVPlayer and Now Playing between channels (#15).
+                    if isTearingDown { player.stop() }
                     // loadLiveStream() may have opened a tuner before cancel landed; release so server doesn't leak.
                     releaseLiveTunerIfNeeded()
                     hostLoadActive = false

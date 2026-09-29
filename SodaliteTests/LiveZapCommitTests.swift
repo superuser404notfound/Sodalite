@@ -44,25 +44,30 @@ struct LiveZapCommitTests {
     @Test func aZapDuringAZapWaitsForTheFirstToSettle() async {
         let vm = makeViewModel(liveChannelID: "a1", playback: RecordingPlaybackService())
         vm.zapLineup = lineupA
+        let gate = TestGate()
         var log: [String] = []
         vm.zapStartPlayback = {
             let id = vm.liveChannel?.id ?? "?"
             log.append("start \(id)")
-            try? await Task.sleep(for: .milliseconds(100))
-            log.append("end \(id)")
+            await gate.pass()
+            log.append("end \(id) cancelled=\(Task.isCancelled)")
         }
         vm.zapPendingOffset = 1
         let first = Task { await vm.commitZap() }
-        try? await Task.sleep(for: .milliseconds(20))
+        await gate.arrival(1)
         vm.zapPendingOffset = 1
-        await vm.commitZap()
+        let second = Task { await vm.commitZap() }
+        while vm.zapCommitGeneration < 2 { await Task.yield() }
+        gate.open()
         await first.value
-        #expect(log == ["start a2", "end a2", "start a3", "end a3"])
+        await second.value
+        #expect(log == ["start a2", "end a2 cancelled=true", "start a3", "end a3 cancelled=false"])
     }
 
     @Test func aZapDuringTheFirstCloseClosesEachTunerOnce() async {
         let service = RecordingPlaybackService()
-        service.stopReportDelay = .milliseconds(100)
+        let gate = TestGate()
+        service.stopReportGate = gate
         let vm = makeViewModel(liveChannelID: "a1", playback: service)
         vm.zapLineup = lineupA
         vm.hasReportedStart = true
@@ -72,13 +77,65 @@ struct LiveZapCommitTests {
         vm.zapStartPlayback = { started.append(vm.liveChannel?.id ?? "?") }
         vm.zapPendingOffset = 1
         let first = Task { await vm.commitZap() }
-        try? await Task.sleep(for: .milliseconds(20))
+        await gate.arrival(1)
         vm.zapPendingOffset = 1
-        await vm.commitZap()
+        let second = Task { await vm.commitZap() }
+        while vm.zapCommitGeneration < 2 { await Task.yield() }
+        gate.open()
         await first.value
-        #expect(service.stoppedReports.compactMap(\.liveStreamId) == ["tuner-1"])
+        await second.value
+        #expect(service.stoppedReports.map(\.liveStreamId) == ["tuner-1"])
         #expect(started == ["a3"])
         #expect(vm.liveChannel?.id == "a3")
+    }
+
+    @Test func aZapDuringARetuneWaitsForItsClose() async {
+        let service = RecordingPlaybackService()
+        let gate = TestGate()
+        service.stopReportGate = gate
+        let vm = makeViewModel(liveChannelID: "a1", playback: service)
+        vm.zapLineup = lineupA
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.activeLiveStreamID = "tuner-1"
+        var started: [String] = []
+        vm.zapStartPlayback = { started.append(vm.liveChannel?.id ?? "?") }
+        let retune = Task { await vm.retuneLiveStream() }
+        await gate.arrival(1)
+        vm.zapPendingOffset = 1
+        let zap = Task { await vm.commitZap() }
+        while vm.zapCommitGeneration < 1 { await Task.yield() }
+        gate.open()
+        await retune.value
+        await zap.value
+        #expect(service.stoppedReports.map(\.liveStreamId) == ["tuner-1"])
+        #expect(started == ["a2"])
+        #expect(vm.liveChannel?.id == "a2")
+    }
+
+    @Test func aRetuneQueuedBehindAZapGivesUpOnTheOldChannel() async {
+        let service = RecordingPlaybackService()
+        let gate = TestGate()
+        service.stopReportGate = gate
+        let vm = makeViewModel(liveChannelID: "a1", playback: service)
+        vm.zapLineup = lineupA
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.activeLiveStreamID = "tuner-1"
+        var started: [String] = []
+        vm.zapStartPlayback = { started.append(vm.liveChannel?.id ?? "?") }
+        vm.zapPendingOffset = 1
+        let zap = Task { await vm.commitZap() }
+        await gate.arrival(1)
+        let retune = Task { await vm.retuneLiveStream() }
+        while vm.liveRetuneTask == nil { await Task.yield() }
+        gate.open()
+        await zap.value
+        await retune.value
+        #expect(service.stoppedReports.map(\.liveStreamId) == ["tuner-1"])
+        #expect(vm.errorMessage == nil)
+        #expect(started == ["a2"])
+        #expect(vm.liveChannel?.id == "a2")
     }
 
     @Test func aZapAfterTeardownDoesNothing() async {
