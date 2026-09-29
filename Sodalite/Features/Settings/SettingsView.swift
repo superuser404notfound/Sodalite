@@ -49,7 +49,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.logout.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.logout.confirm.message"), scope: .everything))
         }
         .alert(
             Text("settings.reset.confirm.title", bundle: .main),
@@ -67,7 +68,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.reset.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.reset.confirm.message"), scope: .everything))
         }
         // Settings is the only surface showing server version; refresh on appear so an upgrade since login is picked up.
         .task {
@@ -79,14 +81,7 @@ struct SettingsView: View {
 
     #if os(iOS)
     private func closeButton(_ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark")
-                .font(.title3.weight(.semibold))
-                .padding(12)
-                .glassEffect(.regular, in: Circle())
-                .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
+        GlassCloseButton(action: action)
         .padding(.trailing, 16)
         .padding(.top, 8)
     }
@@ -238,6 +233,16 @@ struct SettingsView: View {
             ) {
                 PlaybackSettingsView()
             }
+
+            #if os(iOS)
+            SettingsTile(
+                icon: "arrow.down.circle",
+                title: "settings.downloads.title",
+                subtitle: "settings.downloads.subtitle"
+            ) {
+                DownloadSettingsView()
+            }
+            #endif
 
             SettingsTile(
                 icon: "paintpalette",
@@ -444,9 +449,14 @@ struct SettingsView: View {
     }
 
     private func finishLogout() {
-        try? dependencies.clearSession()
-        dependencies.clearSessionResidue()
-        appState.logout()
+        // Log Out drops every server and profile on the device, so every download goes with them;
+        // awaited first, while the session can still tell the server to stop a running transcode.
+        Task {
+            await dependencies.purgeDownloads(.everything)
+            try? dependencies.clearSession()
+            dependencies.clearSessionResidue()
+            appState.logout()
+        }
     }
 
     // MARK: - Reset

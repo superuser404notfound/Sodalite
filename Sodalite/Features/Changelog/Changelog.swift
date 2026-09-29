@@ -21,6 +21,12 @@ enum Changelog {
                     icon: "dial.medium"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.offlineDownloads.title",
+                    "changelog.1_1_0.offlineDownloads.body",
+                    icon: "arrow.down.circle"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

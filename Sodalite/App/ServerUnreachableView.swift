@@ -21,6 +21,8 @@ struct ServerUnreachableView: View {
     /// Offered only where there is a slot to fill and a sheet to fill it in.
     let onAddExternalAddress: (() -> Void)?
     let onRetry: () async -> Void
+    /// Sodalite#81: offered while the profile has downloads; the first and prominent action then.
+    var onOpenDownloads: (() -> Void)? = nil
 
     @State private var isRetrying = false
 
@@ -68,6 +70,17 @@ struct ServerUnreachableView: View {
             .frame(maxWidth: 620)
 
             VStack(spacing: 14) {
+                if let onOpenDownloads {
+                    Button(action: onOpenDownloads) {
+                        Text("downloads.goToDownloads")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(SettingsTileButtonStyle(isProminent: true))
+                }
+
                 if let onAddExternalAddress {
                     Button(action: onAddExternalAddress) {
                         Text("server.offNetwork.addExternal")
@@ -76,7 +89,7 @@ struct ServerUnreachableView: View {
                             .padding(.horizontal, 32)
                             .padding(.vertical, 12)
                     }
-                    .buttonStyle(SettingsTileButtonStyle(isProminent: true))
+                    .buttonStyle(SettingsTileButtonStyle(isProminent: onOpenDownloads == nil))
                 }
 
                 Button {
@@ -100,7 +113,7 @@ struct ServerUnreachableView: View {
                 // and a screen whose only way forward reads as decoration is the Sodalite#82
                 // complaint one screen over. Where the add-address button is present that one is the
                 // primary and this one must stay under it.
-                .buttonStyle(SettingsTileButtonStyle(isProminent: onAddExternalAddress == nil))
+                .buttonStyle(SettingsTileButtonStyle(isProminent: onAddExternalAddress == nil && onOpenDownloads == nil))
                 .disabled(isRetrying)
             }
         }

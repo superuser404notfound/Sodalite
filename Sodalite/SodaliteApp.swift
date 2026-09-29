@@ -12,6 +12,15 @@ final class OrientationAppDelegate: NSObject, UIApplicationDelegate {
         if UIDevice.current.userInterfaceIdiom == .pad { return .all }
         return PlayerOrientation.playerMask ?? .allButUpsideDown
     }
+
+    /// Sodalite#81: iOS relaunches the app to deliver background download events. The container
+    /// recreates the session on launch; this handler is called once the session reports that every
+    /// event has been delivered.
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        guard DownloadSessionDelegate.identifiers.contains(identifier) else { completionHandler(); return }
+        DownloadRelaunch.store(completionHandler, for: identifier)
+    }
 }
 #endif
 

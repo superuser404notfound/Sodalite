@@ -15,16 +15,6 @@ Only buckets that hold something appear below. Everything else lives in
 [Discussions](https://github.com/superuser404notfound/Sodalite/discussions). A request that is
 not on this page has not been rejected, it has simply not been picked up yet.
 
-## Next
-
-### Offline downloads ([#81](https://github.com/superuser404notfound/Sodalite/issues/81))
-
-Download movies and episodes to the device and play them back without a server connection:
-commuting, flights, hotel wifi that only pretends to work. iPhone and iPad first, because that is
-where a file on disk earns its storage.
-
-Targeted at 1.1, the first release after 1.0.
-
 ## Later
 
 ### One home across every server ([#85](https://github.com/superuser404notfound/Sodalite/issues/85))

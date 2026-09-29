@@ -6,6 +6,8 @@ enum AppTab: String, CaseIterable, Sendable {
     case catalog
     case search
     case music
+    /// Sodalite#81, iOS only, and only while the profile has downloads.
+    case downloads
     case settings
 
     /// Home is the landing tab and Settings the only route back to the settings screen on tvOS,
@@ -13,13 +15,17 @@ enum AppTab: String, CaseIterable, Sendable {
     var isHideable: Bool {
         switch self {
         case .home, .settings: false
-        case .liveTV, .catalog, .search, .music: true
+        case .liveTV, .catalog, .search, .music, .downloads: true
         }
     }
 
     /// The switchable tabs, in the order the settings screen lists them.
     static var hideableCases: [AppTab] {
+        #if os(iOS)
         allCases.filter(\.isHideable)
+        #else
+        allCases.filter { $0.isHideable && $0 != .downloads }
+        #endif
     }
 
     var labelKey: LocalizedStringKey {
@@ -29,6 +35,7 @@ enum AppTab: String, CaseIterable, Sendable {
         case .catalog: "tab.catalog"
         case .search: "tab.search"
         case .music: "tab.music"
+        case .downloads: "tab.downloads"
         case .settings: "tab.settings"
         }
     }
@@ -40,6 +47,7 @@ enum AppTab: String, CaseIterable, Sendable {
         case .catalog: "film.stack"
         case .search: "magnifyingglass"
         case .music: "music.note"
+        case .downloads: "arrow.down.circle"
         case .settings: "gearshape"
         }
     }
@@ -54,11 +62,11 @@ enum AppTab: String, CaseIterable, Sendable {
 extension AppTab {
     /// The tabs every server has. The probed set is built by inserting into this.
     static var baseTabs: [AppTab] {
-        allCases.filter { $0 != .music && $0 != .liveTV }
+        allCases.filter { $0 != .music && $0 != .liveTV && $0 != .downloads }
     }
 
-    /// Order: Home, [Live TV,] Catalog, Search, [Music,] Settings.
-    static func probedTabs(hasLiveTV: Bool, hasMusic: Bool) -> [AppTab] {
+    /// Order: Home, [Live TV,] Catalog, Search, [Music,] [Downloads,] Settings.
+    static func probedTabs(hasLiveTV: Bool, hasMusic: Bool, hasDownloads: Bool = false) -> [AppTab] {
         var tabs = baseTabs
         if hasLiveTV, let homeIndex = tabs.firstIndex(of: .home) {
             tabs.insert(.liveTV, at: homeIndex + 1)
@@ -66,6 +74,19 @@ extension AppTab {
         if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
             tabs.insert(.music, at: settingsIndex)
         }
+        return withDownloads(tabs, hasDownloads: hasDownloads)
+    }
+
+    /// Sodalite#81. Inserted at display time rather than by the probe sites: a download finishing
+    /// must not re-run a server probe, and on tvOS nothing downloads, so this never touches its bar.
+    static func withDownloads(_ tabs: [AppTab], hasDownloads: Bool) -> [AppTab] {
+        #if os(iOS)
+        guard hasDownloads, !tabs.contains(.downloads) else { return tabs }
+        var tabs = tabs
+        tabs.insert(.downloads, at: tabs.firstIndex(of: .settings) ?? tabs.endIndex)
         return tabs
+        #else
+        return tabs
+        #endif
     }
 }

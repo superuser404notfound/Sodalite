@@ -55,6 +55,17 @@ final class DependencyContainer {
     let authPreferences: AuthPreferences
     let parentalControlsPreferences: ParentalControlsPreferences
     let parentalGate: ParentalGate
+    /// Sodalite#81. The on-disk truth of the downloads; empty on tvOS, where nothing downloads.
+    let downloadStore = DownloadStore(paths: DownloadPaths(root: DownloadPaths.defaultRoot()))
+    let downloadPreferences: DownloadPreferences
+    /// Nil on tvOS. Created last in init because its backend reads the session through the container.
+    private(set) var downloadManager: DownloadManager?
+    #if os(iOS)
+    /// Sodalite#81: the Dynamic Island / Lock Screen progress of running downloads.
+    private(set) var downloadActivity: DownloadProgressActivity?
+    #endif
+    /// The progress sync in flight, so a second trigger joins it instead of racing it.
+    var downloadSyncTask: Task<Void, Never>?
 
     let seerrClient: SeerrClient
     let seerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol
@@ -199,6 +210,7 @@ final class DependencyContainer {
         )
         self.parentalControlsPreferences = ParentalControlsPreferences(store: defaults)
         self.parentalGate = ParentalGate()
+        self.downloadPreferences = DownloadPreferences(store: defaults)
 
         // Seerr gets its OWN HTTPClient so Catalog browsing doesn't compete with the Home fan-out for the same 6 in-flight permits against a tarpitted Jellyfin CDN (see HTTPClient inFlightLimiter).
         let seerrHTTPClient = HTTPClient()
@@ -265,6 +277,14 @@ final class DependencyContainer {
         profileSettings.isApplyingCloudChanges = { [weak self] in self?.isApplyingCloudChanges ?? false }
         profileSettings.migrateIfNeeded(profiles: profileKeysOnThisDevice())
         profileSettings.markEarlierMigrationSeedsIfNeeded()
+
+        #if os(iOS)
+        let manager = makeDownloadManager()
+        downloadManager = manager
+        downloadActivity = DownloadProgressActivity(store: downloadStore, liveProgress: { [weak manager] in
+            manager?.liveProgress ?? [:]
+        })
+        #endif
     }
 
     /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),

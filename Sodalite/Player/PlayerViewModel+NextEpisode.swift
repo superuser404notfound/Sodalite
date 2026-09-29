@@ -25,8 +25,32 @@ extension PlayerViewModel {
         guard item.seriesId != nil else { return }
 
         hasFetchedNextEpisode = true
+        // Sodalite#81: while the server answers it names the successor, as for any session, and a
+        // downloaded one then plays from the device. Offline only a downloaded immediate successor
+        // continues a local session.
+        if isLocalSession, serverReachability() != .reachable {
+            if let store = downloadStore,
+               let local = Self.nextDownloadedEpisode(
+                   after: item, in: store.items.values.filter { store.completedItem($0.id) != nil }) {
+                nextEpisode = local.snapshot.item
+            }
+            return
+        }
         Task { await fetchNextEpisode() }
     }
+
+    static func nextDownloadedEpisode(after item: JellyfinItem, in pool: [DownloadedItem]) -> DownloadedItem? {
+        guard let series = item.seriesId, let season = item.parentIndexNumber, let index = item.indexNumber else { return nil }
+        // Only the IMMEDIATE successor: with E1 and E5 downloaded, E1 must not skip to E5. Without a
+        // server nothing says whether a season has more episodes, so a season boundary is never
+        // crossed offline; online the server names the successor and it plays from the device when
+        // it is downloaded (see resetSessionState).
+        return pool.first {
+            $0.snapshot.item.seriesId == series && $0.snapshot.item.parentIndexNumber == season
+                && $0.snapshot.item.indexNumber == index + 1
+        }
+    }
+
 
     private func fetchNextEpisode() async {
         guard let seriesID = item.seriesId else { return }
@@ -103,6 +127,8 @@ extension PlayerViewModel {
     }
 
     func warmSuccessor(_ next: JellyfinItem) async {
+        // A downloaded successor needs no PlaybackInfo and no stream to warm.
+        if downloadStore?.completedItem(next.id) != nil { return }
         // Read once, before the await: a rung picked while this is in flight must not relabel a
         // response fetched at the old cap.
         let quality = effectiveStreamingQuality
@@ -207,6 +233,7 @@ extension PlayerViewModel {
             positionTicks: completionAwarePositionTicks,
             liveStreamId: nil
         )
+        recordLocalProgress(positionTicks: stopReport.positionTicks, played: hasReachedEndOfContent)
         let svc = playbackService
         Task {
             do {
@@ -238,6 +265,7 @@ extension PlayerViewModel {
     /// Shared per-session reset for both episode-switch paths (auto-advance + season picker). Single owner on purpose: the two inline copies had drifted once (a stray player.stop() in the picker path, breaking the issue-#15 AVPlayer-reuse design).
     private func resetSessionState(switchingTo newItem: JellyfinItem) {
         item = newItem
+        localDownload = downloadStore?.completedItem(newItem.id)
         // Single choke point for every in-session item switch (auto-advance, queue, season picker), so
         // the detail view behind the player can follow along and backing out lands on the episode that
         // was actually watched instead of the one that was started.
@@ -376,6 +404,7 @@ extension PlayerViewModel {
             positionTicks: completionAwarePositionTicks,
             liveStreamId: nil
         )
+        recordLocalProgress(positionTicks: stopReport.positionTicks, played: hasReachedEndOfContent)
         let svc = playbackService
         Task {
             do {

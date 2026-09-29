@@ -23,6 +23,10 @@ extension DependencyContainer {
             }
         }
 
+        // Sodalite#81: a reset device holds no downloads either; before clearSession, while running
+        // transcodes can still be told to stop.
+        await DownloadCleanup.perform(.everything, store: downloadStore, manager: downloadManager)
+
         // Servers, tokens, profiles, passwords, Seerr, and cloud sync off on this device.
         try? clearSession()
         clearSessionResidue()

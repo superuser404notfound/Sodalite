@@ -190,7 +190,8 @@ struct FilteredGridView: View {
                         server: appState.activeServer,
                         present: { showAddURLSheet = true }
                     ),
-                    onRetry: { await retry() }
+                    onRetry: { await retry() },
+                    onOpenDownloads: dependencies.downloadStore.items.isEmpty ? nil : { appState.requestedTab = .downloads }
                 )
                 .frame(maxWidth: .infinity, minHeight: 400)
             } else if items.isEmpty {

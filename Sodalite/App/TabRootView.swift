@@ -33,6 +33,9 @@ struct TabRootView: View {
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var showSettings = false
+    /// Sodalite#81: on a compact iPhone the downloads open from a button beside the gear instead of
+    /// a tab. A sixth tab sends the bar into iOS's "More" list, which hid Search and crashed on Music.
+    @State private var showDownloads = false
     /// Profiles remembered for the active server, for ActiveUserBadge. Read here because this view is
     /// always on screen and the badge is not until it knows the count (Sodalite#169).
     @State private var rememberedProfileCount = 0
@@ -74,7 +77,8 @@ struct TabRootView: View {
     /// the iOS "More" tab, whose nested navigation controller skips the Settings root on back.
     /// Settings is reached via the gear overlay instead. tvOS + iPad keep it as a tab/sidebar item.
     private var displayedTabs: [AppTab] {
-        var tabs = availableTabs.filter { !appearance.isTabHidden($0) }
+        var tabs = AppTab.withDownloads(availableTabs, hasDownloads: showsDownloadsTab)
+            .filter { !appearance.isTabHidden($0) }
         #if os(iOS)
         if hSizeClass == .compact { tabs = tabs.filter { $0 != .settings } }
         #endif
@@ -162,14 +166,23 @@ struct TabRootView: View {
             if hSizeClass == .compact {
                 // Floating gear + badge in the corner; each tab page reserves space for it
                 // via .padding(.top, gearChromeHeight) so content never slides under it.
-                HStack(spacing: 8) {
-                    ActiveUserBadge(rememberedCount: rememberedProfileCount)
-                    settingsGearButton
+                // 2 + the badge's own 6 pt trailing inset make the same 8 pt gap as between the
+                // circles; the inset stays in the badge, which the other layouts place on its own.
+                HStack(spacing: 2) {
+                    ActiveUserBadge(rememberedCount: rememberedProfileCount,
+                                    onTap: { appState.requestProfilePicker = true })
+                    HStack(spacing: 8) {
+                        if !dependencies.downloadStore.items.isEmpty {
+                            downloadsButton
+                        }
+                        settingsGearButton
+                    }
                 }
                 .padding(.trailing, 16)
                 .padding(.top, 6)
             } else {
-                ActiveUserBadge(rememberedCount: rememberedProfileCount)
+                ActiveUserBadge(rememberedCount: rememberedProfileCount,
+                                onTap: { appState.requestProfilePicker = true })
             }
             #else
             // Not in sidebar mode: the rail carries the profile as its header, so a second badge in
@@ -181,6 +194,10 @@ struct TabRootView: View {
             #endif
         }
         #if os(iOS)
+        .sheet(isPresented: $showDownloads) {
+            DownloadsView(onClose: { showDownloads = false })
+                .themedPresentationBackground()
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(onClose: { showSettings = false })
                 .themedPresentationBackground()
@@ -265,6 +282,10 @@ struct TabRootView: View {
         // is unreachable, so the launch decided "no Live TV, no Music" and the serverDidSwitch latch
         // meant it never asked again: the two tabs stayed gone until the app was force-quit. Answered
         // here rather than by loosening that latch, which guards a device-verified path.
+        // Sodalite#81: the Downloads a profile sees are its own, so the store follows every switch.
+        .task(id: appState.profileKey) {
+            dependencies.activateDownloads()
+        }
         .task(id: appState.requestContentReload) {
             let signal = appState.requestContentReload
             guard signal > 0, signal != lastHandledContentReload else { return }
@@ -287,6 +308,17 @@ struct TabRootView: View {
         // (see presentedTabs). Keyed on the DISPLAYED set, not the probed one: a tab the user switched
         // off changes no bar, and switching one back on inserts an item that needs the same re-tint as
         // a probed insertion.
+        .onChange(of: appState.requestedTab) { _, requested in
+            guard let requested else { return }
+            appState.requestedTab = nil
+            if tabsOnScreen.contains(requested) {
+                selectedTab = requested
+            } else if requested == .downloads {
+                #if os(iOS)
+                showDownloads = true
+                #endif
+            }
+        }
         .onChange(of: shellLayout) { old, new in
             let armed = switchOrigin
             let result = ProfileShellLayout.resolveSwitch(previous: old, current: new, armedOrigin: armed)
@@ -502,6 +534,12 @@ struct TabRootView: View {
                 SearchView()
             case .music:
                 MusicHomeView()
+            case .downloads:
+                #if os(iOS)
+                DownloadsView()
+                #else
+                EmptyView()
+                #endif
             case .settings:
                 SettingsView()
             }
@@ -518,7 +556,10 @@ struct TabRootView: View {
         // Reserve space for the floating settings gear so content never slides under it.
         // padding reliably repositions content, including screens rooted in a NavigationStack
         // (Catalog/Search/...) which ignore a parent safeAreaInset and so would overlap.
-        .padding(.top, hSizeClass == .compact ? Self.gearChromeHeight : 0)
+        // Not for the pages that scroll under the chrome: their inset is a content margin instead
+        // (`scrollsUnderShellChrome`), since a padding here shrinks the page and it clips its rows
+        // at the line below the buttons.
+        .padding(.top, hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
         .background {
             AppBackgroundView(
                 theme: appearanceTheme,
@@ -528,21 +569,52 @@ struct TabRootView: View {
         #endif
     }
 
+    /// A tab only where the bar has room for it: the iPad sidebar. See `showDownloads`.
+    private var showsDownloadsTab: Bool {
+        #if os(iOS)
+        hSizeClass != .compact && !dependencies.downloadStore.items.isEmpty
+        #else
+        false
+        #endif
+    }
+
     #if os(iOS)
     static let gearChromeHeight: CGFloat = 56
+    /// The tabs whose root scroll view sits directly under the chrome (`scrollsUnderShellChrome`).
+    /// The others start with a fixed header (Live TV's and Catalog's pickers, the search field),
+    /// under which their lists end the regular way.
+    static let scrollsUnderChrome: Set<AppTab> = [.home, .music]
+
+    private var downloadsButton: some View {
+        chromeCircleButton(systemImage: "arrow.down.circle", label: "tab.downloads") { showDownloads = true }
+    }
 
     private var settingsGearButton: some View {
-        Button { showSettings = true } label: {
-            Image(systemName: "gearshape")
+        chromeCircleButton(systemImage: "gearshape", label: "tab.settings") { showSettings = true }
+    }
+
+    /// Dressed, sized and lifted like `ActiveUserBadge` beside it (36 pt avatar plus 6 pt insets,
+    /// the same material, edge and shadow, raised by 4 pt), so the corner reads as one strip of
+    /// controls rather than a pill next to larger, lower circles of another material.
+    private func chromeCircleButton(systemImage: String, label: LocalizedStringKey,
+                                    action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
                 .font(.title3)
-                .frame(width: 28, height: 28)
-                .padding(11)
-                .glassEffect(.regular, in: Circle())
+                // The accent, like every close button: these are the app's controls, the badge
+                // beside them is a name.
+                .foregroundStyle(.tint)
+                .frame(width: 36, height: 36)
+                .padding(6)
+                .background(Circle().fill(.ultraThinMaterial))
+                .overlay(Circle().strokeBorder(Color.Theme.panelEdge, lineWidth: 1))
+                .shadow(color: .black.opacity(0.15), radius: 6, y: 3)
                 // Make the whole circle the hit target, not just the rendered glyph.
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("tab.settings"))
+        .offset(y: -4)
+        .accessibilityLabel(Text(label))
     }
     #endif
 }

@@ -85,6 +85,7 @@ Almost everything is identical across devices, it's one codebase. A handful of c
 | Full-screen video out over a wired HDMI adapter | – | ✓ |
 | Rotation lock &amp; portrait player | – | ✓ |
 | Child lock in the player | – | ✓ |
+| Offline downloads | – | ✓ |
 | Separate profiles per Apple TV user | ✓ | – |
 | Top Shelf &amp; Siri Remote focus UX | ✓ | – |
 
@@ -159,6 +160,7 @@ The Seerr integration isn't a tacked-on link to a web view. It's a first-class p
 - **Stats for Nerds overlay**: optional info panel during playback, on video and on live TV alike. The static sections come from the engine, so they describe the stream that actually arrived: video codec / resolution / framerate / bitrate / range / decoder, pixel format / bit depth / colour primaries / transfer / matrix / range (as decoded where the engine decodes itself, otherwise as the stream declares them), audio codec and profile (DTS:X, TrueHD Atmos) / channels / sample rate / bit depth / sample format / bitrate / decoder, subtitle codec, play method and the container the demuxer opened. Filename and file size come from Jellyfin, which is the only side that knows them. A live channel shows its name, number, tuner id and the route the tune took (direct, transcode, tuner file or static) where a file would be. Live section refreshes at 1 Hz with instant + average bitrate from the demuxer, forward buffer + cached MB, network throughput, dropped frames (native AVPlayer) or observed FPS (software AV1), plus a colour-coded A/V sync gap. A second toggle adds an Engine Diagnostics deep-dive (producer restarts, RSS, demuxer / muxer / audio-bridge bytes, server traffic) for troubleshooting. Enable in Settings → Playback → Advanced.
 
 ### 📱 On iPhone & iPad
+- **Offline downloads**: download movies, episodes or whole seasons, in the original or a smaller version the server re-encodes, and watch them with no connection, audio and subtitle choice included. What you watch offline reaches your server the next time it is in reach, so Continue Watching stays right everywhere
 - **AirPlay**: send any title to an AirPlay display, with HDR and surround metadata preserved
 - **Wired HDMI out**: plug in a USB-C to HDMI adapter and playback fills the connected screen instead of showing the mirrored phone window, with HDR / Dolby Vision and match-frame-rate passed through. With subtitles switched on the app takes the screen over to draw them there, video included, since the system's own external playback keeps subtitles on the phone
 - **Rotation lock**: a one-tap toggle in the player pins landscape (or lets it follow the device), with a lock indicator so you always know which mode you're in

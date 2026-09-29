@@ -101,6 +101,10 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
 
     /// tvOS fold marker state. The offset feeds off the same scroll-geometry hook as scrollDim.
     @State private var scrollOffset: CGFloat = 0
+    /// iPhone portrait: whether the band has mostly left the top, so the system's soft top edge may
+    /// blur what scrolls under the Dynamic Island and the close button (as on Home and the genre
+    /// pages). Only there: landscape and iPad have no island for rows to run under.
+    @State private var bandHasLeftTop = false
     /// Viewport height, which is also the first page's height (it is `containerRelativeFrame`).
     /// Read rather than assumed, so the pinned mark arrives with the fold on every tier.
     @State private var containerHeight: CGFloat = 0
@@ -412,9 +416,21 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         .ignoresSafeArea(edges: [.top, .bottom])
         // iOS 26 lays its own effect over a scroll view's top edge, on top of the band, and it is a
         // separate thing from the navigation bar's background: hiding that background left the top of
-        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). This page draws its
-        // own top edge and wants neither.
-        .scrollEdgeEffectHidden(true, for: .top)
+        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). So it stays off
+        // while the band is up there, and comes on once the band has mostly scrolled away: from then
+        // on the page's rows pass under the status bar and the close button, and they blur out there
+        // like everywhere else instead of running under them sharp.
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > bandHeight * 0.6
+        } action: { _, hasLeft in
+            bandHasLeftTop = hasLeft
+        }
+        .safeAreaBar(edge: .top) {
+            // Only the height of the close button's row, for the edge effect to cover it too. The
+            // page ignores the top safe area, so this moves nothing on it.
+            Color.clear.frame(height: 56)
+        }
+        .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
         .animation(.easeInOut(duration: 0.4), value: artworkPalette)
     }
 

@@ -16,6 +16,34 @@ struct ServerSwitchSheet: View {
     @State private var activeID: String?
 
     var body: some View {
+        #if os(iOS)
+        // A system sheet on iOS: the page's own theme background and a close button, like every
+        // other sheet here. The material card below is the tvOS panel, and inside a sheet it read
+        // as a second, darker sheet with no way out but a swipe.
+        NavigationStack {
+            content(horizontalInset: 20)
+                .padding(.top, 8)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .close) { dismiss() }
+                    }
+                }
+                .themedNavigationDestination()
+        }
+        .onAppear(perform: load)
+        .themedPresentationBackground()
+        #else
+        content(horizontalInset: 40)
+            .frame(maxWidth: 900, maxHeight: 700)
+            .padding(40)
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .onAppear(perform: load)
+            .themedPresentationBackground()
+        #endif
+    }
+
+    private func content(horizontalInset: CGFloat) -> some View {
         VStack(spacing: 24) {
             Text("multiServer.switchSheet.title", bundle: .main)
                 .font(.title2.bold())
@@ -35,15 +63,9 @@ struct ServerSwitchSheet: View {
                         onAddServer()
                     })
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, horizontalInset)
             }
         }
-        .frame(maxWidth: 900, maxHeight: 700)
-        .padding(40)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .onAppear(perform: load)
-        .themedPresentationBackground()
     }
 
     private func load() {

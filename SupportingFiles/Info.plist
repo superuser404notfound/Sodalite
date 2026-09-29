@@ -26,16 +26,20 @@
 	     the moment the user leaves the app, even with a live PiP window.
 	     remote-notification: CKSyncEngine receives remote changes through silent CloudKit
 	     pushes; without this mode they are never delivered and cloud sync only ever fetches
-	     when the app foregrounds. -->
+	     when the app foregrounds.
+	     processing: Sodalite#81, the continued-processing task that shows download progress
+	     in the Dynamic Island (iOS). -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>processing</string>
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>de.superuser404.Sodalite.pendingRequestsRefresh</string>
+		<string>de.superuser404.Sodalite.downloads.progress</string>
 	</array>
 	<key>CFBundleURLTypes</key>
 	<array>

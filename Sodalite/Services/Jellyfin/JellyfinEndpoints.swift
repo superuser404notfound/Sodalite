@@ -57,6 +57,9 @@ enum JellyfinEndpoint: APIEndpoint {
 
     // Played
     case markPlayed(userID: String, itemID: String)
+    /// Sodalite#81: read and write one item's UserData, so offline progress can be handed back.
+    case userItemData(itemID: String, userID: String)
+    case updateUserItemData(itemID: String, userID: String, payload: JSONValue)
     case unmarkPlayed(userID: String, itemID: String)
 
     // Search
@@ -152,6 +155,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/FavoriteItems/\(itemID)"
         case .markPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
+        case .userItemData(let itemID, _), .updateUserItemData(let itemID, _, _):
+            "/UserItems/\(itemID)/UserData"
         case .unmarkPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
         case .searchHints:
@@ -210,7 +215,7 @@ enum JellyfinEndpoint: APIEndpoint {
     var method: HTTPMethod {
         switch self {
         case .authenticateByName, .quickConnectInitiate, .quickConnectAuthenticate, .markFavorite,
-             .markPlayed, .sessionLogout,
+             .markPlayed, .sessionLogout, .updateUserItemData,
              .playbackInfo, .livePlaybackInfo,
              .sessionPlaying, .sessionProgress, .sessionStopped,
              .closeLiveStream,
@@ -240,6 +245,9 @@ enum JellyfinEndpoint: APIEndpoint {
 
     var queryItems: [URLQueryItem]? {
         switch self {
+        case .userItemData(_, let userID), .updateUserItemData(_, let userID, _):
+            return [URLQueryItem(name: "userId", value: userID)]
+
         case .quickConnectCheck(let secret):
             return [URLQueryItem(name: "secret", value: secret)]
 
@@ -466,6 +474,8 @@ enum JellyfinEndpoint: APIEndpoint {
         case .quickConnectAuthenticate(let secret):
             QuickConnectAuthBody(secret: secret)
         case .playbackInfo(_, _, let payload), .livePlaybackInfo(_, _, _, let payload):
+            payload
+        case .updateUserItemData(_, _, let payload):
             payload
         case .sessionPlaying(let report):
             report

@@ -140,3 +140,18 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
         try await client.request(endpoint: JellyfinEndpoint.deleteItem(itemID: itemID))
     }
 }
+
+extension JellyfinItemService: UserItemDataServing {
+    func userData(itemID: String, userID: String) async throws -> UserItemData {
+        try await client.request(endpoint: JellyfinEndpoint.userItemData(itemID: itemID, userID: userID), responseType: UserItemData.self)
+    }
+
+    func updateUserData(itemID: String, userID: String, positionTicks: Int64, played: Bool, lastPlayed: Date) async throws {
+        let payload = try JSONValue(jsonObject: [
+            "PlaybackPositionTicks": positionTicks,
+            "Played": played,
+            "LastPlayedDate": JellyfinDate.format(lastPlayed),
+        ])
+        try await client.request(endpoint: JellyfinEndpoint.updateUserItemData(itemID: itemID, userID: userID, payload: payload))
+    }
+}

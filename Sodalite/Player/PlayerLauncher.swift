@@ -27,6 +27,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     var preferredMediaSourceID: String?
     /// Shuffle / play queue; empty = single-item playback.
     var playQueue: [JellyfinItem] = []
+    /// Sodalite#81: the downloaded file to play instead of the server's; nil streams.
+    var localDownload: DownloadedItem?
+    /// Where a local session writes its progress, and where the next downloaded episode is looked up.
+    var downloadStore: DownloadStore?
     /// Read here, on the SwiftUI side, because a UIHostingController inside the UIKit modal starts
     /// from a BLANK environment: every `\.appearanceTheme` read below it silently falls back to
     /// `ResolvedAppearanceTheme.default`, which is system blue.
@@ -70,7 +74,9 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                     preferredMediaSourceID: preferredMediaSourceID,
                     playQueue: playQueue,
                     serverName: serverName,
-                    serverReachability: reachability
+                    serverReachability: reachability,
+                    localDownload: localDownload,
+                    downloadStore: downloadStore
                 )
                 let playerVC = PlayerHostController(
                     viewModel: vm,

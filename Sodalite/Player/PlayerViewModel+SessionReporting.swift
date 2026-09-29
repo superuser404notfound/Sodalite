@@ -3,6 +3,17 @@ import AetherEngine
 
 extension PlayerViewModel {
 
+    /// Sodalite#81: every position the server would get also lands in the manifest, online or not.
+    func recordLocalProgress(positionTicks: Int64, played: Bool) {
+        guard let local = localDownload, let store = downloadStore, positionTicks > 0 || played else { return }
+        let now = Date()
+        try? store.update(itemID: local.id) {
+            $0.progress.positionTicks = played ? 0 : positionTicks
+            $0.progress.played = $0.progress.played || played
+            $0.progress.lastPlayed = now
+        }
+    }
+
     /// Position in Jellyfin ticks from playbackTime (survives player.stop(),
     /// unlike player.currentTime). Falls back to resumePositionTicks only when
     /// playbackTime == 0; NOT max(ticks, resumePositionTicks), which clamped a
@@ -60,6 +71,7 @@ extension PlayerViewModel {
     func reportProgress() async {
         let ticks = currentPositionTicks
         guard ticks > 0 else { return } // Don't report position 0
+        recordLocalProgress(positionTicks: ticks, played: false)
         let report = PlaybackProgressReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,

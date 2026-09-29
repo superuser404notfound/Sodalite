@@ -17,7 +17,9 @@ struct LaunchProfilePickerView: View {
     /// when the target holds no session this device may resume unasked (Sodalite#74). In reprompt
     /// context, picking the active profile must not switch or clear caches, just dismiss; in
     /// switchServer context every card belongs to another server, so every card is a real switch.
-    enum Context { case launch, reprompt, switchServer }
+    /// `chooser`: opened on purpose from the iOS profile badge; dismissible, and the active card
+    /// just closes it.
+    enum Context { case launch, reprompt, switchServer, chooser }
     var context: Context = .launch
     /// Cover dismissal (reprompt + switchServer); nil in launch context.
     var onFinished: (() -> Void)? = nil
@@ -25,6 +27,8 @@ struct LaunchProfilePickerView: View {
     @State private var rememberedUsers: [RememberedUser] = []
     @State private var navigateToAddProfile = false
     @State private var switchError: String?
+    /// Sodalite#81: a profile with downloads on this device, waiting for the viewer to confirm.
+    @State private var pendingForget: RememberedUser?
     /// Set when this picker is the screen a refused profile landed on; its own alert, because the
     /// switch-failed title would be describing something the user never did (Sodalite#90).
     @State private var rejectionNotice: String?
@@ -51,6 +55,15 @@ struct LaunchProfilePickerView: View {
             // current" as tapping the active card, PIN included. On the root only: a pushed screen
             // keeps its own Menu press for popping.
             .onExitCommandIfEnabled(context == .reprompt) { continueAsCurrent() }
+            #if os(iOS)
+            .toolbar {
+                if context == .chooser {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .close) { onFinished?() }
+                    }
+                }
+            }
+            #endif
             .screenContentInset()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $navigateToAddProfile) {
@@ -87,6 +100,11 @@ struct LaunchProfilePickerView: View {
             } message: { message in
                 Text(message)
             }
+            .confirmsForgettingDownloads($pendingForget, message: { user in
+                dependencies.messageWithDownloadWarning(
+                    "", scope: .profile(serverID: user.serverID, userID: user.id))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }, perform: commitForget)
             .onAppear {
                 reloadProfiles()
                 showRejectionNoticeIfAny()
@@ -292,6 +310,11 @@ struct LaunchProfilePickerView: View {
         // changed, and waving the last active card through is the one way in that lock is for.
         // Legitimate exits stay open, their own card is a normal free select, and the pad offers
         // recovery.
+        // Chooser: the viewer opened this to look, and staying who they are costs nothing.
+        if context == .chooser, user.id == activeSessionUserID {
+            onFinished?()
+            return
+        }
         if context == .reprompt, user.id == activeSessionUserID {
             guard dependencies.parentalGateRequired(forActivatingUserID: user.id,
                                                     serverID: server.id) else {
@@ -450,6 +473,15 @@ struct LaunchProfilePickerView: View {
     }
 
     private func performForget(_ user: RememberedUser) {
+        if DownloadCleanup.usage(.profile(serverID: server.id, userID: user.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = user
+            return
+        }
+        commitForget(user)
+    }
+
+    private func commitForget(_ user: RememberedUser) {
+        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
         do {
             try dependencies.forgetUser(id: user.id, serverID: server.id)
             reloadProfiles()

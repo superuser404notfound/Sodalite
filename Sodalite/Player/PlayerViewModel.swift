@@ -261,7 +261,7 @@ final class PlayerViewModel {
 
     /// In-player subtitle-search reachability; VOD-only (live has no searchable library item).
     /// Also shows the subtitle button on files with zero tracks so the download entry exists (issue #15).
-    var supportsSubtitleSearch: Bool { !isLiveSession }
+    var supportsSubtitleSearch: Bool { !isLiveSession && !isLocalSession }
 
     /// Streams eligible as SECONDARY track: text codecs only (bitmap can't stack as a companion line),
     /// never the active primary. Picker order matches `displaySubtitleStreams`.
@@ -483,6 +483,13 @@ final class PlayerViewModel {
     /// Nil keeps default-first. Set by the detail-view version picker.
     let preferredMediaSourceID: String?
 
+    /// Sodalite#81: the downloaded file this session plays instead of asking the server. Changes on an
+    /// auto-advance to another downloaded episode.
+    var localDownload: DownloadedItem?
+    /// Where a local session writes its progress; nil for sessions that never play a download.
+    let downloadStore: DownloadStore?
+    var isLocalSession: Bool { localDownload != nil }
+
     /// Scrub-preview thumbnail provider over the session FrameExtractor; configured in startPlayback,
     /// reset in stopPlayback.
     let scrubPreview: ScrubPreviewProvider
@@ -651,6 +658,12 @@ final class PlayerViewModel {
     var activePlaybackSource: PlaybackMediaSource?
     var playSessionID: String?
     var activePlayMethod: PlayMethod = .directPlay
+    /// Sodalite#81: the route that decides which subtitle tracks are sidecars. The play method for a
+    /// stream; for a download, the route the FILE came from (a transcoded file keeps its text tracks
+    /// only as sidecars, while it is reported and loaded as direct play).
+    var subtitlePlayMethod: PlayMethod { localSubtitleMethod ?? activePlayMethod }
+    /// Set only by a local session; every other session maps subtitles by its play method, as before.
+    var localSubtitleMethod: PlayMethod?
     /// The rung this player session streams at (Sodalite#87). Resolved once, on the first
     /// startPlayback, and then kept across retries and auto-advance, so a network change mid-film
     /// does not move it and an in-player pick holds for the rest of the binge.
@@ -813,7 +826,9 @@ final class PlayerViewModel {
         liveTvService: JellyfinLiveTvServiceProtocol? = nil,
         directStreamMemory: LiveDirectStreamMemory? = nil,
         serverName: String = "",
-        serverReachability: @escaping () -> ServerReachability = { .unknown }
+        serverReachability: @escaping () -> ServerReachability = { .unknown },
+        localDownload: DownloadedItem? = nil,
+        downloadStore: DownloadStore? = nil
     ) {
         self.item = item
         self.player = DependencyContainer.playerEngine
@@ -836,6 +851,8 @@ final class PlayerViewModel {
         self.directStreamMemory = directStreamMemory
         self.serverName = serverName
         self.serverReachability = serverReachability
+        self.localDownload = localDownload
+        self.downloadStore = downloadStore
     }
 
     // MARK: - Lifecycle
@@ -889,7 +906,7 @@ final class PlayerViewModel {
     private func startDetailEnrichment() {
         detailEnrichmentTask?.cancel()
         detailEnrichmentTask = nil
-        guard Self.needsDetailEnrichment(item: item, isLive: isLiveSession),
+        guard Self.needsDetailEnrichment(item: item, isLive: isLiveSession), !isLocalSession,
               let itemService else { return }
         let itemID = item.id
         detailEnrichmentTask = Task { [weak self] in
@@ -919,7 +936,7 @@ final class PlayerViewModel {
     private func configureScrubPreview(source: PlaybackMediaSource) {
         let trickplayTileSet = TrickplayTileSet(
             trickplay: item.trickplay, mediaSourceID: source.id, targetWidth: 320)
-        if Self.shouldUseServerTrickplay(
+        if !isLocalSession, Self.shouldUseServerTrickplay(
             preferServer: preferences.preferServerTrickplay, tileSet: trickplayTileSet),
            let tileSet = trickplayTileSet {
             let itemID = item.id
@@ -1022,77 +1039,38 @@ final class PlayerViewModel {
                 return
             }
 
-            var info: PlaybackInfoResponse
-            // Only a source id the server gave out is pinned: a guessed one that matches no source makes
-            // Jellyfin answer with none.
-            let switchSourceID = pendingMediaSourceID
-            let pinnedSourceID = switchSourceID ?? preferredMediaSourceID
-            let audioStreamIndex = pendingAudioStreamIndex
-            pendingMediaSourceID = nil
-            pendingAudioStreamIndex = nil
-            let profile = DirectPlayProfile.current(
-                maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
-            // Only a prefetch that names THIS item: the play target can move between the prefetch and
-            // the launch (Next Up rolling forward as the player exits, an auto-advance, a replaced item),
-            // and a response from the previous target would put its source id in MediaSourceId under this
-            // item's path, which Jellyfin refuses with HTTP 400.
-            if let cached = cachedPlaybackInfo?.matching(item.id, quality: effectiveStreamingQuality),
-               !cached.mediaSources.isEmpty, switchSourceID == nil {
-                info = cached
+            let source: PlaybackMediaSource
+            let url: URL
+            // Sodalite#81: a downloaded file needs no PlaybackInfo. Its subtitles map by the route the
+            // FILE came from: a transcode's text tracks exist only as sidecars, as when it streamed.
+            var localStartTicks: Int64?
+            if let local = localDownload {
+                guard let plan = LocalPlaybackPlan.make(local, startFromBeginning: startFromBeginning) else {
+                    throw LocalPlaybackError.fileMissing
+                }
+                source = plan.source
+                url = plan.url
+                localStartTicks = plan.startTicks
+                localSubtitleMethod = plan.subtitleMethod
+                playSessionID = nil
+                mediaSourceID = source.id
+                activePlaybackSource = source
+                subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+                activePlayMethod = .directPlay
+                LogTap.shared.note("[Downloads] playing \(item.id) from the device (\(local.manifest.route.rawValue))")
             } else {
-                info = try await playbackService.getPlaybackInfo(
-                    itemID: item.id, userID: userID, profile: profile,
-                    mediaSourceID: pinnedSourceID, audioStreamIndex: audioStreamIndex)
+                let resolved = try await resolveServerSource()
+                source = resolved.source
+                url = resolved.url
+                localSubtitleMethod = nil
             }
-
-            guard var source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
-                ?? info.mediaSources.first else {
-                throw PlayerEngineError.noSource
-            }
-            // A subtitle the server picked itself is burned into a transcode, and Jellyfin prepares that
-            // by extracting every subtitle from the whole file first: a minute on a 15 GB remux, past
-            // AVPlayer's patience (Sodalite#87). Sodalite draws subtitles itself, so ask once more with
-            // the source now known, which lets the request's "no subtitle" count.
-            if Self.serverBurnsInSubtitle(source.transcodingUrl) {
-                LogTap.shared.note("[Quality] server burns in a subtitle; asking again pinned to \(source.id)")
-                info = try await playbackService.getPlaybackInfo(
-                    itemID: item.id, userID: userID, profile: profile,
-                    mediaSourceID: source.id, audioStreamIndex: audioStreamIndex)
-                guard let pinned = info.mediaSources.first else { throw PlayerEngineError.noSource }
-                source = pinned
-            }
-            playSessionID = info.playSessionId
-            mediaSourceID = source.id
-            activePlaybackSource = source
-
-            #if DEBUG
-            print("[PlayerViewModel] Source: container=\(source.container ?? "nil"), directPlay=\(source.supportsDirectPlay ?? false), directStream=\(source.supportsDirectStream ?? false), transcoding=\(source.supportsTranscoding ?? false)")
-            if let tURL = source.transcodingUrl {
-                print("[PlayerViewModel] TranscodingURL: \(tURL.prefix(120))...")
-            }
-            #endif
-
-            // Keep all subtitle tracks: bitmap codecs (PGS/HDMV/DVB/DVD) now render as CGImage so they
-            // belong in the picker, and forced tracks stay (many releases mark every track forced). Dedupe
-            // keys on forced/signs/sdh descriptors so distinct same-language tracks don't collapse.
-            subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
-
-            // The same resolution the successor warm uses, so the URL this opens and the URL that
-            // was warmed for it are the same string (AetherEngine#551 adopts by exact URL).
-            guard let resolved = PlaybackStreamSelection.resolve(
-                itemID: item.id, source: source, using: playbackService
-            ) else {
-                throw PlayerEngineError.noURL
-            }
-            let url = resolved.url
-            activePlayMethod = resolved.method
-            #if DEBUG
-            print("[PlayerViewModel] Using \(resolved.method.rawValue)")
-            #endif
 
             // Scrub preview + chapter thumbnails decode stills from the original file (isStatic:true)
             // regardless of playback method, so transcode sessions still get a preview.
-            if let previewURL = playbackService.buildStreamURL(
+            if isLocalSession {
+                // The engine's still extractor reads a file:// source like any other (Sodalite#81).
+                frameExtractor = player.makeFrameExtractor(url: url)
+            } else if let previewURL = playbackService.buildStreamURL(
                 itemID: item.id, mediaSourceID: source.id,
                 container: source.container, isStatic: true
             ) {
@@ -1112,6 +1090,9 @@ final class PlayerViewModel {
                 startPos = override
                 resumePositionTicks = Int64(override * 10_000_000)
                 resumeOverrideSeconds = nil
+            } else if isLocalSession {
+                startPos = localStartTicks?.ticksToSeconds
+                resumePositionTicks = localStartTicks ?? 0
             } else if !startFromBeginning,
                let ticks = item.userData?.playbackPositionTicks, ticks > 0 {
                 startPos = ticks.ticksToSeconds
@@ -1153,7 +1134,9 @@ final class PlayerViewModel {
             // Live/infinite/external-URL sources (remote .strm IPTV) are exempt: the cap truncates their
             // continuous probe and crashes the load (#31). Safe: the subtitle picker selects via the engine's
             // full-budget side-demuxer.
-            let probeBudget = Self.remoteDirectPlayProbeBudget(method: activePlayMethod, source: source)
+            // A local file is read at disk speed; the remote cap would only hide tracks from the probe.
+            let probeBudget: (probesize: Int64?, maxAnalyzeDuration: Int64?) = isLocalSession
+                ? (nil, nil) : Self.remoteDirectPlayProbeBudget(method: activePlayMethod, source: source)
             // Hand the language preference to the engine so it picks the audio track on the first frame
             // from its single probe (#72), instead of us reloading via selectAudioTrack after load.
             // A remembered pick (Sodalite#46) outranks the global preference here; only a different
@@ -1163,9 +1146,11 @@ final class PlayerViewModel {
             let preferredAudio = rememberedAudioLanguage ?? effectivePreferredAudioLanguage()
             // AE#88: declare external Jellyfin subs at load so they list in engine.subtitleTracks
             // and join the native WebVTT renditions (PiP / external display); the map routes UI selections to engine ids.
+            let local = localDownload
             let externalSubs = Self.externalSubtitleDescriptors(
-                streams: subtitleStreams, playMethod: activePlayMethod) { stream in
-                playbackService.buildSubtitleURL(
+                streams: subtitleStreams, playMethod: subtitlePlayMethod) { stream in
+                if let local { return local.subtitleURL(forStream: stream.index) }
+                return playbackService.buildSubtitleURL(
                     itemID: item.id, mediaSourceID: mediaSourceID,
                     streamIndex: stream.index, format: stream.codec ?? "srt")
             }
@@ -1231,13 +1216,16 @@ final class PlayerViewModel {
             startProgressReporting()
 
             // Background fetch, doesn't block start; the next tick resolves the skip pill once the markers land.
-            Task { [weak self] in await self?.loadEpisodeSegments() }
+            if !isLocalSession || serverReachability() == .reachable {
+                Task { [weak self] in await self?.loadEpisodeSegments() }
+            }
             // Sodalite#87: learn once per server which codec it transcodes in, so the quality picker's
             // estimate is right before the first real transcode. Costs no ffmpeg on the server.
-            Task { [weak self] in await self?.probeTranscodeCodecIfNeeded() }
-
-            // Powers the transport-bar episode picker; stays empty (picker hidden) for movies / single-episode.
-            Task { [weak self] in await self?.loadSeasonEpisodes() }
+            if !isLocalSession {
+                Task { [weak self] in await self?.probeTranscodeCodecIfNeeded() }
+                // Powers the transport-bar episode picker; stays empty (picker hidden) for movies / single-episode.
+                Task { [weak self] in await self?.loadSeasonEpisodes() }
+            }
 
         } catch is CancellationError {
             // Engine signals a SUPERSEDED load this way (newer load/stop took the singleton mid-flight,
@@ -1262,7 +1250,8 @@ final class PlayerViewModel {
             } else if isLiveSession && !(error is APIError) {
                 // Engine-level live open failure (probe fail-fast): friendly message, APIErrors keep their trio.
                 setLiveChannelUnavailableError(info: engineInfo)
-            } else if ReplacedItemRecoveryTrigger.serverAnswered(hostError: error, engineError: engineInfo),
+            } else if !isLocalSession,
+                      ReplacedItemRecoveryTrigger.serverAnswered(hostError: error, engineError: engineInfo),
                       beginReplacedItemRecovery(
                         onGiveUp: { [weak self] in self?.setStartError(error, engineInfo: engineInfo) }) {
                 // The server answered with a status, which a *arr upgrade earns whichever endpoint it hits.
@@ -1274,6 +1263,78 @@ final class PlayerViewModel {
             }
             hostLoadActive = false
         }
+    }
+
+    /// PlaybackInfo, the source pick and the stream URL for a session played from the server.
+    private func resolveServerSource() async throws -> (source: PlaybackMediaSource, url: URL) {
+        var info: PlaybackInfoResponse
+        // Only a source id the server gave out is pinned: a guessed one that matches no source makes
+        // Jellyfin answer with none.
+        let switchSourceID = pendingMediaSourceID
+        let pinnedSourceID = switchSourceID ?? preferredMediaSourceID
+        let audioStreamIndex = pendingAudioStreamIndex
+        pendingMediaSourceID = nil
+        pendingAudioStreamIndex = nil
+        let profile = DirectPlayProfile.current(
+            maxStreamingBitrate: effectiveStreamingQuality.maxStreamingBitrate)
+        // Only a prefetch that names THIS item: the play target can move between the prefetch and
+        // the launch (Next Up rolling forward as the player exits, an auto-advance, a replaced item),
+        // and a response from the previous target would put its source id in MediaSourceId under this
+        // item's path, which Jellyfin refuses with HTTP 400.
+        if let cached = cachedPlaybackInfo?.matching(item.id, quality: effectiveStreamingQuality),
+           !cached.mediaSources.isEmpty, switchSourceID == nil {
+            info = cached
+        } else {
+            info = try await playbackService.getPlaybackInfo(
+                itemID: item.id, userID: userID, profile: profile,
+                mediaSourceID: pinnedSourceID, audioStreamIndex: audioStreamIndex)
+        }
+
+        guard var source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
+            ?? info.mediaSources.first else {
+            throw PlayerEngineError.noSource
+        }
+        // A subtitle the server picked itself is burned into a transcode, and Jellyfin prepares that
+        // by extracting every subtitle from the whole file first: a minute on a 15 GB remux, past
+        // AVPlayer's patience (Sodalite#87). Sodalite draws subtitles itself, so ask once more with
+        // the source now known, which lets the request's "no subtitle" count.
+        if Self.serverBurnsInSubtitle(source.transcodingUrl) {
+            LogTap.shared.note("[Quality] server burns in a subtitle; asking again pinned to \(source.id)")
+            info = try await playbackService.getPlaybackInfo(
+                itemID: item.id, userID: userID, profile: profile,
+                mediaSourceID: source.id, audioStreamIndex: audioStreamIndex)
+            guard let pinned = info.mediaSources.first else { throw PlayerEngineError.noSource }
+            source = pinned
+        }
+        playSessionID = info.playSessionId
+        mediaSourceID = source.id
+        activePlaybackSource = source
+
+        #if DEBUG
+        print("[PlayerViewModel] Source: container=\(source.container ?? "nil"), directPlay=\(source.supportsDirectPlay ?? false), directStream=\(source.supportsDirectStream ?? false), transcoding=\(source.supportsTranscoding ?? false)")
+        if let tURL = source.transcodingUrl {
+            print("[PlayerViewModel] TranscodingURL: \(tURL.prefix(120))...")
+        }
+        #endif
+
+        // Keep all subtitle tracks: bitmap codecs (PGS/HDMV/DVB/DVD) now render as CGImage so they
+        // belong in the picker, and forced tracks stay (many releases mark every track forced). Dedupe
+        // keys on forced/signs/sdh descriptors so distinct same-language tracks don't collapse.
+        subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+
+        // The same resolution the successor warm uses, so the URL this opens and the URL that
+        // was warmed for it are the same string (AetherEngine#551 adopts by exact URL).
+        guard let resolved = PlaybackStreamSelection.resolve(
+            itemID: item.id, source: source, using: playbackService
+        ) else {
+            throw PlayerEngineError.noURL
+        }
+        let url = resolved.url
+        activePlayMethod = resolved.method
+        #if DEBUG
+        print("[PlayerViewModel] Using \(resolved.method.rawValue)")
+        #endif
+        return (source, url)
     }
 
     /// tvOS's single "Match Content" flag. It covers Match Dynamic Range AND Match Frame Rate with no
@@ -1373,6 +1434,7 @@ final class PlayerViewModel {
     /// explicit encode kill. Captures every value now and dispatches when called, because
     /// `player.stop()` and the tuner release in between clear what the report needs.
     func makeServerSessionClose(positionTicks finalTicks: Int64) -> () -> Void {
+        if hasStartedPlaying { recordLocalProgress(positionTicks: finalTicks, played: hasReachedEndOfContent) }
         // Snapshot the payload + service and detach with a STRONG capture: a [weak self] task could be
         // deallocated by PlayerHostController's dismissal before the @MainActor hop ran, silently dropping
         // the position write.
@@ -2265,7 +2327,7 @@ final class PlayerViewModel {
 
     /// Whether this session offers a rung choice: not on live, which has its own ladder, and not on a
     /// file every rung already fits (Sodalite#87).
-    var supportsQualityChoice: Bool { !isLiveSession && pickerQualities.count > 1 }
+    var supportsQualityChoice: Bool { !isLiveSession && !isLocalSession && pickerQualities.count > 1 }
 
     /// The rungs the player's picker offers for the file on screen: Original, and only the rungs that
     /// actually transcode it. A rung the file fits under plays the original, so choosing it changes
@@ -2621,7 +2683,7 @@ final class PlayerViewModel {
             switch mode {
             case .forcedTrack(let index):
                 if let stream = subtitleStreams.first(where: { $0.index == index }),
-                   Self.servedAsSidecar(stream, playMethod: activePlayMethod) { break }
+                   Self.servedAsSidecar(stream, playMethod: subtitlePlayMethod) { break }
                 mode = .none
             case .cueFilter:
                 // Reads cues out of the played stream, which a transcode renumbers.
@@ -2634,7 +2696,7 @@ final class PlayerViewModel {
         switch mode {
         case .forcedTrack(let index):
             let stream = subtitleStreams.first(where: { $0.index == index })
-            if let stream, Self.servedAsSidecar(stream, playMethod: activePlayMethod) {
+            if let stream, Self.servedAsSidecar(stream, playMethod: subtitlePlayMethod) {
                 if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: index) {
                     player.selectSubtitleTrack(index: engineID)
                 } else {
@@ -3022,7 +3084,7 @@ final class PlayerViewModel {
         }
         let stream = subtitleStreams.first(where: { $0.index == id })
         activeSubtitleCodec = stream?.codec?.lowercased()
-        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: subtitlePlayMethod) } ?? false
 
         if isExternal {
             deactivateASSRendering()
@@ -3244,7 +3306,7 @@ final class PlayerViewModel {
         }
         activeSecondarySubtitleIndex = id
         let stream = subtitleStreams.first(where: { $0.index == id })
-        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: activePlayMethod) } ?? false
+        let isExternal = stream.map { Self.servedAsSidecar($0, playMethod: subtitlePlayMethod) } ?? false
 
         if isExternal {
             if let engineID = engineTrackID(forExternalStream: stream, jellyfinIndex: id) {

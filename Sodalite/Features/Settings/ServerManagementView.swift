@@ -94,7 +94,8 @@ struct ServerManagementView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: { server in
-            Text("multiServer.remove.confirm.message \(server.name)", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "multiServer.remove.confirm.message \(server.name)"), scope: .server(server.id)))
         }
         // The reason, not a fixed line: ServerSwitchError already distinguishes "no longer saved on
         // this device" from "no sign-in saved", and discarding that left the one screen that could
@@ -147,6 +148,7 @@ struct ServerManagementView: View {
     }
 
     private func remove(_ server: JellyfinServer) {
+        Task { await dependencies.purgeDownloads(.server(server.id)) }
         try? dependencies.removeServer(id: server.id)
         load()
     }
