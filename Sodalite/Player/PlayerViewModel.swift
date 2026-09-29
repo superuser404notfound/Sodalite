@@ -780,7 +780,7 @@ final class PlayerViewModel {
     var liveSeekableRange: ClosedRange<Double>?
     var isAtLiveEdge: Bool = true
     var behindLiveSeconds: Double = 0
-    /// Channel for live sessions. Nil for VOD.
+    /// Channel for live sessions. Nil for VOD. `resetLiveSessionState` is its only writer.
     var liveChannel: JellyfinChannel?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
@@ -824,7 +824,8 @@ final class PlayerViewModel {
     var liveRoute: LiveRoute?
     /// The audio stream the viewer picked on this live channel (#64), named at load on every
     /// subsequent tune of the session. It outlives the switch on purpose: a recovery retune re-runs
-    /// the same load, and dropping it there would silently put the channel back on its default track.
+    /// the same load, and dropping it there would silently put the channel back on its default track. A channel zap clears
+    /// it, since stream indices are per channel.
     var pendingLiveAudioStreamIndex: Int?
 
     init(

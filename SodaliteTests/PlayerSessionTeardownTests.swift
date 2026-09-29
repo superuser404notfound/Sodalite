@@ -101,6 +101,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _stoppedReports: [PlaybackStopReport] = []
     private var _killedEncodings: [String] = []
     private var _closedLiveStreams: [String] = []
+    private var _events: [String] = []
     private var _playbackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
     private var _requestedAudioIndexes: [Int?] = []
@@ -119,6 +120,8 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
     var closedLiveStreams: [String] { lock.withLock { _closedLiveStreams } }
+    /// Every stop, kill and close in the order the service saw them.
+    var events: [String] { lock.withLock { _events } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
@@ -129,10 +132,16 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var deviceID: String { "device" }
 
     func reportPlaybackStopped(_ report: PlaybackStopReport) async throws {
-        lock.withLock { _stoppedReports.append(report) }
+        lock.withLock {
+            _stoppedReports.append(report)
+            _events.append("stop:\(report.liveStreamId ?? "-")")
+        }
     }
     func stopActiveEncodings(playSessionID: String) async throws {
-        lock.withLock { _killedEncodings.append(playSessionID) }
+        lock.withLock {
+            _killedEncodings.append(playSessionID)
+            _events.append("kill:\(playSessionID)")
+        }
     }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse {
         try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile,
@@ -170,7 +179,10 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
     func closeLiveStream(liveStreamID: String) async throws {
-        lock.withLock { _closedLiveStreams.append(liveStreamID) }
+        lock.withLock {
+            _closedLiveStreams.append(liveStreamID)
+            _events.append("close:\(liveStreamID)")
+        }
     }
     func getSessions() async throws -> [JellyfinSessionInfo] { [] }
     func getSeasons(seriesID: String, userID: String) async throws -> [JellyfinItem] { [] }

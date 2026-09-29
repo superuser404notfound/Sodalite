@@ -19,6 +19,7 @@ extension PlayerViewModel {
         lastLiveRetuneAt = nil
         liveRetuneCount = 0
         liveFirstPlayingAt = nil
+        hasStartedPlaying = false
         liveTunerReleasedWhileSuspended = false
         pendingLiveAudioStreamIndex = nil
         errorMessage = nil
@@ -29,6 +30,8 @@ extension PlayerViewModel {
         externalEngineTrackIDs = [:]
         activeSubtitleIndex = nil
         activeAudioIndex = nil
+        forcedSubtitleFallback = .none
+        activeSubtitleCodec = nil
         deactivateASSRendering()
         showControls = false
         isScrubbing = false

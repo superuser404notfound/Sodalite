@@ -40,6 +40,9 @@ struct LiveZapResetTests {
         vm.showControls = true
         vm.activeSubtitleIndex = 4
         vm.activeAudioIndex = 1
+        vm.hasStartedPlaying = true
+        vm.forcedSubtitleFallback = .forcedTrack(streamIndex: 2)
+        vm.activeSubtitleCodec = "subrip"
 
         vm.resetLiveSessionState(switchingTo: try new())
 
@@ -62,9 +65,12 @@ struct LiveZapResetTests {
         #expect(vm.showControls == false)
         #expect(vm.activeSubtitleIndex == nil)
         #expect(vm.activeAudioIndex == nil)
+        #expect(vm.hasStartedPlaying == false)
+        #expect(vm.forcedSubtitleFallback == .none)
+        #expect(vm.activeSubtitleCodec == nil)
     }
 
-    @Test func aRetuneKeepsTheAudioPick() async {
+    @Test func theServerSideCloseKeepsTheAudioPick() async {
         let service = RecordingPlaybackService()
         let vm = makeViewModel(service)
         vm.pendingLiveAudioStreamIndex = 3
@@ -72,7 +78,7 @@ struct LiveZapResetTests {
         #expect(vm.pendingLiveAudioStreamIndex == 3)
     }
 
-    @Test func theCloseReportsThenKillsThenReleases() async {
+    @Test func theStopReportLandsBeforeTheReleases() async {
         let service = RecordingPlaybackService()
         let vm = makeViewModel(service)
         vm.hasReportedStart = true
@@ -88,6 +94,11 @@ struct LiveZapResetTests {
         #expect(service.stoppedReports.map(\.liveStreamId) == ["tuner-1"])
         #expect(service.killedEncodings == ["ps-1"])
         #expect(service.closedLiveStreams == ["tuner-1"])
+        let events = service.events
+        let stop = events.firstIndex(of: "stop:tuner-1")
+        #expect(stop != nil)
+        #expect(stop! < events.firstIndex(of: "close:tuner-1")!)
+        #expect(stop! < events.firstIndex(of: "kill:ps-1")!)
         #expect(vm.activeLiveStreamID == nil)
         #expect(vm.hasReportedStart == false)
     }
