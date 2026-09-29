@@ -20,6 +20,9 @@ enum DownloadEvent: Sendable {
     case progress(DownloadTaskTag, written: Int64, expected: Int64)
     case finished(DownloadTaskTag, status: Int, movedTo: URL?)
     case failed(DownloadTaskTag, resumeData: Data?, cancelled: Bool)
+    /// iOS cancelled the task itself (the app was force-quit, background refresh turned off, the
+    /// system short on resources): an interruption, not the viewer's cancel.
+    case interrupted(DownloadTaskTag, resumeData: Data?)
 }
 
 /// Foreground API the manager needs; production is `JellyfinDownloadBackend`.
@@ -88,7 +91,12 @@ final class DownloadManager {
         let detail = (try? await backend.itemDetail(itemID: item.id)) ?? item
         let plan = DownloadPlanner.plan(itemID: item.id, source: source, quality: quality, runtimeTicks: detail.runTimeTicks,
                                         audioStreamIndex: audio, baseURL: baseURL)
-        if DownloadPlanner.refusesForSpace(estimate: plan.expectedBytes, available: backend.availableCapacity()) {
+        // What is queued or running has not landed yet, but it will: its bytes are spoken for.
+        let reserved = store.items.values
+            .filter { [.queued, .downloading, .paused].contains($0.manifest.state) }
+            .reduce(Int64(0)) { $0 + max(($1.manifest.expectedBytes ?? 0) - $1.manifest.receivedBytes, 0) }
+        if DownloadPlanner.refusesForSpace(estimate: plan.expectedBytes,
+                                           available: backend.availableCapacity().map { $0 - reserved }) {
             throw DownloadEnqueueError.noSpace
         }
 
@@ -117,10 +125,20 @@ final class DownloadManager {
         pumpQueue()
     }
 
+    /// One episode the server refuses does not cost the rest of the season; running out of space does,
+    /// since every episode after it would be refused the same way. The first error is still reported.
     func enqueueSeason(seriesID: String, seasonID: String, quality: StreamingQuality) async throws {
+        var firstError: Error?
         for episode in try await backend.seasonEpisodes(seriesID: seriesID, seasonID: seasonID) {
-            try await enqueue(item: episode, quality: quality)
+            do {
+                try await enqueue(item: episode, quality: quality)
+            } catch DownloadEnqueueError.noSpace {
+                throw DownloadEnqueueError.noSpace
+            } catch {
+                firstError = firstError ?? error
+            }
         }
+        if let firstError { throw firstError }
     }
 
     // MARK: Control
@@ -215,6 +233,16 @@ final class DownloadManager {
                 }
             } else if let movedTo {
                 await finish(tag, file: movedTo)
+            }
+            pumpQueue()
+        case let .interrupted(tag, data):
+            liveProgress[tag.itemID] = nil
+            guard let manifest = store.manifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) else { return }
+            if manifest.route == .original, let data { try? data.write(to: resumeURL(tag)) }
+            // Back into the queue, so it continues on its own (from the resume data where there is
+            // one) instead of waiting for a retry the viewer never asked to need.
+            try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                $0.transition(to: .queued)
             }
             pumpQueue()
         case let .failed(tag, data, cancelled):

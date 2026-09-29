@@ -112,8 +112,14 @@ nonisolated final class DownloadSessionDelegate: NSObject, URLSessionDownloadDel
         lock.withLock { _ = lastProgress.removeValue(forKey: task.taskIdentifier) }
         guard let error, let tag = task.taskDescription.flatMap(DownloadTaskTag.init(encoded:)) else { return }
         let nsError = error as NSError
-        relay.send(.failed(tag, resumeData: nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data,
-                           cancelled: nsError.code == NSURLErrorCancelled))
+        let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+        // A cancel carrying a background-cancel reason came from iOS (force-quit, background refresh
+        // off, low resources), not from us: resume it rather than drop it.
+        if nsError.code == NSURLErrorCancelled, nsError.userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] != nil {
+            relay.send(.interrupted(tag, resumeData: resumeData))
+            return
+        }
+        relay.send(.failed(tag, resumeData: resumeData, cancelled: nsError.code == NSURLErrorCancelled))
     }
 
     /// Same pinning store as every other request, so a self-signed server that was trusted once

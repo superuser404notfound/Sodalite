@@ -210,6 +210,23 @@ final class PlayerViewModel {
 
     /// Playback speed choices; index 2 = 1.0x (matches native tvOS player's stepped set).
     static let speedOptions: [Float] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+
+    /// What a same-item reload (a quality switch, Sodalite#87) hands to the session it starts: the
+    /// engine comes back at 1.0x with nothing picked, and the viewer's choices must not depend on
+    /// track memory being on to survive it.
+    struct SessionCarry: Equatable {
+        let subtitleStreamIndex: Int?
+        let secondarySubtitleStreamIndex: Int?
+        let speedIndex: Int
+    }
+
+    var pendingSessionCarry: SessionCarry?
+
+    /// The rate to set again after a reload, nil at normal speed (nothing to restore).
+    static func rateToRestore(speedIndex: Int) -> Float? {
+        let rate = speedOptions[max(0, min(speedOptions.count - 1, speedIndex))]
+        return rate == 1 ? nil : rate
+    }
     var activeSpeedIndex: Int = 2
 
     // Tracks
@@ -502,7 +519,7 @@ final class PlayerViewModel {
     @ObservationIgnored private var outageWatchdog: SourceOutageWatchdog?
     /// Latched by the watchdog's verdict. Read by the live recovery paths: retuning a channel on a server
     /// that does not answer only burns tuners.
-    @ObservationIgnored private(set) var serverConfirmedUnreachable = false
+    @ObservationIgnored var serverConfirmedUnreachable = false
     /// Position the outage interrupted, so "Try again" resumes there instead of at the item's last
     /// server-side progress report (which is up to 10s stale, and a dead server never received the last one).
     @ObservationIgnored private var outageResumeSeconds: Double?
@@ -1203,7 +1220,12 @@ final class PlayerViewModel {
             // (PiP / external display, #32 / #34), so the two never double up. Fullscreen behaviour is identical to main.
             resetNativeSubtitleRenderingState()
             resetTemporarySubtitleWindows()
-            resolveInitialTracks(audioLanguage: heardAudioLanguage)
+            if let carry = pendingSessionCarry {
+                pendingSessionCarry = nil
+                applySessionCarry(carry)
+            } else {
+                resolveInitialTracks(audioLanguage: heardAudioLanguage)
+            }
             applyForcedSubtitleFallback()
 
             hostLoadActive = false
@@ -1266,6 +1288,14 @@ final class PlayerViewModel {
     }
 
     /// PlaybackInfo, the source pick and the stream URL for a session played from the server.
+    /// A PlaybackInfo answer that lands after the session was torn down or replaced must not write its
+    /// session ids or source over the state the teardown just cleared; a request already on the
+    /// wire does not necessarily see the cancellation.
+    private func throwIfSuperseded() throws {
+        try Task.checkCancellation()
+        if isTearingDown { throw CancellationError() }
+    }
+
     private func resolveServerSource() async throws -> (source: PlaybackMediaSource, url: URL) {
         var info: PlaybackInfoResponse
         // Only a source id the server gave out is pinned: a guessed one that matches no source makes
@@ -1288,6 +1318,7 @@ final class PlayerViewModel {
             info = try await playbackService.getPlaybackInfo(
                 itemID: item.id, userID: userID, profile: profile,
                 mediaSourceID: pinnedSourceID, audioStreamIndex: audioStreamIndex)
+            try throwIfSuperseded()
         }
 
         guard var source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
@@ -1303,6 +1334,7 @@ final class PlayerViewModel {
             info = try await playbackService.getPlaybackInfo(
                 itemID: item.id, userID: userID, profile: profile,
                 mediaSourceID: source.id, audioStreamIndex: audioStreamIndex)
+            try throwIfSuperseded()
             guard let pinned = info.mediaSources.first else { throw PlayerEngineError.noSource }
             source = pinned
         }
@@ -2362,7 +2394,8 @@ final class PlayerViewModel {
         }
         // A reload that has not started yet still holds the second the viewer was at; the clock
         // reads zero until the new session plays.
-        let resumeAt = resumeOverrideSeconds ?? playbackTime
+        // From the outage error the clock may already read zero; the outage kept where it hit.
+        let resumeAt = resumeOverrideSeconds ?? outageResumeSeconds ?? playbackTime
         LogTap.shared.note("[Quality] \(effectiveStreamingQuality.rawValue) -> \(quality.rawValue) at \(String(format: "%.1f", resumeAt))s")
         let closeServerSession = makeServerSessionClose(positionTicks: Int64(resumeAt * 10_000_000))
         // The engine stop below zeroes its clock; sinks left armed would copy that into the transport
@@ -2384,6 +2417,13 @@ final class PlayerViewModel {
         streamingQuality = quality
         cachedPlaybackInfo = nil
         resumeOverrideSeconds = resumeAt > 0 ? resumeAt : nil
+        pendingSessionCarry = SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
+                                           secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
+                                           speedIndex: activeSpeedIndex)
+        // A switch picked from the outage error is a new session: nothing of the outage carries.
+        serverConfirmedUnreachable = false
+        outageResumeSeconds = nil
+        outageWatchdog?.reset()
         clearError()
         player.stop()
         closeServerSession()
@@ -2635,6 +2675,15 @@ final class PlayerViewModel {
     /// `preferredSubtitleLanguage` and `autoSubtitleForForeignAudio`; anything the memory
     /// cannot resolve falls through to that automatic resolution unchanged. VOD only, the
     /// live path keeps calling `applyPreferredSubtitle` directly.
+    /// The viewer's picks from before a same-item reload. The audio track already came back through
+    /// the reload's AudioStreamIndex.
+    private func applySessionCarry(_ carry: SessionCarry) {
+        selectSubtitleTrack(id: carry.subtitleStreamIndex)
+        if let secondary = carry.secondarySubtitleStreamIndex { selectSecondarySubtitleTrack(id: secondary) }
+        activeSpeedIndex = carry.speedIndex
+        if let rate = Self.rateToRestore(speedIndex: carry.speedIndex) { player.setRate(rate) }
+    }
+
     private func resolveInitialTracks(audioLanguage: String?) {
         let entry = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
         let plan = TrackSelectionMatcher.plan(

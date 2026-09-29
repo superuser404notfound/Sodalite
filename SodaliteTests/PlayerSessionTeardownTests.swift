@@ -111,6 +111,9 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var delayedItemIDs: Set<String> = []
     /// Item ids whose PlaybackInfo never answers (until the caller's task is cancelled).
     var hangingItemIDs: Set<String> = []
+    /// Item ids whose PlaybackInfo answers late and ignores cancellation, like a request already on
+    /// the wire when the session is torn down.
+    var uncancellableDelayItemIDs: Set<String> = []
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
@@ -144,6 +147,11 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         }
         if delayedItemIDs.contains(itemID) {
             try await Task.sleep(for: .milliseconds(150))
+        }
+        if uncancellableDelayItemIDs.contains(itemID) {
+            await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.15) { done.resume() }
+            }
         }
         if hangingItemIDs.contains(itemID) {
             try await Task.sleep(for: .seconds(60))
