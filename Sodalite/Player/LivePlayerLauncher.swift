@@ -95,6 +95,7 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
             liveProgram: liveContext.program,
             liveTvService: liveTvService,
             directStreamMemory: directStreamMemory,
+            zapFilter: liveContext.zapFilter,
             serverName: serverName,
             serverReachability: reachability
         )

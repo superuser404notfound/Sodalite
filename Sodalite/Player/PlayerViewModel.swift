@@ -789,6 +789,12 @@ final class PlayerViewModel {
     var zapBanner: LiveZapBanner?
     @ObservationIgnored var zapSettleTask: Task<Void, Never>?
     @ObservationIgnored var zapLineupTask: Task<LiveChannelLineup?, Never>?
+    @ObservationIgnored var zapBannerHideTask: Task<Void, Never>?
+    /// The commit in flight; the next one waits for it so two never close the same tuner.
+    @ObservationIgnored var zapCommitTask: Task<Void, Never>?
+    @ObservationIgnored var zapCommitGeneration = 0
+    /// Test seam: nil in production, which means `startPlayback()`.
+    @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.
@@ -1452,6 +1458,8 @@ final class PlayerViewModel {
         zapSettleTask = nil
         zapLineupTask?.cancel()
         zapLineupTask = nil
+        zapBannerHideTask?.cancel()
+        zapBannerHideTask = nil
         controlsTimer?.cancel()
         controlsTimer = nil
         continuousSeekTask?.cancel()

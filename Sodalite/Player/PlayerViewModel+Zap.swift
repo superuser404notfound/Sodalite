@@ -10,8 +10,12 @@ extension PlayerViewModel {
     static let zapSettle: Duration = .milliseconds(600)
 
     var zapTarget: JellyfinChannel? {
+        neighbourChannel(offset: zapPendingOffset)
+    }
+
+    private func neighbourChannel(offset: Int) -> JellyfinChannel? {
         guard let current = liveChannel?.id else { return nil }
-        return zapLineup?.neighbour(of: current, offset: zapPendingOffset)
+        return zapLineup?.neighbour(of: current, offset: offset)
     }
 
     func loadZapLineupIfNeeded() {
@@ -79,8 +83,63 @@ extension PlayerViewModel {
         zapBanner = LiveZapBanner(channel: zapTarget, direction: dir)
     }
 
-    /// Task 4 replaces this with the tune.
-    func commitZap() async {}
+    /// Turns the settled presses into a retune. Commits run one after another, so a newer press never
+    /// closes a tuner the previous commit is still closing; it cancels that commit's tune instead.
+    func commitZap() async {
+        let offset = zapPendingOffset
+        zapPendingOffset = 0
+        guard neighbourChannel(offset: offset) != nil else {
+            zapBanner = nil
+            return
+        }
+        zapCommitGeneration += 1
+        let generation = zapCommitGeneration
+        zapBannerHideTask?.cancel()
+        loadTask?.cancel()
+        let prior = zapCommitTask
+        let commit = Task { [weak self] in
+            await prior?.value
+            await self?.performZap(offset: offset, generation: generation)
+        }
+        zapCommitTask = commit
+        await commit.value
+    }
+
+    private func performZap(offset: Int, generation: Int) async {
+        let previous = loadTask
+        previous?.cancel()
+        await previous?.value
+        guard !isTearingDown, let from = liveChannel, let target = neighbourChannel(offset: offset) else { return }
+        LogTap.shared.note("[Zap] from=\(from.id) to=\(target.id) offset=\(offset) "
+            + "lineup=\(zapLineup?.channels.count ?? 0) filter=\(zapFilter.favoritesOnly ? "fav" : "all")")
+        await closeLiveSessionServerSide()
+        guard !isTearingDown else { return }
+        resetLiveSessionState(switchingTo: target)
+        // A newer commit is queued: it tunes from this channel, so opening one here would only be released again.
+        guard generation == zapCommitGeneration else { return }
+        if zapPendingOffset != 0 {
+            refreshZapBanner()
+        } else {
+            zapBanner = LiveZapBanner(channel: target, direction: offset.signum())
+        }
+        let start = zapStartPlayback
+        let task = Task<Void, Never> { [weak self] in
+            if let start { await start() } else { await self?.startPlayback() }
+        }
+        loadTask = task
+        await task.value
+        guard generation == zapCommitGeneration else { return }
+        armZapBannerHide()
+    }
+
+    private func armZapBannerHide() {
+        zapBannerHideTask?.cancel()
+        zapBannerHideTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled, let self, self.zapPendingOffset == 0 else { return }
+            self.zapBanner = nil
+        }
+    }
 
     /// Single owner of channel-bound state for a zap (Sodalite#173), the live counterpart of
     /// `resetSessionState`. The audio pick goes too: a recovery retune keeps it on purpose, but stream
