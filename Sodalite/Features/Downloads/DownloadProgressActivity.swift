@@ -68,27 +68,37 @@ final class DownloadProgressActivity {
         }
         feed = Task { [weak self] in
             while !Task.isCancelled {
-                guard let self, self.update() else { return }
-                try? await Task.sleep(for: .seconds(1))
+                guard let self else { return }
+                switch self.update() {
+                case .running:
+                    try? await Task.sleep(for: .seconds(1))
+                case .finished:
+                    // Held on screen for a moment: completing at once took the activity away the
+                    // instant it reached 100 %, before anyone could see that it had.
+                    try? await Task.sleep(for: Self.finishedHold)
+                    // A download started during the hold joined the batch: keep going for it.
+                    if self.update() == .running { continue }
+                    self.end(success: true)
+                    return
+                case .gone:
+                    self.end(success: true)
+                    return
+                }
             }
         }
     }
 
-    /// Pushes the current numbers; false once the batch is done and the task was completed.
-    private func update() -> Bool {
-        guard let task else { return false }
-        guard let summary = summary() else {
-            end(success: true)
-            return false
-        }
+    private enum Phase { case running, finished, gone }
+
+    /// How long the finished numbers stay up before the task completes.
+    static let finishedHold: Duration = .seconds(3)
+
+    /// Pushes the current numbers. The final ones go out BEFORE completing: the system keeps the
+    /// last subtitle on the finished activity, which otherwise read "0 of 1" under the checkmark.
+    private func update() -> Phase {
+        guard let task, let summary = summary() else { return .gone }
         show(summary, on: task)
-        // The final numbers go out BEFORE completing: the system keeps the last subtitle on the
-        // finished activity, which otherwise read "0 of 1" under the checkmark.
-        if summary.isDone {
-            end(success: true)
-            return false
-        }
-        return true
+        return summary.isDone ? .finished : .running
     }
 
     private func show(_ summary: DownloadActivitySummary, on task: BGContinuedProcessingTask) {
