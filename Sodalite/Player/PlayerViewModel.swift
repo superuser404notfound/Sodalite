@@ -1076,7 +1076,9 @@ final class PlayerViewModel {
                 Task { [weak self] in await self?.refreshExternalMetadataWithArtwork() }
                 await reportStart()
                 startProgressReporting()
+                #if os(tvOS)
                 loadZapLineupIfNeeded()
+                #endif
                 return
             }
 
