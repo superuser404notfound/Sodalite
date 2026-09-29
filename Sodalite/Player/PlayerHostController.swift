@@ -414,6 +414,8 @@ final class PlayerHostController: AVPlayerViewController {
         rightTap.require(toFail: rightHold)
         addPressGesture(.upArrow, action: #selector(upPressed))
         addPressGesture(.downArrow, action: #selector(downPressed))
+        addPressGesture(.pageUp, action: #selector(pageUpPressed))
+        addPressGesture(.pageDown, action: #selector(pageDownPressed))
 
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         pan.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirect.rawValue)]
@@ -1367,7 +1369,28 @@ final class PlayerHostController: AVPlayerViewController {
         }
     }
 
+    #if os(tvOS)
+    private func routeLiveZap(_ key: LiveZapInput.Key) -> Bool {
+        let action = LiveZapInput.action(
+            for: key, isLive: viewModel.isLiveSession, showControls: viewModel.showControls,
+            errorVisible: viewModel.errorMessage != nil,
+            overlayCapturesInput: viewModel.isSubtitleDeletePromptVisible || viewModel.subtitleSearchVisible
+                || statsOverlayCapturesPresses || viewModel.isDropdownOpen)
+        switch action {
+        case .zap(let delta): viewModel.requestZap(by: delta); return true
+        case .ignore: return true
+        case .passThrough: return false
+        }
+    }
+
+    @objc private func pageUpPressed() { _ = routeLiveZap(.pageUp) }
+    @objc private func pageDownPressed() { _ = routeLiveZap(.pageDown) }
+    #endif
+
     @objc private func upPressed() {
+        #if os(tvOS)
+        if routeLiveZap(.up) { return }
+        #endif
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveUp(); return }
         if viewModel.errorMessage != nil { return }
@@ -1419,6 +1442,9 @@ final class PlayerHostController: AVPlayerViewController {
     #endif
 
     @objc private func downPressed() {
+        #if os(tvOS)
+        if routeLiveZap(.down) { return }
+        #endif
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveDown(); return }
         if viewModel.errorMessage != nil { return }
