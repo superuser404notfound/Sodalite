@@ -766,7 +766,7 @@ struct SeriesDetailView: View {
         if let line = episodeMetadataLine(vm: vm) {
             Text(line)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
                 .lineLimit(1)
         }
     }

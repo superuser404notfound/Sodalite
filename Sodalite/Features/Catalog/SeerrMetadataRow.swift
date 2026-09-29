@@ -19,7 +19,7 @@ struct SeerrMetadataRow: View {
             }
         }
         .font(.subheadline)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
     }
 
     private struct Segment {
@@ -59,20 +59,14 @@ struct SeerrMetadataRow: View {
         if let certification, !certification.isEmpty {
             out.append(Segment(view: AnyView(
                 Text(certification)
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(.secondary.opacity(0.5), lineWidth: 1)
-                    )
+                    .metadataBox()
             )))
         }
         return out
     }
 
     private var separator: some View {
-        Text("·").foregroundStyle(.tertiary)
+        Text("·").foregroundStyle(.secondary)
     }
 
     /// TMDB runtime is in minutes.

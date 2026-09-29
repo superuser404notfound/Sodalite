@@ -48,7 +48,7 @@ struct ItemMetadataRow: View {
             }
         }
         .font(.subheadline)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
     }
 
     private var segments: [Segment] {
@@ -68,13 +68,7 @@ struct ItemMetadataRow: View {
             out.append(Segment(
                 view: AnyView(
                     Text(rating)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(.secondary.opacity(0.5), lineWidth: 1)
-                        )
+                        .metadataBox()
                 ),
                 isBordered: true
             ))
@@ -114,6 +108,20 @@ struct ItemMetadataRow: View {
     }
 
     private var separator: some View {
-        Text("·").foregroundStyle(.tertiary)
+        Text("·").foregroundStyle(.secondary)
+    }
+}
+
+extension View {
+    /// The bordered look of a metadata segment (age rating, format pill). The edge is drawn in the
+    /// text's own style, so box and label stay one colour wherever the row puts them (Sodalite#171).
+    func metadataBox() -> some View {
+        font(.caption)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(.foreground, lineWidth: 1)
+            )
     }
 }
