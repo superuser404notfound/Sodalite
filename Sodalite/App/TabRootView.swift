@@ -554,7 +554,10 @@ struct TabRootView: View {
         // Reserve space for the floating settings gear so content never slides under it.
         // padding reliably repositions content, including screens rooted in a NavigationStack
         // (Catalog/Search/...) which ignore a parent safeAreaInset and so would overlap.
-        .padding(.top, hSizeClass == .compact ? Self.gearChromeHeight : 0)
+        // Not for the pages that scroll under the chrome: their inset is a content margin instead
+        // (`scrollsUnderShellChrome`), since a padding here shrinks the page and it clips its rows
+        // at the line below the buttons.
+        .padding(.top, hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
         .background {
             AppBackgroundView(
                 theme: appearanceTheme,
@@ -575,6 +578,10 @@ struct TabRootView: View {
 
     #if os(iOS)
     static let gearChromeHeight: CGFloat = 56
+    /// The tabs whose root scroll view sits directly under the chrome (`scrollsUnderShellChrome`).
+    /// The others start with a fixed header (Live TV's and Catalog's pickers, the search field),
+    /// under which their lists end the regular way.
+    static let scrollsUnderChrome: Set<AppTab> = [.home, .music]
 
     private var downloadsButton: some View {
         chromeCircleButton(systemImage: "arrow.down.circle", label: "tab.downloads") { showDownloads = true }

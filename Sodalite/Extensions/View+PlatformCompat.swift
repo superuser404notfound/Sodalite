@@ -39,6 +39,14 @@ extension View {
         #endif
     }
 
+    /// For a tab page whose scroll view starts right under the iPhone's floating corner chrome
+    /// (TabRootView.scrollsUnderChrome): the page itself reaches the top of the screen, and only the
+    /// scroll CONTENT starts below the chrome, so rows scroll up through the band behind the badge
+    /// and buttons and blur out there instead of being cut at a line.
+    func scrollsUnderShellChrome() -> some View {
+        modifier(ScrollsUnderShellChrome())
+    }
+
     @ViewBuilder
     func themedNavigationDestination() -> some View {
         #if os(iOS)
@@ -246,5 +254,30 @@ extension EnvironmentValues {
     var shellPaysLeadingInset: Bool {
         get { self[ShellPaysLeadingInsetKey.self] }
         set { self[ShellPaysLeadingInsetKey.self] = newValue }
+    }
+}
+
+private struct ScrollsUnderShellChrome: ViewModifier {
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    #endif
+
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if hSizeClass == .compact {
+            // An empty bar the height of the chrome: it insets the content, and it is what the
+            // system's own scroll edge effect blurs under, which stays invisible while nothing is
+            // beneath it (a material band of our own showed as a grey strip at rest).
+            content
+                .safeAreaBar(edge: .top) {
+                    Color.clear.frame(height: TabRootView.gearChromeHeight)
+                }
+                .scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            content
+        }
+        #else
+        content
+        #endif
     }
 }

@@ -386,6 +386,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical, 40)
             }
+            .scrollsUnderShellChrome()
             .onChange(of: focusedRowIndex) { oldValue, newValue in
                 // Scroll to top only on a real top-row → tab-bar arrival, gated two ways:
                 // 1. oldValue == 0: the focus engine routes Up to the tab bar only from the top row; a row-N→nil (N>0) is a transient between LazyVStack row materializations, not a tab-bar arrival.
