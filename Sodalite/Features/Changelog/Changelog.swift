@@ -27,6 +27,12 @@ enum Changelog {
                     icon: "arrow.down.circle"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.channelZap.title",
+                    "changelog.1_1_0.channelZap.body",
+                    icon: "tv"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

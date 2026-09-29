@@ -780,8 +780,24 @@ final class PlayerViewModel {
     var liveSeekableRange: ClosedRange<Double>?
     var isAtLiveEdge: Bool = true
     var behindLiveSeconds: Double = 0
-    /// Channel for live sessions. Nil for VOD.
-    let liveChannel: JellyfinChannel?
+    /// Channel for live sessions. Nil for VOD. `resetLiveSessionState` is its only writer.
+    var liveChannel: JellyfinChannel?
+    /// Sodalite#173: the channels Up/Down steps through, fetched in the background per live session.
+    var zapLineup: LiveChannelLineup?
+    /// Net presses since the last tune; 0 when idle.
+    var zapPendingOffset = 0
+    var zapBanner: LiveZapBanner?
+    @ObservationIgnored var zapSettleTask: Task<Void, Never>?
+    @ObservationIgnored var zapLineupTask: Task<LiveChannelLineup?, Never>?
+    @ObservationIgnored var zapBannerHideTask: Task<Void, Never>?
+    /// The commit in flight; the next one waits for it so two never close the same tuner.
+    @ObservationIgnored var zapCommitTask: Task<Void, Never>?
+    @ObservationIgnored var zapCommitGeneration = 0
+    /// The retune in flight (recovery, audio switch, foreground return). Zap commits and retunes wait
+    /// for each other, so the two never close or open a tuner side by side.
+    @ObservationIgnored var liveRetuneTask: Task<Void, Never>?
+    /// Test seam: nil in production, which means `startPlayback()`.
+    @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.
@@ -815,6 +831,8 @@ final class PlayerViewModel {
     var didAbandonLiveTunerFile = false
     /// Remembered upstream URLs, so a repeat tune of a direct channel skips Jellyfin entirely. Nil for VOD.
     let directStreamMemory: LiveDirectStreamMemory?
+    /// The guide filter the zap lineup is built from; `.default` for a launch outside the guide (#173).
+    let zapFilter: GuideFilter
     /// Which of the four live routes carried this tune, nil for VOD and until one is chosen. It mirrors the
     /// `[LiveDirect] route=` line, which lives in a ring buffer only a diagnostic build's in-player HUD can
     /// render; a reporter cannot reach it. In the stats panel the same fact is a screenshot (Sodalite#70,
@@ -822,7 +840,8 @@ final class PlayerViewModel {
     var liveRoute: LiveRoute?
     /// The audio stream the viewer picked on this live channel (#64), named at load on every
     /// subsequent tune of the session. It outlives the switch on purpose: a recovery retune re-runs
-    /// the same load, and dropping it there would silently put the channel back on its default track.
+    /// the same load, and dropping it there would silently put the channel back on its default track. A channel zap clears
+    /// it, since stream indices are per channel.
     var pendingLiveAudioStreamIndex: Int?
 
     init(
@@ -842,6 +861,7 @@ final class PlayerViewModel {
         liveProgram: JellyfinProgram? = nil,
         liveTvService: JellyfinLiveTvServiceProtocol? = nil,
         directStreamMemory: LiveDirectStreamMemory? = nil,
+        zapFilter: GuideFilter = .default,
         serverName: String = "",
         serverReachability: @escaping () -> ServerReachability = { .unknown },
         localDownload: DownloadedItem? = nil,
@@ -866,6 +886,7 @@ final class PlayerViewModel {
         self.liveProgram = liveProgram
         self.liveTvService = liveTvService
         self.directStreamMemory = directStreamMemory
+        self.zapFilter = zapFilter
         self.serverName = serverName
         self.serverReachability = serverReachability
         self.localDownload = localDownload
@@ -1032,7 +1053,9 @@ final class PlayerViewModel {
                 didAbandonLiveTunerFile = false
                 try await loadLiveStream()
                 if Task.isCancelled || isTearingDown {
-                    player.stop()
+                    // A superseded load (channel zap) leaves the engine to its successor's in-place load;
+                    // stopping here would drop the AVPlayer and Now Playing between channels (#15).
+                    if isTearingDown { player.stop() }
                     // loadLiveStream() may have opened a tuner before cancel landed; release so server doesn't leak.
                     releaseLiveTunerIfNeeded()
                     hostLoadActive = false
@@ -1053,6 +1076,9 @@ final class PlayerViewModel {
                 Task { [weak self] in await self?.refreshExternalMetadataWithArtwork() }
                 await reportStart()
                 startProgressReporting()
+                #if os(tvOS)
+                loadZapLineupIfNeeded()
+                #endif
                 return
             }
 
@@ -1435,6 +1461,12 @@ final class PlayerViewModel {
         nextEpisodeTimer = nil
         liveProgramFollow?.cancel()
         liveProgramFollow = nil
+        zapSettleTask?.cancel()
+        zapSettleTask = nil
+        zapLineupTask?.cancel()
+        zapLineupTask = nil
+        zapBannerHideTask?.cancel()
+        zapBannerHideTask = nil
         controlsTimer?.cancel()
         controlsTimer = nil
         continuousSeekTask?.cancel()
