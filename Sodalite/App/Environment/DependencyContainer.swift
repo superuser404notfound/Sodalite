@@ -60,6 +60,10 @@ final class DependencyContainer {
     let downloadPreferences: DownloadPreferences
     /// Nil on tvOS. Created last in init because its backend reads the session through the container.
     private(set) var downloadManager: DownloadManager?
+    #if os(iOS)
+    /// Sodalite#81: the Dynamic Island / Lock Screen progress of running downloads.
+    private(set) var downloadActivity: DownloadProgressActivity?
+    #endif
     /// The progress sync in flight, so a second trigger joins it instead of racing it.
     var downloadSyncTask: Task<Void, Never>?
 
@@ -275,7 +279,11 @@ final class DependencyContainer {
         profileSettings.markEarlierMigrationSeedsIfNeeded()
 
         #if os(iOS)
-        downloadManager = makeDownloadManager()
+        let manager = makeDownloadManager()
+        downloadManager = manager
+        downloadActivity = DownloadProgressActivity(store: downloadStore, liveProgress: { [weak manager] in
+            manager?.liveProgress ?? [:]
+        })
         #endif
     }
 

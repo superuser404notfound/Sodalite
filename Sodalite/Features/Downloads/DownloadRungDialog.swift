@@ -112,6 +112,7 @@ private struct DownloadRungDialog: ViewModifier {
                 case .season(let seriesID, let seasonID, _):
                     try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, quality: quality)
                 }
+                dependencies.downloadActivity?.begin()
             } catch {
                 errorMessage = ErrorText.user(for: error)
             }
@@ -153,7 +154,9 @@ struct DownloadActionButton: View {
             ) {
                 switch state {
                 case .available: target = .item(item)
-                case .paused: manager.resume(itemID: item.id)
+                case .paused:
+                    manager.resume(itemID: item.id)
+                    dependencies.downloadActivity?.begin()
                 default: showsMenu = true
                 }
             }
@@ -171,15 +174,22 @@ struct DownloadMenuActions: View {
     let itemID: String
     let state: DownloadButtonState
     let manager: DownloadManager
+    @Environment(\.dependencies) private var dependencies
 
     var body: some View {
         switch state {
         case .downloading:
             Button("downloads.action.pause") { Task { await manager.pause(itemID: itemID) } }
         case .paused:
-            Button("downloads.action.resume") { manager.resume(itemID: itemID) }
+            Button("downloads.action.resume") {
+                manager.resume(itemID: itemID)
+                dependencies.downloadActivity?.begin()
+            }
         case .failed:
-            Button("downloads.action.retry") { manager.retry(itemID: itemID) }
+            Button("downloads.action.retry") {
+                manager.retry(itemID: itemID)
+                dependencies.downloadActivity?.begin()
+            }
         default:
             EmptyView()
         }
