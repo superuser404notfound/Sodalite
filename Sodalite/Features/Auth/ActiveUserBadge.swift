@@ -10,6 +10,9 @@ struct ActiveUserBadge: View {
     @Environment(\.dependencies) private var dependencies
 
     let rememberedCount: Int
+    /// iOS: the badge opens the profile picker. nil keeps it display-only, which tvOS needs so an
+    /// up-press lands on the Home tab (issue #25).
+    var onTap: (() -> Void)? = nil
 
     private let diameter: CGFloat = 36
 
@@ -50,7 +53,10 @@ struct ActiveUserBadge: View {
         // Title-safe top; negative offset lifts center level with the tab-bar pills (sit above the title-safe inset).
         .padding(.trailing, 6)
         .offset(y: -4)
-        .allowsHitTesting(false)
+        .contentShape(Capsule())
+        .onTapGesture { onTap?() }
+        .allowsHitTesting(onTap != nil)
+        .accessibilityAddTraits(onTap != nil ? .isButton : [])
     }
 
     private func avatar(for user: JellyfinUser) -> some View {

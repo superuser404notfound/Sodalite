@@ -169,7 +169,8 @@ struct TabRootView: View {
                 // 2 + the badge's own 6 pt trailing inset make the same 8 pt gap as between the
                 // circles; the inset stays in the badge, which the other layouts place on its own.
                 HStack(spacing: 2) {
-                    ActiveUserBadge(rememberedCount: rememberedProfileCount)
+                    ActiveUserBadge(rememberedCount: rememberedProfileCount,
+                                    onTap: { appState.requestProfilePicker = true })
                     HStack(spacing: 8) {
                         if !dependencies.downloadStore.items.isEmpty {
                             downloadsButton
@@ -180,7 +181,8 @@ struct TabRootView: View {
                 .padding(.trailing, 16)
                 .padding(.top, 6)
             } else {
-                ActiveUserBadge(rememberedCount: rememberedProfileCount)
+                ActiveUserBadge(rememberedCount: rememberedProfileCount,
+                                onTap: { appState.requestProfilePicker = true })
             }
             #else
             // Not in sidebar mode: the rail carries the profile as its header, so a second badge in

@@ -381,6 +381,15 @@ struct AppRouter: View {
                 .pausesAppBackgroundMotion()
             }
         }
+        // iOS profile badge: the picker as a cover, opened on purpose (context .chooser). Never over
+        // a sibling cover, the same rule the reprompt follows.
+        .onChange(of: appState.requestProfilePicker) { _, requested in
+            guard requested else { return }
+            appState.requestProfilePicker = false
+            guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew,
+                  let server = appState.activeServer else { return }
+            profileCover = ProfileCoverRequest(server: server, context: .chooser)
+        }
         .onChange(of: appState.isLoading) { _, isLoading in
             // Splash finished: fire What's-New on a release-boundary crossing. isAuthenticated lets the prefs layer tell a fresh install (don't pester) from a pre-Changelog upgrade (0.3.2 and earlier never wrote lastSeenVersion).
             guard !isLoading else { return }

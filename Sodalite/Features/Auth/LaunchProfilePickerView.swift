@@ -17,7 +17,9 @@ struct LaunchProfilePickerView: View {
     /// when the target holds no session this device may resume unasked (Sodalite#74). In reprompt
     /// context, picking the active profile must not switch or clear caches, just dismiss; in
     /// switchServer context every card belongs to another server, so every card is a real switch.
-    enum Context { case launch, reprompt, switchServer }
+    /// `chooser`: opened on purpose from the iOS profile badge; dismissible, and the active card
+    /// just closes it.
+    enum Context { case launch, reprompt, switchServer, chooser }
     var context: Context = .launch
     /// Cover dismissal (reprompt + switchServer); nil in launch context.
     var onFinished: (() -> Void)? = nil
@@ -53,6 +55,15 @@ struct LaunchProfilePickerView: View {
             // current" as tapping the active card, PIN included. On the root only: a pushed screen
             // keeps its own Menu press for popping.
             .onExitCommandIfEnabled(context == .reprompt) { continueAsCurrent() }
+            #if os(iOS)
+            .toolbar {
+                if context == .chooser {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .close) { onFinished?() }
+                    }
+                }
+            }
+            #endif
             .screenContentInset()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $navigateToAddProfile) {
@@ -299,6 +310,11 @@ struct LaunchProfilePickerView: View {
         // changed, and waving the last active card through is the one way in that lock is for.
         // Legitimate exits stay open, their own card is a normal free select, and the pad offers
         // recovery.
+        // Chooser: the viewer opened this to look, and staying who they are costs nothing.
+        if context == .chooser, user.id == activeSessionUserID {
+            onFinished?()
+            return
+        }
         if context == .reprompt, user.id == activeSessionUserID {
             guard dependencies.parentalGateRequired(forActivatingUserID: user.id,
                                                     serverID: server.id) else {

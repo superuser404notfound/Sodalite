@@ -27,6 +27,9 @@ final class AppState {
     /// Sodalite#81: a screen asks the tab root to switch tabs (the unreachable screen's "Go to Downloads"). TabRootView consumes and clears it.
     var requestedTab: AppTab?
 
+    /// iOS: the profile badge asks the router for the profile picker. AppRouter consumes and clears it.
+    var requestProfilePicker = false
+
     /// Bumped by DependencyContainer after a server switch; consumers (Home) observe via `.task(id:)` to clear caches + reload. Int (not Date) so back-to-back switches always change the value.
     var serverDidSwitch: Int = 0
 
