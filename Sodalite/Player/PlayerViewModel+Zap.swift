@@ -104,6 +104,7 @@ extension PlayerViewModel {
         let generation = zapCommitGeneration
         zapBannerHideTask?.cancel()
         loadTask?.cancel()
+        liveRetuneTask?.cancel()
         let prior = zapCommitTask
         let retune = liveRetuneTask
         let commit = Task { [weak self] in
@@ -122,6 +123,9 @@ extension PlayerViewModel {
         guard !isTearingDown, let from = liveChannel, let target = neighbourChannel(offset: offset) else { return }
         LogTap.shared.note("[Zap] from=\(from.id) to=\(target.id) offset=\(offset) "
             + "lineup=\(zapLineup?.channels.count ?? 0) filter=\(zapFilter.favoritesOnly ? "fav" : "all")")
+        // The old channel's engine sinks would read its dying pipeline as an error or a source reset;
+        // the close stops its progress timer first thing.
+        cancellables.removeAll()
         await closeLiveSessionServerSide()
         guard !isTearingDown else { return }
         resetLiveSessionState(switchingTo: target)
@@ -134,6 +138,7 @@ extension PlayerViewModel {
         }
         let start = zapStartPlayback
         let task = Task<Void, Never> { [weak self] in
+            guard !Task.isCancelled else { return }
             if let start { await start() } else { await self?.startPlayback() }
         }
         loadTask = task

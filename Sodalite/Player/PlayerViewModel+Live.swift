@@ -994,10 +994,12 @@ extension PlayerViewModel {
 
     /// Close the session on the server: stop report with the tuner handle, the orphan-transcode kill, the tuner release. Shared by the recovery retune and the channel zap.
     func closeLiveSessionServerSide() async {
+        stopProgressReporting()
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
         if hasReportedStart || deadTuner != nil {
-            await reportStop(liveStreamID: deadTuner)
+            // Unstructured, so a zap cancelling the retune that runs this cannot drop the report mid-flight.
+            await Task { await self.reportStop(liveStreamID: deadTuner) }.value
         }
         if let deadSession {
             let svc = playbackService
@@ -1029,7 +1031,7 @@ extension PlayerViewModel {
         await closeLiveSessionServerSide()
         // Not loadTask, so stopPlayback cannot cancel this: a Back during the stop report or the new
         // tune has to be read off the latch, or the tune plays on behind a dismissed player.
-        guard !isTearingDown, liveChannel?.id == channelID else { return }
+        guard !isTearingDown, !Task.isCancelled, liveChannel?.id == channelID else { return }
         do {
             try await loadLiveStream()
             if isTearingDown {
@@ -1042,8 +1044,9 @@ extension PlayerViewModel {
                 return
             }
             await reportStart()
+            startProgressReporting()
         } catch is CancellationError {
-            // Superseded by a newer load; nothing to clean up.
+            // Superseded by a newer load or a zap; the zap's close releases whatever this opened.
         } catch {
             hostLoadActive = false
             setEnginePlaybackError(message: ErrorText.user(for: error))
