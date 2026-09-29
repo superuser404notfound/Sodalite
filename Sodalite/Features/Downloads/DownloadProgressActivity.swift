@@ -50,15 +50,20 @@ final class DownloadProgressActivity {
 
     private func register() {
         guard !isRegistered else { return }
-        isRegistered = BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.identifier, using: nil) { [weak self] task in
-            guard let task = task as? BGContinuedProcessingTask else { task.setTaskCompleted(success: false); return }
-            Task { @MainActor in self?.run(task) }
+        // @Sendable, or Swift 6 infers this closure main-actor isolated from the class around it,
+        // and BackgroundTasks calls it on a queue of its own: the isolation check traps (crashed the
+        // first download on the device, 2026-09-29).
+        isRegistered = BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.identifier, using: nil) { @Sendable [weak self] task in
+            guard let continued = task as? BGContinuedProcessingTask else { task.setTaskCompleted(success: false); return }
+            nonisolated(unsafe) let handed = continued
+            Task { @MainActor in self?.run(handed) }
         }
     }
 
     private func run(_ task: BGContinuedProcessingTask) {
         self.task = task
-        task.expirationHandler = { [weak self] in
+        // Called on a system queue too, so not main-actor isolated either.
+        task.expirationHandler = { @Sendable [weak self] in
             Task { @MainActor in self?.end(success: false) }
         }
         feed = Task { [weak self] in
