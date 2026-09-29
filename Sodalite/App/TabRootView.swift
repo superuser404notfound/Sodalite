@@ -166,12 +166,16 @@ struct TabRootView: View {
             if hSizeClass == .compact {
                 // Floating gear + badge in the corner; each tab page reserves space for it
                 // via .padding(.top, gearChromeHeight) so content never slides under it.
-                HStack(spacing: 8) {
+                // 2 + the badge's own 6 pt trailing inset make the same 8 pt gap as between the
+                // circles; the inset stays in the badge, which the other layouts place on its own.
+                HStack(spacing: 2) {
                     ActiveUserBadge(rememberedCount: rememberedProfileCount)
-                    if !dependencies.downloadStore.items.isEmpty {
-                        downloadsButton
+                    HStack(spacing: 8) {
+                        if !dependencies.downloadStore.items.isEmpty {
+                            downloadsButton
+                        }
+                        settingsGearButton
                     }
-                    settingsGearButton
                 }
                 .padding(.trailing, 16)
                 .padding(.top, 6)
