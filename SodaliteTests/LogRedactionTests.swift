@@ -318,3 +318,77 @@ struct LogRedactionHostileShapeTests {
     }
 }
 
+/// Audit 2026-09-29 SUB-104, SUB-108, SUB-109, ported from AetherEngine's redactor (a4dcba8b): the copy
+/// here was measured leaking 22 of 27 credential-bearing inputs. Each case below went through unchanged
+/// before the port.
+@Suite("Diagnostic log credential stripping, percent escapes, query values and names")
+struct LogRedactionEngineAuditTests {
+
+    private let token = "9f2c1ab34de5470fa1b6c8d90e7f2a11"
+
+    // MARK: Nameless shapes inside a percent-encoded URL (SUB-104)
+
+    /// An IPTV proxy or a debrid wrapper carries the upstream URL percent-encoded in its own query.
+    /// The key forms of that were covered by NET-1; the shapes that need no key only matched raw.
+    @Test("a nameless credential inside a percent-encoded URL goes", arguments: [
+        ("url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2FSECRETpass%2F1234.ts",
+         "url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2F<redacted>%2F1234.ts"),
+        ("u=http%3A%2F%2Faddon%2FeyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ%2Fmanifest.json",
+         "u=http%3A%2F%2Faddon%2F<redacted>%2Fmanifest.json"),
+        ("u=smb%3A%2F%2Fbob%3ASECRETpw%40nas%2Fshare", "u=smb%3A%2F%2Fbob%3A<redacted>%40nas%2Fshare"),
+        ("http://addon/v1-eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+         "http://addon/v1-<redacted>/manifest.json"),
+    ])
+    func namelessShapesThroughEscapes(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    @Test("the same shapes encoded twice go too", arguments: [
+        "http://iptv.example/live/alice/SECRETpass/1234.ts",
+        "http://addon/eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+        "smb://bob:SECRETpw@nas/share",
+    ])
+    func namelessShapesEncodedTwice(upstream: String) {
+        let once = upstream.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let twice = once.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let out = LogRedaction.redact("[HLSIngest] #1 load url=https://mfp.example/p?d=\(twice) startPos=nil")
+        for secret in ["SECRETpass", "SECRETpw", "U0VDUkVUeHl6"] { #expect(!out.contains(secret), "\(out)") }
+        #expect(out.contains("<redacted>"))
+        #expect(out.hasSuffix(" startPos=nil"))
+    }
+
+    /// `"\(error)"` of a URLError prints the failing URL twice through its userInfo.
+    @Test("an interpolated URLError loses the encoded upstream credential of its failing URL")
+    func urlErrorDescription() {
+        let upstream = "http://iptv/live/alice/SECRETpass/1.ts"
+            .addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let failing = "http://127.0.0.1:1/live/playlist.m3u8?u=\(upstream)"
+        let error = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut,
+                            userInfo: [NSURLErrorFailingURLStringErrorKey: failing,
+                                       NSURLErrorFailingURLErrorKey: URL(string: failing)!])
+        let out = LogRedaction.redact("[HLSIngest] carriage probe inconclusive: \(error)")
+        #expect(!out.contains("SECRETpass"), "\(out)")
+    }
+
+    @Test("an escape-heavy line with nothing secret in it comes back unchanged", arguments: [
+        "[ffmpeg] Opening 'https://s/Videos/My%20Movie%20(2009)/stream.mkv' for reading",
+        "[x] url=https://s/Shows/Show%20Name/Season%2001/Show%20Name%20-%20S01E01.mkv ok",
+        "[x] path=%2Fmedia%2Flive%2Fchannel1%2Findex.m3u8 ok",
+        "[HLSLocalServer] GET /0123/aether-origin-relay?ref=eW91IGNhbm5vdCByZWFkIHRoaXM_3kJ-qZ HTTP/1.1 fd=9",
+        "[x] buffer 100% full, 5%token budget, 12%3 left",
+    ])
+    func escapesWithoutSecretsSurvive(line: String) {
+        #expect(LogRedaction.redact(line) == line)
+    }
+
+    @Test("a registered value inside a percent-encoded URL goes through the decoded view too")
+    func registeredSecretThroughEscapes() {
+        let value = "Zq7/Decoded+View"
+        #expect(LogRedaction.register(value))
+        defer { LogRedaction.unregister(value) }
+        // Lowercase hex is neither encoded form `register` knows, so only the decoded view reads it.
+        let line = LogRedaction.redact("[x] u=http%3A%2F%2Fh%2FZq7%2fDecoded%2bView%2F1.ts ok")
+        #expect(!line.contains("Decoded"), "\(line)")
+        #expect(line.hasSuffix(" ok"))
+    }
+}

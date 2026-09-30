@@ -13,9 +13,9 @@ import Foundation
 /// an engine pin that lags a redactor fix must not reopen the leak here. Running twice is harmless, the
 /// second pass skips a placeholder rather than redacting it again.
 ///
-/// The matchers below are the engine's (7.17.0) byte for byte in behaviour, so the two funnels cannot
-/// drift apart a third time; the additions on top of it are marked `Sodalite-only`. Keep a change to a
-/// shared matcher in both places.
+/// The matchers below are the engine's (a4dcba8b, audit 2026-09-29 SUB-104, SUB-108, SUB-109) byte for
+/// byte in behaviour, so the two funnels cannot drift apart a third time; the additions on top of it are
+/// marked `Sodalite-only`. Keep a change to a shared matcher in both places.
 ///
 /// Placed on the `LogTap.note(_:)` funnel rather than at each call site on purpose, so a line added
 /// tomorrow is covered without anyone remembering this file. Over-redaction is the safe failure here,
@@ -45,13 +45,51 @@ nonisolated enum LogRedaction {
     /// cost enough on this hot path to shift request timing in an AetherEngine test, which is how the
     /// first version of this file was caught. Every engine line passes through `note(_:)`, so anything
     /// per-line here is per-line for the whole session.
+    ///
+    /// Audit SUB-104: a URL carried percent-encoded inside another URL's query hides every shape that
+    /// needs no key (`%2F` is not a `/`, `%40` is not an `@`, `%2F` ends in a base64 letter). A line
+    /// holding a valid escape therefore also runs the nameless matchers over a decoded view built once,
+    /// and each hit maps back to whole escapes. The key matcher stays raw-only: its depth-aware
+    /// terminators are the NET-1 rule, and the view is produced once and never decoded again. A line
+    /// without an escape, which is nearly every line, takes the one raw pass and no view.
     static func redact(_ line: String) -> String {
         let bytes = Array(line.utf8)
         let secrets = registeredSecrets
-        var out: [UInt8]?
-        var copiedUpTo = 0
-        var i = 0
+        var spans = scan(bytes, secrets: secrets, keys: true)
+        if let view = DecodedView(bytes) {
+            let hits = scan(view.decoded, secrets: secrets, keys: false)
+            if !hits.isEmpty {
+                spans += hits.map { view.rawStart[$0.lowerBound] ..< view.rawStart[$0.upperBound] }
+                spans.sort { $0.lowerBound < $1.lowerBound }
+            }
+        }
+        guard !spans.isEmpty else { return line }
 
+        var out: [UInt8] = []
+        out.reserveCapacity(bytes.count)
+        var copiedUpTo = 0
+        var current = spans[0]
+        for span in spans.dropFirst() {
+            if span.lowerBound <= current.upperBound {
+                current = current.lowerBound ..< max(current.upperBound, span.upperBound)
+                continue
+            }
+            out.append(contentsOf: bytes[copiedUpTo ..< current.lowerBound])
+            out.append(contentsOf: placeholderBytes)
+            copiedUpTo = current.upperBound
+            current = span
+        }
+        out.append(contentsOf: bytes[copiedUpTo ..< current.lowerBound])
+        out.append(contentsOf: placeholderBytes)
+        out.append(contentsOf: bytes[current.upperBound...])
+        return String(decoding: out, as: UTF8.self)
+    }
+
+    /// The secret spans of one pass, in order and disjoint. Empty, and allocation-free, for a line
+    /// with nothing in it.
+    private static func scan(_ bytes: [UInt8], secrets: [[UInt8]], keys: Bool) -> [Range<Int>] {
+        var spans: [Range<Int>] = []
+        var i = 0
         while i < bytes.count {
             // A placeholder the engine already wrote is passed over whole, or the `>` that ends it
             // would read as a value terminator and leave `<redacted>>` behind.
@@ -59,34 +97,74 @@ nonisolated enum LogRedaction {
                 i += placeholderBytes.count
                 continue
             }
-            // Several shapes, because a credential does not always arrive next to a name. The key
-            // matcher covers `api_key=…`, `X-Emby-Token: …` and the cookie; the payload matcher covers
-            // an encoded blob that no name points at, which is how a path segment carries one; the
-            // userinfo matcher covers `smb://user:secret@host`, where it sits in the authority; the
-            // path matcher covers the Xtream layout; a registered secret is found wherever it sits.
-            guard let value = registeredSecretRange(in: bytes, at: i, secrets: secrets)
-                    ?? matchedKey(in: bytes, at: i)
-                    .flatMap({ valueRange(in: bytes, keyStart: i, keyEnd: i + $0.length, key: $0.key) })
-                    ?? bearerTokenRange(in: bytes, at: i)
-                    ?? encodedPayloadRange(in: bytes, at: i)
-                    ?? userInfoSecretRange(in: bytes, at: i)
-                    ?? xtreamPathSecretRange(in: bytes, at: i) else {
+            guard let value = match(in: bytes, at: i, secrets: secrets, keys: keys) else {
                 i += 1
                 continue
             }
-            if out == nil {
-                out = []
-                out?.reserveCapacity(bytes.count)
-            }
-            out?.append(contentsOf: bytes[copiedUpTo ..< value.lowerBound])
-            out?.append(contentsOf: placeholderBytes)
-            copiedUpTo = value.upperBound
+            spans.append(value)
             i = value.upperBound
         }
+        return spans
+    }
 
-        guard var out else { return line }
-        out.append(contentsOf: bytes[copiedUpTo...])
-        return String(decoding: out, as: UTF8.self)
+    /// Several shapes, because a credential does not always arrive next to a name. The key matcher
+    /// covers `api_key=…`, `X-Emby-Token: …` and the cookie; the scheme matcher covers
+    /// `Authorization: Bearer …`; the payload matcher covers an encoded blob that no name
+    /// points at, which is how a path segment carries one; the userinfo matcher covers
+    /// `smb://user:secret@host`, where it sits in the authority; the path matcher covers the Xtream
+    /// layout; a registered secret is found wherever it sits.
+    @inline(__always)
+    private static func match(in bytes: [UInt8], at index: Int, secrets: [[UInt8]], keys: Bool)
+        -> Range<Int>?
+    {
+        if let secret = registeredSecretRange(in: bytes, at: index, secrets: secrets) { return secret }
+        if keys, let key = matchedKey(in: bytes, at: index),
+           let value = valueRange(in: bytes, keyStart: index, keyEnd: index + key.length, key: key.key) {
+            return value
+        }
+        return bearerTokenRange(in: bytes, at: index)
+            ?? encodedPayloadRange(in: bytes, at: index)
+            ?? userInfoSecretRange(in: bytes, at: index)
+            ?? xtreamPathSecretRange(in: bytes, at: index)
+    }
+
+    /// Every logical character of a line once, escapes followed through `%25` layers by
+    /// `logicalByte`, with the raw offset each one starts at, so a range found in `decoded` maps back
+    /// to whole escapes. Nil for a line without a valid escape, which keeps the raw pass alone.
+    private struct DecodedView {
+        let decoded: [UInt8]
+        /// `decoded.count + 1` entries; the last is the raw length.
+        let rawStart: [Int]
+
+        init?(_ bytes: [UInt8]) {
+            guard bytes.withUnsafeBufferPointer({ memchr($0.baseAddress, 0x25, $0.count) }) != nil
+            else { return nil }
+            var k = 0
+            var found = false
+            while k + 2 < bytes.count {
+                if bytes[k] == LogRedaction.percent, LogRedaction.hexValue(bytes[k + 1]) != nil,
+                   LogRedaction.hexValue(bytes[k + 2]) != nil {
+                    found = true
+                    break
+                }
+                k += 1
+            }
+            guard found else { return nil }
+            var decoded: [UInt8] = []
+            decoded.reserveCapacity(bytes.count)
+            var rawStart: [Int] = []
+            rawStart.reserveCapacity(bytes.count + 1)
+            var i = 0
+            while i < bytes.count {
+                let char = LogRedaction.logicalByte(in: bytes, at: i)
+                decoded.append(char.byte)
+                rawStart.append(i)
+                i += char.width
+            }
+            rawStart.append(bytes.count)
+            self.decoded = decoded
+            self.rawStart = rawStart
+        }
     }
 
     /// Raw length of the key starting here, and which key, or nil. The key must start on a boundary,
@@ -210,7 +288,7 @@ nonisolated enum LogRedaction {
 
     // MARK: Percent escapes
 
-    private static let percent = UInt8(ascii: "%")
+    fileprivate static let percent = UInt8(ascii: "%")
     private static let space = UInt8(ascii: " ")
 
     /// Sodalite-only: a tab separates a header value as readily as a space does.
@@ -223,7 +301,7 @@ nonisolated enum LogRedaction {
 
     /// One character as a URL decoder would see it: a raw byte, or a `%XX` escape, followed through
     /// `%25` when the value was encoded more than once. `depth` is the number of layers (0 = raw).
-    private static func logicalByte(in bytes: [UInt8], at index: Int)
+    fileprivate static func logicalByte(in bytes: [UInt8], at index: Int)
         -> (byte: UInt8, width: Int, depth: Int)
     {
         let raw = bytes[index]
@@ -261,7 +339,7 @@ nonisolated enum LogRedaction {
         return isLetterOrDigit(hi << 4 | lo)
     }
 
-    private static func hexValue(_ b: UInt8) -> UInt8? {
+    fileprivate static func hexValue(_ b: UInt8) -> UInt8? {
         switch b {
         case UInt8(ascii: "0")...UInt8(ascii: "9"): return b - UInt8(ascii: "0")
         case UInt8(ascii: "a")...UInt8(ascii: "f"): return b - UInt8(ascii: "a") + 10
@@ -379,7 +457,9 @@ nonisolated enum LogRedaction {
     /// byte comparison rejects very nearly every position in the line.
     private static func encodedPayloadRange(in bytes: [UInt8], at index: Int) -> Range<Int>? {
         guard bytes[index] == UInt8(ascii: "e") || bytes[index] == UInt8(ascii: "W") else { return nil }
-        if index > 0, isBase64URL(bytes[index - 1]) { return nil }
+        // A letter or digit in front means the run started earlier. A `-` or `_` does not: a blob
+        // glued to a version prefix (`/v1-eyJ…`) is still a blob (audit SUB-104).
+        if index > 0, isLetterOrDigit(bytes[index - 1]) { return nil }
 
         var end = index
         while end < bytes.count, isBase64URL(bytes[end]) { end += 1 }
