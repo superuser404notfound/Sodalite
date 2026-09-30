@@ -318,3 +318,177 @@ struct LogRedactionHostileShapeTests {
     }
 }
 
+/// Audit 2026-09-29 SUB-104, SUB-108, SUB-109, ported from AetherEngine's redactor (a4dcba8b): the copy
+/// here was measured leaking 22 of 27 credential-bearing inputs. Each case below went through unchanged
+/// before the port.
+@Suite("Diagnostic log credential stripping, percent escapes, query values and names")
+struct LogRedactionEngineAuditTests {
+
+    private let token = "9f2c1ab34de5470fa1b6c8d90e7f2a11"
+
+    // MARK: Nameless shapes inside a percent-encoded URL (SUB-104)
+
+    /// An IPTV proxy or a debrid wrapper carries the upstream URL percent-encoded in its own query.
+    /// The key forms of that were covered by NET-1; the shapes that need no key only matched raw.
+    @Test("a nameless credential inside a percent-encoded URL goes", arguments: [
+        ("url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2FSECRETpass%2F1234.ts",
+         "url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2F<redacted>%2F1234.ts"),
+        ("u=http%3A%2F%2Faddon%2FeyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ%2Fmanifest.json",
+         "u=http%3A%2F%2Faddon%2F<redacted>%2Fmanifest.json"),
+        ("u=smb%3A%2F%2Fbob%3ASECRETpw%40nas%2Fshare", "u=smb%3A%2F%2Fbob%3A<redacted>%40nas%2Fshare"),
+        ("http://addon/v1-eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+         "http://addon/v1-<redacted>/manifest.json"),
+    ])
+    func namelessShapesThroughEscapes(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    @Test("the same shapes encoded twice go too", arguments: [
+        "http://iptv.example/live/alice/SECRETpass/1234.ts",
+        "http://addon/eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+        "smb://bob:SECRETpw@nas/share",
+    ])
+    func namelessShapesEncodedTwice(upstream: String) {
+        let once = upstream.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let twice = once.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let out = LogRedaction.redact("[HLSIngest] #1 load url=https://mfp.example/p?d=\(twice) startPos=nil")
+        for secret in ["SECRETpass", "SECRETpw", "U0VDUkVUeHl6"] { #expect(!out.contains(secret), "\(out)") }
+        #expect(out.contains("<redacted>"))
+        #expect(out.hasSuffix(" startPos=nil"))
+    }
+
+    /// `"\(error)"` of a URLError prints the failing URL twice through its userInfo.
+    @Test("an interpolated URLError loses the encoded upstream credential of its failing URL")
+    func urlErrorDescription() {
+        let upstream = "http://iptv/live/alice/SECRETpass/1.ts"
+            .addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let failing = "http://127.0.0.1:1/live/playlist.m3u8?u=\(upstream)"
+        let error = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut,
+                            userInfo: [NSURLErrorFailingURLStringErrorKey: failing,
+                                       NSURLErrorFailingURLErrorKey: URL(string: failing)!])
+        let out = LogRedaction.redact("[HLSIngest] carriage probe inconclusive: \(error)")
+        #expect(!out.contains("SECRETpass"), "\(out)")
+    }
+
+    @Test("an escape-heavy line with nothing secret in it comes back unchanged", arguments: [
+        "[ffmpeg] Opening 'https://s/Videos/My%20Movie%20(2009)/stream.mkv' for reading",
+        "[x] url=https://s/Shows/Show%20Name/Season%2001/Show%20Name%20-%20S01E01.mkv ok",
+        "[x] path=%2Fmedia%2Flive%2Fchannel1%2Findex.m3u8 ok",
+        "[HLSLocalServer] GET /0123/aether-origin-relay?ref=eW91IGNhbm5vdCByZWFkIHRoaXM_3kJ-qZ HTTP/1.1 fd=9",
+        "[x] buffer 100% full, 5%token budget, 12%3 left",
+    ])
+    func escapesWithoutSecretsSurvive(line: String) {
+        #expect(LogRedaction.redact(line) == line)
+    }
+
+    @Test("a registered value inside a percent-encoded URL goes through the decoded view too")
+    func registeredSecretThroughEscapes() {
+        let value = "Zq7/Decoded+View"
+        #expect(LogRedaction.register(value))
+        defer { LogRedaction.unregister(value) }
+        // Lowercase hex is neither encoded form `register` knows, so only the decoded view reads it.
+        let line = LogRedaction.redact("[x] u=http%3A%2F%2Fh%2FZq7%2fDecoded%2bView%2F1.ts ok")
+        #expect(!line.contains("Decoded"), "\(line)")
+        #expect(line.hasSuffix(" ok"))
+    }
+
+    // MARK: Query values that hold a terminator (SUB-108)
+
+    @Test("a query password holding : ; , ) or > goes whole", arguments: [":", ";", ",", ")", ">"])
+    func queryPasswordWithPunctuation(mark: String) {
+        let out = LogRedaction.redact("https://h/get.php?username=u&password=SECRET\(mark)tail123&type=m3u")
+        #expect(out == "https://h/get.php?username=u&password=<redacted>&type=m3u")
+    }
+
+    @Test("punctuation that prose puts after a value still ends it")
+    func proseAfterAValue() {
+        #expect(LogRedaction.redact("[x] fetch failed (api_key=abc), retrying")
+                == "[x] fetch failed (api_key=<redacted>), retrying")
+        #expect(LogRedaction.redact("[x] seen <token=abc>") == "[x] seen <token=<redacted>>")
+        #expect(LogRedaction.redact("[x] https://s/i?ApiKey=abc: timeout") == "[x] https://s/i?ApiKey=<redacted>: timeout")
+    }
+
+    @Test("the password field of AuthenticateByName holds punctuation too", arguments: [":", ";", ",", ")", ">"])
+    func shortPasswordKeyWithPunctuation(mark: String) {
+        #expect(LogRedaction.redact("https://h/a?pw=SECRET\(mark)tail123&x=1") == "https://h/a?pw=<redacted>&x=1")
+    }
+
+    // MARK: Credential names outside Jellyfin and Xtream (SUB-109)
+
+    @Test("the other backends' credential names are covered", arguments: [
+        ("Authorization: Bearer SECRETopaque12345", "Authorization: Bearer <redacted>"),
+        ("Authorization: Basic dmluY2VudDpzZWNyZXQxMjM0", "Authorization: Basic <redacted>"),
+        ("Cookie: PHPSESSID=SECRETsess123; other=1", "Cookie: <redacted>; other=1"),
+        ("Set-Cookie: session=SECRETsess123; Path=/", "Set-Cookie: <redacted>; Path=/"),
+        ("X-Api-Key: SECRETkey123", "X-Api-Key: <redacted>"),
+        ("https://h/a?api-key=SECRETkey123&x=1", "https://h/a?api-key=<redacted>&x=1"),
+        (#"{"api_key":"SECRETjson123"}"#, #"{"api_key":"<redacted>"}"#),
+        (#"["X-Emby-Token": "SECRETjson123"]"#, #"["X-Emby-Token": "<redacted>"]"#),
+        ("https://h/p.php?user=u&pwd=SECRETkey123", "https://h/p.php?user=u&pwd=<redacted>"),
+        ("https://h/p.php?user=u&passwd=SECRETkey123", "https://h/p.php?user=u&passwd=<redacted>"),
+        ("authToken=SECRETrt123 done", "authToken=<redacted> done"),
+        ("refreshToken=SECRETrt123 done", "refreshToken=<redacted> done"),
+        ("sessionToken=SECRETrt123 done", "sessionToken=<redacted> done"),
+        ("auth_token=SECRETrt123 done", "auth_token=<redacted> done"),
+        ("https://h/a?sessionid=SECRETsid123&session_id=SECRETsid456",
+         "https://h/a?sessionid=<redacted>&session_id=<redacted>"),
+    ])
+    func otherBackendNames(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    @Test("prose around the new names is left alone", arguments: [
+        "[http] 401 with WWW-Authenticate: Bearer realm=\"fixture\"",
+        "[auth] a bearer token was sent",
+        "[auth] basic auth failed",
+        "[x] X-Playback-Session-Id: 5A0C2D7E-1234",
+        "[x] no cookie was set",
+    ])
+    func proseAroundNewNames(line: String) {
+        #expect(LogRedaction.redact(line) == line)
+    }
+
+    // MARK: What the shared copy keeps of its own
+
+    /// `pwd` has to come before `pw` in the key list, or `pw` matches first, finds a `d` where the
+    /// separator should be, and never gives `pwd=` a second look.
+    @Test("pw and pwd are both credential names, in either order of appearance")
+    func pwAndPwd() {
+        #expect(LogRedaction.redact("https://h/a?pw=SECRETkey123&pwd=SECRETkey456&x=1")
+                == "https://h/a?pw=<redacted>&pwd=<redacted>&x=1")
+        #expect(LogRedaction.redact("https://h/a?mediabrowsertoken=SECRETkey123&x=1")
+                == "https://h/a?mediabrowsertoken=<redacted>&x=1")
+    }
+
+    /// `cookie` is a key now, and a `Cookie:` header's value runs to its first `;`. The Seerr cookie
+    /// keeps its own rule (name stays readable, decoded `s:` prefix skipped), so the header key steps
+    /// aside for it.
+    @Test("a Seerr session cookie in a Cookie header still keeps its name and goes whole", arguments: [
+        ("Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/", "Cookie: connect.sid=<redacted>; Path=/"),
+        ("Set-Cookie: connect.sid=s%3ASECRETabc123def.sigpart; Path=/; HttpOnly",
+         "Set-Cookie: connect.sid=<redacted>; Path=/; HttpOnly"),
+        ("cookie: Connect.SID=s:SECRETabc123def.sigpart; x=1", "cookie: Connect.SID=<redacted>; x=1"),
+    ])
+    func seerrCookieHeader(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    /// The decoded view exists for lines with a valid escape, and a placeholder the engine already
+    /// wrote sits inside such a line. The second pass must hand it back unchanged.
+    @Test("a second pass leaves every shape above alone", arguments: [
+        "url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2FSECRETpass%2F1234.ts",
+        "u=smb%3A%2F%2Fbob%3ASECRETpw%40nas%2Fshare",
+        "http://addon/v1-eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+        "https://h/get.php?username=u&password=SECRET:tail123&type=m3u",
+        "[x] seen <token=abc>",
+        "Cookie: PHPSESSID=SECRETsess123; other=1",
+        "Authorization: Basic dmluY2VudDpzZWNyZXQxMjM0",
+        "Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/",
+        "[x] u=http%3A%2F%2Fh%2Fx%3Fapi%5Fkey%3DSECRETabc123def%26a%3D1 ok",
+    ])
+    func secondPassIsIdempotent(line: String) {
+        let once = LogRedaction.redact(line)
+        #expect(once != line)
+        #expect(LogRedaction.redact(once) == once)
+    }
+}
