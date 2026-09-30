@@ -391,4 +391,25 @@ struct LogRedactionEngineAuditTests {
         #expect(!line.contains("Decoded"), "\(line)")
         #expect(line.hasSuffix(" ok"))
     }
+
+    // MARK: Query values that hold a terminator (SUB-108)
+
+    @Test("a query password holding : ; , ) or > goes whole", arguments: [":", ";", ",", ")", ">"])
+    func queryPasswordWithPunctuation(mark: String) {
+        let out = LogRedaction.redact("https://h/get.php?username=u&password=SECRET\(mark)tail123&type=m3u")
+        #expect(out == "https://h/get.php?username=u&password=<redacted>&type=m3u")
+    }
+
+    @Test("punctuation that prose puts after a value still ends it")
+    func proseAfterAValue() {
+        #expect(LogRedaction.redact("[x] fetch failed (api_key=abc), retrying")
+                == "[x] fetch failed (api_key=<redacted>), retrying")
+        #expect(LogRedaction.redact("[x] seen <token=abc>") == "[x] seen <token=<redacted>>")
+        #expect(LogRedaction.redact("[x] https://s/i?ApiKey=abc: timeout") == "[x] https://s/i?ApiKey=<redacted>: timeout")
+    }
+
+    @Test("the password field of AuthenticateByName holds punctuation too", arguments: [":", ";", ",", ")", ">"])
+    func shortPasswordKeyWithPunctuation(mark: String) {
+        #expect(LogRedaction.redact("https://h/a?pw=SECRET\(mark)tail123&x=1") == "https://h/a?pw=<redacted>&x=1")
+    }
 }

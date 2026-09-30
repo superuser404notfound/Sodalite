@@ -253,11 +253,27 @@ nonisolated enum LogRedaction {
             let char = logicalByte(in: bytes, at: i)
             if char.depth <= depth {
                 if let quote, char.byte == quote { break }
-                if quote == nil, isValueTerminator(char.byte) { break }
+                if quote == nil, isValueTerminator(char.byte),
+                   endsValue(char, at: i, in: bytes, afterHeaderSeparator: isHeaderSeparator) {
+                    break
+                }
             }
             i += char.width
         }
         return start < i ? start ..< i : nil
+    }
+
+    /// Audit SUB-108: `: ; , ) >` are legal unescaped inside a query value, and a user-chosen
+    /// password holds them, so after `=` one of them ends the value only where prose follows it (a
+    /// terminator, a blank or the end of the line): `…&api_key=abc: timeout` and
+    /// `connect.sid=abc; Path=/` still give their text back, `password=Pa:ss,word&…` goes whole. The
+    /// header form keeps the wide set, since a header value is not a query value.
+    private static func endsValue(_ char: (byte: UInt8, width: Int, depth: Int), at index: Int,
+                                  in bytes: [UInt8], afterHeaderSeparator: Bool) -> Bool {
+        guard !afterHeaderSeparator, isSoftTerminator(char.byte) else { return true }
+        let next = index + char.width
+        guard next < bytes.count else { return true }
+        return isValueTerminator(logicalByte(in: bytes, at: next).byte)
     }
 
     // MARK: Bearer credentials (Sodalite-only)
@@ -563,9 +579,15 @@ nonisolated enum LogRedaction {
         }
     }
 
-    /// `:` counts, so `…&api_key=abc: timeout` gives the token back and keeps the error text. None of
-    /// the credential shapes here (hex, base64url, percent-encoded cookie) contain a literal colon; the
-    /// decoded cookie's `s:` prefix is passed over in `valueRange`.
+    /// Audit SUB-108: the terminators that are also legal inside a query value.
+    private static func isSoftTerminator(_ b: UInt8) -> Bool {
+        b == UInt8(ascii: ":") || b == UInt8(ascii: ";") || b == UInt8(ascii: ",")
+            || b == UInt8(ascii: ")") || b == UInt8(ascii: ">")
+    }
+
+    /// `:` counts, so `…&api_key=abc: timeout` gives the token back and keeps the error text, though
+    /// after `=` only where prose follows it (`endsValue`). The decoded cookie's `s:` prefix is passed
+    /// over in `valueRange`.
     private static func isValueTerminator(_ b: UInt8) -> Bool {
         switch b {
         case UInt8(ascii: "&"), UInt8(ascii: ";"), UInt8(ascii: ","), UInt8(ascii: ")"),
