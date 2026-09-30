@@ -30,14 +30,20 @@ nonisolated enum LogRedaction {
     /// Jellyfin and Seerr credential names plus the generic ones, so a future backend is covered too.
     /// Held as lowercase ASCII bytes and matched longest first, so `x-mediabrowser-token` wins over its
     /// `token` suffix. `token` alone is deliberately broad and only fires on a boundary, so identifiers
-    /// such as `hasToken` and `refreshTokenAt` are left alone. Sodalite-only: `mediabrowsertoken`,
-    /// `api-key`, and `pw` (the password field of Jellyfin's `AuthenticateByName` body).
+    /// such as `hasToken` and `refreshTokenAt` are left alone. `api-key` covers `X-Api-Key` through the
+    /// `-` boundary and `cookie` covers `Set-Cookie`; bare `pass`, `key`, `auth` and `sid` stay out,
+    /// because prose carries them. Sodalite-only: `mediabrowsertoken`, and `pw` (the password field of
+    /// Jellyfin's `AuthenticateByName` body), which has to stay behind `pwd`, or it matches first, finds
+    /// a `d` where the separator should be and never gives `pwd=` a second look.
     private static let keys: [[UInt8]] = [
         "x-mediabrowser-token", "mediabrowsertoken", "x-emby-token", "access_token", "accesstoken",
-        "connect.sid", "signature", "password", "api_key", "api-key", "apikey", "secret", "token", "pw",
+        "refreshtoken", "sessiontoken", "auth_token", "authtoken", "connect.sid", "session_id",
+        "sessionid", "signature", "password", "api_key", "api-key", "apikey", "passwd", "secret",
+        "cookie", "token", "pwd", "pw",
     ].map { Array($0.utf8) }
 
     private static let connectSID = Array("connect.sid".utf8)
+    private static let cookie = Array("cookie".utf8)
     private static let placeholderBytes = Array(placeholder.utf8)
 
     /// Works on UTF-8 bytes, not Characters, and allocates the output only once something actually
@@ -109,7 +115,7 @@ nonisolated enum LogRedaction {
 
     /// Several shapes, because a credential does not always arrive next to a name. The key matcher
     /// covers `api_key=…`, `X-Emby-Token: …` and the cookie; the scheme matcher covers
-    /// `Authorization: Bearer …`; the payload matcher covers an encoded blob that no name
+    /// `Authorization: Bearer …` / `Basic …`; the payload matcher covers an encoded blob that no name
     /// points at, which is how a path segment carries one; the userinfo matcher covers
     /// `smb://user:secret@host`, where it sits in the authority; the path matcher covers the Xtream
     /// layout; a registered secret is found wherever it sits.
@@ -122,7 +128,7 @@ nonisolated enum LogRedaction {
            let value = valueRange(in: bytes, keyStart: index, keyEnd: index + key.length, key: key.key) {
             return value
         }
-        return bearerTokenRange(in: bytes, at: index)
+        return authorizationSchemeRange(in: bytes, at: index)
             ?? encodedPayloadRange(in: bytes, at: index)
             ?? userInfoSecretRange(in: bytes, at: index)
             ?? xtreamPathSecretRange(in: bytes, at: index)
@@ -176,7 +182,7 @@ nonisolated enum LogRedaction {
     /// (`%26api%5Fkey%3D…`, or `%2526api%255Fkey%253D…` encoded twice) is matched like the plain form.
     private static func matchedKey(in bytes: [UInt8], at index: Int) -> (length: Int, key: [UInt8])? {
         let first = logicalByte(in: bytes, at: index)
-        guard keyInitials.contains(lowercased(first.byte)) else { return nil }
+        guard keyInitials[Int(lowercased(first.byte))] else { return nil }
         if precededByWordCharacter(bytes, at: index) { return nil }
         for key in keys {
             var j = index
@@ -192,7 +198,13 @@ nonisolated enum LogRedaction {
         return nil
     }
 
-    private static let keyInitials = Set(keys.map { $0[0] })
+    /// A table rather than a `Set`: this is asked at every position of every line, and hashing the
+    /// byte cost more than the rest of an escape-free line's pass put together (measured upstream).
+    private static let keyInitials: [Bool] = {
+        var table = [Bool](repeating: false, count: 256)
+        for key in keys { table[Int(key[0])] = true }
+        return table
+    }()
 
     /// The span holding the secret, given the key's bounds. Covers the query form
     /// (`api_key=abc&next=1`), both header forms (`Token="abc"`, `X-Emby-Token: abc`), the cookie
@@ -242,6 +254,11 @@ nonisolated enum LogRedaction {
         let start = i
         if hasPrefix(placeholderBytes, in: bytes, at: start) { return nil }
 
+        // Sodalite-only: the Seerr cookie keeps its name readable and has its own rule below, so a
+        // `Cookie:` header that opens with it is left to that key (the header's wide terminator set
+        // would end the value at the `s:` of a decoded cookie).
+        if key == cookie, hasPrefixIgnoringCase(connectSID, in: bytes, at: start) { return nil }
+
         // Sodalite-only: a decoded session cookie is `s:<sid>.<sig>`, and the colon would otherwise end
         // the value after the `s`.
         if key == connectSID, start + 1 < bytes.count,
@@ -276,25 +293,35 @@ nonisolated enum LogRedaction {
         return isValueTerminator(logicalByte(in: bytes, at: next).byte)
     }
 
-    // MARK: Bearer credentials (Sodalite-only)
+    // MARK: Authorization schemes
 
-    private static let bearer = Array("bearer".utf8)
+    private static let authorizationSchemes: [[UInt8]] = ["bearer", "basic"].map { Array($0.utf8) }
 
-    /// A bearer token shorter than this is prose ("bearer token"), not a credential.
-    private static let minimumBearerLength = 16
+    /// A credential after an `Authorization` scheme shorter than this is prose ("bearer token",
+    /// "basic realm"), not a credential.
+    private static let minimumSchemeCredentialLength = 16
 
-    /// The token after `Bearer `, or nil. The scheme has no `=` or `:` of its own, so the key matcher
-    /// cannot see it; the length floor keeps "a bearer token was sent" whole.
-    private static func bearerTokenRange(in bytes: [UInt8], at index: Int) -> Range<Int>? {
-        guard lowercased(bytes[index]) == bearer[0], index + bearer.count < bytes.count else { return nil }
+    /// The credential after `Bearer ` or `Basic `, or nil (audit SUB-109). The scheme has no `=` or
+    /// `:` of its own, so the key matcher cannot see it, and `Authorization` is not a key: the
+    /// Jellyfin form of that header carries readable fields around its token.
+    private static func authorizationSchemeRange(in bytes: [UInt8], at index: Int) -> Range<Int>? {
+        guard lowercased(bytes[index]) == UInt8(ascii: "b") else { return nil }
         if index > 0, isLetterOrDigit(bytes[index - 1]) { return nil }
-        for offset in 1 ..< bearer.count where lowercased(bytes[index + offset]) != bearer[offset] { return nil }
-        var i = index + bearer.count
-        guard isBlank(bytes[i]) else { return nil }
-        while i < bytes.count, isBlank(bytes[i]) { i += 1 }
-        let start = i
-        while i < bytes.count, isToken68(bytes[i]) { i += 1 }
-        return i - start >= minimumBearerLength ? start ..< i : nil
+        for scheme in authorizationSchemes where index + scheme.count < bytes.count {
+            var matched = true
+            for offset in 1 ..< scheme.count where lowercased(bytes[index + offset]) != scheme[offset] {
+                matched = false
+                break
+            }
+            guard matched else { continue }
+            var i = index + scheme.count
+            guard isBlank(bytes[i]) else { continue }
+            while i < bytes.count, isBlank(bytes[i]) { i += 1 }
+            let start = i
+            while i < bytes.count, isToken68(bytes[i]) { i += 1 }
+            if i - start >= minimumSchemeCredentialLength { return start ..< i }
+        }
+        return nil
     }
 
     private static func isToken68(_ b: UInt8) -> Bool {
@@ -553,6 +580,13 @@ nonisolated enum LogRedaction {
     private static func hasPrefix(_ prefix: [UInt8], in bytes: [UInt8], at index: Int) -> Bool {
         guard index + prefix.count <= bytes.count else { return false }
         for offset in 0 ..< prefix.count where bytes[index + offset] != prefix[offset] { return false }
+        return true
+    }
+
+    /// `prefix` must be lowercase ASCII.
+    private static func hasPrefixIgnoringCase(_ prefix: [UInt8], in bytes: [UInt8], at index: Int) -> Bool {
+        guard index + prefix.count <= bytes.count else { return false }
+        for offset in 0 ..< prefix.count where lowercased(bytes[index + offset]) != prefix[offset] { return false }
         return true
     }
 

@@ -412,4 +412,83 @@ struct LogRedactionEngineAuditTests {
     func shortPasswordKeyWithPunctuation(mark: String) {
         #expect(LogRedaction.redact("https://h/a?pw=SECRET\(mark)tail123&x=1") == "https://h/a?pw=<redacted>&x=1")
     }
+
+    // MARK: Credential names outside Jellyfin and Xtream (SUB-109)
+
+    @Test("the other backends' credential names are covered", arguments: [
+        ("Authorization: Bearer SECRETopaque12345", "Authorization: Bearer <redacted>"),
+        ("Authorization: Basic dmluY2VudDpzZWNyZXQxMjM0", "Authorization: Basic <redacted>"),
+        ("Cookie: PHPSESSID=SECRETsess123; other=1", "Cookie: <redacted>; other=1"),
+        ("Set-Cookie: session=SECRETsess123; Path=/", "Set-Cookie: <redacted>; Path=/"),
+        ("X-Api-Key: SECRETkey123", "X-Api-Key: <redacted>"),
+        ("https://h/a?api-key=SECRETkey123&x=1", "https://h/a?api-key=<redacted>&x=1"),
+        (#"{"api_key":"SECRETjson123"}"#, #"{"api_key":"<redacted>"}"#),
+        (#"["X-Emby-Token": "SECRETjson123"]"#, #"["X-Emby-Token": "<redacted>"]"#),
+        ("https://h/p.php?user=u&pwd=SECRETkey123", "https://h/p.php?user=u&pwd=<redacted>"),
+        ("https://h/p.php?user=u&passwd=SECRETkey123", "https://h/p.php?user=u&passwd=<redacted>"),
+        ("authToken=SECRETrt123 done", "authToken=<redacted> done"),
+        ("refreshToken=SECRETrt123 done", "refreshToken=<redacted> done"),
+        ("sessionToken=SECRETrt123 done", "sessionToken=<redacted> done"),
+        ("auth_token=SECRETrt123 done", "auth_token=<redacted> done"),
+        ("https://h/a?sessionid=SECRETsid123&session_id=SECRETsid456",
+         "https://h/a?sessionid=<redacted>&session_id=<redacted>"),
+    ])
+    func otherBackendNames(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    @Test("prose around the new names is left alone", arguments: [
+        "[http] 401 with WWW-Authenticate: Bearer realm=\"fixture\"",
+        "[auth] a bearer token was sent",
+        "[auth] basic auth failed",
+        "[x] X-Playback-Session-Id: 5A0C2D7E-1234",
+        "[x] no cookie was set",
+    ])
+    func proseAroundNewNames(line: String) {
+        #expect(LogRedaction.redact(line) == line)
+    }
+
+    // MARK: What the shared copy keeps of its own
+
+    /// `pwd` has to come before `pw` in the key list, or `pw` matches first, finds a `d` where the
+    /// separator should be, and never gives `pwd=` a second look.
+    @Test("pw and pwd are both credential names, in either order of appearance")
+    func pwAndPwd() {
+        #expect(LogRedaction.redact("https://h/a?pw=SECRETkey123&pwd=SECRETkey456&x=1")
+                == "https://h/a?pw=<redacted>&pwd=<redacted>&x=1")
+        #expect(LogRedaction.redact("https://h/a?mediabrowsertoken=SECRETkey123&x=1")
+                == "https://h/a?mediabrowsertoken=<redacted>&x=1")
+    }
+
+    /// `cookie` is a key now, and a `Cookie:` header's value runs to its first `;`. The Seerr cookie
+    /// keeps its own rule (name stays readable, decoded `s:` prefix skipped), so the header key steps
+    /// aside for it.
+    @Test("a Seerr session cookie in a Cookie header still keeps its name and goes whole", arguments: [
+        ("Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/", "Cookie: connect.sid=<redacted>; Path=/"),
+        ("Set-Cookie: connect.sid=s%3ASECRETabc123def.sigpart; Path=/; HttpOnly",
+         "Set-Cookie: connect.sid=<redacted>; Path=/; HttpOnly"),
+        ("cookie: Connect.SID=s:SECRETabc123def.sigpart; x=1", "cookie: Connect.SID=<redacted>; x=1"),
+    ])
+    func seerrCookieHeader(input: String, expected: String) {
+        #expect(LogRedaction.redact(input) == expected)
+    }
+
+    /// The decoded view exists for lines with a valid escape, and a placeholder the engine already
+    /// wrote sits inside such a line. The second pass must hand it back unchanged.
+    @Test("a second pass leaves every shape above alone", arguments: [
+        "url=http://proxy/x?u=http%3A%2F%2Fiptv.example%2Flive%2Falice%2FSECRETpass%2F1234.ts",
+        "u=smb%3A%2F%2Fbob%3ASECRETpw%40nas%2Fshare",
+        "http://addon/v1-eyJzdG9yZXMiOlsiYSJdLCJjIjoiU0VDUkVUeHl6IiwidCI6InQifQ/manifest.json",
+        "https://h/get.php?username=u&password=SECRET:tail123&type=m3u",
+        "[x] seen <token=abc>",
+        "Cookie: PHPSESSID=SECRETsess123; other=1",
+        "Authorization: Basic dmluY2VudDpzZWNyZXQxMjM0",
+        "Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/",
+        "[x] u=http%3A%2F%2Fh%2Fx%3Fapi%5Fkey%3DSECRETabc123def%26a%3D1 ok",
+    ])
+    func secondPassIsIdempotent(line: String) {
+        let once = LogRedaction.redact(line)
+        #expect(once != line)
+        #expect(LogRedaction.redact(once) == once)
+    }
 }
