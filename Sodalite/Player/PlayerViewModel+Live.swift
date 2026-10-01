@@ -1036,6 +1036,9 @@ extension PlayerViewModel {
     private func performLiveRetune(channelID: String?) async {
         // A zap landed while this waited: the channel it was asked for is gone, and so is its session.
         guard liveChannel?.id == channelID else { return }
+        lastIngestError = nil
+        lastTunerOpenError = nil
+        tileRefusal = nil
         // Close the dead session server-side BEFORE opening the new one, so an orphan ffmpeg cannot fill the server disk.
         let deadSession = playSessionID
         await closeLiveSessionServerSide()
@@ -1059,6 +1062,9 @@ extension PlayerViewModel {
             // Superseded by a newer load or a zap; the zap's close releases whatever this opened.
         } catch {
             hostLoadActive = false
+            if isMultiviewTile {
+                tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
+            }
             setEnginePlaybackError(message: ErrorText.user(for: error))
         }
     }
