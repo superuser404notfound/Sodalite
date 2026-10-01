@@ -886,6 +886,7 @@
 		A037C34E1934EDE69C53A86C /* ProfilePINSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167D405842453353CBD91CE9 /* ProfilePINSyncTests.swift */; };
 		A095FFB4CDB6FBE78052CA4A /* SodaliteShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B211E0C4ACD1D88E8763E7CC /* SodaliteShortcuts.swift */; };
 		A0C910E3D7491389F8478BE9 /* JellyfinUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8C86911CAC2C3C5F103774 /* JellyfinUser.swift */; };
+		A1205135948F02774071DA0E /* LiveZapOvertakeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44BE2983319BDFD88AC64A1 /* LiveZapOvertakeTests.swift */; };
 		A14A6EF82BA9A7F01F9DDF06 /* AtkinsonHyperlegible-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CD0A81C3E831093174A0085A /* AtkinsonHyperlegible-BoldItalic.ttf */; };
 		A1570D935F19BC0F36F0BEAE /* PlayerViewModel+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C3D4639FA7277264A7D858 /* PlayerViewModel+Live.swift */; };
 		A1D97DE1DA105142D3BE41A8 /* SidebarItemState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1ED651FA4E10DF6FB410894 /* SidebarItemState.swift */; };
@@ -2181,6 +2182,7 @@
 		E2F1B3C38E5D186AFF71A7FA /* ReplacedEpisodeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplacedEpisodeResolver.swift; sourceTree = "<group>"; };
 		E34B48C22ADA9876864D8093 /* SessionRestoreEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRestoreEnvironment.swift; sourceTree = "<group>"; };
 		E3F52F9B3910324011B0BA5C /* SeekReadoutChromeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeekReadoutChromeTests.swift; sourceTree = "<group>"; };
+		E44BE2983319BDFD88AC64A1 /* LiveZapOvertakeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveZapOvertakeTests.swift; sourceTree = "<group>"; };
 		E4CE69511B110DCCF9EC0603 /* JellyfinServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinServer.swift; sourceTree = "<group>"; };
 		E57A7B5E3ACBEA39B9DF2941 /* VersionPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionPickerSheet.swift; sourceTree = "<group>"; };
 		E585EECADA5A1372977990DE /* LiveZapCommitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveZapCommitTests.swift; sourceTree = "<group>"; };
@@ -2705,6 +2707,7 @@
 				A07F28C0BB4A8EA04756A6A8 /* LiveTvProgramTests.swift */,
 				E585EECADA5A1372977990DE /* LiveZapCommitTests.swift */,
 				E09A347740814C5324DF6D76 /* LiveZapInputTests.swift */,
+				E44BE2983319BDFD88AC64A1 /* LiveZapOvertakeTests.swift */,
 				A8C93514C258DDFE15ECF782 /* LiveZapRequestTests.swift */,
 				51E846C0CC00BF7BBD9318BC /* LiveZapResetTests.swift */,
 				0A0B4A2AA0DEB9AEA63E121F /* LocalNetworkAccessTests.swift */,
@@ -4536,6 +4539,7 @@
 				A7201594DA0940BF3760185B /* LiveTvProgramTests.swift in Sources */,
 				3B667F3D678AC08B54B740DE /* LiveZapCommitTests.swift in Sources */,
 				2C954BE93EA895A6BE099CE7 /* LiveZapInputTests.swift in Sources */,
+				A1205135948F02774071DA0E /* LiveZapOvertakeTests.swift in Sources */,
 				62C7A3714247E54254E32C2F /* LiveZapRequestTests.swift in Sources */,
 				28B5F9546084945527D305E5 /* LiveZapResetTests.swift in Sources */,
 				FC2061DA6040A36E26C031EC /* LocalNetworkAccessTests.swift in Sources */,

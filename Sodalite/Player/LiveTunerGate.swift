@@ -28,6 +28,7 @@ final class LiveTunerGate {
     static let shared = LiveTunerGate()
 
     private var pending: [UUID: Task<Void, Never>] = [:]
+    private var abandonedOpens: [UUID: (itemID: String, task: Task<Void, Never>)] = [:]
 
     /// Run a tuner close as a tracked, detached task. Detached so a slow server cannot stall a
     /// teardown, tracked so the next open can wait for it.
@@ -49,8 +50,25 @@ final class LiveTunerGate {
         pending[id] = nil
     }
 
+    /// Track an open whose tune was superseded while Jellyfin was still answering it. The request runs
+    /// on, since cancelling it loses a tuner the server may still open, and `work` closes whatever it
+    /// answers with. A later open of the SAME item waits for it like for a close: both name the channel.
+    func abandonOpen(itemID: String, _ work: @escaping @Sendable () async -> Void) {
+        let id = UUID()
+        let gate = self
+        let task = Task.detached {
+            await work()
+            await MainActor.run { gate.abandonedOpens[id] = nil }
+        }
+        abandonedOpens[id] = (itemID, task)
+    }
+
     /// How many closes are still unanswered. Test seam.
     var pendingCount: Int { pending.count }
+
+    private func unsettled(opening itemID: String?) -> Int {
+        pending.count + abandonedOpens.values.filter { $0.itemID == itemID }.count
+    }
 
     /// Wait for every close we have fired to be answered, bounded. Returns the number still
     /// unanswered when the wait ended, which is 0 on the normal path (a zap gives a close seconds to
@@ -62,16 +80,47 @@ final class LiveTunerGate {
     /// stalled every later tune. Giving up on the WAIT never cancels the close itself, since a
     /// cancelled close is a tuner nobody will ever close again.
     @discardableResult
-    func settle(timeout: TimeInterval) async -> Int {
-        guard !pending.isEmpty else { return 0 }
+    func settle(timeout: TimeInterval, opening itemID: String? = nil) async -> Int {
+        guard unsettled(opening: itemID) > 0 else { return 0 }
         let deadline = Date().addingTimeInterval(max(0, timeout))
-        while !pending.isEmpty, Date() < deadline {
+        while unsettled(opening: itemID) > 0, Date() < deadline {
             do {
                 try await Task.sleep(nanoseconds: 20_000_000)
             } catch {
                 break
             }
         }
-        return pending.count
+        return unsettled(opening: itemID)
+    }
+}
+
+/// Resumes one continuation with whichever value arrives first, including one that arrives before the
+/// continuation does (a cancellation handler runs at once when the caller is already cancelled).
+nonisolated final class FirstOutcome<Value: Sendable>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Value, Never>?
+    private var early: Value?
+    private var isDone = false
+
+    func arm(_ continuation: CheckedContinuation<Value, Never>) {
+        let value: Value? = lock.withLock {
+            guard isDone else {
+                self.continuation = continuation
+                return nil
+            }
+            return early
+        }
+        if let value { continuation.resume(returning: value) }
+    }
+
+    func finish(_ value: Value) {
+        let waiting: CheckedContinuation<Value, Never>? = lock.withLock {
+            guard !isDone else { return nil }
+            isDone = true
+            defer { continuation = nil }
+            if continuation == nil { early = value }
+            return continuation
+        }
+        waiting?.resume(returning: value)
     }
 }

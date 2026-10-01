@@ -117,6 +117,10 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     /// Item ids whose PlaybackInfo answers late and ignores cancellation, like a request already on
     /// the wire when the session is torn down.
     var uncancellableDelayItemIDs: Set<String> = []
+    /// Live tuner answers by item id; an item without one fails its live PlaybackInfo.
+    var liveStreamIDs: [String: String] = [:]
+    /// Holds an item's live PlaybackInfo at this gate before it answers.
+    var liveAnswerGates: [String: TestGate] = [:]
     /// Holds every stop report at this gate before recording it, so a test can act while one is on the wire.
     var stopReportGate: TestGate?
 
@@ -183,7 +187,13 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private struct NotUsed: Error {}
     func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
         lock.withLock { _livePlaybackInfoRequests.append(itemID) }
-        throw NotUsed()
+        guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
+        // Ignores cancellation, like a request Jellyfin is already probing the tuner for.
+        await liveAnswerGates[itemID]?.pass()
+        return try JSONDecoder().decode(
+            PlaybackInfoResponse.self,
+            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"ts","LiveStreamId":"\#(liveStreamID)"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+        )
     }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}

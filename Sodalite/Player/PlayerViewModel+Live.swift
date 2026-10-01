@@ -164,22 +164,27 @@ extension PlayerViewModel {
     /// exists only in that answer. A request cancelled in flight therefore leaves a tuner open that no
     /// one can name, which is the one leak shape a teardown cannot clean up after the fact. The request
     /// runs in an unstructured task, which does not inherit the caller's cancellation, so the handle
-    /// always comes back; if the tune it was for is gone by then, the tuner is released here instead.
+    /// always comes back; if the tune it was for is gone by then, the tuner is released instead.
     /// A viewer giving up during the seconds Jellyfin spends probing a tuner is the common case on a slow
     /// channel, not a corner (#70).
+    ///
+    /// The caller does not wait for that, though: a dead provider holds the answer for a minute, and a
+    /// zap that waited for the tune it overtook queued every later press behind it (#173). A cancelled
+    /// caller returns at once and hands the request to the gate, which closes its late answer.
     private func openLiveTuner(
         maxStreamingBitrate: Int, enableDirectPlay: Bool = true
     ) async throws -> PlaybackInfoResponse {
-        // Never open while one of our own closes is still unanswered: the id Jellyfin closes by names
-        // the CHANNEL, not this stream, so an open that overtakes a close either orphans the tuner it
-        // replaces or hands that close the stream we are about to play (LiveTunerGate, #70).
-        let unsettled = await LiveTunerGate.shared.settle(timeout: 6)
-        if unsettled > 0 {
-            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) still unanswered after 6s")
-        }
         let svc = playbackService
         let itemID = item.id
         let user = userID
+        // Never open while one of our own closes is still unanswered: the id Jellyfin closes by names
+        // the CHANNEL, not this stream, so an open that overtakes a close either orphans the tuner it
+        // replaces or hands that close the stream we are about to play (LiveTunerGate, #70).
+        let unsettled = await LiveTunerGate.shared.settle(timeout: 6, opening: itemID)
+        if unsettled > 0 {
+            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) still unanswered after 6s")
+        }
+        try Task.checkCancellation()
         let request = Task {
             try await svc.getLivePlaybackInfo(
                 itemID: itemID, userID: user,
@@ -187,13 +192,39 @@ extension PlayerViewModel {
                 maxStreamingBitrate: maxStreamingBitrate,
                 enableDirectPlay: enableDirectPlay)
         }
+        guard let outcome = await Self.outcome(of: request) else {
+            LogTap.shared.note("[Live] tune superseded while PlaybackInfo was out, its tuner closes on arrival")
+            LiveTunerGate.shared.abandonOpen(itemID: itemID) { [self] in
+                guard let info = try? await request.value else { return }
+                await closeLateTuner(info, itemID: itemID)
+            }
+            throw CancellationError()
+        }
         let info: PlaybackInfoResponse
         do {
-            info = try await request.value
+            info = try outcome.get()
         } catch {
             lastTunerOpenError = error
             throw error
         }
+        let source = info.mediaSources.first
+        noteTunerOpened(info, itemID: itemID)
+        if Task.isCancelled || isTearingDown {
+            if let stranded = source?.liveStreamId {
+                releaseTuner(stranded, reason: "tune cancelled while the tuner was opening")
+            }
+            throw CancellationError()
+        }
+        return info
+    }
+
+    private func closeLateTuner(_ info: PlaybackInfoResponse, itemID: String) async {
+        guard let key = info.mediaSources.first?.liveStreamId else { return }
+        noteTunerOpened(info, itemID: itemID)
+        await releaseTuner(key, reason: "late answer for a superseded tune").value
+    }
+
+    private func noteTunerOpened(_ info: PlaybackInfoResponse, itemID: String) {
         let source = info.mediaSources.first
         // The open half of the ledger. Without it a capture shows closes with nothing to pair them
         // against, and a tuner we opened and never closed looks exactly like one we never opened (#70).
@@ -218,13 +249,22 @@ extension PlayerViewModel {
             // worse than a tuner we forgot to close is a tuner we were never given a handle for.
             LogTap.shared.note("[Live] PlaybackInfo answered without a live stream id, nothing to close later")
         }
-        if Task.isCancelled || isTearingDown {
-            if let stranded = source?.liveStreamId {
-                releaseTuner(stranded, reason: "tune cancelled while the tuner was opening")
+    }
+
+    /// The request's result, or nil as soon as the caller is cancelled, whichever comes first. Awaiting
+    /// `request.value` alone would not observe the caller's cancellation at all.
+    private static func outcome(
+        of request: Task<PlaybackInfoResponse, Error>
+    ) async -> Result<PlaybackInfoResponse, Error>? {
+        let race = FirstOutcome<Result<PlaybackInfoResponse, Error>?>()
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                race.arm(continuation)
+                Task { race.finish(await request.result) }
             }
-            throw CancellationError()
+        } onCancel: {
+            race.finish(nil)
         }
-        return info
     }
 
     /// Close a tuner we opened, without waiting on it and without swallowing the outcome. A close that

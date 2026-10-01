@@ -64,6 +64,23 @@ struct LiveTunerGateTests {
         #expect(gate.pendingCount == 0)
     }
 
+    @Test func anAbandonedOpenHoldsBackOnlyAnOpenOfTheSameChannel() async {
+        let gate = LiveTunerGate()
+        let signal = Gate()
+        let finished = Locked(false)
+        gate.abandonOpen(itemID: "b") {
+            await signal.wait()
+            finished.set(true)
+        }
+
+        #expect(await gate.settle(timeout: 5, opening: "c") == 0)
+        #expect(await gate.settle(timeout: 0.05, opening: "b") == 1)
+
+        Task { signal.open() }
+        #expect(await gate.settle(timeout: 5, opening: "b") == 0)
+        #expect(finished.value)
+    }
+
     @Test func settleGivesUpOnTheWaitButNeverOnTheClose() async {
         let gate = LiveTunerGate()
         let signal = Gate()
