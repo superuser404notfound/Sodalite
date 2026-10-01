@@ -85,8 +85,6 @@ final class LiveMultiviewCoordinator {
                 return vm
             }
         )
-        // The player it came from wrote its own end handler; that controller is gone.
-        Self.armTileEnd(first)
     }
 
     // MARK: - Pure policy
@@ -136,14 +134,23 @@ final class LiveMultiviewCoordinator {
                 onPlayerDismiss: onPlayerDismiss
             )
             host.multiview = coordinator
-            coordinator.start()
+            guard coordinator.start() else {
+                if host.multiview === coordinator { host.multiview = nil }
+                vm.isMultiviewTile = false
+                return false
+            }
+            return true
         }
     }
 
     // MARK: - Transitions
 
-    func start() {
-        guard let presenter = presenter ?? host, grid == nil, !finished else { return }
+    /// Decides synchronously: true means the session owns the view model from here.
+    @discardableResult
+    func start() -> Bool {
+        guard let presenter = presenter ?? host, grid == nil, !finished else { return false }
+        // The player it came from wrote its own end handler; that controller is gone.
+        if let first = session.tiles.first?.viewModel { Self.armTileEnd(first) }
         LogTap.shared.note("[Multiview] enter channel=\(session.tiles.first?.currentChannel.id ?? "?")")
         // A session whose view model is tile 1 is the one being restored; ending it would stop tile 1.
         if let first = session.tiles.first?.viewModel, PiPSessionCoordinator.shared.activeViewModel !== first {
@@ -159,6 +166,7 @@ final class LiveMultiviewCoordinator {
                 self?.pickerRequest = .add
             }
         }
+        return true
     }
 
     func showFullScreen(_ id: UUID) {
@@ -298,7 +306,8 @@ final class LiveMultiviewCoordinator {
             let loaded = await source.zapLineupTask?.value ?? source.zapLineup
             guard let self else { return }
             self.lineupTask = nil
-            self.lineup = loaded?.channels ?? []
+            // A failed fetch stays nil, so the picker's next appearance asks again.
+            if let loaded { self.lineup = loaded.channels }
         }
     }
 

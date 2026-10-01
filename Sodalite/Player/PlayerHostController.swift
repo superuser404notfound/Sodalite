@@ -27,7 +27,8 @@ final class PlayerHostController: AVPlayerViewController {
     private let onDismiss: () -> Void
     let mode: PlayerPresentationMode
     /// Sodalite#175: the multiview coordinator takes the view model; set when Live TV hands this one over.
-    var onEnterMultiview: ((PlayerViewModel) -> Void)?
+    /// Returns whether the coordinator took it; if not, this player carries on as it was.
+    var onEnterMultiview: ((PlayerViewModel) -> Bool)?
 
     private var hasLaunched = false
     /// Set by handOffToMultiview so the dismiss that follows leaves the view model playing.
@@ -887,8 +888,15 @@ final class PlayerHostController: AVPlayerViewController {
     /// Sodalite#175: give the playing view model to multiview. The coordinator dismisses this controller,
     /// and `handingOff` keeps that dismiss from stopping playback.
     func handOffToMultiview() {
+        guard let onEnterMultiview else { return }
+        // Set before the call: the coordinator's dismiss of this controller must already see a hand-off.
         handingOff = true
         detached = true
+        guard onEnterMultiview(viewModel) else {
+            handingOff = false
+            detached = false
+            return
+        }
         // The session owns lifecycle from here; a still-alive controller must not retune tile 1 beside it.
         let center = NotificationCenter.default
         center.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -896,7 +904,9 @@ final class PlayerHostController: AVPlayerViewController {
         center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         unmountAetherViewIfNeeded()
         player = nil
-        onEnterMultiview?(viewModel)
+        // The grid has no transport bar to focus, and no Play/Pause to take a paused channel out of its pause.
+        viewModel.hideControls()
+        if viewModel.player.state == .paused { viewModel.player.play() }
     }
 
     var offersMultiview: Bool { mode.offersMultiview && viewModel.isLiveSession }

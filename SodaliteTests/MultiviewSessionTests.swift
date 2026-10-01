@@ -30,12 +30,21 @@ struct MultiviewSessionTests {
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
         suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
     ) throws -> MultiviewSession {
+        try makeSessionAndPool(audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend).session
+    }
+
+    private func makeSessionAndPool(
+        audioFollowDelay: Duration = .milliseconds(300),
+        retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
+        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
+    ) throws -> (session: MultiviewSession, pool: MultiviewEnginePool) {
         let pool = MultiviewEnginePool(primary: try AetherEngine(), make: { try AetherEngine() })
         let first = makeVM(channel("c1"), engine: pool.primary, role: .primary)
-        return MultiviewSession(
+        let session = MultiviewSession(
             first: first, channel: channel("c1"), pool: pool,
             makeTileVM: { [self] channel, engine in makeVM(channel, engine: engine, role: .primary) },
             audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend)
+        return (session, pool)
     }
 
     @Test("the first tile keeps playing and is audible")
@@ -116,17 +125,17 @@ struct MultiviewSessionTests {
 
     @Test("audio follows focus only after it rests")
     func audioFollowsFocusAfterRest() async throws {
-        let session = try makeSession(audioFollowDelay: .milliseconds(50))
+        let session = try makeSession(audioFollowDelay: .milliseconds(200))
         try session.add(channel("c2"))
         try session.add(channel("c3"))
         let t1 = session.tiles[0]
         let t2 = session.tiles[1]
         let t3 = session.tiles[2]
         session.focusDidMove(to: t2.id)
-        try await Task.sleep(for: .milliseconds(10))
+        try await Task.sleep(for: .milliseconds(20))
         #expect(session.audibleTileID == t1.id)
         session.focusDidMove(to: t3.id)
-        try await Task.sleep(for: .milliseconds(120))
+        try await Task.sleep(for: .milliseconds(400))
         #expect(session.audibleTileID == t3.id)
         #expect(t1.viewModel.player.volume == 0)
         #expect(t2.viewModel.player.volume == 0)
@@ -150,6 +159,42 @@ struct MultiviewSessionTests {
         #expect(t1.viewModel.didStopPlayback == true)
         #expect(t3.viewModel.didStopPlayback == true)
         #expect(session.tiles.isEmpty)
+    }
+
+    @Test("ending on a slot 1 survivor leaves the app engine audible for whatever plays on it next")
+    func endLeavesEveryEngineAudible() throws {
+        let (session, pool) = try makeSessionAndPool()
+        try session.add(channel("c2"))
+        let t2 = session.tiles[1]
+        session.setAudible(t2.id)
+        #expect(pool.primary.volume == 0)
+        let survivor = try #require(session.end())
+        #expect(survivor === t2.viewModel)
+        #expect(pool.primary.volume == 1)
+        #expect(survivor.player.volume == 1)
+    }
+
+    @Test("a muted tile that is removed leaves its engine audible")
+    func removeLeavesEngineAudible() throws {
+        let session = try makeSession()
+        try session.add(channel("c2"))
+        let t2 = session.tiles[1]
+        #expect(t2.viewModel.player.volume == 0)
+        session.remove(t2.id)
+        #expect(t2.viewModel.player.volume == 1)
+    }
+
+    @Test("stopping every tile leaves every engine audible")
+    func stopAllLeavesEveryEngineAudible() throws {
+        let (session, pool) = try makeSessionAndPool()
+        try session.add(channel("c2"))
+        try session.add(channel("c3"))
+        session.setAudible(session.tiles[2].id)
+        let engines = session.tiles.map(\.viewModel.player)
+        #expect(engines.filter { $0.volume == 0 }.count == 2)
+        session.stopAll()
+        #expect(engines.allSatisfy { $0.volume == 1 })
+        #expect(pool.primary.volume == 1)
     }
 
     @Test("ending twice is safe and the second end has nothing to return")

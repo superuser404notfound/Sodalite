@@ -91,7 +91,7 @@ final class MultiviewSession {
 
     func remove(_ id: UUID) {
         guard let index = tiles.firstIndex(where: { $0.id == id }) else { return }
-        tiles[index].viewModel.stopPlayback()
+        release(tiles[index].viewModel)
         tiles.remove(at: index)
         if id == audibleTileID, let first = tiles.first {
             audibleTileID = first.id
@@ -123,8 +123,9 @@ final class MultiviewSession {
         let survivorIndex = tiles.firstIndex(where: { $0.id == audibleTileID }) ?? 0
         let survivor = tiles[survivorIndex].viewModel
         for (index, tile) in tiles.enumerated() where index != survivorIndex {
-            tile.viewModel.stopPlayback()
+            release(tile.viewModel)
         }
+        survivor.player.volume = 1
         survivor.sharedOutputRole = .primary
         survivor.isMultiviewTile = false
         tiles = []
@@ -135,7 +136,7 @@ final class MultiviewSession {
         pendingAudio?.cancel()
         pendingAudio = nil
         for tile in tiles {
-            tile.viewModel.stopPlayback()
+            release(tile.viewModel)
         }
         tiles = []
     }
@@ -160,6 +161,12 @@ final class MultiviewSession {
         for tile in ordered {
             await retune(tile.viewModel)
         }
+    }
+
+    /// The engine remembers its volume across `stop()`, so a tile let go muted would silence whatever plays on it next.
+    private func release(_ vm: PlayerViewModel) {
+        vm.stopPlayback()
+        vm.player.volume = 1
     }
 
     private func applyVolumes() {
