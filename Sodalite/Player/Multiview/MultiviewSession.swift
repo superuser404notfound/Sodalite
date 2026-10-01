@@ -11,8 +11,14 @@ struct MultiviewTile: Identifiable {
     var currentChannel: JellyfinChannel { viewModel.liveChannel ?? channel }
 }
 
-enum MultiviewError: Error, Equatable {
+enum MultiviewError: LocalizedError, Equatable {
     case full
+
+    var errorDescription: String? {
+        switch self {
+        case .full: String(localized: "multiview.error.full", defaultValue: "No more than four channels at once.")
+        }
+    }
 }
 
 @Observable
