@@ -25,8 +25,13 @@ final class PlayerHostController: AVPlayerViewController {
     /// blank environment, so `\.appearanceTheme` has to be put back by hand below.
     private let theme: ResolvedAppearanceTheme
     private let onDismiss: () -> Void
+    let mode: PlayerPresentationMode
+    /// Sodalite#175: the multiview coordinator takes the view model; set when Live TV hands this one over.
+    var onEnterMultiview: ((PlayerViewModel) -> Void)?
 
     private var hasLaunched = false
+    /// Set by handOffToMultiview so the dismiss that follows leaves the view model playing.
+    private var handingOff = false
 
     #if os(iOS)
     /// Orientation-session identity. The exit is terminal for it, so a lifecycle callback that still
@@ -107,10 +112,12 @@ final class PlayerHostController: AVPlayerViewController {
     init(
         viewModel: PlayerViewModel,
         theme: ResolvedAppearanceTheme,
+        mode: PlayerPresentationMode = .standalone,
         onDismiss: @escaping () -> Void
     ) {
         self.viewModel = viewModel
         self.theme = theme
+        self.mode = mode
         self.onDismiss = onDismiss
         super.init(nibName: nil, bundle: nil)
     }
@@ -138,8 +145,8 @@ final class PlayerHostController: AVPlayerViewController {
         // player alive across backgrounding, canStartPictureInPictureAutomaticallyFromInline triggers PiP
         // on swipe-Home. tvOS does not use PiP.
         #if os(iOS)
-        allowsPictureInPicturePlayback = true
-        canStartPictureInPictureAutomaticallyFromInline = true
+        allowsPictureInPicturePlayback = mode.offersPictureInPicture
+        canStartPictureInPictureAutomaticallyFromInline = mode.offersPictureInPicture
         #else
         allowsPictureInPicturePlayback = false
         #endif
@@ -430,6 +437,8 @@ final class PlayerHostController: AVPlayerViewController {
         // below the controls, so they coexist with the tappable widgets. Nothing to attach here.
         #endif
 
+        // A multiview tile's session owns suspension and foreground retune for every tile.
+        guard mode.observesAppLifecycle else { return }
         // Foreground reloads the pipeline at current position (VT + AVIO die in suspension).
         NotificationCenter.default.addObserver(
             self, selector: #selector(appDidBecomeActive),
@@ -501,7 +510,8 @@ final class PlayerHostController: AVPlayerViewController {
     /// (framework limitation, see the softwarePiPSource sink comment), so SW titles get no button here;
     /// SW-PiP is iOS-only until the OS closes that gap.
     private func updatePiPAvailability() {
-        viewModel.isPiPAvailable = AVPictureInPictureController.isPictureInPictureSupported()
+        viewModel.isPiPAvailable = mode.offersPictureInPicture
+            && AVPictureInPictureController.isPictureInPictureSupported()
             && viewModel.player.currentAVPlayer != nil
         if !viewModel.isPiPAvailable { viewModel.isPiPPossible = false }
     }
@@ -719,6 +729,7 @@ final class PlayerHostController: AVPlayerViewController {
         // Kick off playback as the modal starts appearing so network/demuxer work overlaps the present-then-layout sequence.
         guard !hasLaunched else { return }
         hasLaunched = true
+        guard mode.launchesPlayback else { return }
         // Tracked launch: a back-press during loading cancels this task (latches teardown) so an in-flight load can't resume into player.load() after dismissal and leave audio behind a gone player.
         viewModel.beginPlayback()
     }
@@ -859,8 +870,21 @@ final class PlayerHostController: AVPlayerViewController {
         #endif
         unmountAetherViewIfNeeded()
         player = nil
+        // A tile or a hand-off leaves the view model playing; dropping this surface lets the grid's take the layer back.
+        guard mode.stopsOnDismiss, !handingOff else { return }
         viewModel.stopPlayback()
     }
+
+    /// Sodalite#175: give the playing view model to multiview. The coordinator dismisses this controller,
+    /// and `handingOff` keeps that dismiss from stopping playback.
+    func handOffToMultiview() {
+        handingOff = true
+        unmountAetherViewIfNeeded()
+        player = nil
+        onEnterMultiview?(viewModel)
+    }
+
+    var offersMultiview: Bool { mode.offersMultiview && viewModel.isLiveSession }
 
     /// Sodalite#149: the one word that says which kind of trip this was, short enough to read next to a
     /// playhead in a log line.
@@ -1531,6 +1555,12 @@ final class PlayerHostController: AVPlayerViewController {
         #endif
         unmountAetherViewIfNeeded()
         player = nil
+        // A tile's full screen: Back returns to the grid with the tile still playing.
+        guard mode.stopsOnDismiss else {
+            onDismiss()
+            if presentingViewController != nil { dismiss(animated: false) }
+            return
+        }
         // stopPlayback fire-and-forgets the reportStop call (DrHurt #12); called inline so synchronous teardown finishes before onDismiss and the back press hits the dismiss animation immediately.
         viewModel.stopPlayback()
         onDismiss()

@@ -546,6 +546,7 @@
 		6443B555E9DEB5192AFE108E /* TopShelfAccent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A76F4E46F2995ECC621AF105 /* TopShelfAccent.swift */; };
 		64619202E454CFACEACDF471 /* ServerTrustStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA70A9F12B8CF73DA6A6D91F /* ServerTrustStoreTests.swift */; };
 		64913A8514DF05A048AE8406 /* SiriRemoteEdgeClick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */; };
+		64ACDF3B596FC66A1E2A77F0 /* PlayerPresentationModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A53A54EFA5ABA88020FB01A /* PlayerPresentationModeTests.swift */; };
 		64EDED872A2D4749BA6E30FB /* LiveProgramsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BC18D495A4C0E5055CA6A7 /* LiveProgramsView.swift */; };
 		64F7AA6C02338018B7EFCAD0 /* ProfileKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11735278116778A1D183DA55 /* ProfileKey.swift */; };
 		650BF60A3F55B46E6E3740FC /* EpisodeStateOriginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8377D1E5010C13C1C3A8722 /* EpisodeStateOriginTests.swift */; };
@@ -647,6 +648,7 @@
 		762E975FE795AA5C059679CF /* NowPlayingColumnAlignmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF88DF2D226719A36470DB6 /* NowPlayingColumnAlignmentTests.swift */; };
 		7697F3AFA448A1EE03EC4225 /* MusicHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466FF1007CC23C8934BA9FD7 /* MusicHomeView.swift */; };
 		769EE5E5BA6E963852C08B12 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0D6DF76D26CB39C5D10E0A /* DependencyContainer.swift */; };
+		76CFEB475F14217945E9109C /* PlayerPresentationMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009825E59410A8CA307C9F69 /* PlayerPresentationMode.swift */; };
 		77031B52AEEFCB596CF64DE7 /* RecordingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FF2C59F162B68CC0D9F82B /* RecordingsView.swift */; };
 		77057A5582B0A1BE87D51377 /* ArtworkStateBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC77BDA6A3B780DF2964CC4 /* ArtworkStateBadges.swift */; };
 		775467145E38E09D26128ACD /* HDR10PlusProbeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9623313C1149761C270A5552 /* HDR10PlusProbeStore.swift */; };
@@ -1112,6 +1114,7 @@
 		CEC7DC2F00B0534E9E139047 /* CloudSyncLoadOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CD46B60AB2991E263AF7F48 /* CloudSyncLoadOutcomeTests.swift */; };
 		CEE4F399F4267AB60982F85B /* PlayerOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65078FEBC5D0CDB0C24799C4 /* PlayerOrientation.swift */; };
 		CF4EC28EDB43B31A93892C1A /* BackgroundPickerLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588112BFC0A31A2AA0D4CD08 /* BackgroundPickerLayoutTests.swift */; };
+		CF769DCBF678F659E81EE3CD /* PlayerPresentationMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009825E59410A8CA307C9F69 /* PlayerPresentationMode.swift */; };
 		CF8ED7254A05D0364D2774DB /* JellyfinAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477BA4C25F579EBD37469D21 /* JellyfinAuthService.swift */; };
 		CFA6D845B2FF2DF355F41029 /* PersistedLogFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0DAB5E05E4BA030E8B98D8 /* PersistedLogFile.swift */; };
 		CFAE64CD92C74114C9C65085 /* MusicScrubberInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C0989097FA38E35DE5B355 /* MusicScrubberInput.swift */; };
@@ -1417,6 +1420,7 @@
 /* Begin PBXFileReference section */
 		0049820D32E9F8F26AE51AB4 /* ServerDiscoveryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDiscoveryViewModelTests.swift; sourceTree = "<group>"; };
 		004C9DBEB1D1B91A4C2E2D48 /* GuideProgramCellBudgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideProgramCellBudgetTests.swift; sourceTree = "<group>"; };
+		009825E59410A8CA307C9F69 /* PlayerPresentationMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerPresentationMode.swift; sourceTree = "<group>"; };
 		00DD61893C2D9B04065CB8BF /* ScrubPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrubPreviewProvider.swift; sourceTree = "<group>"; };
 		010DCB1E62A7233707A0BB2C /* MultiviewLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiviewLayoutTests.swift; sourceTree = "<group>"; };
 		01247173B9E78716CBFCD414 /* DownloadButtonState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadButtonState.swift; sourceTree = "<group>"; };
@@ -1454,6 +1458,7 @@
 		098DC40DFD22F68568CF8CE9 /* SeerrRequestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequestService.swift; sourceTree = "<group>"; };
 		0A0B4A2AA0DEB9AEA63E121F /* LocalNetworkAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNetworkAccessTests.swift; sourceTree = "<group>"; };
 		0A4F6464C543DFF6027F96CB /* JSONValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONValue.swift; sourceTree = "<group>"; };
+		0A53A54EFA5ABA88020FB01A /* PlayerPresentationModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerPresentationModeTests.swift; sourceTree = "<group>"; };
 		0A67A85813AA4FE94C9DF9D5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		0A8630F13AD6A7B6C4F5C33E /* PlayerTrackDropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTrackDropdown.swift; sourceTree = "<group>"; };
 		0ADF8ED6F88095120AED5DF3 /* LocalPlaybackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPlaybackTests.swift; sourceTree = "<group>"; };
@@ -2459,6 +2464,7 @@
 				A3116EDEDD1564A47A461A91 /* PlayerLoadingIndicator.swift */,
 				9A49C90E145510D9212683F8 /* PlayerLockProgress.swift */,
 				C06A68BD50E0DF719FEB9553 /* PlayerPiPController.swift */,
+				009825E59410A8CA307C9F69 /* PlayerPresentationMode.swift */,
 				805C6914767AC1469126A3BD /* PlayerReachabilityFace.swift */,
 				9BD1784CA145F8A51ADEF045 /* PlayerViewModel.swift */,
 				BCF3A9D8BE6DD4C682266627 /* PlayerViewModel+ItemRecovery.swift */,
@@ -2736,6 +2742,7 @@
 				5E2509512DE5F3DD304BACE8 /* PlayerErrorFocusTests.swift */,
 				DE6F5DDE2F05B9FB53D03697 /* PlayerLoadingIndicatorTests.swift */,
 				1F36981949B7D048B208609F /* PlayerLockProgressTests.swift */,
+				0A53A54EFA5ABA88020FB01A /* PlayerPresentationModeTests.swift */,
 				D30C08C3C3A7FCD33C4C46A7 /* PlayerReachabilityFaceTests.swift */,
 				B3A695C1E39263E5D9C3C48A /* PlayerSessionTeardownTests.swift */,
 				7BC0FFB550FE99D21023289B /* PlayerThemeBoundaryTests.swift */,
@@ -4122,6 +4129,7 @@
 				CEE4F399F4267AB60982F85B /* PlayerOrientation.swift in Sources */,
 				036CE46C7C775190D89DB068 /* PlayerOverlayView.swift in Sources */,
 				6A9C6D7D2DD01ADCBBD2387B /* PlayerPiPController.swift in Sources */,
+				CF769DCBF678F659E81EE3CD /* PlayerPresentationMode.swift in Sources */,
 				2060D69925D19FA78BC4355B /* PlayerReachabilityFace.swift in Sources */,
 				9CD7CDE71FF7444B06418E18 /* PlayerSystemVolume.swift in Sources */,
 				5DC61C3A25E8BC40621DFA33 /* PlayerTitleLines.swift in Sources */,
@@ -4561,6 +4569,7 @@
 				BE20731E5E151E88ECC6E9D7 /* PlayerErrorFocusTests.swift in Sources */,
 				DCC1D2F675DC3C00E8171120 /* PlayerLoadingIndicatorTests.swift in Sources */,
 				7EE1CF274830D9DAE1E66F1E /* PlayerLockProgressTests.swift in Sources */,
+				64ACDF3B596FC66A1E2A77F0 /* PlayerPresentationModeTests.swift in Sources */,
 				2DCB06F2CE5AE3E5911FC7C3 /* PlayerReachabilityFaceTests.swift in Sources */,
 				468B22E1EFCF84F499141858 /* PlayerSessionTeardownTests.swift in Sources */,
 				B943A2C97149DDAB3DC39FA1 /* PlayerThemeBoundaryTests.swift in Sources */,
@@ -4988,6 +4997,7 @@
 				3803C74745F32BCD93A5F75E /* PlayerNoticeBanner.swift in Sources */,
 				09914478D057722C2E7E2231 /* PlayerOverlayView.swift in Sources */,
 				7FD848A2EF7366D2AD517E46 /* PlayerPiPController.swift in Sources */,
+				76CFEB475F14217945E9109C /* PlayerPresentationMode.swift in Sources */,
 				5EBFA68EFBE0005A678C601D /* PlayerReachabilityFace.swift in Sources */,
 				695AC4E17FEBC2C1C0202F5C /* PlayerTitleLines.swift in Sources */,
 				5551B8838EECC94A5399EEE6 /* PlayerTrackDropdown.swift in Sources */,
