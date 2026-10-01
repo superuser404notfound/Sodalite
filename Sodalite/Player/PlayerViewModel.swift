@@ -813,6 +813,8 @@ final class PlayerViewModel {
     @ObservationIgnored var liveRetuneTask: Task<Void, Never>?
     /// Test seam: nil in production, which means `startPlayback()`.
     @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
+    /// How long a tuner open waits for our own unanswered closes. Test seam.
+    @ObservationIgnored var liveTunerCloseSettle: TimeInterval = 6
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.

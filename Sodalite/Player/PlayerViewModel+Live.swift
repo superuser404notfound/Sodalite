@@ -129,7 +129,8 @@ extension PlayerViewModel {
             }
 
             // Ineligible route (static/server): reuse the stage-1 tuner so it isn't leaked and the server path avoids a duplicate roundtrip.
-            try await loadLiveStreamViaServer(reusing: (info: info, source: source))
+            try await loadLiveStreamViaServer(
+                reusing: (info: info, source: source), onStageOneReleased: { stageOneTuner = nil })
         } catch {
             // The tuner is open from the moment PlaybackInfo answered. If this tune never got far enough
             // to hand it to the session, nothing else will ever close it: Jellyfin's MediaSourceManager
@@ -180,11 +181,15 @@ extension PlayerViewModel {
         // Never open while one of our own closes is still unanswered: the id Jellyfin closes by names
         // the CHANNEL, not this stream, so an open that overtakes a close either orphans the tuner it
         // replaces or hands that close the stream we are about to play (LiveTunerGate, #70).
-        let unsettled = await LiveTunerGate.shared.settle(timeout: 6, opening: itemID)
-        if unsettled > 0 {
-            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) still unanswered after 6s")
-        }
+        // An open of this channel we gave up on is waited for as long as its answer can take: the
+        // close that follows that answer would otherwise land on the stream this open is for.
+        let unsettled = await LiveTunerGate.shared.settle(
+            timeout: liveTunerCloseSettle, opening: itemID,
+            abandonedOpenTimeout: JellyfinEndpoint.livePlaybackInfoTimeout + 5)
         try Task.checkCancellation()
+        if unsettled > 0 {
+            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) or abandoned open(s) still unanswered")
+        }
         let request = Task {
             try await svc.getLivePlaybackInfo(
                 itemID: itemID, userID: user,
@@ -192,7 +197,7 @@ extension PlayerViewModel {
                 maxStreamingBitrate: maxStreamingBitrate,
                 enableDirectPlay: enableDirectPlay)
         }
-        guard let outcome = await Self.outcome(of: request) else {
+        guard case .answered(let outcome) = await Self.outcome(of: request) else {
             LogTap.shared.note("[Live] tune superseded while PlaybackInfo was out, its tuner closes on arrival")
             LiveTunerGate.shared.abandonOpen(itemID: itemID) { [self] in
                 guard let info = try? await request.value else { return }
@@ -251,19 +256,17 @@ extension PlayerViewModel {
         }
     }
 
-    /// The request's result, or nil as soon as the caller is cancelled, whichever comes first. Awaiting
+    /// The request's result, or `.superseded` as soon as the caller is cancelled, whichever comes first. Awaiting
     /// `request.value` alone would not observe the caller's cancellation at all.
-    private static func outcome(
-        of request: Task<PlaybackInfoResponse, Error>
-    ) async -> Result<PlaybackInfoResponse, Error>? {
-        let race = FirstOutcome<Result<PlaybackInfoResponse, Error>?>()
+    private static func outcome(of request: Task<PlaybackInfoResponse, Error>) async -> TunerOpenOutcome {
+        let race = FirstOutcome()
         return await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
                 race.arm(continuation)
-                Task { race.finish(await request.result) }
+                Task { race.finish(.answered(await request.result)) }
             }
         } onCancel: {
-            race.finish(nil)
+            race.finish(.superseded)
         }
     }
 
@@ -415,8 +418,11 @@ extension PlayerViewModel {
     /// Jellyfin-mediated live load: open the tuner via PlaybackInfo, pick the infinite live MediaSource, prefer its HLS TranscodingUrl, hand it to the engine with isLive + a DVR window, and set the tuner handle for teardown.
     ///
     /// - Parameter prefetched: reuses a stage-1 PlaybackInfo from the router (avoids a second tuner + duplicate roundtrip); nil triggers a fresh negotiation.
+    /// - Parameter onStageOneReleased: told when the prefetched tuner was closed here, so the caller's
+    ///   failure path does not close it a second time.
     private func loadLiveStreamViaServer(
-        reusing prefetched: (info: PlaybackInfoResponse, source: PlaybackMediaSource)? = nil
+        reusing prefetched: (info: PlaybackInfoResponse, source: PlaybackMediaSource)? = nil,
+        onStageOneReleased: () -> Void = {}
     ) async throws {
         // Engine-decode live: request a copy-TS source (liveProfile = Protocol=http, full codec list) and hand to AetherEngine like VOD. The engine demuxes the TS, dispatching h264/hevc to native AVPlayer loopback and MPEG-2/VC-1/MPEG-4 Part 2 to SW, so every codec plays with no re-encode. High copy ceiling (maxStreamingBitrate) keeps the server stream-copying rather than downscaling.
         var info: PlaybackInfoResponse
@@ -441,6 +447,7 @@ extension PlayerViewModel {
             // single-profile tuner host the ids match and the guard skipped every release (#70).
             if let staleTuner = source.liveStreamId {
                 releaseTuner(staleTuner, reason: "re-negotiating at the re-encode cap")
+                if prefetched != nil { onStageOneReleased() }
             }
             info = try await openLiveTuner(maxStreamingBitrate: DirectPlayProfile.liveReencodeCapBitrate)
             guard let rebounded = info.mediaSources.first else { throw PlayerEngineError.noSource }

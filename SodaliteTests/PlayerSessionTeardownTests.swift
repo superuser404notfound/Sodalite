@@ -119,8 +119,9 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var uncancellableDelayItemIDs: Set<String> = []
     /// Live tuner answers by item id; an item without one fails its live PlaybackInfo.
     var liveStreamIDs: [String: String] = [:]
-    /// Holds an item's live PlaybackInfo at this gate before it answers.
-    var liveAnswerGates: [String: TestGate] = [:]
+    /// Holds an item's live PlaybackInfo before it answers: each request takes the next gate, the last
+    /// one holds every request after it.
+    var liveAnswerGates: [String: [TestGate]] = [:]
     /// Holds every stop report at this gate before recording it, so a test can act while one is on the wire.
     var stopReportGate: TestGate?
 
@@ -189,7 +190,13 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         lock.withLock { _livePlaybackInfoRequests.append(itemID) }
         guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
         // Ignores cancellation, like a request Jellyfin is already probing the tuner for.
-        await liveAnswerGates[itemID]?.pass()
+        let gate = lock.withLock { () -> TestGate? in
+            guard var gates = liveAnswerGates[itemID], let next = gates.first else { return nil }
+            if gates.count > 1 { gates.removeFirst() }
+            liveAnswerGates[itemID] = gates
+            return next
+        }
+        await gate?.pass()
         return try JSONDecoder().decode(
             PlaybackInfoResponse.self,
             from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"ts","LiveStreamId":"\#(liveStreamID)"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)

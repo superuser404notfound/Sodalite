@@ -37,7 +37,7 @@ struct LiveZapOvertakeTests {
         service: RecordingPlaybackService, holdB: TestGate, holdC: TestGate
     ) async -> (PlayerViewModel, Task<Void, Never>, Task<Void, Never>) {
         service.liveStreamIDs = ["a2": "tuner-a2", "a3": "tuner-a3"]
-        service.liveAnswerGates = ["a2": holdB, "a3": holdC]
+        service.liveAnswerGates = ["a2": [holdB], "a3": [holdC]]
         let vm = makeViewModel(liveChannelID: "a1", playback: service)
         vm.zapLineup = lineupA
         vm.zapStartPlayback = { try? await vm.loadLiveStream() }
@@ -92,5 +92,48 @@ struct LiveZapOvertakeTests {
         #expect(vm.liveChannel?.id == "a3")
 
         await finish(vm, [holdC], [first, second])
+    }
+
+    /// A -> B -> A on a channel whose first answer is slow: the second open of A must wait for the
+    /// first one's answer and its close, however long past the close bound, or that close lands on the
+    /// stream the second open is for (Jellyfin's id names the channel, #70).
+    @Test func aZapBackToASlowChannelWaitsForItsAbandonedOpen() async {
+        let service = RecordingPlaybackService()
+        let holdA = TestGate()
+        let holdA2 = TestGate()
+        let holdB = TestGate()
+        service.liveStreamIDs = ["a2": "tuner-a2", "a3": "tuner-a3"]
+        service.liveAnswerGates = ["a2": [holdA, holdA2], "a3": [holdB]]
+        let vm = makeViewModel(liveChannelID: "a1", playback: service)
+        vm.zapLineup = lineupA
+        vm.liveTunerCloseSettle = 0.05
+        vm.zapStartPlayback = { try? await vm.loadLiveStream() }
+
+        vm.zapPendingOffset = 1
+        let toA = Task { await vm.commitZap() }
+        await holdA.arrival(1)
+        vm.zapPendingOffset = 1
+        let toB = Task { await vm.commitZap() }
+        await holdB.arrival(1)
+        vm.zapPendingOffset = -1
+        let backToA = Task { await vm.commitZap() }
+        _ = await waitUntil { vm.liveChannel?.id == "a2" }
+
+        try? await Task.sleep(for: .milliseconds(300))
+        #expect(service.livePlaybackInfoRequests.filter { $0 == "a2" }.count == 1,
+                "the second open of a2 went out before the first one answered")
+
+        holdA.open()
+        let reopened = await waitUntil { service.livePlaybackInfoRequests.filter { $0 == "a2" }.count == 2 }
+        #expect(reopened)
+        #expect(service.closedLiveStreams == ["tuner-a2"])
+
+        holdB.open()
+        _ = await waitUntil { service.closedLiveStreams.contains("tuner-a3") }
+        _ = await LiveTunerGate.shared.settle(timeout: 2)
+        #expect(service.closedLiveStreams.filter { $0 == "tuner-a2" }.count == 1)
+        #expect(vm.liveChannel?.id == "a2")
+
+        await finish(vm, [holdA2], [toA, toB, backToA])
     }
 }

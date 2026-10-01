@@ -66,8 +66,12 @@ final class LiveTunerGate {
     /// How many closes are still unanswered. Test seam.
     var pendingCount: Int { pending.count }
 
+    private func abandonedOpenCount(_ itemID: String?) -> Int {
+        abandonedOpens.values.filter { $0.itemID == itemID }.count
+    }
+
     private func unsettled(opening itemID: String?) -> Int {
-        pending.count + abandonedOpens.values.filter { $0.itemID == itemID }.count
+        pending.count + abandonedOpenCount(itemID)
     }
 
     /// Wait for every close we have fired to be answered, bounded. Returns the number still
@@ -80,10 +84,22 @@ final class LiveTunerGate {
     /// stalled every later tune. Giving up on the WAIT never cancels the close itself, since a
     /// cancelled close is a tuner nobody will ever close again.
     @discardableResult
-    func settle(timeout: TimeInterval, opening itemID: String? = nil) async -> Int {
+    ///
+    /// An abandoned open of `itemID` gets its own bound, `abandonedOpenTimeout`, which a caller sets to
+    /// how long that answer can take: the close that follows it names the channel too.
+    func settle(
+        timeout: TimeInterval, opening itemID: String? = nil, abandonedOpenTimeout: TimeInterval = 0
+    ) async -> Int {
         guard unsettled(opening: itemID) > 0 else { return 0 }
-        let deadline = Date().addingTimeInterval(max(0, timeout))
-        while unsettled(opening: itemID) > 0, Date() < deadline {
+        let start = Date()
+        let closeDeadline = start.addingTimeInterval(max(0, timeout))
+        let openDeadline = start.addingTimeInterval(max(timeout, abandonedOpenTimeout))
+        func waiting() -> Bool {
+            let now = Date()
+            return (!pending.isEmpty && now < closeDeadline)
+                || (abandonedOpenCount(itemID) > 0 && now < openDeadline)
+        }
+        while waiting() {
             do {
                 try await Task.sleep(nanoseconds: 20_000_000)
             } catch {
@@ -94,33 +110,50 @@ final class LiveTunerGate {
     }
 }
 
-/// Resumes one continuation with whichever value arrives first, including one that arrives before the
-/// continuation does (a cancellation handler runs at once when the caller is already cancelled).
-nonisolated final class FirstOutcome<Value: Sendable>: @unchecked Sendable {
-    private let lock = NSLock()
-    private var continuation: CheckedContinuation<Value, Never>?
-    private var early: Value?
-    private var isDone = false
+/// How a tune's wait for its PlaybackInfo ended.
+enum TunerOpenOutcome: Sendable {
+    case answered(Result<PlaybackInfoResponse, Error>)
+    case superseded
+}
 
-    func arm(_ continuation: CheckedContinuation<Value, Never>) {
-        let value: Value? = lock.withLock {
-            guard isDone else {
-                self.continuation = continuation
-                return nil
-            }
-            return early
-        }
-        if let value { continuation.resume(returning: value) }
+/// Resumes one continuation with whichever outcome arrives first, including one that arrives before
+/// the continuation does (a cancellation handler runs at once when the caller is already cancelled).
+nonisolated final class FirstOutcome: @unchecked Sendable {
+    private enum State {
+        case waiting
+        case armed(CheckedContinuation<TunerOpenOutcome, Never>)
+        case early(TunerOpenOutcome)
+        case done
     }
 
-    func finish(_ value: Value) {
-        let waiting: CheckedContinuation<Value, Never>? = lock.withLock {
-            guard !isDone else { return nil }
-            isDone = true
-            defer { continuation = nil }
-            if continuation == nil { early = value }
-            return continuation
+    private let lock = NSLock()
+    private var state = State.waiting
+
+    func arm(_ continuation: CheckedContinuation<TunerOpenOutcome, Never>) {
+        let early: TunerOpenOutcome? = lock.withLock {
+            if case .early(let outcome) = state {
+                state = .done
+                return outcome
+            }
+            state = .armed(continuation)
+            return nil
         }
-        waiting?.resume(returning: value)
+        if let early { continuation.resume(returning: early) }
+    }
+
+    func finish(_ outcome: TunerOpenOutcome) {
+        let armed: CheckedContinuation<TunerOpenOutcome, Never>? = lock.withLock {
+            switch state {
+            case .waiting:
+                state = .early(outcome)
+                return nil
+            case .armed(let continuation):
+                state = .done
+                return continuation
+            case .early, .done:
+                return nil
+            }
+        }
+        armed?.resume(returning: outcome)
     }
 }
