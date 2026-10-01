@@ -469,6 +469,11 @@ final class PlayerViewModel {
     var sharedOutputRole: SharedOutputRole
     /// Sodalite#175: true while this view model is a multiview tile, so its stop leaves process-wide caches alone.
     var isMultiviewTile = false
+    /// Sodalite#175: the last direct-ingest and tuner-open failures of this attempt, read by the tile's failure branch.
+    @ObservationIgnored var lastIngestError: HLSIngestError?
+    @ObservationIgnored var lastTunerOpenError: Error?
+    /// Sodalite#175: why this tile could not tune, when the failures above say so. Nil outside a failed tile load.
+    var tileRefusal: LiveTuneRefusal?
 
     /// Coded video dims for the overlay's bitmap-canvas mapping (.zero before load).
     var videoSize: CGSize {
@@ -1034,6 +1039,9 @@ final class PlayerViewModel {
         }
         hostLoadActive = true
         clearError()
+        lastIngestError = nil
+        lastTunerOpenError = nil
+        tileRefusal = nil
         // Cleared before the load, not after it: an auto-advance swaps `item` first, and a source left
         // standing from the previous episode would describe the new one until PlaybackInfo answers.
         activePlaybackSource = nil
@@ -1296,6 +1304,9 @@ final class PlayerViewModel {
             // them, so a load that threw still has its classification sitting here. Read once: `load()`
             // clears it on the next attempt's `.loading`, so it can only ever describe THIS attempt.
             let engineInfo = player.errorInfo
+            if isMultiviewTile {
+                tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
+            }
             LogTap.shared.note(
                 PlayerEngineErrorPresentation.logLine(for: engineInfo, engineMessage: error.localizedDescription)
             )

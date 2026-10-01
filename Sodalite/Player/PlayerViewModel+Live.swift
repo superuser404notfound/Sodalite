@@ -49,6 +49,7 @@ extension PlayerViewModel {
                 // fallback is for a freshly negotiated URL failing, not for a stale remembered one.
                 usedDirectLivePath = false
                 memory.forget(userID: userID, channelID: item.id)
+                lastIngestError = reader.terminalError
                 let detail = reader.terminalError.map { " ingest=\($0)" } ?? ""
                 LogTap.shared.note("[LiveDirect] remembered upstream failed, renegotiating: \(error)\(detail)")
             }
@@ -116,6 +117,7 @@ extension PlayerViewModel {
                     // Once per session, fall back to the Jellyfin path; the direct attempt already closed (awaited) the stage-1 tuner, so the server path re-negotiates fresh.
                     didAttemptLiveFallback = true
                     usedDirectLivePath = false
+                    lastIngestError = reader.terminalError
                     let detail = reader.terminalError.map { " ingest=\($0)" } ?? ""
                     LogTap.shared.note("[LiveDirect] route=fallback reason=\(error)\(detail)")
                     try await loadLiveStreamViaServer()
@@ -185,7 +187,13 @@ extension PlayerViewModel {
                 maxStreamingBitrate: maxStreamingBitrate,
                 enableDirectPlay: enableDirectPlay)
         }
-        let info = try await request.value
+        let info: PlaybackInfoResponse
+        do {
+            info = try await request.value
+        } catch {
+            lastTunerOpenError = error
+            throw error
+        }
         let source = info.mediaSources.first
         // The open half of the ledger. Without it a capture shows closes with nothing to pair them
         // against, and a tuner we opened and never closed looks exactly like one we never opened (#70).
