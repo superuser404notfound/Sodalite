@@ -349,7 +349,8 @@ extension PlayerViewModel {
                 // Engine picks the preferred-language audio on the first frame (#72), replacing the
                 // post-load selectAudioTrack reload that misfired on single-track channels.
                 preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-                teletextPage: preferences.liveTeletextPage.page
+                teletextPage: preferences.liveTeletextPage.page,
+                sharedOutputRole: sharedOutputRole
             ),
             // #64: the viewer's audio pick, named at load. It is the only way onto a track other than
             // the container default here, because the ingest is forward-only and the engine refuses
@@ -479,7 +480,8 @@ extension PlayerViewModel {
             // Engine picks the preferred-language audio on the first frame (#72), replacing the
             // post-load selectAudioTrack reload that misfired on single-track channels.
             preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-            teletextPage: preferences.liveTeletextPage.page
+            teletextPage: preferences.liveTeletextPage.page,
+            sharedOutputRole: sharedOutputRole
         )
         // #64: same pick on the server route, where the engine could re-point in place but a
         // re-tune is what the viewer asked for either way. One spelling, one behaviour.

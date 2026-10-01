@@ -328,6 +328,7 @@
 		3BDED48F510EB65A36C5A7E3 /* CloudSyncRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA46CA9FFF62E14F69958428 /* CloudSyncRecoveryTests.swift */; };
 		3C025FF85682E1F4AB0FA2B4 /* ArtworkTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC726417573B591C1BAEFC70 /* ArtworkTile.swift */; };
 		3C3D0B611951A4F020CE7211 /* PosterBadgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81D94D4C977D63DA093C6E9 /* PosterBadgeStore.swift */; };
+		3C5FA5A904DA3156F83D375B /* PlayerViewModelEngineInjectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6E79E550FDC166CEE1F9C64 /* PlayerViewModelEngineInjectionTests.swift */; };
 		3C6E101361ED5F9E62FBEDD8 /* JellyfinItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D12A1E28286856D9BCD249 /* JellyfinItemTests.swift */; };
 		3C70F7FB93B4BF67FBD80F02 /* ServerDiscoveryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0049820D32E9F8F26AE51AB4 /* ServerDiscoveryViewModelTests.swift */; };
 		3C7F41B3F092F8D6752BF2B3 /* NamedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B739FE6FBF942CA19A33B3F /* NamedItem.swift */; };
@@ -2156,6 +2157,7 @@
 		E5FF9439B65978C332544ECC /* QualityPickerRungsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QualityPickerRungsTests.swift; sourceTree = "<group>"; };
 		E6D1D9D37BA64B2094938A4F /* CloudSyncNewerBuildValuesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncNewerBuildValuesTests.swift; sourceTree = "<group>"; };
 		E6D2018F09D626C459D70932 /* CollectionPlaybackQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionPlaybackQueueTests.swift; sourceTree = "<group>"; };
+		E6E79E550FDC166CEE1F9C64 /* PlayerViewModelEngineInjectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewModelEngineInjectionTests.swift; sourceTree = "<group>"; };
 		E7C2F6626D47D897ABFD497A /* TopShelfRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfRefresher.swift; sourceTree = "<group>"; };
 		E7F81009C589A7D985A13C16 /* ContentLogoBudgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLogoBudgetTests.swift; sourceTree = "<group>"; };
 		E80A021B835F6729AC316A2C /* Sodalite-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Sodalite-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2706,6 +2708,7 @@
 				7BC0FFB550FE99D21023289B /* PlayerThemeBoundaryTests.swift */,
 				F7AFC9D69550F3562E83D486 /* PlayerTouchInputTests.swift */,
 				1FB580518F9C9E2171C6274A /* PlayerTrackDropdownWidthTests.swift */,
+				E6E79E550FDC166CEE1F9C64 /* PlayerViewModelEngineInjectionTests.swift */,
 				29F7CC53B87E7E5AE63C0EF1 /* PlaylistDetailViewRowIDTests.swift */,
 				5D00CC584D73D8FAFF74FA41 /* PosterBadgeStoreCancellationTests.swift */,
 				D1A07AA09138D51EDE17FE24 /* PosterBadgeStoreTests.swift */,
@@ -4523,6 +4526,7 @@
 				B943A2C97149DDAB3DC39FA1 /* PlayerThemeBoundaryTests.swift in Sources */,
 				8B4A55B1019A82FFDB20CB1F /* PlayerTouchInputTests.swift in Sources */,
 				7A5D29CB5FCDFB94CE83772E /* PlayerTrackDropdownWidthTests.swift in Sources */,
+				3C5FA5A904DA3156F83D375B /* PlayerViewModelEngineInjectionTests.swift in Sources */,
 				3AF501EB77DA0C21063A3116 /* PlaylistDetailViewRowIDTests.swift in Sources */,
 				6641B1391279DA9823E9A3D1 /* PosterBadgeStoreCancellationTests.swift in Sources */,
 				949E87BD002C5B02FC56F29E /* PosterBadgeStoreTests.swift in Sources */,

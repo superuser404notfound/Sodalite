@@ -465,6 +465,10 @@ final class PlayerViewModel {
 
     var item: JellyfinItem
     let player: AetherEngine
+    /// Sodalite#175: the shared-output role every live load on this engine declares. A promoted tile flips it to `.primary`.
+    var sharedOutputRole: SharedOutputRole
+    /// Sodalite#175: true while this view model is a multiview tile, so its stop leaves process-wide caches alone.
+    var isMultiviewTile = false
 
     /// Coded video dims for the overlay's bitmap-canvas mapping (.zero before load).
     var videoSize: CGSize {
@@ -865,10 +869,13 @@ final class PlayerViewModel {
         serverName: String = "",
         serverReachability: @escaping () -> ServerReachability = { .unknown },
         localDownload: DownloadedItem? = nil,
-        downloadStore: DownloadStore? = nil
+        downloadStore: DownloadStore? = nil,
+        engine: AetherEngine? = nil,
+        sharedOutputRole: SharedOutputRole = .primary
     ) {
         self.item = item
-        self.player = DependencyContainer.playerEngine
+        self.player = engine ?? DependencyContainer.playerEngine
+        self.sharedOutputRole = sharedOutputRole
         self.startFromBeginning = startFromBeginning
         self.playbackService = playbackService
         self.userID = userID
@@ -892,6 +899,8 @@ final class PlayerViewModel {
         self.localDownload = localDownload
         self.downloadStore = downloadStore
     }
+
+    nonisolated static func clearsSharedFontCacheOnStop(isMultiviewTile: Bool) -> Bool { !isMultiviewTile }
 
     // MARK: - Lifecycle
 
@@ -1478,7 +1487,9 @@ final class PlayerViewModel {
         frameExtractor = nil
         Task { await extractorToClose?.shutdown() }
         deactivateASSRendering()
-        ASSFontCache.removeAll()
+        if Self.clearsSharedFontCacheOnStop(isMultiviewTile: isMultiviewTile) {
+            ASSFontCache.removeAll()
+        }
         cancellables.removeAll()
         outageWatchdog?.cancel()
         outageWatchdog = nil
