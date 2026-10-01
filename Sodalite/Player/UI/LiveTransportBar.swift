@@ -186,7 +186,7 @@ struct LiveTransportBar: View {
                     TransportTrackLabel(
                         label: String(localized: "multiview.button", defaultValue: "Multiview"),
                         icon: "rectangle.split.2x2",
-                        showsLabel: false,
+                        showsLabel: viewModel.controlsFocus == .multiviewButton,
                         isFocused: viewModel.controlsFocus == .multiviewButton
                     )
                 }
