@@ -31,6 +31,10 @@ final class PlayerPiPController: NSObject {
     var onDidStop: (() -> Void)?
 
     var isActive: Bool { controller?.isPictureInPictureActive ?? false }
+    /// Sodalite#175 diagnostics: whether a PiP controller and its source layer still hold a player.
+    var diagnosticFacts: String {
+        "\(controller == nil ? "none" : (isActive ? "active" : "armed"))/layer=\(sourceView.playerLayer.player == nil ? "nil" : "set")"
+    }
     var isPossible: Bool { controller?.isPictureInPicturePossible ?? false }
 
     /// (Re)binds the source layer to the engine's current AVPlayer; nil unbinds (SW path / teardown).

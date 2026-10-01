@@ -283,6 +283,7 @@ final class LiveMultiviewCoordinator {
         switch Self.exit(after: survivor) {
         case .continuing(let vm):
             LogTap.shared.note("[Multiview] end, continuing channel=\(vm.liveChannel?.id ?? "?")")
+            PlayerHostDiagnostics.noteLiveHosts("multiview end")
             guard let presenter, let launcherHost = host as? PlayerLauncherHostVC,
                   let channel = vm.liveChannel ?? survivorChannel else {
                 vm.stopPlayback()
@@ -322,6 +323,7 @@ final class LiveMultiviewCoordinator {
     }
 
     private func close() {
+        PlayerHostDiagnostics.noteAftermath("multiview close")
         let presenter = grid?.presentingViewController
         onPlayerDismiss()
         if let launcherHost = host as? PlayerLauncherHostVC, launcherHost.multiview === self {

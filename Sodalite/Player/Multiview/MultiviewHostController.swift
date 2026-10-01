@@ -26,6 +26,8 @@ final class MultiviewHostController: UIHostingController<MultiviewView> {
         super.viewDidAppear(animated)
         coordinator.gridDidAppear()
         PlayerModalPresence.notifyDidChange()
+        // Sodalite#175 diagnostics: by now the player this grid came from, or the tile's full screen, should be gone.
+        PlayerHostDiagnostics.noteAftermath("the grid appeared", after: 2)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
