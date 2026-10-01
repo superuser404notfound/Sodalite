@@ -10,10 +10,14 @@ struct MultiviewView: View {
     @FocusState private var focusedTile: UUID?
     @FocusState private var addFocused: Bool
     @State private var labelTileID: UUID?
+    /// The tile whose speaker glyph shows: set when a tile becomes audible, cleared after a few seconds.
+    @State private var speakerTileID: UUID?
 
     private static let padding: CGFloat = 40
     private static let spacing: CGFloat = 24
     private static let addButtonHeight: CGFloat = 96
+    /// How long the speaker glyph stays on a tile after the sound moved to it.
+    static let speakerGlyphDuration: Duration = .seconds(3)
 
     private var session: MultiviewSession { coordinator.session }
     private var tint: Color { coordinator.theme.palette.control.color }
@@ -35,6 +39,12 @@ struct MultiviewView: View {
                 try? await Task.sleep(for: .seconds(3))
                 guard !Task.isCancelled else { return }
                 withAnimation(.easeOut(duration: 0.3)) { labelTileID = nil }
+            }
+            .task(id: session.audibleTileID) {
+                withAnimation(.easeOut(duration: 0.2)) { speakerTileID = session.audibleTileID }
+                try? await Task.sleep(for: Self.speakerGlyphDuration)
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.6)) { speakerTileID = nil }
             }
             .onExitCommand { coordinator.end() }
             // Nothing to pause on a grid; pinned so the press does not reach a tile's player.
@@ -107,13 +117,14 @@ struct MultiviewView: View {
                 channelLabel(tile.currentChannel)
                     .transition(.opacity)
             }
-            if session.audibleTileID == tile.id, session.tiles.count > 1 {
+            if speakerTileID == tile.id, session.audibleTileID == tile.id, session.tiles.count > 1 {
                 Image(systemName: "speaker.wave.2.fill")
                     .font(.title3)
                     .padding(12)
                     .background(Color.Theme.scrim, in: Circle())
                     .padding(16)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .transition(.opacity)
             }
         }
         .frame(width: size.width, height: size.height)
