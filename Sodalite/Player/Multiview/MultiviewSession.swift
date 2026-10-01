@@ -112,9 +112,10 @@ final class MultiviewSession {
     }
 
     /// Back to a single player: the audible tile survives as the primary, everything else stops.
-    func end() -> PlayerViewModel {
+    func end() -> PlayerViewModel? {
         pendingAudio?.cancel()
         pendingAudio = nil
+        guard !tiles.isEmpty else { return nil }
         let survivorIndex = tiles.firstIndex(where: { $0.id == audibleTileID }) ?? 0
         let survivor = tiles[survivorIndex].viewModel
         for (index, tile) in tiles.enumerated() where index != survivorIndex {

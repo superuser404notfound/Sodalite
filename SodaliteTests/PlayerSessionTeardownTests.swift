@@ -103,6 +103,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _closedLiveStreams: [String] = []
     private var _events: [String] = []
     private var _playbackInfoRequests: [String] = []
+    private var _livePlaybackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
     private var _requestedAudioIndexes: [Int?] = []
     private var _requestedMediaSourceIDs: [String?] = []
@@ -125,6 +126,8 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     /// Every stop, kill and close in the order the service saw them.
     var events: [String] { lock.withLock { _events } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
+    /// Every live tuner open (live PlaybackInfo), by item id.
+    var livePlaybackInfoRequests: [String] { lock.withLock { _livePlaybackInfoRequests } }
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
     var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
@@ -178,7 +181,10 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     }
 
     private struct NotUsed: Error {}
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
+        lock.withLock { _livePlaybackInfoRequests.append(itemID) }
+        throw NotUsed()
+    }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
     func closeLiveStream(liveStreamID: String) async throws {

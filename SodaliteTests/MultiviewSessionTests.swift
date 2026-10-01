@@ -34,7 +34,7 @@ struct MultiviewSessionTests {
         let first = makeVM(channel("c1"), engine: pool.primary, role: .primary)
         return MultiviewSession(
             first: first, channel: channel("c1"), pool: pool,
-            makeTileVM: { [self] channel, engine in makeVM(channel, engine: engine, role: .secondary) },
+            makeTileVM: { [self] channel, engine in makeVM(channel, engine: engine, role: .primary) },
             audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend)
     }
 
@@ -142,7 +142,7 @@ struct MultiviewSessionTests {
         let t2 = session.tiles[1]
         let t3 = session.tiles[2]
         session.setAudible(t2.id)
-        let survivor = session.end()
+        let survivor = try #require(session.end())
         #expect(survivor === t2.viewModel)
         #expect(survivor.didStopPlayback == false)
         #expect(survivor.sharedOutputRole == .primary)
@@ -150,6 +150,28 @@ struct MultiviewSessionTests {
         #expect(t1.viewModel.didStopPlayback == true)
         #expect(t3.viewModel.didStopPlayback == true)
         #expect(session.tiles.isEmpty)
+    }
+
+    @Test("ending twice is safe and the second end has nothing to return")
+    func endTwiceIsSafe() throws {
+        let session = try makeSession()
+        try session.add(channel("c2"))
+        #expect(session.end() != nil)
+        #expect(session.end() == nil)
+        #expect(session.tiles.isEmpty)
+    }
+
+    @Test("a tile removed before its launch runs never loads")
+    func removedBeforeLaunchNeverLoads() async throws {
+        let session = try makeSession()
+        try session.add(channel("c2"))
+        let t2 = session.tiles[1]
+        session.remove(t2.id)
+        try await Task.sleep(for: .milliseconds(50))
+        let service = try #require(t2.viewModel.playbackService as? RecordingPlaybackService)
+        #expect(t2.viewModel.didStopPlayback == true)
+        #expect(service.livePlaybackInfoRequests.isEmpty)
+        #expect(service.playbackInfoRequests.isEmpty)
     }
 
     @Test("replacing a channel stops the old tile and starts the new one on the same engine")

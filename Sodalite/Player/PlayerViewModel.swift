@@ -907,6 +907,11 @@ final class PlayerViewModel {
 
     nonisolated static func clearsSharedFontCacheOnStop(isMultiviewTile: Bool) -> Bool { !isMultiviewTile }
 
+    func classifyTileRefusalIfNeeded() {
+        guard isMultiviewTile else { return }
+        tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
+    }
+
     // MARK: - Lifecycle
 
     /// Initial-launch entry point (host VC, modal appear), via a tracked task so a back-press during
@@ -1026,6 +1031,8 @@ final class PlayerViewModel {
     }
 
     func startPlayback() async {
+        // A launch cancelled before it ran (stop, remove or zap in the same turn) must not undo that stop.
+        guard !Task.isCancelled else { return }
         isTearingDown = false
         didStopPlayback = false
         // Everything a previous attempt on this view model armed (a retry, an item recovery): its sinks
@@ -1304,9 +1311,7 @@ final class PlayerViewModel {
             // them, so a load that threw still has its classification sitting here. Read once: `load()`
             // clears it on the next attempt's `.loading`, so it can only ever describe THIS attempt.
             let engineInfo = player.errorInfo
-            if isMultiviewTile {
-                tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
-            }
+            classifyTileRefusalIfNeeded()
             LogTap.shared.note(
                 PlayerEngineErrorPresentation.logLine(for: engineInfo, engineMessage: error.localizedDescription)
             )

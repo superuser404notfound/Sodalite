@@ -1062,9 +1062,7 @@ extension PlayerViewModel {
             // Superseded by a newer load or a zap; the zap's close releases whatever this opened.
         } catch {
             hostLoadActive = false
-            if isMultiviewTile {
-                tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
-            }
+            classifyTileRefusalIfNeeded()
             setEnginePlaybackError(message: ErrorText.user(for: error))
         }
     }
