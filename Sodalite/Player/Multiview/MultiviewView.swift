@@ -9,15 +9,11 @@ struct MultiviewView: View {
 
     @FocusState private var focusedTile: UUID?
     @FocusState private var addFocused: Bool
-    @State private var labelTileID: UUID?
-    /// The tile whose speaker glyph shows: set when a tile becomes audible, cleared after a few seconds.
-    @State private var speakerTileID: UUID?
+    @State private var overlays = MultiviewOverlayVisibility()
 
     private static let padding: CGFloat = 40
     private static let spacing: CGFloat = 24
     private static let addButtonHeight: CGFloat = 96
-    /// How long the speaker glyph stays on a tile after the sound moved to it.
-    static let speakerGlyphDuration: Duration = .seconds(3)
 
     private var session: MultiviewSession { coordinator.session }
     private var tint: Color { coordinator.theme.palette.control.color }
@@ -34,17 +30,17 @@ struct MultiviewView: View {
                 session.focusDidMove(to: tile)
             }
             .task(id: focusedTile) {
-                labelTileID = focusedTile
-                guard focusedTile != nil else { return }
-                try? await Task.sleep(for: .seconds(3))
-                guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.3)) { labelTileID = nil }
+                if let tile = focusedTile { overlays.show(tile, now: .now) }
             }
             .task(id: session.audibleTileID) {
-                withAnimation(.easeOut(duration: 0.2)) { speakerTileID = session.audibleTileID }
-                try? await Task.sleep(for: Self.speakerGlyphDuration)
-                guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.6)) { speakerTileID = nil }
+                overlays.show(session.audibleTileID, now: .now)
+            }
+            .task(id: overlays.revision) {
+                while let next = overlays.nextDeadline {
+                    try? await Task.sleep(until: next, clock: .continuous)
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.easeInOut(duration: 0.3)) { overlays.expire(now: .now) }
+                }
             }
             .onExitCommand { coordinator.end() }
             // Nothing to pause on a grid; pinned so the press does not reach a tile's player.
@@ -109,15 +105,16 @@ struct MultiviewView: View {
         let failure = LiveMultiviewCoordinator.tileFailure(
             refusal: vm.tileRefusal, errorTitle: vm.errorTitle, errorMessage: vm.errorMessage)
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        let showOverlays = overlays.isVisible(tile.id)
         return ZStack(alignment: .bottomLeading) {
             AetherPlayerSurface(engine: vm.player)
             if let failure {
                 failureOverlay(failure)
-            } else if labelTileID == tile.id {
+            } else if showOverlays {
                 channelLabel(tile.currentChannel)
                     .transition(.opacity)
             }
-            if speakerTileID == tile.id, session.audibleTileID == tile.id, session.tiles.count > 1 {
+            if showOverlays, session.audibleTileID == tile.id, session.tiles.count > 1 {
                 Image(systemName: "speaker.wave.2.fill")
                     .font(.title3)
                     .padding(12)
@@ -127,6 +124,7 @@ struct MultiviewView: View {
                     .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: showOverlays)
         .frame(width: size.width, height: size.height)
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
             coordinator.tileFrames[tile.id] = frame
