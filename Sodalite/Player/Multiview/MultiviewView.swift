@@ -105,7 +105,8 @@ struct MultiviewView: View {
             refusal: vm.tileRefusal, errorTitle: vm.errorTitle, errorMessage: vm.errorMessage)
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         let showInfo = overlays.isVisible(tile.id) && failure == nil
-        let showSpeaker = overlays.isVisible(tile.id) && session.audibleTileID == tile.id && session.tiles.count > 1
+        // The sound follows focus 0.3 s later; the glyph shows with the info so both arrive together.
+        let showSpeaker = overlays.isVisible(tile.id) && failure == nil && session.tiles.count > 1
         return ZStack(alignment: .bottomLeading) {
             AetherPlayerSurface(engine: vm.player)
             if let failure {
