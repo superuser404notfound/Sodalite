@@ -28,7 +28,7 @@ struct MultiviewSessionTests {
     private func makeSession(
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
-        suspend: @escaping (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
+        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
     ) throws -> MultiviewSession {
         let pool = MultiviewEnginePool(primary: try AetherEngine(), make: { try AetherEngine() })
         let first = makeVM(channel("c1"), engine: pool.primary, role: .primary)
@@ -222,18 +222,46 @@ struct MultiviewSessionTests {
         #expect(journal.entries == ["start:c2", "end:c2", "start:c1", "end:c1", "start:c3", "end:c3"])
     }
 
-    @Test("on leaving the foreground every tile is suspended, one after another")
-    func suspendAllIsSequential() async throws {
+    @Test("on leaving the foreground every tile is suspended, all at once, within one call")
+    func suspendAllCoversEveryTile() async throws {
         let journal = Journal()
         let session = try makeSession(suspend: { vm in
             let id = vm.liveChannel?.id ?? "?"
             journal.entries.append("start:\(id)")
-            try? await Task.sleep(for: .milliseconds(5))
+            try? await Task.sleep(for: .milliseconds(20))
             journal.entries.append("end:\(id)")
         })
         try session.add(channel("c2"))
+        try session.add(channel("c3"))
         await session.suspendAll()
-        #expect(journal.entries == ["start:c1", "end:c1", "start:c2", "end:c2"])
+        #expect(Set(journal.entries) == ["start:c1", "end:c1", "start:c2", "end:c2", "start:c3", "end:c3"])
+        // Concurrent: every suspension starts before the first one finishes.
+        #expect(journal.entries.prefix(3).allSatisfy { $0.hasPrefix("start:") })
+    }
+
+    @Test("a survivor on a pool engine keeps its slot when multiview is entered again")
+    func reentryKeepsTheSurvivorsSlot() throws {
+        let pool = MultiviewEnginePool(primary: try AetherEngine(), make: { try AetherEngine() })
+        let slotTwo = try pool.engine(forSlot: 2)
+        let first = makeVM(channel("c1"), engine: slotTwo, role: .primary)
+        let session = MultiviewSession(
+            first: first, channel: channel("c1"), pool: pool,
+            makeTileVM: { [self] channel, engine in makeVM(channel, engine: engine, role: .primary) })
+        try session.add(channel("c2"))
+        try session.add(channel("c3"))
+        try session.add(channel("c4"))
+        #expect(session.tiles[0].slot == 2)
+        #expect(session.tiles.dropFirst().allSatisfy { $0.slot != 2 })
+        let engines = session.tiles.map { ObjectIdentifier($0.viewModel.player) }
+        #expect(Set(engines).count == 4)
+    }
+
+    @Test("a tile zapped in its full screen is reported on its new channel")
+    func channelsOnTilesFollowTheViewModel() throws {
+        let session = try makeSession()
+        try session.add(channel("c2"))
+        session.tiles[1].viewModel.resetLiveSessionState(switchingTo: channel("c9"))
+        #expect(session.channelsOnTiles() == ["c1", "c9"])
     }
 }
 
@@ -251,6 +279,16 @@ struct MultiviewEnginePoolTests {
         #expect(second.deactivatesAudioSessionOnStop == true)
         #expect(try pool.engine(forSlot: 1) === second)
         #expect(made == 1)
+    }
+
+    @Test("an engine's slot is found by identity, an unknown engine has none")
+    func slotOfEngine() throws {
+        let primary = try AetherEngine()
+        let pool = MultiviewEnginePool(primary: primary, make: { try AetherEngine() })
+        let third = try pool.engine(forSlot: 3)
+        #expect(pool.slot(of: primary) == 0)
+        #expect(pool.slot(of: third) == 3)
+        #expect(pool.slot(of: try AetherEngine()) == nil)
     }
 }
 

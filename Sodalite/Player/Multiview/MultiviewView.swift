@@ -37,6 +37,8 @@ struct MultiviewView: View {
                 withAnimation(.easeOut(duration: 0.3)) { labelTileID = nil }
             }
             .onExitCommand { coordinator.end() }
+            // Nothing to pause on a grid; pinned so the press does not reach a tile's player.
+            .onPlayPauseCommand {}
             .menuPresentation(item: $coordinator.pickerRequest) { request in
                 MultiviewChannelPicker(
                     channels: coordinator.pickerChannels(),
@@ -102,7 +104,7 @@ struct MultiviewView: View {
             if let failure {
                 failureOverlay(failure)
             } else if labelTileID == tile.id {
-                channelLabel(vm.liveChannel ?? tile.channel)
+                channelLabel(tile.currentChannel)
                     .transition(.opacity)
             }
             if session.audibleTileID == tile.id, session.tiles.count > 1 {

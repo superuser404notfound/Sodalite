@@ -49,6 +49,16 @@ struct MultiviewCoordinatorPolicyTests {
         #expect(LiveMultiviewCoordinator.exit(after: vm) == .close)
     }
 
+    @Test("a zap in a tile's full screen steps over the channels the other tiles show")
+    func zapSkipsOtherTiles() throws {
+        let vm = try makeVM()
+        vm.zapLineup = LiveChannelLineup(channels: ["c1", "c2", "c3"].map(channel))
+        vm.zapSkipsChannelIDs = { ["c2"] }
+        vm.requestZap(by: 1)
+        #expect(vm.zapBanner?.channel?.id == "c3")
+        vm.stopPlayback()
+    }
+
     @Test("a tile refusal wins over the view model's error text")
     func tileFailureRefusal() {
         let failure = LiveMultiviewCoordinator.tileFailure(

@@ -48,6 +48,8 @@ final class LiveMultiviewCoordinator {
     private(set) var lineup: [JellyfinChannel]?
 
     @ObservationIgnored private weak var host: UIViewController?
+    /// What presented the player this came from; after a PiP restore that is not the launcher host.
+    @ObservationIgnored private weak var presenter: UIViewController?
     @ObservationIgnored private weak var grid: MultiviewHostController?
     @ObservationIgnored private let makeTileVM: TileFactory
     @ObservationIgnored private let onPlayerDismiss: () -> Void
@@ -61,6 +63,7 @@ final class LiveMultiviewCoordinator {
 
     init(
         host: UIViewController,
+        presenter: UIViewController? = nil,
         first: PlayerViewModel,
         channel: JellyfinChannel,
         makeTileVM: @escaping TileFactory,
@@ -68,6 +71,7 @@ final class LiveMultiviewCoordinator {
         onPlayerDismiss: @escaping () -> Void
     ) {
         self.host = host
+        self.presenter = presenter ?? host
         self.theme = theme
         self.makeTileVM = makeTileVM
         self.onPlayerDismiss = onPlayerDismiss
@@ -121,9 +125,10 @@ final class LiveMultiviewCoordinator {
         theme: ResolvedAppearanceTheme,
         onPlayerDismiss: @escaping () -> Void
     ) {
-        controller.onEnterMultiview = { vm in
+        controller.onEnterMultiview = { [weak controller] vm in
             let coordinator = LiveMultiviewCoordinator(
                 host: host,
+                presenter: controller?.presentingViewController ?? host,
                 first: vm,
                 channel: vm.liveChannel ?? fallbackChannel,
                 makeTileVM: makeTileVM,
@@ -138,16 +143,19 @@ final class LiveMultiviewCoordinator {
     // MARK: - Transitions
 
     func start() {
-        guard let host, grid == nil, !finished else { return }
-        LogTap.shared.note("[Multiview] enter channel=\(session.tiles.first?.channel.id ?? "?")")
-        PiPSessionCoordinator.shared.endActiveSession()
+        guard let presenter = presenter ?? host, grid == nil, !finished else { return }
+        LogTap.shared.note("[Multiview] enter channel=\(session.tiles.first?.currentChannel.id ?? "?")")
+        // A session whose view model is tile 1 is the one being restored; ending it would stop tile 1.
+        if let first = session.tiles.first?.viewModel, PiPSessionCoordinator.shared.activeViewModel !== first {
+            PiPSessionCoordinator.shared.endActiveSession()
+        }
         let grid = MultiviewHostController(coordinator: self)
         self.grid = grid
         UIApplication.shared.isIdleTimerDisabled = true
         observeAppLifecycle()
         loadLineupIfNeeded()
-        host.dismiss(animated: false) { [weak self] in
-            host.present(grid, animated: false) {
+        presenter.dismiss(animated: false) { [weak self] in
+            presenter.present(grid, animated: false) {
                 self?.pickerRequest = .add
             }
         }
@@ -158,6 +166,11 @@ final class LiveMultiviewCoordinator {
               let tile = session.tiles.first(where: { $0.id == id }) else { return }
         session.setAudible(id)
         let vm = tile.viewModel
+        // Zapping stays, but never onto a channel another tile shows: Jellyfin keys open streams by channel.
+        vm.zapSkipsChannelIDs = { [weak self] in
+            guard let self else { return [] }
+            return Set(self.session.tiles.filter { $0.id != id }.map(\.currentChannel.id))
+        }
         weak var fullScreen: PlayerHostController?
         let controller = PlayerHostController(
             viewModel: vm,
@@ -178,6 +191,7 @@ final class LiveMultiviewCoordinator {
     /// The grid is on screen again: every tile's end handler is ours, whatever a full screen wrote meanwhile.
     func gridDidAppear() {
         for tile in session.tiles {
+            tile.viewModel.zapSkipsChannelIDs = nil
             Self.armTileEnd(tile.viewModel)
             // Ended while its full screen was up: that player closed itself, the tile is still dead.
             if tile.viewModel.player.state == .ended { tile.viewModel.onPlaybackReachedEnd?() }
@@ -204,7 +218,7 @@ final class LiveMultiviewCoordinator {
     }
 
     func channelsOnTiles() -> Set<String> {
-        Set(session.tiles.map { $0.viewModel.liveChannel?.id ?? $0.channel.id })
+        session.channelsOnTiles()
     }
 
     func pickerChannels() -> [JellyfinChannel]? {
@@ -215,11 +229,12 @@ final class LiveMultiviewCoordinator {
     func end() {
         guard !finished else { return }
         finished = true
-        let survivorChannel = session.tiles.first(where: { $0.id == session.audibleTileID })?.channel
-            ?? session.tiles.first?.channel
+        let survivorChannel = session.tiles.first(where: { $0.id == session.audibleTileID })?.currentChannel
+            ?? session.tiles.first?.currentChannel
         let survivor = session.end()
+        survivor?.zapSkipsChannelIDs = nil
         tearDownLifecycle()
-        let presenter = grid?.presentingViewController ?? host
+        let presenter = grid?.presentingViewController ?? self.presenter ?? host
         switch Self.exit(after: survivor) {
         case .continuing(let vm):
             LogTap.shared.note("[Multiview] end, continuing channel=\(vm.liveChannel?.id ?? "?")")
@@ -264,6 +279,9 @@ final class LiveMultiviewCoordinator {
     private func close() {
         let presenter = grid?.presentingViewController
         onPlayerDismiss()
+        if let launcherHost = host as? PlayerLauncherHostVC, launcherHost.multiview === self {
+            launcherHost.multiview = nil
+        }
         // The launcher's dismiss runs from its host; a grid presented from elsewhere still has to go.
         if let presenter, let grid, presenter.presentedViewController === grid {
             presenter.dismiss(animated: false)

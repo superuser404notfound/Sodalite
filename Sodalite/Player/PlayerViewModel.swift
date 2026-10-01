@@ -802,6 +802,8 @@ final class PlayerViewModel {
     var zapBanner: LiveZapBanner?
     @ObservationIgnored var zapSettleTask: Task<Void, Never>?
     @ObservationIgnored var zapLineupTask: Task<LiveChannelLineup?, Never>?
+    /// Sodalite#175: channels a zap steps over, the ones other multiview tiles show. Nil outside a tile's full screen.
+    @ObservationIgnored var zapSkipsChannelIDs: (() -> Set<String>)?
     @ObservationIgnored var zapBannerHideTask: Task<Void, Never>?
     /// The commit in flight; the next one waits for it so two never close the same tuner.
     @ObservationIgnored var zapCommitTask: Task<Void, Never>?

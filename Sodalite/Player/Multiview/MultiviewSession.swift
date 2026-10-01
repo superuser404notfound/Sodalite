@@ -6,6 +6,9 @@ struct MultiviewTile: Identifiable {
     var channel: JellyfinChannel
     var viewModel: PlayerViewModel
     let slot: Int
+
+    /// A tile's full screen can zap, so the view model is the source of truth for what it shows.
+    var currentChannel: JellyfinChannel { viewModel.liveChannel ?? channel }
 }
 
 enum MultiviewError: Error, Equatable {
@@ -24,7 +27,7 @@ final class MultiviewSession {
     @ObservationIgnored private let makeTileVM: (JellyfinChannel, AetherEngine) -> PlayerViewModel
     @ObservationIgnored private let audioFollowDelay: Duration
     @ObservationIgnored private let retune: (PlayerViewModel) async -> Void
-    @ObservationIgnored private let suspend: (PlayerViewModel) async -> Void
+    @ObservationIgnored private let suspend: @MainActor @Sendable (PlayerViewModel) async -> Void
     @ObservationIgnored private var pendingAudio: Task<Void, Never>?
 
     init(
@@ -34,13 +37,14 @@ final class MultiviewSession {
         makeTileVM: @escaping (JellyfinChannel, AetherEngine) -> PlayerViewModel,
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
-        suspend: @escaping (PlayerViewModel) async -> Void = {
+        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = {
             await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18)
         }
     ) {
-        // The first tile is the channel already on screen: it keeps playing on whatever engine it has.
+        // The first tile is the channel already on screen: it keeps playing on whatever engine it has, and
+        // a survivor of an earlier grid keeps that engine's slot so no later tile is handed it again.
         first.isMultiviewTile = true
-        let tile = MultiviewTile(id: UUID(), channel: channel, viewModel: first, slot: 0)
+        let tile = MultiviewTile(id: UUID(), channel: channel, viewModel: first, slot: pool.slot(of: first.player) ?? 0)
         tiles = [tile]
         audibleTileID = tile.id
         self.pool = pool
@@ -56,7 +60,7 @@ final class MultiviewSession {
     var shouldEnd: Bool { tiles.count == 1 }
 
     func channelsOnTiles() -> Set<String> {
-        Set(tiles.map(\.channel.id))
+        Set(tiles.map(\.currentChannel.id))
     }
 
     func add(_ channel: JellyfinChannel) throws {
@@ -136,9 +140,17 @@ final class MultiviewSession {
         tiles = []
     }
 
+    /// All at once, so every tile's release fits the one background-task budget the app gets.
     func suspendAll() async {
-        for tile in tiles {
-            await suspend(tile.viewModel)
+        let suspend = suspend
+        let releases = tiles.map { tile in
+            let vm = tile.viewModel
+            return Task { @MainActor in await suspend(vm) }
+        }
+        await withTaskCancellationHandler {
+            for release in releases { await release.value }
+        } onCancel: {
+            for release in releases { release.cancel() }
         }
     }
 

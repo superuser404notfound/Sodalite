@@ -889,6 +889,11 @@ final class PlayerHostController: AVPlayerViewController {
     func handOffToMultiview() {
         handingOff = true
         detached = true
+        // The session owns lifecycle from here; a still-alive controller must not retune tile 1 beside it.
+        let center = NotificationCenter.default
+        center.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         unmountAetherViewIfNeeded()
         player = nil
         onEnterMultiview?(viewModel)

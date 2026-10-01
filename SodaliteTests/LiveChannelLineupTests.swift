@@ -29,6 +29,16 @@ struct LiveChannelLineupTests {
         #expect(lineup(0).neighbour(of: "c0", offset: 1) == nil)
     }
 
+    @Test func skippedChannelsAreSteppedOver() {
+        #expect(lineup(3).neighbour(of: "c0", offset: 1, skipping: ["c1"])?.id == "c2")
+        #expect(lineup(3).neighbour(of: "c0", offset: -1, skipping: ["c2"])?.id == "c1")
+        #expect(lineup(5).neighbour(of: "c0", offset: 2, skipping: ["c1", "c3"])?.id == "c4")
+    }
+
+    @Test func everyOtherChannelSkippedMeansNoZap() {
+        #expect(lineup(3).neighbour(of: "c0", offset: 1, skipping: ["c1", "c2"]) == nil)
+    }
+
     @Test func aChannelOutsideTheLineupHasNoNeighbour() {
         #expect(lineup(5).contains("x") == false)
         #expect(lineup(5).neighbour(of: "x", offset: 1) == nil)
