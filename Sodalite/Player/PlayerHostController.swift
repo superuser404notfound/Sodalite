@@ -32,6 +32,8 @@ final class PlayerHostController: AVPlayerViewController {
     private var hasLaunched = false
     /// Set by handOffToMultiview so the dismiss that follows leaves the view model playing.
     private var handingOff = false
+    /// An off-screen controller whose view model plays on elsewhere: its engine sinks must not take the surface back.
+    private var detached = false
 
     #if os(iOS)
     /// Orientation-session identity. The exit is terminal for it, so a lifecycle callback that still
@@ -170,7 +172,7 @@ final class PlayerHostController: AVPlayerViewController {
         engine.$currentAVPlayer
             .receive(on: DispatchQueue.main)
             .sink { [weak self] avPlayer in
-                guard let self else { return }
+                guard let self, !self.detached else { return }
                 LogTap.shared.note("[NowPlaying] vc_rebind player=\(avPlayer == nil ? "nil" : "set") items=\(avPlayer?.currentItem?.externalMetadata.count ?? -1)")
                 if let avPlayer {
                     // AirPlay enabled: the engine serves the loopback HLS over the LAN WiFi IP while external
@@ -286,7 +288,7 @@ final class PlayerHostController: AVPlayerViewController {
         engine.$playbackBackend
             .receive(on: DispatchQueue.main)
             .sink { [weak self] backend in
-                guard let self else { return }
+                guard let self, !self.detached else { return }
                 switch backend {
                 case .software, .aether:
                     self.mountAetherViewIfNeeded()
@@ -871,7 +873,10 @@ final class PlayerHostController: AVPlayerViewController {
         unmountAetherViewIfNeeded()
         player = nil
         // A tile or a hand-off leaves the view model playing; dropping this surface lets the grid's take the layer back.
-        guard mode.stopsOnDismiss, !handingOff else { return }
+        guard mode.stopsOnDismiss, !handingOff else {
+            detached = true
+            return
+        }
         viewModel.stopPlayback()
     }
 
@@ -879,6 +884,7 @@ final class PlayerHostController: AVPlayerViewController {
     /// and `handingOff` keeps that dismiss from stopping playback.
     func handOffToMultiview() {
         handingOff = true
+        detached = true
         unmountAetherViewIfNeeded()
         player = nil
         onEnterMultiview?(viewModel)
@@ -1555,9 +1561,11 @@ final class PlayerHostController: AVPlayerViewController {
         #endif
         unmountAetherViewIfNeeded()
         player = nil
-        // A tile's full screen: Back returns to the grid with the tile still playing.
-        guard mode.stopsOnDismiss else {
-            onDismiss()
+        // A tile's full screen: Back returns to the grid with the tile still playing. A handed-off
+        // controller was already given away, its dismiss belongs to the coordinator.
+        guard mode.stopsOnDismiss, !handingOff else {
+            detached = true
+            if !handingOff { onDismiss() }
             if presentingViewController != nil { dismiss(animated: false) }
             return
         }
