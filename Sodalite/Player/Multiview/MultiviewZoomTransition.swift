@@ -31,6 +31,7 @@ final class MultiviewZoomTransition: NSObject, UIViewControllerTransitioningDele
         presenting: UIViewController,
         source: UIViewController
     ) -> UIViewControllerAnimatedTransitioning? {
+        // Copied into the animator on purpose: a later present or dismiss re-arms `tileFrame` for its own tile.
         Animator(tileFrame: tileFrame, isPresenting: true)
     }
 

@@ -197,9 +197,17 @@ final class LiveMultiviewCoordinator {
                     grid.dismiss(animated: animated)
                     self?.gridDidAppear()
                 }
-                // Back during the zoom in: UIKit drops a dismiss that overlaps a presentation.
+                // Back during the zoom in: UIKit drops a dismiss that overlaps a presentation, so it waits for
+                // the presentation to land, one turn later, and gets one more try if it still did not take.
                 if let transition = shown.transitionCoordinator, shown.isBeingPresented {
-                    transition.animate(alongsideTransition: nil) { _ in dismiss() }
+                    transition.animate(alongsideTransition: nil) { _ in
+                        DispatchQueue.main.async { [weak grid] in
+                            dismiss()
+                            guard let grid, grid.presentedViewController === shown, !shown.isBeingDismissed else { return }
+                            LogTap.shared.note("[Multiview] full screen dismiss after zoom-in did not take, retrying")
+                            DispatchQueue.main.async { dismiss() }
+                        }
+                    }
                 } else {
                     dismiss()
                 }
@@ -236,6 +244,8 @@ final class LiveMultiviewCoordinator {
     func remove(_ id: UUID) {
         guard !finished else { return }
         session.remove(id)
+        // A replaced tile keeps its id and its place, so only a removed one loses its frame.
+        tileFrames[id] = nil
         if session.shouldEnd || session.tiles.isEmpty { end() }
     }
 
