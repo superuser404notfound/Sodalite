@@ -62,6 +62,12 @@ enum Changelog {
                     "changelog.1_1_0.versionLabel.body",
                     icon: "film.stack"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.multiview.title",
+                    "changelog.1_1_0.multiview.body",
+                    icon: "rectangle.split.2x2"
+                ),
             ]
         ),
         // MARK: 1.0.0
