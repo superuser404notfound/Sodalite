@@ -23,7 +23,7 @@ enum PlayerModalPresence {
         var presenter: UIViewController? = window.rootViewController
         while let current = presenter {
             guard let presented = current.presentedViewController else { break }
-            if presented is PlayerHostController { return true }
+            if PlayerLauncherHostVC.isPlayer(presented) { return true }
             presenter = presented
         }
         return false

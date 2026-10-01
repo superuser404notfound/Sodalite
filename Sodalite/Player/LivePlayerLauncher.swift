@@ -1,5 +1,8 @@
 import SwiftUI
 import UIKit
+#if os(tvOS)
+import AetherEngine
+#endif
 
 // MARK: - Live Player Launcher (UIKit modal presentation)
 
@@ -31,6 +34,13 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ host: PlayerLauncherHostVC, context: Context) {
+        #if os(tvOS)
+        // Sodalite#175: the grid owns the session until it hands a player back or closes.
+        if let multiview = host.multiview {
+            if !isPresented { multiview.stopAll() }
+            return
+        }
+        #endif
         if isPresented, let liveContext = self.context {
             guard host.viewIfLoaded?.window != nil else { return }
             if host.presentedViewController is PlayerHostController || host.pendingLivePresent { return }
@@ -99,14 +109,62 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
             serverName: serverName,
             serverReachability: reachability
         )
+        let onDismiss = {
+            host.dismiss(animated: false) {
+                #if os(tvOS)
+                host.multiview = nil
+                #endif
+                isPresented = false
+            }
+        }
         let playerVC = PlayerHostController(
             viewModel: vm,
             theme: appearanceTheme,
-            onDismiss: {
-                host.dismiss(animated: false) { isPresented = false }
-            }
+            onDismiss: onDismiss
         )
         playerVC.modalPresentationStyle = .fullScreen
+        #if os(tvOS)
+        LiveMultiviewCoordinator.wireEntry(
+            playerVC,
+            host: host,
+            fallbackChannel: liveContext.channel,
+            makeTileVM: tileFactory(zapFilter: liveContext.zapFilter),
+            theme: appearanceTheme,
+            onPlayerDismiss: onDismiss
+        )
+        #endif
         host.present(playerVC, animated: false)
     }
+
+    #if os(tvOS)
+    /// Sodalite#175: a multiview tile is the same live player on its own engine.
+    private func tileFactory(zapFilter: GuideFilter) -> LiveMultiviewCoordinator.TileFactory {
+        let playbackService = playbackService
+        let liveTvService = liveTvService
+        let userID = userID
+        let preferences = preferences
+        let directStreamMemory = directStreamMemory
+        let serverName = serverName
+        let reachability = reachability
+        return { channel, engine in
+            PlayerViewModel(
+                item: JellyfinItem(liveChannel: channel, program: channel.currentProgram),
+                startFromBeginning: true,
+                playbackService: playbackService,
+                userID: userID,
+                preferences: preferences,
+                isLiveSession: true,
+                liveChannel: channel,
+                liveProgram: channel.currentProgram,
+                liveTvService: liveTvService,
+                directStreamMemory: directStreamMemory,
+                zapFilter: zapFilter,
+                serverName: serverName,
+                serverReachability: reachability,
+                engine: engine,
+                sharedOutputRole: .secondary
+            )
+        }
+    }
+    #endif
 }

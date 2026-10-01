@@ -119,6 +119,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
 final class PlayerLauncherHostVC: UIViewController {
     /// Guards the live-player present retry loop against duplicate launches.
     var pendingLivePresent = false
+    #if os(tvOS)
+    /// Sodalite#175: the live multiview session presented from this host, until it closes or hands a player back.
+    var multiview: LiveMultiviewCoordinator?
+    #endif
     /// A launch is in flight (waiting for a free presentation context). Blocks
     /// `updateUIViewController` from starting a second one, which would
     /// re-request PlaybackInfo (#31).
@@ -223,7 +227,7 @@ final class PlayerLauncherHostVC: UIViewController {
             top = presented
         }
         // A player is already up here -- don't stack a second one.
-        if top is PlayerHostController { return nil }
+        if Self.isPlayer(top) { return nil }
         return top
     }
 
@@ -234,10 +238,18 @@ final class PlayerLauncherHostVC: UIViewController {
             ?? view.window
         var vc = window?.rootViewController
         while let current = vc {
-            if current is PlayerHostController { return true }
+            if Self.isPlayer(current) { return true }
             vc = current.presentedViewController
         }
         return false
+    }
+
+    /// A multiview grid counts as the one player on screen.
+    static func isPlayer(_ controller: UIViewController) -> Bool {
+        #if os(tvOS)
+        if controller is MultiviewHostController { return true }
+        #endif
+        return controller is PlayerHostController
     }
 
     private func activeWindowScene() -> UIWindowScene? {
