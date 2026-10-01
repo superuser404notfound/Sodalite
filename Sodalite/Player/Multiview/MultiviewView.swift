@@ -30,17 +30,16 @@ struct MultiviewView: View {
                 session.focusDidMove(to: tile)
             }
             .task(id: focusedTile) {
-                if let tile = focusedTile { overlays.show(tile, now: .now) }
+                overlays.focusChanged(to: focusedTile, now: .now)
             }
             .task(id: session.audibleTileID) {
-                overlays.show(session.audibleTileID, now: .now)
+                overlays.audioArrived(on: session.audibleTileID, now: .now)
             }
             .task(id: overlays.revision) {
-                while let next = overlays.nextDeadline {
-                    try? await Task.sleep(until: next, clock: .continuous)
-                    guard !Task.isCancelled else { return }
-                    withAnimation(.easeInOut(duration: 0.3)) { overlays.expire(now: .now) }
-                }
+                guard let deadline = overlays.deadline else { return }
+                try? await Task.sleep(until: deadline, clock: .continuous)
+                guard !Task.isCancelled else { return }
+                overlays.expire(now: .now)
             }
             .onExitCommand { coordinator.end() }
             // Nothing to pause on a grid; pinned so the press does not reach a tile's player.
@@ -105,26 +104,29 @@ struct MultiviewView: View {
         let failure = LiveMultiviewCoordinator.tileFailure(
             refusal: vm.tileRefusal, errorTitle: vm.errorTitle, errorMessage: vm.errorMessage)
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
-        let showOverlays = overlays.isVisible(tile.id)
+        let showInfo = overlays.isVisible(tile.id) && failure == nil
+        let showSpeaker = overlays.isVisible(tile.id) && session.audibleTileID == tile.id && session.tiles.count > 1
         return ZStack(alignment: .bottomLeading) {
             AetherPlayerSurface(engine: vm.player)
             if let failure {
                 failureOverlay(failure)
-            } else if showOverlays {
-                channelLabel(tile.currentChannel)
-                    .transition(.opacity)
             }
-            if showOverlays, session.audibleTileID == tile.id, session.tiles.count > 1 {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.title3)
-                    .padding(12)
-                    .background(Color.Theme.scrim, in: Circle())
-                    .padding(16)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .transition(.opacity)
-            }
+            channelLabel(tile.currentChannel)
+                .opacity(showInfo ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: showInfo)
+                .allowsHitTesting(false)
+                .accessibilityHidden(!showInfo)
+            Image(systemName: "speaker.wave.2.fill")
+                .font(.title3)
+                .padding(12)
+                .background(Color.Theme.scrim, in: Circle())
+                .padding(16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .opacity(showSpeaker ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: showSpeaker)
+                .allowsHitTesting(false)
+                .accessibilityHidden(!showSpeaker)
         }
-        .animation(.easeInOut(duration: 0.3), value: showOverlays)
         .frame(width: size.width, height: size.height)
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
             coordinator.tileFrames[tile.id] = frame
