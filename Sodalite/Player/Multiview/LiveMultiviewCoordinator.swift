@@ -60,6 +60,9 @@ final class LiveMultiviewCoordinator {
     @ObservationIgnored private var resumeTask: Task<Void, Never>?
     @ObservationIgnored private var suspensionAssertion: UIBackgroundTaskIdentifier = .invalid
     @ObservationIgnored private var finished = false
+    /// Each tile's frame in window coordinates, as the grid last laid it out.
+    @ObservationIgnored var tileFrames: [UUID: CGRect] = [:]
+    @ObservationIgnored private let zoom = MultiviewZoomTransition()
 
     init(
         host: UIViewController,
@@ -186,14 +189,38 @@ final class LiveMultiviewCoordinator {
             mode: .multiviewTile,
             onDismiss: { [weak self, weak grid] in
                 // Called by Back and possibly again by the dismiss that follows it.
-                guard let grid, let shown = fullScreen, grid.presentedViewController === shown else { return }
-                grid.dismiss(animated: false)
-                self?.gridDidAppear()
+                guard let grid, let shown = fullScreen, grid.presentedViewController === shown,
+                      !shown.isBeingDismissed else { return }
+                let dismiss = { [weak self, weak grid] in
+                    guard let grid, grid.presentedViewController === shown, !shown.isBeingDismissed else { return }
+                    let animated = self?.armZoom(on: shown, tile: id) ?? false
+                    grid.dismiss(animated: animated)
+                    self?.gridDidAppear()
+                }
+                // Back during the zoom in: UIKit drops a dismiss that overlaps a presentation.
+                if let transition = shown.transitionCoordinator, shown.isBeingPresented {
+                    transition.animate(alongsideTransition: nil) { _ in dismiss() }
+                } else {
+                    dismiss()
+                }
             }
         )
         fullScreen = controller
         controller.modalPresentationStyle = .fullScreen
-        grid.present(controller, animated: false)
+        grid.present(controller, animated: armZoom(on: controller, tile: id))
+    }
+
+    /// Zooms between the tile and full screen when the tile's frame is known and Reduce Motion is off,
+    /// else the plain cut it always was.
+    private func armZoom(on controller: UIViewController, tile id: UUID) -> Bool {
+        guard let frame = MultiviewZoomTransition.zoomFrame(
+            tileFrame: tileFrames[id], reduceMotion: UIAccessibility.isReduceMotionEnabled) else {
+            controller.transitioningDelegate = nil
+            return false
+        }
+        zoom.tileFrame = frame
+        controller.transitioningDelegate = zoom
+        return true
     }
 
     /// The grid is on screen again: every tile's end handler is ours, whatever a full screen wrote meanwhile.

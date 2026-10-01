@@ -1585,7 +1585,8 @@ final class PlayerHostController: AVPlayerViewController {
         guard mode.stopsOnDismiss, !handingOff else {
             detached = true
             if !handingOff { onDismiss() }
-            if presentingViewController != nil { dismiss(animated: false) }
+            // The coordinator may be zooming back to the grid, or waiting for the zoom in to land first.
+            if presentingViewController != nil, !isBeingDismissed, !isBeingPresented { dismiss(animated: false) }
             return
         }
         // stopPlayback fire-and-forgets the reportStop call (DrHurt #12); called inline so synchronous teardown finishes before onDismiss and the back press hits the dismiss animation immediately.

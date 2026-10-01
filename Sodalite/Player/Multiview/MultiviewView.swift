@@ -128,6 +128,9 @@ struct MultiviewView: View {
             }
         }
         .frame(width: size.width, height: size.height)
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            coordinator.tileFrames[tile.id] = frame
+        }
         .background(Color.black)
         .clipShape(shape)
         .overlay(shape.stroke(.tint, lineWidth: 4).opacity(isFocused ? 1 : 0))
