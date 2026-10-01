@@ -129,6 +129,10 @@ final class PlayerHostController: AVPlayerViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        #if os(tvOS)
+        viewModel.offersMultiview = offersMultiview
+        viewModel.onMultiviewRequested = { [weak self] in self?.handOffToMultiview() }
+        #endif
 
         // REQUIRED on tvOS for AVKit's Now Playing session + AirPods + Atmos sync; visible chrome is suppressed separately.
         showsPlaybackControls = true
@@ -1454,7 +1458,7 @@ final class PlayerHostController: AVPlayerViewController {
                 viewModel.controlsFocus = viewModel.transportFocusOrder
                     .first(where: { $0 != .restartButton }) ?? .speedButton
                 viewModel.scheduleControlsHide()
-            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .infoButton, .returnToLiveButton:
+            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()
             }
         } else {

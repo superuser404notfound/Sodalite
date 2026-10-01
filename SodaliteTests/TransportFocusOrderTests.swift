@@ -93,11 +93,19 @@ struct TransportFocusOrderTests {
 struct LiveTransportFocusOrderTests {
     private func order(isAtLiveEdge: Bool = true, hasAudioTracks: Bool = false,
                        hasSubtitles: Bool = false, isPiPAvailable: Bool = false,
+                       offersMultiview: Bool = false,
                        showsStats: Bool = false) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.liveTransportFocusOrder(
             isAtLiveEdge: isAtLiveEdge, hasAudioTracks: hasAudioTracks,
             hasSubtitles: hasSubtitles, isPiPAvailable: isPiPAvailable,
-            showsStats: showsStats)
+            offersMultiview: offersMultiview, showsStats: showsStats)
+    }
+
+    @Test("the multiview button sits after PiP and before stats, and only when offered")
+    func multiviewInLiveOrder() {
+        #expect(order(hasAudioTracks: true, isPiPAvailable: true, offersMultiview: true, showsStats: true)
+            == [.audioButton, .pipButton, .multiviewButton, .infoButton])
+        #expect(!order(hasAudioTracks: true, isPiPAvailable: true, showsStats: true).contains(.multiviewButton))
     }
 
     @Test("a channel at the live edge with nothing to pick has no controls above the scrubber")

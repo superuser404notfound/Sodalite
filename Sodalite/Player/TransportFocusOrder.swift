@@ -42,6 +42,7 @@ extension PlayerViewModel {
         hasAudioTracks: Bool,
         hasSubtitles: Bool,
         isPiPAvailable: Bool,
+        offersMultiview: Bool,
         showsStats: Bool
     ) -> [ControlsFocus] {
         var order: [ControlsFocus] = []
@@ -50,6 +51,7 @@ extension PlayerViewModel {
         if hasAudioTracks { order.append(.audioButton) }
         if hasSubtitles { order.append(.subtitleButton) }
         if isPiPAvailable { order.append(.pipButton) }
+        if offersMultiview { order.append(.multiviewButton) }
         if showsStats { order.append(.infoButton) }
         return order
     }
@@ -76,6 +78,7 @@ extension PlayerViewModel {
             hasAudioTracks: !displayAudioTracks.isEmpty,
             hasSubtitles: !displaySubtitleStreams.isEmpty,
             isPiPAvailable: isPiPAvailable,
+            offersMultiview: offersMultiview,
             showsStats: preferences.showStatsForNerds)
     }
 }

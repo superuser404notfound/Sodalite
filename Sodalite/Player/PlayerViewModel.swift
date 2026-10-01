@@ -136,6 +136,7 @@ final class PlayerViewModel {
         case speedButton
         case pictureButton
         case pipButton
+        case multiviewButton
         case infoButton
         // Live-only "Return to Live" pill (LiveTransportBar); Up from the live scrubber when
         // behind the live edge, Select fires returnToLiveEdge(). VOD button row N/A for live.
@@ -357,6 +358,9 @@ final class PlayerViewModel {
 
     /// Native backend bound and PiP supported on this device; host writes it from the player bind.
     var isPiPAvailable = false
+    /// Sodalite#175: the live bar shows the Multiview chip; the host writes it, iOS never does.
+    var offersMultiview = false
+    @ObservationIgnored var onMultiviewRequested: (() -> Void)?
     /// AVKit's isPictureInPicturePossible; drives the transport button's enabled/dimmed state.
     var isPiPPossible = false
     /// Host hook: the AVPictureInPictureController lives host-side (PlayerPiPController).
@@ -3758,6 +3762,7 @@ final class PlayerViewModel {
         case .speedButton: openSpeedDropdown()
         case .pictureButton: openPictureDropdown()
         case .pipButton: requestPictureInPicture()
+        case .multiviewButton: onMultiviewRequested?()
         case .infoButton:
             showStatsOverlay.toggle()
             scheduleControlsHide()

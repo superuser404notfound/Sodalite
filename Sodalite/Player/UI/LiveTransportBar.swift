@@ -181,6 +181,17 @@ struct LiveTransportBar: View {
                     .opacity(viewModel.isPiPPossible ? 1.0 : 0.4)
                 }
 
+                #if os(tvOS)
+                if viewModel.offersMultiview {
+                    TransportTrackLabel(
+                        label: String(localized: "multiview.button", defaultValue: "Multiview"),
+                        icon: "rectangle.split.2x2",
+                        showsLabel: false,
+                        isFocused: viewModel.controlsFocus == .multiviewButton
+                    )
+                }
+                #endif
+
                 // The chip the VOD bar has always had. Without it the stats panel existed on a live channel
                 // and had no way to be opened on tvOS, which is where a live route or a tuner id is worth
                 // reading; the touch bar on iOS never gated it, so the two players disagreed.
