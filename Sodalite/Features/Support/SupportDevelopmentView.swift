@@ -26,7 +26,6 @@ struct SupportDevelopmentView: View {
                 header
                 tipJarSection
                 supporterPackSection
-                restoreButton
             }
             .screenContentInset()
         }
@@ -113,6 +112,7 @@ struct SupportDevelopmentView: View {
             }
 
             productsSection(for: .pack)
+            restoreSection
         }
     }
 
@@ -161,12 +161,25 @@ struct SupportDevelopmentView: View {
         }
     }
 
+    /// Lives inside the Supporter Pack section: the pack is the only restorable product, tips are consumables (App Review 3.1.1).
+    private var restoreSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            restoreButton
+            Text(String(
+                localized: "support.restore.footnote",
+                defaultValue: "Tips are one-time purchases and cannot be restored."
+            ))
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
+    }
+
     private var restoreButton: some View {
         Button {
             Task { await restore() }
         } label: {
             Label(
-                String(localized: "support.restore.button", defaultValue: "Restore Purchases"),
+                String(localized: "support.restore.button", defaultValue: "Restore Supporter Pack"),
                 systemImage: "arrow.clockwise"
             )
             .font(.body)
@@ -178,7 +191,6 @@ struct SupportDevelopmentView: View {
         .buttonStyle(SettingsTileButtonStyle())
         .disabled(isRestoring)
         .opacity(isRestoring ? 0.5 : 1)
-        .padding(.top, 12)
     }
 
     // MARK: - Helpers
@@ -313,10 +325,17 @@ struct SupportDevelopmentView: View {
 
         do {
             try await service.restorePurchases()
-            show(.success, text: String(
-                localized: "support.restore.success",
-                defaultValue: "Purchases restored."
-            ))
+            if service.isSupporter {
+                show(.success, text: String(
+                    localized: "support.restore.success",
+                    defaultValue: "Supporter Pack restored."
+                ))
+            } else {
+                show(.info, text: String(
+                    localized: "support.restore.none",
+                    defaultValue: "No Supporter Pack purchase found for this Apple Account."
+                ))
+            }
         } catch {
             show(.error, text: String(
                 localized: "support.restore.error",
