@@ -195359,163 +195359,163 @@
       }
     },
     "support.restore.button" : {
-      "comment" : "Restore Purchases button label - Apple requires this for apps with non-consumable IAP",
+      "comment" : "Restore button under the Supporter Pack, the only restorable (non-consumable) product",
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obnovit nákupy"
+            "value" : "Obnovit Balíček podporovatele"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gendan køb"
+            "value" : "Gendan Supporter-pakke"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einkäufe wiederherstellen"
+            "value" : "Supporter-Paket wiederherstellen"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Επαναφορά αγορών"
+            "value" : "Επαναφορά Πακέτου Υποστήριξης"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restore Purchases"
+            "value" : "Restore Supporter Pack"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restaurar compras"
+            "value" : "Restaurar Pack de Apoyo"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Palauta ostokset"
+            "value" : "Palauta Tukijapaketti"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restaurer les achats"
+            "value" : "Restaurer le Pack de soutien"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obnovi kupnje"
+            "value" : "Obnovi Podržavateljski paket"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vásárlások visszaállítása"
+            "value" : "Támogatói csomag visszaállítása"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ripristina acquisti"
+            "value" : "Ripristina Pacchetto Sostenitore"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "購入を復元"
+            "value" : "サポーターパックを復元"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "구매 복원"
+            "value" : "서포터 팩 복원"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gjenopprett kjøp"
+            "value" : "Gjenopprett Supporter-pakke"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aankopen herstellen"
+            "value" : "Supporterspakket herstellen"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przywróć zakupy"
+            "value" : "Przywróć Pakiet Wspierający"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restaurar compras"
+            "value" : "Restaurar Pacote de Apoio"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restaurar compras"
+            "value" : "Restaurar Pacote de Apoio"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restabilește achizițiile"
+            "value" : "Restabilește Pachetul de Susținător"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Восстановить покупки"
+            "value" : "Восстановить Пакет поддержки"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obnoviť nákupy"
+            "value" : "Obnoviť Balíček podporovateľa"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Återställ köp"
+            "value" : "Återställ Supporterpaket"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Satın almaları geri yükle"
+            "value" : "Destekçi Paketini geri yükle"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Відновити покупки"
+            "value" : "Відновити Пакет прихильника"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "恢复购买"
+            "value" : "恢复支持者套餐"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "恢復購買"
+            "value" : "恢復支持者套裝"
           }
         }
       }
@@ -195682,6 +195682,330 @@
         }
       }
     },
+    "support.restore.footnote" : {
+      "comment" : "Footnote under the restore button: consumable tips are not restorable",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spropitné je jednorázový nákup a nelze ho obnovit."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drikkepenge er engangskøb og kan ikke gendannes."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinkgelder sind einmalige Käufe und lassen sich nicht wiederherstellen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα φιλοδωρήματα είναι εφάπαξ αγορές και δεν μπορούν να επαναφερθούν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tips are one-time purchases and cannot be restored."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las propinas son compras únicas y no se pueden restaurar."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipit ovat kertaostoja, eikä niitä voi palauttaa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pourboires sont des achats uniques et ne peuvent pas être restaurés."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napojnice su jednokratne kupnje i ne mogu se obnoviti."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A borravalók egyszeri vásárlások, és nem állíthatók vissza."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mance sono acquisti una tantum e non possono essere ripristinate."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チップは1回限りの購入のため、復元できません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "팁은 일회성 구매이며 복원할 수 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tips er engangskjøp og kan ikke gjenopprettes."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fooien zijn eenmalige aankopen en kunnen niet worden hersteld."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napiwki to jednorazowe zakupy i nie można ich przywrócić."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As gorjetas são compras únicas e não podem ser restauradas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As gorjetas são compras únicas e não podem ser restauradas."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bacșișurile sunt achiziții unice și nu pot fi restabilite."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чаевые являются разовыми покупками и не восстанавливаются."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepitné je jednorazový nákup a nedá sa obnoviť."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dricks är engångsköp och kan inte återställas."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bahşişler tek seferlik satın alımlardır ve geri yüklenemez."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чайові є разовими покупками й не відновлюються."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打赏为一次性购买，无法恢复。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打賞為一次性購買，無法恢復。"
+          }
+        }
+      }
+    },
+    "support.restore.none" : {
+      "comment" : "Banner after a restore that found no Supporter Pack entitlement",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro tento účet Apple nebyl nalezen žádný nákup Balíčku podporovatele."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der blev ikke fundet noget køb af Supporter-pakken på denne Apple-konto."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für diesen Apple Account wurde kein Kauf des Supporter-Pakets gefunden."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν βρέθηκε αγορά του Πακέτου Υποστήριξης για αυτόν τον λογαριασμό Apple."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Supporter Pack purchase found for this Apple Account."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha encontrado ninguna compra del Pack de Apoyo en esta cuenta de Apple."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tältä Apple-tililtä ei löytynyt Tukijapaketin ostoa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun achat du Pack de soutien trouvé pour ce compte Apple."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za ovaj Apple račun nije pronađena kupnja Podržavateljskog paketa."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ehhez az Apple-fiókhoz nem található Támogatói csomag vásárlás."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun acquisto del Pacchetto Sostenitore trovato per questo account Apple."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このAppleアカウントではサポーターパックの購入が見つかりませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Apple 계정에서 서포터 팩 구매 내역을 찾을 수 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fant ikke noe kjøp av Supporter-pakken på denne Apple-kontoen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen aankoop van het Supporterspakket gevonden voor dit Apple-account."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie znaleziono zakupu Pakietu Wspierającego na tym koncie Apple."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma compra do Pacote de Apoio encontrada nesta conta Apple."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi encontrada nenhuma compra do Pacote de Apoio nesta conta Apple."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nu s-a găsit nicio achiziție a Pachetului de Susținător pentru acest cont Apple."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для этого аккаунта Apple покупка Пакета поддержки не найдена."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pre tento účet Apple sa nenašiel žiadny nákup Balíčka podporovateľa."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget köp av Supporterpaketet hittades för det här Apple-kontot."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Apple Hesabı için Destekçi Paketi satın alımı bulunamadı."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для цього облікового запису Apple покупку Пакета прихильника не знайдено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未在此 Apple 账户中找到支持者套餐的购买记录。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未在此 Apple 帳號中找到支持者套裝的購買紀錄。"
+          }
+        }
+      }
+    },
     "support.restore.success" : {
       "comment" : "Status banner after a successful restore",
       "extractionState" : "manual",
@@ -195689,157 +196013,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nákupy obnoveny."
+            "value" : "Balíček podporovatele obnoven."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Køb gendannet."
+            "value" : "Supporter-pakke gendannet."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einkäufe wiederhergestellt."
+            "value" : "Supporter-Paket wiederhergestellt."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Οι αγορές επαναφέρθηκαν."
+            "value" : "Το Πακέτο Υποστήριξης επαναφέρθηκε."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Purchases restored."
+            "value" : "Supporter Pack restored."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compras restauradas."
+            "value" : "Pack de Apoyo restaurado."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ostokset palautettu."
+            "value" : "Tukijapaketti palautettu."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Achats restaurés."
+            "value" : "Pack de soutien restauré."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kupnje obnovljene."
+            "value" : "Podržavateljski paket obnovljen."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vásárlások visszaállítva."
+            "value" : "Támogatói csomag visszaállítva."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Acquisti ripristinati."
+            "value" : "Pacchetto Sostenitore ripristinato."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "購入が復元されました。"
+            "value" : "サポーターパックを復元しました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "구매가 복원되었습니다."
+            "value" : "서포터 팩이 복원되었습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kjøp gjenopprettet."
+            "value" : "Supporter-pakke gjenopprettet."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aankopen hersteld."
+            "value" : "Supporterspakket hersteld."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zakupy przywrócone."
+            "value" : "Pakiet Wspierający przywrócony."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compras restauradas."
+            "value" : "Pacote de Apoio restaurado."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compras restauradas."
+            "value" : "Pacote de Apoio restaurado."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Achiziții restabilite."
+            "value" : "Pachetul de Susținător a fost restabilit."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Покупки восстановлены."
+            "value" : "Пакет поддержки восстановлен."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nákupy obnovené."
+            "value" : "Balíček podporovateľa obnovený."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Köp återställda."
+            "value" : "Supporterpaket återställt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Satın almalar geri yüklendi."
+            "value" : "Destekçi Paketi geri yüklendi."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Покупки відновлено."
+            "value" : "Пакет прихильника відновлено."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已恢复购买。"
+            "value" : "已恢复支持者套餐。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已恢復購買。"
+            "value" : "已恢復支持者套裝。"
           }
         }
       }

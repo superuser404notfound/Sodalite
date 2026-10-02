@@ -123,7 +123,7 @@ final class StoreKitService: StoreKitServiceProtocol {
     }
 
     func restorePurchases() async throws {
-        // Required by App Review (happy path needs no sync; currentEntitlements already has Apple-ID-restored non-consumables); also covers offline-during-last-change.
+        // Required by App Review (happy path needs no sync; currentEntitlements already has Apple-ID-restored non-consumables); also covers offline-during-last-change. Restores the Supporter Pack only: tips are consumables and never come back.
         try await AppStore.sync()
         await refreshSupporterStatus()
     }
