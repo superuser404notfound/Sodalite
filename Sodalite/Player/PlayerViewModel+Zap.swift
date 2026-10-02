@@ -15,7 +15,7 @@ extension PlayerViewModel {
 
     private func neighbourChannel(offset: Int) -> JellyfinChannel? {
         guard let current = liveChannel?.id else { return nil }
-        return zapLineup?.neighbour(of: current, offset: offset)
+        return zapLineup?.neighbour(of: current, offset: offset, skipping: zapSkipsChannelIDs?() ?? [])
     }
 
     func loadZapLineupIfNeeded() {

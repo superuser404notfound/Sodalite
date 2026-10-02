@@ -25,8 +25,19 @@ final class PlayerHostController: AVPlayerViewController {
     /// blank environment, so `\.appearanceTheme` has to be put back by hand below.
     private let theme: ResolvedAppearanceTheme
     private let onDismiss: () -> Void
+    let mode: PlayerPresentationMode
+    /// Sodalite#175: the multiview coordinator takes the view model; set when Live TV hands this one over.
+    /// Returns whether the coordinator took it; if not, this player carries on as it was.
+    var onEnterMultiview: ((PlayerViewModel) -> Bool)?
 
     private var hasLaunched = false
+    /// Set by handOffToMultiview so the dismiss that follows leaves the view model playing.
+    private var handingOff = false
+    /// An off-screen controller whose view model plays on elsewhere: its engine sinks must not take the surface back.
+    private var detached = false
+    /// Sodalite#175 diagnostics, see PlayerHostDiagnostics.
+    nonisolated let diagnosticID: String
+    private var playerBoundAt: Date?
 
     #if os(iOS)
     /// Orientation-session identity. The exit is terminal for it, so a lifecycle callback that still
@@ -107,12 +118,21 @@ final class PlayerHostController: AVPlayerViewController {
     init(
         viewModel: PlayerViewModel,
         theme: ResolvedAppearanceTheme,
+        mode: PlayerPresentationMode = .standalone,
         onDismiss: @escaping () -> Void
     ) {
         self.viewModel = viewModel
         self.theme = theme
+        self.mode = mode
         self.onDismiss = onDismiss
+        self.diagnosticID = PlayerHostDiagnostics.makeID()
         super.init(nibName: nil, bundle: nil)
+        PlayerHostDiagnostics.register(self)
+        LogTap.shared.note("[NowPlaying] host \(diagnosticID) created mode=\(mode)")
+    }
+
+    deinit {
+        LogTap.shared.note("[NowPlaying] host \(diagnosticID) deinit")
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -120,6 +140,10 @@ final class PlayerHostController: AVPlayerViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        #if os(tvOS)
+        viewModel.offersMultiview = offersMultiview
+        viewModel.onMultiviewRequested = { [weak self] in self?.handOffToMultiview() }
+        #endif
 
         // REQUIRED on tvOS for AVKit's Now Playing session + AirPods + Atmos sync; visible chrome is suppressed separately.
         showsPlaybackControls = true
@@ -138,8 +162,8 @@ final class PlayerHostController: AVPlayerViewController {
         // player alive across backgrounding, canStartPictureInPictureAutomaticallyFromInline triggers PiP
         // on swipe-Home. tvOS does not use PiP.
         #if os(iOS)
-        allowsPictureInPicturePlayback = true
-        canStartPictureInPictureAutomaticallyFromInline = true
+        allowsPictureInPicturePlayback = mode.offersPictureInPicture
+        canStartPictureInPictureAutomaticallyFromInline = mode.offersPictureInPicture
         #else
         allowsPictureInPicturePlayback = false
         #endif
@@ -163,8 +187,9 @@ final class PlayerHostController: AVPlayerViewController {
         engine.$currentAVPlayer
             .receive(on: DispatchQueue.main)
             .sink { [weak self] avPlayer in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] vc_rebind player=\(avPlayer == nil ? "nil" : "set") items=\(avPlayer?.currentItem?.externalMetadata.count ?? -1)")
+                guard let self, !self.detached else { return }
+                LogTap.shared.note("[NowPlaying] vc_rebind player=\(avPlayer == nil ? "nil" : "set") items=\(avPlayer?.currentItem?.externalMetadata.count ?? -1) host=\(self.diagnosticID)")
+                if avPlayer != nil, self.playerBoundAt == nil { self.playerBoundAt = Date() }
                 if let avPlayer {
                     // AirPlay enabled: the engine serves the loopback HLS over the LAN WiFi IP while external
                     // playback is active (AetherEngine #86), so the receiver reaches the engine-processed stream
@@ -279,7 +304,7 @@ final class PlayerHostController: AVPlayerViewController {
         engine.$playbackBackend
             .receive(on: DispatchQueue.main)
             .sink { [weak self] backend in
-                guard let self else { return }
+                guard let self, !self.detached else { return }
                 switch backend {
                 case .software, .aether:
                     self.mountAetherViewIfNeeded()
@@ -430,6 +455,8 @@ final class PlayerHostController: AVPlayerViewController {
         // below the controls, so they coexist with the tappable widgets. Nothing to attach here.
         #endif
 
+        // A multiview tile's session owns suspension and foreground retune for every tile.
+        guard mode.observesAppLifecycle else { return }
         // Foreground reloads the pipeline at current position (VT + AVIO die in suspension).
         NotificationCenter.default.addObserver(
             self, selector: #selector(appDidBecomeActive),
@@ -501,7 +528,8 @@ final class PlayerHostController: AVPlayerViewController {
     /// (framework limitation, see the softwarePiPSource sink comment), so SW titles get no button here;
     /// SW-PiP is iOS-only until the OS closes that gap.
     private func updatePiPAvailability() {
-        viewModel.isPiPAvailable = AVPictureInPictureController.isPictureInPictureSupported()
+        viewModel.isPiPAvailable = mode.offersPictureInPicture
+            && AVPictureInPictureController.isPictureInPictureSupported()
             && viewModel.player.currentAVPlayer != nil
         if !viewModel.isPiPAvailable { viewModel.isPiPPossible = false }
     }
@@ -719,6 +747,7 @@ final class PlayerHostController: AVPlayerViewController {
         // Kick off playback as the modal starts appearing so network/demuxer work overlaps the present-then-layout sequence.
         guard !hasLaunched else { return }
         hasLaunched = true
+        guard mode.launchesPlayback else { return }
         // Tracked launch: a back-press during loading cancels this task (latches teardown) so an in-flight load can't resume into player.load() after dismissal and leave audio behind a gone player.
         viewModel.beginPlayback()
     }
@@ -857,10 +886,89 @@ final class PlayerHostController: AVPlayerViewController {
         PlayerOrientation.unlock(session: orientationSession)
         endKeyboardTransport()
         #endif
+        let stops = mode.stopsOnDismiss && !handingOff
+        unbindForDismissal(path: "viewWillDisappear", stops: stops)
+        // A tile or a hand-off leaves the view model playing; dropping this surface lets the grid's take the layer back.
+        guard stops else {
+            detached = true
+            return
+        }
+        viewModel.stopPlayback()
+        PlayerHostDiagnostics.noteAftermath("stop")
+    }
+
+    /// Takes the picture and AVKit's player away from this controller, and says so in the log with what
+    /// AVKit believed either side of it (Sodalite#175 diagnostics).
+    private func unbindForDismissal(path: String, stops: Bool) {
+        let before = nowPlayingFacts
         unmountAetherViewIfNeeded()
         player = nil
-        viewModel.stopPlayback()
+        let bound = playerBoundAt.map { String(format: "%.1fs", Date().timeIntervalSince($0)) } ?? "never"
+        LogTap.shared.note(
+            "[NowPlaying] host \(diagnosticID) unbind path=\(path) mode=\(mode) stops=\(stops) "
+            + "engine=\(lifecycleSessionFacts) boundFor=\(bound) before[\(before)] after[\(nowPlayingFacts)] "
+            + "live=[\(PlayerHostDiagnostics.liveSummary())]")
     }
+
+    /// One controller in a `PlayerHostDiagnostics` listing.
+    var diagnosticSummary: String {
+        var facts = "\(diagnosticID) \(mode)"
+        if detached { facts += " detached" }
+        if handingOff { facts += " handedOff" }
+        if pipActive { facts += " pipActive" }
+        facts += presentingViewController == nil ? " offscreen" : " presented"
+        return facts + " \(nowPlayingFacts)"
+    }
+
+    /// What this controller holds that could keep a Now Playing registration alive. The AVKit half reads
+    /// internals by name, so it exists in Debug builds only: the App Store's static analysis finds the strings.
+    private var nowPlayingFacts: String {
+        var facts = "player=\(player == nil ? "nil" : "set")"
+        #if os(tvOS)
+        facts += " pip=\(pipController.diagnosticFacts)"
+        #endif
+        #if DEBUG
+        func flag(_ object: NSObject, getter: String, key: String) -> String {
+            guard object.responds(to: NSSelectorFromString(getter)) else { return "?" }
+            return (object.value(forKey: key) as? Bool).map { $0 ? "1" : "0" } ?? "?"
+        }
+        facts += " avkitActive=\(flag(self, getter: "isActiveNowPlaying", key: "activeNowPlaying"))"
+        facts += " otherVCActive=\(flag(self, getter: "_isAnotherPlayerViewControllerNowPlaying", key: "_isAnotherPlayerViewControllerNowPlaying"))"
+        if let ivar = class_getInstanceVariable(AVPlayerViewController.self, "_mediaRemoteManager"),
+           let manager = object_getIvar(self, ivar) as? NSObject {
+            facts += " mgrNowPlaying=\(flag(manager, getter: "isNowPlaying", key: "nowPlaying"))"
+            facts += " mgrPublishing=\(flag(manager, getter: "isPublishing", key: "publishing"))"
+        } else {
+            facts += " mgr=nil"
+        }
+        #endif
+        return facts
+    }
+
+    /// Sodalite#175: give the playing view model to multiview. The coordinator dismisses this controller,
+    /// and `handingOff` keeps that dismiss from stopping playback.
+    func handOffToMultiview() {
+        guard let onEnterMultiview else { return }
+        // Set before the call: the coordinator's dismiss of this controller must already see a hand-off.
+        handingOff = true
+        detached = true
+        guard onEnterMultiview(viewModel) else {
+            handingOff = false
+            detached = false
+            return
+        }
+        // The session owns lifecycle from here; a still-alive controller must not retune tile 1 beside it.
+        let center = NotificationCenter.default
+        center.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        unbindForDismissal(path: "handOff", stops: false)
+        // The grid has no transport bar to focus, and no Play/Pause to take a paused channel out of its pause.
+        viewModel.hideControls()
+        if viewModel.player.state == .paused { viewModel.player.play() }
+    }
+
+    var offersMultiview: Bool { mode.offersMultiview && viewModel.isLiveSession }
 
     /// Sodalite#149: the one word that says which kind of trip this was, short enough to read next to a
     /// playhead in a log line.
@@ -1424,7 +1532,7 @@ final class PlayerHostController: AVPlayerViewController {
                 viewModel.controlsFocus = viewModel.transportFocusOrder
                     .first(where: { $0 != .restartButton }) ?? .speedButton
                 viewModel.scheduleControlsHide()
-            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .infoButton, .returnToLiveButton:
+            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()
             }
         } else {
@@ -1529,10 +1637,20 @@ final class PlayerHostController: AVPlayerViewController {
         PlayerOrientation.unlock(session: orientationSession)
         viewModel.stopVolumeObservation()
         #endif
-        unmountAetherViewIfNeeded()
-        player = nil
+        let stops = mode.stopsOnDismiss && !handingOff
+        unbindForDismissal(path: "dismissPlayer", stops: stops)
+        // A tile's full screen: Back returns to the grid with the tile still playing. A handed-off
+        // controller was already given away, its dismiss belongs to the coordinator.
+        guard stops else {
+            detached = true
+            if !handingOff { onDismiss() }
+            // The coordinator may be zooming back to the grid, or waiting for the zoom in to land first.
+            if presentingViewController != nil, !isBeingDismissed, !isBeingPresented { dismiss(animated: false) }
+            return
+        }
         // stopPlayback fire-and-forgets the reportStop call (DrHurt #12); called inline so synchronous teardown finishes before onDismiss and the back press hits the dismiss animation immediately.
         viewModel.stopPlayback()
+        PlayerHostDiagnostics.noteAftermath("stop")
         onDismiss()
         #if os(tvOS)
         PiPSessionCoordinator.shared.playerDidDismiss(self)

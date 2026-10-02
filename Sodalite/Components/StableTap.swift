@@ -23,6 +23,10 @@ struct StableTapModifier: ViewModifier {
     /// Stability is judged when the press STARTS. Judging it at release would count the hold itself as
     /// steadiness and wave through exactly the drift this guards against.
     @State private var pressBeganOnStableFocus = false
+    /// Set when the hold reached the limit. The gesture ends right there, and the end it reports measures
+    /// against our own start stamp, which arrives a frame after the gesture's: that difference read a
+    /// completed hold as a 0.39 s click often enough to open the row instead of its menu.
+    @State private var holdReachedLimit = false
 
     func body(content: Content) -> some View {
         let tracked = content
@@ -36,22 +40,27 @@ struct StableTapModifier: ViewModifier {
         return Group {
             if longPressOpensMenu {
                 tracked.onLongPressGesture(minimumDuration: Self.clickHoldLimit) {
-                    // Reaching the limit is the menu's press, not the row's. Nothing to do here: the
-                    // release below sees the duration and stays out of the way.
+                    holdReachedLimit = true
                 } onPressingChanged: { pressing in
                     if pressing {
                         pressStartedAt = Date()
                         pressBeganOnStableFocus = isFocusStable(at: Date())
+                        holdReachedLimit = false
                     } else {
-                        let started = pressStartedAt
+                        guard let started = pressStartedAt else { return }
                         pressStartedAt = nil
-                        guard let started,
-                              Self.isClick(
-                                beganOnStableFocus: pressBeganOnStableFocus,
-                                pressDuration: Date().timeIntervalSince(started)
-                              )
-                        else { return }
-                        action()
+                        let duration = Date().timeIntervalSince(started)
+                        let beganOnStableFocus = pressBeganOnStableFocus
+                        // A completed hold reports its end and its completion in either order; the
+                        // decision waits for both.
+                        Task { @MainActor in
+                            guard Self.isClick(
+                                beganOnStableFocus: beganOnStableFocus,
+                                pressDuration: duration,
+                                holdReachedLimit: holdReachedLimit
+                            ) else { return }
+                            action()
+                        }
                     }
                 }
             } else {
@@ -77,9 +86,14 @@ struct StableTapModifier: ViewModifier {
     }
 
     /// Whether a finished press activates the row: it has to have started on steady focus and to have
-    /// ended before the menu's hold claims it.
-    static func isClick(beganOnStableFocus: Bool, pressDuration: TimeInterval) -> Bool {
-        beganOnStableFocus && pressDuration < clickHoldLimit
+    /// ended before the menu's hold claims it. A hold the gesture saw complete never counts, whatever the
+    /// measured duration says.
+    static func isClick(
+        beganOnStableFocus: Bool,
+        pressDuration: TimeInterval,
+        holdReachedLimit: Bool = false
+    ) -> Bool {
+        beganOnStableFocus && !holdReachedLimit && pressDuration < clickHoldLimit
     }
 }
 

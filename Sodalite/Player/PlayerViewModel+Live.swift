@@ -49,6 +49,7 @@ extension PlayerViewModel {
                 // fallback is for a freshly negotiated URL failing, not for a stale remembered one.
                 usedDirectLivePath = false
                 memory.forget(userID: userID, channelID: item.id)
+                lastIngestError = reader.terminalError
                 let detail = reader.terminalError.map { " ingest=\($0)" } ?? ""
                 LogTap.shared.note("[LiveDirect] remembered upstream failed, renegotiating: \(error)\(detail)")
             }
@@ -116,6 +117,7 @@ extension PlayerViewModel {
                     // Once per session, fall back to the Jellyfin path; the direct attempt already closed (awaited) the stage-1 tuner, so the server path re-negotiates fresh.
                     didAttemptLiveFallback = true
                     usedDirectLivePath = false
+                    lastIngestError = reader.terminalError
                     let detail = reader.terminalError.map { " ingest=\($0)" } ?? ""
                     LogTap.shared.note("[LiveDirect] route=fallback reason=\(error)\(detail)")
                     try await loadLiveStreamViaServer()
@@ -127,7 +129,8 @@ extension PlayerViewModel {
             }
 
             // Ineligible route (static/server): reuse the stage-1 tuner so it isn't leaked and the server path avoids a duplicate roundtrip.
-            try await loadLiveStreamViaServer(reusing: (info: info, source: source))
+            try await loadLiveStreamViaServer(
+                reusing: (info: info, source: source), onStageOneReleased: { stageOneTuner = nil })
         } catch {
             // The tuner is open from the moment PlaybackInfo answered. If this tune never got far enough
             // to hand it to the session, nothing else will ever close it: Jellyfin's MediaSourceManager
@@ -162,22 +165,31 @@ extension PlayerViewModel {
     /// exists only in that answer. A request cancelled in flight therefore leaves a tuner open that no
     /// one can name, which is the one leak shape a teardown cannot clean up after the fact. The request
     /// runs in an unstructured task, which does not inherit the caller's cancellation, so the handle
-    /// always comes back; if the tune it was for is gone by then, the tuner is released here instead.
+    /// always comes back; if the tune it was for is gone by then, the tuner is released instead.
     /// A viewer giving up during the seconds Jellyfin spends probing a tuner is the common case on a slow
     /// channel, not a corner (#70).
+    ///
+    /// The caller does not wait for that, though: a dead provider holds the answer for a minute, and a
+    /// zap that waited for the tune it overtook queued every later press behind it (#173). A cancelled
+    /// caller returns at once and hands the request to the gate, which closes its late answer.
     private func openLiveTuner(
         maxStreamingBitrate: Int, enableDirectPlay: Bool = true
     ) async throws -> PlaybackInfoResponse {
-        // Never open while one of our own closes is still unanswered: the id Jellyfin closes by names
-        // the CHANNEL, not this stream, so an open that overtakes a close either orphans the tuner it
-        // replaces or hands that close the stream we are about to play (LiveTunerGate, #70).
-        let unsettled = await LiveTunerGate.shared.settle(timeout: 6)
-        if unsettled > 0 {
-            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) still unanswered after 6s")
-        }
         let svc = playbackService
         let itemID = item.id
         let user = userID
+        // Never open while one of our own closes is still unanswered: the id Jellyfin closes by names
+        // the CHANNEL, not this stream, so an open that overtakes a close either orphans the tuner it
+        // replaces or hands that close the stream we are about to play (LiveTunerGate, #70).
+        // An open of this channel we gave up on is waited for as long as its answer can take: the
+        // close that follows that answer would otherwise land on the stream this open is for.
+        let unsettled = await LiveTunerGate.shared.settle(
+            timeout: liveTunerCloseSettle, opening: itemID,
+            abandonedOpenTimeout: JellyfinEndpoint.livePlaybackInfoTimeout + 5)
+        try Task.checkCancellation()
+        if unsettled > 0 {
+            LogTap.shared.note("[Live] opening with \(unsettled) tuner close(s) or abandoned open(s) still unanswered")
+        }
         let request = Task {
             try await svc.getLivePlaybackInfo(
                 itemID: itemID, userID: user,
@@ -185,7 +197,39 @@ extension PlayerViewModel {
                 maxStreamingBitrate: maxStreamingBitrate,
                 enableDirectPlay: enableDirectPlay)
         }
-        let info = try await request.value
+        guard case .answered(let outcome) = await Self.outcome(of: request) else {
+            LogTap.shared.note("[Live] tune superseded while PlaybackInfo was out, its tuner closes on arrival")
+            LiveTunerGate.shared.abandonOpen(itemID: itemID) { [self] in
+                guard let info = try? await request.value else { return }
+                await closeLateTuner(info, itemID: itemID)
+            }
+            throw CancellationError()
+        }
+        let info: PlaybackInfoResponse
+        do {
+            info = try outcome.get()
+        } catch {
+            lastTunerOpenError = error
+            throw error
+        }
+        let source = info.mediaSources.first
+        noteTunerOpened(info, itemID: itemID)
+        if Task.isCancelled || isTearingDown {
+            if let stranded = source?.liveStreamId {
+                releaseTuner(stranded, reason: "tune cancelled while the tuner was opening")
+            }
+            throw CancellationError()
+        }
+        return info
+    }
+
+    private func closeLateTuner(_ info: PlaybackInfoResponse, itemID: String) async {
+        guard let key = info.mediaSources.first?.liveStreamId else { return }
+        noteTunerOpened(info, itemID: itemID)
+        await releaseTuner(key, reason: "late answer for a superseded tune").value
+    }
+
+    private func noteTunerOpened(_ info: PlaybackInfoResponse, itemID: String) {
         let source = info.mediaSources.first
         // The open half of the ledger. Without it a capture shows closes with nothing to pair them
         // against, and a tuner we opened and never closed looks exactly like one we never opened (#70).
@@ -210,13 +254,20 @@ extension PlayerViewModel {
             // worse than a tuner we forgot to close is a tuner we were never given a handle for.
             LogTap.shared.note("[Live] PlaybackInfo answered without a live stream id, nothing to close later")
         }
-        if Task.isCancelled || isTearingDown {
-            if let stranded = source?.liveStreamId {
-                releaseTuner(stranded, reason: "tune cancelled while the tuner was opening")
+    }
+
+    /// The request's result, or `.superseded` as soon as the caller is cancelled, whichever comes first. Awaiting
+    /// `request.value` alone would not observe the caller's cancellation at all.
+    private static func outcome(of request: Task<PlaybackInfoResponse, Error>) async -> TunerOpenOutcome {
+        let race = FirstOutcome()
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                race.arm(continuation)
+                Task { race.finish(.answered(await request.result)) }
             }
-            throw CancellationError()
+        } onCancel: {
+            race.finish(.superseded)
         }
-        return info
     }
 
     /// Close a tuner we opened, without waiting on it and without swallowing the outcome. A close that
@@ -349,7 +400,8 @@ extension PlayerViewModel {
                 // Engine picks the preferred-language audio on the first frame (#72), replacing the
                 // post-load selectAudioTrack reload that misfired on single-track channels.
                 preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-                teletextPage: preferences.liveTeletextPage.page
+                teletextPage: preferences.liveTeletextPage.page,
+                sharedOutputRole: sharedOutputRole
             ),
             // #64: the viewer's audio pick, named at load. It is the only way onto a track other than
             // the container default here, because the ingest is forward-only and the engine refuses
@@ -366,8 +418,11 @@ extension PlayerViewModel {
     /// Jellyfin-mediated live load: open the tuner via PlaybackInfo, pick the infinite live MediaSource, prefer its HLS TranscodingUrl, hand it to the engine with isLive + a DVR window, and set the tuner handle for teardown.
     ///
     /// - Parameter prefetched: reuses a stage-1 PlaybackInfo from the router (avoids a second tuner + duplicate roundtrip); nil triggers a fresh negotiation.
+    /// - Parameter onStageOneReleased: told when the prefetched tuner was closed here, so the caller's
+    ///   failure path does not close it a second time.
     private func loadLiveStreamViaServer(
-        reusing prefetched: (info: PlaybackInfoResponse, source: PlaybackMediaSource)? = nil
+        reusing prefetched: (info: PlaybackInfoResponse, source: PlaybackMediaSource)? = nil,
+        onStageOneReleased: () -> Void = {}
     ) async throws {
         // Engine-decode live: request a copy-TS source (liveProfile = Protocol=http, full codec list) and hand to AetherEngine like VOD. The engine demuxes the TS, dispatching h264/hevc to native AVPlayer loopback and MPEG-2/VC-1/MPEG-4 Part 2 to SW, so every codec plays with no re-encode. High copy ceiling (maxStreamingBitrate) keeps the server stream-copying rather than downscaling.
         var info: PlaybackInfoResponse
@@ -392,6 +447,7 @@ extension PlayerViewModel {
             // single-profile tuner host the ids match and the guard skipped every release (#70).
             if let staleTuner = source.liveStreamId {
                 releaseTuner(staleTuner, reason: "re-negotiating at the re-encode cap")
+                if prefetched != nil { onStageOneReleased() }
             }
             info = try await openLiveTuner(maxStreamingBitrate: DirectPlayProfile.liveReencodeCapBitrate)
             guard let rebounded = info.mediaSources.first else { throw PlayerEngineError.noSource }
@@ -479,7 +535,8 @@ extension PlayerViewModel {
             // Engine picks the preferred-language audio on the first frame (#72), replacing the
             // post-load selectAudioTrack reload that misfired on single-track channels.
             preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-            teletextPage: preferences.liveTeletextPage.page
+            teletextPage: preferences.liveTeletextPage.page,
+            sharedOutputRole: sharedOutputRole
         )
         // #64: same pick on the server route, where the engine could re-point in place but a
         // re-tune is what the viewer asked for either way. One spelling, one behaviour.
@@ -1026,6 +1083,9 @@ extension PlayerViewModel {
     private func performLiveRetune(channelID: String?) async {
         // A zap landed while this waited: the channel it was asked for is gone, and so is its session.
         guard liveChannel?.id == channelID else { return }
+        lastIngestError = nil
+        lastTunerOpenError = nil
+        tileRefusal = nil
         // Close the dead session server-side BEFORE opening the new one, so an orphan ffmpeg cannot fill the server disk.
         let deadSession = playSessionID
         await closeLiveSessionServerSide()
@@ -1049,6 +1109,7 @@ extension PlayerViewModel {
             // Superseded by a newer load or a zap; the zap's close releases whatever this opened.
         } catch {
             hostLoadActive = false
+            classifyTileRefusalIfNeeded()
             setEnginePlaybackError(message: ErrorText.user(for: error))
         }
     }

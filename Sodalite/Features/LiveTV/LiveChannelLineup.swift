@@ -16,4 +16,11 @@ struct LiveChannelLineup: Equatable, Sendable {
         let target = ((index + offset) % count + count) % count
         return target == index ? nil : channels[target]
     }
+
+    /// The same step over the lineup without `skipped` (Sodalite#175: the channels other multiview tiles show).
+    func neighbour(of channelID: String, offset: Int, skipping skipped: Set<String>) -> JellyfinChannel? {
+        guard !skipped.isEmpty else { return neighbour(of: channelID, offset: offset) }
+        let remaining = LiveChannelLineup(channels: channels.filter { $0.id == channelID || !skipped.contains($0.id) })
+        return remaining.neighbour(of: channelID, offset: offset)
+    }
 }

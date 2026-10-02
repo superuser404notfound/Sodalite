@@ -15,6 +15,7 @@ final class DependencyContainer {
         engine.deactivatesAudioSessionOnStop = true
         return engine
     }()
+    @MainActor static let multiviewEnginePool = MultiviewEnginePool(primary: playerEngine)
     let keychainService: KeychainServiceProtocol
     let httpClient: HTTPClientProtocol
     /// Seerr's own client, kept so the caches screen can reach the handle it holds on the shared response store.

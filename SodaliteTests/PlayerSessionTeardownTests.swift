@@ -103,6 +103,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _closedLiveStreams: [String] = []
     private var _events: [String] = []
     private var _playbackInfoRequests: [String] = []
+    private var _livePlaybackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
     private var _requestedAudioIndexes: [Int?] = []
     private var _requestedMediaSourceIDs: [String?] = []
@@ -116,6 +117,11 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     /// Item ids whose PlaybackInfo answers late and ignores cancellation, like a request already on
     /// the wire when the session is torn down.
     var uncancellableDelayItemIDs: Set<String> = []
+    /// Live tuner answers by item id; an item without one fails its live PlaybackInfo.
+    var liveStreamIDs: [String: String] = [:]
+    /// Holds an item's live PlaybackInfo before it answers: each request takes the next gate, the last
+    /// one holds every request after it.
+    var liveAnswerGates: [String: [TestGate]] = [:]
     /// Holds every stop report at this gate before recording it, so a test can act while one is on the wire.
     var stopReportGate: TestGate?
 
@@ -125,6 +131,8 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     /// Every stop, kill and close in the order the service saw them.
     var events: [String] { lock.withLock { _events } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
+    /// Every live tuner open (live PlaybackInfo), by item id.
+    var livePlaybackInfoRequests: [String] { lock.withLock { _livePlaybackInfoRequests } }
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
     var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
@@ -178,7 +186,22 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     }
 
     private struct NotUsed: Error {}
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
+        lock.withLock { _livePlaybackInfoRequests.append(itemID) }
+        guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
+        // Ignores cancellation, like a request Jellyfin is already probing the tuner for.
+        let gate = lock.withLock { () -> TestGate? in
+            guard var gates = liveAnswerGates[itemID], let next = gates.first else { return nil }
+            if gates.count > 1 { gates.removeFirst() }
+            liveAnswerGates[itemID] = gates
+            return next
+        }
+        await gate?.pass()
+        return try JSONDecoder().decode(
+            PlaybackInfoResponse.self,
+            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"ts","LiveStreamId":"\#(liveStreamID)"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+        )
+    }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
     func closeLiveStream(liveStreamID: String) async throws {

@@ -230,6 +230,8 @@ enum JellyfinEndpoint: APIEndpoint {
         }
     }
 
+    static let livePlaybackInfoTimeout: TimeInterval = 60
+
     /// 90s for fire-and-forget session writes: a 30s drop on a slow CDN origin loses the position and strands a stale resume point (Sodalite#12). Everything else keeps 30s.
     var timeoutInterval: TimeInterval? {
         switch self {
@@ -237,7 +239,7 @@ enum JellyfinEndpoint: APIEndpoint {
             return 90
         case .playbackInfo, .livePlaybackInfo:
             // 60s (its old URLSession.shared ceiling); live AutoOpenLiveStream probes the tuner server-side and slow IPTV tuners exceed 30s.
-            return 60
+            return Self.livePlaybackInfoTimeout
         default:
             return nil
         }

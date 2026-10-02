@@ -136,6 +136,7 @@ final class PlayerViewModel {
         case speedButton
         case pictureButton
         case pipButton
+        case multiviewButton
         case infoButton
         // Live-only "Return to Live" pill (LiveTransportBar); Up from the live scrubber when
         // behind the live edge, Select fires returnToLiveEdge(). VOD button row N/A for live.
@@ -357,6 +358,9 @@ final class PlayerViewModel {
 
     /// Native backend bound and PiP supported on this device; host writes it from the player bind.
     var isPiPAvailable = false
+    /// Sodalite#175: the live bar shows the Multiview chip; the host writes it, iOS never does.
+    var offersMultiview = false
+    @ObservationIgnored var onMultiviewRequested: (() -> Void)?
     /// AVKit's isPictureInPicturePossible; drives the transport button's enabled/dimmed state.
     var isPiPPossible = false
     /// Host hook: the AVPictureInPictureController lives host-side (PlayerPiPController).
@@ -465,6 +469,15 @@ final class PlayerViewModel {
 
     var item: JellyfinItem
     let player: AetherEngine
+    /// Sodalite#175: the shared-output role every live load on this engine declares. A promoted tile flips it to `.primary`.
+    var sharedOutputRole: SharedOutputRole
+    /// Sodalite#175: true while this view model is a multiview tile, so its stop leaves process-wide caches alone.
+    var isMultiviewTile = false
+    /// Sodalite#175: the last direct-ingest and tuner-open failures of this attempt, read by the tile's failure branch.
+    @ObservationIgnored var lastIngestError: HLSIngestError?
+    @ObservationIgnored var lastTunerOpenError: Error?
+    /// Sodalite#175: why this tile could not tune, when the failures above say so. Nil outside a failed tile load.
+    var tileRefusal: LiveTuneRefusal?
 
     /// Coded video dims for the overlay's bitmap-canvas mapping (.zero before load).
     var videoSize: CGSize {
@@ -789,6 +802,8 @@ final class PlayerViewModel {
     var zapBanner: LiveZapBanner?
     @ObservationIgnored var zapSettleTask: Task<Void, Never>?
     @ObservationIgnored var zapLineupTask: Task<LiveChannelLineup?, Never>?
+    /// Sodalite#175: channels a zap steps over, the ones other multiview tiles show. Nil outside a tile's full screen.
+    @ObservationIgnored var zapSkipsChannelIDs: (() -> Set<String>)?
     @ObservationIgnored var zapBannerHideTask: Task<Void, Never>?
     /// The commit in flight; the next one waits for it so two never close the same tuner.
     @ObservationIgnored var zapCommitTask: Task<Void, Never>?
@@ -798,6 +813,8 @@ final class PlayerViewModel {
     @ObservationIgnored var liveRetuneTask: Task<Void, Never>?
     /// Test seam: nil in production, which means `startPlayback()`.
     @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
+    /// How long a tuner open waits for our own unanswered closes. Test seam.
+    @ObservationIgnored var liveTunerCloseSettle: TimeInterval = 6
     /// What is on air right now, as far as this session knows. Seeded with the programme that was on
     /// at tune time and kept current by `startFollowingLiveProgram` (#96), because `item` is built
     /// from it and the title above the picture reads `item`.
@@ -865,10 +882,13 @@ final class PlayerViewModel {
         serverName: String = "",
         serverReachability: @escaping () -> ServerReachability = { .unknown },
         localDownload: DownloadedItem? = nil,
-        downloadStore: DownloadStore? = nil
+        downloadStore: DownloadStore? = nil,
+        engine: AetherEngine? = nil,
+        sharedOutputRole: SharedOutputRole = .primary
     ) {
         self.item = item
-        self.player = DependencyContainer.playerEngine
+        self.player = engine ?? DependencyContainer.playerEngine
+        self.sharedOutputRole = sharedOutputRole
         self.startFromBeginning = startFromBeginning
         self.playbackService = playbackService
         self.userID = userID
@@ -891,6 +911,13 @@ final class PlayerViewModel {
         self.serverReachability = serverReachability
         self.localDownload = localDownload
         self.downloadStore = downloadStore
+    }
+
+    nonisolated static func clearsSharedFontCacheOnStop(isMultiviewTile: Bool) -> Bool { !isMultiviewTile }
+
+    func classifyTileRefusalIfNeeded() {
+        guard isMultiviewTile else { return }
+        tileRefusal = LiveTuneRefusal.classify(tunerOpenError: lastTunerOpenError, ingestError: lastIngestError)
     }
 
     // MARK: - Lifecycle
@@ -1012,6 +1039,8 @@ final class PlayerViewModel {
     }
 
     func startPlayback() async {
+        // A launch cancelled before it ran (stop, remove or zap in the same turn) must not undo that stop.
+        guard !Task.isCancelled else { return }
         isTearingDown = false
         didStopPlayback = false
         // Everything a previous attempt on this view model armed (a retry, an item recovery): its sinks
@@ -1025,6 +1054,9 @@ final class PlayerViewModel {
         }
         hostLoadActive = true
         clearError()
+        lastIngestError = nil
+        lastTunerOpenError = nil
+        tileRefusal = nil
         // Cleared before the load, not after it: an auto-advance swaps `item` first, and a source left
         // standing from the previous episode would describe the new one until PlaybackInfo answers.
         activePlaybackSource = nil
@@ -1287,6 +1319,7 @@ final class PlayerViewModel {
             // them, so a load that threw still has its classification sitting here. Read once: `load()`
             // clears it on the next attempt's `.loading`, so it can only ever describe THIS attempt.
             let engineInfo = player.errorInfo
+            classifyTileRefusalIfNeeded()
             LogTap.shared.note(
                 PlayerEngineErrorPresentation.logLine(for: engineInfo, engineMessage: error.localizedDescription)
             )
@@ -1478,7 +1511,9 @@ final class PlayerViewModel {
         frameExtractor = nil
         Task { await extractorToClose?.shutdown() }
         deactivateASSRendering()
-        ASSFontCache.removeAll()
+        if Self.clearsSharedFontCacheOnStop(isMultiviewTile: isMultiviewTile) {
+            ASSFontCache.removeAll()
+        }
         cancellables.removeAll()
         outageWatchdog?.cancel()
         outageWatchdog = nil
@@ -3731,6 +3766,7 @@ final class PlayerViewModel {
         case .speedButton: openSpeedDropdown()
         case .pictureButton: openPictureDropdown()
         case .pipButton: requestPictureInPicture()
+        case .multiviewButton: onMultiviewRequested?()
         case .infoButton:
             showStatsOverlay.toggle()
             scheduleControlsHide()

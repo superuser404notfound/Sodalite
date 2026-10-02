@@ -23,6 +23,14 @@ enum PlayerModalDismisser {
         var presenter: UIViewController? = window.rootViewController
         while let current = presenter {
             guard let presented = current.presentedViewController else { break }
+            #if os(tvOS)
+            if let grid = presented as? MultiviewHostController {
+                EngineLog.emit("\(logPrefix) deep-link dismiss: stopping multiview")
+                grid.coordinator.stopAll()
+                if current.presentedViewController === grid { current.dismiss(animated: false) }
+                return
+            }
+            #endif
             if presented is PlayerHostController {
                 EngineLog.emit("\(logPrefix) deep-link dismiss: tearing down active player modal")
                 current.dismiss(animated: false)
