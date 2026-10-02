@@ -107,8 +107,17 @@ struct MultiviewView: View {
         let showInfo = overlays.isVisible(tile.id) && failure == nil
         // The sound follows focus 0.3 s later; the glyph shows with the info so both arrive together.
         let showSpeaker = overlays.isVisible(tile.id) && failure == nil && session.tiles.count > 1
+        let showSpinner = vm.isLoading && failure == nil
         return ZStack(alignment: .bottomLeading) {
             AetherPlayerSurface(engine: vm.player)
+            // The player's own spinner rule, so a tile says it is loading instead of sitting black.
+            ProgressView()
+                .controlSize(.large)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .opacity(showSpinner ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: showSpinner)
+                .allowsHitTesting(false)
+                .accessibilityHidden(!showSpinner)
             if let failure {
                 failureOverlay(failure)
             }
