@@ -173,6 +173,8 @@ struct ResumeProgressBar: View {
                         .frame(width: geo.size.width * min(max(fraction, 0), 1))
                 }
             }
+            // Flattened for the same reason as the badge, or the fill casts a shadow into the track.
+            .compositingGroup()
             .shadow(color: .black.opacity(0.5), radius: trackHeight * 0.5)
     }
 
@@ -180,8 +182,10 @@ struct ResumeProgressBar: View {
         badgeText(text)
             .foregroundStyle(appearanceTheme.palette.foreground.color)
             .background(appearanceTheme.palette.control.color, in: Capsule())
-            // The same edge the track wears. The fill is opaque, so the number no longer needs
-            // one; this is for the badge itself, when the accent and the still share a colour.
+            // The same edge the track wears, for the badge itself, when the accent and the still
+            // share a colour. Flattened first: a shadow on an uncomposited view is applied to each
+            // child, so the number cast its own shadow onto the badge (seen on the TV, 2026-10-03).
+            .compositingGroup()
             .shadow(color: .black.opacity(0.5), radius: trackHeight * 0.5)
     }
 
