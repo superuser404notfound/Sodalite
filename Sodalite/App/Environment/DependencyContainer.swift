@@ -116,6 +116,7 @@ final class DependencyContainer {
     let serverSyncMetadata: ServerSyncMetadataStore
     /// When each server was last made active here, which orders a combined Home's secondaries.
     let serverActivation: ServerActivationStore
+    let combinedServers: CombinedServersPreferences
     /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
     /// closure so the sign-in route can be tested without a network; the app never replaces it.
     var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
@@ -160,6 +161,7 @@ final class DependencyContainer {
         self.serverRouteStore = ServerRouteStore(defaults: defaults)
         self.serverSyncMetadata = ServerSyncMetadataStore(defaults: defaults)
         self.serverActivation = ServerActivationStore(defaults: defaults)
+        self.combinedServers = CombinedServersPreferences(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
         self.jellyfinClient = JellyfinClient(httpClient: httpClient)
@@ -608,6 +610,17 @@ final class DependencyContainer {
         guard !parentalGateRequired(forActivatingUserID: candidate.id, serverID: serverID)
         else { return nil }
         return candidate
+    }
+
+    /// The session a secondary server contributes to a combined Home: the same pick a switch to it
+    /// would make, this device's own token slot first, else the resumable profile (Sodalite#85).
+    func secondaryCredential(serverID: String) -> SessionCredential? {
+        if let token = try? keychainService.loadString(for: KeychainKeys.accessToken(serverID: serverID)),
+           let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID)),
+           !token.isEmpty {
+            return SessionCredential(userID: userID, token: token)
+        }
+        return resumableProfile(serverID: serverID).map { SessionCredential(userID: $0.id, token: $0.token) }
     }
 
     /// Switches the active server: sets the pointer, loads the cached token, reconfigures JellyfinClient, rewrites SharedSessionMirror, bumps serverDidSwitch. Seerr is left to the caller's restore path. Throws .unknown (not in knownServers) or .missingToken (caller routes to the target's profile picker). Both throws land before the first write, so a switch that cannot complete leaves no half-switched session behind.
