@@ -18,8 +18,8 @@ struct PosterBadgePills: View {
         Text(text)
             .font(.system(size: fontSize, weight: .semibold))
             .foregroundStyle(.white)
-            .padding(.horizontal, fontSize * 0.42)
-            .padding(.vertical, fontSize * 0.18)
+            .padding(.horizontal, fontSize * PosterBadgeMetrics.pillHorizontalPadding)
+            .padding(.vertical, fontSize * PosterBadgeMetrics.pillVerticalPadding)
             .background(Color.Theme.scrim, in: Capsule())
             .overlay(Capsule().strokeBorder(Color.Theme.hairline, lineWidth: 1))
     }

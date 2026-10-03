@@ -5,8 +5,8 @@ import SwiftUI
 /// Sizing a pill off its own card would put a 32pt pill on a landscape card next to a 20pt one on
 /// the poster beside it, so every mark on artwork reads the tier's poster width instead.
 enum PosterBadgeMetrics {
-    /// The size of every piece of TEXT drawn on artwork: the corner pills and the remaining-time
-    /// label beside the resume capsule.
+    /// The text size of the corner pills. The remaining-time badge beside the resume capsule stands
+    /// one step above it, see ``remainingLabelSize(posterWidth:scale:)``.
     ///
     /// This shipped at 0.09, which is 19.8pt on the TV, and the reporter who asked for the pills
     /// came back with "slightly too big, reduce by about a third" (Sodalite#79). 0.06 is that third:
@@ -21,6 +21,11 @@ enum PosterBadgeMetrics {
     static func fontSize(posterWidth: CGFloat, scale: CGFloat) -> CGFloat {
         max(10, posterWidth * 0.06 * scale)
     }
+
+    /// Padding around the text of a mark on artwork, as a share of its font size. One pair for the
+    /// corner pills and the remaining-time badge, so the two read as the same kind of mark.
+    static let pillHorizontalPadding: CGFloat = 0.42
+    static let pillVerticalPadding: CGFloat = 0.18
 
     /// Diameter of the watched check opposite the pills (Sodalite#89). Every comparable client
     /// draws that disc at 12 to 16 percent of the poster, and 0.13 puts it at 28.6pt on the TV,
@@ -51,20 +56,24 @@ enum PosterBadgeMetrics {
         posterWidth * 0.036 * scale
     }
 
-    /// The remaining-time label beside the resume capsule: the same size as the pills, not a step
-    /// below them.
+    /// The remaining-time badge beside the resume capsule, one step above the corner pills.
     ///
-    /// It used to be 0.075 against their 0.09, because a bare number as loud as a scrimmed pill
-    /// dominates the poster. That step was measured against the pill it stood next to, so shrinking
-    /// the pill and leaving the number at 16.5pt turned the annotation into the loudest mark on the
-    /// card (rendered, Sodalite#79 round 2). What separates the two marks is the pill's scrim and
-    /// hairline, which a number set at the same point size still reads as quieter than.
+    /// The two were one size while the number was bare (Sodalite#79 round 2): a naked number as
+    /// large as a scrimmed pill was the loudest mark on the card. The number sits on a badge of its
+    /// own since Sodalite#176, and unlike a pill it is READ, on every card of Continue Watching and
+    /// from the sofa, where 13.2pt was reported as too small. 0.07 is 15.4pt on the TV and 11.2 on
+    /// the iPad, the last step that stays under the iPad's 12pt card title; the phone keeps the
+    /// 10pt floor. Rendered on the tvOS simulator at 0.06, 0.07 and 0.08, and measured against all
+    /// 26 locales: 0.08 is the size where the TV poster starts dropping a label.
     static func remainingLabelSize(posterWidth: CGFloat, scale: CGFloat) -> CGFloat {
-        fontSize(posterWidth: posterWidth, scale: scale)
+        max(10, posterWidth * 0.07 * scale)
     }
 
-    /// Below this share of the card the meter stops reading as a meter, so the label is dropped and
+    /// Below this share of the card the meter stops reading as a meter, so the badge is dropped and
     /// the capsule keeps the full row. Only a long localized hour form on the smallest poster gets
     /// there: measured against all 26 locales, zh-Hans "3小时48分钟" is the single case.
-    static let minimumTrackShare: CGFloat = 0.35
+    ///
+    /// It was 0.35 while the number was bare. The badge's padding costs 8.4pt on the phone poster,
+    /// and at 0.35 that also dropped every Russian hour form ("3 ч 48 мин"), by under a point.
+        static let minimumTrackShare: CGFloat = 0.33
 }

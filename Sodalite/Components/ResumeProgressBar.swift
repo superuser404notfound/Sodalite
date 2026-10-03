@@ -90,9 +90,13 @@ enum ResumeIndicator {
 /// landscape card wears the same indicator as the poster beside it and both track the setting.
 ///
 /// No scrim under the row, unlike the Top Shelf artwork, which needs one because the system draws
-/// its own title into the same corner. Rendered against a white still, a dark still and a busy one,
-/// the opaque track carries itself and the label carries on a two-layer shadow; the scrim variant
-/// only dimmed the lower third of every partly-watched card in a row where nearly all of them are.
+/// its own title into the same corner. The scrim variant only dimmed the lower third of every
+/// partly-watched card in a row where nearly all of them are, so each mark brings its own ground
+/// instead: the track is opaque, and the remaining time sits on a badge filled with the accent.
+///
+/// That badge replaces a bare white number on a two-layer shadow (Sodalite#176). A shadow darkens
+/// what is behind a glyph by a share, so on a white still the number stood on light grey, and on a
+/// busy one the edge it drew was one more edge among the picture's own.
 struct ResumeProgressBar: View {
     /// 0...1. Callers hold Jellyfin percentages; they convert, so the view has a single unit.
     let fraction: Double
@@ -105,6 +109,10 @@ struct ResumeProgressBar: View {
     /// The tier's poster width, not this card's width.
     let posterWidth: CGFloat
     var scale: CGFloat = 1
+
+    /// The badge needs the accent's ROLES, fill and what is legible on it, which the environment
+    /// `.tint` cannot hand out: it is an opaque ShapeStyle.
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     private var inset: CGFloat { PosterBadgeMetrics.checkInset(posterWidth: posterWidth, scale: scale) }
     private var trackHeight: CGFloat { PosterBadgeMetrics.trackHeight(posterWidth: posterWidth, scale: scale) }
@@ -142,13 +150,12 @@ struct ResumeProgressBar: View {
     /// tall as the capsule when there is no time to show, so its meter sits lower on the card than
     /// the meter on the card beside it, which is visible in any row that mixes the two.
     ///
-    /// The spacer is a hidden `Text` in the same font rather than an arithmetic line height: a font's
-    /// line height is not its point size, and guessing the factor would drift per platform.
+    /// The spacer is the badge's own text and padding, hidden, rather than an arithmetic line
+    /// height: a font's line height is not its point size, and guessing the factor would drift per
+    /// platform.
     private var unlabelledTrack: some View {
         ZStack {
-            Text(verbatim: "0")
-                .font(.system(size: labelSize, weight: .semibold))
-                .hidden()
+            badgeText("0").hidden()
             track
         }
     }
@@ -166,23 +173,34 @@ struct ResumeProgressBar: View {
                         .frame(width: geo.size.width * min(max(fraction, 0), 1))
                 }
             }
+            // Flattened for the same reason as the badge, or the fill casts a shadow into the track.
+            .compositingGroup()
             .shadow(color: .black.opacity(0.5), radius: trackHeight * 0.5)
     }
 
     private func label(_ text: String) -> some View {
+        badgeText(text)
+            .foregroundStyle(appearanceTheme.palette.foreground.color)
+            .background(appearanceTheme.palette.control.color, in: Capsule())
+            // The same edge the track wears, for the badge itself, when the accent and the still
+            // share a colour. Flattened first: a shadow on an uncomposited view is applied to each
+            // child, so the number cast its own shadow onto the badge (seen on the TV, 2026-10-03).
+            .compositingGroup()
+            .shadow(color: .black.opacity(0.5), radius: trackHeight * 0.5)
+    }
+
+    /// The number in the badge's geometry, without its colours, so the unlabelled row can reserve
+    /// exactly this height.
+    private func badgeText(_ text: String) -> some View {
         Text(text)
             // Fixed, like the poster badges: it is sized off the artwork it sits on, so growing it
             // with the viewer's Dynamic Type setting would push it out of a card that stayed put.
             .font(.system(size: labelSize, weight: .semibold))
-            .foregroundStyle(.white)
             .lineLimit(1)
-            // Never truncate. The row either has room for the whole label or drops it, and that is
+            // Never truncate. The row either has room for the whole badge or drops it, and that is
             // ViewThatFits' decision, which needs the natural width to make.
             .fixedSize()
-            // Two layers, not one. A tight radius alone draws a contour around the glyphs and a wide
-            // one alone reads as a grey smudge on a bright still; together they give the number an
-            // edge and a soft ground, the same lesson as the detail logo's glow (Sodalite#97).
-            .shadow(color: .black.opacity(0.7), radius: labelSize * 0.1)
-            .shadow(color: .black.opacity(0.45), radius: labelSize * 0.5)
+            .padding(.horizontal, labelSize * PosterBadgeMetrics.pillHorizontalPadding)
+            .padding(.vertical, labelSize * PosterBadgeMetrics.pillVerticalPadding)
     }
 }

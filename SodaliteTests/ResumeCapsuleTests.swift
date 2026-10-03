@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import SwiftUI
+import UIKit
 @testable import Sodalite
 
 /// Sodalite#99 replaced a 10pt full-bleed bar with an inset capsule plus a remaining-time label.
@@ -53,19 +54,49 @@ struct ResumeCapsuleTests {
         }
     }
 
-    /// One size for both text marks on artwork, not two. The old step (label 0.075 against a 0.09
-    /// pill) was measured against the pill it stands next to, so when Sodalite#79 round 2 cut the
-    /// pill to 0.06 the bare number would have become the loudest mark on the card. What separates
-    /// them is the pill's scrim and hairline, not a point size.
-    @Test func theLabelMatchesThePillBesideIt() {
+    /// The badge is read from the sofa on every Continue Watching card, a corner pill is a tag, so
+    /// the badge stands one step above it (Sodalite#176). They were one size while the number was
+    /// bare, because a naked number as large as a scrimmed pill dominated the card.
+    @Test func theBadgeIsNeverSmallerThanThePill() {
         for tier in tiers {
             for scale in scales {
                 let width = tier.metrics.posterSize.width
                 let label = PosterBadgeMetrics.remainingLabelSize(posterWidth: width, scale: scale)
-                #expect(label == PosterBadgeMetrics.fontSize(posterWidth: width, scale: scale))
+                #expect(label >= PosterBadgeMetrics.fontSize(posterWidth: width, scale: scale))
                 #expect(label >= 10, "\(tier.name) at \(scale) is \(label)pt, below reading size")
             }
         }
+        let tv = LayoutMetrics.tv.posterSize.width
+        #expect(PosterBadgeMetrics.remainingLabelSize(posterWidth: tv, scale: 1)
+                > PosterBadgeMetrics.fontSize(posterWidth: tv, scale: 1))
+    }
+
+    /// What the guard costs, per language: the badge is dropped where a card cannot hold it next to
+    /// a meter of the minimum share, and that must stay the one case it was built for. The badge's
+    /// padding moved this once already, silently taking every Russian hour form off the phone
+    /// poster, which is why it is measured and not reasoned.
+    @Test func onlyTheLongestHourFormOnTheSmallestPosterLosesItsBadge() {
+        let locales = ["cs", "da", "de", "el", "en", "es", "fi", "fr", "hr", "hu", "it", "ja", "ko",
+                       "nb", "nl", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk", "sv", "tr", "uk",
+                       "zh-Hans", "zh-Hant"]
+        var dropped: [String] = []
+        for tier in tiers {
+            let width = tier.metrics.posterSize.width
+            let size = PosterBadgeMetrics.remainingLabelSize(posterWidth: width, scale: 1)
+            let font = UIFont.systemFont(ofSize: size, weight: .semibold)
+            let available = width - 2 * PosterBadgeMetrics.checkInset(posterWidth: width, scale: 1)
+            let fixed = width * PosterBadgeMetrics.minimumTrackShare
+                + PosterBadgeMetrics.labelGap(posterWidth: width, scale: 1)
+                + 2 * size * PosterBadgeMetrics.pillHorizontalPadding
+            for identifier in locales {
+                let text = Duration.seconds(3 * 3600 + 48 * 60).formatted(
+                    .units(allowed: [.hours, .minutes], width: .narrow, fractionalPart: .hide(rounded: .up))
+                        .locale(Locale(identifier: identifier)))
+                let textWidth = (text as NSString).size(withAttributes: [.font: font]).width
+                if fixed + textWidth > available { dropped.append("\(tier.name) \(identifier)") }
+            }
+        }
+        #expect(dropped == ["iPhone zh-Hans"])
     }
 
     /// The guard that drops the label. It is a share of the card, so it holds at both card scales
