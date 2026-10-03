@@ -29,6 +29,7 @@ final class HDR10PlusProbeStore {
     )
 
     private struct Key: Hashable {
+        let serverID: String?
         let itemID: String
         let sourceID: String
     }
@@ -40,11 +41,12 @@ final class HDR10PlusProbeStore {
     private var answered: Set<Key> = []
     private var inFlight: Set<Key> = []
 
-    private let streamURL: @MainActor (_ itemID: String, _ sourceID: String, _ container: String?) -> URL?
+    /// Takes the item so the URL is built against the server it came from (Sodalite#85).
+    private let streamURL: @MainActor (_ item: JellyfinItem, _ sourceID: String, _ container: String?) -> URL?
     private let isEnabled: @MainActor () -> Bool
     private let probe: @Sendable (URL, ProbeCancellation) throws -> Bool
 
-    init(streamURL: @escaping @MainActor (String, String, String?) -> URL?,
+    init(streamURL: @escaping @MainActor (JellyfinItem, String, String?) -> URL?,
          isEnabled: @escaping @MainActor () -> Bool,
          probe: @escaping @Sendable (URL, ProbeCancellation) throws -> Bool = HDR10PlusProbeStore.engineProbe) {
         self.streamURL = streamURL
@@ -67,7 +69,7 @@ final class HDR10PlusProbeStore {
     /// under the resolved source.
     func carriesHDR10Plus(item: JellyfinItem, sourceID: String?) -> Bool {
         guard let source = item.effectiveMediaSource(id: sourceID) else { return false }
-        return confirmed.contains(Key(itemID: item.id, sourceID: source.id))
+        return confirmed.contains(Key(serverID: item.serverID, itemID: item.id, sourceID: source.id))
     }
 
     /// The only case worth a connection: a movie or episode whose badge currently reads plain HDR10.
@@ -91,9 +93,9 @@ final class HDR10PlusProbeStore {
         guard isEnabled(), Self.shouldProbe(item: item, sourceID: sourceID) else { return }
         guard let source = item.effectiveMediaSource(id: sourceID) else { return }
 
-        let key = Key(itemID: item.id, sourceID: source.id)
+        let key = Key(serverID: item.serverID, itemID: item.id, sourceID: source.id)
         guard !answered.contains(key), !inFlight.contains(key) else { return }
-        guard let url = streamURL(item.id, source.id, source.container) else { return }
+        guard let url = streamURL(item, source.id, source.container) else { return }
 
         inFlight.insert(key)
         defer { inFlight.remove(key) }

@@ -201,16 +201,21 @@ final class DependencyContainer {
         self.spoilerRevealMemory = SpoilerRevealMemory(store: defaults)
         self.spoilerSeriesRules = SpoilerSeriesRules(store: defaults)
         self.storeKitService = StoreKitService()
+        let libraryService = self.jellyfinLibraryService
         self.posterBadgeStore = PosterBadgeStore(
-            library: self.jellyfinLibraryService,
+            route: { [weak sessionRegistry] serverID in
+                guard let session = sessionRegistry?.session(forServerID: serverID), !session.isActive
+                else { return (libraryService, nil) }
+                return (session.libraryService, session.userID)
+            },
             isEnabled: { profileSettings.current.appearance.showPosterBadges }
         )
         // Static=true, so the probe always opens the original file and never a transcode.
         let playbackService = self.jellyfinPlaybackService
         self.hdr10PlusProbeStore = HDR10PlusProbeStore(
-            streamURL: { itemID, sourceID, container in
-                playbackService.buildStreamURL(
-                    itemID: itemID, mediaSourceID: sourceID, container: container, isStatic: true)
+            streamURL: { [weak sessionRegistry] item, sourceID, container in
+                (sessionRegistry?.session(for: item).playbackService ?? playbackService).buildStreamURL(
+                    itemID: item.id, mediaSourceID: sourceID, container: container, isStatic: true)
             },
             isEnabled: { profileSettings.current.appearance.showDetailBadges }
         )
