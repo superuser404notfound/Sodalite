@@ -829,6 +829,14 @@ final class PlayerHostController: AVPlayerViewController {
     private func hideChrome(on v: UIView, preserve: Set<ObjectIdentifier>) {
         if preserve.contains(ObjectIdentifier(v)) { return }
         let typeName = String(describing: type(of: v))
+        // Sodalite#177: iOS 26+ draws a full-screen AVMobileGlassBackgroundDimmingView (black at 0.40)
+        // under its controls, which darkened the picture to 60% for as long as AVKit showed them: a few
+        // seconds on the native path, the whole session on the SW path (no player, controls never hide).
+        // AVKit drives its alpha without a layout pass, so a zeroed alpha comes back; hidden sticks.
+        if typeName.contains("Dimming") {
+            v.isHidden = true
+            return
+        }
         // Keywords matched against AVKit's runtime view hierarchy: Controls (_AVPlayerControlsView), Transport (scrubber), Info (title/_AVPlayerInfoView), Menu (AVInfoMenuCell picker rows), Focus (_AVFocusContainerView). Match Focus not Container (too broad).
         let isChrome = typeName.contains("Controls")
             || typeName.contains("Transport")
