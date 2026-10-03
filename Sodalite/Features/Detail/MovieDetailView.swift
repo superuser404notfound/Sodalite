@@ -3,6 +3,10 @@ import SwiftUI
 struct MovieDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -52,6 +56,7 @@ struct MovieDetailView: View {
     /// account granted deletion on one library. The policy remains the fallback for a response
     /// without the field, read from AppState.activeUser so a profile switch updates visibility.
     private func canDelete(_ item: JellyfinItem) -> Bool {
+        guard session.allowsDeleteAndDownload else { return false }
         if let serverAnswer = item.canDelete { return serverAnswer }
         return appState.activeUser?.canDeleteContent == true
     }
@@ -101,13 +106,13 @@ struct MovieDetailView: View {
             if !isShowing { streamFromServer = false }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? (viewModel?.item ?? item) : nil,
                     startFromBeginning: playFromBeginning,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -121,13 +126,13 @@ struct MovieDetailView: View {
             }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showTrailer,
                     item: showTrailer ? trailerItem : nil,
                     startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -247,14 +252,14 @@ struct MovieDetailView: View {
                 .detailCoverPush()
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    libraryService: dependencies.jellyfinLibraryService,
-                    playbackService: dependencies.jellyfinPlaybackService,
+                    libraryService: session.libraryService,
+                    playbackService: session.playbackService,
                     seerrMediaService: catalogSimilarService,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
@@ -664,7 +669,9 @@ struct MovieDetailView: View {
             .focused($focusedAction, equals: .watched)
 
             #if os(iOS)
-            DownloadActionButton(item: vm.item, target: $downloadTarget)
+            if session.allowsDeleteAndDownload {
+                DownloadActionButton(item: vm.item, target: $downloadTarget)
+            }
             #endif
 
             // Last of the informational controls, and the page's only route to the full synopsis

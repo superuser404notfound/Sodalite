@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DetailRouterView: View {
+    @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var inheritedSession
     let item: JellyfinItem
     /// TopShelf playAction: start playback as soon as the detail view model is ready. Collections and playlists ignore it; the shelf never emits them and "play a collection" is not a defined action.
     var autoPlay: Bool = false
@@ -33,5 +35,13 @@ struct DetailRouterView: View {
             }
         }
         .hidesShellTabBar()
+        .environment(\.serverSession, session)
+    }
+
+    /// An item without a `ServerId` (the series stub built for an episode) stays on the session it
+    /// was opened from.
+    private var session: ServerSession {
+        guard item.serverID != nil else { return inheritedSession ?? dependencies.sessionRegistry.active }
+        return dependencies.sessionRegistry.session(for: item)
     }
 }

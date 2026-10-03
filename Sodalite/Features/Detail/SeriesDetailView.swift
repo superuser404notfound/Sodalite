@@ -3,6 +3,10 @@ import SwiftUI
 struct SeriesDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -63,6 +67,7 @@ struct SeriesDetailView: View {
     /// See `MovieDetailView.canDelete(_:)`: the item's own `CanDelete` decides wherever the server
     /// sent it, the user policy is the fallback for a response without it (Sodalite#146).
     private func canDelete(_ item: JellyfinItem) -> Bool {
+        guard session.allowsDeleteAndDownload else { return false }
         if let serverAnswer = item.canDelete { return serverAnswer }
         return appState.activeUser?.canDeleteContent == true
     }
@@ -244,13 +249,13 @@ struct SeriesDetailView: View {
             if !isShowing { streamFromServer = false }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: playItem,
                     startFromBeginning: playFromBeginning,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -398,15 +403,15 @@ struct SeriesDetailView: View {
                 .detailCoverPush()
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if viewModel == nil, let userID = sessionUserID {
                 selectedEpisode = initialEpisode
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    libraryService: dependencies.jellyfinLibraryService,
-                    playbackService: dependencies.jellyfinPlaybackService,
+                    libraryService: session.libraryService,
+                    playbackService: session.playbackService,
                     seerrMediaService: catalogSimilarService,
                     initialEpisode: initialEpisode,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
@@ -910,7 +915,7 @@ struct SeriesDetailView: View {
 
     @ViewBuilder
     private func spoilerRuleMenu(seriesID: String) -> some View {
-        let key = SpoilerPolicy.seriesKey(userID: appState.activeUser?.id ?? "", seriesID: seriesID)
+        let key = SpoilerPolicy.seriesKey(userID: sessionUserID ?? "", seriesID: seriesID)
         let current = dependencies.spoilerSeriesRules.rule(for: key)
         ForEach(SpoilerSeriesRule.allCases, id: \.self) { rule in
             Button {
@@ -924,7 +929,7 @@ struct SeriesDetailView: View {
     }
 
     private func setSpoilerRule(_ rule: SpoilerSeriesRule, seriesID: String) {
-        guard let userID = appState.activeUser?.id else { return }
+        guard let userID = sessionUserID else { return }
         dependencies.spoilerSeriesRules.set(
             rule,
             for: SpoilerPolicy.seriesKey(userID: userID, seriesID: seriesID)
@@ -964,14 +969,14 @@ struct SeriesDetailView: View {
                     // Spinner on tap (VideoShuffleQueue.build lands a few hundred ms later), else the row sits inert until showPlayer flips.
                     isLoading: isShuffleLoading,
                     action: {
-                        guard let userID = appState.activeUser?.id else { return }
+                        guard let userID = sessionUserID else { return }
                         let seriesID = vm.item.id
                         isShuffleLoading = true
                         Task {
                             let queue = await VideoShuffleQueue.build(
                                 parentID: seriesID,
                                 itemTypes: [.episode],
-                                service: dependencies.jellyfinLibraryService,
+                                service: session.libraryService,
                                 userID: userID
                             )
                             isShuffleLoading = false
@@ -1042,7 +1047,7 @@ struct SeriesDetailView: View {
             if !isShowingEpisode {
                 let seriesID = vm.item.id
                 let hidesNow = dependencies
-                    .spoilerPolicy(userID: appState.activeUser?.id)
+                    .spoilerPolicy(userID: sessionUserID)
                     .effectiveHidesSeries(seriesID)
                 GlassActionButton(
                     title: hidesNow ? "detail.spoiler.show" : "detail.spoiler.hide",
@@ -1090,7 +1095,9 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .watched)
 
                 #if os(iOS)
-                DownloadActionButton(item: ep, target: $downloadTarget)
+                if session.allowsDeleteAndDownload {
+                    DownloadActionButton(item: ep, target: $downloadTarget)
+                }
                 #endif
             }
 
@@ -1299,7 +1306,7 @@ struct SeriesDetailView: View {
         }
 
         #if os(iOS)
-        if dependencies.downloadManager != nil {
+        if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
             if dependencies.downloadStore.completedItem(episode.id) != nil {
                 Button {
                     streamFromServer = true
@@ -1425,7 +1432,7 @@ struct SeriesDetailView: View {
                                     )
                                 }
                                 #if os(iOS)
-                                if dependencies.downloadManager != nil {
+                                if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
                                     Button {
                                         downloadTarget = .season(
                                             seriesID: vm.item.id, seasonID: season.id,

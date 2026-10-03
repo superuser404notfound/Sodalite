@@ -39,6 +39,7 @@ struct ContentLogoTitle<Fallback: View>: View {
     @ViewBuilder let fallback: () -> Fallback
 
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSession
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.displayScale) private var displayScale
@@ -90,6 +91,7 @@ struct ContentLogoTitle<Fallback: View>: View {
         let box = tier.requestPixels(scale: pixelScale)
         return dependencies.jellyfinImageService.imageURL(
             itemID: itemID,
+            serverID: serverSession?.server?.id,
             imageType: .logo,
             maxWidth: box.width,
             maxHeight: box.height

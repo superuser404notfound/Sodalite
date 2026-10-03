@@ -23,6 +23,10 @@ struct PersonDetailView: View {
 
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -303,7 +307,7 @@ struct PersonDetailView: View {
         }
         guard let id = profile?.jellyfinPersonID else { return nil }
         return dependencies.jellyfinImageService.personImageURL(
-            personID: id, tag: profile?.jellyfinImageTag, maxWidth: ImageWidth.avatar
+            personID: id, tag: profile?.jellyfinImageTag, maxWidth: ImageWidth.avatar, serverID: session.server?.id
         )
     }
 
@@ -320,7 +324,7 @@ struct PersonDetailView: View {
     private func bootstrap() async {
         guard viewModel == nil else { return }
         let vm = PersonDetailViewModel(
-            itemService: dependencies.jellyfinItemService,
+            itemService: session.itemService,
             mediaService: dependencies.seerrMediaService,
             searchService: dependencies.seerrSearchService,
             // Follows the Catalog tab: with it hidden, the filmography would be the same catalog one level deeper (Sodalite#62).
@@ -328,7 +332,7 @@ struct PersonDetailView: View {
                 appState: appState,
                 appearance: dependencies.appearancePreferences
             ),
-            userID: appState.activeUser?.id
+            userID: sessionUserID
         )
         viewModel = vm
         await reload()
@@ -348,8 +352,8 @@ struct PersonDetailView: View {
         Task {
             let status = media.mediaInfo?.status
             if status == .available || status == .partiallyAvailable,
-               let userID = appState.activeUser?.id,
-               let item = try? await dependencies.jellyfinItemService.findByTmdbID(
+               let userID = sessionUserID,
+               let item = try? await session.itemService.findByTmdbID(
                    userID: userID, tmdbID: media.id, searchTerm: media.displayTitle
                ) {
                 navigateToJellyfinItem = item

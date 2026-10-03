@@ -27,6 +27,10 @@ enum WatchStatusFilter: String, CaseIterable, Hashable {
 struct FilteredGridView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @State private var items: [JellyfinItem]
     @State private var isLoading: Bool
     @State private var selectedItem: JellyfinItem?
@@ -141,7 +145,7 @@ struct FilteredGridView: View {
                     title: "action.shuffle",
                     systemImage: "shuffle",
                     action: {
-                        guard let userID = appState.activeUser?.id else { return }
+                        guard let userID = sessionUserID else { return }
                         // Shows libraries shuffle episodes across the whole
                         // library; everything else keeps its own item types.
                         var types = query.includeItemTypes ?? [.movie]
@@ -151,7 +155,7 @@ struct FilteredGridView: View {
                                 parentID: query.parentID,
                                 baseQuery: query,
                                 itemTypes: types,
-                                service: dependencies.jellyfinLibraryService,
+                                service: session.libraryService,
                                 userID: userID
                             )
                             guard let first = queue.first else { return }
@@ -244,13 +248,13 @@ struct FilteredGridView: View {
             }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
                     startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -369,7 +373,7 @@ struct FilteredGridView: View {
     }
 
     private func loadItems() async {
-        guard let userID = appState.activeUser?.id else { return }
+        guard let userID = sessionUserID else { return }
         loadGeneration += 1
         let generation = loadGeneration
 
@@ -388,7 +392,7 @@ struct FilteredGridView: View {
 
         // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
         async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
-            try? await dependencies.jellyfinLibraryService.getItems(
+            try? await session.libraryService.getItems(
                 userID: userID, query: effectiveQuery
             )
         }()
@@ -409,7 +413,7 @@ struct FilteredGridView: View {
             if let filter = watchFilterValue {
                 allQuery.filters = [filter]
             }
-            return try? await dependencies.jellyfinLibraryService.getItems(
+            return try? await session.libraryService.getItems(
                 userID: userID, query: allQuery
             ).items
         }()
@@ -501,7 +505,7 @@ struct FilteredGridView: View {
 
     private func loadMore() async {
         defer { isLoadingMore = false }
-        guard let userID = appState.activeUser?.id else { return }
+        guard let userID = sessionUserID else { return }
         let generation = loadGeneration
 
         var pageQuery = sort.applied(to: query)
@@ -513,7 +517,7 @@ struct FilteredGridView: View {
         if nextStartIndex == 0 { nextStartIndex = items.count }
         pageQuery.startIndex = nextStartIndex
 
-        guard let response = try? await dependencies.jellyfinLibraryService.getItems(
+        guard let response = try? await session.libraryService.getItems(
             userID: userID, query: pageQuery
         ) else { return }
         guard !Task.isCancelled, generation == loadGeneration else { return }
