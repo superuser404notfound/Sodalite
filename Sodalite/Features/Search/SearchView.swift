@@ -119,10 +119,9 @@ struct SearchView: View {
             }
         }
         guard !urls.isEmpty else { return }
-        let token = dependencies.jellyfinClient.accessToken
-        let host = dependencies.jellyfinClient.baseURL?.host
+        let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
         Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, authToken: token, jellyfinHost: host)
+            await ImageCache.prefetch(urls, auth: auth)
         }
     }
 
