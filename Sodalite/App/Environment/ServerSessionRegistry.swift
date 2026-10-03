@@ -47,7 +47,9 @@ final class ServerSessionRegistry {
         let wanted = candidates.filter { !muted.contains($0.server.id) }
         var next: [String: (session: ServerSession, credential: SessionCredential)] = [:]
         for candidate in wanted {
-            if let existing = secondaries[candidate.server.id], existing.credential == candidate.credential {
+            // A changed address or name builds a fresh session, so its client and route follow.
+            if let existing = secondaries[candidate.server.id], existing.credential == candidate.credential,
+               existing.session.server == candidate.server {
                 next[candidate.server.id] = existing
             } else {
                 next[candidate.server.id] = (
@@ -83,28 +85,6 @@ final class ServerSessionRegistry {
         let client = session(forServerID: serverID).client
         guard let base = client.baseURL else { return nil }
         return (base, client.accessToken)
-    }
-
-    /// The token a request to `host:port` may carry, matched against every participant's base URL
-    /// with scheme default ports applied.
-    func token(forHost host: String?, port: Int?) -> String? {
-        guard let host else { return nil }
-        for session in participants {
-            guard let base = session.client.baseURL, base.host == host else { continue }
-            let basePort = base.port ?? Self.defaultPort(base.scheme)
-            if basePort == (port ?? Self.defaultPort(base.scheme)) {
-                return session.client.accessToken
-            }
-        }
-        return nil
-    }
-
-    private static func defaultPort(_ scheme: String?) -> Int? {
-        switch scheme?.lowercased() {
-        case "https": 443
-        case "http": 80
-        default: nil
-        }
     }
 
     private func noteParticipantsChanged() {

@@ -259,7 +259,7 @@ struct SeriesDetailView: View {
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
                     preferredMediaSourceID: versionSelection.preferredSourceID(for: playItem),
                     playQueue: playQueue,
@@ -641,7 +641,8 @@ struct SeriesDetailView: View {
                         let cast = jellyfinCastMembers(
                             from: people,
                             imageService: dependencies.jellyfinImageService,
-                            imageWidth: metrics.castImageWidth
+                            imageWidth: metrics.castImageWidth,
+                            serverID: vm.item.serverID
                         )
                         MediaCastRow(
                             members: cast,
@@ -915,7 +916,7 @@ struct SeriesDetailView: View {
 
     @ViewBuilder
     private func spoilerRuleMenu(seriesID: String) -> some View {
-        let key = SpoilerPolicy.seriesKey(userID: sessionUserID ?? "", seriesID: seriesID)
+        let key = SpoilerPolicy.seriesKey(userID: appState.activeUser?.id ?? "", seriesID: seriesID)
         let current = dependencies.spoilerSeriesRules.rule(for: key)
         ForEach(SpoilerSeriesRule.allCases, id: \.self) { rule in
             Button {
@@ -929,7 +930,7 @@ struct SeriesDetailView: View {
     }
 
     private func setSpoilerRule(_ rule: SpoilerSeriesRule, seriesID: String) {
-        guard let userID = sessionUserID else { return }
+        guard let userID = appState.activeUser?.id else { return }
         dependencies.spoilerSeriesRules.set(
             rule,
             for: SpoilerPolicy.seriesKey(userID: userID, seriesID: seriesID)
@@ -1047,7 +1048,7 @@ struct SeriesDetailView: View {
             if !isShowingEpisode {
                 let seriesID = vm.item.id
                 let hidesNow = dependencies
-                    .spoilerPolicy(userID: sessionUserID)
+                    .spoilerPolicy(userID: appState.activeUser?.id)
                     .effectiveHidesSeries(seriesID)
                 GlassActionButton(
                     title: hidesNow ? "detail.spoiler.show" : "detail.spoiler.hide",

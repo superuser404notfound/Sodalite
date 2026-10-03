@@ -116,7 +116,7 @@ struct MovieDetailView: View {
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
                     preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item),
                     localDownload: streamFromServer ? nil : dependencies.downloadStore.completedItem((viewModel?.item ?? item).id),
@@ -136,7 +136,7 @@ struct MovieDetailView: View {
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     // Trailer is a distinct server item; the movie's
                     // cached PlaybackInfo does not apply to it.
                     cachedPlaybackInfo: nil
@@ -375,7 +375,8 @@ struct MovieDetailView: View {
                     let cast = jellyfinCastMembers(
                         from: people,
                         imageService: dependencies.jellyfinImageService,
-                        imageWidth: metrics.castImageWidth
+                        imageWidth: metrics.castImageWidth,
+                        serverID: vm.item.serverID
                     )
                     MediaCastRow(
                         members: cast,

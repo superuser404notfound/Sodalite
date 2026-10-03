@@ -32,7 +32,7 @@ struct ImageAuthTests {
     }
 
     @Test func defaultPortsMatchImplicitly() {
-        let auth = ImageAuth(tokens: ["jf.example:443": "tok"])
+        let auth = ImageAuth(bases: [(URL(string: "https://jf.example")!, "tok")])
         #expect(auth.token(for: URL(string: "https://jf.example/Items/1")!) == "tok")
         #expect(auth.token(for: URL(string: "https://jf.example:443/Items/1")!) == "tok")
         #expect(auth.token(for: URL(string: "http://jf.example/Items/1")!) == nil)

@@ -86,17 +86,6 @@ struct ServerSessionRegistryTests {
         #expect(registry.participants.count == 1)
     }
 
-    @Test func tokensAreLookedUpByHostAndPort() {
-        let (registry, _) = makeRegistry()
-        registry.apply(
-            active: (server("a", "http://a.lan:8096"), "u-a"),
-            secondaries: [candidate("b", "http://a.lan:8097")],
-            baseURL: { $0.url })
-        #expect(registry.token(forHost: "a.lan", port: 8096) == "tok-a")
-        #expect(registry.token(forHost: "a.lan", port: 8097) == "tok-b")
-        #expect(registry.token(forHost: "image.tmdb.org", port: nil) == nil)
-    }
-
     @Test func secondaryTokensReachTheLogRedactor() {
         let (registry, _) = makeRegistry()
         registry.apply(

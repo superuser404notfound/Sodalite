@@ -628,10 +628,13 @@ final class DependencyContainer {
 
     /// The session a secondary server contributes to a combined Home: the same pick a switch to it
     /// would make, this device's own token slot first, else the resumable profile (Sodalite#85).
+    /// Unlike a switch, nobody is asked for the Guardian PIN here, so a profile that would cost it
+    /// stays out whichever way its token is stored.
     func secondaryCredential(serverID: String) -> SessionCredential? {
         if let token = try? keychainService.loadString(for: KeychainKeys.accessToken(serverID: serverID)),
            let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID)),
            !token.isEmpty {
+            guard !parentalGateRequired(forActivatingUserID: userID, serverID: serverID) else { return nil }
             return SessionCredential(userID: userID, token: token)
         }
         return resumableProfile(serverID: serverID).map { SessionCredential(userID: $0.id, token: $0.token) }
