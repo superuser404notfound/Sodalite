@@ -114,6 +114,8 @@ final class DependencyContainer {
     /// When each server was added and when its URL slots were last edited, which is what a removal
     /// tombstone and a URL edit have to outrank a stale republish with.
     let serverSyncMetadata: ServerSyncMetadataStore
+    /// When each server was last made active here, which orders a combined Home's secondaries.
+    let serverActivation: ServerActivationStore
     /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
     /// closure so the sign-in route can be tested without a network; the app never replaces it.
     var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
@@ -157,6 +159,7 @@ final class DependencyContainer {
     ) {
         self.serverRouteStore = ServerRouteStore(defaults: defaults)
         self.serverSyncMetadata = ServerSyncMetadataStore(defaults: defaults)
+        self.serverActivation = ServerActivationStore(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
         self.jellyfinClient = JellyfinClient(httpClient: httpClient)
@@ -365,6 +368,7 @@ final class DependencyContainer {
                 accessToken: token
             )
         }
+        serverActivation.stamp(serverID: server.id)
         scheduleRouteResolve()
         return true
     }
@@ -416,7 +420,7 @@ final class DependencyContainer {
             )
         )
 
-
+        serverActivation.stamp(serverID: server.id)
         cloudSyncMarkServer(server.id)
         scheduleRouteResolve()
     }
@@ -697,6 +701,7 @@ final class DependencyContainer {
             SharedSessionMirror.clear()
         }
 
+        serverActivation.stamp(serverID: serverID)
         scheduleRouteResolve()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
@@ -717,6 +722,7 @@ final class DependencyContainer {
         try? keychainService.delete(for: KeychainKeys.rememberedUsers(serverID: serverID))
         // The removal markers go with the server, else re-adding it later holds its profiles out again.
         try? keychainService.delete(for: KeychainKeys.forgottenUsers(serverID: serverID))
+        serverActivation.forget(serverID: serverID)
         // Every profile on the box, not just the active one: the whole server is going.
         FilterCache.shared.evict(serverID: serverID)
         profileSettings.forgetProfiles(onServer: serverID)
@@ -933,6 +939,7 @@ final class DependencyContainer {
         }
 
         let sessionURL = preferredURL(for: server)
+        serverActivation.stamp(serverID: server.id)
         jellyfinClient.baseURL = sessionURL
         jellyfinClient.accessToken = remembered.token
 
