@@ -36,6 +36,8 @@ final class DependencyContainer {
     let jellyfinItemService: JellyfinItemServiceProtocol
     let jellyfinImageService: JellyfinImageService
     let jellyfinPlaybackService: JellyfinPlaybackServiceProtocol
+    /// Every Jellyfin session held at once; the active one wraps `jellyfinClient` (Sodalite#85).
+    let sessionRegistry: ServerSessionRegistry
     /// Per-profile playback and appearance settings plus the shared device values. The two
     /// properties below resolve to the active profile, so a view that reads them follows a switch.
     let profileSettings: ProfileSettingsRegistry
@@ -188,6 +190,14 @@ final class DependencyContainer {
             }
         )
         self.jellyfinPlaybackService = JellyfinPlaybackService(client: jellyfinClient)
+        self.sessionRegistry = ServerSessionRegistry(
+            activeClient: jellyfinClient,
+            httpClient: httpClient,
+            libraryService: jellyfinLibraryService,
+            itemService: jellyfinItemService,
+            playbackService: jellyfinPlaybackService,
+            liveTvService: jellyfinLiveTvService
+        )
         let profileSettings = ProfileSettingsRegistry(defaults: defaults)
         self.profileSettings = profileSettings
         self.trackSelectionMemory = TrackSelectionMemory(store: defaults)
@@ -371,6 +381,7 @@ final class DependencyContainer {
             )
         }
         serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
         scheduleRouteResolve()
         return true
     }
@@ -423,6 +434,7 @@ final class DependencyContainer {
         )
 
         serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
         scheduleRouteResolve()
     }
@@ -497,6 +509,7 @@ final class DependencyContainer {
         if !isApplyingCloudChanges, updated != current {
             serverSyncMetadata.noteURLsChanged(serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
         appState?.updateActiveServer(updated)
         if activeServer?.id == serverID {
@@ -715,6 +728,7 @@ final class DependencyContainer {
         }
 
         serverActivation.stamp(serverID: serverID)
+        refreshSessionRegistry()
         scheduleRouteResolve()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
@@ -787,6 +801,7 @@ final class DependencyContainer {
             }
         }
 
+        refreshSessionRegistry()
 
         // Only signal when the ACTIVE server was removed; an inactive removal's bump would needlessly cancel probes + force a Home reload.
         if activeID == serverID, !signalAlreadyScheduled {
@@ -840,6 +855,7 @@ final class DependencyContainer {
         var forgotten = listForgottenUsers(serverID: user.serverID)
         forgotten.removeValue(forKey: user.id)
         setForgottenUsers(forgotten, serverID: user.serverID)
+        refreshSessionRegistry()
         cloudSyncMarkServer(user.serverID)
     }
 
@@ -912,6 +928,7 @@ final class DependencyContainer {
         if authPreferences.defaultUserID(serverID: serverID) == id {
             authPreferences.setDefaultUserID(nil, serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
     }
 
@@ -964,6 +981,7 @@ final class DependencyContainer {
 
         // Seerr left to the caller's restoreSeerrSession(forJellyfinUserID:jellyfinServerID:) so each profile picks up its own session, or lands on the empty state.
 
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
         scheduleRouteResolve()
     }
