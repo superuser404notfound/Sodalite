@@ -8,32 +8,37 @@ enum ImageType: String, Sendable {
 }
 
 final class JellyfinImageService {
-    private let baseURL: () -> URL?
-    private let accessToken: () -> String?
+    /// Base URL and token of the server an image lives on; nil `serverID` means the active one
+    /// (Sodalite#85).
+    private let endpoint: (String?) -> (baseURL: URL, token: String?)?
 
-    init(
+    init(endpoint: @escaping (String?) -> (baseURL: URL, token: String?)?) {
+        self.endpoint = endpoint
+    }
+
+    convenience init(
         baseURLProvider: @escaping () -> URL?,
         accessTokenProvider: @escaping () -> String? = { nil }
     ) {
-        self.baseURL = baseURLProvider
-        self.accessToken = accessTokenProvider
+        self.init(endpoint: { _ in baseURLProvider().map { ($0, accessTokenProvider()) } })
     }
 
     func imageURL(
         itemID: String,
+        serverID: String? = nil,
         imageType: ImageType = .primary,
         tag: String? = nil,
         maxWidth: Int? = nil,
         maxHeight: Int? = nil
     ) -> URL? {
-        guard let base = baseURL() else { return nil }
+        guard let (base, token) = endpoint(serverID) else { return nil }
         return Self.buildURL(
             base: base,
             path: "/Items/\(itemID)/Images/\(imageType.rawValue)",
             tag: tag,
             maxWidth: maxWidth,
             maxHeight: maxHeight,
-            token: accessToken()
+            token: token
         )
     }
 
@@ -69,10 +74,10 @@ final class JellyfinImageService {
 
     func backdropURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.fullBleed) -> URL? {
         if let tags = item.backdropImageTags, let tag = tags.first {
-            return imageURL(itemID: item.id, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
         }
         if let tags = item.parentBackdropImageTags, let tag = tags.first, let seriesId = item.seriesId {
-            return imageURL(itemID: seriesId, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
         }
         return nil
     }
@@ -82,7 +87,7 @@ final class JellyfinImageService {
     func parentBackdropURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.fullBleed) -> URL? {
         guard let tags = item.parentBackdropImageTags, let tag = tags.first, let seriesId = item.seriesId
         else { return nil }
-        return imageURL(itemID: seriesId, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+        return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
     }
 
     /// Sodalite#66. Show-level art only: the series backdrop, else the series poster. Never the
@@ -91,35 +96,35 @@ final class JellyfinImageService {
     func seriesArtworkURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.wideCard) -> URL? {
         if let url = parentBackdropURL(for: item, maxWidth: maxWidth) { return url }
         guard let seriesId = item.seriesId, let tag = item.seriesPrimaryImageTag else { return nil }
-        return imageURL(itemID: seriesId, imageType: .primary, tag: tag, maxWidth: maxWidth)
+        return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
     }
 
     /// Episode thumbnail fallback chain: own primary → own thumb → own backdrop → series backdrop → series poster.
     func episodeThumbnailURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.wideCard) -> URL? {
         if let tag = item.imageTags?.primary {
-            return imageURL(itemID: item.id, imageType: .primary, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
         }
         if let tag = item.imageTags?.thumb {
-            return imageURL(itemID: item.id, imageType: .thumb, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .thumb, tag: tag, maxWidth: maxWidth)
         }
         if let tags = item.backdropImageTags, let tag = tags.first {
-            return imageURL(itemID: item.id, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
         }
         if let tags = item.parentBackdropImageTags, let tag = tags.first, let seriesId = item.seriesId {
-            return imageURL(itemID: seriesId, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
         }
         if item.type == .episode, let seriesId = item.seriesId, let tag = item.seriesPrimaryImageTag {
-            return imageURL(itemID: seriesId, imageType: .primary, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
         }
         return nil
     }
 
     func posterURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.card) -> URL? {
         if let tag = item.imageTags?.primary {
-            return imageURL(itemID: item.id, imageType: .primary, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
         }
         if item.type == .episode, let seriesId = item.seriesId, let tag = item.seriesPrimaryImageTag {
-            return imageURL(itemID: seriesId, imageType: .primary, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: seriesId, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
         }
         return nil
     }
@@ -127,7 +132,7 @@ final class JellyfinImageService {
     /// Music cover: album primary image else the item's own poster.
     func musicCoverURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.card) -> URL? {
         if let albumID = item.albumId, let albumTag = item.albumPrimaryImageTag {
-            return imageURL(itemID: albumID, imageType: .primary, tag: albumTag, maxWidth: maxWidth)
+            return imageURL(itemID: albumID, serverID: item.serverID, imageType: .primary, tag: albumTag, maxWidth: maxWidth)
         }
         return posterURL(for: item, maxWidth: maxWidth)
     }
@@ -137,31 +142,31 @@ final class JellyfinImageService {
     /// tile on screen.
     func libraryArtworkURL(for library: JellyfinLibrary, maxWidth: Int = ImageWidth.wideCard) -> URL? {
         if let tag = library.imageTags?.primary {
-            return imageURL(itemID: library.id, imageType: .primary, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: library.id, serverID: library.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
         }
         if let tag = library.imageTags?.thumb {
-            return imageURL(itemID: library.id, imageType: .thumb, tag: tag, maxWidth: maxWidth)
+            return imageURL(itemID: library.id, serverID: library.serverID, imageType: .thumb, tag: tag, maxWidth: maxWidth)
         }
         return nil
     }
 
-    func personImageURL(personID: String, tag: String?, maxWidth: Int = ImageWidth.avatar) -> URL? {
-        guard let base = baseURL(), let tag else { return nil }
+    func personImageURL(personID: String, tag: String?, maxWidth: Int = ImageWidth.avatar, serverID: String? = nil) -> URL? {
+        guard let (base, token) = endpoint(serverID), let tag else { return nil }
         return Self.buildURL(
             base: base,
             path: "/Items/\(personID)/Images/Primary",
             tag: tag,
             maxWidth: maxWidth,
             maxHeight: nil,
-            token: accessToken()
+            token: token
         )
     }
 
     /// User avatar under `/Users/{id}/Images/Primary` (vs items' `/Items` prefix). Nil when no avatar so the UI falls back to initials.
-    func userProfileImageURL(userID: String, tag: String?, maxWidth: Int = ImageWidth.avatar) -> URL? {
-        guard let base = baseURL() else { return nil }
+    func userProfileImageURL(userID: String, tag: String?, maxWidth: Int = ImageWidth.avatar, serverID: String? = nil) -> URL? {
+        guard let (base, token) = endpoint(serverID) else { return nil }
         return userProfileImageURL(
-            userID: userID, tag: tag, baseURL: base, token: accessToken(), maxWidth: maxWidth
+            userID: userID, tag: tag, baseURL: base, token: token, maxWidth: maxWidth
         )
     }
 

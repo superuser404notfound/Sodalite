@@ -1107,6 +1107,7 @@
 		C77D3D2A6F5AB6799D6A1F46 /* HomeReleaseRowQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B9F8AC1E525AAB393B265 /* HomeReleaseRowQuery.swift */; };
 		C79A003530C19DF0252ACD0F /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545F0A25E3B7C1295647548F /* HTTPClient.swift */; };
 		C79A0C3A7C7A685CFBA2F8E5 /* LiveTunerGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC26AA8655AB4CC74F3C0793 /* LiveTunerGate.swift */; };
+		C7CC6C7F4B81D51EDFFB53A0 /* ImageServerRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC81EE1E7FB3E28F9E3D22FF /* ImageServerRoutingTests.swift */; };
 		C80E62F59C5872A28C5A57BE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B7A3A1B0D1115927B31D730C /* Localizable.xcstrings */; };
 		C8606BD7F2913B7C4A1DAC6B /* NetworkBufferDepthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741F6735F2BBBAF0C5648BFB /* NetworkBufferDepthTests.swift */; };
 		C87F28FC785A5708EBA31AF6 /* SeerrLibraryDedupe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FA4EA0B999306644936FFA /* SeerrLibraryDedupe.swift */; };
@@ -2256,6 +2257,7 @@
 		EBFD66C8435155A3FFF29632 /* SeerrServiceConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrServiceConfigService.swift; sourceTree = "<group>"; };
 		EC08EF0EAD172AC8712C2435 /* PlayActionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayActionState.swift; sourceTree = "<group>"; };
 		EC26AA8655AB4CC74F3C0793 /* LiveTunerGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTunerGate.swift; sourceTree = "<group>"; };
+		EC81EE1E7FB3E28F9E3D22FF /* ImageServerRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageServerRoutingTests.swift; sourceTree = "<group>"; };
 		ECB2F471C812F74E010AFA5F /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailView.swift; sourceTree = "<group>"; };
 		ED1B66962B0EE533D8025B38 /* ServerSyncMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSyncMetadata.swift; sourceTree = "<group>"; };
 		ED1D214148D8B90DA199B490 /* OptionalTabPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionalTabPolicyTests.swift; sourceTree = "<group>"; };
@@ -2720,6 +2722,7 @@
 				0C6EEE44B397DF5FEE297A84 /* HTTPDiagnosticsTests.swift */,
 				8A6AE703C0A166EA3C902E85 /* ImageLoadLadderTests.swift */,
 				BB7403E5854C3DB4E7342F23 /* ImagePayloadTests.swift */,
+				EC81EE1E7FB3E28F9E3D22FF /* ImageServerRoutingTests.swift */,
 				862B18533CB0A82310522E0E /* ImageWidthTests.swift */,
 				594FF4CD36B27FEFDD9B7F98 /* Issue72LimiterSaturationTests.swift */,
 				7E1A5FB120F71C04FB1DF6C3 /* ItemServerOriginTests.swift */,
@@ -4568,6 +4571,7 @@
 				BD36E6CC476A5BE2E146D08B /* HomeRowIdentityTests.swift in Sources */,
 				F52B009295674B06AF509201 /* ImageLoadLadderTests.swift in Sources */,
 				0F6857072E7F74A5EABBC26C /* ImagePayloadTests.swift in Sources */,
+				C7CC6C7F4B81D51EDFFB53A0 /* ImageServerRoutingTests.swift in Sources */,
 				21B28CC759ECB90648CC90C0 /* ImageWidthTests.swift in Sources */,
 				F703C5A648FED4D809CA485C /* Issue72LimiterSaturationTests.swift in Sources */,
 				E2768AA92FCED5151D6A9DFD /* ItemServerOriginTests.swift in Sources */,

@@ -181,16 +181,8 @@ final class DependencyContainer {
             libraryService: jellyfinLibraryService
         )
         self.jellyfinItemService = JellyfinItemService(client: jellyfinClient)
-        self.jellyfinImageService = JellyfinImageService(
-            baseURLProvider: { [weak jellyfinClient] in
-                jellyfinClient?.baseURL
-            },
-            accessTokenProvider: { [weak jellyfinClient] in
-                jellyfinClient?.accessToken
-            }
-        )
         self.jellyfinPlaybackService = JellyfinPlaybackService(client: jellyfinClient)
-        self.sessionRegistry = ServerSessionRegistry(
+        let sessionRegistry = ServerSessionRegistry(
             activeClient: jellyfinClient,
             httpClient: httpClient,
             libraryService: jellyfinLibraryService,
@@ -198,6 +190,10 @@ final class DependencyContainer {
             playbackService: jellyfinPlaybackService,
             liveTvService: jellyfinLiveTvService
         )
+        self.sessionRegistry = sessionRegistry
+        self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
+            sessionRegistry?.endpoint(forServerID: serverID)
+        })
         let profileSettings = ProfileSettingsRegistry(defaults: defaults)
         self.profileSettings = profileSettings
         self.trackSelectionMemory = TrackSelectionMemory(store: defaults)
