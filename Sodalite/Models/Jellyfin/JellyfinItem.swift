@@ -58,6 +58,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     /// an audio playlist apart from a video one (see `isAudioPlaylist`). `var` with a default so
     /// the hand-written inits below stay untouched.
     var mediaType: String?
+    /// Jellyfin `ServerId`, on every BaseItemDto. nil on items cached before it was decoded, which
+    /// resolve against the active server (Sodalite#85).
+    var serverID: String?
     let childCount: Int?
     /// Local trailer count (requires LocalTrailerCount in Fields); gates the detail Trailer button. nil if unrequested.
     let localTrailerCount: Int?
@@ -176,6 +179,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case recursiveItemCount = "RecursiveItemCount"
         case locationType = "LocationType"
         case mediaType = "MediaType"
+        case serverID = "ServerId"
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
         case seriesPrimaryImageTag = "SeriesPrimaryImageTag"
@@ -345,6 +349,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    /// Identity across servers: two servers can, in principle, mint the same id.
+    var originKey: String { "\(serverID ?? "")|\(id)" }
 }
 
 enum ItemType: String, Codable, Sendable {

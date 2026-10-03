@@ -5,12 +5,15 @@ struct JellyfinLibrary: Codable, Sendable, Identifiable, Equatable {
     let name: String
     let collectionType: String?
     let imageTags: ImageTags?
+    /// Jellyfin `ServerId`, so a combined My Media knows which server a library belongs to (Sodalite#85).
+    var serverID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
         case name = "Name"
         case collectionType = "CollectionType"
         case imageTags = "ImageTags"
+        case serverID = "ServerId"
     }
 
     var libraryType: LibraryType {
