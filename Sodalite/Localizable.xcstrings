@@ -63998,157 +63998,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapni Kombinovat servery v Nastavení > Servery a domovská obrazovka spojí všechny servery, ke kterým jsi přihlášen: jedno Pokračovat ve sledování, jedno Moje média, stejný film jen jednou."
+            "value" : "Zapni Kombinovat servery v Nastavení > Servery a domovská obrazovka spojí všechny servery, ke kterým jsi přihlášen: jedno Pokračovat ve sledování, jedno Moje média, stejný film jen jednou. Karta Živé TV se objeví, když má tuner kterýkoli ze serverů, a přepínač vybere, čí program vidíš."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå Kombiner servere til under Indstillinger > Servere, så samler startsiden alle servere, du er logget ind på: én Fortsæt med at se, ét Mine medier, den samme film kun én gang."
+            "value" : "Slå Kombiner servere til under Indstillinger > Servere, så samler startsiden alle servere, du er logget ind på: én Fortsæt med at se, ét Mine medier, den samme film kun én gang. Fanen Live TV vises, når en af serverne har en tuner, og en vælger bestemmer, hvis programoversigt du ser."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit \"Server kombinieren\" unter Einstellungen > Server führt Home alle Server zusammen, bei denen du angemeldet bist: Weiterschauen und Meine Medien gibt es nur noch einmal, und derselbe Film erscheint nur einmal."
+            "value" : "Mit \"Server kombinieren\" unter Einstellungen > Server führt Home alle Server zusammen, bei denen du angemeldet bist: Weiterschauen und Meine Medien gibt es nur noch einmal, und derselbe Film erscheint nur einmal. Der Live-TV-Tab erscheint, sobald einer der Server einen Tuner hat, und ein Umschalter wählt, wessen Programm du siehst."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ενεργοποίησε τον Συνδυασμό διακομιστών στις Ρυθμίσεις > Διακομιστές και η αρχική ενώνει όλους τους διακομιστές όπου έχεις συνδεθεί: μία Συνέχιση παρακολούθησης, ένα Τα πολυμέσα μου, η ίδια ταινία μόνο μία φορά."
+            "value" : "Ενεργοποίησε τον Συνδυασμό διακομιστών στις Ρυθμίσεις > Διακομιστές και η αρχική ενώνει όλους τους διακομιστές όπου έχεις συνδεθεί: μία Συνέχιση παρακολούθησης, ένα Τα πολυμέσα μου, η ίδια ταινία μόνο μία φορά. Η καρτέλα Live TV εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει δέκτη, και ένας επιλογέας διαλέγει ποιου τον οδηγό βλέπεις."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn on Combine servers in Settings > Servers and Home merges every server you are signed in to: one Continue Watching, one My Media, the same film only once."
+            "value" : "Turn on Combine servers in Settings > Servers and Home merges every server you are signed in to: one Continue Watching, one My Media, the same film only once. The Live TV tab appears when any of the servers has a tuner, and a switcher picks whose guide you see."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activa Combinar servidores en Ajustes > Servidores e Inicio une todos los servidores en los que has iniciado sesión: un solo Seguir viendo, un solo Mi contenido, la misma película solo una vez."
+            "value" : "Activa Combinar servidores en Ajustes > Servidores e Inicio une todos los servidores en los que has iniciado sesión: un solo Seguir viendo, un solo Mi contenido, la misma película solo una vez. La pestaña TV en directo aparece cuando cualquiera de los servidores tiene un sintonizador, y un selector elige de cuál ves la guía."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ota Yhdistä palvelimet käyttöön kohdassa Asetukset > Palvelimet, niin koti yhdistää kaikki palvelimet, joille olet kirjautunut: yksi Jatka katselua, yksi Oma media, sama elokuva vain kerran."
+            "value" : "Ota Yhdistä palvelimet käyttöön kohdassa Asetukset > Palvelimet, niin koti yhdistää kaikki palvelimet, joille olet kirjautunut: yksi Jatka katselua, yksi Oma media, sama elokuva vain kerran. Suora TV -välilehti näkyy, kun millä tahansa palvelimella on viritin, ja valitsin määrää, kenen ohjelmaopasta katsot."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Combiner les serveurs dans Réglages > Serveurs et l'Accueil réunit tous les serveurs auxquels tu es connecté : un seul Continuer à regarder, une seule Ma médiathèque, le même film une seule fois."
+            "value" : "Active Combiner les serveurs dans Réglages > Serveurs et l'Accueil réunit tous les serveurs auxquels tu es connecté : un seul Continuer à regarder, une seule Ma médiathèque, le même film une seule fois. L'onglet TV en direct apparaît dès qu'un des serveurs a un tuner, et un sélecteur choisit le guide affiché."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uključi Kombiniraj poslužitelje u Postavke > Poslužitelji i početni zaslon spaja sve poslužitelje na koje si prijavljen: jedno Nastavi gledanje, jedni Moji mediji, isti film samo jednom."
+            "value" : "Uključi Kombiniraj poslužitelje u Postavke > Poslužitelji i početni zaslon spaja sve poslužitelje na koje si prijavljen: jedno Nastavi gledanje, jedni Moji mediji, isti film samo jednom. Kartica TV uživo pojavljuje se čim bilo koji poslužitelj ima tuner, a prekidač bira čiji vodič gledaš."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kapcsold be a Szerverek egyesítését a Beállítások > Szerverek alatt, és a kezdőlap egyesíti az összes szervert, ahová be vagy jelentkezve: egy Folytatás, egy Saját média, ugyanaz a film csak egyszer."
+            "value" : "Kapcsold be a Szerverek egyesítését a Beállítások > Szerverek alatt, és a kezdőlap egyesíti az összes szervert, ahová be vagy jelentkezve: egy Folytatás, egy Saját média, ugyanaz a film csak egyszer. Az Élő TV lap megjelenik, ha bármelyik szerveren van tuner, és egy választóval eldöntheted, melyik műsorújságát látod."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attiva Combina server in Impostazioni > Server e la Home unisce tutti i server a cui hai effettuato l'accesso: un solo Continua a guardare, un solo I miei contenuti, lo stesso film una sola volta."
+            "value" : "Attiva Combina server in Impostazioni > Server e la Home unisce tutti i server a cui hai effettuato l'accesso: un solo Continua a guardare, un solo I miei contenuti, lo stesso film una sola volta. La scheda TV in diretta compare quando uno qualsiasi dei server ha un sintonizzatore, e un selettore sceglie di quale vedi la guida."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定 > サーバーで「サーバーを統合」をオンにすると、サインインしているすべてのサーバーがホームにまとまります。視聴を続けるもマイメディアもひとつ、同じ映画は一度だけ。"
+            "value" : "設定 > サーバーで「サーバーを統合」をオンにすると、サインインしているすべてのサーバーがホームにまとまります。視聴を続けるもマイメディアもひとつ、同じ映画は一度だけ。いずれかのサーバーにチューナーがあればライブTVタブが表示され、切り替えでどの番組表を見るか選べます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 > 서버에서 서버 통합을 켜면 로그인한 모든 서버가 홈에 합쳐집니다. 계속 시청도 내 미디어도 하나, 같은 영화는 한 번만."
+            "value" : "설정 > 서버에서 서버 통합을 켜면 로그인한 모든 서버가 홈에 합쳐집니다. 계속 시청도 내 미디어도 하나, 같은 영화는 한 번만. 서버 중 하나라도 튜너가 있으면 라이브 TV 탭이 나타나고, 전환기로 어느 서버의 편성표를 볼지 고릅니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå på Kombiner servere under Innstillinger > Servere, så samler startsiden alle servere du er logget på: én Fortsett å se, ett Mine medier, den samme filmen bare én gang."
+            "value" : "Slå på Kombiner servere under Innstillinger > Servere, så samler startsiden alle servere du er logget på: én Fortsett å se, ett Mine medier, den samme filmen bare én gang. Fanen Direkte-TV vises når en av serverne har en tuner, og en velger bestemmer hvilken programguide du ser."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zet Servers combineren aan in Instellingen > Servers en de startpagina voegt alle servers samen waarop je bent ingelogd: één Verder kijken, één Mijn media, dezelfde film maar één keer."
+            "value" : "Zet Servers combineren aan in Instellingen > Servers en de startpagina voegt alle servers samen waarop je bent ingelogd: één Verder kijken, één Mijn media, dezelfde film maar één keer. Het tabblad Live tv verschijnt zodra een van de servers een tuner heeft, en een schakelaar kiest wiens gids je ziet."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Włącz Połącz serwery w Ustawienia > Serwery, a ekran główny połączy wszystkie serwery, na których jesteś zalogowany: jedno Kontynuuj oglądanie, jedne Moje multimedia, ten sam film tylko raz."
+            "value" : "Włącz Połącz serwery w Ustawienia > Serwery, a ekran główny połączy wszystkie serwery, na których jesteś zalogowany: jedno Kontynuuj oglądanie, jedne Moje multimedia, ten sam film tylko raz. Karta Telewizja na żywo pojawia się, gdy którykolwiek serwer ma tuner, a przełącznik wybiera, czyj program oglądasz."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ative Combinar servidores em Ajustes > Servidores e o Início junta todos os servidores em que você entrou: um só Continuar assistindo, um só Minha mídia, o mesmo filme só uma vez."
+            "value" : "Ative Combinar servidores em Ajustes > Servidores e o Início junta todos os servidores em que você entrou: um só Continuar assistindo, um só Minha mídia, o mesmo filme só uma vez. A aba TV ao vivo aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual você vê o guia."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ativa Combinar servidores em Definições > Servidores e o Início junta todos os servidores em que tens sessão iniciada: um só Continuar a ver, uma só A minha biblioteca, o mesmo filme só uma vez."
+            "value" : "Ativa Combinar servidores em Definições > Servidores e o Início junta todos os servidores em que tens sessão iniciada: um só Continuar a ver, uma só A minha biblioteca, o mesmo filme só uma vez. O separador TV em direto aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual vês o guia."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează Combină serverele în Setări > Servere și ecranul principal reunește toate serverele la care ești conectat: un singur Continuă vizionarea, un singur Media mea, același film o singură dată."
+            "value" : "Activează Combină serverele în Setări > Servere și ecranul principal reunește toate serverele la care ești conectat: un singur Continuă vizionarea, un singur Media mea, același film o singură dată. Fila TV live apare când oricare dintre servere are un tuner, iar un comutator alege al cui ghid vezi."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Включите «Объединить серверы» в Настройки > Серверы, и главная соберёт все серверы, на которых выполнен вход: одно «Продолжить просмотр», одна «Моя медиатека», один и тот же фильм только один раз."
+            "value" : "Включите «Объединить серверы» в Настройки > Серверы, и главная соберёт все серверы, на которых выполнен вход: одно «Продолжить просмотр», одна «Моя медиатека», один и тот же фильм только один раз. Вкладка «ТВ» появляется, если тюнер есть хотя бы на одном сервере, а переключатель выбирает, чью телепрограмму вы видите."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapni Kombinovať servery v Nastavenia > Servery a domovská obrazovka spojí všetky servery, ku ktorým si prihlásený: jedno Pokračovať v sledovaní, jedno Moje médiá, rovnaký film len raz."
+            "value" : "Zapni Kombinovať servery v Nastavenia > Servery a domovská obrazovka spojí všetky servery, ku ktorým si prihlásený: jedno Pokračovať v sledovaní, jedno Moje médiá, rovnaký film len raz. Karta Živá TV sa zobrazí, keď má tuner ktorýkoľvek zo serverov, a prepínač vyberie, čí program vidíš."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå på Kombinera servrar under Inställningar > Servrar så samlar startsidan alla servrar du är inloggad på: en Fortsätt titta, ett Mina media, samma film bara en gång."
+            "value" : "Slå på Kombinera servrar under Inställningar > Servrar så samlar startsidan alla servrar du är inloggad på: en Fortsätt titta, ett Mina media, samma film bara en gång. Fliken Live-tv visas när någon av servrarna har en tuner, och en väljare avgör vems tv-guide du ser."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ayarlar > Sunucular'da Sunucuları birleştir'i aç, ana sayfa oturum açtığın tüm sunucuları birleştirsin: tek bir İzlemeye Devam Et, tek bir Medyam, aynı film yalnızca bir kez."
+            "value" : "Ayarlar > Sunucular'da Sunucuları birleştir'i aç, ana sayfa oturum açtığın tüm sunucuları birleştirsin: tek bir İzlemeye Devam Et, tek bir Medyam, aynı film yalnızca bir kez. Sunuculardan herhangi birinde tuner varsa Canlı TV sekmesi görünür ve bir seçici hangisinin rehberini göreceğini belirler."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Увімкніть «Об'єднати сервери» в Налаштування > Сервери, і головна збере всі сервери, на яких виконано вхід: одне «Продовжити перегляд», одна «Моя медіатека», той самий фільм лише один раз."
+            "value" : "Увімкніть «Об'єднати сервери» в Налаштування > Сервери, і головна збере всі сервери, на яких виконано вхід: одне «Продовжити перегляд», одна «Моя медіатека», той самий фільм лише один раз. Вкладка «ТБ» з’являється, якщо тюнер є хоча б на одному сервері, а перемикач обирає, чию телепрограму ви бачите."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在设置 > 服务器中打开“合并服务器”，主页会汇集你登录的所有服务器：一个继续观看，一个我的媒体，同一部电影只出现一次。"
+            "value" : "在设置 > 服务器中打开“合并服务器”，主页会汇集你登录的所有服务器：一个继续观看，一个我的媒体，同一部电影只出现一次。只要任一服务器有调谐器，直播电视标签就会出现，切换器决定你看哪台服务器的节目指南。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在設定 > 伺服器中開啟「合併伺服器」，首頁會匯集你登入的所有伺服器：一個繼續觀看，一個我的媒體，同一部電影只出現一次。"
+            "value" : "在設定 > 伺服器中開啟「合併伺服器」，首頁會匯集你登入的所有伺服器：一個繼續觀看，一個我的媒體，同一部電影只出現一次。只要任一伺服器有調諧器，直播電視分頁就會出現，切換器決定你看哪台伺服器的節目表。"
           }
         }
       }
