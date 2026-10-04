@@ -12,7 +12,9 @@ final class ServerSessionRegistry {
 
     @ObservationIgnored private let httpClient: HTTPClientProtocol
     @ObservationIgnored private var secondaries: [String: (session: ServerSession, credential: SessionCredential)] = [:]
-    @ObservationIgnored private var muted: Set<String> = []
+    /// The credential each muted server refused. Keyed by credential, not just server, so signing
+    /// in again brings the server back at once instead of at the next launch.
+    @ObservationIgnored private var muted: [String: SessionCredential] = [:]
     @ObservationIgnored private var lastSignature: [String] = []
 
     init(
@@ -44,7 +46,7 @@ final class ServerSessionRegistry {
         baseURL: (JellyfinServer) -> URL
     ) {
         active.updateActive(server: activeIdentity?.server, userID: activeIdentity?.userID ?? "")
-        let wanted = candidates.filter { !muted.contains($0.server.id) }
+        let wanted = candidates.filter { muted[$0.server.id] != $0.credential }
         var next: [String: (session: ServerSession, credential: SessionCredential)] = [:]
         for candidate in wanted {
             // A changed address or name builds a fresh session, so its client and route follow.
@@ -63,12 +65,12 @@ final class ServerSessionRegistry {
         noteParticipantsChanged()
     }
 
-    /// A secondary that refused its token sits out until the next launch; a re-auth prompt for a
+    /// A secondary that refused its token sits out until it has a new one; a re-auth prompt for a
     /// server nobody is looking at would be worse than its rows going missing.
     func mute(serverID: String) {
-        guard !muted.contains(serverID) else { return }
-        muted.insert(serverID)
-        LogTap.shared.note("[sessions] secondary \(serverID.prefix(8)) refused its token, left out until next launch")
+        guard let credential = secondaries[serverID]?.credential, muted[serverID] != credential else { return }
+        muted[serverID] = credential
+        LogTap.shared.note("[sessions] secondary \(serverID.prefix(8)) refused its token, left out until it signs in again")
         secondaries[serverID] = nil
         participants.removeAll { !$0.isActive && $0.server?.id == serverID }
         noteParticipantsChanged()

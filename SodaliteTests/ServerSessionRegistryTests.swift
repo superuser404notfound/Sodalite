@@ -86,6 +86,31 @@ struct ServerSessionRegistryTests {
         #expect(registry.participants.count == 1)
     }
 
+    /// Signing in again replaces the refused token, and the server takes part again at once,
+    /// without a relaunch (device round 2026-10-04).
+    @Test func aFreshTokenLiftsTheMute() {
+        let (registry, _) = makeRegistry()
+        let active = server("a", "http://a.lan:8096")
+        registry.apply(active: (active, "u-a"), secondaries: [candidate("b", "http://b.lan:8096", token: "expired")], baseURL: { $0.url })
+        registry.mute(serverID: "b")
+        #expect(registry.participants.count == 1)
+        registry.apply(active: (active, "u-a"), secondaries: [candidate("b", "http://b.lan:8096", token: "expired")], baseURL: { $0.url })
+        #expect(registry.participants.count == 1)
+        registry.apply(active: (active, "u-a"), secondaries: [candidate("b", "http://b.lan:8096", token: "fresh")], baseURL: { $0.url })
+        #expect(registry.participants.count == 2)
+        #expect(registry.session(forServerID: "b").client.accessToken == "fresh")
+    }
+
+    @Test func aFreshTokenThatIsRefusedTooIsMutedAgain() {
+        let (registry, _) = makeRegistry()
+        let active = server("a", "http://a.lan:8096")
+        registry.apply(active: (active, "u-a"), secondaries: [candidate("b", "http://b.lan:8096", token: "expired")], baseURL: { $0.url })
+        registry.mute(serverID: "b")
+        registry.apply(active: (active, "u-a"), secondaries: [candidate("b", "http://b.lan:8096", token: "fresh")], baseURL: { $0.url })
+        registry.mute(serverID: "b")
+        #expect(registry.participants.count == 1)
+    }
+
     @Test func secondaryTokensReachTheLogRedactor() {
         let (registry, _) = makeRegistry()
         registry.apply(
