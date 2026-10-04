@@ -1031,6 +1031,7 @@
 		B53C6F869069604AA5B2B61D /* ServerActivationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2F21F2314CC95B7CD5C921 /* ServerActivationStore.swift */; };
 		B56A48C351B74F2161ADABFF /* TopShelfAccent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A76F4E46F2995ECC621AF105 /* TopShelfAccent.swift */; };
 		B591946DADA95EB0C793D627 /* SeerrRequestOptionsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6830A3E115B8115485AA5ACB /* SeerrRequestOptionsForm.swift */; };
+		B5C63EC622CDF416EF3B6845 /* MergedPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EA4A7C68D00D08DB75239D /* MergedPager.swift */; };
 		B65391485A46762598BEB8E0 /* TrackDisplayFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8D1C94A258062863ED46C1 /* TrackDisplayFormatterTests.swift */; };
 		B6B45A1B2D052F6E6A30F248 /* DiagnosticLogLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF8C4DA1E1B7ED889DC57D4 /* DiagnosticLogLink.swift */; };
 		B6CF01CD872CC9399B061668 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6CBE5D06910923DEFED66F /* CloudSyncService.swift */; };
@@ -1148,6 +1149,7 @@
 		CB9F611CD8E8E225D5F3DB1E /* PlayerHostController+SkipDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88577784DD91D770319A3349 /* PlayerHostController+SkipDelegate.swift */; };
 		CBACCC59196D47B5EEEB6F19 /* SRTParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3558FABE54073F78BABEF9DD /* SRTParser.swift */; };
 		CBE83C1725E50F96FFD86818 /* LivePlaybackContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116E63A3D0E2D96FFA20EC65 /* LivePlaybackContext.swift */; };
+		CBFBA2AD76D21B373F88EDBF /* MergedPagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CB688AA3CD8CF2213A66A1 /* MergedPagerTests.swift */; };
 		CC18EB27D97B83920515672E /* SeerrRequestDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC10569861518012D10FCE03 /* SeerrRequestDraft.swift */; };
 		CC1A36A3D81BF3B3D00E0096 /* MusicTimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E41472FF5A78B0C4F640829 /* MusicTimeFormatter.swift */; };
 		CC727F5E3B76B9525CE934D0 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 58BD2D49CE8AB49360409981 /* OFL.txt */; };
@@ -1350,6 +1352,7 @@
 		F01B3523DA803BCF532A6C48 /* SubtitleMenuLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B60AEAEA1E24DBE622AA94F /* SubtitleMenuLayout.swift */; };
 		F037CDE82E611B4FA4E1BBB8 /* JellyfinLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C70AF39F350B8FBC30EDFF0 /* JellyfinLibrary.swift */; };
 		F05C42287A7C3CA6A4848696 /* ProviderMatchMerging.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA06E6A3F31863E5F2E74C1 /* ProviderMatchMerging.swift */; };
+		F08453BCCCF955F7CDA0CDF8 /* MergedPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EA4A7C68D00D08DB75239D /* MergedPager.swift */; };
 		F09184FDC2FFDF2EFDCAF938 /* ForegroundReloadGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4C9FBD5F7D9120B46B71E0 /* ForegroundReloadGateTests.swift */; };
 		F0CD48A08028A8FBB61A7C1B /* SkipBackSubtitleWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AB8B7D07A1B990DF0036F63 /* SkipBackSubtitleWindow.swift */; };
 		F0F39C716B7F695404B9E1A9 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F75B9F040C820A852BEBC8 /* WhatsNewView.swift */; };
@@ -2029,6 +2032,7 @@
 		97F52845EFD489AE02A52FF2 /* SodaliteIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SodaliteIntents.swift; sourceTree = "<group>"; };
 		98A7D932F1A7D481F18B8B46 /* CachedDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedDataView.swift; sourceTree = "<group>"; };
 		98AD611609B558446EBE5DF6 /* AccentButtonContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentButtonContrastTests.swift; sourceTree = "<group>"; };
+		98CB688AA3CD8CF2213A66A1 /* MergedPagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergedPagerTests.swift; sourceTree = "<group>"; };
 		996502532B626B8B72DC25CF /* SiriRemoteSurfaceTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteSurfaceTracker.swift; sourceTree = "<group>"; };
 		99C0FDE1041F3C651DDC2FAE /* PlayerViewModel+NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerViewModel+NowPlaying.swift"; sourceTree = "<group>"; };
 		9A49C90E145510D9212683F8 /* PlayerLockProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLockProgress.swift; sourceTree = "<group>"; };
@@ -2136,6 +2140,7 @@
 		B82D8F1E51EB10C19C9627EA /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		B85A393F0C425F4A3B688C6A /* HomeLoadContentCancellationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeLoadContentCancellationTests.swift; sourceTree = "<group>"; };
 		B874FA86F857E10482B6DB5B /* SidebarExitPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarExitPolicyTests.swift; sourceTree = "<group>"; };
+		B8EA4A7C68D00D08DB75239D /* MergedPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergedPager.swift; sourceTree = "<group>"; };
 		B90188D1665D501580A98615 /* View+PlatformCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PlatformCompat.swift"; sourceTree = "<group>"; };
 		B9A555200A5ACA574AF2055E /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
 		BB149BA23CB052B131D011BD /* LiveProgramCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveProgramCategory.swift; sourceTree = "<group>"; };
@@ -2531,6 +2536,7 @@
 				CC9E7E3CFDA7723780F5C45F /* FilteredGridView.swift */,
 				C4D870347A5A37B3477481FB /* LibrarySort.swift */,
 				0B0EBC152D80BAC2D6FE9AEF /* LibrarySortSheet.swift */,
+				B8EA4A7C68D00D08DB75239D /* MergedPager.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -2839,6 +2845,7 @@
 				C6ABFF34797853D2B659B7B1 /* MediaBadgeTests.swift */,
 				6EF94E17272A70E89BB80D05 /* MediaDeletionRequestCleanupTests.swift */,
 				7138A1E131E7104ED1881D2B /* MediaSegmentRequestTests.swift */,
+				98CB688AA3CD8CF2213A66A1 /* MergedPagerTests.swift */,
 				49A11C917DEC4C0F211E3B56 /* MultiviewCoordinatorPolicyTests.swift */,
 				010DCB1E62A7233707A0BB2C /* MultiviewLayoutTests.swift */,
 				B0864AEB6C541D61CECB6E0D /* MultiviewOverlayVisibilityTests.swift */,
@@ -4215,6 +4222,7 @@
 				BE73E1EE330DCEC644D332AB /* MediaDeletionSheet.swift in Sources */,
 				D1B2E592167F11561540DB01 /* MediaFocusRing.swift in Sources */,
 				7B13679E148F325101FF3DE9 /* MenuPresentation.swift in Sources */,
+				B5C63EC622CDF416EF3B6845 /* MergedPager.swift in Sources */,
 				A4F0DB44A3CC4CFAC17ABA3C /* MovieDetailView.swift in Sources */,
 				AA33762FDECD763E7B5B20BF /* MultiviewEnginePool.swift in Sources */,
 				07660D87B39001F06A104FE2 /* MultiviewHostController.swift in Sources */,
@@ -4713,6 +4721,7 @@
 				6EFDB41723F8073181EBFFAF /* MediaBadgeTests.swift in Sources */,
 				14CE8A61CEFB8680E59C440E /* MediaDeletionRequestCleanupTests.swift in Sources */,
 				338F54EC5F1360AD3EB148EE /* MediaSegmentRequestTests.swift in Sources */,
+				CBFBA2AD76D21B373F88EDBF /* MergedPagerTests.swift in Sources */,
 				BA8F9246D8D386C1602BC793 /* MultiviewCoordinatorPolicyTests.swift in Sources */,
 				F98E106BF2F58B51A061EDCA /* MultiviewLayoutTests.swift in Sources */,
 				0E22FA6F8958DA8A0FDCAEEF /* MultiviewOverlayVisibilityTests.swift in Sources */,
@@ -5131,6 +5140,7 @@
 				3597A65B0A4EFDE1257BDC92 /* MediaDeletionSheet.swift in Sources */,
 				DB8FA730D14C867ADA30ED8D /* MediaFocusRing.swift in Sources */,
 				FD24A35469CB59134AF89EB6 /* MenuPresentation.swift in Sources */,
+				F08453BCCCF955F7CDA0CDF8 /* MergedPager.swift in Sources */,
 				D3962583893888366DD7ECEB /* MovieDetailView.swift in Sources */,
 				68806A15733E1C6F6E769E28 /* MultiviewEnginePool.swift in Sources */,
 				90D32EB424FF5A889DF709A3 /* MultiviewHostController.swift in Sources */,
