@@ -35,7 +35,12 @@ enum TopShelfPrerender {
         let api = TopShelfAPI(session: session)
         async let resume = try? api.resumeItems()
         async let nextUp = try? api.nextUp()
-        let items = (await resume ?? []) + (await nextUp ?? [])
+        // Both rows or no pass. `prepare` sweeps every file outside the set it is handed, so a pass
+        // built from one row deleted the other row's artwork, and the extension then had to
+        // download and composite it again while tvOS waited for the shelf.
+        guard let fetchedResume = await resume, let fetchedNextUp = await nextUp else { return }
+        let rows = TopShelfItem.shelfRows(resume: fetchedResume, nextUp: fetchedNextUp)
+        let items = rows.resume + rows.nextUp
         guard !items.isEmpty else { return }
 
         let artwork = TopShelfArtwork.read()

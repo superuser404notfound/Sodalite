@@ -66,7 +66,10 @@ enum ResumeBarArtwork {
             return [:]
         }
 
-        let candidates = cells.map { cell in
+        // One file per item. A repeated id would leave `covered` short of `candidates` for good,
+        // and the all-or-nothing check below would then drop the artwork on every pass.
+        var seen = Set<String>()
+        let candidates = cells.filter { seen.insert($0.itemID).inserted }.map { cell in
             Candidate(cell: cell,
                       destination: directory.appendingPathComponent(name(for: cell, accent: accent)))
         }
@@ -120,9 +123,9 @@ enum ResumeBarArtwork {
         let destination: URL
     }
 
-    nonisolated private struct Download: Sendable {
-        let url: URL
-        let data: Data?
+    nonisolated private enum Event: Sendable {
+        case downloaded(URL, Data?)
+        case deadline
     }
 
     /// Downloads overlap, compositing stays serial: the network is what makes a pass slow, and
@@ -132,36 +135,51 @@ enum ResumeBarArtwork {
     /// of a show points at the same show-level artwork, so a shelf with four episodes of one series
     /// asked for the same file four times; the cells still differ, because each burns in its own
     /// resume bar.
+    ///
+    /// The deadline is a timer in the group, not a clock check between results. A check only runs
+    /// when a download returns, so a stalled request held the pass (and with it the extension's
+    /// answer) for its full timeout on top of the budget, per stalled slot.
     nonisolated private static func render(_ pending: [Candidate], accent: UInt32) async -> [String: URL] {
-        let started = Date()
         var done: [String: URL] = [:]
         let sources = Dictionary(grouping: pending, by: { $0.cell.remote })
         let urls = Array(sources.keys)
 
-        await withTaskGroup(of: Download.self) { group in
+        await withTaskGroup(of: Event.self) { group in
+            group.addTask {
+                try? await Task.sleep(for: .seconds(deadline))
+                return .deadline
+            }
             var next = 0
-            while next < urls.count, next < maxConcurrentDownloads {
+            var inFlight = 0
+            while next < urls.count, inFlight < maxConcurrentDownloads {
                 let url = urls[next]
-                group.addTask { Download(url: url, data: await download(url)) }
+                group.addTask { .downloaded(url, await download(url)) }
                 next += 1
+                inFlight += 1
             }
 
-            while let outcome = await group.next() {
-                guard Date().timeIntervalSince(started) < deadline else {
+            while inFlight > 0, let event = await group.next() {
+                switch event {
+                case .deadline:
                     log.notice("artwork pass hit its deadline with \(pending.count - done.count) cells left")
                     group.cancelAll()
-                    continue
-                }
-                if next < urls.count {
-                    let url = urls[next]
-                    group.addTask { Download(url: url, data: await download(url)) }
-                    next += 1
-                }
-                guard let data = outcome.data else { continue }
-                for candidate in sources[outcome.url] ?? [] where persist(data, for: candidate, accent: accent) {
-                    done[candidate.cell.itemID] = candidate.destination
+                    return
+                case let .downloaded(url, data):
+                    inFlight -= 1
+                    if next < urls.count {
+                        let url = urls[next]
+                        group.addTask { .downloaded(url, await download(url)) }
+                        next += 1
+                        inFlight += 1
+                    }
+                    guard let data else { continue }
+                    for candidate in sources[url] ?? [] where persist(data, for: candidate, accent: accent) {
+                        done[candidate.cell.itemID] = candidate.destination
+                    }
                 }
             }
+            // Wakes the timer, which the group would otherwise wait out.
+            group.cancelAll()
         }
         // The one number a pass cannot reason about from here. A composite holds two bitmaps of
         // `maxPixelSize`, so that width trades sharpness against a hard ceiling, and the headroom

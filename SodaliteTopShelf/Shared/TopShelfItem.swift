@@ -69,6 +69,17 @@ nonisolated struct TopShelfUserData: Codable, Sendable {
 }
 
 nonisolated extension TopShelfItem {
+    /// The two rows as the shelf shows them: an item appears once, in Continue Watching if it is
+    /// there. `EnableResumable=false` keeps a part-watched episode out of Next Up on current
+    /// servers, older ones ignore it, and a repeated identifier is one the shelf has no use for.
+    static func shelfRows(resume: [TopShelfItem],
+                          nextUp: [TopShelfItem]) -> (resume: [TopShelfItem], nextUp: [TopShelfItem]) {
+        var seen = Set<String>()
+        let resume = resume.filter { seen.insert($0.id).inserted }
+        let nextUp = nextUp.filter { seen.insert($0.id).inserted }
+        return (resume, nextUp)
+    }
+
     /// Wide thumbnail for the carousel cell, along whichever chain the viewer picked in Settings
     /// (`TopShelfArtwork`). Episode resolution is capped at the server's image-extraction-width
     /// setting (320 old default, can't upscale client-side), which is the reason the choice exists:

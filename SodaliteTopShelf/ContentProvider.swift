@@ -30,8 +30,8 @@ final class ContentProvider: TVTopShelfContentProvider {
             ? Self.usableCache(session: session)
             : nil
 
-        let resumeItems = fetchedResume ?? cached?.resume ?? []
-        let nextUpItems = fetchedNextUp ?? cached?.nextUp ?? []
+        let (resumeItems, nextUpItems) = TopShelfItem.shelfRows(resume: fetchedResume ?? cached?.resume ?? [],
+                                                                nextUp: fetchedNextUp ?? cached?.nextUp ?? [])
         log.info("Fetched resume=\(resumeItems.count) nextUp=\(nextUpItems.count) usedCache=\(cached != nil)")
 
         // Writes the merged view, not just what came back, so a partial failure still leaves
