@@ -70,7 +70,7 @@ extension HomeViewModel {
             }
         }
         guard let deadline else { return await work() }
-        return await Self.race(deadline) { @MainActor in await work() } ?? .timedOut
+        return await Deadline.race(deadline) { @MainActor in await work() } ?? .timedOut
     }
 
     /// A per-library row is fetched from the servers that hold the library, nobody else. Jellyfin
@@ -84,7 +84,7 @@ extension HomeViewModel {
             guard let task = librariesTasks[source.serverID] else { continue }
             let libraries = source.isActive
                 ? await task.value
-                : await Self.race(deadline) { await task.value } ?? nil
+                : await Deadline.race(deadline) { await task.value } ?? nil
             if libraries?.contains(where: { $0.id == libraryID }) == true { owners.append(source) }
         }
         if owners.isEmpty {
@@ -105,7 +105,7 @@ extension HomeViewModel {
                 guard let task = librariesTasks[source.serverID] else { continue }
                 let isActive = source.isActive
                 group.addTask {
-                    (index, isActive ? await task.value : await Self.race(deadline) { await task.value } ?? nil)
+                    (index, isActive ? await task.value : await Deadline.race(deadline) { await task.value } ?? nil)
                 }
             }
             var collected: [Int: [JellyfinLibrary]?] = [:]
@@ -128,30 +128,6 @@ extension HomeViewModel {
             }
         }
         return (combined, complete)
-    }
-
-    /// The value of `work`, or nil once `deadline` passes, whichever comes first. A continuation
-    /// rather than a task group: a group waits for its slowest child even after cancelling it, and
-    /// `await task.value` on an unstructured task ignores cancellation, so a group-based deadline
-    /// held a dead server's library list for its full request timeout.
-    nonisolated static func race<T: Sendable>(
-        _ deadline: Duration,
-        _ work: @escaping @Sendable () async -> T
-    ) async -> T? {
-        let gate = ResumeOnce()
-        return await withCheckedContinuation { (continuation: CheckedContinuation<T?, Never>) in
-            let worker = Task {
-                let value = await work()
-                if gate.claim() { continuation.resume(returning: value) }
-            }
-            Task {
-                try? await Task.sleep(for: deadline)
-                if gate.claim() {
-                    worker.cancel()
-                    continuation.resume(returning: nil)
-                }
-            }
-        }
     }
 
     /// The participant set changed: repaint from that set's own cached feed, then fetch.
@@ -201,16 +177,3 @@ extension HomeViewModel {
     }
 }
 
-/// Lets exactly one of two racers resume a continuation.
-nonisolated final class ResumeOnce: @unchecked Sendable {
-    private let lock = NSLock()
-    private var done = false
-
-    func claim() -> Bool {
-        lock.withLock {
-            guard !done else { return false }
-            done = true
-            return true
-        }
-    }
-}

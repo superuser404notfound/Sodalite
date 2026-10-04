@@ -529,6 +529,7 @@
 		5D6FF869455188BA8DE18E2A /* ServerRouteResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0E521708A7EBC3D396F706 /* ServerRouteResolver.swift */; };
 		5DB47B4E42E718BAC552EF51 /* CloudSyncPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306295C10371A4A926588650 /* CloudSyncPreferences.swift */; };
 		5DC61C3A25E8BC40621DFA33 /* PlayerTitleLines.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CC2F20D0F7929B317EF8EB /* PlayerTitleLines.swift */; };
+		5DCE6324C41C4DC63549EB45 /* Deadline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A29DD45578D822A541B7C /* Deadline.swift */; };
 		5DE013ED98985AA1100BE414 /* TopShelfAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F6727C1A1F0FB1F1E2C3AA /* TopShelfAPI.swift */; };
 		5DE471BFC36CDF3243D989E0 /* HomeRowData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949228FF4210420390D3B76D /* HomeRowData.swift */; };
 		5E035FA54CB96CD9BCB59E1C /* ControlScrimLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFA3813F4C278D463624A9F6 /* ControlScrimLayer.swift */; };
@@ -1077,6 +1078,7 @@
 		BF7319388D6CDBB27B410818 /* ForcedSubtitleFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 857E0642BACD0B5C1CA99B12 /* ForcedSubtitleFallback.swift */; };
 		BF8CC8ECCD4897A67371670B /* ServerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92F70D67DC2DE192A24567 /* ServerManagementView.swift */; };
 		BF8E101114AF46A31EDA4789 /* ResumeBarRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FF85A82012DB16FC162782 /* ResumeBarRenderer.swift */; };
+		BFB0B7B9B3EED142C61B4813 /* Deadline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A29DD45578D822A541B7C /* Deadline.swift */; };
 		BFD8F69D7D6E4B27A5F919B8 /* GuideGridFocus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B2BC92FD669158893FC018 /* GuideGridFocus.swift */; };
 		C00C827C94A3366BC7090A59 /* LiveTuneRefusal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5394300E7836775C37F461 /* LiveTuneRefusal.swift */; };
 		C018BAC11972578D1ED16B44 /* EpisodeMetadataFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B19E021DA509D66BA25B68 /* EpisodeMetadataFormatter.swift */; };
@@ -1324,6 +1326,7 @@
 		EAE8B943BB09D49866DD75C3 /* SeerrServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52B58D4E42BF82C030A8DA2 /* SeerrServer.swift */; };
 		EB93240173A2C3FF74947753 /* NowPlayingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D67C0E479E49AEC10441E52 /* NowPlayingCard.swift */; };
 		EC4C33C0E5DE0EF375B8ECAD /* SessionRestoreEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B48C22ADA9876864D8093 /* SessionRestoreEnvironment.swift */; };
+		EC63F84EBA2C388F30D9C298 /* DeadlineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7495460E1E3B1710B47CD5B9 /* DeadlineTests.swift */; };
 		EC7782AE40E233924A6D56F4 /* GuideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7CBA5844F0A3FB37651620C /* GuideViewModel.swift */; };
 		EC8C52A9E3CAC6CCBCE4BF2B /* LocalPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ADF8ED6F88095120AED5DF3 /* LocalPlaybackTests.swift */; };
 		ECB34071C05CE3F826E912CF /* ASSRenderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0AF18F7475A04D2A6EF1A2 /* ASSRenderCoordinator.swift */; };
@@ -1530,6 +1533,7 @@
 		0D7940D0EDA65B631385D51B /* ServerAddressEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAddressEntryViewModel.swift; sourceTree = "<group>"; };
 		0D8F02ACD2153F7A0D898E74 /* SeerrMedia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrMedia.swift; sourceTree = "<group>"; };
 		0E4738A351C002E7BCC83240 /* DependencyContainer+Reset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DependencyContainer+Reset.swift"; sourceTree = "<group>"; };
+		0E4A29DD45578D822A541B7C /* Deadline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deadline.swift; sourceTree = "<group>"; };
 		0E78738385037844F707C771 /* SpoilerVeil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoilerVeil.swift; sourceTree = "<group>"; };
 		0EA2D320AE52671C5BC612F3 /* SeerrNotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrNotificationPreferences.swift; sourceTree = "<group>"; };
 		0F0CD2FCA6BDE4DB80C62A96 /* SpoilerSurfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoilerSurfaceTests.swift; sourceTree = "<group>"; };
@@ -1888,6 +1892,7 @@
 		73C70C69CE2B4D51320E884C /* SeerrMediaCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrMediaCard.swift; sourceTree = "<group>"; };
 		741F6735F2BBBAF0C5648BFB /* NetworkBufferDepthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkBufferDepthTests.swift; sourceTree = "<group>"; };
 		746976011350B5A9113537B7 /* ServerUnreachableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerUnreachableView.swift; sourceTree = "<group>"; };
+		7495460E1E3B1710B47CD5B9 /* DeadlineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadlineTests.swift; sourceTree = "<group>"; };
 		74987CFA1D164691B62A7A89 /* SeerrDiscoverResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrDiscoverResult.swift; sourceTree = "<group>"; };
 		74F1B7D9B75812409A1B1475 /* ProfileSyncPayloadsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSyncPayloadsTests.swift; sourceTree = "<group>"; };
 		74FBF5F7692C791B5FFC8AFE /* MusicPlaybackCoordinator+Scrubbing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MusicPlaybackCoordinator+Scrubbing.swift"; sourceTree = "<group>"; };
@@ -2694,6 +2699,7 @@
 				21E105BAEC82CC437A7BFC44 /* CombinedServersSettingsTests.swift */,
 				BEA407D28203BD57515A1970 /* ContentLogoAvailabilityTests.swift */,
 				E7F81009C589A7D985A13C16 /* ContentLogoBudgetTests.swift */,
+				7495460E1E3B1710B47CD5B9 /* DeadlineTests.swift */,
 				B07E95DC61BDDF80C17F37F5 /* DeepLinkRouteTests.swift */,
 				9369DC581B31CDF29ACEFE58 /* DeletedActiveProfileReconcileTests.swift */,
 				8921B4CB17D85FE1BD42D192 /* DetailActionRowPackingTests.swift */,
@@ -3590,6 +3596,7 @@
 				D594112B176D376D071761F2 /* APIError.swift */,
 				FF76354814B374060E8AE5C2 /* AsyncSemaphore.swift */,
 				614E28A7002618314BCD6123 /* CertificateTrustFailure.swift */,
+				0E4A29DD45578D822A541B7C /* Deadline.swift */,
 				6103321F2E25924263193999 /* DiscoveryProbeRace.swift */,
 				D260C52619403D730EF4F564 /* ErrorText.swift */,
 				545F0A25E3B7C1295647548F /* HTTPClient.swift */,
@@ -4027,6 +4034,7 @@
 				AD4340B7F27794FB3B1EE65E /* ContentLogoBudget.swift in Sources */,
 				566A6533F1235493C7543F70 /* ContentLogoTitle.swift in Sources */,
 				5E035FA54CB96CD9BCB59E1C /* ControlScrimLayer.swift in Sources */,
+				5DCE6324C41C4DC63549EB45 /* Deadline.swift in Sources */,
 				594DC18DBE99B28BFEDBA4AC /* DeepLinkRoute.swift in Sources */,
 				ED54F7B26CB249BD892183CC /* DependencyContainer+Caches.swift in Sources */,
 				71C9EEA30D2FFD720A45CB54 /* DependencyContainer+CloudSync.swift in Sources */,
@@ -4562,6 +4570,7 @@
 				859AA81CD94E5052FB37353A /* CombinedServersSettingsTests.swift in Sources */,
 				AAD4536E5885B133072F348C /* ContentLogoAvailabilityTests.swift in Sources */,
 				62444ECC7C955FBAC95BEF87 /* ContentLogoBudgetTests.swift in Sources */,
+				EC63F84EBA2C388F30D9C298 /* DeadlineTests.swift in Sources */,
 				1BACA753B79B7BB7FBC63E29 /* DeepLinkRouteTests.swift in Sources */,
 				092532C8CB08BDDCEC574C53 /* DeletedActiveProfileReconcileTests.swift in Sources */,
 				95D7E87C32B0ED2C2E010541 /* DetailActionRowPackingTests.swift in Sources */,
@@ -4942,6 +4951,7 @@
 				DA4A5FDC873A673FA5FF2462 /* ContentLogoBudget.swift in Sources */,
 				258594188526B3858EA556EB /* ContentLogoTitle.swift in Sources */,
 				60CC947FFF77089B172EF807 /* ControlScrimLayer.swift in Sources */,
+				BFB0B7B9B3EED142C61B4813 /* Deadline.swift in Sources */,
 				DE28C77D6BAB6E68B88E82D4 /* DeepLinkRoute.swift in Sources */,
 				0EB07CAF2A67CF8EB42AEB48 /* DependencyContainer+Caches.swift in Sources */,
 				AA993FFC8F0F4F7CD32FADF7 /* DependencyContainer+CloudSync.swift in Sources */,
