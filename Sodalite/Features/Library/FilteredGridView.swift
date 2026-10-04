@@ -414,36 +414,56 @@ struct FilteredGridView: View {
             return
         }
 
-        // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
-        async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
-            try? await session.libraryService.getItems(
-                userID: userID, query: effectiveQuery
-            )
-        }()
-
-        async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
-            guard smartProviderID != nil, !reusePhase2 else { return [] }
-            // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
-            var allQuery = ItemQuery(
+        let phase1Response: JellyfinItemsResponse?
+        let allItems: [JellyfinItem]?
+        var combinedTmdbMap: [String: JellyfinItem]?
+        if isMerged, let sources, smartProviderID != nil {
+            // A combined Home's provider tile: both phases from every server (Sodalite#85).
+            var libraryQuery = ItemQuery(
                 includeItemTypes: [.movie, .series],
                 sortBy: "SortName",
                 sortOrder: "Ascending",
                 limit: 10000,
-                // Only tmdbID and the image tags are read off this scan. Same set as the identical
-                // query in HomeViewModel+Precompute; detailFields over a whole library was the
-                // single biggest request the app could issue (Sodalite#68).
                 fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
             )
-            if let filter = watchFilterValue {
-                allQuery.filters = [filter]
-            }
-            return try? await session.libraryService.getItems(
-                userID: userID, query: allQuery
-            ).items
-        }()
+            if let filter = watchFilter.jellyfinFilter { libraryQuery.filters = [filter] }
+            let combined = await CombinedProviderMatch.fetch(
+                sources: sources, studioQuery: effectiveQuery,
+                libraryQuery: reusePhase2 ? nil : libraryQuery, deadline: .seconds(4))
+            phase1Response = combined.phase1
+            allItems = combined.allItems
+            combinedTmdbMap = combined.tmdbMap
+        } else {
+            // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
+            async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
+                try? await session.libraryService.getItems(
+                    userID: userID, query: effectiveQuery
+                )
+            }()
 
-        let phase1Response = await studioMatchTask
-        let allItems = await allLibraryTask
+            async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
+                guard smartProviderID != nil, !reusePhase2 else { return [] }
+                // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
+                var allQuery = ItemQuery(
+                    includeItemTypes: [.movie, .series],
+                    sortBy: "SortName",
+                    sortOrder: "Ascending",
+                    limit: 10000,
+                    // Only tmdbID and the image tags are read off this scan. Same set as the identical
+                    // query in HomeViewModel+Precompute; detailFields over a whole library was the
+                    // single biggest request the app could issue (Sodalite#68).
+                    fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
+                )
+                if let filter = watchFilterValue {
+                    allQuery.filters = [filter]
+                }
+                return try? await session.libraryService.getItems(
+                    userID: userID, query: allQuery
+                ).items
+            }()
+            phase1Response = await studioMatchTask
+            allItems = await allLibraryTask
+        }
 
         // Backed out (Menu/detail tap) or superseded: leave all state alone.
         guard !Task.isCancelled, generation == loadGeneration else { return }
@@ -459,10 +479,12 @@ struct FilteredGridView: View {
         studioItems = phase1
         totalRecordCount = phase1Response.totalRecordCount
 
-        var tmdbMap: [String: JellyfinItem] = [:]
-        for item in allItems ?? [] {
-            if let id = item.tmdbID {
-                tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
+        var tmdbMap: [String: JellyfinItem] = combinedTmdbMap ?? [:]
+        if combinedTmdbMap == nil {
+            for item in allItems ?? [] {
+                if let id = item.tmdbID {
+                    tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
+                }
             }
         }
 

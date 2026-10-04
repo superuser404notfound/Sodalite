@@ -48,9 +48,10 @@ nonisolated enum HomeMerger {
         return nil
     }
 
-    static func merge(_ lists: [[JellyfinItem]], type: HomeRowType, mergedContinueWatching: Bool) -> [JellyfinItem] {
+    /// `limit` overrides the row's own, for a grid that merges a whole list.
+    static func merge(_ lists: [[JellyfinItem]], type: HomeRowType, mergedContinueWatching: Bool, limit: Int? = nil) -> [JellyfinItem] {
         guard lists.count > 1 else { return lists.first ?? [] }
-        let limit = limit(for: type, mergedContinueWatching: mergedContinueWatching)
+        let limit = limit ?? Self.limit(for: type, mergedContinueWatching: mergedContinueWatching)
         let order = order(for: type, mergedContinueWatching: mergedContinueWatching)
         let ordered = arrange(lists, order: order)
         let result = dedupes(type) ? deduplicate(ordered, newestWins: order == .lastPlayedDescending) : ordered

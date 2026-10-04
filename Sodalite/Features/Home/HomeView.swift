@@ -457,7 +457,8 @@ struct HomeView: View {
             ),
             smartProviderID: provider.tmdbWatchProviderID,
             smartProviderRegion: region,
-            cacheScope: cacheScope(FilterCacheKey.Home.provider(id: provider.id, region: region))
+            cacheScope: homeTileScope(FilterCacheKey.Home.provider(id: provider.id, region: region)),
+            sources: combinedSources
         )
     }
 

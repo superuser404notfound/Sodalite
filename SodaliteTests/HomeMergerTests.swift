@@ -92,6 +92,13 @@ struct HomeMergerTests {
         #expect(HomeMerger.merge([Array(a.prefix(2)), Array(b.prefix(1))], type: .nextUp, mergedContinueWatching: false).count == 3)
     }
 
+    @Test func explicitLimitOverridesTheRowLimit() throws {
+        let a = (0..<25).map { try! item("a\($0)", server: "a") }
+        let b = (0..<25).map { try! item("b\($0)", server: "b") }
+        #expect(HomeMerger.merge([a, b], type: .allMovies, mergedContinueWatching: false).count == 30)
+        #expect(HomeMerger.merge([a, b], type: .allMovies, mergedContinueWatching: false, limit: .max).count == 50)
+    }
+
     @Test func foldedRowsMergeRoundRobin() {
         #expect(HomeMerger.order(for: .latestShows, mergedContinueWatching: false) == .roundRobin)
         #expect(HomeMerger.order(for: .recentlyReleasedShows, mergedContinueWatching: false) == .roundRobin)
