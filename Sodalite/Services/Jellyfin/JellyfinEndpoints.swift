@@ -28,6 +28,8 @@ enum JellyfinEndpoint: APIEndpoint {
     case itemDetail(userID: String, itemID: String)
     /// GET LocalTrailers: bare BaseItemDto array (not the {Items:[...]} envelope); each is a playable item with its own id.
     case localTrailers(userID: String, itemID: String)
+    /// GET SpecialFeatures: bare array like LocalTrailers. The server already filters to the displayable extra types, trailers and theme media excluded.
+    case specialFeatures(userID: String, itemID: String)
     case resumeItems(userID: String, mediaType: String, limit: Int)
     case nextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool)
     case latestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int)
@@ -121,6 +123,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/Items/\(itemID)"
         case .localTrailers(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)/LocalTrailers"
+        case .specialFeatures(let userID, let itemID):
+            "/Users/\(userID)/Items/\(itemID)/SpecialFeatures"
         case .resumeItems(let userID, _, _):
             "/Users/\(userID)/Items/Resume"
         case .nextUp:
@@ -269,7 +273,7 @@ enum JellyfinEndpoint: APIEndpoint {
         case .items(_, let query):
             return query.toQueryItems()
 
-        case .localTrailers(let userID, _):
+        case .localTrailers(let userID, _), .specialFeatures(let userID, _):
             // UserId for user data; detailFields so trailers arrive with MediaSources/Chapters like a playable detail item.
             return [
                 URLQueryItem(name: "UserId", value: userID),
@@ -508,7 +512,7 @@ enum JellyfinEndpoint: APIEndpoint {
     /// `ItemQuery` fell back to for any caller that left `fields` nil, which is how four grid queries
     /// ended up asking a large library for cast lists and chapter arrays no cell renders. There is no
     /// fallback any more: `ItemQuery.fields` has no default and every call site picks its set.
-    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,Trickplay"
+    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,Trickplay"
 
     /// Season bar: ChildCount (episode count per season) without defaultFields' heavy arrays. Name/index/watched are base/UserData fields.
     /// It must be `ChildCount`, NOT `ItemCounts`: Jellyfin's DtoService fills a Season's ChildCount only under `ItemFields.ChildCount`; `ItemCounts` sets it on the ItemsByName path (people/genres/studios) and leaves a Season's nil. With the wrong field every season read as zero episodes, which the catalog's Jellyfin ground-truth reconcile scores as "deleted".

@@ -23,6 +23,7 @@ struct DetailViewModelRefreshSeasonsTests {
         }
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem { throw ServiceFailure() }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }

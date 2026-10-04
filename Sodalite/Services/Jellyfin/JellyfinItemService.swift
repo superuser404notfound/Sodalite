@@ -6,6 +6,8 @@ protocol JellyfinItemServiceProtocol: MovieCatalogQuerying {
     func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem
     /// Local trailers; bare array response (not the {Items:[...]} envelope), possibly empty.
     func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem]
+    /// Extras (clips, featurettes, deleted scenes, ...); bare array response, possibly empty.
+    func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem]
     func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse
     func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse
@@ -35,6 +37,14 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
     func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] {
         let response: LossyJellyfinItems = try await client.request(
             endpoint: JellyfinEndpoint.localTrailers(userID: userID, itemID: itemID),
+            responseType: LossyJellyfinItems.self
+        )
+        return response.elements
+    }
+
+    func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] {
+        let response: LossyJellyfinItems = try await client.request(
+            endpoint: JellyfinEndpoint.specialFeatures(userID: userID, itemID: itemID),
             responseType: LossyJellyfinItems.self
         )
         return response.elements

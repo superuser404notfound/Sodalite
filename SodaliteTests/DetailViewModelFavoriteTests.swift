@@ -26,6 +26,7 @@ struct DetailViewModelFavoriteTests {
             throw ServiceFailure()
         }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }

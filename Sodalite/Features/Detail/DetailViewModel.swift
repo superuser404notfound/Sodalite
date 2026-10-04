@@ -21,6 +21,8 @@ final class DetailViewModel {
     /// Full next-up episode, populated when getNextUp lands; lets the play button render "S1E5 · 12:34" + resume bar before loadEpisodes fills `episodes` (else a flicker on the first focused tile).
     var nextUpEpisode: JellyfinItem?
     var similarItems: [JellyfinItem] = []
+    /// Extras from the item's clips/extras folders (Sodalite#179). Fetched only when the detail reports a SpecialFeatureCount.
+    var specialFeatures: [JellyfinItem] = []
     /// Similar titles the server does NOT have, from Jellyseerr. Empty unless the catalog is connected and visible, the item carries a TMDB id, and something survives the dedupe.
     var catalogSimilar: [SeerrMedia] = []
     var selectedSeasonID: String?
@@ -151,6 +153,9 @@ final class DetailViewModel {
             item = detail
             isFavorite = detail.userData?.isFavorite ?? false
             isPlayed = detail.userData?.played ?? false
+            if (detail.specialFeatureCount ?? 0) > 0 {
+                loadSpecialFeatures(for: itemID)
+            }
         }
         // Settled either way: on failure nothing more arrives, so placeholders must stop reserving space.
         hasFullDetail = true
@@ -165,6 +170,15 @@ final class DetailViewModel {
         await playlistContentTask?.value
 
         isLoading = false
+    }
+
+    /// Below the fold like the similar row, so it lands progressively instead of gating isLoading.
+    private func loadSpecialFeatures(for itemID: String) {
+        Task { [weak self] in
+            guard let self else { return }
+            let extras = (try? await itemService.getSpecialFeatures(userID: userID, itemID: itemID)) ?? []
+            await MainActor.run { self.specialFeatures = extras }
+        }
     }
 
     /// Catalog counterpart of the similar row: what Jellyseerr suggests and the server does not have.

@@ -25,8 +25,9 @@ struct MovieDetailView: View {
     @State private var versionChoice: VersionPickerChoice?
     /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
     @State private var versionSelection = VersionSelection()
-    @State private var showTrailer = false
-    @State private var trailerItem: JellyfinItem?
+    @State private var showExtra = false
+    /// The local trailer or an Extras card (Sodalite#179); both are distinct server items played from the start.
+    @State private var extraItem: JellyfinItem?
     @State private var isPresentingDeleteSheet: Bool = false
     @State private var isPresentingMoreDetails = false
     @FocusState private var playButtonFocused: Bool
@@ -128,8 +129,8 @@ struct MovieDetailView: View {
         .overlay {
             if let userID = sessionUserID {
                 PlayerLauncher(
-                    isPresented: $showTrailer,
-                    item: showTrailer ? trailerItem : nil,
+                    isPresented: $showExtra,
+                    item: showExtra ? extraItem : nil,
                     startFromBeginning: true,
                     playbackService: session.playbackService,
                     itemService: session.itemService,
@@ -137,8 +138,8 @@ struct MovieDetailView: View {
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
-                    // Trailer is a distinct server item; the movie's
-                    // cached PlaybackInfo does not apply to it.
+                    // Trailers and extras are distinct server items; the movie's
+                    // cached PlaybackInfo does not apply to them.
                     cachedPlaybackInfo: nil
                 )
                 .allowsHitTesting(false)
@@ -177,9 +178,9 @@ struct MovieDetailView: View {
                 versionChoice = nil
             }
         }
-        .onChange(of: showTrailer) { _, isPlaying in
+        .onChange(of: showExtra) { _, isPlaying in
             if !isPlaying {
-                trailerItem = nil
+                extraItem = nil
                 deferOnMain(by: 0.1) { playButtonFocused = true }
             }
         }
@@ -389,6 +390,11 @@ struct MovieDetailView: View {
                     }
                 }
 
+                if !vm.specialFeatures.isEmpty {
+                    extrasRow(vm: vm)
+                        .onFocusMoveUp(active: !hasCast) { playButtonFocused = true }
+                }
+
                 if !vm.similarItems.isEmpty {
                     HorizontalMediaRow(
                         title: "detail.similar",
@@ -397,7 +403,7 @@ struct MovieDetailView: View {
                         onItemSelected: { navigateToItem = $0 },
                         cardStyle: .poster
                     )
-                    .onFocusMoveUp(active: !hasCast) { playButtonFocused = true }
+                    .onFocusMoveUp(active: !hasCast && vm.specialFeatures.isEmpty) { playButtonFocused = true }
                 }
 
                 // Same split the search screen teaches: what the server has on top, what it would have
@@ -408,7 +414,9 @@ struct MovieDetailView: View {
                         items: vm.catalogSimilar,
                         onItemSelected: { navigateToSeerrRequest = $0 }
                     )
-                    .onFocusMoveUp(active: !hasCast && vm.similarItems.isEmpty) { playButtonFocused = true }
+                    .onFocusMoveUp(active: !hasCast && vm.specialFeatures.isEmpty && vm.similarItems.isEmpty) {
+                        playButtonFocused = true
+                    }
                 }
 
                 // Sodalite#146, after Infuse: one non-focusable line closing the page with what the
@@ -522,7 +530,23 @@ struct MovieDetailView: View {
     /// Whether anything below the fold is a section rather than the closing caption line. It decides
     /// where that line is drawn, and through it whether the page is scrollable at all.
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
-        !(vm.item.people?.isEmpty ?? true) || !vm.similarItems.isEmpty || !vm.catalogSimilar.isEmpty
+        !(vm.item.people?.isEmpty ?? true) || !vm.specialFeatures.isEmpty
+            || !vm.similarItems.isEmpty || !vm.catalogSimilar.isEmpty
+    }
+
+    /// Sodalite#179. Frame grabs are 16:9; an extra without one borrows the page's own backdrop.
+    private func extrasRow(vm: DetailViewModel) -> some View {
+        HorizontalMediaRow(
+            title: "detail.extras",
+            items: vm.specialFeatures,
+            imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
+            fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
+            onItemSelected: { extra in
+                extraItem = extra
+                showExtra = true
+            },
+            cardStyle: .landscape
+        )
     }
 
     private func techFacts(vm: DetailViewModel) -> TechFacts {
@@ -628,8 +652,8 @@ struct MovieDetailView: View {
                     action: {
                         Task {
                             if let trailer = await vm.loadTrailer() {
-                                trailerItem = trailer
-                                showTrailer = true
+                                extraItem = trailer
+                                showExtra = true
                             }
                         }
                     }
