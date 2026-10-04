@@ -223,6 +223,8 @@ struct ProfileHomePayload: Codable, Equatable {
     /// Combine servers (Sodalite#85). Optional so a record from an older build decodes.
     var combineServers: Bool?
     var combineServersExcluded: [String]?
+    /// My Media order and hiding (Sodalite#85). Optional so a record from an older build decodes.
+    var libraryLayoutJSON: Data?
 }
 
 /// Type-erased profile payload, the per-profile counterpart of `SettingsSyncPayload`.

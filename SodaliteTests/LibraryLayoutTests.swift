@@ -70,4 +70,26 @@ struct LibraryLayoutTests {
         LibraryLayout.clear(scope: "s1", defaults: defaults)
         #expect(LibraryLayout.load(scope: "s1", defaults: defaults).entries.isEmpty)
     }
+
+    @Test func homeRecordCarriesTheLayout() {
+        let scope = "layout-sync-\(UUID())"
+        defer { LibraryLayout.clear(scope: scope) }
+        LibraryLayout(entries: [.init(serverID: "a", libraryID: "1", isHidden: true)]).save(scope: scope)
+        let payload = ProfileHomeStore.collect(scope: scope, stamp: Date())
+        LibraryLayout.clear(scope: scope)
+        ProfileHomeStore.apply(payload, scope: scope)
+        #expect(LibraryLayout.load(scope: scope).entries == [.init(serverID: "a", libraryID: "1", isHidden: true)])
+    }
+
+    @Test func olderRecordLeavesLayoutAlone() throws {
+        let scope = "layout-old-\(UUID())"
+        defer { LibraryLayout.clear(scope: scope) }
+        let local = LibraryLayout(entries: [.init(serverID: "a", libraryID: "1", isHidden: true)])
+        local.save(scope: scope)
+        let old = try JSONDecoder().decode(ProfileHomePayload.self, from: Data(
+            #"{"schemaVersion":1,"updatedAt":0,"mergeCWNextUp":false,"rewatchNextUp":false,"collectionGrouping":"system","librarySorts":{}}"#.utf8))
+        #expect(old.libraryLayoutJSON == nil)
+        ProfileHomeStore.apply(old, scope: scope)
+        #expect(LibraryLayout.load(scope: scope) == local)
+    }
 }

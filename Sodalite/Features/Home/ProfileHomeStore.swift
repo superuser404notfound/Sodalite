@@ -13,7 +13,8 @@ enum ProfileHomeStore {
             collectionGrouping: HomeRowConfig.collectionGrouping(scope: scope).rawValue,
             librarySorts: LibrarySortStore.allSorts(scope: scope),
             combineServers: CombinedServersPreferences(defaults: .standard).isEnabled(scope: scope),
-            combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted()
+            combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted(),
+            libraryLayoutJSON: LibraryLayout.rawData(scope: scope)
         )
     }
 
@@ -33,6 +34,7 @@ enum ProfileHomeStore {
         let combined = CombinedServersPreferences(defaults: .standard)
         if let enabled = payload.combineServers { combined.setEnabled(enabled, scope: scope) }
         if let excluded = payload.combineServersExcluded { combined.setExcluded(Set(excluded), scope: scope) }
+        if let layout = payload.libraryLayoutJSON { LibraryLayout.setRawData(layout, scope: scope) }
     }
 
     /// Combine servers stays behind: it names another profile's accounts on other servers, and a
