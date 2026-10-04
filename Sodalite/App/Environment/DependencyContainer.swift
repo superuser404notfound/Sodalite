@@ -346,17 +346,6 @@ final class DependencyContainer {
         }
     }
 
-    /// Gates the Live TV tab: does the active server expose any Live TV channels? False on any error.
-    func serverHasLiveTV(userID: String) async -> Bool {
-        do {
-            let response = try await jellyfinLiveTvService.getChannels(
-                userID: userID, startIndex: 0, limit: 1, filter: .any)
-            return !response.items.isEmpty
-        } catch {
-            return false
-        }
-    }
-
     /// Silent `try?`: a missing/unreadable keychain entry means no session to restore (app falls back to login); no recovery path benefits from the underlying error.
     func restoreSession() -> Bool {
         guard let server = activeServer else {

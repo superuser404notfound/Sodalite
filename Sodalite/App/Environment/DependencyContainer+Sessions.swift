@@ -111,4 +111,24 @@ extension DependencyContainer {
             )
         }
     }
+
+    /// Live TV's sources, active first.
+    func liveTVSources(activeUserID: String) -> [LiveTVSource] {
+        sessionRegistry.participants.map { session in
+            LiveTVSource(
+                serverID: session.server?.id ?? "",
+                serverName: session.server?.name ?? "",
+                userID: session.isActive ? activeUserID : session.userID,
+                liveTvService: session.liveTvService,
+                playbackService: session.playbackService,
+                itemService: session.itemService,
+                isActive: session.isActive
+            )
+        }
+    }
+
+    /// Gates the Live TV tab: the participants exposing any Live TV channel. Empty on any error.
+    func liveTVServerIDs(activeUserID: String) async -> [String] {
+        await LiveTVProbe.capableServerIDs(liveTVSources(activeUserID: activeUserID), secondaryDeadline: .seconds(4))
+    }
 }

@@ -252,7 +252,7 @@ struct TabRootView: View {
             guard let userID = dependencies.activeUserID else { return }
 
             // Probe both optional tabs then publish the tab set in ONE assignment. Two separate insertions rebuilt the bar twice, stranding the earlier item (Live TV) on tvOS's gray icon template; one atomic rebuild tints every item uniformly.
-            let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+            let hasLive = !(await dependencies.liveTVServerIDs(activeUserID: userID)).isEmpty
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
             // Swallow a music-probe error into false so it doesn't skip the assignment and leave Live TV hidden.
@@ -398,7 +398,7 @@ struct TabRootView: View {
         }
         guard let userID = dependencies.activeUserID else { return }
 
-        let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+        let hasLive = !(await dependencies.liveTVServerIDs(activeUserID: userID)).isEmpty
         if Task.isCancelled { return }
         var hasMusic = false
         do {
@@ -429,7 +429,7 @@ struct TabRootView: View {
     private func recoverOptionalTabs() async {
         guard let userID = dependencies.activeUserID else { return }
 
-        let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+        let hasLive = !(await dependencies.liveTVServerIDs(activeUserID: userID)).isEmpty
         if Task.isCancelled { return }
         var hasMusic = false
         do {
