@@ -45,6 +45,29 @@ extension HomeViewModel {
                 tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
             }
         }
+        // A combined Home joins every server's library into the map, the active server winning an id.
+        // Only secondaries whose scan answered take part further down: a dead one would otherwise
+        // cost one deadline per provider.
+        var secondaries: [HomeSource] = []
+        var secondaryMaps: [[String: JellyfinItem]] = []
+        for source in inputs.secondaries {
+            let run: @MainActor @Sendable () async -> [JellyfinItem]? = {
+                try? await source.libraryService.getItems(userID: source.userID, query: allItemsQuery).items
+            }
+            guard let items = await Deadline.race(secondaryPassDeadline, { await run() }) ?? nil else { continue }
+            var map: [String: JellyfinItem] = [:]
+            for item in items {
+                var stamped = item
+                if stamped.serverID == nil { stamped.serverID = source.serverID }
+                if let id = stamped.tmdbID { map[ProviderMatchMerging.tmdbKey(type: stamped.type, tmdbID: id)] = stamped }
+            }
+            secondaryMaps.append(map)
+            secondaries.append(source)
+        }
+        if !secondaryMaps.isEmpty {
+            tmdbMap = CombinedProviderMatch.unionTmdbMaps([tmdbMap] + secondaryMaps)
+        }
+        guard !Task.isCancelled else { return }
         // Snapshot into a Sendable struct: CatalogProvider is MainActor-isolated, so it can't cross into the detached task directly.
         let providerInfos: [ProviderResolveInfo] = CatalogProviders.networks.map {
             ProviderResolveInfo(
@@ -103,7 +126,38 @@ extension HomeViewModel {
 
         // A cancelled precompute must not write superseded results over the replacement run's.
         guard !Task.isCancelled else { return }
-        owner()?.applyProviderCounts(resolved, region: region)
+        guard !secondaries.isEmpty else {
+            owner()?.applyProviderCounts(resolved, region: region)
+            return
+        }
+        // Each secondary's studio match joins the active server's, as the combined grid does.
+        var combined = resolved
+        for source in secondaries {
+            for index in combined.indices {
+                guard !Task.isCancelled else { return }
+                guard let info = providerInfos.first(where: { $0.id == combined[index].0 }) else { continue }
+                let studioQuery = ItemQuery(
+                    includeItemTypes: [.movie, .series],
+                    sortBy: "SortName",
+                    sortOrder: "Ascending",
+                    limit: 200,
+                    studioNames: info.studioNames,
+                    fields: JellyfinEndpoint.homeRowFields
+                )
+                let run: @MainActor @Sendable () async -> [JellyfinItem]? = {
+                    try? await source.libraryService.getItems(userID: source.userID, query: studioQuery).items
+                }
+                guard let studio = await Deadline.race(secondaryPassDeadline, { await run() }) ?? nil, !studio.isEmpty else { continue }
+                let stamped = studio.map { item -> JellyfinItem in
+                    var copy = item
+                    if copy.serverID == nil { copy.serverID = source.serverID }
+                    return copy
+                }
+                combined[index].1 = CombinedProviderMatch.mergeStudioMatches([combined[index].1, stamped])
+            }
+        }
+        guard !Task.isCancelled else { return }
+        owner()?.applyProviderCounts(combined, region: region)
     }
 
     private struct PassInputs {
@@ -111,12 +165,18 @@ extension HomeViewModel {
         let libraryService: JellyfinLibraryServiceProtocol
         let discoverService: SeerrDiscoverServiceProtocol?
         let userID: String
+        /// A combined Home's other servers (Sodalite#85); empty with one server.
+        let secondaries: [HomeSource]
     }
 
     private func providerPassInputs() -> PassInputs {
         PassInputs(pending: providerCountsComputedAt == nil, libraryService: libraryService,
-                   discoverService: discoverService, userID: userID)
+                   discoverService: discoverService, userID: userID,
+                   secondaries: sources.filter { !$0.isActive })
     }
+
+    /// How long a secondary's part of a background pass may take; generous, since nobody waits on it.
+    static let secondaryPassDeadline: Duration = .seconds(60)
 
     /// MainActor: write counts + cache + sample backdrop per provider.
     private func applyProviderCounts(_ resolved: [(Int, [JellyfinItem])], region: String) {
@@ -125,7 +185,7 @@ extension HomeViewModel {
             FilterCache.shared.setHomeFilterItems(
                 items,
                 filterKey: FilterCacheKey.Home.provider(id: providerID, region: region),
-                identity: cacheIdentity
+                identity: feedIdentity
             )
             // Backfill the backdrop only if the fast studio pass didn't set one; this resolver includes watch-provider matches, so it finds a sample for studio-tag-less tiles (Paramount+).
             if providerBackdrops[providerID] == nil,
@@ -148,6 +208,27 @@ extension HomeViewModel {
     static func runGenreCaches(_ owner: () -> HomeViewModel?) async {
         guard let inputs = owner()?.genrePassInputs() else { return }
         let genreNames = inputs.genreNames
+        // A combined Home pre-warms the same merged first page its genre grid opens on (Sodalite#85).
+        if inputs.sources.count > 1 {
+            var resolved: [(String, [JellyfinItem])] = []
+            for name in genreNames {
+                guard !Task.isCancelled else { return }
+                let query = ItemQuery(
+                    includeItemTypes: [.movie, .series],
+                    sortBy: "SortName",
+                    sortOrder: "Ascending",
+                    limit: 50,
+                    genres: [name],
+                    fields: JellyfinEndpoint.homeRowFields
+                )
+                let pager = MergedPager(sources: MergedPager.sources(from: inputs.sources, query: query),
+                                        sort: .default, pageSize: 50)
+                resolved.append((name, await pager.nextPage()))
+            }
+            guard !Task.isCancelled else { return }
+            owner()?.applyGenreCaches(resolved)
+            return
+        }
         let lib = inputs.libraryService
         let uid = inputs.userID
 
@@ -205,6 +286,7 @@ extension HomeViewModel {
         let genreNames: [String]
         let libraryService: JellyfinLibraryServiceProtocol
         let userID: String
+        let sources: [HomeSource]
     }
 
     private func genrePassInputs() -> GenrePassInputs? {
@@ -214,14 +296,14 @@ extension HomeViewModel {
             .filter { $0.type == .genres }
             .flatMap { $0.tags.map(\.name) }
         if genreNames.isEmpty { return nil }
-        return GenrePassInputs(genreNames: genreNames, libraryService: libraryService, userID: userID)
+        return GenrePassInputs(genreNames: genreNames, libraryService: libraryService, userID: userID, sources: sources)
     }
 
     private func applyGenreCaches(_ resolved: [(String, [JellyfinItem])]) {
         // MainActor cache writes (the detached closure can't see FilterCache.shared's non-isolation under strict concurrency).
         for (name, items) in resolved where !items.isEmpty {
             FilterCache.shared.setHomeFilterItems(
-                items, filterKey: FilterCacheKey.Home.genre(name: name), identity: cacheIdentity
+                items, filterKey: FilterCacheKey.Home.genre(name: name), identity: feedIdentity
             )
         }
         // Latch at the END: up front, a cancelled run marked the session "computed" with an empty cache.

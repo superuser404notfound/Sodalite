@@ -301,10 +301,40 @@ extension HomeViewModel {
     func loadTagRow(type: HomeRowType) async -> HomeTagRowData? {
         do {
             let tags: [NamedItem]
+            // Which source probes each genre: the first one that lists it (Sodalite#85).
+            var owners: [String: HomeSource] = [:]
             switch type {
             case .genres:
-                let allGenres = try await libraryService.getGenres(userID: userID)
-                tags = allGenres.filter { GenreFilter.isPrimary($0.name) }
+                if sources.count > 1 {
+                    let deadline = secondaryDeadline
+                    var lists: [Int: [NamedItem]?] = [:]
+                    await withTaskGroup(of: (Int, [NamedItem]?).self) { group in
+                        for (index, source) in sources.enumerated() {
+                            let run: @MainActor @Sendable () async -> [NamedItem]? = {
+                                try? await source.libraryService.getGenres(userID: source.userID)
+                            }
+                            let isActive = source.isActive
+                            group.addTask {
+                                (index, isActive ? await run() : await Deadline.race(deadline) { await run() } ?? nil)
+                            }
+                        }
+                        for await (index, list) in group { lists[index] = list }
+                    }
+                    guard let activeGenres = lists[0] ?? nil else { return nil }
+                    var seen = Set<String>()
+                    var union: [NamedItem] = []
+                    for (index, source) in sources.enumerated() {
+                        let list = index == 0 ? activeGenres : ((lists[index] ?? nil) ?? [])
+                        for genre in list where GenreFilter.isPrimary(genre.name) && seen.insert(genre.name.lowercased()).inserted {
+                            union.append(genre)
+                            owners[genre.id] = source
+                        }
+                    }
+                    tags = union
+                } else {
+                    let allGenres = try await libraryService.getGenres(userID: userID)
+                    tags = allGenres.filter { GenreFilter.isPrimary($0.name) }
+                }
             default:
                 return nil
             }
@@ -318,6 +348,7 @@ extension HomeViewModel {
                 let maxConcurrent = 6
 
                 func enqueue(_ tag: NamedItem) {
+                    let owner = owners[tag.id]
                     group.addTask {
                         let query = ItemQuery(
                             includeItemTypes: [.movie, .series],
@@ -326,7 +357,9 @@ extension HomeViewModel {
                             genres: [tag.name],
                             fields: JellyfinEndpoint.homeRowFields
                         )
-                        let item = try? await self.libraryService.getItems(userID: self.userID, query: query).items.first
+                        let service = owner?.libraryService ?? self.libraryService
+                        let user = owner?.userID ?? self.userID
+                        let item = try? await service.getItems(userID: user, query: query).items.first
                         return (tag.id, item)
                     }
                 }
