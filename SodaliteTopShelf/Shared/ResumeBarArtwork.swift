@@ -16,9 +16,8 @@ nonisolated private let log = ShelfLog(category: "ResumeBar")
 /// budget for left the accent capsule standing beside the white system bar inside one row, at two
 /// different resolutions, with the seam moving on every refresh (Sodalite#128).
 ///
-/// It lives in `Shared/` because the app runs it too: doing this work when the app has a reason to
-/// (a setting changed, a title finished) is what keeps it off the path of someone looking at the
-/// shelf, where it used to hold the row back until it finished.
+/// It lives in `Shared/` because both processes read the result, but only the app renders: the
+/// extension's 25 MB ceiling does not hold a composite at the cell's width (see `existing`).
 enum ResumeBarArtwork {
 
     /// One cell's input. Neutral on purpose: the extension and the app each have their own
@@ -86,15 +85,9 @@ enum ResumeBarArtwork {
             return [:]
         }
 
-        var covered: [String: URL] = [:]
-        var pending: [Candidate] = []
-        for candidate in candidates {
-            if FileManager.default.fileExists(atPath: candidate.destination.path) {
-                covered[candidate.cell.itemID] = candidate.destination
-            } else {
-                pending.append(candidate)
-            }
-        }
+        let found = split(candidates)
+        var covered = found.covered
+        let pending = found.pending
 
         if !pending.isEmpty {
             covered.merge(await render(pending, accent: accent)) { current, _ in current }
@@ -105,6 +98,45 @@ enum ResumeBarArtwork {
             return [:]
         }
         return covered
+    }
+
+    /// The extension's side: the artwork the app has already rendered, all or nothing, and never a
+    /// download, a composite or a sweep.
+    ///
+    /// tvOS gives a Top Shelf extension a hard 25 MB footprint, and a composite at the cell's width
+    /// holds two 5.8 MB bitmaps on top of the decoder's own buffer and the process itself. On the
+    /// living room box every pass that had to composite was killed for it
+    /// (`JETSAM_REASON_MEMORY_PERPROCESSLIMIT`, seven times on 2026-10-04), and a killed extension
+    /// answers nothing, so the shelf stayed empty instead of falling back. Whatever is missing here is
+    /// the app's to render: the caller shows remote artwork with the system bar until it has.
+    nonisolated static func existing(cells: [Cell], accent: UInt32) -> [String: URL] {
+        guard let directory = containerDirectory() else { return [:] }
+        var seen = Set<String>()
+        let candidates = cells.filter { seen.insert($0.itemID).inserted }.map { cell in
+            Candidate(cell: cell,
+                      destination: directory.appendingPathComponent(name(for: cell, accent: accent)))
+        }
+        guard !candidates.isEmpty, candidates.count <= maxCells else { return [:] }
+        let (covered, pending) = split(candidates)
+        guard pending.isEmpty else {
+            log.notice("\(pending.count) of \(candidates.count) cells not rendered yet; "
+                       + "shelf keeps the remote artwork until the app renders them")
+            return [:]
+        }
+        return covered
+    }
+
+    nonisolated private static func split(_ candidates: [Candidate]) -> (covered: [String: URL], pending: [Candidate]) {
+        var covered: [String: URL] = [:]
+        var pending: [Candidate] = []
+        for candidate in candidates {
+            if FileManager.default.fileExists(atPath: candidate.destination.path) {
+                covered[candidate.cell.itemID] = candidate.destination
+            } else {
+                pending.append(candidate)
+            }
+        }
+        return (covered, pending)
     }
 
     /// The accent rides in the name only for a cell that draws a bar. Without this an accent change

@@ -92,6 +92,7 @@ final class PlayerHostController: AVPlayerViewController {
     /// suspension, and the assertion that keeps the app running long enough to send it.
     private var liveSuspensionRelease: Task<Void, Never>?
     private var liveSuspensionAssertion: UIBackgroundTaskIdentifier = .invalid
+    private var shelfRefreshAssertion: UIBackgroundTaskIdentifier = .invalid
     /// Set synchronously by the AVKit PiP delegate (willStart) BEFORE PiP dismisses this VC, so
     /// viewWillDisappear can tell a PiP handoff from a real dismiss and not stopPlayback (which would
     /// idle the engine and immediately close PiP). nonisolated(unsafe): written from the nonisolated
@@ -1016,6 +1017,35 @@ final class PlayerHostController: AVPlayerViewController {
         // the viewer cannot see, so it stops probing until we are back.
         viewModel.setAppActive(false)
         armLiveSuspensionRelease()
+        refreshTopShelfForSuspension()
+    }
+
+    /// Home pressed mid-title leaves the player without a stop report, so nothing told the shelf
+    /// that this item's resume position moved, and its cell is named after the old one. tvOS asks the
+    /// extension for the shelf about a second later, and the extension cannot render the missing
+    /// cell itself (25 MB ceiling, see `ResumeBarArtwork.existing`). So the position goes to the
+    /// server now and the app renders before it is suspended; the extension shows remote artwork for
+    /// the moment in between and is asked again once the files are there.
+    private func refreshTopShelfForSuspension() {
+        #if os(tvOS)
+        guard viewModel.hasStartedPlaying, !viewModel.isLiveSession, shelfRefreshAssertion == .invalid else { return }
+        // Same strong captures as the live release below, for the same reason: an assertion nobody
+        // ends is a termination.
+        shelfRefreshAssertion = UIApplication.shared.beginBackgroundTask(withName: "topshelf-refresh") {
+            self.endShelfRefreshAssertion()
+        }
+        Task { @MainActor in
+            await self.viewModel.reportProgress()
+            await TopShelfRefresher.refresh()
+            self.endShelfRefreshAssertion()
+        }
+        #endif
+    }
+
+    private func endShelfRefreshAssertion() {
+        guard shelfRefreshAssertion != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(shelfRefreshAssertion)
+        shelfRefreshAssertion = .invalid
     }
 
     /// How long a backgrounded live session waits for the engine to give its pipeline up before the
