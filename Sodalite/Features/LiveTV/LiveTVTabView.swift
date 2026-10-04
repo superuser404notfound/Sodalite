@@ -3,6 +3,8 @@ import SwiftUI
 struct LiveTVTabView: View {
     /// Whether this tab is the selected one. See TabRootView's call site.
     let isTabSelected: Bool
+    /// Participants with Live TV, active first (Sodalite#85).
+    let capableServerIDs: [String]
 
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
