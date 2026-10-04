@@ -264,7 +264,8 @@ final class HomeViewModel {
         /// a single row was even planned. On an unreachable server that was thirty seconds of dead
         /// time under a bare spinner, every launch. nil = the fetch failed and the stored config
         /// stands, which is the same fallback as before.
-        case libraries([JellyfinLibrary]?)
+        /// `complete` is false when a combined Home's secondary did not answer (Sodalite#85).
+        case libraries([JellyfinLibrary]?, complete: Bool)
     }
 
     /// One planned row, with everything the fetch needs already resolved.
@@ -389,7 +390,8 @@ final class HomeViewModel {
                 // Unstructured, so cancelling the group has to be passed on by hand; without this
                 // a torn-down Home would leave the requests running to completion.
                 await withTaskCancellationHandler {
-                    .libraries(await self?.combinedLibraries() ?? nil)
+                    let combined = await self?.combinedLibraries()
+                    return .libraries(combined?.libraries, complete: combined?.complete ?? true)
                 } onCancel: {
                     libraryTasks.forEach { $0.cancel() }
                 }
@@ -429,13 +431,16 @@ final class HomeViewModel {
                     serverAnswered()
                 case .empty:
                     break
-                case .libraries(let libraries):
+                case .libraries(let libraries, let complete):
                     guard let libraries else {
                         LogTap.shared.note("Home: getLibraries failed, falling back to aggregated Latest rows")
                         break
                     }
                     // Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
                     myMediaLibraries = MyMediaLibraries.browsable(libraries)
+                    // A server missing from the list would read as a server whose libraries are
+                    // gone, and retire its per-library rows for good (Sodalite#85).
+                    guard complete else { break }
                     let reconciled = HomeRowConfig.reconciled(stored: rowConfigs, libraries: libraries)
                     guard reconciled != rowConfigs else { break }
                     rowConfigs = reconciled

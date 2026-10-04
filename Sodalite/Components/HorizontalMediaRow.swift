@@ -44,7 +44,8 @@ struct HorizontalMediaRow: View {
             RowScrollView(leading: leadingInset, trailing: rowInset,
                           vertical: metrics.rowVerticalPadding) {
                 LazyHStack(spacing: metrics.itemSpacing) {
-                    ForEach(items) { item in
+                    // Per server: two servers can carry the same id, and a repeated identity draws a blank card.
+                    ForEach(items, id: \.originKey) { item in
                         FocusableCard {
                             onItemSelected?(item)
                         } content: { isFocused in

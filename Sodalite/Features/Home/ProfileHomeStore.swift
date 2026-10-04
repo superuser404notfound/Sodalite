@@ -35,7 +35,12 @@ enum ProfileHomeStore {
         if let excluded = payload.combineServersExcluded { combined.setExcluded(Set(excluded), scope: scope) }
     }
 
+    /// Combine servers stays behind: it names another profile's accounts on other servers, and a
+    /// profile used for the first time must not start showing them (Sodalite#85).
     static func copy(fromScope source: String, toScope target: String) {
-        apply(collect(scope: source, stamp: .distantPast), scope: target)
+        var payload = collect(scope: source, stamp: .distantPast)
+        payload.combineServers = nil
+        payload.combineServersExcluded = nil
+        apply(payload, scope: target)
     }
 }

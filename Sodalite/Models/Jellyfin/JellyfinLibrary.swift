@@ -16,6 +16,10 @@ struct JellyfinLibrary: Codable, Sendable, Identifiable, Equatable {
         case serverID = "ServerId"
     }
 
+    /// Identity across servers: Jellyfin derives a folder id from its path, so two servers with the
+    /// same layout can mint the same one (Sodalite#85).
+    var originKey: String { "\(serverID ?? "")|\(id)" }
+
     var libraryType: LibraryType {
         guard let collectionType else { return .unknown }
         return LibraryType(rawValue: collectionType) ?? .unknown

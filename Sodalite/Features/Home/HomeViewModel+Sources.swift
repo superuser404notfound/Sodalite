@@ -10,7 +10,8 @@ extension HomeViewModel {
             hash ^= UInt64(byte)
             hash = hash &* 0x100000001b3
         }
-        return CacheIdentity(serverID: "combined-" + String(hash, radix: 16), userID: userID)
+        // The pairs already name every user, so the slot does not depend on which one is active.
+        return CacheIdentity(serverID: "combined-" + String(hash, radix: 16), userID: "combined")
     }
 
     private enum SourceOutcome: Sendable {
@@ -69,67 +70,87 @@ extension HomeViewModel {
             }
         }
         guard let deadline else { return await work() }
-        return await withTaskGroup(of: SourceOutcome.self) { group in
-            group.addTask { await work() }
-            group.addTask {
-                try? await Task.sleep(for: deadline)
-                return .timedOut
-            }
-            let first = await group.next() ?? .timedOut
-            group.cancelAll()
-            return first
-        }
+        return await Self.race(deadline) { @MainActor in await work() } ?? .timedOut
     }
 
-    /// A per-library row is fetched from the server that owns the library, nobody else.
+    /// A per-library row is fetched from the servers that hold the library, nobody else. Jellyfin
+    /// derives a folder id from its path, so two servers with the same layout can share one; their
+    /// row then merges like any other.
     private func owningSources(for config: HomeRowConfig) async -> [HomeSource] {
-        guard let libraryID = config.libraryID else { return [sources[0]] }
+        guard sources.count > 1, let libraryID = config.libraryID else { return sources }
+        let deadline = secondaryDeadline
+        var owners: [HomeSource] = []
         for source in sources {
-            let task = librariesTasks[source.serverID]
+            guard let task = librariesTasks[source.serverID] else { continue }
             let libraries = source.isActive
-                ? await task?.value ?? nil
-                : await withDeadline(secondaryDeadline) { await task?.value ?? nil } ?? nil
-            if libraries?.contains(where: { $0.id == libraryID }) == true { return [source] }
+                ? await task.value
+                : await Self.race(deadline) { await task.value } ?? nil
+            if libraries?.contains(where: { $0.id == libraryID }) == true { owners.append(source) }
         }
-        if let owner = myMediaLibraries.first(where: { $0.id == libraryID })?.serverID,
-           let source = sources.first(where: { $0.serverID == owner }) {
-            return [source]
+        if owners.isEmpty {
+            let known = Set(myMediaLibraries.filter { $0.id == libraryID }.compactMap(\.serverID))
+            owners = sources.filter { known.contains($0.serverID) }
         }
-        return [sources[0]]
+        return owners.isEmpty ? [sources[0]] : owners
     }
 
     /// Every source's libraries, active first, each stamped with its server. nil when the active
-    /// server's own list failed, which keeps today's "stored config stands" fallback.
-    func combinedLibraries() async -> [JellyfinLibrary]? {
-        var combined: [JellyfinLibrary] = []
-        for source in sources {
-            let task = librariesTasks[source.serverID]
-            let fetched: [JellyfinLibrary]?
-            if source.isActive {
-                fetched = await task?.value ?? nil
-                guard fetched != nil else { return nil }
-            } else {
-                fetched = await withDeadline(secondaryDeadline) { await task?.value ?? nil } ?? nil
+    /// server's own list failed, which keeps today's "stored config stands" fallback. `complete`
+    /// is false when a secondary did not answer in time, and an incomplete list must not be used
+    /// to retire that server's per-library rows.
+    func combinedLibraries() async -> (libraries: [JellyfinLibrary], complete: Bool)? {
+        let deadline = secondaryDeadline
+        let lists = await withTaskGroup(of: (Int, [JellyfinLibrary]?).self, returning: [Int: [JellyfinLibrary]?].self) { group in
+            for (index, source) in sources.enumerated() {
+                guard let task = librariesTasks[source.serverID] else { continue }
+                let isActive = source.isActive
+                group.addTask {
+                    (index, isActive ? await task.value : await Self.race(deadline) { await task.value } ?? nil)
+                }
             }
-            combined += (fetched ?? []).map { library in
+            var collected: [Int: [JellyfinLibrary]?] = [:]
+            for await (index, list) in group { collected[index] = list }
+            return collected
+        }
+        var combined: [JellyfinLibrary] = []
+        var complete = true
+        for (index, source) in sources.enumerated() {
+            guard let fetched = lists[index] ?? nil else {
+                if source.isActive { return nil }
+                complete = false
+                if !pendingUnreachable.contains(source.serverName) { pendingUnreachable.append(source.serverName) }
+                continue
+            }
+            combined += fetched.map { library in
                 var stamped = library
                 if stamped.serverID == nil { stamped.serverID = source.serverID }
                 return stamped
             }
         }
-        return combined
+        return (combined, complete)
     }
 
-    private func withDeadline<T: Sendable>(_ deadline: Duration, _ work: @escaping @Sendable () async -> T?) async -> T? {
-        await withTaskGroup(of: T?.self) { group in
-            group.addTask { await work() }
-            group.addTask {
-                try? await Task.sleep(for: deadline)
-                return nil
+    /// The value of `work`, or nil once `deadline` passes, whichever comes first. A continuation
+    /// rather than a task group: a group waits for its slowest child even after cancelling it, and
+    /// `await task.value` on an unstructured task ignores cancellation, so a group-based deadline
+    /// held a dead server's library list for its full request timeout.
+    nonisolated static func race<T: Sendable>(
+        _ deadline: Duration,
+        _ work: @escaping @Sendable () async -> T
+    ) async -> T? {
+        let gate = ResumeOnce()
+        return await withCheckedContinuation { (continuation: CheckedContinuation<T?, Never>) in
+            let worker = Task {
+                let value = await work()
+                if gate.claim() { continuation.resume(returning: value) }
             }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
+            Task {
+                try? await Task.sleep(for: deadline)
+                if gate.claim() {
+                    worker.cancel()
+                    continuation.resume(returning: nil)
+                }
+            }
         }
     }
 
@@ -153,8 +174,43 @@ extension HomeViewModel {
     }
 
     func serverLabel(forRow row: HomeRowData) -> String? {
-        guard let libraryID = row.libraryID,
-              let library = myMediaLibraries.first(where: { $0.id == libraryID }) else { return nil }
+        guard let libraryID = row.libraryID else { return nil }
+        let matches = myMediaLibraries.filter { $0.id == libraryID }
+        // One id on two servers is one merged row, which belongs to neither.
+        guard matches.count == 1, let library = matches.first else { return nil }
         return serverLabel(forLibrary: library)
+    }
+}
+
+extension HomeViewModel {
+    /// Only sources for the identity this view model was built for. A registry revision fires
+    /// before AppState follows a switch, and the outgoing Home must not fetch the incoming
+    /// session into its own cache slot.
+    func acceptsSources(_ newSources: [HomeSource]) -> Bool {
+        guard let active = newSources.first else { return false }
+        return active.serverID == serverID && active.userID == userID
+    }
+
+    /// The cache slot of a library grid opened from My Media: the library's own server and the
+    /// user who reads it there.
+    func gridIdentity(forLibrary library: JellyfinLibrary) -> CacheIdentity {
+        guard let owner = library.serverID,
+              let source = sources.first(where: { $0.serverID == owner }), !source.isActive
+        else { return cacheIdentity }
+        return CacheIdentity(serverID: source.serverID, userID: source.userID)
+    }
+}
+
+/// Lets exactly one of two racers resume a continuation.
+nonisolated final class ResumeOnce: @unchecked Sendable {
+    private let lock = NSLock()
+    private var done = false
+
+    func claim() -> Bool {
+        lock.withLock {
+            guard !done else { return false }
+            done = true
+            return true
+        }
     }
 }

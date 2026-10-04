@@ -71,6 +71,8 @@ struct HomeView: View {
                     sortScope: filter.sortScope,
                     hidesAudioPlaylists: filter.hidesAudioPlaylists
                 )
+                // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
+                .environment(\.serverSession, filter.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
             }
         }
         .onAppear {
@@ -198,7 +200,9 @@ struct HomeView: View {
         // repaint from that set's cached feed, then fetch (Sodalite#85).
         .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
             guard let userID = appState.activeUser?.id, let vm = viewModel else { return }
-            Task { await vm.updateSources(dependencies.homeSources(activeUserID: userID)) }
+            let sources = dependencies.homeSources(activeUserID: userID)
+            guard vm.acceptsSources(sources) else { return }
+            Task { await vm.updateSources(sources) }
         }
         // No serverDidSwitch handler here: TabRootView is `.id(appState.activeServer?.id)`, so a
         // switch tears this whole view down and `.onAppear` above builds a fresh view model on the
@@ -486,9 +490,14 @@ struct HomeView: View {
         return FilterDestination(
             title: library.name,
             query: query,
-            cacheScope: cacheScope(FilterCacheKey.Home.library(id: library.id, grouping: grouping)),
+            cacheScope: FilterCacheScope(
+                key: FilterCacheKey.Home.library(id: library.id, grouping: grouping),
+                identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                    ?? CacheIdentity(serverID: "", userID: "")
+            ),
             sortScope: sortScopeID.map { LibrarySortScope.library(id: library.id, scope: $0) },
-            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType)
+            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType),
+            serverID: viewModel?.sources.first(where: { $0.serverID == library.serverID && !$0.isActive })?.serverID
         )
     }
 
@@ -513,6 +522,8 @@ struct FilterDestination: Identifiable, Hashable {
     var sortScope: LibrarySortScope?
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).
     var hidesAudioPlaylists = false
+    /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
+    var serverID: String? = nil
 }
 
 extension ItemQuery: Hashable {

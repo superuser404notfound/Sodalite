@@ -26,7 +26,7 @@ struct LibraryRow: View {
                 vertical: metrics.rowVerticalPadding
             ) {
                 LazyHStack(spacing: metrics.itemSpacing) {
-                    ForEach(libraries) { library in
+                    ForEach(libraries, id: \.originKey) { library in
                         LibraryTile(library: library, label: label(library)) {
                             onSelect(library)
                         }
