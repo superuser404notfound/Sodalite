@@ -571,10 +571,10 @@ final class HomeViewModel {
                 // Without a series id the item's own Thumb is the still again, so show art only.
                 guard let seriesID else { return imageService.seriesArtworkURL(for: item) }
                 return imageService.imageURL(
-                    itemID: seriesID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
+                    itemID: seriesID, serverID: item.serverID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
             }
             return imageService.imageURL(
-                itemID: seriesID ?? item.id, imageType: .thumb, maxWidth: ImageWidth.wideCard)
+                itemID: seriesID ?? item.id, serverID: item.serverID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
         }
     }
 

@@ -81,8 +81,10 @@ struct HomeView: View {
                     imageService: dependencies.jellyfinImageService,
                     discoverService: dependencies.seerrDiscoverService,
                     userID: userID,
-                    serverID: appState.activeServer?.id ?? userID
+                    serverID: appState.activeServer?.id ?? userID,
+                    sources: dependencies.homeSources(activeUserID: userID)
                 )
+                viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
                 Task { await viewModel?.loadContent() }
             } else {
                 // Pick up new server-side content on the way back to the tab; the view model owns
@@ -186,9 +188,17 @@ struct HomeView: View {
                 imageService: dependencies.jellyfinImageService,
                 discoverService: dependencies.seerrDiscoverService,
                 userID: userID,
-                serverID: appState.activeServer?.id ?? userID
+                serverID: appState.activeServer?.id ?? userID,
+                sources: dependencies.homeSources(activeUserID: userID)
             )
+            viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
             Task { await viewModel?.loadContent() }
+        }
+        // The participating servers changed (Combine servers switched, a server added or muted):
+        // repaint from that set's cached feed, then fetch (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            guard let userID = appState.activeUser?.id, let vm = viewModel else { return }
+            Task { await vm.updateSources(dependencies.homeSources(activeUserID: userID)) }
         }
         // No serverDidSwitch handler here: TabRootView is `.id(appState.activeServer?.id)`, so a
         // switch tears this whole view down and `.onAppear` above builds a fresh view model on the
@@ -300,6 +310,9 @@ struct HomeView: View {
                 // Invisible zero-height scroll-to-top anchor for when focus leaves the rows.
                 Color.clear.frame(height: 0).id("top")
                 LazyVStack(alignment: .leading, spacing: 40) {
+                    if !vm.unreachableServerNames.isEmpty {
+                        CombinedHomeNotice(serverNames: vm.unreachableServerNames)
+                    }
                     ForEach(Array(vm.orderedSections().enumerated()), id: \.element.id) { idx, section in
                     switch section {
                     case .media(let row):
@@ -314,7 +327,7 @@ struct HomeView: View {
                                         localized: "home.libraryLatest.format",
                                         defaultValue: "Latest in %@"
                                     ),
-                                    row.libraryName ?? ""
+                                    [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
                                 )
                                 : nil,
                             items: row.items,
@@ -375,6 +388,7 @@ struct HomeView: View {
                         LibraryRow(
                             titleKey: HomeRowType.myMedia.localizedTitle,
                             libraries: libraries,
+                            label: { vm.serverLabel(forLibrary: $0) },
                             onSelect: { library in
                                 selectedFilter = makeLibraryFilter(for: library)
                             }
@@ -515,5 +529,25 @@ extension ItemQuery: Hashable {
         lhs.genres == rhs.genres &&
         lhs.studioNames == rhs.studioNames &&
         lhs.isFavorite == rhs.isFavorite
+    }
+}
+
+/// One quiet line above the shelf naming the servers that did not answer this round (Sodalite#85).
+private struct CombinedHomeNotice: View {
+    let serverNames: [String]
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
+    private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
+
+    var body: some View {
+        Text(String(
+            format: String(localized: "home.serverUnreachable.format", defaultValue: "%@ is not reachable right now"),
+            serverNames.formatted(.list(type: .and))
+        ))
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))
+        .padding(.trailing, metrics.rowInset)
     }
 }

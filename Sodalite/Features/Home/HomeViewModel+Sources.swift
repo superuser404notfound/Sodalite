@@ -140,3 +140,21 @@ extension HomeViewModel {
         await reloadAfterServerSwitch()
     }
 }
+
+extension HomeViewModel {
+    /// The server name a library tile or row carries when another participating server has a
+    /// library of the same name; nil otherwise, so a single server never shows one.
+    func serverLabel(forLibrary library: JellyfinLibrary) -> String? {
+        guard sources.count > 1 else { return nil }
+        let clashes = myMediaLibraries.filter { $0.name.caseInsensitiveCompare(library.name) == .orderedSame }.count > 1
+        guard clashes else { return nil }
+        let owner = library.serverID ?? sources[0].serverID
+        return sources.first { $0.serverID == owner }?.serverName
+    }
+
+    func serverLabel(forRow row: HomeRowData) -> String? {
+        guard let libraryID = row.libraryID,
+              let library = myMediaLibraries.first(where: { $0.id == libraryID }) else { return nil }
+        return serverLabel(forLibrary: library)
+    }
+}

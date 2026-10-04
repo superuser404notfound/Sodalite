@@ -38,3 +38,19 @@ extension DependencyContainer {
         }
     }
 }
+
+extension DependencyContainer {
+    /// Home's sources, active first. The active one uses the caller's user id, which is what
+    /// `AppState.activeUser` holds, so a single-server Home keeps its exact identity.
+    func homeSources(activeUserID: String) -> [HomeSource] {
+        sessionRegistry.participants.map { session in
+            HomeSource(
+                serverID: session.server?.id ?? activeUserID,
+                serverName: session.server?.name ?? "",
+                userID: session.isActive ? activeUserID : session.userID,
+                libraryService: session.libraryService,
+                isActive: session.isActive
+            )
+        }
+    }
+}
