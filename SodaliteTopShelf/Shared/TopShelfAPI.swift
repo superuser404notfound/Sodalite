@@ -52,12 +52,29 @@ nonisolated struct TopShelfAPI: Sendable {
         return components.url!
     }
 
+    /// Ephemeral and uncached: the shelf has to reflect what was just watched, and a response cached
+    /// on the strength of a proxy's headers would hand back the previous state. The resource
+    /// timeout caps the whole request; the request timeout alone only measures idle gaps, so a
+    /// server trickling bytes could hold the shelf's answer indefinitely.
+    private static let urlSession: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.urlCache = nil
+        configuration.timeoutIntervalForRequest = 8
+        configuration.timeoutIntervalForResource = 10
+        return URLSession(configuration: configuration)
+    }()
+
     private func get<T: Decodable>(_ url: URL) async throws -> T {
         var request = URLRequest(url: url)
-        request.timeoutInterval = 8
         request.setValue(authHeader, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await Self.urlSession.data(for: request)
+        // A 401 after a token rotation used to surface as a JSON decode error, which named the
+        // wrong cause in the log.
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw TopShelfHTTPError(status: http.statusCode)
+        }
         return try JSONDecoder().decode(T.self, from: data)
     }
 
@@ -82,4 +99,9 @@ nonisolated private struct ItemsResponse: Decodable {
     enum CodingKeys: String, CodingKey {
         case items = "Items"
     }
+}
+
+nonisolated struct TopShelfHTTPError: LocalizedError {
+    let status: Int
+    var errorDescription: String? { "HTTP \(status)" }
 }

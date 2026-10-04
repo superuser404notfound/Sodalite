@@ -21,7 +21,7 @@ nonisolated struct SharedSession: Sendable {
     static func read() -> SharedSession? {
         let slot = sharedSessionSlot
         guard let data = readSharedKeychainData(account: slot) else {
-            log.info("SharedSession.read slot=\(slot) data=nil group=\(resolvedAccessGroup)")
+            log.info("SharedSession.read slot=\(slot) data=nil")
             return nil
         }
         guard let payload = try? JSONDecoder().decode(Payload.self, from: data),
@@ -30,7 +30,7 @@ nonisolated struct SharedSession: Sendable {
             log.error("SharedSession.read decode failed slot=\(slot)")
             return nil
         }
-        log.info("SharedSession.read slot=\(slot) ok=true group=\(resolvedAccessGroup)")
+        log.info("SharedSession.read slot=\(slot) ok=true")
         return SharedSession(baseURL: url, userID: payload.userID, accessToken: payload.accessToken)
     }
 }
@@ -40,39 +40,31 @@ nonisolated private let sharedSessionSlot = "tvOSSession_default"
 
 nonisolated enum SharedSessionKeys {
     static let service = "de.superuser404.Sodalite.shared"
-    static let accessGroup = "$(AppIdentifierPrefix)de.superuser404.Sodalite.shared"
 }
 
+/// No access group in the query. The service is unique to this slot, so searching every group
+/// the process is entitled to finds the same item without knowing the team prefix.
+///
+/// The extension used to probe that prefix off "any visible keychain item" into a `static let`.
+/// Its entitlement names only the shared group, so a probe that ran while the slot was empty
+/// (before the first login, after a logout, or in the gap of a rewrite) found nothing and pinned
+/// the unexpanded `$(AppIdentifierPrefix)` literal for the life of the process. Every read after
+/// that failed, and the shelf stayed empty until tvOS happened to recycle the extension.
 nonisolated private func readSharedKeychainData(account: String) -> Data? {
     let query: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
         kSecAttrService as String: SharedSessionKeys.service,
         kSecAttrAccount as String: account,
-        kSecAttrAccessGroup as String: resolvedAccessGroup,
         kSecReturnData as String: true,
         kSecMatchLimit as String: kSecMatchLimitOne,
     ]
     var result: AnyObject?
     let status = SecItemCopyMatching(query as CFDictionary, &result)
-    guard status == errSecSuccess, let data = result as? Data else { return nil }
+    guard status == errSecSuccess, let data = result as? Data else {
+        if status != errSecItemNotFound {
+            log.error("SharedSession keychain read failed status=\(status)")
+        }
+        return nil
+    }
     return data
 }
-
-/// `$(AppIdentifierPrefix)` only expands in entitlement plists; at runtime recover the team-ID prefix by reading kSecAttrAccessGroup off any visible keychain item. Falls back to the raw entitlement value for a brand-new install with an empty keychain.
-nonisolated private let resolvedAccessGroup: String = {
-    let query: [String: Any] = [
-        kSecClass as String: kSecClassGenericPassword,
-        kSecMatchLimit as String: kSecMatchLimitOne,
-        kSecReturnAttributes as String: true,
-    ]
-    var item: AnyObject?
-    let status = SecItemCopyMatching(query as CFDictionary, &item)
-    if status == errSecSuccess,
-       let attrs = item as? [String: Any],
-       let group = attrs[kSecAttrAccessGroup as String] as? String,
-       let dot = group.firstIndex(of: ".") {
-        let prefix = String(group[..<group.index(after: dot)])
-        return prefix + "de.superuser404.Sodalite.shared"
-    }
-    return SharedSessionKeys.accessGroup
-}()
