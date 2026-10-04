@@ -98,3 +98,17 @@ extension DependencyContainer {
         return excluded ? .excluded(userName: name) : .contributes(userName: name)
     }
 }
+
+extension DependencyContainer {
+    /// Search's sources, active first, read when a search tab opens and refreshed on a revision.
+    func searchSources(activeUserID: String) -> [SearchSource] {
+        sessionRegistry.participants.map { session in
+            SearchSource(
+                serverID: session.server?.id ?? "",
+                userID: session.isActive ? activeUserID : session.userID,
+                itemService: session.itemService,
+                isActive: session.isActive
+            )
+        }
+    }
+}

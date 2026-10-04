@@ -16,6 +16,10 @@ final class SearchViewModel {
     /// `var` so SearchView can flip nil→service when Seerr connects after the search tab is already open; otherwise a cold-start tap pins the catalog half at nil for the session.
     var seerrSearchService: SeerrSearchServiceProtocol?
     private let userID: String
+    /// Servers a search runs against, active first; one unless servers are combined (Sodalite#85).
+    var sources: [SearchSource]
+    /// How long a secondary server gets before a search leaves it out.
+    var secondaryDeadline: Duration = .seconds(4)
     private var searchTask: Task<Void, Never>?
 
     /// Monotonic in-flight search ID; only the run still matching `currentSearchID` may publish. `Task.isCancelled` alone is insufficient since network helpers swallow cancellation into `[]`, which would wipe a newer search's results.
@@ -24,11 +28,13 @@ final class SearchViewModel {
     init(
         itemService: JellyfinItemServiceProtocol,
         seerrSearchService: SeerrSearchServiceProtocol?,
-        userID: String
+        userID: String,
+        sources: [SearchSource]? = nil
     ) {
         self.itemService = itemService
         self.seerrSearchService = seerrSearchService
         self.userID = userID
+        self.sources = sources ?? [SearchSource(serverID: "", userID: userID, itemService: itemService, isActive: true)]
     }
 
     /// Debounced search; cancels the prior task so fast typing only runs the final query (saves bandwidth, avoids out-of-order results).
@@ -99,12 +105,49 @@ final class SearchViewModel {
             searchTerm: query,
             fields: JellyfinEndpoint.homeRowFields
         )
-        do {
-            let resp = try await itemService.getCollectionItems(userID: userID, query: q)
-            return ServiceResult(items: resp.items, error: nil)
-        } catch {
-            return ServiceResult(items: [], error: error)
+        guard sources.count > 1 else {
+            do {
+                let resp = try await sources[0].itemService.getCollectionItems(userID: sources[0].userID, query: q)
+                return ServiceResult(items: resp.items, error: nil)
+            } catch {
+                return ServiceResult(items: [], error: error)
+            }
         }
+        // Every server at once; a secondary that fails or misses the deadline is left out quietly,
+        // only the active server's failure counts as "couldn't reach your server" (Sodalite#85).
+        let deadline = secondaryDeadline
+        var outcomes: [Int: Result<[JellyfinItem], Error>?] = [:]
+        await withTaskGroup(of: (Int, Result<[JellyfinItem], Error>?).self) { group in
+            for (index, source) in sources.enumerated() {
+                let run: @MainActor @Sendable () async -> Result<[JellyfinItem], Error> = {
+                    do { return .success(try await source.itemService.getCollectionItems(userID: source.userID, query: q).items) }
+                    catch { return .failure(error) }
+                }
+                let isActive = source.isActive
+                group.addTask {
+                    (index, isActive ? await run() : await Deadline.race(deadline) { await run() })
+                }
+            }
+            for await (index, result) in group { outcomes[index] = result }
+        }
+        var answered: [[JellyfinItem]] = []
+        var activeError: Error?
+        for (index, source) in sources.enumerated() {
+            switch outcomes[index] ?? nil {
+            case .success(let items)?:
+                answered.append(items.map { item in
+                    var stamped = item
+                    if stamped.serverID == nil { stamped.serverID = source.serverID }
+                    return stamped
+                })
+            case .failure(let error)?:
+                if source.isActive { activeError = error }
+            case nil:
+                break
+            }
+        }
+        let merged = HomeMerger.merge(answered, type: .allMovies, mergedContinueWatching: false)
+        return ServiceResult(items: Array(merged.prefix(30)), error: answered.isEmpty ? activeError : nil)
     }
 
     /// Two lists rather than one `ServiceResult`: the same response feeds the catalog row and the people row.
