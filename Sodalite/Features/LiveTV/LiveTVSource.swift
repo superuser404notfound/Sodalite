@@ -47,3 +47,11 @@ nonisolated enum LiveTVServerChoice {
         return capable.first
     }
 }
+
+enum LiveTVSwitcher {
+    static func isVisible(capable: [String]) -> Bool { capable.count > 1 }
+
+    static func options(capable: [String], sources: [LiveTVSource]) -> [CatalogPickerSheet.Option] {
+        sources.filter { capable.contains($0.serverID) }.map { .init(id: $0.serverID, label: $0.serverName) }
+    }
+}

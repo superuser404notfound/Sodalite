@@ -624,7 +624,7 @@ final class GuideGridViewController: UIViewController,
         guard indexPath.item < rows.count else { return }
         let channel = rows[indexPath.item].channel
         let logoURL = dependencies.jellyfinImageService.imageURL(
-            itemID: channel.id, imageType: .primary,
+            itemID: channel.id, serverID: channel.serverID, imageType: .primary,
             tag: channel.primaryImageTag, maxHeight: Int(metrics.channelLogoSize * 2))
         cell.configure(name: channel.name, number: channel.channelNumber, logoURL: logoURL,
                        isFavorite: model.timers.isFavorite(channel.id), tint: tint,

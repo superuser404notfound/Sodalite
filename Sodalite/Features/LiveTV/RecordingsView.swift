@@ -6,6 +6,7 @@ struct RecordingsView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.serverSession) private var serverSessionOverride
     let model: RecordingsViewModel
     let tint: Color
 
@@ -14,6 +15,9 @@ struct RecordingsView: View {
     @State private var recordingToDelete: JellyfinItem?
 
     private var imageService: JellyfinImageService { dependencies.jellyfinImageService }
+    /// The server the Live TV tab runs against (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? dependencies.activeUserID : session.userID }
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
 
     /// Same rule as the detail pages: the server's own CanDelete (it knows a DVR-only deletion grant),
@@ -46,13 +50,13 @@ struct RecordingsView: View {
         }
         .task { await model.load() }
         .overlay {
-            if let userID = dependencies.activeUserID {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $isPlayerPresented,
                     item: playerItem,
                     startFromBeginning: false,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -104,7 +108,7 @@ struct RecordingsView: View {
                     RecordingCard(
                         item: item,
                         imageURL: imageService.imageURL(
-                            itemID: item.id, imageType: .primary,
+                            itemID: item.id, serverID: item.serverID, imageType: .primary,
                             tag: item.imageTags?.primary, maxWidth: ImageWidth.wideCard),
                         isInProgress: model.isInProgress(item),
                         tint: tint,

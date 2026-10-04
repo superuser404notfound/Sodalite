@@ -39,6 +39,11 @@ struct LiveTVTabView: View {
     @State private var chromeFocusRelease: Task<Void, Never>?
     /// Last requestContentReload this view answered (same latch as TabRootView's).
     @State private var lastHandledContentReload = 0
+    /// The server the models below were built for (Sodalite#85).
+    @State private var builtForServerID: String?
+    @State private var builtForKey: String?
+    @State private var rememberedServerID: String?
+    @State private var isServerPickerPresented = false
 
     private enum LiveTVSection { case overview, guide, recordings }
 
@@ -55,9 +60,23 @@ struct LiveTVTabView: View {
             isSupporter: dependencies.storeKitService.isSupporter)
     }
 
+    private var sources: [LiveTVSource] {
+        dependencies.activeUserID.map { dependencies.liveTVSources(activeUserID: $0) } ?? []
+    }
+
+    private var chosenServerID: String? {
+        LiveTVServerChoice.resolve(capable: capableServerIDs, remembered: rememberedServerID)
+    }
+
+    /// Before the first probe lands this is the active server, exactly as before Sodalite#85.
+    private var source: LiveTVSource? {
+        let all = sources
+        return all.first { $0.serverID == chosenServerID } ?? all.first { $0.isActive }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            sectionPicker
+            headerRow
                 .padding(.top, 20)
             ZStack {
                 Group {
@@ -107,6 +126,8 @@ struct LiveTVTabView: View {
                     }
                     #endif
                 }
+                // A new server gets a fresh grid; the old one's scroll and focus belong to other channels.
+                .id(builtForServerID)
                 // Keep the UIKit grid alive across the toggle (scroll + focus state survive); just hide it.
                 .opacity(section == .guide ? 1 : 0)
                 .allowsHitTesting(section == .guide)
@@ -127,23 +148,27 @@ struct LiveTVTabView: View {
 
                 if section == .recordings, let recordingsModel {
                     RecordingsView(model: recordingsModel, tint: tint)
+                        .environment(\.serverSession, builtForServerID.flatMap {
+                            dependencies.sessionRegistry.session(forServerID: $0)
+                        })
                 }
             }
         }
-        .task {
-            guard guideModel == nil, let userID = dependencies.activeUserID else { return }
-            let store = LiveTimerStore(service: dependencies.jellyfinLiveTvService, userID: userID)
+        .onAppear { rememberedServerID = dependencies.rememberedLiveTVServerID() }
+        .task(id: source.map { "\($0.serverID)|\($0.userID)" }) {
+            guard let source else { return }
+            let key = "\(source.serverID)|\(source.userID)"
+            guard key != builtForKey else { return }
+            builtForKey = key
+            builtForServerID = source.serverID
+            let store = LiveTimerStore(service: source.liveTvService, userID: source.userID)
             timers = store
-            guideModel = GuideViewModel(
-                service: dependencies.jellyfinLiveTvService, userID: userID, timers: store)
+            guideModel = GuideViewModel(service: source.liveTvService, userID: source.userID, timers: store)
             channelListModel = ChannelListViewModel(
-                service: dependencies.jellyfinLiveTvService, userID: userID, timers: store)
+                service: source.liveTvService, userID: source.userID, timers: store)
             recordingsModel = RecordingsViewModel(
-                liveTvService: dependencies.jellyfinLiveTvService,
-                itemService: dependencies.jellyfinItemService,
-                userID: userID)
-            programsModel = LiveProgramsViewModel(
-                service: dependencies.jellyfinLiveTvService, userID: userID)
+                liveTvService: source.liveTvService, itemService: source.itemService, userID: source.userID)
+            programsModel = LiveProgramsViewModel(service: source.liveTvService, userID: source.userID)
         }
         // The server is back within a running session (Sodalite#122): a guide whose load failed while it
         // was away retries, and the Overview rows are asked again.
@@ -187,13 +212,14 @@ struct LiveTVTabView: View {
         }
         .overlay {
             // Guard userID at the call site (mirrors MovieDetailView) so the live player never launches blank.
-            if let userID = dependencies.activeUserID {
+            if let source {
                 LivePlayerLauncher(
                     isPresented: $isPlayerPresented,
                     context: isPlayerPresented ? liveContext : nil,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    liveTvService: dependencies.jellyfinLiveTvService,
-                    userID: userID,
+                    playbackService: source.playbackService,
+                    liveTvService: source.liveTvService,
+                    userID: source.userID,
+                    serverName: source.serverName,
                     preferences: dependencies.playbackPreferences,
                     directStreamMemory: dependencies.liveDirectStreamMemory
                 )
@@ -218,7 +244,58 @@ struct LiveTVTabView: View {
         // Only while the player covers the screen and for a moment after it closes, see
         // chromeFocusSuppressed.
         .disabled(chromeFocusSuppressed)
+    }
+
+    private var headerRow: some View {
+        HStack(spacing: hSizeClass == .compact ? 12 : 24) {
+            sectionPicker
+            if LiveTVSwitcher.isVisible(capable: capableServerIDs), let source {
+                LiveServerChip(name: source.serverName, tint: tint,
+                               isFocusable: !chromeFocusSuppressed) {
+                    guard !isPlayerPresented else { return }
+                    isServerPickerPresented = true
+                }
+            }
+        }
         // tvOS/iPad keep the wide inset; compact uses a phone-scale margin so the control fits ~393pt.
         .padding(.horizontal, hSizeClass == .compact ? 16 : 80)
+        .menuPresentation(isPresented: $isServerPickerPresented) {
+            CatalogPickerSheet(
+                title: String(localized: "multiServer.picker.header.label"),
+                options: LiveTVSwitcher.options(capable: capableServerIDs, sources: sources),
+                selectedID: chosenServerID,
+                onSelect: { serverID in
+                    dependencies.rememberLiveTVServer(serverID)
+                    rememberedServerID = serverID
+                    isServerPickerPresented = false
+                },
+                onCancel: { isServerPickerPresented = false })
+        }
+    }
+}
+
+/// The Live TV server switcher (Sodalite#85), shaped like the guide's filter chips.
+private struct LiveServerChip: View {
+    let name: String
+    let tint: Color
+    let isFocusable: Bool
+    let action: () -> Void
+
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        Label(name, systemImage: "server.rack")
+            .font(.caption)
+            .fontWeight(.semibold)
+            .lineLimit(1)
+            .foregroundStyle(focused ? Color.black : .white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(focused ? AnyShapeStyle(tint) : AnyShapeStyle(Color.Theme.restFillStrong)))
+            .focusResponse(.chip, isFocused: focused)
+            .focusable(isFocusable)
+            .focused($focused)
+            .stableTap(isFocused: focused) { action() }
+            .fixedSize()
     }
 }

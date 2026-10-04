@@ -106,4 +106,19 @@ struct CombinedLiveTVTests {
         prefs.setLiveTVServerID("b", scope: "s1")
         #expect(prefs.liveTVServerID(scope: "s2") == nil)
     }
+
+    @Test func switcherListsOnlyCapableServersInParticipantOrder() {
+        let sources = [source("a", FakeLive(), active: true), source("b", FakeLive(), active: false),
+                       source("c", FakeLive(), active: false)]
+        let options = LiveTVSwitcher.options(capable: ["c", "a"], sources: sources)
+        #expect(options.map(\.id) == ["a", "c"])
+        #expect(options.map(\.label) == ["A", "C"])
+    }
+
+    @Test func switcherHidesWithOneCapableServer() {
+        let sources = [source("a", FakeLive(), active: true), source("b", FakeLive(), active: false)]
+        #expect(LiveTVSwitcher.options(capable: ["b"], sources: sources).count == 1)
+        #expect(!LiveTVSwitcher.isVisible(capable: ["b"]))
+        #expect(LiveTVSwitcher.isVisible(capable: ["a", "b"]))
+    }
 }

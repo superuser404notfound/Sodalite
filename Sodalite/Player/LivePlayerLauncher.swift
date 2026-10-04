@@ -14,6 +14,8 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     let playbackService: JellyfinPlaybackServiceProtocol
     let liveTvService: JellyfinLiveTvServiceProtocol
     let userID: String
+    /// The server the channel lives on, not necessarily the active one (Sodalite#85).
+    let serverName: String
     let preferences: PlaybackPreferences
     let directStreamMemory: LiveDirectStreamMemory
     /// Same reason as PlayerLauncher: the theme has to be picked up on the SwiftUI side and carried
@@ -22,7 +24,6 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     /// And the same for the server verdict (Sodalite#126).
     @Environment(\.appState) private var appState
 
-    private var serverName: String { appState.activeServer?.name ?? "" }
 
     private var reachability: () -> ServerReachability {
         let state = appState
