@@ -151,4 +151,12 @@ struct LibraryLayoutTests {
         ProfileHomeStore.apply(ProfileHomeStore.collect(scope: scope, stamp: Date()), scope: other)
         #expect(LibraryLayout.load(scope: other).entries.isEmpty)
     }
+
+    // Review finding 3 (decided 2026-10-04): a hidden copy no longer feeds the shared Latest row.
+    @Test func aHiddenCopyStopsContributingToTheSharedRow() {
+        let layout = LibraryLayout(entries: [.init(serverID: "b", libraryID: "x", isHidden: true),
+                                             .init(serverID: "a", libraryID: "x", isHidden: false)])
+        #expect(layout.contributingServers(["a", "b"], libraryID: "x") == ["a"])
+        #expect(LibraryLayout(entries: []).contributingServers(["a", "b"], libraryID: "x") == ["a", "b"])
+    }
 }

@@ -71,6 +71,11 @@ nonisolated struct LibraryLayout: Codable, Equatable {
 
     /// A "Latest in X" row goes only while every copy of its library is hidden: one id on two
     /// servers is one merged row.
+    /// The servers whose copy of a shared library still feeds its row: a hidden copy does not.
+    func contributingServers(_ serverIDs: [String], libraryID: String) -> [String] {
+        serverIDs.filter { id in !entries.contains { $0.serverID == id && $0.libraryID == libraryID && $0.isHidden } }
+    }
+
     func hidesLatestRow(libraryID: String) -> Bool {
         let copies = entries.filter { $0.libraryID == libraryID }
         return !copies.isEmpty && copies.allSatisfy(\.isHidden)

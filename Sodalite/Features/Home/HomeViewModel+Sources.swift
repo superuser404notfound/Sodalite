@@ -91,6 +91,8 @@ extension HomeViewModel {
             let known = Set(myMediaLibraries.filter { $0.id == libraryID }.compactMap(\.serverID))
             owners = sources.filter { known.contains($0.serverID) }
         }
+        let contributing = libraryLayout.contributingServers(owners.map(\.serverID), libraryID: libraryID)
+        owners = owners.filter { contributing.contains($0.serverID) }
         return owners.isEmpty ? [sources[0]] : owners
     }
 
