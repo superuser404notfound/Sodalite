@@ -18,6 +18,8 @@ final class HomeViewModel {
     /// silence, and `HomeView.blockingState`, which asks the same question one level up.
     private(set) var isShowingCachedFeed = false
     var rowConfigs: [HomeRowConfig] = []
+    /// My Media order and hidden libraries (Sodalite#85).
+    var libraryLayout = LibraryLayout(entries: [])
     /// Sample backdrop per provider TMDB id from a one-shot Studios query so each provider tile shows a real library hero; nil falls back to logo-only.
     var providerBackdrops: [Int: URL] = [:]
 
@@ -181,6 +183,7 @@ final class HomeViewModel {
             libraryService: libraryService, isActive: true
         )]
         self.rowConfigs = HomeRowConfig.loadFromStorage(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
+        self.libraryLayout = LibraryLayout.load(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
         hydrateFeedFromCache()
     }
 
@@ -198,7 +201,7 @@ final class HomeViewModel {
         // (about a second behind the shelf, measured by classicjazz on the first build to carry the
         // cache). It is not evidence of anything: a list alone paints nothing, because Home is
         // still behind the spinner until a row lands.
-        myMediaLibraries = cached.libraries
+        myMediaLibraries = myMediaVisible(cached.libraries)
         guard !cached.rows.isEmpty else { return }
         rows = cached.rows
         isShowingCachedFeed = true
@@ -282,6 +285,11 @@ final class HomeViewModel {
         let id: String
     }
 
+    /// My Media's tiles: browsable libraries in the profile's order, hidden ones left out.
+    func myMediaVisible(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
+        libraryLayout.visible(MyMediaLibraries.browsable(libraries), fallbackServerID: sources.first?.serverID ?? serverID)
+    }
+
     /// The rows this config actually fetches, in display order.
     ///
     /// Three kinds drop out: Discover provider rows and My Media render from state the fan-out does
@@ -294,6 +302,10 @@ final class HomeViewModel {
             .compactMap { config in
                 if config.type.isDiscoverProviderRow { return nil }
                 if config.type == .myMedia { return nil }
+                if config.type == .libraryLatest, let id = config.libraryID,
+                   libraryLayout.hidesLatestRow(libraryID: id) {
+                    return nil
+                }
                 if config.type == .nextUp,
                    HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope) {
                     return nil
@@ -437,7 +449,7 @@ final class HomeViewModel {
                         break
                     }
                     // Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
-                    myMediaLibraries = MyMediaLibraries.browsable(libraries)
+                    myMediaLibraries = myMediaVisible(libraries)
                     // A server missing from the list would read as a server whose libraries are
                     // gone, and retire its per-library rows for good (Sodalite#85).
                     guard complete else { break }
@@ -600,6 +612,7 @@ final class HomeViewModel {
 
     func reloadConfig() {
         rowConfigs = HomeRowConfig.loadFromStorage(scope: homeScope)
+        libraryLayout = LibraryLayout.load(scope: homeScope)
     }
 
     /// On active-server change: clear in-memory carousels (so the old server's posters don't linger) and reset the throttle guards so precompute reruns for the new library, then reload.
@@ -616,7 +629,7 @@ final class HomeViewModel {
         // lives in memory only, so a switch that kept it would leave the outgoing server's
         // libraries on screen and tappable under the new session, which is the exact thing the
         // blanking was there to prevent.
-        myMediaLibraries = cached.libraries
+        myMediaLibraries = myMediaVisible(cached.libraries)
         isShowingCachedFeed = !cached.rows.isEmpty
         isLoading = cached.rows.isEmpty
         tagRows = []

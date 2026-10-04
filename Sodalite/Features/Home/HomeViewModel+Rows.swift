@@ -118,8 +118,14 @@ extension HomeViewModel {
                 } else {
                     libraries = myMediaLibraries.filter { ($0.serverID ?? source.serverID) == source.serverID }
                 }
-                let showLibraries = libraries.filter { ($0.collectionType ?? "") == "tvshows" }
-                if showLibraries.isEmpty {
+                let allShowLibraries = libraries.filter { ($0.collectionType ?? "") == "tvshows" }
+                let showLibraries = allShowLibraries.filter {
+                    !libraryLayout.isHidden($0, fallbackServerID: source.serverID)
+                }
+                if !allShowLibraries.isEmpty, showLibraries.isEmpty {
+                    // Every shows library is hidden; the aggregate below would bring them back.
+                    items = []
+                } else if showLibraries.isEmpty {
                     // No shows library, or getLibraries failed: fall back to the typed aggregate, imperfect but better than empty.
                     let latest = try await source.libraryService.getLatestMedia(
                         userID: source.userID,
