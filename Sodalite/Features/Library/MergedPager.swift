@@ -100,3 +100,17 @@ final class MergedPager {
         return best
     }
 }
+
+extension MergedPager {
+    /// One pager source per Home source, each running the grid's query with its own user.
+    static func sources(from homeSources: [HomeSource], query: ItemQuery) -> [Source] {
+        homeSources.map { source in
+            Source(serverID: source.serverID, isActive: source.isActive) { start, limit in
+                var page = query
+                page.startIndex = start
+                page.limit = limit
+                return try await source.libraryService.getItems(userID: source.userID, query: page)
+            }
+        }
+    }
+}

@@ -82,6 +82,11 @@ struct FilteredGridView: View {
     /// across versions (Sodalite#73). A music playlist has no detail screen to open, so it is dropped
     /// here instead. nil-tolerant: an unknown media type stays visible.
     let hidesAudioPlaylists: Bool
+    /// A combined Home's servers, active first; with more than one the grid pages through all of
+    /// them (Sodalite#85). nil or one entry keeps the single-server path.
+    let sources: [HomeSource]?
+    @State private var pager: MergedPager?
+    private var isMerged: Bool { (sources?.count ?? 0) > 1 }
 
     init(
         title: String,
@@ -90,7 +95,8 @@ struct FilteredGridView: View {
         smartProviderRegion: String? = nil,
         cacheScope: FilterCacheScope? = nil,
         sortScope: LibrarySortScope? = nil,
-        hidesAudioPlaylists: Bool = false
+        hidesAudioPlaylists: Bool = false,
+        sources: [HomeSource]? = nil
     ) {
         self.title = title
         self.query = query
@@ -99,6 +105,7 @@ struct FilteredGridView: View {
         self.cacheScope = cacheScope
         self.sortScope = sortScope
         self.hidesAudioPlaylists = hidesAudioPlaylists
+        self.sources = sources
         let storedSort = sortScope.map(LibrarySortStore.sort) ?? .default
         _sort = State(initialValue: storedSort)
         // Hydrate from FilterCache in init so the first render paints the cached grid; doing it in .task means a frame with isLoading=true first (the brief loading flash on every tap).
@@ -222,18 +229,18 @@ struct FilteredGridView: View {
                         spacing: metrics.gridSpacing
                     )
                 ], spacing: metrics.gridSpacing) {
-                    ForEach(items) { item in
+                    ForEach(items, id: \.originKey) { item in
                         Button {
                             selectedItem = item
                         } label: {
                             MediaCard(
                                 item: item,
                                 imageURL: dependencies.jellyfinImageService.posterURL(for: item),
-                                isFocused: focusedItemID == item.id
+                                isFocused: focusedItemID == item.originKey
                             )
                         }
                         .buttonStyle(GridCardButtonStyle())
-                        .focused($focusedItemID, equals: item.id)
+                        .focused($focusedItemID, equals: item.originKey)
                         .onAppear { loadMoreIfNeeded(after: item) }
                     }
                 }
@@ -390,6 +397,23 @@ struct FilteredGridView: View {
             smartProviderID: smartProviderID, cacheFilter: phase2CacheFilter, currentFilter: watchFilter
         )
 
+        // A combined Home's genre or studio grid: every server, one sort order (Sodalite#85).
+        if isMerged, smartProviderID == nil, let sources {
+            let pager = MergedPager(
+                sources: MergedPager.sources(from: sources, query: effectiveQuery),
+                sort: sort, pageSize: query.limit ?? 50)
+            let first = browsable(await pager.nextPage())
+            guard !Task.isCancelled, generation == loadGeneration else { return }
+            self.pager = pager
+            loadFailed = first.isEmpty && pager.failedServerIDs.count == sources.count
+            if items.map(\.originKey) != first.map(\.originKey) { items = first }
+            isLoading = false
+            if let scope = cacheScope, !isWatchFiltered, sort == .default {
+                FilterCache.shared.setHomeFilterItems(first, filterKey: scope.key, identity: scope.identity)
+            }
+            return
+        }
+
         // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
         async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
             try? await session.libraryService.getItems(
@@ -452,7 +476,7 @@ struct FilteredGridView: View {
         if let providerID = smartProviderID, let region = smartProviderRegion {
             if reusePhase2 {
                 let merged = ProviderMatchMerging.merge(phase1: phase1, phase2: cachedPhase2Items)
-                if items.map(\.id) != merged.map(\.id) { items = merged }
+                if items.map(\.originKey) != merged.map(\.originKey) { items = merged }
                 isLoading = false
                 return
             }
@@ -471,7 +495,7 @@ struct FilteredGridView: View {
         } else {
             // No smart filter (broadcast nets, genre/studio tiles): phase 1 is final. Skip the assignment on an unchanged id list (a wholesale replace re-diffs every cell, a reload flash), and keep appended pages when the user paginated (didPaginate; the old prefix heuristic broke on a page-1 server reorder).
             let pagedPastPhase1 = didPaginate && !items.isEmpty
-            if !pagedPastPhase1, items.map(\.id) != phase1.map(\.id) {
+            if !pagedPastPhase1, items.map(\.originKey) != phase1.map(\.originKey) {
                 items = phase1
             }
             isLoading = false
@@ -489,6 +513,7 @@ struct FilteredGridView: View {
 
     /// More pages exist server-side. Only the plain path paginates: smart-provider grids are merged from the full library map and complete by construction.
     private var canLoadMore: Bool {
+        if isMerged, smartProviderID == nil { return pager?.hasMore ?? false }
         guard smartProviderID == nil, query.limit != nil else { return false }
         guard !reachedEnd, let total = totalRecordCount else { return false }
         return items.count < total
@@ -497,7 +522,7 @@ struct FilteredGridView: View {
     private func loadMoreIfNeeded(after item: JellyfinItem) {
         guard canLoadMore, !isLoadingMore, !isLoading else { return }
         // Trigger within the last two rows so the next page lands before focus reaches the edge.
-        guard let index = items.firstIndex(where: { $0.id == item.id }),
+        guard let index = items.firstIndex(where: { $0.originKey == item.originKey }),
               index >= items.count - 12 else { return }
         isLoadingMore = true
         Task { await loadMore() }
@@ -505,6 +530,15 @@ struct FilteredGridView: View {
 
     private func loadMore() async {
         defer { isLoadingMore = false }
+        if isMerged, smartProviderID == nil, let pager {
+            let generation = loadGeneration
+            let page = browsable(await pager.nextPage())
+            guard !Task.isCancelled, generation == loadGeneration else { return }
+            let known = Set(items.map(\.originKey))
+            items += page.filter { !known.contains($0.originKey) }
+            didPaginate = true
+            return
+        }
         guard let userID = sessionUserID else { return }
         let generation = loadGeneration
 
@@ -524,8 +558,8 @@ struct FilteredGridView: View {
 
         totalRecordCount = response.totalRecordCount
         nextStartIndex += response.items.count
-        let known = Set(items.map(\.id))
-        items += browsable(response.items).filter { !known.contains($0.id) }
+        let known = Set(items.map(\.originKey))
+        items += browsable(response.items).filter { !known.contains($0.originKey) }
         didPaginate = true
         // A short/empty page means the server has no more rows; stop even if dedup left items.count
         // below totalRecordCount, so canLoadMore can't loop on the same overlapping window.
@@ -560,7 +594,7 @@ struct FilteredGridView: View {
         cachedPhase2Items = phase2Items
         phase2CacheFilter = watchFilter
         let merged = ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
-        if items.map(\.id) != merged.map(\.id) {
+        if items.map(\.originKey) != merged.map(\.originKey) {
             items = merged
         }
         isLoading = false

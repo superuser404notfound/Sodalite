@@ -69,7 +69,8 @@ struct HomeView: View {
                     smartProviderRegion: filter.smartProviderRegion,
                     cacheScope: filter.cacheScope,
                     sortScope: filter.sortScope,
-                    hidesAudioPlaylists: filter.hidesAudioPlaylists
+                    hidesAudioPlaylists: filter.hidesAudioPlaylists,
+                    sources: filter.sources
                 )
                 // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
                 .environment(\.serverSession, filter.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
@@ -426,6 +427,18 @@ struct HomeView: View {
         appState.cacheIdentity.map { FilterCacheScope(key: key, identity: $0) }
     }
 
+    /// A genre or provider tile's cache slot: the combined one when servers are combined, so the
+    /// grid and the precompute that pre-warms it agree on one slot (Sodalite#85).
+    private func homeTileScope(_ key: String) -> FilterCacheScope? {
+        guard let vm = viewModel, vm.sources.count > 1 else { return cacheScope(key) }
+        return FilterCacheScope(key: key, identity: vm.feedIdentity)
+    }
+
+    private var combinedSources: [HomeSource]? {
+        guard let sources = viewModel?.sources, sources.count > 1 else { return nil }
+        return sources
+    }
+
     private func makeJellyfinFilter(for provider: CatalogProvider) -> FilterDestination {
         // A provider tile filters the LOCAL library by Studio (pipe-joined aliases catch "Disney+" and "Walt Disney Pictures"), augmented by the smart-provider TMDB watch-provider hint so studio-tag-less titles surface (Modern Family on Disney+, Bluey via Ludo Studio).
         let region = Locale.current.region?.identifier ?? "US"
@@ -461,8 +474,9 @@ struct HomeView: View {
                 fields: JellyfinEndpoint.homeRowFields
             ),
             // Without a cache scope FilteredGridView.init falls to the empty-state branch with isLoading=true on every visit (the brief flash on opening a genre tile). Tag name is a stable enough key, once the session is in the scope: "Action" is the same name on every server.
-            cacheScope: cacheScope(FilterCacheKey.Home.genre(name: tag.name)),
-            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) }
+            cacheScope: homeTileScope(FilterCacheKey.Home.genre(name: tag.name)),
+            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) },
+            sources: combinedSources
         )
     }
 
@@ -524,6 +538,12 @@ struct FilterDestination: Identifiable, Hashable {
     var hidesAudioPlaylists = false
     /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
     var serverID: String? = nil
+    /// A combined Home's servers for a genre or provider tile; the grid pages through all of them.
+    var sources: [HomeSource]? = nil
+
+    // Identity is the per-instance id; the sources carry services, which have no equality.
+    static func == (lhs: FilterDestination, rhs: FilterDestination) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 extension ItemQuery: Hashable {
