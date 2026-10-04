@@ -45,6 +45,12 @@ enum Changelog {
                     icon: "tv"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.extras.title",
+                    "changelog.1_1_0.extras.body",
+                    icon: "popcorn.fill"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

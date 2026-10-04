@@ -64639,6 +64639,330 @@
         }
       }
     },
+    "changelog.1_1_0.extras.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipy, featurety, vystřižené scény a další bonusy ze složek s bonusy filmu nebo seriálu mají teď na stránce s detaily vlastní řadu a přehrají se přímo odtud."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip, featurettes, slettede scener og andet ekstramateriale fra en films eller series ekstramapper har nu deres egen række på detaljesiden og afspilles direkte derfra."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clips, Featurettes, entfallene Szenen und andere Extras aus den Extras-Ordnern eines Films oder einer Serie haben jetzt eine eigene Reihe auf der Detailseite und spielen direkt von dort."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλιπ, featurettes, κομμένες σκηνές και άλλο επιπλέον υλικό από τους φακέλους extras μιας ταινίας ή σειράς έχουν πλέον τη δική τους σειρά στη σελίδα λεπτομερειών και παίζουν απευθείας από εκεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clips, featurettes, deleted scenes and other extras from a movie's or show's extras folders now get their own row on the detail page and play right from there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los clips, featurettes, escenas eliminadas y otros extras de las carpetas de extras de una película o serie tienen ahora su propia fila en la página de detalles y se reproducen desde ahí."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elokuvan tai sarjan lisämateriaalikansioiden klipit, featuretit, poistetut kohtaukset ja muu lisämateriaali saavat nyt oman rivinsä tietosivulle, ja ne toistetaan suoraan sieltä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les extraits, making-of, scènes coupées et autres bonus des dossiers d'extras d'un film ou d'une série ont désormais leur propre rangée sur la page de détails et se lisent directement depuis celle-ci."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isječci, featurette, izbačene scene i ostali dodaci iz mapa s dodacima filma ili serije sada imaju vlastiti red na stranici s detaljima i reproduciraju se izravno odande."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A film vagy sorozat extramappáiban lévő klipek, werkfilmek, kivágott jelenetek és egyéb extrák mostantól saját sort kapnak a részletek oldalon, és közvetlenül onnan játszhatók le."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clip, featurette, scene eliminate e altri contenuti extra dalle cartelle extra di un film o di una serie hanno ora una propria fila nella pagina dei dettagli e si riproducono direttamente da lì."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "映画やシリーズの特典フォルダにあるクリップ、メイキング、未公開シーンなどの特典映像が詳細ページに専用の列で表示され、そこから直接再生できるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영화나 시리즈의 부가 영상 폴더에 있는 클립, 메이킹 영상, 삭제된 장면 등이 이제 상세 페이지에 별도의 줄로 표시되며 바로 재생할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipp, featurettes, slettede scener og annet ekstramateriale fra en films eller series ekstramapper har nå sin egen rad på detaljsiden og spilles av rett derfra."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clips, featurettes, verwijderde scènes en andere extra's uit de extra-mappen van een film of serie hebben nu een eigen rij op de detailpagina en spelen daar direct af."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipy, materiały zza kulis, usunięte sceny i inne dodatki z folderów z dodatkami filmu lub serialu mają teraz własny rząd na stronie szczegółów i odtwarzają się bezpośrednio stamtąd."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clipes, featurettes, cenas excluídas e outros extras das pastas de extras de um filme ou série agora têm sua própria fileira na página de detalhes e são reproduzidos direto de lá."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clipes, featurettes, cenas eliminadas e outros extras das pastas de extras de um filme ou série têm agora a sua própria fila na página de detalhes e são reproduzidos diretamente a partir daí."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clipurile, featurette-urile, scenele eliminate și alte materiale bonus din folderele de extras ale unui film sau serial au acum propriul rând pe pagina de detalii și se redau direct de acolo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Клипы, фильмы о съёмках, удалённые сцены и другие доп. материалы из папок extras фильма или сериала теперь показываются отдельным рядом на странице с подробностями и воспроизводятся прямо оттуда."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipy, featurety, vystrihnuté scény a ďalšie bonusy z priečinkov s bonusmi filmu alebo seriálu majú teraz na stránke s detailmi vlastný rad a prehrajú sa priamo odtiaľ."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipp, featurettes, borttagna scener och annat extramaterial från en films eller series extramappar har nu en egen rad på detaljsidan och spelas upp direkt därifrån."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir filmin veya dizinin ekstra klasörlerindeki klipler, kamera arkası videoları, silinmiş sahneler ve diğer ekstralar artık ayrıntı sayfasında kendi satırında yer alıyor ve doğrudan oradan oynatılıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кліпи, фільми про зйомки, видалені сцени та інші додаткові матеріали з папок extras фільму чи серіалу тепер мають власний ряд на сторінці з подробицями й відтворюються просто звідти."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电影或剧集花絮文件夹中的片段、幕后特辑、删减片段等花絮现在会在详情页单独成行显示，并可直接从那里播放。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電影或影集花絮資料夾中的片段、幕後特輯、刪減片段等花絮現在會在詳細資料頁單獨成列顯示，並可直接從那裡播放。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.extras.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonusy a klipy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstramateriale og klip"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras und Clips"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιπλέον υλικό και κλιπ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras and clips"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras y clips"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lisämateriaali ja klipit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonus et extraits"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodaci i isječci"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrák és klipek"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contenuti extra e clip"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特典映像とクリップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "부가 영상과 클립"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstramateriale og klipp"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra's en clips"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodatki i klipy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras e clipes"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras e clipes"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Materiale bonus și clipuri"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доп. материалы и клипы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonusy a klipy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extramaterial och klipp"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstralar ve klipler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додаткові матеріали та кліпи"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "花絮与片段"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "花絮與片段"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.libraryOrder.body" : {
       "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
       "extractionState" : "manual",
@@ -73016,6 +73340,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示詳細資訊"
+          }
+        }
+      }
+    },
+    "detail.extras" : {
+      "comment" : "Extras row on movie and series detail pages (clips, featurettes, deleted scenes)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonusy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstramateriale"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιπλέον υλικό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lisämateriaali"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonus"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodaci"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrák"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contenuti extra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特典映像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "부가 영상"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstramateriale"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodatki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extras"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Materiale bonus"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дополнительные материалы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonusy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extramaterial"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstralar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Додаткові матеріали"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "花絮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "花絮"
           }
         }
       }

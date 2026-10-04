@@ -655,6 +655,26 @@ struct SeriesDetailView: View {
                         }
                     }
 
+                    // Sodalite#179. The show's extras, not an episode's, so they leave with the
+                    // Trailer button when an episode takes the page.
+                    let showsExtras = !isShowingEpisode && !vm.specialFeatures.isEmpty
+                    if showsExtras {
+                        HorizontalMediaRow(
+                            title: "detail.extras",
+                            items: vm.specialFeatures,
+                            imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
+                            fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
+                            onItemSelected: { extra in
+                                playItem = extra
+                                playFromBeginning = true
+                                playOriginatedFromPlayButton = false
+                                showPlayer = true
+                            },
+                            cardStyle: .landscape
+                        )
+                        .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast) { playButtonFocused = true }
+                    }
+
                     if !vm.similarItems.isEmpty {
                         HorizontalMediaRow(
                             title: "detail.similar",
@@ -663,7 +683,7 @@ struct SeriesDetailView: View {
                             onItemSelected: { navigateToItem = $0 },
                             cardStyle: .poster
                         )
-                        .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast) { playButtonFocused = true }
+                        .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast && !showsExtras) { playButtonFocused = true }
                     }
 
                     // Same split the search screen teaches: what the server has on top, what it
@@ -674,7 +694,7 @@ struct SeriesDetailView: View {
                             items: vm.catalogSimilar,
                             onItemSelected: { navigateToSeerrRequest = $0 }
                         )
-                        .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast && vm.similarItems.isEmpty) {
+                        .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast && !showsExtras && vm.similarItems.isEmpty) {
                             playButtonFocused = true
                         }
                     }
@@ -825,6 +845,7 @@ struct SeriesDetailView: View {
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
         !vm.seasons.isEmpty || vm.isLoadingSeasons
             || !(vm.item.people?.isEmpty ?? true)
+            || (!isShowingEpisode && !vm.specialFeatures.isEmpty)
             || !vm.similarItems.isEmpty
             || !vm.catalogSimilar.isEmpty
     }

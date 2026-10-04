@@ -16,6 +16,7 @@ struct CombinedSearchTests {
         struct NotUsed: Error {}
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem { throw NotUsed() }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse { throw NotUsed() }
