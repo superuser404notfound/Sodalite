@@ -80,12 +80,6 @@ enum Changelog {
                     "changelog.1_1_0.multiview.body",
                     icon: "rectangle.split.2x2"
                 ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.topShelf.title",
-                    "changelog.1_1_0.topShelf.body",
-                    icon: "rectangle.topthird.inset.filled"
-                ),
             ]
         ),
         // MARK: 1.0.0
