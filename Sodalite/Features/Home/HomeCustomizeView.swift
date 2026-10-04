@@ -92,7 +92,7 @@ struct HomeCustomizeView: View {
                     configs = HomeRowConfig.resetToDefault(current: configs)
                     layout = LibraryLayout(entries: [])
                 }
-                LibraryLayout.clear(scope: scope)
+                LibraryLayout.reset(scope: scope)
                 save()
             }) { isFocused in
                 Label("home.customize.resetDefaults", systemImage: "arrow.counterclockwise")
@@ -121,6 +121,7 @@ struct HomeCustomizeView: View {
                 get: { mergeCWNextUp },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     withAnimation(.easeInOut(duration: 0.25)) {
                         mergeCWNextUp = newValue
                     }
@@ -150,6 +151,7 @@ struct HomeCustomizeView: View {
                 get: { rewatchNextUp },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     rewatchNextUp = newValue
                     HomeRowConfig.setEnableRewatchingNextUp(newValue, scope: scope)
                     NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
@@ -177,6 +179,7 @@ struct HomeCustomizeView: View {
                 get: { collectionGrouping },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     collectionGrouping = newValue
                     HomeRowConfig.setCollectionGrouping(newValue, scope: scope)
                     // The grids cache per mode, so no stale shape survives; Home still reloads for the My Media tiles.
@@ -234,6 +237,7 @@ struct HomeCustomizeView: View {
 
             RowToggleButton(isOn: true) {
                 movingID = nil
+                movingLibrary = nil
                 toggle(id: config.id)
             }
         }
@@ -352,6 +356,7 @@ struct HomeCustomizeView: View {
             }
             withAnimation(.easeInOut(duration: 0.2)) {
                 movingID = nil
+                movingLibrary = nil
             }
         } else {
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -374,6 +379,7 @@ struct HomeCustomizeView: View {
     }
 
     private func toggle(id: String) {
+        movingLibrary = nil
         guard let index = configs.firstIndex(where: { $0.id == id }) else { return }
         withAnimation(.easeInOut(duration: 0.25)) {
             configs[index].isEnabled.toggle()

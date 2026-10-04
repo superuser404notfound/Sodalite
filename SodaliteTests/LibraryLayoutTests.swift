@@ -139,4 +139,16 @@ struct LibraryLayoutTests {
         #expect(CustomizeLibraryList.serverLabel(for: libs[2], in: libs, sources: sources) == nil)
         #expect(CustomizeLibraryList.serverLabel(for: libs[0], in: libs, sources: Array(sources.prefix(1))) == nil)
     }
+
+    // Review finding 1: a reset must travel, or another device pushes the old layout back.
+    @Test func aResetReachesTheOtherDevices() {
+        let scope = "layout-reset-\(UUID())"
+        let other = "layout-reset-other-\(UUID())"
+        defer { LibraryLayout.clear(scope: scope); LibraryLayout.clear(scope: other) }
+        LibraryLayout(entries: [.init(serverID: "a", libraryID: "1", isHidden: true)]).save(scope: scope)
+        LibraryLayout(entries: [.init(serverID: "a", libraryID: "1", isHidden: true)]).save(scope: other)
+        LibraryLayout.reset(scope: scope)
+        ProfileHomeStore.apply(ProfileHomeStore.collect(scope: scope, stamp: Date()), scope: other)
+        #expect(LibraryLayout.load(scope: other).entries.isEmpty)
+    }
 }

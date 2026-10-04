@@ -98,6 +98,12 @@ extension LibraryLayout {
     }
 
     static func clear(scope: String, defaults: UserDefaults = .standard) { defaults.removeObject(forKey: key(scope)) }
+
+    /// Back to server order with nothing hidden. Stored as an empty layout rather than removed, so the
+    /// profile's home record carries the reset to its other devices instead of reading as "no layout".
+    static func reset(scope: String, defaults: UserDefaults = .standard) {
+        LibraryLayout(entries: []).save(scope: scope, defaults: defaults)
+    }
 }
 
 enum ServerLabels {
