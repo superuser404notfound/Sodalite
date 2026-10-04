@@ -43,6 +43,11 @@ final class HomeViewModel {
     /// reader: the fan-out consumes it to reconcile the row config, and Latest Shows awaits it for
     /// the library id its query needs. Internal so +Rows can reach it. nil between loads.
     var librariesTask: Task<[JellyfinLibrary]?, Never>?
+    /// Every source's library list for the running load, by server id (Sodalite#85).
+    var librariesTasks: [String: Task<[JellyfinLibrary]?, Never>] = [:]
+
+    /// Where rows come from, active server first. One entry unless servers are combined.
+    var sources: [HomeSource]
 
     /// Last successful loadContent(); the staleness gate below reads it, else new server-side content never shows until app restart.
     var lastLoadedAt: Date?
@@ -151,13 +156,18 @@ final class HomeViewModel {
         imageService: JellyfinImageService,
         discoverService: SeerrDiscoverServiceProtocol? = nil,
         userID: String,
-        serverID: String
+        serverID: String,
+        sources: [HomeSource]? = nil
     ) {
         self.libraryService = libraryService
         self.imageService = imageService
         self.discoverService = discoverService
         self.userID = userID
         self.serverID = serverID
+        self.sources = sources ?? [HomeSource(
+            serverID: serverID, serverName: "", userID: userID,
+            libraryService: libraryService, isActive: true
+        )]
         self.rowConfigs = HomeRowConfig.loadFromStorage(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
         hydrateFeedFromCache()
     }
@@ -214,6 +224,7 @@ final class HomeViewModel {
         providerCountsTask?.cancel()
         genreCachesTask?.cancel()
         librariesTask?.cancel()
+        librariesTasks.values.forEach { $0.cancel() }
     }
 
     /// Patch a just-watched item's resume progress in place across every row holding it (issue #24). Mirrors the detail-side fix off the authoritative playback-stop payload so the Continue Watching progress bar is right immediately without racing a loadContent() re-fetch. loadContent() still runs for structural changes a patch can't make (re-ordering, dropping out once finished).
@@ -307,6 +318,7 @@ final class HomeViewModel {
         providerCountsTask?.cancel()
         genreCachesTask?.cancel()
         librariesTask?.cancel()
+        librariesTasks.values.forEach { $0.cancel() }
         backdropTask = nil
         providerCountsTask = nil
         genreCachesTask = nil
