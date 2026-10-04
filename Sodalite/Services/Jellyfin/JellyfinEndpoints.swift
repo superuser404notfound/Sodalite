@@ -528,7 +528,9 @@ enum JellyfinEndpoint: APIEndpoint {
     /// BaseItem row, unlike MediaStreams which costs a GetStaticMediaSources call per item. They
     /// stay in the set whether or not the badge setting is on, because grid and precompute write
     /// the same FilterCache keys and two writers of one key must not carry different field sets.
-    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height"
+    /// `DateCreated`, `SortName` and `ProviderIds` are what a combined Home sorts and deduplicates by
+    /// (Sodalite#85), small enough to ride on every card.
+    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height,DateCreated,SortName,ProviderIds"
 
     /// Music browse rows: image tags + album/artist linkage; IndexNumber/ParentIndexNumber/RunTimeTicks/ProductionYear come back without an explicit Fields request.
     nonisolated static let musicListFields = "ImageTags,Artists,AlbumArtist,AlbumId,AlbumPrimaryImageTag"

@@ -61,6 +61,8 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     /// Jellyfin `ServerId`, on every BaseItemDto. nil on items cached before it was decoded, which
     /// resolve against the active server (Sodalite#85).
     var serverID: String?
+    /// Jellyfin `DateCreated` (card field set), the sort key a combined Home's Latest rows merge by.
+    var dateCreated: String?
     let childCount: Int?
     /// Local trailer count (requires LocalTrailerCount in Fields); gates the detail Trailer button. nil if unrequested.
     let localTrailerCount: Int?
@@ -180,6 +182,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case locationType = "LocationType"
         case mediaType = "MediaType"
         case serverID = "ServerId"
+        case dateCreated = "DateCreated"
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
         case seriesPrimaryImageTag = "SeriesPrimaryImageTag"
