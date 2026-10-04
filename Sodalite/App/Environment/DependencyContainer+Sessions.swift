@@ -54,3 +54,47 @@ extension DependencyContainer {
         }
     }
 }
+
+extension DependencyContainer {
+    enum CombinedServerStatus: Equatable {
+        case active
+        case contributes(userName: String)
+        case excluded(userName: String)
+        case noSession
+    }
+
+    private var combineScope: String? {
+        guard let server = activeServer, let userID = activeUserID else { return nil }
+        return ProfileKey(serverID: server.id, userID: userID).storageScope
+    }
+
+    func isCombiningServers() -> Bool {
+        combineScope.map { combinedServers.isEnabled(scope: $0) } ?? false
+    }
+
+    /// The one way the switch changes: Home reloads and the profile's home record uploads off the
+    /// same notification Customize posts.
+    func setCombiningServers(_ enabled: Bool) {
+        guard let scope = combineScope else { return }
+        combinedServers.setEnabled(enabled, scope: scope)
+        refreshSessionRegistry()
+        NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
+    }
+
+    func setServer(_ serverID: String, combined: Bool) {
+        guard let scope = combineScope else { return }
+        var excluded = combinedServers.excludedServerIDs(scope: scope)
+        if combined { excluded.remove(serverID) } else { excluded.insert(serverID) }
+        combinedServers.setExcluded(excluded, scope: scope)
+        refreshSessionRegistry()
+        NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
+    }
+
+    func combinedServerStatus(_ server: JellyfinServer) -> CombinedServerStatus {
+        if server.id == activeServer?.id { return .active }
+        guard let credential = secondaryCredential(serverID: server.id) else { return .noSession }
+        let name = listRememberedUsers(serverID: server.id).first { $0.id == credential.userID }?.name ?? ""
+        let excluded = combineScope.map { combinedServers.excludedServerIDs(scope: $0).contains(server.id) } ?? false
+        return excluded ? .excluded(userName: name) : .contributes(userName: name)
+    }
+}

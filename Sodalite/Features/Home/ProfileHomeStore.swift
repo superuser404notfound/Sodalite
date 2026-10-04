@@ -11,7 +11,9 @@ enum ProfileHomeStore {
             mergeCWNextUp: HomeRowConfig.mergeContinueWatchingNextUp(scope: scope),
             rewatchNextUp: HomeRowConfig.enableRewatchingNextUp(scope: scope),
             collectionGrouping: HomeRowConfig.collectionGrouping(scope: scope).rawValue,
-            librarySorts: LibrarySortStore.allSorts(scope: scope)
+            librarySorts: LibrarySortStore.allSorts(scope: scope),
+            combineServers: CombinedServersPreferences(defaults: .standard).isEnabled(scope: scope),
+            combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted()
         )
     }
 
@@ -28,6 +30,9 @@ enum ProfileHomeStore {
             HomeRowConfig.setCollectionGrouping(grouping, scope: scope)
         }
         LibrarySortStore.applySorts(payload.librarySorts, scope: scope)
+        let combined = CombinedServersPreferences(defaults: .standard)
+        if let enabled = payload.combineServers { combined.setEnabled(enabled, scope: scope) }
+        if let excluded = payload.combineServersExcluded { combined.setExcluded(Set(excluded), scope: scope) }
     }
 
     static func copy(fromScope source: String, toScope target: String) {

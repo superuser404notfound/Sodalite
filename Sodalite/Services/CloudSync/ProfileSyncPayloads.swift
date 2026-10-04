@@ -220,6 +220,9 @@ struct ProfileHomePayload: Codable, Equatable {
     var rewatchNextUp: Bool
     var collectionGrouping: String
     var librarySorts: [String: String]
+    /// Combine servers (Sodalite#85). Optional so a record from an older build decodes.
+    var combineServers: Bool?
+    var combineServersExcluded: [String]?
 }
 
 /// Type-erased profile payload, the per-profile counterpart of `SettingsSyncPayload`.

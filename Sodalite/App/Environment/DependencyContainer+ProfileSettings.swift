@@ -59,6 +59,8 @@ extension DependencyContainer {
         case .home(let h):
             ProfileHomeStore.apply(h, scope: key.storageScope)
             if key == activeProfileKey {
+                // The record carries Combine servers, so who takes part may have changed (Sodalite#85).
+                refreshSessionRegistry()
                 NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
             }
         }
