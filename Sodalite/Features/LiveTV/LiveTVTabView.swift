@@ -43,6 +43,11 @@ struct LiveTVTabView: View {
     @State private var builtForServerID: String?
     @State private var builtForKey: String?
     @State private var rememberedServerID: String?
+    /// The profile `rememberedServerID` was read for; nothing is built before it matches, so a stored
+    /// secondary is not preceded by a throwaway build against the active server.
+    @State private var rememberedLoadedFor: ProfileKey?
+    /// The signed-in user on a secondary source, for its rights (nil on the active one).
+    @State private var sessionUser: JellyfinUser?
     @State private var isServerPickerPresented = false
 
     private enum LiveTVSection { case overview, guide, recordings }
@@ -65,7 +70,9 @@ struct LiveTVTabView: View {
     }
 
     private var chosenServerID: String? {
-        LiveTVServerChoice.resolve(capable: capableServerIDs, remembered: rememberedServerID)
+        LiveTVServerChoice.resolve(
+            capable: capableServerIDs, available: sources.map(\.serverID), remembered: rememberedServerID,
+            pinned: isPlayerPresented ? builtForServerID : nil)
     }
 
     /// Before the first probe lands this is the active server, exactly as before Sodalite#85.
@@ -126,8 +133,6 @@ struct LiveTVTabView: View {
                     }
                     #endif
                 }
-                // A new server gets a fresh grid; the old one's scroll and focus belong to other channels.
-                .id(builtForServerID)
                 // Keep the UIKit grid alive across the toggle (scroll + focus state survive); just hide it.
                 .opacity(section == .guide ? 1 : 0)
                 .allowsHitTesting(section == .guide)
@@ -153,10 +158,18 @@ struct LiveTVTabView: View {
                         })
                 }
             }
+            // Every view below holds its model in @State, so a new server or user needs new views,
+            // not just new models; the guide's scroll and focus belong to other channels too.
+            .id(builtForKey)
+            .environment(\.liveTVPolicy, LiveTVPolicy(
+                isActiveSource: source?.isActive ?? true, activeUser: appState.activeUser, sessionUser: sessionUser))
         }
-        .onAppear { rememberedServerID = dependencies.rememberedLiveTVServerID() }
-        .task(id: source.map { "\($0.serverID)|\($0.userID)" }) {
-            guard let source else { return }
+        .task(id: appState.profileKey) {
+            rememberedServerID = dependencies.rememberedLiveTVServerID()
+            rememberedLoadedFor = appState.profileKey
+        }
+        .task(id: source.map { "\($0.serverID)|\($0.userID)|\(rememberedLoadedFor?.storageScope ?? "")" }) {
+            guard rememberedLoadedFor == appState.profileKey, let source else { return }
             let key = "\(source.serverID)|\(source.userID)"
             guard key != builtForKey else { return }
             builtForKey = key
@@ -169,6 +182,11 @@ struct LiveTVTabView: View {
             recordingsModel = RecordingsViewModel(
                 liveTvService: source.liveTvService, itemService: source.itemService, userID: source.userID)
             programsModel = LiveProgramsViewModel(service: source.liveTvService, userID: source.userID)
+            sessionUser = nil
+            if !source.isActive {
+                let client = dependencies.sessionRegistry.session(forServerID: source.serverID).client
+                sessionUser = try? await JellyfinAuthService(client: client).getCurrentUser()
+            }
         }
         // The server is back within a running session (Sodalite#122): a guide whose load failed while it
         // was away retries, and the Overview rows are asked again.

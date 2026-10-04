@@ -243,6 +243,7 @@
 		26E7B56FD677DF67930576DE /* HomeRowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168C9C4EDD234AD97BFA1D96 /* HomeRowConfiguration.swift */; };
 		2707A7F7EDBB9D8DE8E44152 /* AuthDefaultProfilePinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319871CEDEF5EBA6EFCF4C63 /* AuthDefaultProfilePinTests.swift */; };
 		2768C5A0801BEC07999AFBE0 /* NowPlayingWaveIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DDD1EA2510104B724CB32 /* NowPlayingWaveIcon.swift */; };
+		2772E5C80472F81D65C46059 /* CombinedLiveTVReviewFixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D14FCC3A0D48C0FB90D85D /* CombinedLiveTVReviewFixTests.swift */; };
 		27AF375084D0B6A15F068F82 /* DetailHeroBudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9FFA6B018805118824DE /* DetailHeroBudgetTests.swift */; };
 		27C4BFBA7335228B0E0A3D0F /* DirectPlayProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1FB619B1F615A7F27C1C90 /* DirectPlayProfile.swift */; };
 		28266255B4CE7307E061676E /* JellyfinServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CE69511B110DCCF9EC0603 /* JellyfinServer.swift */; };
@@ -1970,6 +1971,7 @@
 		81E6D9A823ADF28BFA536A81 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		826A27DB6C5D09ED982E7C49 /* ASSFontCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASSFontCache.swift; sourceTree = "<group>"; };
 		84A366A9666BD16A484E1F50 /* MediaDeletionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDeletionSheet.swift; sourceTree = "<group>"; };
+		84D14FCC3A0D48C0FB90D85D /* CombinedLiveTVReviewFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedLiveTVReviewFixTests.swift; sourceTree = "<group>"; };
 		84FF85A82012DB16FC162782 /* ResumeBarRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeBarRenderer.swift; sourceTree = "<group>"; };
 		854F1BB00479515062667971 /* CloudSyncSettingsParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncSettingsParityTests.swift; sourceTree = "<group>"; };
 		8560FA449219A96F8D74074B /* LiveChannelLineup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChannelLineup.swift; sourceTree = "<group>"; };
@@ -2729,6 +2731,7 @@
 				16D43AE728D48D1CF89B6950 /* CombinedHomeModelTests.swift */,
 				CC93F2D3BB39989456A0CC68 /* CombinedHomeReviewFixTests.swift */,
 				3B76BBB91FDBD81D926C9A1E /* CombinedHomeViewModelTests.swift */,
+				84D14FCC3A0D48C0FB90D85D /* CombinedLiveTVReviewFixTests.swift */,
 				F654D7469B39A63D9642BEC9 /* CombinedLiveTVTests.swift */,
 				9C48B785FD580495676E681E /* CombinedProviderMatchTests.swift */,
 				27ED6A1BA0223AF1331E71A8 /* CombinedSearchTests.swift */,
@@ -4614,6 +4617,7 @@
 				CB7B8430448CFB7036FFB5C6 /* CombinedHomeModelTests.swift in Sources */,
 				816E12E76A540FD65F3FEE48 /* CombinedHomeReviewFixTests.swift in Sources */,
 				259F51B7034BAD6B55465651 /* CombinedHomeViewModelTests.swift in Sources */,
+				2772E5C80472F81D65C46059 /* CombinedLiveTVReviewFixTests.swift in Sources */,
 				436AEABD96772F2B6CCFD02C /* CombinedLiveTVTests.swift in Sources */,
 				D96B6773AE1A675F695A7E65 /* CombinedProviderMatchTests.swift in Sources */,
 				26B3C7F4157FCFECCC069AB7 /* CombinedSearchTests.swift in Sources */,

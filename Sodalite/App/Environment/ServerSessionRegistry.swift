@@ -9,6 +9,9 @@ final class ServerSessionRegistry {
     let active: ServerSession
     private(set) var participants: [ServerSession]
     private(set) var participantsRevision: UInt64 = 0
+    /// Bumped when a secondary moves to another address, which can turn an unreachable server into a
+    /// reachable one without any participant changing.
+    private(set) var routesRevision: UInt64 = 0
 
     @ObservationIgnored private let httpClient: HTTPClientProtocol
     @ObservationIgnored private var secondaries: [String: (session: ServerSession, credential: SessionCredential)] = [:]
@@ -87,6 +90,12 @@ final class ServerSessionRegistry {
         let client = session(forServerID: serverID).client
         guard let base = client.baseURL else { return nil }
         return (base, client.accessToken)
+    }
+
+    func updateRoute(_ url: URL, for session: ServerSession) {
+        guard session.client.baseURL != url else { return }
+        session.client.baseURL = url
+        routesRevision &+= 1
     }
 
     private func noteParticipantsChanged() {

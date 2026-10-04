@@ -255,7 +255,7 @@ struct TabRootView: View {
             guard let userID = dependencies.activeUserID else { return }
 
             // Probe both optional tabs then publish the tab set in ONE assignment. Two separate insertions rebuilt the bar twice, stranding the earlier item (Live TV) on tvOS's gray icon template; one atomic rebuild tints every item uniformly.
-            let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID)
+            let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
             let hasLive = !liveIDs.isEmpty
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
@@ -305,8 +305,12 @@ struct TabRootView: View {
         .onAppear {
             configureTabBarItemAppearance()
         }
-        // Combining turned on, a server excluded, or a secondary route resolved late (Sodalite#85).
+        // Combining turned on, a server excluded, or a secondary moved to an address that answers (Sodalite#85).
         .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            loginProbeTask?.cancel()
+            loginProbeTask = Task { await recoverOptionalTabs() }
+        }
+        .onChange(of: dependencies.sessionRegistry.routesRevision) { _, _ in
             loginProbeTask?.cancel()
             loginProbeTask = Task { await recoverOptionalTabs() }
         }
@@ -408,7 +412,7 @@ struct TabRootView: View {
         }
         guard let userID = dependencies.activeUserID else { return }
 
-        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID)
+        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
         let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
         var hasMusic = false
@@ -441,7 +445,7 @@ struct TabRootView: View {
     private func recoverOptionalTabs() async {
         guard let userID = dependencies.activeUserID else { return }
 
-        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID)
+        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
         let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
         var hasMusic = false

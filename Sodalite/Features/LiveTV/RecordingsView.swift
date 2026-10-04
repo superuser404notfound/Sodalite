@@ -7,6 +7,7 @@ struct RecordingsView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.serverSession) private var serverSessionOverride
+    @Environment(\.liveTVPolicy) private var liveTVPolicy
     let model: RecordingsViewModel
     let tint: Color
 
@@ -23,10 +24,14 @@ struct RecordingsView: View {
     /// Same rule as the detail pages: the server's own CanDelete (it knows a DVR-only deletion grant),
     /// else the account policy.
     private func canDelete(_ item: JellyfinItem) -> Bool {
-        item.canDelete ?? (appState.activeUser?.canDeleteContent == true)
+        item.canDelete ?? policy.canDeleteContent
     }
 
-    private var canManageLiveTv: Bool { appState.activeUser?.canManageLiveTv == true }
+    private var canManageLiveTv: Bool { policy.canManageLiveTv }
+
+    private var policy: LiveTVPolicy {
+        liveTVPolicy ?? LiveTVPolicy(isActiveSource: true, activeUser: appState.activeUser, sessionUser: nil)
+    }
 
     /// tvOS/iPad keep the fixed 4-column grid; compact goes adaptive so landscape tiles fit ~2-up
     /// on a phone (the poster-scaled gridMinimum would pack three cramped columns).

@@ -34,7 +34,7 @@ extension DependencyContainer {
                 probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
             ) else { continue }
             serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
-            session.client.baseURL = resolved.url
+            sessionRegistry.updateRoute(resolved.url, for: session)
         }
     }
 }
@@ -137,7 +137,9 @@ extension DependencyContainer {
     }
 
     /// Gates the Live TV tab: the participants exposing any Live TV channel. Empty on any error.
-    func liveTVServerIDs(activeUserID: String) async -> [String] {
-        await LiveTVProbe.capableServerIDs(liveTVSources(activeUserID: activeUserID), secondaryDeadline: .seconds(4))
+    func liveTVServerIDs(activeUserID: String, previouslyCapable: Set<String> = []) async -> [String] {
+        await LiveTVProbe.capableServerIDs(
+            liveTVSources(activeUserID: activeUserID), secondaryDeadline: .seconds(4),
+            previouslyCapable: previouslyCapable)
     }
 }
