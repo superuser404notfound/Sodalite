@@ -17,6 +17,9 @@ enum SkipBackSubtitleWindow {
         var landing: Double
         /// The track this window switched on, so closing can never disable a different one.
         var streamIndex: Int
+        /// Sodalite#178: set once the playhead reaches `end(of:)` while a line is on screen. The
+        /// window then closes at this point on the subtitle clock, so that line is not cut short.
+        var lingerUntil: Double? = nil
     }
 
     /// A jump shorter than this is treated as no movement: skipping back at the very start of a file
@@ -81,6 +84,29 @@ enum SkipBackSubtitleWindow {
     static func shouldClose(state: State?, playhead: Double) -> Bool {
         guard let state else { return false }
         return playhead >= end(of: state)
+    }
+
+    /// Bounds the linger, because a bitmap cue can carry an end time far past its real display
+    /// (PGS often states none until the next display set).
+    static let maximumLinger: Double = 8
+
+    /// Sodalite#178: where the line on screen when the window reaches its end stops showing, on the
+    /// subtitle clock. It runs to its own end time but never into the next line, so the window
+    /// finishes what it showed and shows nothing new. nil when no line is on screen: close now.
+    /// `delay` is the user's subtitle offset, applied the way the overlay applies it.
+    static func lingerEnd(cues: [SubtitleCue], subtitleTime: Double, delay: Double) -> Double? {
+        let lookup = subtitleTime - delay
+        var lineEnd: Double?
+        var nextStart = Double.infinity
+        for cue in cues {
+            if cue.startTime > lookup {
+                nextStart = min(nextStart, cue.startTime)
+            } else if cue.endTime > lookup {
+                lineEnd = max(lineEnd ?? cue.endTime, cue.endTime)
+            }
+        }
+        guard let lineEnd else { return nil }
+        return min(lineEnd, nextStart, lookup + maximumLinger) + delay
     }
 
     /// Preferred subtitle language first, then the language being heard. A preferred language with no

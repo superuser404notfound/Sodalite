@@ -3284,6 +3284,7 @@ final class PlayerViewModel {
             }
             open.origin = origin
             open.landing = targetTime
+            open.lingerUntil = nil
             skipBackSubtitleWindow = open
             return
         }
@@ -3313,11 +3314,24 @@ final class PlayerViewModel {
             origin: pendingOrigin, landing: targetTime, streamIndex: streamIndex)
     }
 
-    /// Close the window once playback has caught up with where the jump started. Driven by the clock
-    /// sink rather than a timer, so playback speed and pauses need no handling of their own.
+    /// Close the window once playback has caught up with where the jump started, letting the line on
+    /// screen at that point finish first (Sodalite#178). Driven by the clock sink rather than a timer,
+    /// so playback speed and pauses need no handling of their own.
     func closeSkipBackSubtitlesIfReached(time: Double) {
-        guard SkipBackSubtitleWindow.shouldClose(state: skipBackSubtitleWindow, playhead: time) else { return }
-        endSkipBackSubtitleWindow()
+        guard var window = skipBackSubtitleWindow else { return }
+        if let lingerUntil = window.lingerUntil {
+            if subtitleTime >= lingerUntil { endSkipBackSubtitleWindow() }
+            return
+        }
+        guard SkipBackSubtitleWindow.shouldClose(state: window, playhead: time) else { return }
+        guard let lingerUntil = SkipBackSubtitleWindow.lingerEnd(
+            cues: subtitleCues, subtitleTime: subtitleTime, delay: preferences.subtitleDelaySeconds
+        ) else {
+            endSkipBackSubtitleWindow()
+            return
+        }
+        window.lingerUntil = lingerUntil
+        skipBackSubtitleWindow = window
     }
 
     /// Sodalite#65: the system asked for captions on its own. The engine already took its own
