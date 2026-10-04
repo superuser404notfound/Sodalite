@@ -3,6 +3,10 @@ import SwiftUI
 struct PlaylistDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var viewModel: DetailViewModel?
@@ -45,17 +49,17 @@ struct PlaylistDetailView: View {
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
                     startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: nil,
                     preferredMediaSourceID: nil,
                     playQueue: playQueue
@@ -81,13 +85,13 @@ struct PlaylistDetailView: View {
             #endif
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    playbackService: dependencies.jellyfinPlaybackService
+                    playbackService: session.playbackService
                 )
                 Task {
                     await viewModel?.loadFullDetail()

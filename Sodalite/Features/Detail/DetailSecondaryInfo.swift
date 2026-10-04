@@ -36,7 +36,8 @@ struct PersonRoute: Identifiable, Hashable {
 func jellyfinCastMembers(
     from people: [PersonInfo],
     imageService: JellyfinImageService,
-    imageWidth: Int
+    imageWidth: Int,
+    serverID: String? = nil
 ) -> [CastMember] {
     people.prefix(15).map { person in
         CastMember(
@@ -46,7 +47,8 @@ func jellyfinCastMembers(
             imageURL: imageService.personImageURL(
                 personID: person.id,
                 tag: person.primaryImageTag,
-                maxWidth: imageWidth
+                maxWidth: imageWidth,
+                serverID: serverID
             ),
             personID: nil,
             jellyfinPersonID: person.id

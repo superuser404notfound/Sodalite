@@ -69,8 +69,11 @@ struct HomeView: View {
                     smartProviderRegion: filter.smartProviderRegion,
                     cacheScope: filter.cacheScope,
                     sortScope: filter.sortScope,
-                    hidesAudioPlaylists: filter.hidesAudioPlaylists
+                    hidesAudioPlaylists: filter.hidesAudioPlaylists,
+                    sources: filter.sources
                 )
+                // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
+                .environment(\.serverSession, filter.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
             }
         }
         .onAppear {
@@ -81,8 +84,10 @@ struct HomeView: View {
                     imageService: dependencies.jellyfinImageService,
                     discoverService: dependencies.seerrDiscoverService,
                     userID: userID,
-                    serverID: appState.activeServer?.id ?? userID
+                    serverID: appState.activeServer?.id ?? userID,
+                    sources: dependencies.homeSources(activeUserID: userID)
                 )
+                viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
                 Task { await viewModel?.loadContent() }
             } else {
                 // Pick up new server-side content on the way back to the tab; the view model owns
@@ -186,9 +191,19 @@ struct HomeView: View {
                 imageService: dependencies.jellyfinImageService,
                 discoverService: dependencies.seerrDiscoverService,
                 userID: userID,
-                serverID: appState.activeServer?.id ?? userID
+                serverID: appState.activeServer?.id ?? userID,
+                sources: dependencies.homeSources(activeUserID: userID)
             )
+            viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
             Task { await viewModel?.loadContent() }
+        }
+        // The participating servers changed (Combine servers switched, a server added or muted):
+        // repaint from that set's cached feed, then fetch (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            guard let userID = appState.activeUser?.id, let vm = viewModel else { return }
+            let sources = dependencies.homeSources(activeUserID: userID)
+            guard vm.acceptsSources(sources) else { return }
+            Task { await vm.updateSources(sources) }
         }
         // No serverDidSwitch handler here: TabRootView is `.id(appState.activeServer?.id)`, so a
         // switch tears this whole view down and `.onAppear` above builds a fresh view model on the
@@ -288,10 +303,9 @@ struct HomeView: View {
             }
         }
         guard !urls.isEmpty else { return }
-        let token = dependencies.jellyfinClient.accessToken
-        let host = dependencies.jellyfinClient.baseURL?.host
+        let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
         Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, authToken: token, jellyfinHost: host)
+            await ImageCache.prefetch(urls, auth: auth)
         }
     }
 
@@ -301,6 +315,9 @@ struct HomeView: View {
                 // Invisible zero-height scroll-to-top anchor for when focus leaves the rows.
                 Color.clear.frame(height: 0).id("top")
                 LazyVStack(alignment: .leading, spacing: 40) {
+                    if !vm.unreachableServerNames.isEmpty {
+                        CombinedHomeNotice(serverNames: vm.unreachableServerNames)
+                    }
                     ForEach(Array(vm.orderedSections().enumerated()), id: \.element.id) { idx, section in
                     switch section {
                     case .media(let row):
@@ -315,7 +332,7 @@ struct HomeView: View {
                                         localized: "home.libraryLatest.format",
                                         defaultValue: "Latest in %@"
                                     ),
-                                    row.libraryName ?? ""
+                                    [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
                                 )
                                 : nil,
                             items: row.items,
@@ -338,7 +355,8 @@ struct HomeView: View {
                                 : nil,
                             onItemSelected: { selectedItem = $0 },
                             cardStyle: row.type.cardStyle,
-                            showsSeriesArtwork: cwImage != .still
+                            showsSeriesArtwork: cwImage != .still,
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) }
                         )
                         .focused($focusedRowIndex, equals: idx)
 
@@ -376,6 +394,7 @@ struct HomeView: View {
                         LibraryRow(
                             titleKey: HomeRowType.myMedia.localizedTitle,
                             libraries: libraries,
+                            label: { vm.serverLabel(forLibrary: $0) },
                             onSelect: { library in
                                 selectedFilter = makeLibraryFilter(for: library)
                             }
@@ -409,6 +428,18 @@ struct HomeView: View {
         appState.cacheIdentity.map { FilterCacheScope(key: key, identity: $0) }
     }
 
+    /// A genre or provider tile's cache slot: the combined one when servers are combined, so the
+    /// grid and the precompute that pre-warms it agree on one slot (Sodalite#85).
+    private func homeTileScope(_ key: String) -> FilterCacheScope? {
+        guard let vm = viewModel, vm.sources.count > 1 else { return cacheScope(key) }
+        return FilterCacheScope(key: key, identity: vm.feedIdentity)
+    }
+
+    private var combinedSources: [HomeSource]? {
+        guard let sources = viewModel?.sources, sources.count > 1 else { return nil }
+        return sources
+    }
+
     private func makeJellyfinFilter(for provider: CatalogProvider) -> FilterDestination {
         // A provider tile filters the LOCAL library by Studio (pipe-joined aliases catch "Disney+" and "Walt Disney Pictures"), augmented by the smart-provider TMDB watch-provider hint so studio-tag-less titles surface (Modern Family on Disney+, Bluey via Ludo Studio).
         let region = Locale.current.region?.identifier ?? "US"
@@ -427,7 +458,8 @@ struct HomeView: View {
             ),
             smartProviderID: provider.tmdbWatchProviderID,
             smartProviderRegion: region,
-            cacheScope: cacheScope(FilterCacheKey.Home.provider(id: provider.id, region: region))
+            cacheScope: homeTileScope(FilterCacheKey.Home.provider(id: provider.id, region: region)),
+            sources: combinedSources
         )
     }
 
@@ -444,8 +476,9 @@ struct HomeView: View {
                 fields: JellyfinEndpoint.homeRowFields
             ),
             // Without a cache scope FilteredGridView.init falls to the empty-state branch with isLoading=true on every visit (the brief flash on opening a genre tile). Tag name is a stable enough key, once the session is in the scope: "Action" is the same name on every server.
-            cacheScope: cacheScope(FilterCacheKey.Home.genre(name: tag.name)),
-            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) }
+            cacheScope: homeTileScope(FilterCacheKey.Home.genre(name: tag.name)),
+            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) },
+            sources: combinedSources
         )
     }
 
@@ -473,9 +506,14 @@ struct HomeView: View {
         return FilterDestination(
             title: library.name,
             query: query,
-            cacheScope: cacheScope(FilterCacheKey.Home.library(id: library.id, grouping: grouping)),
+            cacheScope: FilterCacheScope(
+                key: FilterCacheKey.Home.library(id: library.id, grouping: grouping),
+                identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                    ?? CacheIdentity(serverID: "", userID: "")
+            ),
             sortScope: sortScopeID.map { LibrarySortScope.library(id: library.id, scope: $0) },
-            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType)
+            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType),
+            serverID: viewModel?.sources.first(where: { $0.serverID == library.serverID && !$0.isActive })?.serverID
         )
     }
 
@@ -500,6 +538,14 @@ struct FilterDestination: Identifiable, Hashable {
     var sortScope: LibrarySortScope?
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).
     var hidesAudioPlaylists = false
+    /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
+    var serverID: String? = nil
+    /// A combined Home's servers for a genre or provider tile; the grid pages through all of them.
+    var sources: [HomeSource]? = nil
+
+    // Identity is the per-instance id; the sources carry services, which have no equality.
+    static func == (lhs: FilterDestination, rhs: FilterDestination) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 extension ItemQuery: Hashable {
@@ -516,5 +562,25 @@ extension ItemQuery: Hashable {
         lhs.genres == rhs.genres &&
         lhs.studioNames == rhs.studioNames &&
         lhs.isFavorite == rhs.isFavorite
+    }
+}
+
+/// One quiet line above the shelf naming the servers that did not answer this round (Sodalite#85).
+private struct CombinedHomeNotice: View {
+    let serverNames: [String]
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
+    private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
+
+    var body: some View {
+        Text(String(
+            format: String(localized: "home.serverUnreachable.format", defaultValue: "%@ is not reachable right now"),
+            serverNames.formatted(.list(type: .and))
+        ))
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))
+        .padding(.trailing, metrics.rowInset)
     }
 }

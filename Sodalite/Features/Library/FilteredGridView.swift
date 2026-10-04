@@ -27,6 +27,10 @@ enum WatchStatusFilter: String, CaseIterable, Hashable {
 struct FilteredGridView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
     @State private var items: [JellyfinItem]
     @State private var isLoading: Bool
     @State private var selectedItem: JellyfinItem?
@@ -78,6 +82,13 @@ struct FilteredGridView: View {
     /// across versions (Sodalite#73). A music playlist has no detail screen to open, so it is dropped
     /// here instead. nil-tolerant: an unknown media type stays visible.
     let hidesAudioPlaylists: Bool
+    /// A combined Home's servers, active first; with more than one the grid pages through all of
+    /// them (Sodalite#85). nil or one entry keeps the single-server path.
+    let sources: [HomeSource]?
+    @State private var mergedGrid = MergedGridState()
+    /// A combined provider grid whose secondary dropped out this round: shown, never cached.
+    @State private var combinedIncomplete = false
+    private var isMerged: Bool { (sources?.count ?? 0) > 1 }
 
     init(
         title: String,
@@ -86,7 +97,8 @@ struct FilteredGridView: View {
         smartProviderRegion: String? = nil,
         cacheScope: FilterCacheScope? = nil,
         sortScope: LibrarySortScope? = nil,
-        hidesAudioPlaylists: Bool = false
+        hidesAudioPlaylists: Bool = false,
+        sources: [HomeSource]? = nil
     ) {
         self.title = title
         self.query = query
@@ -95,6 +107,7 @@ struct FilteredGridView: View {
         self.cacheScope = cacheScope
         self.sortScope = sortScope
         self.hidesAudioPlaylists = hidesAudioPlaylists
+        self.sources = sources
         let storedSort = sortScope.map(LibrarySortStore.sort) ?? .default
         _sort = State(initialValue: storedSort)
         // Hydrate from FilterCache in init so the first render paints the cached grid; doing it in .task means a frame with isLoading=true first (the brief loading flash on every tap).
@@ -141,7 +154,7 @@ struct FilteredGridView: View {
                     title: "action.shuffle",
                     systemImage: "shuffle",
                     action: {
-                        guard let userID = appState.activeUser?.id else { return }
+                        guard let userID = sessionUserID else { return }
                         // Shows libraries shuffle episodes across the whole
                         // library; everything else keeps its own item types.
                         var types = query.includeItemTypes ?? [.movie]
@@ -151,7 +164,7 @@ struct FilteredGridView: View {
                                 parentID: query.parentID,
                                 baseQuery: query,
                                 itemTypes: types,
-                                service: dependencies.jellyfinLibraryService,
+                                service: session.libraryService,
                                 userID: userID
                             )
                             guard let first = queue.first else { return }
@@ -218,18 +231,18 @@ struct FilteredGridView: View {
                         spacing: metrics.gridSpacing
                     )
                 ], spacing: metrics.gridSpacing) {
-                    ForEach(items) { item in
+                    ForEach(items, id: \.originKey) { item in
                         Button {
                             selectedItem = item
                         } label: {
                             MediaCard(
                                 item: item,
                                 imageURL: dependencies.jellyfinImageService.posterURL(for: item),
-                                isFocused: focusedItemID == item.id
+                                isFocused: focusedItemID == item.originKey
                             )
                         }
                         .buttonStyle(GridCardButtonStyle())
-                        .focused($focusedItemID, equals: item.id)
+                        .focused($focusedItemID, equals: item.originKey)
                         .onAppear { loadMoreIfNeeded(after: item) }
                     }
                 }
@@ -244,17 +257,17 @@ struct FilteredGridView: View {
             }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
                     startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: nil,
                     preferredMediaSourceID: nil,
                     playQueue: playQueue
@@ -299,6 +312,7 @@ struct FilteredGridView: View {
             didPaginate = false
             nextStartIndex = 0
             reachedEnd = false
+            mergedGrid.reset()
         }
         .task(id: reloadKey) {
             await loadItems()
@@ -369,7 +383,7 @@ struct FilteredGridView: View {
     }
 
     private func loadItems() async {
-        guard let userID = appState.activeUser?.id else { return }
+        guard let userID = sessionUserID else { return }
         loadGeneration += 1
         let generation = loadGeneration
 
@@ -386,36 +400,80 @@ struct FilteredGridView: View {
             smartProviderID: smartProviderID, cacheFilter: phase2CacheFilter, currentFilter: watchFilter
         )
 
-        // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
-        async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
-            try? await dependencies.jellyfinLibraryService.getItems(
-                userID: userID, query: effectiveQuery
-            )
-        }()
+        // A combined Home's genre or studio grid: every server, one sort order (Sodalite#85).
+        if isMerged, smartProviderID == nil, let sources {
+            let outcome = await mergedGrid.load(
+                sources: MergedPager.sources(from: sources, query: effectiveQuery),
+                sort: sort, pageSize: query.limit ?? 50, filter: browsable)
+            guard !Task.isCancelled, generation == loadGeneration else { return }
+            switch outcome {
+            case .kept:
+                break
+            case .failed:
+                loadFailed = items.isEmpty
+            case .replaced(let cacheable):
+                loadFailed = false
+                if items.map(\.originKey) != mergedGrid.items.map(\.originKey) { items = mergedGrid.items }
+                if cacheable, let scope = cacheScope, !isWatchFiltered, sort == .default {
+                    FilterCache.shared.setHomeFilterItems(mergedGrid.items, filterKey: scope.key, identity: scope.identity)
+                }
+            }
+            isLoading = false
+            return
+        }
 
-        async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
-            guard smartProviderID != nil, !reusePhase2 else { return [] }
-            // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
-            var allQuery = ItemQuery(
+        let phase1Response: JellyfinItemsResponse?
+        let allItems: [JellyfinItem]?
+        var combinedTmdbMap: [String: JellyfinItem]?
+        if isMerged, let sources, smartProviderID != nil {
+            // A combined Home's provider tile: both phases from every server (Sodalite#85).
+            var libraryQuery = ItemQuery(
                 includeItemTypes: [.movie, .series],
                 sortBy: "SortName",
                 sortOrder: "Ascending",
                 limit: 10000,
-                // Only tmdbID and the image tags are read off this scan. Same set as the identical
-                // query in HomeViewModel+Precompute; detailFields over a whole library was the
-                // single biggest request the app could issue (Sodalite#68).
                 fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
             )
-            if let filter = watchFilterValue {
-                allQuery.filters = [filter]
-            }
-            return try? await dependencies.jellyfinLibraryService.getItems(
-                userID: userID, query: allQuery
-            ).items
-        }()
+            if let filter = watchFilter.jellyfinFilter { libraryQuery.filters = [filter] }
+            let combined = await CombinedProviderMatch.fetch(
+                sources: sources, studioQuery: effectiveQuery,
+                libraryQuery: reusePhase2 ? nil : libraryQuery,
+                studioDeadline: .seconds(4), scanDeadline: .seconds(20))
+            phase1Response = combined.phase1
+            allItems = combined.allItems
+            combinedTmdbMap = combined.tmdbMap
+            combinedIncomplete = !combined.complete
+        } else {
+            // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
+            async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
+                try? await session.libraryService.getItems(
+                    userID: userID, query: effectiveQuery
+                )
+            }()
 
-        let phase1Response = await studioMatchTask
-        let allItems = await allLibraryTask
+            async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
+                guard smartProviderID != nil, !reusePhase2 else { return [] }
+                // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
+                var allQuery = ItemQuery(
+                    includeItemTypes: [.movie, .series],
+                    sortBy: "SortName",
+                    sortOrder: "Ascending",
+                    limit: 10000,
+                    // Only tmdbID and the image tags are read off this scan. Same set as the identical
+                    // query in HomeViewModel+Precompute; detailFields over a whole library was the
+                    // single biggest request the app could issue (Sodalite#68).
+                    fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
+                )
+                if let filter = watchFilterValue {
+                    allQuery.filters = [filter]
+                }
+                return try? await session.libraryService.getItems(
+                    userID: userID, query: allQuery
+                ).items
+            }()
+            phase1Response = await studioMatchTask
+            allItems = await allLibraryTask
+        }
 
         // Backed out (Menu/detail tap) or superseded: leave all state alone.
         guard !Task.isCancelled, generation == loadGeneration else { return }
@@ -431,10 +489,12 @@ struct FilteredGridView: View {
         studioItems = phase1
         totalRecordCount = phase1Response.totalRecordCount
 
-        var tmdbMap: [String: JellyfinItem] = [:]
-        for item in allItems ?? [] {
-            if let id = item.tmdbID {
-                tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
+        var tmdbMap: [String: JellyfinItem] = combinedTmdbMap ?? [:]
+        if combinedTmdbMap == nil {
+            for item in allItems ?? [] {
+                if let id = item.tmdbID {
+                    tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
+                }
             }
         }
 
@@ -447,8 +507,10 @@ struct FilteredGridView: View {
         // Always refresh (stale-while-revalidate): the fresh list replaces the cache so titles rotated off the service drop out. Except on a reappear (BROWSE-6): the studio query above still ran fresh (a watched toggle under Unwatched, say), but the augment reuses what the last full load resolved.
         if let providerID = smartProviderID, let region = smartProviderRegion {
             if reusePhase2 {
-                let merged = ProviderMatchMerging.merge(phase1: phase1, phase2: cachedPhase2Items)
-                if items.map(\.id) != merged.map(\.id) { items = merged }
+                let merged = isMerged
+                    ? CombinedProviderMatch.mergePhases(phase1: phase1, phase2: cachedPhase2Items)
+                    : ProviderMatchMerging.merge(phase1: phase1, phase2: cachedPhase2Items)
+                if items.map(\.originKey) != merged.map(\.originKey) { items = merged }
                 isLoading = false
                 return
             }
@@ -467,7 +529,7 @@ struct FilteredGridView: View {
         } else {
             // No smart filter (broadcast nets, genre/studio tiles): phase 1 is final. Skip the assignment on an unchanged id list (a wholesale replace re-diffs every cell, a reload flash), and keep appended pages when the user paginated (didPaginate; the old prefix heuristic broke on a page-1 server reorder).
             let pagedPastPhase1 = didPaginate && !items.isEmpty
-            if !pagedPastPhase1, items.map(\.id) != phase1.map(\.id) {
+            if !pagedPastPhase1, items.map(\.originKey) != phase1.map(\.originKey) {
                 items = phase1
             }
             isLoading = false
@@ -485,6 +547,7 @@ struct FilteredGridView: View {
 
     /// More pages exist server-side. Only the plain path paginates: smart-provider grids are merged from the full library map and complete by construction.
     private var canLoadMore: Bool {
+        if isMerged, smartProviderID == nil { return mergedGrid.hasMore }
         guard smartProviderID == nil, query.limit != nil else { return false }
         guard !reachedEnd, let total = totalRecordCount else { return false }
         return items.count < total
@@ -493,7 +556,7 @@ struct FilteredGridView: View {
     private func loadMoreIfNeeded(after item: JellyfinItem) {
         guard canLoadMore, !isLoadingMore, !isLoading else { return }
         // Trigger within the last two rows so the next page lands before focus reaches the edge.
-        guard let index = items.firstIndex(where: { $0.id == item.id }),
+        guard let index = items.firstIndex(where: { $0.originKey == item.originKey }),
               index >= items.count - 12 else { return }
         isLoadingMore = true
         Task { await loadMore() }
@@ -501,7 +564,15 @@ struct FilteredGridView: View {
 
     private func loadMore() async {
         defer { isLoadingMore = false }
-        guard let userID = appState.activeUser?.id else { return }
+        if isMerged, smartProviderID == nil {
+            let generation = loadGeneration
+            guard await mergedGrid.loadMore(filter: browsable),
+                  !Task.isCancelled, generation == loadGeneration else { return }
+            items = mergedGrid.items
+            didPaginate = true
+            return
+        }
+        guard let userID = sessionUserID else { return }
         let generation = loadGeneration
 
         var pageQuery = sort.applied(to: query)
@@ -513,15 +584,15 @@ struct FilteredGridView: View {
         if nextStartIndex == 0 { nextStartIndex = items.count }
         pageQuery.startIndex = nextStartIndex
 
-        guard let response = try? await dependencies.jellyfinLibraryService.getItems(
+        guard let response = try? await session.libraryService.getItems(
             userID: userID, query: pageQuery
         ) else { return }
         guard !Task.isCancelled, generation == loadGeneration else { return }
 
         totalRecordCount = response.totalRecordCount
         nextStartIndex += response.items.count
-        let known = Set(items.map(\.id))
-        items += browsable(response.items).filter { !known.contains($0.id) }
+        let known = Set(items.map(\.originKey))
+        items += browsable(response.items).filter { !known.contains($0.originKey) }
         didPaginate = true
         // A short/empty page means the server has no more rows; stop even if dedup left items.count
         // below totalRecordCount, so canLoadMore can't loop on the same overlapping window.
@@ -555,8 +626,15 @@ struct FilteredGridView: View {
         let phase2Items = providerTmdbIDs.compactMap { tmdbMap[$0] }
         cachedPhase2Items = phase2Items
         phase2CacheFilter = watchFilter
-        let merged = ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
-        if items.map(\.id) != merged.map(\.id) {
+        let merged = isMerged
+            ? CombinedProviderMatch.mergePhases(phase1: studioItems, phase2: phase2Items)
+            : ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
+        // A secondary dropped out this round: what the precompute cached from all servers stays.
+        if combinedIncomplete, !items.isEmpty {
+            isLoading = false
+            return
+        }
+        if items.map(\.originKey) != merged.map(\.originKey) {
             items = merged
         }
         isLoading = false

@@ -63991,6 +63991,330 @@
         }
       }
     },
+    "changelog.1_1_0.combinedServers.body" : {
+      "comment" : "What's New 1.1.0 highlight body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapni Kombinovat servery v Nastavení > Servery a domovská obrazovka spojí všechny servery, ke kterým jsi přihlášen: jedno Pokračovat ve sledování, jedno Moje média, stejný film jen jednou. Karta Živé TV se objeví, když má tuner kterýkoli ze serverů, a přepínač vybere, čí program vidíš."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå Kombiner servere til under Indstillinger > Servere, så samler startsiden alle servere, du er logget ind på: én Fortsæt med at se, ét Mine medier, den samme film kun én gang. Fanen Live TV vises, når en af serverne har en tuner, og en vælger bestemmer, hvis programoversigt du ser."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit \"Server kombinieren\" unter Einstellungen > Server führt Home alle Server zusammen, bei denen du angemeldet bist: Weiterschauen und Meine Medien gibt es nur noch einmal, und derselbe Film erscheint nur einmal. Der Live-TV-Tab erscheint, sobald einer der Server einen Tuner hat, und ein Umschalter wählt, wessen Programm du siehst."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ενεργοποίησε τον Συνδυασμό διακομιστών στις Ρυθμίσεις > Διακομιστές και η αρχική ενώνει όλους τους διακομιστές όπου έχεις συνδεθεί: μία Συνέχιση παρακολούθησης, ένα Τα πολυμέσα μου, η ίδια ταινία μόνο μία φορά. Η καρτέλα Live TV εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει δέκτη, και ένας επιλογέας διαλέγει ποιου τον οδηγό βλέπεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on Combine servers in Settings > Servers and Home merges every server you are signed in to: one Continue Watching, one My Media, the same film only once. The Live TV tab appears when any of the servers has a tuner, and a switcher picks whose guide you see."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa Combinar servidores en Ajustes > Servidores e Inicio une todos los servidores en los que has iniciado sesión: un solo Seguir viendo, un solo Mi contenido, la misma película solo una vez. La pestaña TV en directo aparece cuando cualquiera de los servidores tiene un sintonizador, y un selector elige de cuál ves la guía."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ota Yhdistä palvelimet käyttöön kohdassa Asetukset > Palvelimet, niin koti yhdistää kaikki palvelimet, joille olet kirjautunut: yksi Jatka katselua, yksi Oma media, sama elokuva vain kerran. Suora TV -välilehti näkyy, kun millä tahansa palvelimella on viritin, ja valitsin määrää, kenen ohjelmaopasta katsot."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active Combiner les serveurs dans Réglages > Serveurs et l'Accueil réunit tous les serveurs auxquels tu es connecté : un seul Continuer à regarder, une seule Ma médiathèque, le même film une seule fois. L'onglet TV en direct apparaît dès qu'un des serveurs a un tuner, et un sélecteur choisit le guide affiché."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uključi Kombiniraj poslužitelje u Postavke > Poslužitelji i početni zaslon spaja sve poslužitelje na koje si prijavljen: jedno Nastavi gledanje, jedni Moji mediji, isti film samo jednom. Kartica TV uživo pojavljuje se čim bilo koji poslužitelj ima tuner, a prekidač bira čiji vodič gledaš."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapcsold be a Szerverek egyesítését a Beállítások > Szerverek alatt, és a kezdőlap egyesíti az összes szervert, ahová be vagy jelentkezve: egy Folytatás, egy Saját média, ugyanaz a film csak egyszer. Az Élő TV lap megjelenik, ha bármelyik szerveren van tuner, és egy választóval eldöntheted, melyik műsorújságát látod."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attiva Combina server in Impostazioni > Server e la Home unisce tutti i server a cui hai effettuato l'accesso: un solo Continua a guardare, un solo I miei contenuti, lo stesso film una sola volta. La scheda TV in diretta compare quando uno qualsiasi dei server ha un sintonizzatore, e un selettore sceglie di quale vedi la guida."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定 > サーバーで「サーバーを統合」をオンにすると、サインインしているすべてのサーバーがホームにまとまります。視聴を続けるもマイメディアもひとつ、同じ映画は一度だけ。いずれかのサーバーにチューナーがあればライブTVタブが表示され、切り替えでどの番組表を見るか選べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 > 서버에서 서버 통합을 켜면 로그인한 모든 서버가 홈에 합쳐집니다. 계속 시청도 내 미디어도 하나, 같은 영화는 한 번만. 서버 중 하나라도 튜너가 있으면 라이브 TV 탭이 나타나고, 전환기로 어느 서버의 편성표를 볼지 고릅니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå på Kombiner servere under Innstillinger > Servere, så samler startsiden alle servere du er logget på: én Fortsett å se, ett Mine medier, den samme filmen bare én gang. Fanen Direkte-TV vises når en av serverne har en tuner, og en velger bestemmer hvilken programguide du ser."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet Servers combineren aan in Instellingen > Servers en de startpagina voegt alle servers samen waarop je bent ingelogd: één Verder kijken, één Mijn media, dezelfde film maar één keer. Het tabblad Live tv verschijnt zodra een van de servers een tuner heeft, en een schakelaar kiest wiens gids je ziet."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Włącz Połącz serwery w Ustawienia > Serwery, a ekran główny połączy wszystkie serwery, na których jesteś zalogowany: jedno Kontynuuj oglądanie, jedne Moje multimedia, ten sam film tylko raz. Karta Telewizja na żywo pojawia się, gdy którykolwiek serwer ma tuner, a przełącznik wybiera, czyj program oglądasz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ative Combinar servidores em Ajustes > Servidores e o Início junta todos os servidores em que você entrou: um só Continuar assistindo, um só Minha mídia, o mesmo filme só uma vez. A aba TV ao vivo aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual você vê o guia."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativa Combinar servidores em Definições > Servidores e o Início junta todos os servidores em que tens sessão iniciada: um só Continuar a ver, uma só A minha biblioteca, o mesmo filme só uma vez. O separador TV em direto aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual vês o guia."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activează Combină serverele în Setări > Servere și ecranul principal reunește toate serverele la care ești conectat: un singur Continuă vizionarea, un singur Media mea, același film o singură dată. Fila TV live apare când oricare dintre servere are un tuner, iar un comutator alege al cui ghid vezi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включите «Объединить серверы» в Настройки > Серверы, и главная соберёт все серверы, на которых выполнен вход: одно «Продолжить просмотр», одна «Моя медиатека», один и тот же фильм только один раз. Вкладка «ТВ» появляется, если тюнер есть хотя бы на одном сервере, а переключатель выбирает, чью телепрограмму вы видите."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapni Kombinovať servery v Nastavenia > Servery a domovská obrazovka spojí všetky servery, ku ktorým si prihlásený: jedno Pokračovať v sledovaní, jedno Moje médiá, rovnaký film len raz. Karta Živá TV sa zobrazí, keď má tuner ktorýkoľvek zo serverov, a prepínač vyberie, čí program vidíš."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå på Kombinera servrar under Inställningar > Servrar så samlar startsidan alla servrar du är inloggad på: en Fortsätt titta, ett Mina media, samma film bara en gång. Fliken Live-tv visas när någon av servrarna har en tuner, och en väljare avgör vems tv-guide du ser."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar > Sunucular'da Sunucuları birleştir'i aç, ana sayfa oturum açtığın tüm sunucuları birleştirsin: tek bir İzlemeye Devam Et, tek bir Medyam, aynı film yalnızca bir kez. Sunuculardan herhangi birinde tuner varsa Canlı TV sekmesi görünür ve bir seçici hangisinin rehberini göreceğini belirler."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкніть «Об'єднати сервери» в Налаштування > Сервери, і головна збере всі сервери, на яких виконано вхід: одне «Продовжити перегляд», одна «Моя медіатека», той самий фільм лише один раз. Вкладка «ТБ» з’являється, якщо тюнер є хоча б на одному сервері, а перемикач обирає, чию телепрограму ви бачите."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在设置 > 服务器中打开“合并服务器”，主页会汇集你登录的所有服务器：一个继续观看，一个我的媒体，同一部电影只出现一次。只要任一服务器有调谐器，直播电视标签就会出现，切换器决定你看哪台服务器的节目指南。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在設定 > 伺服器中開啟「合併伺服器」，首頁會匯集你登入的所有伺服器：一個繼續觀看，一個我的媒體，同一部電影只出現一次。只要任一伺服器有調諧器，直播電視分頁就會出現，切換器決定你看哪台伺服器的節目表。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.combinedServers.title" : {
+      "comment" : "What's New 1.1.0 highlight title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedna domovská obrazovka pro všechny tvé servery"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én startside til alle dine servere"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Home für alle deine Server"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μία αρχική για όλους τους διακομιστές σου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One Home for all your servers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un solo Inicio para todos tus servidores"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yksi koti kaikille palvelimillesi"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un seul Accueil pour tous tes serveurs"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedan početni zaslon za sve tvoje poslužitelje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy kezdőlap az összes szerveredhez"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sola Home per tutti i tuoi server"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのサーバーをひとつのホームに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 서버를 하나의 홈에"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én startside for alle serverne dine"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén startpagina voor al je servers"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden ekran główny dla wszystkich twoich serwerów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um só Início para todos os seus servidores"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um só Início para todos os teus servidores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un singur ecran principal pentru toate serverele tale"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна главная для всех ваших серверов"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedna domovská obrazovka pre všetky tvoje servery"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En startsida för alla dina servrar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm sunucuların için tek bir ana sayfa"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна головна для всіх ваших серверів"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一个主页，汇集你的所有服务器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一個首頁，匯集你的所有伺服器"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.durations.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -64311,6 +64635,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "統一的時間顯示"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.libraryOrder.body" : {
+      "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V Přizpůsobit domov teď seřadíš a skryješ knihovny v Moje média, i napříč všemi kombinovanými servery. Skrytá knihovna zmizí i ze svého řádku Nové."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Tilpas hjem kan du nu ordne og skjule bibliotekerne i Mine medier, også på tværs af alle kombinerede servere. Et skjult bibliotek forsvinder også fra sin Nyeste-række."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Startseite anpassen ordnest du jetzt die Bibliotheken in Meine Medien und blendest sie aus, auch über alle kombinierten Server hinweg. Eine ausgeblendete Bibliothek verschwindet auch aus ihrer Neu-in-Reihe."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Προσαρμογή αρχικής ταξινομείς και κρύβεις πλέον τις βιβλιοθήκες στα Τα πολυμέσα μου, και σε όλους τους συνδυασμένους διακομιστές. Μια κρυμμένη βιβλιοθήκη φεύγει και από τη σειρά Πρόσφατα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize Home now orders and hides the libraries in My Media, across every combined server too. A hidden library also leaves its Latest row."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Personalizar inicio ahora ordenas y ocultas las bibliotecas de Mi contenido, también en todos los servidores combinados. Una biblioteca oculta también sale de su fila de Novedades."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mukauta aloitusnäyttö -kohdassa järjestät ja piilotat nyt Oma media -kirjastot, myös kaikkien yhdistettyjen palvelimien yli. Piilotettu kirjasto poistuu myös Uusimmat-riviltään."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnaliser l'accueil permet maintenant d'ordonner et de masquer les bibliothèques de Ma médiathèque, y compris sur tous les serveurs combinés. Une bibliothèque masquée quitte aussi sa rangée Nouveautés."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U Prilagodi početnu sada slažeš i skrivaš knjižnice u Moji mediji, i preko svih kombiniranih poslužitelja. Skrivena knjižnica nestaje i iz svog retka Najnovije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Kezdőképernyő testreszabása alatt most rendezheted és elrejtheted a Saját média könyvtárait, az összes egyesített szerveren is. Egy elrejtett könyvtár a Legújabb sorából is eltűnik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Personalizza home ora ordini e nascondi le librerie di I miei contenuti, anche su tutti i server combinati. Una libreria nascosta esce anche dalla sua riga Novità."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームをカスタマイズで、マイメディアのライブラリを並べ替えたり非表示にしたりできるようになりました。統合したすべてのサーバーにまたがって使えます。非表示にしたライブラリは新着の行からも消えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 사용자 지정에서 이제 내 미디어의 라이브러리를 정렬하고 숨길 수 있으며, 통합된 모든 서버에도 적용됩니다. 숨긴 라이브러리는 최신 항목 줄에서도 사라집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Tilpass hjem kan du nå ordne og skjule bibliotekene i Mine medier, også på tvers av alle kombinerte servere. Et skjult bibliotek forsvinner også fra Nyeste-raden sin."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Home aanpassen orden en verberg je nu de bibliotheken in Mijn media, ook over alle gecombineerde servers heen. Een verborgen bibliotheek verdwijnt ook uit zijn rij Nieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W Dostosuj stronę główną możesz teraz porządkować i ukrywać biblioteki w Moje multimedia, także na wszystkich połączonych serwerach. Ukryta biblioteka znika też ze swojego wiersza Najnowsze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em Personalizar início agora você ordena e oculta as bibliotecas de Minha mídia, também em todos os servidores combinados. Uma biblioteca oculta também sai da sua fileira de Novidades."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em Personalizar início podes agora ordenar e ocultar as bibliotecas de A minha biblioteca, também em todos os servidores combinados. Uma biblioteca oculta também sai da sua fila de Novidades."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În Personalizează ecranul principal poți acum ordona și ascunde bibliotecile din Media mea, inclusiv pe toate serverele combinate. O bibliotecă ascunsă dispare și din rândul ei de Noutăți."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Настроить главную» теперь можно упорядочивать и скрывать библиотеки в «Моя медиатека», в том числе на всех объединённых серверах. Скрытая библиотека исчезает и из своего ряда «Новое»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V Prispôsobiť domov teraz zoradíš a skryješ knižnice v Moje médiá, aj naprieč všetkými kombinovanými servermi. Skrytá knižnica zmizne aj zo svojho riadka Nové."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Anpassa hem ordnar och döljer du nu biblioteken i Mina media, även över alla kombinerade servrar. Ett dolt bibliotek försvinner också från sin Senaste-rad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana Ekranı Özelleştir'de artık Medyam'daki kitaplıkları sıralayıp gizleyebilirsin, birleştirilen tüm sunucularda da. Gizlenen bir kitaplık kendi Yeni satırından da çıkar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У «Налаштувати головну» тепер можна впорядковувати й приховувати бібліотеки в «Моя медіатека», зокрема на всіх об’єднаних серверах. Прихована бібліотека зникає і зі свого ряду «Нове»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "现在可以在自定义首页中排列和隐藏我的媒体里的媒体库，合并的所有服务器也适用。隐藏的媒体库也会从其最新行中消失。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在可以在自訂主畫面中排列和隱藏我的媒體裡的媒體庫，合併的所有伺服器也適用。隱藏的媒體庫也會從其最新列中消失。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.libraryOrder.title" : {
+      "comment" : "What's New 1.1.0: title for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uspořádej Moje média"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arranger Mine medier"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Medien anordnen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τακτοποίησε τα Τα πολυμέσα μου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrange My Media"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiza Mi contenido"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Järjestä Oma media"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiser Ma médiathèque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posloži Moji mediji"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Saját média elrendezése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riordina I miei contenuti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイメディアを並べ替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 미디어 정리"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordne Mine medier"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijn media ordenen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uporządkuj Moje multimedia"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organize Minha mídia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiza A minha biblioteca"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aranjează Media mea"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Упорядочьте «Моя медиатека»"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usporiadaj Moje médiá"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordna Mina media"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medyam'ı düzenle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Упорядкуйте «Моя медіатека»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理我的媒体"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理我的媒體"
           }
         }
       }
@@ -92302,6 +92950,168 @@
         }
       }
     },
+    "home.customize.libraries.description" : {
+      "comment" : "Home Customize: caption under the My Media section that orders and hides libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořadí a viditelnost dlaždic v Moje média. Skrytá knihovna zmizí i z řádku Nové."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rækkefølge og synlighed for felterne i Mine medier. Et skjult bibliotek forsvinder også fra sin Nyeste-række."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reihenfolge und Sichtbarkeit der Kacheln in Meine Medien. Eine ausgeblendete Bibliothek verschwindet auch aus ihrer Neu-in-Reihe."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά και ορατότητα των πλακιδίων στα Τα πολυμέσα μου. Μια κρυμμένη βιβλιοθήκη φεύγει και από τη σειρά Πρόσφατα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Order and visibility of the tiles in My Media. A hidden library also leaves its Latest row."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden y visibilidad de los mosaicos de Mi contenido. Una biblioteca oculta también sale de su fila de Novedades."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma media -ruutujen järjestys ja näkyvyys. Piilotettu kirjasto poistuu myös Uusimmat-riviltään."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre et visibilité des vignettes de Ma médiathèque. Une bibliothèque masquée quitte aussi sa rangée Nouveautés."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redoslijed i vidljivost pločica u Moji mediji. Skrivena knjižnica nestaje i iz svog retka Najnovije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Saját média csempéinek sorrendje és láthatósága. Egy elrejtett könyvtár a Legújabb sorából is eltűnik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordine e visibilità dei riquadri in I miei contenuti. Una libreria nascosta esce anche dalla sua riga Novità."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイメディアのタイルの順序と表示。非表示にしたライブラリは新着の行からも消えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 미디어 타일의 순서와 표시 여부입니다. 숨긴 라이브러리는 최신 항목 줄에서도 사라집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekkefølge og synlighet for flisene i Mine medier. Et skjult bibliotek forsvinner også fra Nyeste-raden sin."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgorde en zichtbaarheid van de tegels in Mijn media. Een verborgen bibliotheek verdwijnt ook uit zijn rij Nieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolejność i widoczność kafelków w Moje multimedia. Ukryta biblioteka znika też ze swojego wiersza Najnowsze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem e visibilidade dos blocos em Minha mídia. Uma biblioteca oculta também sai da sua fileira de Novidades."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem e visibilidade dos mosaicos em A minha biblioteca. Uma biblioteca oculta também sai da sua fila de Novidades."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinea și vizibilitatea plăcilor din Media mea. O bibliotecă ascunsă dispare și din rândul ei de Noutăți."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок и видимость плиток в «Моя медиатека». Скрытая библиотека исчезает и из своего ряда «Новое»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poradie a viditeľnosť dlaždíc v Moje médiá. Skrytá knižnica zmizne aj zo svojho riadka Nové."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordning och synlighet för rutorna i Mina media. Ett dolt bibliotek försvinner också från sin Senaste-rad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medyam'daki kutucukların sırası ve görünürlüğü. Gizlenen bir kitaplık kendi Yeni satırından da çıkar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок і видимість плиток у «Моя медіатека». Прихована бібліотека зникає і зі свого ряду «Нове»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的媒体中磁贴的顺序和显示。隐藏的媒体库也会从其最新行中消失。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的媒體中磚塊的順序與顯示。隱藏的媒體庫也會從其最新列中消失。"
+          }
+        }
+      }
+    },
     "home.customize.mergeCwNextUp" : {
       "comment" : "Customize Homepage toggle that folds the Next Up row into Continue Watching",
       "extractionState" : "manual",
@@ -95860,6 +96670,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重試"
+          }
+        }
+      }
+    },
+    "home.serverUnreachable.format" : {
+      "comment" : "Quiet note above a combined Home; %@ is one or more server names",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ teď není dostupný"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kan ikke nås lige nu"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist gerade nicht erreichbar"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το %@ δεν είναι προσβάσιμο αυτή τη στιγμή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is not reachable right now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está disponible en este momento"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ei ole juuri nyt tavoitettavissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est injoignable pour le moment"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ trenutačno nije dostupan"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jelenleg nem érhető el"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non è raggiungibile al momento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ に現在接続できません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에 지금 연결할 수 없습니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kan ikke nås akkurat nå"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is momenteel niet bereikbaar"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jest teraz niedostępny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não está acessível no momento"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não está acessível neste momento"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nu poate fi accesat acum"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ сейчас недоступен"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ teraz nie je dostupný"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ går inte att nå just nu"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ şu anda erişilemiyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ зараз недоступний"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 当前无法连接"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 目前無法連線"
           }
         }
       }
@@ -164040,6 +165012,978 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iCloud 同步"
+          }
+        }
+      }
+    },
+    "settings.combineServers.footer" : {
+      "comment" : "Footer under the Combine servers list",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapojí se až pět serverů, naposledy použité jako první. Požadavky, živé vysílání a Top Shelf zůstávají u aktivního serveru."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op til fem servere er med, de senest brugte først. Anmodninger, Live TV og Top Shelf bliver hos den aktive server."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis zu fünf Server machen mit, die zuletzt benutzten zuerst. Anfragen, Live TV und Top Shelf bleiben beim aktiven Server."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συμμετέχουν έως πέντε διακομιστές, πρώτα οι πιο πρόσφατα χρησιμοποιημένοι. Τα αιτήματα, η ζωντανή TV και το Top Shelf μένουν στον ενεργό διακομιστή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to five servers take part, the most recently used first. Requests, Live TV and Top Shelf stay with the active server."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participan hasta cinco servidores, primero los usados más recientemente. Las solicitudes, la TV en directo y Top Shelf se quedan en el servidor activo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mukana on enintään viisi palvelinta, viimeksi käytetyt ensin. Pyynnöt, suora TV ja Top Shelf pysyvät aktiivisella palvelimella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jusqu'à cinq serveurs participent, les plus récemment utilisés en premier. Les demandes, la TV en direct et Top Shelf restent sur le serveur actif."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sudjeluje do pet poslužitelja, najprije nedavno korišteni. Zahtjevi, TV uživo i Top Shelf ostaju na aktivnom poslužitelju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legfeljebb öt szerver vesz részt, a legutóbb használtak elöl. A kérések, az élő TV és a Top Shelf az aktív szervernél maradnak."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partecipano fino a cinque server, prima quelli usati più di recente. Richieste, TV in diretta e Top Shelf restano sul server attivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大5台のサーバーが参加し、最近使ったものが優先されます。リクエスト、ライブTV、Top Shelf はアクティブなサーバーのままです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최대 5개의 서버가 참여하며 최근에 사용한 서버가 먼저입니다. 요청, 라이브 TV, Top Shelf는 활성 서버에 남습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opptil fem servere er med, de sist brukte først. Forespørsler, direkte-TV og Top Shelf blir værende på den aktive serveren."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er doen maximaal vijf servers mee, de laatst gebruikte eerst. Verzoeken, live-tv en Top Shelf blijven bij de actieve server."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uczestniczy do pięciu serwerów, najpierw ostatnio używane. Prośby, telewizja na żywo i Top Shelf pozostają przy aktywnym serwerze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Até cinco servidores participam, primeiro os usados mais recentemente. Pedidos, TV ao vivo e Top Shelf ficam no servidor ativo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participam até cinco servidores, primeiro os usados mais recentemente. Pedidos, TV em direto e Top Shelf ficam no servidor ativo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participă până la cinci servere, mai întâi cele folosite recent. Cererile, TV live și Top Shelf rămân pe serverul activ."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Участвуют до пяти серверов, сначала недавно использованные. Запросы, прямой эфир и Top Shelf остаются на активном сервере."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapojí sa až päť serverov, naposledy použité ako prvé. Požiadavky, živé vysielanie a Top Shelf zostávajú na aktívnom serveri."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upp till fem servrar är med, de senast använda först. Förfrågningar, live-tv och Top Shelf stannar på den aktiva servern."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En fazla beş sunucu katılır, en son kullanılanlar önce gelir. İstekler, canlı TV ve Top Shelf etkin sunucuda kalır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Беруть участь до п'яти серверів, спершу нещодавно використані. Запити, пряме ТБ і Top Shelf залишаються на активному сервері."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多五台服务器参与，最近使用的优先。请求、直播电视和 Top Shelf 仍属于当前服务器。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多五台伺服器參與，最近使用的優先。請求、直播電視和 Top Shelf 仍屬於目前的伺服器。"
+          }
+        }
+      }
+    },
+    "settings.combineServers.section" : {
+      "comment" : "Settings > Servers section header for the combined Home",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinovaná domovská obrazovka"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombineret startside"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombiniertes Home"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συνδυασμένη αρχική"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combined Home"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio combinado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yhdistetty koti"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accueil combiné"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinirani početni zaslon"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egyesített kezdőlap"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home combinata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統合ホーム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "통합 홈"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinert startside"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gecombineerde startpagina"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połączony ekran główny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início combinado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início combinado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ecran principal combinat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединённая главная"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinovaná domovská obrazovka"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinerad startsida"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birleşik ana sayfa"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об'єднана головна"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合并主页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合併首頁"
+          }
+        }
+      }
+    },
+    "settings.combineServers.server.as" : {
+      "comment" : "Under a server in the Combine servers list; %@ is the profile name that contributes from that server",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jako %@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ως %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käyttäjänä %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En tant que %@"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kao %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ として"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(으)로"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jako %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como %@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ca %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как %@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ako %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ olarak"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Як %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以 %@ 身份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以 %@ 身分"
+          }
+        }
+      }
+    },
+    "settings.combineServers.server.noSession" : {
+      "comment" : "Under a server in the Combine servers list that has no usable session on this device",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na tomto zařízení nepřihlášen"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke logget ind på denne enhed"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf diesem Gerät nicht angemeldet"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν έχει γίνει σύνδεση σε αυτή τη συσκευή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not signed in on this device"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin sesión en este dispositivo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ei kirjautunut tällä laitteella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non connecté sur cet appareil"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nisi prijavljen na ovom uređaju"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nincs bejelentkezve ezen az eszközön"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesso non effettuato su questo dispositivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデバイスではサインインしていません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기에서 로그인하지 않음"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke logget på denne enheten"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet ingelogd op dit apparaat"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brak logowania na tym urządzeniu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem login neste dispositivo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem sessão iniciada neste dispositivo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neconectat pe acest dispozitiv"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вход на этом устройстве не выполнен"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na tomto zariadení neprihlásený"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inte inloggad på den här enheten"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihazda oturum açılmadı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На цьому пристрої вхід не виконано"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未在此设备上登录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未在此裝置上登入"
+          }
+        }
+      }
+    },
+    "settings.combineServers.subtitle" : {
+      "comment" : "Subtitle of the Combine servers toggle",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedna domovská obrazovka ze všech serverů, ke kterým jsi přihlášen"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én startside på tværs af alle servere, du er logget ind på"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Home über alle Server, bei denen du angemeldet bist"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μία αρχική από όλους τους διακομιστές όπου έχεις συνδεθεί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One Home across every server you are signed in to"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un solo Inicio con todos los servidores en los que has iniciado sesión"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yksi koti kaikista palvelimista, joille olet kirjautunut"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un seul Accueil pour tous les serveurs auxquels tu es connecté"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedan početni zaslon za sve poslužitelje na koje si prijavljen"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy kezdőlap minden szerverről, ahová be vagy jelentkezve"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sola Home per tutti i server a cui hai effettuato l'accesso"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サインインしているすべてのサーバーをひとつのホームに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인한 모든 서버를 하나의 홈으로"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Én startside på tvers av alle servere du er logget på"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eén startpagina voor alle servers waarop je bent ingelogd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden ekran główny ze wszystkich serwerów, na których jesteś zalogowany"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um só Início com todos os servidores em que você entrou"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um só Início com todos os servidores em que tens sessão iniciada"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un singur ecran principal pentru toate serverele la care ești conectat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна главная для всех серверов, на которых выполнен вход"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedna domovská obrazovka zo všetkých serverov, ku ktorým si prihlásený"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En startsida för alla servrar du är inloggad på"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum açtığın tüm sunucular için tek bir ana sayfa"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна головна для всіх серверів, на яких виконано вхід"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将你登录的所有服务器合并为一个主页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將你登入的所有伺服器合併為一個首頁"
+          }
+        }
+      }
+    },
+    "settings.combineServers.title" : {
+      "comment" : "Settings toggle that merges Home across every signed-in Jellyfin server",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinovat servery"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombiner servere"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server kombinieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συνδυασμός διακομιστών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combine servers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinar servidores"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yhdistä palvelimet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combiner les serveurs"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombiniraj poslužitelje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szerverek egyesítése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combina server"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーを統合"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 통합"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombiner servere"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servers combineren"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połącz serwery"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinar servidores"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinar servidores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combină serverele"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединить серверы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinovať servery"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kombinera servrar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucuları birleştir"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об'єднати сервери"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合并服务器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合併伺服器"
           }
         }
       }

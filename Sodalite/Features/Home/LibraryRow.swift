@@ -4,6 +4,8 @@ import SwiftUI
 struct LibraryRow: View {
     let titleKey: LocalizedStringKey
     let libraries: [JellyfinLibrary]
+    /// A suffix for the tile name, the server's when two servers share a library name (Sodalite#85).
+    var label: (JellyfinLibrary) -> String? = { _ in nil }
     let onSelect: (JellyfinLibrary) -> Void
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -24,8 +26,8 @@ struct LibraryRow: View {
                 vertical: metrics.rowVerticalPadding
             ) {
                 LazyHStack(spacing: metrics.itemSpacing) {
-                    ForEach(libraries) { library in
-                        LibraryTile(library: library) {
+                    ForEach(libraries, id: \.originKey) { library in
+                        LibraryTile(library: library, label: label(library)) {
                             onSelect(library)
                         }
                     }
@@ -38,7 +40,10 @@ struct LibraryRow: View {
 
 private struct LibraryTile: View {
     let library: JellyfinLibrary
+    let label: String?
     let action: () -> Void
+
+    private var name: String { [library.name, label].compactMap { $0 }.joined(separator: " · ") }
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -58,7 +63,7 @@ private struct LibraryTile: View {
 
     var body: some View {
         ArtworkTile(
-            title: drawsNameOverArtwork ? library.name : nil,
+            title: drawsNameOverArtwork ? name : nil,
             artworkURL: dependencies.jellyfinImageService.libraryArtworkURL(for: library),
             size: size,
             action: action
@@ -77,11 +82,11 @@ private struct LibraryTile: View {
                 // Only when the tile above is unlabelled, else ArtworkTile draws a second copy of
                 // the name right on top of this one.
                 if !drawsNameOverArtwork {
-                    ArtworkTileLabel(title: library.name)
+                    ArtworkTileLabel(title: name)
                 }
             }
         }
-        .accessibilityLabel(library.name)
+        .accessibilityLabel(name)
     }
 
     private func symbol(for type: LibraryType) -> String {

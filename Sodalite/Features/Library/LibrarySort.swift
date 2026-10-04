@@ -184,3 +184,36 @@ enum LibrarySortStore {
         }
     }
 }
+
+extension LibrarySort {
+    /// The client-side order a merged grid needs, matching what the server returns for this sort:
+    /// the key in the chosen direction, a missing value as the smallest, SortName as the
+    /// tiebreaker. nil only for two items the order cannot tell apart.
+    func orders(_ lhs: JellyfinItem, before rhs: JellyfinItem) -> Bool? {
+        func compare<T: Comparable>(_ l: T?, _ r: T?) -> Bool? {
+            switch (l, r) {
+            case let (l?, r?): l == r ? nil : (descending ? l > r : l < r)
+            // A missing value is the smallest, as SQLite (under Jellyfin) sorts NULL: first when
+            // ascending, last when descending. Each server's stream arrives in that order, and a
+            // merge that disagrees with it drains one server before the other.
+            case (.some, .none): descending
+            case (.none, .some): !descending
+            case (.none, .none): nil
+            }
+        }
+        let primary: Bool?
+        switch key {
+        case .title: primary = nil
+        case .releaseDate: primary = compare(lhs.premiereDate, rhs.premiereDate)
+        case .dateAdded: primary = compare(lhs.dateCreated, rhs.dateCreated)
+        case .rating: primary = compare(lhs.communityRating, rhs.communityRating)
+        case .runtime: primary = compare(lhs.runTimeTicks, rhs.runTimeTicks)
+        }
+        if let primary { return primary }
+        let byName = (lhs.sortName ?? lhs.name).localizedStandardCompare(rhs.sortName ?? rhs.name)
+        guard byName != .orderedSame else { return nil }
+        // Title sorts honour the direction; for the other keys SortName is a tiebreaker and runs in
+        // the same direction, as the server's single SortOrder does.
+        return descending ? byName == .orderedDescending : byName == .orderedAscending
+    }
+}

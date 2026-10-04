@@ -12,6 +12,9 @@ struct ServerManagementView: View {
     @State private var pendingRemoval: JellyfinServer?
     /// Non-nil while the switch-failed alert is up: the reason, already run through ErrorText.
     @State private var switchFailure: String?
+    /// Combine servers for the active profile, and a tick that redraws the per-server rows (Sodalite#85).
+    @State private var combining = false
+    @State private var combineTick = 0
     #if os(iOS)
     @State private var editingURLsFor: JellyfinServer?
     #endif
@@ -47,6 +50,10 @@ struct ServerManagementView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
+
+                if servers.count > 1 {
+                    combineSection
+                }
 
                 AddServerSettingsRow(onTap: { showAddServerFlow = true })
                     .padding(.top, 16)
@@ -117,7 +124,86 @@ struct ServerManagementView: View {
         }
     }
 
+    @ViewBuilder
+    private var combineSection: some View {
+        Text("settings.combineServers.section", bundle: .main)
+            .font(.title3)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .padding(.top, 24)
+            .padding(.bottom, 4)
+
+        ValuePickerRow(
+            icon: "square.stack.3d.up",
+            title: "settings.combineServers.title",
+            subtitle: "settings.combineServers.subtitle",
+            options: [false, true],
+            selection: Binding(
+                get: { combining },
+                set: { newValue in
+                    dependencies.setCombiningServers(newValue)
+                    combining = newValue
+                }
+            ),
+            label: onOffLabel
+        )
+
+        if combining {
+            ForEach(servers.filter { $0.id != activeID }) { server in
+                combinedServerRow(server)
+            }
+            .id(combineTick)
+            Text("settings.combineServers.footer", bundle: .main)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+        }
+    }
+
+    @ViewBuilder
+    private func combinedServerRow(_ server: JellyfinServer) -> some View {
+        switch dependencies.combinedServerStatus(server) {
+        case .contributes(let name), .excluded(let name):
+            ValuePickerRow(
+                icon: "server.rack",
+                title: LocalizedStringKey(server.name),
+                subtitle: LocalizedStringKey(String(
+                    format: String(localized: "settings.combineServers.server.as", defaultValue: "As %@"), name
+                )),
+                options: [false, true],
+                selection: Binding(
+                    get: {
+                        if case .contributes = dependencies.combinedServerStatus(server) { return true }
+                        return false
+                    },
+                    set: { newValue in
+                        dependencies.setServer(server.id, combined: newValue)
+                        combineTick &+= 1
+                    }
+                ),
+                label: onOffLabel
+            )
+        case .noSession:
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: server.name)
+                    .font(.headline)
+                Text("settings.combineServers.server.noSession", bundle: .main)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 8)
+        case .active:
+            EmptyView()
+        }
+    }
+
+    private func onOffLabel(_ on: Bool) -> String {
+        on ? String(localized: "common.on", defaultValue: "On")
+           : String(localized: "common.off", defaultValue: "Off")
+    }
+
     private func load() {
+        combining = dependencies.isCombiningServers()
         servers = dependencies.listKnownServers()
         activeID = dependencies.activeServer?.id
         defaultID = dependencies.authPreferences.defaultServerID

@@ -96,7 +96,7 @@ struct PosterBadgeStoreTests {
     }
 
     private func store(_ library: LibraryFake, enabled: Bool = true) -> PosterBadgeStore {
-        PosterBadgeStore(library: library, isEnabled: { enabled })
+        PosterBadgeStore(route: { _ in (library, "u1") }, isEnabled: { enabled })
     }
 
     // MARK: - The free half

@@ -18,7 +18,7 @@ extension HomeViewModel {
     /// parent series (one batched Ids lookup) and dedupe, so a row titled Latest Shows holds shows
     /// and a tap lands on the series page; on lookup failure fall back to the unfolded items rather
     /// than going empty.
-    private func foldIntoSeries(_ items: [JellyfinItem]) async -> [JellyfinItem] {
+    private func foldIntoSeries(_ items: [JellyfinItem], source: HomeSource) async -> [JellyfinItem] {
         let seriesIDs = items.compactMap(seriesFoldTarget)
         guard !seriesIDs.isEmpty else { return items }
 
@@ -26,7 +26,7 @@ extension HomeViewModel {
             ids: Array(Set(seriesIDs)),
             fields: JellyfinEndpoint.homeRowFields
         )
-        guard let response = try? await libraryService.getItems(userID: userID, query: query) else {
+        guard let response = try? await source.libraryService.getItems(userID: source.userID, query: query) else {
             return items
         }
         let seriesByID = Dictionary(
@@ -53,7 +53,14 @@ extension HomeViewModel {
         return folded
     }
 
+    /// The active server's row, errors read as "no answer", which is what Home has always done.
     func loadRow(config: HomeRowConfig) async -> HomeRowData? {
+        (try? await loadRow(config: config, source: sources[0])) ?? nil
+    }
+
+    /// One row from one source. Throws, so the combined fan-out can tell a refused token from a
+    /// server that is down (Sodalite#85). nil for the row types this does not fetch.
+    func loadRow(config: HomeRowConfig, source: HomeSource) async throws -> HomeRowData? {
         do {
             let type = config.type
             let items: [JellyfinItem]
@@ -69,25 +76,25 @@ extension HomeViewModel {
                     // failing must not take resume items down (try?), and resume failing takes the
                     // row down as before, cancelling the Next Up call on the way out.
                     let rewatching = HomeRowConfig.enableRewatchingNextUp(scope: homeScope)
-                    async let resumeResponse = libraryService.getResumeItems(userID: userID, mediaType: "Video", limit: 16)
-                    async let nextUpResponse = libraryService.getNextUp(userID: userID, seriesID: nil, limit: 16, rewatching: rewatching)
+                    async let resumeResponse = source.libraryService.getResumeItems(userID: source.userID, mediaType: "Video", limit: 16)
+                    async let nextUpResponse = source.libraryService.getNextUp(userID: source.userID, seriesID: nil, limit: 16, rewatching: rewatching)
                     let response = try await resumeResponse
                     let nextUp = (try? await nextUpResponse)?.items ?? []
                     var seen = Set(response.items.map(\.id))
                     items = response.items + nextUp.filter { seen.insert($0.id).inserted }
                 } else {
-                    items = try await libraryService.getResumeItems(userID: userID, mediaType: "Video", limit: 16).items
+                    items = try await source.libraryService.getResumeItems(userID: source.userID, mediaType: "Video", limit: 16).items
                 }
 
             case .nextUp:
                 let rewatching = HomeRowConfig.enableRewatchingNextUp(scope: homeScope)
-                let response = try await libraryService.getNextUp(userID: userID, seriesID: nil, limit: 16, rewatching: rewatching)
+                let response = try await source.libraryService.getNextUp(userID: source.userID, seriesID: nil, limit: 16, rewatching: rewatching)
                 items = response.items
 
             case .latestMovies:
                 // Native /Items/Latest for web-UI parity. ParentId omitted so multiple movie libraries all surface, which makes IncludeItemTypes=Movie mandatory (else Jellyfin jumbles movies/series/music into one row).
-                items = try await libraryService.getLatestMedia(
-                    userID: userID,
+                items = try await source.libraryService.getLatestMedia(
+                    userID: source.userID,
                     parentID: nil,
                     includeItemTypes: [.movie],
                     limit: 16
@@ -105,26 +112,33 @@ extension HomeViewModel {
                 // the newest Limit*2 items across every library and groups them in memory, so one
                 // bulk import fills the window and the row collapses to the few series inside it.
                 let libraries: [JellyfinLibrary]
-                if let task = librariesTask, let fetched = await task.value {
+                if let task = librariesTasks[source.serverID] ?? (source.isActive ? librariesTask : nil),
+                   let fetched = await task.value {
                     libraries = fetched
                 } else {
-                    libraries = myMediaLibraries
+                    libraries = myMediaLibraries.filter { ($0.serverID ?? source.serverID) == source.serverID }
                 }
-                let showLibraries = libraries.filter { ($0.collectionType ?? "") == "tvshows" }
-                if showLibraries.isEmpty {
+                let allShowLibraries = libraries.filter { ($0.collectionType ?? "") == "tvshows" }
+                let showLibraries = allShowLibraries.filter {
+                    !libraryLayout.isHidden($0, fallbackServerID: source.serverID)
+                }
+                if !allShowLibraries.isEmpty, showLibraries.isEmpty {
+                    // Every shows library is hidden; the aggregate below would bring them back.
+                    items = []
+                } else if showLibraries.isEmpty {
                     // No shows library, or getLibraries failed: fall back to the typed aggregate, imperfect but better than empty.
-                    let latest = try await libraryService.getLatestMedia(
-                        userID: userID,
+                    let latest = try await source.libraryService.getLatestMedia(
+                        userID: source.userID,
                         parentID: nil,
                         includeItemTypes: [.series, .episode],
                         limit: 64
                     )
-                    items = Array(await foldIntoSeries(latest).prefix(16))
+                    items = Array(await foldIntoSeries(latest, source: source).prefix(16))
                 } else {
                     var lists: [[JellyfinItem]] = []
                     for library in showLibraries {
-                        let list = (try? await libraryService.getLatestMedia(
-                            userID: userID,
+                        let list = (try? await source.libraryService.getLatestMedia(
+                            userID: source.userID,
                             parentID: library.id,
                             includeItemTypes: nil,
                             limit: 16
@@ -138,7 +152,7 @@ extension HomeViewModel {
                             merged.append(list[index])
                         }
                     }
-                    items = Array(await foldIntoSeries(merged).prefix(16))
+                    items = Array(await foldIntoSeries(merged, source: source).prefix(16))
                 }
 
             case .allMovies:
@@ -149,7 +163,7 @@ extension HomeViewModel {
                     limit: 30,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .allSeries:
@@ -160,7 +174,7 @@ extension HomeViewModel {
                     limit: 30,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .favorites:
@@ -172,7 +186,7 @@ extension HomeViewModel {
                     isFavorite: true,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .favoriteEpisodes:
@@ -186,7 +200,7 @@ extension HomeViewModel {
                     isFavorite: true,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .topRatedMovies:
@@ -197,7 +211,7 @@ extension HomeViewModel {
                     limit: 20,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .topRatedShows:
@@ -208,7 +222,7 @@ extension HomeViewModel {
                     limit: 20,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .recentlyAdded:
@@ -219,12 +233,12 @@ extension HomeViewModel {
                     limit: 20,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .recentlyReleasedMovies:
-                let response = try await libraryService.getItems(
-                    userID: userID,
+                let response = try await source.libraryService.getItems(
+                    userID: source.userID,
                     query: HomeReleaseRowQuery.movies(now: Date(), limit: 20)
                 )
                 items = HomeReleaseRowQuery.airedOnly(response.items)
@@ -232,12 +246,12 @@ extension HomeViewModel {
             case .recentlyReleasedShows:
                 // Episodes folded onto their series, so a show that aired last night ranks by that
                 // episode rather than by the date the show first started (see HomeReleaseRowQuery).
-                let response = try await libraryService.getItems(
-                    userID: userID,
+                let response = try await source.libraryService.getItems(
+                    userID: source.userID,
                     query: HomeReleaseRowQuery.episodes(now: Date(), limit: 64)
                 )
                 let aired = HomeReleaseRowQuery.airedOnly(response.items)
-                items = Array(await foldIntoSeries(aired).prefix(16))
+                items = Array(await foldIntoSeries(aired, source: source).prefix(16))
 
             case .collections:
                 let query = ItemQuery(
@@ -247,7 +261,7 @@ extension HomeViewModel {
                     limit: 30,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
 
             case .playlists:
@@ -261,20 +275,20 @@ extension HomeViewModel {
                     limit: 60,
                     fields: JellyfinEndpoint.homeRowFields
                 )
-                let response = try await libraryService.getItems(userID: userID, query: query)
+                let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = Array(response.items.filter { !$0.isAudioPlaylist }.prefix(30))
 
             case .libraryLatest:
                 // Per-library Latest scoped by parentID alone. Deliberately NO IncludeItemTypes: it would filter before GroupItems grouping, collapsing an episodes-only library to one tile (Sodalite#12, DrHurt "latest in Series - French only loads 1 item"). ParentId already constrains the library, so the type hint the aggregate rows need (they drop ParentId) is the bug here.
                 guard let libraryID = config.libraryID else { return nil }
                 // Over-fetch + post-fold cap (latestShows rationale): the fold can dedupe a series against its own episodes, shrinking the row below 16.
-                let latest = try await libraryService.getLatestMedia(
-                    userID: userID,
+                let latest = try await source.libraryService.getLatestMedia(
+                    userID: source.userID,
                     parentID: libraryID,
                     includeItemTypes: nil,
                     limit: 24
                 )
-                items = Array(await foldIntoSeries(latest).prefix(16))
+                items = Array(await foldIntoSeries(latest, source: source).prefix(16))
 
             case .myMedia, .genres, .discoverProviders:
                 return nil
@@ -284,20 +298,49 @@ extension HomeViewModel {
                 type: type,
                 items: items,
                 libraryID: config.libraryID,
-                libraryName: config.libraryName
+                libraryName: config.libraryName,
+                serverID: source.serverID
             )
-        } catch {
-            return nil
         }
     }
 
     func loadTagRow(type: HomeRowType) async -> HomeTagRowData? {
         do {
             let tags: [NamedItem]
+            // Which source probes each genre: the first one that lists it (Sodalite#85).
+            var owners: [String: HomeSource] = [:]
             switch type {
             case .genres:
-                let allGenres = try await libraryService.getGenres(userID: userID)
-                tags = allGenres.filter { GenreFilter.isPrimary($0.name) }
+                if sources.count > 1 {
+                    let deadline = secondaryDeadline
+                    var lists: [Int: [NamedItem]?] = [:]
+                    await withTaskGroup(of: (Int, [NamedItem]?).self) { group in
+                        for (index, source) in sources.enumerated() {
+                            let run: @MainActor @Sendable () async -> [NamedItem]? = {
+                                try? await source.libraryService.getGenres(userID: source.userID)
+                            }
+                            let isActive = source.isActive
+                            group.addTask {
+                                (index, isActive ? await run() : await Deadline.race(deadline) { await run() } ?? nil)
+                            }
+                        }
+                        for await (index, list) in group { lists[index] = list }
+                    }
+                    guard let activeGenres = lists[0] ?? nil else { return nil }
+                    var seen = Set<String>()
+                    var union: [NamedItem] = []
+                    for (index, source) in sources.enumerated() {
+                        let list = index == 0 ? activeGenres : ((lists[index] ?? nil) ?? [])
+                        for genre in list where GenreFilter.isPrimary(genre.name) && seen.insert(genre.name.lowercased()).inserted {
+                            union.append(genre)
+                            owners[genre.id] = source
+                        }
+                    }
+                    tags = union
+                } else {
+                    let allGenres = try await libraryService.getGenres(userID: userID)
+                    tags = allGenres.filter { GenreFilter.isPrimary($0.name) }
+                }
             default:
                 return nil
             }
@@ -311,6 +354,7 @@ extension HomeViewModel {
                 let maxConcurrent = 6
 
                 func enqueue(_ tag: NamedItem) {
+                    let owner = owners[tag.id]
                     group.addTask {
                         let query = ItemQuery(
                             includeItemTypes: [.movie, .series],
@@ -319,7 +363,9 @@ extension HomeViewModel {
                             genres: [tag.name],
                             fields: JellyfinEndpoint.homeRowFields
                         )
-                        let item = try? await self.libraryService.getItems(userID: self.userID, query: query).items.first
+                        let service = owner?.libraryService ?? self.libraryService
+                        let user = owner?.userID ?? self.userID
+                        let item = try? await service.getItems(userID: user, query: query).items.first
                         return (tag.id, item)
                     }
                 }

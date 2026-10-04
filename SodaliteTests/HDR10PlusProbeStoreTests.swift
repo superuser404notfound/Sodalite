@@ -42,8 +42,8 @@ struct HDR10PlusProbeStoreTests {
                               enabled: Bool = true) -> (HDR10PlusProbeStore, ProbeSpy) {
         let spy = ProbeSpy(answer: answer)
         let store = HDR10PlusProbeStore(
-            streamURL: { itemID, sourceID, container in
-                URL(string: "https://jf.example/Videos/\(itemID)/stream.\(container ?? "mp4")?MediaSourceId=\(sourceID)&Static=true")
+            streamURL: { item, sourceID, container in
+                URL(string: "https://jf.example/Videos/\(item.id)/stream.\(container ?? "mp4")?MediaSourceId=\(sourceID)&Static=true")
             },
             isEnabled: { enabled },
             probe: { url, _ in try spy.probe(url) }

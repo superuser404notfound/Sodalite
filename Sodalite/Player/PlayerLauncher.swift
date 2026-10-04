@@ -40,7 +40,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     /// environment left to read it from (Sodalite#126).
     @Environment(\.appState) private var appState
 
-    private var serverName: String { appState.activeServer?.name ?? "" }
+    /// The server the item plays from, which in a combined Home need not be the active one (Sodalite#85).
+    @Environment(\.serverSession) private var serverSession
+
+    private var serverName: String { serverSession?.server?.name ?? appState.activeServer?.name ?? "" }
 
     /// The reader is handed over, not the value: a server that dies forty minutes into a session is
     /// exactly the case the player needs this for.

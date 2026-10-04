@@ -11,7 +11,10 @@ enum ProfileHomeStore {
             mergeCWNextUp: HomeRowConfig.mergeContinueWatchingNextUp(scope: scope),
             rewatchNextUp: HomeRowConfig.enableRewatchingNextUp(scope: scope),
             collectionGrouping: HomeRowConfig.collectionGrouping(scope: scope).rawValue,
-            librarySorts: LibrarySortStore.allSorts(scope: scope)
+            librarySorts: LibrarySortStore.allSorts(scope: scope),
+            combineServers: CombinedServersPreferences(defaults: .standard).isEnabled(scope: scope),
+            combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted(),
+            libraryLayoutJSON: LibraryLayout.rawData(scope: scope)
         )
     }
 
@@ -28,9 +31,18 @@ enum ProfileHomeStore {
             HomeRowConfig.setCollectionGrouping(grouping, scope: scope)
         }
         LibrarySortStore.applySorts(payload.librarySorts, scope: scope)
+        let combined = CombinedServersPreferences(defaults: .standard)
+        if let enabled = payload.combineServers { combined.setEnabled(enabled, scope: scope) }
+        if let excluded = payload.combineServersExcluded { combined.setExcluded(Set(excluded), scope: scope) }
+        if let layout = payload.libraryLayoutJSON { LibraryLayout.setRawData(layout, scope: scope) }
     }
 
+    /// Combine servers stays behind: it names another profile's accounts on other servers, and a
+    /// profile used for the first time must not start showing them (Sodalite#85).
     static func copy(fromScope source: String, toScope target: String) {
-        apply(collect(scope: source, stamp: .distantPast), scope: target)
+        var payload = collect(scope: source, stamp: .distantPast)
+        payload.combineServers = nil
+        payload.combineServersExcluded = nil
+        apply(payload, scope: target)
     }
 }

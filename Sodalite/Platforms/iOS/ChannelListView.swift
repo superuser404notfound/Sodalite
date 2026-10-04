@@ -226,7 +226,8 @@ private struct ChannelRow: View {
 
     private var logoURL: URL? {
         dependencies.jellyfinImageService.imageURL(
-            itemID: channel.id, imageType: .primary, tag: channel.primaryImageTag, maxHeight: 120)
+            itemID: channel.id, serverID: channel.serverID, imageType: .primary,
+            tag: channel.primaryImageTag, maxHeight: 120)
     }
 }
 

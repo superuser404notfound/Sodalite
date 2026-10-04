@@ -10,6 +10,7 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
     let currentProgram: JellyfinProgram?
     /// Present when the channel list is fetched with `EnableUserData=true`.
     let userData: ChannelUserData?
+    var serverID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -18,6 +19,7 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
         case imageTags = "ImageTags"
         case currentProgram = "CurrentProgram"
         case userData = "UserData"
+        case serverID = "ServerId"
     }
 
     /// Primary image tag, used to build the channel-logo URL.
@@ -68,9 +70,11 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
     /// The film's year for a movie; for anything else Jellyfin derives it from the original air
     /// date, which identifies nothing on a guide entry, so only `movieYear` reads it.
     var productionYear: Int? = nil
+    var serverID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
+        case serverID = "ServerId"
         case channelId = "ChannelId"
         case channelName = "ChannelName"
         case name = "Name"

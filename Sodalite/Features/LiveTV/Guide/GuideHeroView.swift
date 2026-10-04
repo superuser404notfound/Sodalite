@@ -107,7 +107,7 @@ struct GuideHeroView: View {
     private var programImageURL: URL? {
         guard let program, !program.isSynthesized else { return nil }
         return dependencies.jellyfinImageService.imageURL(
-            itemID: program.id, imageType: .primary,
+            itemID: program.id, serverID: program.serverID, imageType: .primary,
             tag: program.primaryImageTag,
             maxWidth: Int(metrics.heroThumbSize.width * 2))
     }
@@ -115,7 +115,7 @@ struct GuideHeroView: View {
     private var channelLogoURL: URL? {
         guard let channel else { return nil }
         return dependencies.jellyfinImageService.imageURL(
-            itemID: channel.id, imageType: .primary,
+            itemID: channel.id, serverID: channel.serverID, imageType: .primary,
             tag: channel.primaryImageTag,
             maxWidth: Int(metrics.heroThumbSize.width * 2))
     }

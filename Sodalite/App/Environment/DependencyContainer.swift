@@ -36,6 +36,8 @@ final class DependencyContainer {
     let jellyfinItemService: JellyfinItemServiceProtocol
     let jellyfinImageService: JellyfinImageService
     let jellyfinPlaybackService: JellyfinPlaybackServiceProtocol
+    /// Every Jellyfin session held at once; the active one wraps `jellyfinClient` (Sodalite#85).
+    let sessionRegistry: ServerSessionRegistry
     /// Per-profile playback and appearance settings plus the shared device values. The two
     /// properties below resolve to the active profile, so a view that reads them follows a switch.
     let profileSettings: ProfileSettingsRegistry
@@ -114,6 +116,9 @@ final class DependencyContainer {
     /// When each server was added and when its URL slots were last edited, which is what a removal
     /// tombstone and a URL edit have to outrank a stale republish with.
     let serverSyncMetadata: ServerSyncMetadataStore
+    /// When each server was last made active here, which orders a combined Home's secondaries.
+    let serverActivation: ServerActivationStore
+    let combinedServers: CombinedServersPreferences
     /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
     /// closure so the sign-in route can be tested without a network; the app never replaces it.
     var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
@@ -157,6 +162,8 @@ final class DependencyContainer {
     ) {
         self.serverRouteStore = ServerRouteStore(defaults: defaults)
         self.serverSyncMetadata = ServerSyncMetadataStore(defaults: defaults)
+        self.serverActivation = ServerActivationStore(defaults: defaults)
+        self.combinedServers = CombinedServersPreferences(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
         self.jellyfinClient = JellyfinClient(httpClient: httpClient)
@@ -174,15 +181,19 @@ final class DependencyContainer {
             libraryService: jellyfinLibraryService
         )
         self.jellyfinItemService = JellyfinItemService(client: jellyfinClient)
-        self.jellyfinImageService = JellyfinImageService(
-            baseURLProvider: { [weak jellyfinClient] in
-                jellyfinClient?.baseURL
-            },
-            accessTokenProvider: { [weak jellyfinClient] in
-                jellyfinClient?.accessToken
-            }
-        )
         self.jellyfinPlaybackService = JellyfinPlaybackService(client: jellyfinClient)
+        let sessionRegistry = ServerSessionRegistry(
+            activeClient: jellyfinClient,
+            httpClient: httpClient,
+            libraryService: jellyfinLibraryService,
+            itemService: jellyfinItemService,
+            playbackService: jellyfinPlaybackService,
+            liveTvService: jellyfinLiveTvService
+        )
+        self.sessionRegistry = sessionRegistry
+        self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
+            sessionRegistry?.endpoint(forServerID: serverID)
+        })
         let profileSettings = ProfileSettingsRegistry(defaults: defaults)
         self.profileSettings = profileSettings
         self.trackSelectionMemory = TrackSelectionMemory(store: defaults)
@@ -190,16 +201,21 @@ final class DependencyContainer {
         self.spoilerRevealMemory = SpoilerRevealMemory(store: defaults)
         self.spoilerSeriesRules = SpoilerSeriesRules(store: defaults)
         self.storeKitService = StoreKitService()
+        let libraryService = self.jellyfinLibraryService
         self.posterBadgeStore = PosterBadgeStore(
-            library: self.jellyfinLibraryService,
+            route: { [weak sessionRegistry] serverID in
+                guard let session = sessionRegistry?.session(forServerID: serverID), !session.isActive
+                else { return (libraryService, nil) }
+                return (session.libraryService, session.userID)
+            },
             isEnabled: { profileSettings.current.appearance.showPosterBadges }
         )
         // Static=true, so the probe always opens the original file and never a transcode.
         let playbackService = self.jellyfinPlaybackService
         self.hdr10PlusProbeStore = HDR10PlusProbeStore(
-            streamURL: { itemID, sourceID, container in
-                playbackService.buildStreamURL(
-                    itemID: itemID, mediaSourceID: sourceID, container: container, isStatic: true)
+            streamURL: { [weak sessionRegistry] item, sourceID, container in
+                (sessionRegistry?.session(for: item).playbackService ?? playbackService).buildStreamURL(
+                    itemID: item.id, mediaSourceID: sourceID, container: container, isStatic: true)
             },
             isEnabled: { profileSettings.current.appearance.showDetailBadges }
         )
@@ -330,17 +346,6 @@ final class DependencyContainer {
         }
     }
 
-    /// Gates the Live TV tab: does the active server expose any Live TV channels? False on any error.
-    func serverHasLiveTV(userID: String) async -> Bool {
-        do {
-            let response = try await jellyfinLiveTvService.getChannels(
-                userID: userID, startIndex: 0, limit: 1, filter: .any)
-            return !response.items.isEmpty
-        } catch {
-            return false
-        }
-    }
-
     /// Silent `try?`: a missing/unreadable keychain entry means no session to restore (app falls back to login); no recovery path benefits from the underlying error.
     func restoreSession() -> Bool {
         guard let server = activeServer else {
@@ -365,6 +370,8 @@ final class DependencyContainer {
                 accessToken: token
             )
         }
+        serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
         scheduleRouteResolve()
         return true
     }
@@ -416,7 +423,8 @@ final class DependencyContainer {
             )
         )
 
-
+        serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
         scheduleRouteResolve()
     }
@@ -491,6 +499,7 @@ final class DependencyContainer {
         if !isApplyingCloudChanges, updated != current {
             serverSyncMetadata.noteURLsChanged(serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
         appState?.updateActiveServer(updated)
         if activeServer?.id == serverID {
@@ -606,6 +615,20 @@ final class DependencyContainer {
         return candidate
     }
 
+    /// The session a secondary server contributes to a combined Home: the same pick a switch to it
+    /// would make, this device's own token slot first, else the resumable profile (Sodalite#85).
+    /// Unlike a switch, nobody is asked for the Guardian PIN here, so a profile that would cost it
+    /// stays out whichever way its token is stored.
+    func secondaryCredential(serverID: String) -> SessionCredential? {
+        if let token = try? keychainService.loadString(for: KeychainKeys.accessToken(serverID: serverID)),
+           let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID)),
+           !token.isEmpty {
+            guard !parentalGateRequired(forActivatingUserID: userID, serverID: serverID) else { return nil }
+            return SessionCredential(userID: userID, token: token)
+        }
+        return resumableProfile(serverID: serverID).map { SessionCredential(userID: $0.id, token: $0.token) }
+    }
+
     /// Switches the active server: sets the pointer, loads the cached token, reconfigures JellyfinClient, rewrites SharedSessionMirror, bumps serverDidSwitch. Seerr is left to the caller's restore path. Throws .unknown (not in knownServers) or .missingToken (caller routes to the target's profile picker). Both throws land before the first write, so a switch that cannot complete leaves no half-switched session behind.
     func switchServer(to serverID: String) throws {
         guard let server = listKnownServers().first(where: { $0.id == serverID }) else {
@@ -697,6 +720,8 @@ final class DependencyContainer {
             SharedSessionMirror.clear()
         }
 
+        serverActivation.stamp(serverID: serverID)
+        refreshSessionRegistry()
         scheduleRouteResolve()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
@@ -717,6 +742,7 @@ final class DependencyContainer {
         try? keychainService.delete(for: KeychainKeys.rememberedUsers(serverID: serverID))
         // The removal markers go with the server, else re-adding it later holds its profiles out again.
         try? keychainService.delete(for: KeychainKeys.forgottenUsers(serverID: serverID))
+        serverActivation.forget(serverID: serverID)
         // Every profile on the box, not just the active one: the whole server is going.
         FilterCache.shared.evict(serverID: serverID)
         profileSettings.forgetProfiles(onServer: serverID)
@@ -768,6 +794,7 @@ final class DependencyContainer {
             }
         }
 
+        refreshSessionRegistry()
 
         // Only signal when the ACTIVE server was removed; an inactive removal's bump would needlessly cancel probes + force a Home reload.
         if activeID == serverID, !signalAlreadyScheduled {
@@ -821,6 +848,7 @@ final class DependencyContainer {
         var forgotten = listForgottenUsers(serverID: user.serverID)
         forgotten.removeValue(forKey: user.id)
         setForgottenUsers(forgotten, serverID: user.serverID)
+        refreshSessionRegistry()
         cloudSyncMarkServer(user.serverID)
     }
 
@@ -893,6 +921,7 @@ final class DependencyContainer {
         if authPreferences.defaultUserID(serverID: serverID) == id {
             authPreferences.setDefaultUserID(nil, serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
     }
 
@@ -933,6 +962,7 @@ final class DependencyContainer {
         }
 
         let sessionURL = preferredURL(for: server)
+        serverActivation.stamp(serverID: server.id)
         jellyfinClient.baseURL = sessionURL
         jellyfinClient.accessToken = remembered.token
 
@@ -944,6 +974,7 @@ final class DependencyContainer {
 
         // Seerr left to the caller's restoreSeerrSession(forJellyfinUserID:jellyfinServerID:) so each profile picks up its own session, or lands on the empty state.
 
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
         scheduleRouteResolve()
     }

@@ -63,6 +63,7 @@ extension DependencyContainer {
     }
 
     func applyServerPayload(_ payload: ServerSyncPayload) {
+        defer { refreshSessionRegistry() }
         isApplyingCloudChanges = true
         defer { isApplyingCloudChanges = false }
         let serverID = payload.server.id
@@ -244,6 +245,7 @@ extension DependencyContainer {
     /// A removal only bites where the local `addedAt` does not outrank it: a device that signed back
     /// in after the removal keeps its server, which is the same escape hatch a re-added profile has.
     func applyForgottenServers(_ incoming: [String: Date]) {
+        defer { refreshSessionRegistry() }
         // Save and restore rather than clear: this runs both on its own (a record that lost
         // last-writer-wins still hands over its removals) and from inside applySettingsPayload,
         // where clearing the flag on the way out would unsuppress the rest of that apply.
@@ -273,6 +275,7 @@ extension DependencyContainer {
     /// Remote record delete: same teardown as a local removeServer (successor
     /// promotion included), but suppressed so it does not echo back to CloudKit.
     func applyRemoteServerDeletion(serverID: String) {
+        defer { refreshSessionRegistry() }
         isApplyingCloudChanges = true
         defer { isApplyingCloudChanges = false }
         try? removeServer(id: serverID)

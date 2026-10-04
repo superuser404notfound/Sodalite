@@ -197,13 +197,11 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             return .image(cached)
         }
 
-        // Request built on MainActor to read the MainActor-isolated token; attach auth only for the active Jellyfin host so external URLs (TMDB/CDN posters) don't see our token.
+        // Request built on MainActor to read the MainActor-isolated tokens; attach auth only for a participating Jellyfin server, matched by host and port, so external URLs (TMDB/CDN posters) don't see our token.
         var request = URLRequest(url: url)
         // 15s, not the 60s default: one hanging poster otherwise holds the row in placeholder for a full minute.
         request.timeoutInterval = 15
-        if url.host == dependencies.jellyfinClient.baseURL?.host,
-           let token = dependencies.jellyfinClient.accessToken,
-           !token.isEmpty {
+        if let token = ImageAuth.snapshot(dependencies.sessionRegistry).token(for: url) {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
 
@@ -283,12 +281,8 @@ final class ImageCache: @unchecked Sendable {
 // MARK: - Prefetch
 
 extension ImageCache {
-    /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `authToken`/`jellyfinHost` mirror `load`: X-Emby-Token only for the active Jellyfin host so external CDN URLs don't leak the token.
-    static func prefetch(
-        _ urls: [URL],
-        authToken: String?,
-        jellyfinHost: String?
-    ) async {
+    /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `auth` mirrors `load`: X-Emby-Token only for a participating Jellyfin server so external CDN URLs don't leak the token.
+    static func prefetch(_ urls: [URL], auth: ImageAuth) async {
         let pending = urls.filter { ImageCache.shared.image(for: $0) == nil }
         guard !pending.isEmpty else { return }
 
@@ -300,27 +294,23 @@ extension ImageCache {
             for _ in 0..<min(maxConcurrent, pending.count) {
                 guard let url = iter.next() else { break }
                 group.addTask {
-                    await prefetchOne(url: url, token: authToken, jfHost: jellyfinHost)
+                    await prefetchOne(url: url, auth: auth)
                 }
             }
             for await _ in group {
                 if let url = iter.next() {
                     group.addTask {
-                        await prefetchOne(url: url, token: authToken, jfHost: jellyfinHost)
+                        await prefetchOne(url: url, auth: auth)
                     }
                 }
             }
         }
     }
 
-    nonisolated private static func prefetchOne(
-        url: URL,
-        token: String?,
-        jfHost: String?
-    ) async {
+    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async {
         var request = URLRequest(url: url)
         request.timeoutInterval = 15
-        if let token, !token.isEmpty, url.host == jfHost {
+        if let token = auth.token(for: url) {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
         // Same funnel as the foreground path: a prefetch must never be the thing that puts a

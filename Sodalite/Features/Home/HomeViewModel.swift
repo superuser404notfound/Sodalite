@@ -18,6 +18,8 @@ final class HomeViewModel {
     /// silence, and `HomeView.blockingState`, which asks the same question one level up.
     private(set) var isShowingCachedFeed = false
     var rowConfigs: [HomeRowConfig] = []
+    /// My Media order and hidden libraries (Sodalite#85).
+    var libraryLayout = LibraryLayout(entries: [])
     /// Sample backdrop per provider TMDB id from a one-shot Studios query so each provider tile shows a real library hero; nil falls back to logo-only.
     var providerBackdrops: [Int: URL] = [:]
 
@@ -43,6 +45,23 @@ final class HomeViewModel {
     /// reader: the fan-out consumes it to reconcile the row config, and Latest Shows awaits it for
     /// the library id its query needs. Internal so +Rows can reach it. nil between loads.
     var librariesTask: Task<[JellyfinLibrary]?, Never>?
+    /// Every source's library list for the running load, by server id (Sodalite#85).
+    var librariesTasks: [String: Task<[JellyfinLibrary]?, Never>] = [:]
+
+    /// Where rows come from, active server first. One entry unless servers are combined.
+    var sources: [HomeSource]
+    /// How long a secondary server gets to answer before its slice is left out of a row.
+    var secondaryDeadline: Duration = .seconds(4)
+    /// Secondaries that failed or missed the deadline in the last finished load, by name.
+    private(set) var unreachableServerNames: [String] = []
+    /// The same, collected while a load runs.
+    var pendingUnreachable: [String] = []
+    /// Called with the server id of a secondary that refused its token.
+    var onUnauthorized: ((String) -> Void)?
+    /// The home feed's cache slot: the profile's own with one source, a combined one otherwise.
+    var feedIdentity: CacheIdentity {
+        sources.count > 1 ? Self.combinedIdentity(for: sources, userID: userID) : cacheIdentity
+    }
 
     /// Last successful loadContent(); the staleness gate below reads it, else new server-side content never shows until app restart.
     var lastLoadedAt: Date?
@@ -151,14 +170,20 @@ final class HomeViewModel {
         imageService: JellyfinImageService,
         discoverService: SeerrDiscoverServiceProtocol? = nil,
         userID: String,
-        serverID: String
+        serverID: String,
+        sources: [HomeSource]? = nil
     ) {
         self.libraryService = libraryService
         self.imageService = imageService
         self.discoverService = discoverService
         self.userID = userID
         self.serverID = serverID
+        self.sources = sources ?? [HomeSource(
+            serverID: serverID, serverName: "", userID: userID,
+            libraryService: libraryService, isActive: true
+        )]
         self.rowConfigs = HomeRowConfig.loadFromStorage(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
+        self.libraryLayout = LibraryLayout.load(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
         hydrateFeedFromCache()
     }
 
@@ -176,7 +201,7 @@ final class HomeViewModel {
         // (about a second behind the shelf, measured by classicjazz on the first build to carry the
         // cache). It is not evidence of anything: a list alone paints nothing, because Home is
         // still behind the spinner until a row lands.
-        myMediaLibraries = cached.libraries
+        myMediaLibraries = myMediaVisible(cached.libraries)
         guard !cached.rows.isEmpty else { return }
         rows = cached.rows
         isShowingCachedFeed = true
@@ -186,7 +211,7 @@ final class HomeViewModel {
     /// The persisted feed, minus rows the stored config no longer plans. Empty when there is
     /// nothing to paint, which both callers read as "behave the way this did before the cache".
     private func cachedFeed() -> FilterCache.HomeFeed {
-        guard let cached = FilterCache.shared.homeFeed(identity: cacheIdentity) else {
+        guard let cached = FilterCache.shared.homeFeed(identity: feedIdentity) else {
             return FilterCache.HomeFeed(rows: [], libraries: [])
         }
         let planned = Set(plannedRows(from: rowConfigs).map(\.id))
@@ -214,6 +239,7 @@ final class HomeViewModel {
         providerCountsTask?.cancel()
         genreCachesTask?.cancel()
         librariesTask?.cancel()
+        librariesTasks.values.forEach { $0.cancel() }
     }
 
     /// Patch a just-watched item's resume progress in place across every row holding it (issue #24). Mirrors the detail-side fix off the authoritative playback-stop payload so the Continue Watching progress bar is right immediately without racing a loadContent() re-fetch. loadContent() still runs for structural changes a patch can't make (re-ordering, dropping out once finished).
@@ -241,7 +267,8 @@ final class HomeViewModel {
         /// a single row was even planned. On an unreachable server that was thirty seconds of dead
         /// time under a bare spinner, every launch. nil = the fetch failed and the stored config
         /// stands, which is the same fallback as before.
-        case libraries([JellyfinLibrary]?)
+        /// `complete` is false when a combined Home's secondary did not answer (Sodalite#85).
+        case libraries([JellyfinLibrary]?, complete: Bool)
     }
 
     /// One planned row, with everything the fetch needs already resolved.
@@ -258,6 +285,11 @@ final class HomeViewModel {
         let id: String
     }
 
+    /// My Media's tiles: browsable libraries in the profile's order, hidden ones left out.
+    func myMediaVisible(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
+        libraryLayout.visible(MyMediaLibraries.browsable(libraries), fallbackServerID: sources.first?.serverID ?? serverID)
+    }
+
     /// The rows this config actually fetches, in display order.
     ///
     /// Three kinds drop out: Discover provider rows and My Media render from state the fan-out does
@@ -270,6 +302,10 @@ final class HomeViewModel {
             .compactMap { config in
                 if config.type.isDiscoverProviderRow { return nil }
                 if config.type == .myMedia { return nil }
+                if config.type == .libraryLatest, let id = config.libraryID,
+                   libraryLayout.hidesLatestRow(libraryID: id) {
+                    return nil
+                }
                 if config.type == .nextUp,
                    HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope) {
                     return nil
@@ -291,9 +327,18 @@ final class HomeViewModel {
                 return tagRow.tags.isEmpty ? .emptied(id: entry.id, isTag: true) : .tag(tagRow)
             }
         } else {
-            if let rowData = await loadRow(config: entry.config) {
-                return rowData.items.isEmpty ? .emptied(id: entry.id, isTag: false) : .media(rowData)
-            }
+            let rows = await fetchAcrossSources(entry.config)
+            guard let first = rows.first else { return .empty }
+            let items = HomeMerger.merge(
+                rows.map(\.items),
+                type: entry.type,
+                mergedContinueWatching: HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope)
+            )
+            let merged = HomeRowData(
+                type: first.type, items: items, libraryID: first.libraryID,
+                libraryName: first.libraryName, serverID: rows.count == 1 ? first.serverID : nil
+            )
+            return merged.items.isEmpty ? .emptied(id: entry.id, isTag: false) : .media(merged)
         }
         return .empty
     }
@@ -307,6 +352,7 @@ final class HomeViewModel {
         providerCountsTask?.cancel()
         genreCachesTask?.cancel()
         librariesTask?.cancel()
+        librariesTasks.values.forEach { $0.cancel() }
         backdropTask = nil
         providerCountsTask = nil
         genreCachesTask = nil
@@ -316,6 +362,7 @@ final class HomeViewModel {
             isLoading = true
         }
         loadFailedEntirely = false
+        pendingUnreachable = []
 
         // Row plans are built from the stored config; the server's library list only reconciles it.
         var plan = plannedRows(from: rowConfigs)
@@ -339,23 +386,26 @@ final class HomeViewModel {
 
         // Progressive publish: upsert each row as it completes so fast rows paint while the slowest (Latest on a huge library, 10+ s) streams. ForEach diffs by HomeRowData.id, so in-place replace preserves mounted AsyncImage state.
         await withTaskGroup(of: RowResult.self) { group in
-            // The service and the id are lifted out of `self` here for the same reason the row
-            // plan is: the task body runs off this actor and cannot read it.
-            let libraryService = libraryService
-            let userID = userID
-            // Started here, not inside the group, because Latest Shows has to await the same
-            // answer (see loadRow) and must not pay for a second request to get it. The group
-            // still consumes it as a result, so reconciliation is unchanged and no row waits on it
-            // except the one that cannot be built without it (Sodalite#122).
-            let libraries = Task { try? await libraryService.getLibraries(userID: userID) }
-            librariesTask = libraries
-            group.addTask {
+            // One library list per source, started before the group because Latest Shows awaits
+            // its own source's answer (see loadRow) and must not pay for a second request. The
+            // group consumes the combined list as one result, so reconciliation is unchanged
+            // (Sodalite#122, Sodalite#85).
+            librariesTasks = [:]
+            for source in sources {
+                let service = source.libraryService
+                let user = source.userID
+                librariesTasks[source.serverID] = Task { try? await service.getLibraries(userID: user) }
+            }
+            librariesTask = librariesTasks[sources[0].serverID]
+            let libraryTasks = Array(librariesTasks.values)
+            group.addTask { [weak self] in
                 // Unstructured, so cancelling the group has to be passed on by hand; without this
-                // a torn-down Home would leave the request running to completion.
+                // a torn-down Home would leave the requests running to completion.
                 await withTaskCancellationHandler {
-                    .libraries(await libraries.value)
+                    let combined = await self?.combinedLibraries()
+                    return .libraries(combined?.libraries, complete: combined?.complete ?? true)
                 } onCancel: {
-                    libraries.cancel()
+                    libraryTasks.forEach { $0.cancel() }
                 }
             }
             for entry in plan {
@@ -393,13 +443,16 @@ final class HomeViewModel {
                     serverAnswered()
                 case .empty:
                     break
-                case .libraries(let libraries):
+                case .libraries(let libraries, let complete):
                     guard let libraries else {
                         LogTap.shared.note("Home: getLibraries failed, falling back to aggregated Latest rows")
                         break
                     }
                     // Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
-                    myMediaLibraries = MyMediaLibraries.browsable(libraries)
+                    myMediaLibraries = myMediaVisible(libraries)
+                    // A server missing from the list would read as a server whose libraries are
+                    // gone, and retire its per-library rows for good (Sodalite#85).
+                    guard complete else { break }
                     let reconciled = HomeRowConfig.reconciled(stored: rowConfigs, libraries: libraries)
                     guard reconciled != rowConfigs else { break }
                     rowConfigs = reconciled
@@ -423,6 +476,7 @@ final class HomeViewModel {
         }
 
         guard loadGeneration == myGen else { return }
+        unreachableServerNames = pendingUnreachable
 
         let enabledRows = rowConfigs
             .filter(\.isEnabled)
@@ -456,7 +510,7 @@ final class HomeViewModel {
             // `myMediaLibraries` is whatever is on screen: the list this load fetched, or the
             // hydrated one where the library fetch alone failed. So a degraded load writes the
             // shelf back unchanged rather than emptying it.
-            FilterCache.shared.setHomeFeed(rows, libraries: myMediaLibraries, identity: cacheIdentity)
+            FilterCache.shared.setHomeFeed(rows, libraries: myMediaLibraries, identity: feedIdentity)
         }
 
         // Gate each background pass on its consuming row being enabled: the provider precompute is the heaviest query (one 10 000-item all-library scan + 33 per-provider resolves) and only the Discover row reads it, so hiding that row in Customize genuinely stops the scan (Sodalite#12 backend contention), not just the tiles.
@@ -534,10 +588,10 @@ final class HomeViewModel {
                 // Without a series id the item's own Thumb is the still again, so show art only.
                 guard let seriesID else { return imageService.seriesArtworkURL(for: item) }
                 return imageService.imageURL(
-                    itemID: seriesID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
+                    itemID: seriesID, serverID: item.serverID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
             }
             return imageService.imageURL(
-                itemID: seriesID ?? item.id, imageType: .thumb, maxWidth: ImageWidth.wideCard)
+                itemID: seriesID ?? item.id, serverID: item.serverID, imageType: .thumb, maxWidth: ImageWidth.wideCard)
         }
     }
 
@@ -558,6 +612,7 @@ final class HomeViewModel {
 
     func reloadConfig() {
         rowConfigs = HomeRowConfig.loadFromStorage(scope: homeScope)
+        libraryLayout = LibraryLayout.load(scope: homeScope)
     }
 
     /// On active-server change: clear in-memory carousels (so the old server's posters don't linger) and reset the throttle guards so precompute reruns for the new library, then reload.
@@ -574,10 +629,11 @@ final class HomeViewModel {
         // lives in memory only, so a switch that kept it would leave the outgoing server's
         // libraries on screen and tappable under the new session, which is the exact thing the
         // blanking was there to prevent.
-        myMediaLibraries = cached.libraries
+        myMediaLibraries = myMediaVisible(cached.libraries)
         isShowingCachedFeed = !cached.rows.isEmpty
         isLoading = cached.rows.isEmpty
         tagRows = []
+        unreachableServerNames = []
         providerBackdrops = [:]
         providerItemCounts = [:]
         providerCountsComputedAt = nil

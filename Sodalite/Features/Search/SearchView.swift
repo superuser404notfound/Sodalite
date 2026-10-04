@@ -70,6 +70,11 @@ struct SearchView: View {
             }
         }
         .onAppear(perform: bootstrap)
+        // Who takes part changed (Combine servers, a server muted or back): the next search uses it (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            guard let vm = viewModel, let userID = appState.activeUser?.id else { return }
+            vm.sources = dependencies.searchSources(activeUserID: userID)
+        }
         // Reactive Seerr hookup: bootstrap captures the flag once, so hitting Search before restoreSession finishes the Seerr part would pin a nil service for the session. Re-sync on change keeps the catalog half live, and it follows the Catalog tab's visibility too (Sodalite#62).
         .onChange(of: seerrBrowsingEnabled) { _, enabled in
             viewModel?.seerrSearchService = enabled ? dependencies.seerrSearchService : nil
@@ -119,10 +124,9 @@ struct SearchView: View {
             }
         }
         guard !urls.isEmpty else { return }
-        let token = dependencies.jellyfinClient.accessToken
-        let host = dependencies.jellyfinClient.baseURL?.host
+        let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
         Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, authToken: token, jellyfinHost: host)
+            await ImageCache.prefetch(urls, auth: auth)
         }
     }
 
@@ -376,7 +380,8 @@ struct SearchView: View {
         viewModel = SearchViewModel(
             itemService: dependencies.jellyfinItemService,
             seerrSearchService: seerrBrowsingEnabled ? dependencies.seerrSearchService : nil,
-            userID: userID
+            userID: userID,
+            sources: dependencies.searchSources(activeUserID: userID)
         )
     }
 }

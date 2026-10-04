@@ -16,6 +16,7 @@ extension DependencyContainer {
     func resolveActiveRoutes() async {
         await resolveJellyfinRoute()
         await resolveSeerrRoute()
+        await resolveSecondaryRoutes()
     }
 
     /// A client of its own for signing in to `server`: no token, and an address the live session

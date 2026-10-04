@@ -4,6 +4,8 @@ import UIKit
 struct TabRootView: View {
     @State private var selectedTab: AppTab = .home
     @State private var availableTabs: [AppTab] = AppTab.baseTabs
+    /// Participants with Live TV, from the last tab probe (Sodalite#85).
+    @State private var liveTVServerIDs: [String] = []
     /// Last requestContentReload this view answered, so a reappear does not re-probe a signal it
     /// already handled.
     @State private var lastHandledContentReload = 0
@@ -244,6 +246,7 @@ struct TabRootView: View {
             if isServerSwitch {
                 let base = AppTab.baseTabs
                 availableTabs = base
+                liveTVServerIDs = []
                 if !base.contains(selectedTab) {
                     selectedTab = .home
                 }
@@ -252,7 +255,8 @@ struct TabRootView: View {
             guard let userID = dependencies.activeUserID else { return }
 
             // Probe both optional tabs then publish the tab set in ONE assignment. Two separate insertions rebuilt the bar twice, stranding the earlier item (Live TV) on tvOS's gray icon template; one atomic rebuild tints every item uniformly.
-            let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+            let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
+            let hasLive = !liveIDs.isEmpty
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
             // Swallow a music-probe error into false so it doesn't skip the assignment and leave Live TV hidden.
@@ -264,6 +268,7 @@ struct TabRootView: View {
             }
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
+            liveTVServerIDs = liveIDs
             tabsProbedForServerID = appState.activeServer?.id
             if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
                 onScreen: availableTabs,
@@ -299,6 +304,15 @@ struct TabRootView: View {
         }
         .onAppear {
             configureTabBarItemAppearance()
+        }
+        // Combining turned on, a server excluded, or a secondary moved to an address that answers (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            loginProbeTask?.cancel()
+            loginProbeTask = Task { await recoverOptionalTabs() }
+        }
+        .onChange(of: dependencies.sessionRegistry.routesRevision) { _, _ in
+            loginProbeTask?.cancel()
+            loginProbeTask = Task { await recoverOptionalTabs() }
         }
         .onChange(of: iconColor) { _, _ in
             // Re-apply on accent change; UITabBarItem.appearance() reads at configure time, not live.
@@ -398,7 +412,8 @@ struct TabRootView: View {
         }
         guard let userID = dependencies.activeUserID else { return }
 
-        let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
+        let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
         var hasMusic = false
         do {
@@ -408,6 +423,7 @@ struct TabRootView: View {
         }
         if Task.isCancelled { return }
 
+        liveTVServerIDs = liveIDs
         tabsProbedForServerID = appState.activeServer?.id
         if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
             onScreen: availableTabs,
@@ -429,7 +445,8 @@ struct TabRootView: View {
     private func recoverOptionalTabs() async {
         guard let userID = dependencies.activeUserID else { return }
 
-        let hasLive = await dependencies.serverHasLiveTV(userID: userID)
+        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
+        let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
         var hasMusic = false
         do {
@@ -439,6 +456,7 @@ struct TabRootView: View {
         }
         if Task.isCancelled { return }
 
+        liveTVServerIDs = liveIDs
         tabsProbedForServerID = appState.activeServer?.id
         if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
             onScreen: availableTabs,
@@ -527,7 +545,7 @@ struct TabRootView: View {
             case .liveTV:
                 // Selection is passed rather than inferred from onAppear: a tab that is not selected
                 // keeps its content in the hierarchy, so its clocks have to be told (#96).
-                LiveTVTabView(isTabSelected: selectedTab == .liveTV)
+                LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
             case .catalog:
                 CatalogView()
             case .search:

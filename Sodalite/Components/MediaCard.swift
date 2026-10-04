@@ -20,6 +20,8 @@ struct MediaCard: View {
     /// Sodalite#66. Set where the row paints show-level art (Continue Watching on Backdrop or
     /// Thumb): a series backdrop is marketing art, so the spoiler veil stays off the image.
     let showsSeriesArtwork: Bool
+    /// Server name for a same-name collection or playlist from another server (Sodalite#85).
+    let serverLabel: String?
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -48,7 +50,8 @@ struct MediaCard: View {
         fallbackURL: URL? = nil,
         style: MediaCardStyle = .poster,
         isFocused: Bool = false,
-        showsSeriesArtwork: Bool = false
+        showsSeriesArtwork: Bool = false,
+        serverLabel: String? = nil
     ) {
         self.item = item
         self.imageURL = imageURL
@@ -56,6 +59,7 @@ struct MediaCard: View {
         self.style = style
         self.isFocused = isFocused
         self.showsSeriesArtwork = showsSeriesArtwork
+        self.serverLabel = serverLabel
     }
 
     var body: some View {
@@ -140,6 +144,7 @@ struct MediaCard: View {
     }
 
     private var displaySubtitle: String? {
+        if let serverLabel { return serverLabel }
         if item.type == .episode, let seriesName = item.seriesName {
             // Season only: the episode number is already on the title line above.
             return EpisodeMetadataFormatter.label(seriesName: seriesName,
