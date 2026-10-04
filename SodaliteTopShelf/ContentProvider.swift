@@ -44,18 +44,14 @@ final class ContentProvider: TVTopShelfContentProvider {
                           nextUp: nextUpItems).write()
         }
 
-        // Every cell of both rows, bar or no bar. The pass answers for the whole shelf or for none
-        // of it, so `bars` is either empty or covers every cell; a partial map is what put two bar
-        // styles and two resolutions in one row (Sodalite#128).
-        //
-        // Warm in the normal case: the app renders these when it has a reason to, so what happens
-        // here is a directory listing. The pass stays as the fallback for a shelf whose items
-        // changed while the app was closed, and it is the reason this can still cost seconds.
+        // Every cell of both rows, bar or no bar, and only what the app has already rendered: either
+        // every cell is a local file or the row keeps its remote artwork with the system bar, never a
+        // mix (Sodalite#128). The extension does not render; see `ResumeBarArtwork.existing`.
         let artwork = TopShelfArtwork.read()
-        let bars = await ResumeBarArtwork.prepare(cells: (resumeItems + nextUpItems)
-                                                      .compactMap { $0.artworkCell(session: session, artwork: artwork) },
-                                                  accent: TopShelfAccent.read())
-        log.info("shelf artwork rendered=\(bars.count)")
+        let bars = ResumeBarArtwork.existing(cells: (resumeItems + nextUpItems)
+                                                 .compactMap { $0.artworkCell(session: session, artwork: artwork) },
+                                             accent: TopShelfAccent.read())
+        log.info("shelf artwork local=\(bars.count)")
 
         var sections: [TVTopShelfItemCollection<TVTopShelfSectionedItem>] = []
 

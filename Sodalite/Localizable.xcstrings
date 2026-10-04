@@ -67227,6 +67227,330 @@
         }
       }
     },
+    "changelog.1_1_0.topShelf.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf už nezůstane prázdný, když titul opustíte uprostřed. Sodalite si nyní obrázky připravuje sám a dokud nejsou hotové, zobrazuje řada obrázky z vašeho serveru."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf forbliver ikke længere tom, når du forlader en titel halvvejs. Sodalite forbereder nu selv billederne, og indtil de er klar, viser rækken billederne fra din server."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Top Shelf bleibt nicht mehr leer, wenn du einen Titel mittendrin verlässt. Sodalite bereitet die Bilder jetzt selbst vor, und bis sie fertig sind, zeigt die Reihe die Bilder deines Servers."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Top Shelf δεν μένει πλέον κενό όταν αφήνετε έναν τίτλο στη μέση. Το Sodalite προετοιμάζει πλέον μόνο του τις εικόνες και, μέχρι να είναι έτοιμες, η σειρά δείχνει τις εικόνες του διακομιστή σας."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Top Shelf no longer stays empty after you leave a title halfway through. Sodalite now prepares the artwork itself, and until it is ready the row shows your server's pictures."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El Top Shelf ya no se queda vacío cuando dejas un título a medias. Sodalite prepara ahora las imágenes por sí mismo y, hasta que están listas, la fila muestra las imágenes de tu servidor."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf ei enää jää tyhjäksi, kun keskeytät nimikkeen kesken. Sodalite valmistelee nyt kuvat itse, ja kunnes ne ovat valmiita, rivi näyttää palvelimesi kuvat."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Top Shelf ne reste plus vide lorsque vous quittez un titre en cours de route. Sodalite prépare désormais lui-même les illustrations et, en attendant, la rangée affiche les images de votre serveur."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf više ne ostaje prazan kad napustite naslov na pola. Sodalite sada sam priprema slike, a dok ne budu gotove, red prikazuje slike s vašeg poslužitelja."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Top Shelf már nem marad üres, ha egy címet félúton abbahagysz. A Sodalite most maga készíti elő a képeket, és amíg el nem készülnek, a sor a szervered képeit mutatja."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Top Shelf non resta più vuoto quando lasci un titolo a metà. Sodalite ora prepara da sé le immagini e, finché non sono pronte, la riga mostra le immagini del tuo server."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルを途中で終了しても、Top Shelfが空のままになることはなくなりました。画像はSodalite自身が用意するようになり、準備が整うまではサーバーの画像が表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타이틀을 중간에 나가도 이제 Top Shelf가 비어 있지 않습니다. 이제 Sodalite가 직접 이미지를 준비하며, 준비가 끝날 때까지는 서버의 이미지가 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf blir ikke lenger stående tom når du forlater en tittel halvveis. Sodalite forbereder nå bildene selv, og til de er klare, viser raden bildene fra serveren din."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De Top Shelf blijft niet langer leeg als je een titel halverwege verlaat. Sodalite bereidt de afbeeldingen nu zelf voor, en tot ze klaar zijn toont de rij de afbeeldingen van je server."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf nie pozostaje już pusty, gdy opuścisz tytuł w połowie. Sodalite przygotowuje teraz obrazy samodzielnie, a dopóki nie są gotowe, rząd pokazuje obrazy z Twojego serwera."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Top Shelf não fica mais vazio quando você sai de um título no meio. O Sodalite agora prepara as imagens por conta própria e, até que fiquem prontas, a fileira mostra as imagens do seu servidor."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Top Shelf já não fica vazio quando sai de um título a meio. O Sodalite prepara agora as imagens por si próprio e, até estarem prontas, a fila mostra as imagens do seu servidor."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf nu mai rămâne gol când părăsești un titlu la jumătate. Sodalite pregătește acum singur imaginile, iar până sunt gata, rândul afișează imaginile serverului tău."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf больше не остаётся пустым, если выйти из фильма или серии на середине. Теперь Sodalite сам готовит изображения, а пока они не готовы, в ряду показываются изображения с вашего сервера."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf už nezostane prázdny, keď titul opustíte v polovici. Sodalite si teraz obrázky pripravuje sám a kým nie sú hotové, rad zobrazuje obrázky z vášho servera."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf blir inte längre tom när du lämnar en titel halvvägs. Sodalite förbereder nu bilderna själv, och tills de är klara visar raden bilderna från din server."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir içeriği yarıda bıraktığınızda Top Shelf artık boş kalmıyor. Sodalite görselleri artık kendisi hazırlıyor ve hazır olana kadar satırda sunucunuzun görselleri gösteriliyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf більше не залишається порожнім, якщо вийти з фільму чи серії на половині. Тепер Sodalite сам готує зображення, а поки вони не готові, у ряду показуються зображення з вашого сервера."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中途退出影片后，Top Shelf 不再保持空白。现在由 Sodalite 自行准备图片，在准备好之前，这一行会显示服务器上的图片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中途離開影片後，Top Shelf 不再保持空白。現在由 Sodalite 自行準備圖片，在準備好之前，這一列會顯示伺服器上的圖片。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.topShelf.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spolehlivě načítaný Top Shelf"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf indlæses pålideligt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf lädt zuverlässig"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Top Shelf φορτώνει αξιόπιστα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf loads reliably"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf carga de forma fiable"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf latautuu luotettavasti"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un Top Shelf qui se charge toujours"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf se pouzdano učitava"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megbízhatóan betöltődő Top Shelf"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf si carica in modo affidabile"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelfが確実に読み込まれるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf가 안정적으로 로드됨"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf lastes pålitelig"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf laadt betrouwbaar"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf ładuje się niezawodnie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf carrega de forma confiável"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf carrega de forma fiável"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf se încarcă fiabil"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf загружается надёжно"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoľahlivo načítaný Top Shelf"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf läses in pålitligt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf güvenilir şekilde yükleniyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf завантажується надійно"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf 稳定加载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Shelf 穩定載入"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.versionLabel.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

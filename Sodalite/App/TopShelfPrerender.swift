@@ -1,12 +1,9 @@
 import Foundation
 
-/// Renders the Top Shelf's cell artwork from inside the app, so the extension's own pass finds
-/// everything on disk and answers with a directory listing.
-///
-/// The work is the same either way, the difference is who waits for it. In the extension it sits
-/// between tvOS asking for the shelf and the row appearing, which is what made switching the
-/// artwork setting feel slow: up to twenty downloads and composites with the row held back until
-/// the last one. Here it runs while the app is open and nobody is looking at the shelf.
+/// Renders the Top Shelf's cell artwork from inside the app, the only process that can: the
+/// extension answers from what is on disk and shows remote artwork for a row this has not covered
+/// yet, because a composite at the cell's width does not fit its 25 MB ceiling
+/// (`ResumeBarArtwork.existing`). So every change to what the shelf shows has to reach a pass here.
 ///
 /// It goes through the extension's own client and model (`TopShelfAPI`, `TopShelfItem`), not the
 /// app's: the two have to select the same items and the same pictures, or the files this writes are
