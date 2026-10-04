@@ -92626,6 +92626,168 @@
         }
       }
     },
+    "home.customize.libraries.description" : {
+      "comment" : "Home Customize: caption under the My Media section that orders and hides libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořadí a viditelnost dlaždic v Moje média. Skrytá knihovna zmizí i z řádku Nové."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rækkefølge og synlighed for felterne i Mine medier. Et skjult bibliotek forsvinder også fra sin Nyeste-række."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reihenfolge und Sichtbarkeit der Kacheln in Meine Medien. Eine ausgeblendete Bibliothek verschwindet auch aus ihrer Neu-in-Reihe."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά και ορατότητα των πλακιδίων στα Τα πολυμέσα μου. Μια κρυμμένη βιβλιοθήκη φεύγει και από τη σειρά Πρόσφατα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Order and visibility of the tiles in My Media. A hidden library also leaves its Latest row."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden y visibilidad de los mosaicos de Mi contenido. Una biblioteca oculta también sale de su fila de Novedades."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma media -ruutujen järjestys ja näkyvyys. Piilotettu kirjasto poistuu myös Uusimmat-riviltään."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre et visibilité des vignettes de Ma médiathèque. Une bibliothèque masquée quitte aussi sa rangée Nouveautés."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redoslijed i vidljivost pločica u Moji mediji. Skrivena knjižnica nestaje i iz svog retka Najnovije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Saját média csempéinek sorrendje és láthatósága. Egy elrejtett könyvtár a Legújabb sorából is eltűnik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordine e visibilità dei riquadri in I miei contenuti. Una libreria nascosta esce anche dalla sua riga Novità."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイメディアのタイルの順序と表示。非表示にしたライブラリは新着の行からも消えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 미디어 타일의 순서와 표시 여부입니다. 숨긴 라이브러리는 최신 항목 줄에서도 사라집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekkefølge og synlighet for flisene i Mine medier. Et skjult bibliotek forsvinner også fra Nyeste-raden sin."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgorde en zichtbaarheid van de tegels in Mijn media. Een verborgen bibliotheek verdwijnt ook uit zijn rij Nieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolejność i widoczność kafelków w Moje multimedia. Ukryta biblioteka znika też ze swojego wiersza Najnowsze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem e visibilidade dos blocos em Minha mídia. Uma biblioteca oculta também sai da sua fileira de Novidades."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem e visibilidade dos mosaicos em A minha biblioteca. Uma biblioteca oculta também sai da sua fila de Novidades."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinea și vizibilitatea plăcilor din Media mea. O bibliotecă ascunsă dispare și din rândul ei de Noutăți."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок и видимость плиток в «Моя медиатека». Скрытая библиотека исчезает и из своего ряда «Новое»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poradie a viditeľnosť dlaždíc v Moje médiá. Skrytá knižnica zmizne aj zo svojho riadka Nové."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordning och synlighet för rutorna i Mina media. Ett dolt bibliotek försvinner också från sin Senaste-rad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medyam'daki kutucukların sırası ve görünürlüğü. Gizlenen bir kitaplık kendi Yeni satırından da çıkar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок і видимість плиток у «Моя медіатека». Прихована бібліотека зникає і зі свого ряду «Нове»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的媒体中磁贴的顺序和显示。隐藏的媒体库也会从其最新行中消失。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的媒體中磚塊的順序與顯示。隱藏的媒體庫也會從其最新列中消失。"
+          }
+        }
+      }
+    },
     "home.customize.mergeCwNextUp" : {
       "comment" : "Customize Homepage toggle that folds the Next Up row into Continue Watching",
       "extractionState" : "manual",

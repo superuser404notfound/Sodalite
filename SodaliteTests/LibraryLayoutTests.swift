@@ -92,4 +92,51 @@ struct LibraryLayoutTests {
         ProfileHomeStore.apply(old, scope: scope)
         #expect(LibraryLayout.load(scope: scope) == local)
     }
+
+    final class FakeLibraries: JellyfinLibraryServiceProtocol, @unchecked Sendable {
+        var libraries: [JellyfinLibrary] = []
+        var delay: Duration = .zero
+        func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
+        func getLibraries(userID: String) async throws -> [JellyfinLibrary] {
+            if delay > .zero { try? await Task.sleep(for: delay) }
+            return libraries
+        }
+        func getItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse { .init(items: [], totalRecordCount: 0) }
+        func getResumeItems(userID: String, mediaType: String, limit: Int) async throws -> JellyfinItemsResponse { .init(items: [], totalRecordCount: 0) }
+        func getNextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool) async throws -> JellyfinItemsResponse { .init(items: [], totalRecordCount: 0) }
+        func getGenres(userID: String) async throws -> [NamedItem] { [] }
+        func getStudios(userID: String) async throws -> [NamedItem] { [] }
+    }
+
+    private func bare(_ id: String) -> JellyfinLibrary {
+        JellyfinLibrary(id: id, name: id, collectionType: "movies", imageTags: nil)
+    }
+
+    @MainActor
+    @Test func slowSecondaryMakesTheListIncomplete() async throws {
+        let a = FakeLibraries(); a.libraries = [bare("1")]
+        let b = FakeLibraries(); b.libraries = [bare("2")]
+        let sources = [HomeSource(serverID: "a", serverName: "A", userID: "u", libraryService: a, isActive: true),
+                       HomeSource(serverID: "b", serverName: "B", userID: "u", libraryService: b, isActive: false)]
+        let fast = try #require(await CustomizeLibraryList.fetch(sources, secondaryDeadline: .seconds(1)))
+        #expect(fast.libraries.map(\.id) == ["1", "2"])
+        #expect(fast.libraries.map(\.serverID) == ["a", "b"])
+        #expect(fast.complete)
+        b.delay = .seconds(5)
+        let slow = try #require(await CustomizeLibraryList.fetch(sources, secondaryDeadline: .milliseconds(200)))
+        #expect(slow.libraries.map(\.id) == ["1"])
+        #expect(!slow.complete)
+    }
+
+    @MainActor
+    @Test func customizeLabelsOnlyDuplicateNamesAcrossServers() {
+        let fake = FakeLibraries()
+        let sources = [HomeSource(serverID: "a", serverName: "Wohnzimmer", userID: "u", libraryService: fake, isActive: true),
+                       HomeSource(serverID: "b", serverName: "Keller", userID: "u", libraryService: fake, isActive: false)]
+        let libs = [lib("1", "a", "Filme"), lib("2", "b", "filme"), lib("3", "b", "Serien")]
+        #expect(CustomizeLibraryList.serverLabel(for: libs[0], in: libs, sources: sources) == "Wohnzimmer")
+        #expect(CustomizeLibraryList.serverLabel(for: libs[1], in: libs, sources: sources) == "Keller")
+        #expect(CustomizeLibraryList.serverLabel(for: libs[2], in: libs, sources: sources) == nil)
+        #expect(CustomizeLibraryList.serverLabel(for: libs[0], in: libs, sources: Array(sources.prefix(1))) == nil)
+    }
 }
