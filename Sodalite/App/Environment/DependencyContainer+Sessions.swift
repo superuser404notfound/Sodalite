@@ -90,6 +90,15 @@ extension DependencyContainer {
         NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
     }
 
+    func rememberedLiveTVServerID() -> String? {
+        combineScope.flatMap { combinedServers.liveTVServerID(scope: $0) }
+    }
+
+    func rememberLiveTVServer(_ serverID: String) {
+        guard let scope = combineScope else { return }
+        combinedServers.setLiveTVServerID(serverID, scope: scope)
+    }
+
     func combinedServerStatus(_ server: JellyfinServer) -> CombinedServerStatus {
         if server.id == activeServer?.id { return .active }
         guard let credential = secondaryCredential(serverID: server.id) else { return .noSession }

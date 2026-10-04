@@ -38,3 +38,12 @@ nonisolated enum LiveTVProbe {
         return capable.sorted().map { ids[$0] }
     }
 }
+
+nonisolated enum LiveTVServerChoice {
+    /// The remembered server while it still has Live TV, else the first capable one (active first,
+    /// then most recently activated).
+    static func resolve(capable: [String], remembered: String?) -> String? {
+        if let remembered, capable.contains(remembered) { return remembered }
+        return capable.first
+    }
+}

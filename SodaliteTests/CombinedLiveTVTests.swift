@@ -81,4 +81,29 @@ struct CombinedLiveTVTests {
         #expect(program.serverID == "srv-b")
         #expect(bare.serverID == nil)
     }
+
+    @Test func rememberedServerWinsWhileCapable() {
+        #expect(LiveTVServerChoice.resolve(capable: ["a", "b"], remembered: "b") == "b")
+    }
+
+    @Test func fallbackDoesNotForgetTheRememberedServer() {
+        let defaults = UserDefaults(suiteName: "live-choice-\(UUID())")!
+        let prefs = CombinedServersPreferences(defaults: defaults)
+        prefs.setLiveTVServerID("b", scope: "s1")
+        #expect(LiveTVServerChoice.resolve(capable: ["a"], remembered: prefs.liveTVServerID(scope: "s1")) == "a")
+        #expect(prefs.liveTVServerID(scope: "s1") == "b")
+        #expect(LiveTVServerChoice.resolve(capable: ["a", "b"], remembered: prefs.liveTVServerID(scope: "s1")) == "b")
+    }
+
+    @Test func noRememberedServerTakesTheFirstCapable() {
+        #expect(LiveTVServerChoice.resolve(capable: ["b", "c"], remembered: nil) == "b")
+        #expect(LiveTVServerChoice.resolve(capable: [], remembered: "a") == nil)
+    }
+
+    @Test func rememberedServerIsPerProfile() {
+        let defaults = UserDefaults(suiteName: "live-scope-\(UUID())")!
+        let prefs = CombinedServersPreferences(defaults: defaults)
+        prefs.setLiveTVServerID("b", scope: "s1")
+        #expect(prefs.liveTVServerID(scope: "s2") == nil)
+    }
 }
