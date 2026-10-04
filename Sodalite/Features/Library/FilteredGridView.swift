@@ -85,7 +85,9 @@ struct FilteredGridView: View {
     /// A combined Home's servers, active first; with more than one the grid pages through all of
     /// them (Sodalite#85). nil or one entry keeps the single-server path.
     let sources: [HomeSource]?
-    @State private var pager: MergedPager?
+    @State private var mergedGrid = MergedGridState()
+    /// A combined provider grid whose secondary dropped out this round: shown, never cached.
+    @State private var combinedIncomplete = false
     private var isMerged: Bool { (sources?.count ?? 0) > 1 }
 
     init(
@@ -310,6 +312,7 @@ struct FilteredGridView: View {
             didPaginate = false
             nextStartIndex = 0
             reachedEnd = false
+            mergedGrid.reset()
         }
         .task(id: reloadKey) {
             await loadItems()
@@ -399,18 +402,23 @@ struct FilteredGridView: View {
 
         // A combined Home's genre or studio grid: every server, one sort order (Sodalite#85).
         if isMerged, smartProviderID == nil, let sources {
-            let pager = MergedPager(
+            let outcome = await mergedGrid.load(
                 sources: MergedPager.sources(from: sources, query: effectiveQuery),
-                sort: sort, pageSize: query.limit ?? 50)
-            let first = browsable(await pager.nextPage())
+                sort: sort, pageSize: query.limit ?? 50, filter: browsable)
             guard !Task.isCancelled, generation == loadGeneration else { return }
-            self.pager = pager
-            loadFailed = first.isEmpty && pager.failedServerIDs.count == sources.count
-            if items.map(\.originKey) != first.map(\.originKey) { items = first }
-            isLoading = false
-            if let scope = cacheScope, !isWatchFiltered, sort == .default {
-                FilterCache.shared.setHomeFilterItems(first, filterKey: scope.key, identity: scope.identity)
+            switch outcome {
+            case .kept:
+                break
+            case .failed:
+                loadFailed = items.isEmpty
+            case .replaced(let cacheable):
+                loadFailed = false
+                if items.map(\.originKey) != mergedGrid.items.map(\.originKey) { items = mergedGrid.items }
+                if cacheable, let scope = cacheScope, !isWatchFiltered, sort == .default {
+                    FilterCache.shared.setHomeFilterItems(mergedGrid.items, filterKey: scope.key, identity: scope.identity)
+                }
             }
+            isLoading = false
             return
         }
 
@@ -429,10 +437,12 @@ struct FilteredGridView: View {
             if let filter = watchFilter.jellyfinFilter { libraryQuery.filters = [filter] }
             let combined = await CombinedProviderMatch.fetch(
                 sources: sources, studioQuery: effectiveQuery,
-                libraryQuery: reusePhase2 ? nil : libraryQuery, deadline: .seconds(4))
+                libraryQuery: reusePhase2 ? nil : libraryQuery,
+                studioDeadline: .seconds(4), scanDeadline: .seconds(20))
             phase1Response = combined.phase1
             allItems = combined.allItems
             combinedTmdbMap = combined.tmdbMap
+            combinedIncomplete = !combined.complete
         } else {
             // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
             async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
@@ -497,7 +507,9 @@ struct FilteredGridView: View {
         // Always refresh (stale-while-revalidate): the fresh list replaces the cache so titles rotated off the service drop out. Except on a reappear (BROWSE-6): the studio query above still ran fresh (a watched toggle under Unwatched, say), but the augment reuses what the last full load resolved.
         if let providerID = smartProviderID, let region = smartProviderRegion {
             if reusePhase2 {
-                let merged = ProviderMatchMerging.merge(phase1: phase1, phase2: cachedPhase2Items)
+                let merged = isMerged
+                    ? CombinedProviderMatch.mergePhases(phase1: phase1, phase2: cachedPhase2Items)
+                    : ProviderMatchMerging.merge(phase1: phase1, phase2: cachedPhase2Items)
                 if items.map(\.originKey) != merged.map(\.originKey) { items = merged }
                 isLoading = false
                 return
@@ -535,7 +547,7 @@ struct FilteredGridView: View {
 
     /// More pages exist server-side. Only the plain path paginates: smart-provider grids are merged from the full library map and complete by construction.
     private var canLoadMore: Bool {
-        if isMerged, smartProviderID == nil { return pager?.hasMore ?? false }
+        if isMerged, smartProviderID == nil { return mergedGrid.hasMore }
         guard smartProviderID == nil, query.limit != nil else { return false }
         guard !reachedEnd, let total = totalRecordCount else { return false }
         return items.count < total
@@ -552,12 +564,11 @@ struct FilteredGridView: View {
 
     private func loadMore() async {
         defer { isLoadingMore = false }
-        if isMerged, smartProviderID == nil, let pager {
+        if isMerged, smartProviderID == nil {
             let generation = loadGeneration
-            let page = browsable(await pager.nextPage())
-            guard !Task.isCancelled, generation == loadGeneration else { return }
-            let known = Set(items.map(\.originKey))
-            items += page.filter { !known.contains($0.originKey) }
+            guard await mergedGrid.loadMore(filter: browsable),
+                  !Task.isCancelled, generation == loadGeneration else { return }
+            items = mergedGrid.items
             didPaginate = true
             return
         }
@@ -615,7 +626,14 @@ struct FilteredGridView: View {
         let phase2Items = providerTmdbIDs.compactMap { tmdbMap[$0] }
         cachedPhase2Items = phase2Items
         phase2CacheFilter = watchFilter
-        let merged = ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
+        let merged = isMerged
+            ? CombinedProviderMatch.mergePhases(phase1: studioItems, phase2: phase2Items)
+            : ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
+        // A secondary dropped out this round: what the precompute cached from all servers stays.
+        if combinedIncomplete, !items.isEmpty {
+            isLoading = false
+            return
+        }
         if items.map(\.originKey) != merged.map(\.originKey) {
             items = merged
         }

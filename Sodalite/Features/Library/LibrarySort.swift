@@ -187,14 +187,17 @@ enum LibrarySortStore {
 
 extension LibrarySort {
     /// The client-side order a merged grid needs, matching what the server returns for this sort:
-    /// the key in the chosen direction, items without a value last either way, SortName as the
+    /// the key in the chosen direction, a missing value as the smallest, SortName as the
     /// tiebreaker. nil only for two items the order cannot tell apart.
     func orders(_ lhs: JellyfinItem, before rhs: JellyfinItem) -> Bool? {
         func compare<T: Comparable>(_ l: T?, _ r: T?) -> Bool? {
             switch (l, r) {
             case let (l?, r?): l == r ? nil : (descending ? l > r : l < r)
-            case (.some, .none): true
-            case (.none, .some): false
+            // A missing value is the smallest, as SQLite (under Jellyfin) sorts NULL: first when
+            // ascending, last when descending. Each server's stream arrives in that order, and a
+            // merge that disagrees with it drains one server before the other.
+            case (.some, .none): descending
+            case (.none, .some): !descending
             case (.none, .none): nil
             }
         }

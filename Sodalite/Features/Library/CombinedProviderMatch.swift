@@ -15,32 +15,35 @@ enum CombinedProviderMatch {
         HomeMerger.merge(lists, type: .allMovies, mergedContinueWatching: false, limit: .max)
     }
 
-    /// Both phases' inputs from every source at once, secondaries capped by `deadline`. `phase1` is
-    /// nil when the active server's studio match failed and `allItems` nil when its library scan
-    /// failed, the same "failed, not empty" signals the single-server grid reads.
+    /// Both phases' inputs from every source at once. A secondary's studio match gets
+    /// `studioDeadline`, its library scan the longer `scanDeadline`, raced separately so a slow scan
+    /// does not cost the studio match too. `phase1` is nil when the active server's studio match
+    /// failed and `allItems` nil when its scan failed, the same "failed, not empty" signals the
+    /// single-server grid reads. `complete` is false when any secondary dropped out, and an
+    /// incomplete result must not be cached.
     static func fetch(
         sources: [HomeSource],
         studioQuery: ItemQuery,
         libraryQuery: ItemQuery?,
-        deadline: Duration
-    ) async -> (phase1: JellyfinItemsResponse?, allItems: [JellyfinItem]?, tmdbMap: [String: JellyfinItem]) {
+        studioDeadline: Duration,
+        scanDeadline: Duration
+    ) async -> (phase1: JellyfinItemsResponse?, allItems: [JellyfinItem]?, tmdbMap: [String: JellyfinItem], complete: Bool) {
         typealias Answer = (studio: [JellyfinItem]?, library: [JellyfinItem]?)
-        var answers: [Int: Answer?] = [:]
-        await withTaskGroup(of: (Int, Answer?).self) { group in
+        var answers: [Int: Answer] = [:]
+        await withTaskGroup(of: (Int, Answer).self) { group in
             for (index, source) in sources.enumerated() {
-                let run: @MainActor @Sendable () async -> Answer = {
-                    async let studio = try? source.libraryService.getItems(userID: source.userID, query: studioQuery).items
-                    let library: [JellyfinItem]?
-                    if let libraryQuery {
-                        library = try? await source.libraryService.getItems(userID: source.userID, query: libraryQuery).items
-                    } else {
-                        library = []
-                    }
-                    return (await studio, library)
+                let studio: @MainActor @Sendable () async -> [JellyfinItem]? = {
+                    try? await source.libraryService.getItems(userID: source.userID, query: studioQuery).items
+                }
+                let library: @MainActor @Sendable () async -> [JellyfinItem]? = {
+                    guard let libraryQuery else { return [] }
+                    return try? await source.libraryService.getItems(userID: source.userID, query: libraryQuery).items
                 }
                 let isActive = source.isActive
                 group.addTask {
-                    (index, isActive ? await run() : await Deadline.race(deadline) { await run() })
+                    async let studioAnswer = isActive ? await studio() : await Deadline.race(studioDeadline) { await studio() } ?? nil
+                    async let libraryAnswer = isActive ? await library() : await Deadline.race(scanDeadline) { await library() } ?? nil
+                    return (index, (await studioAnswer, await libraryAnswer))
                 }
             }
             for await (index, answer) in group { answers[index] = answer }
@@ -50,14 +53,21 @@ enum CombinedProviderMatch {
         var allItems: [JellyfinItem] = []
         var phase1Failed = false
         var libraryFailed = false
+        var complete = true
         for (index, source) in sources.enumerated() {
-            guard let answer = answers[index] ?? nil else { continue }
+            let answer = answers[index] ?? (nil, nil)
             let stamp = { (item: JellyfinItem) -> JellyfinItem in
                 var stamped = item
                 if stamped.serverID == nil { stamped.serverID = source.serverID }
                 return stamped
             }
-            if let studio = answer.studio { studioLists.append(studio.map(stamp)) } else if source.isActive { phase1Failed = true }
+            if let studio = answer.studio {
+                studioLists.append(studio.map(stamp))
+            } else if source.isActive {
+                phase1Failed = true
+            } else {
+                complete = false
+            }
             if let library = answer.library {
                 let stamped = library.map(stamp)
                 allItems += stamped
@@ -68,13 +78,29 @@ enum CombinedProviderMatch {
                 maps.append(map)
             } else if source.isActive {
                 libraryFailed = true
+            } else {
+                complete = false
             }
         }
         let merged = mergeStudioMatches(studioLists)
         return (
             phase1Failed ? nil : JellyfinItemsResponse(items: merged, totalRecordCount: merged.count),
             libraryFailed ? nil : allItems,
-            unionTmdbMaps(maps)
+            unionTmdbMaps(maps),
+            complete
         )
+    }
+}
+
+extension CombinedProviderMatch {
+    /// `ProviderMatchMerging.merge`, plus the cross-server dedupe it cannot do: its id check misses
+    /// the same title on two servers, which arrives once from the studio match and once from the
+    /// TMDB map.
+    nonisolated static func mergePhases(phase1: [JellyfinItem], phase2: [JellyfinItem]) -> [JellyfinItem] {
+        var seen = Set<String>()
+        return ProviderMatchMerging.merge(phase1: phase1, phase2: phase2).filter { item in
+            guard let key = HomeMerger.dedupeKey(item) else { return true }
+            return seen.insert(key).inserted
+        }
     }
 }

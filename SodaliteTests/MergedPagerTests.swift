@@ -71,13 +71,13 @@ struct MergedPagerTests {
         #expect(pager.failedServerIDs == ["b"])
     }
 
-    @Test func missingKeysSortLastBothWays() throws {
+    @Test func missingKeysSortAsTheSmallestValue() throws {
         let rated = try item("r", server: "a", sort: "b", rating: 7)
         let unrated = try item("u", server: "a", sort: "a")
         let desc = LibrarySort(key: .rating, descending: true)
         let asc = LibrarySort(key: .rating, descending: false)
         #expect(desc.orders(rated, before: unrated) == true)
-        #expect(asc.orders(rated, before: unrated) == true)
+        #expect(asc.orders(unrated, before: rated) == true)
         let tieA = try item("t1", server: "a", sort: "alpha", rating: 5)
         let tieB = try item("t2", server: "b", sort: "beta", rating: 5)
         // One SortOrder for every field, as the server applies it: the tiebreaker runs Z-A too.
