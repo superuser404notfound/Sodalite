@@ -64639,6 +64639,330 @@
         }
       }
     },
+    "changelog.1_1_0.libraryOrder.body" : {
+      "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V Přizpůsobit domov teď seřadíš a skryješ knihovny v Moje média, i napříč všemi kombinovanými servery. Skrytá knihovna zmizí i ze svého řádku Nové."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Tilpas hjem kan du nu ordne og skjule bibliotekerne i Mine medier, også på tværs af alle kombinerede servere. Et skjult bibliotek forsvinder også fra sin Nyeste-række."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Startseite anpassen ordnest du jetzt die Bibliotheken in Meine Medien und blendest sie aus, auch über alle kombinierten Server hinweg. Eine ausgeblendete Bibliothek verschwindet auch aus ihrer Neu-in-Reihe."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Προσαρμογή αρχικής ταξινομείς και κρύβεις πλέον τις βιβλιοθήκες στα Τα πολυμέσα μου, και σε όλους τους συνδυασμένους διακομιστές. Μια κρυμμένη βιβλιοθήκη φεύγει και από τη σειρά Πρόσφατα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize Home now orders and hides the libraries in My Media, across every combined server too. A hidden library also leaves its Latest row."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Personalizar inicio ahora ordenas y ocultas las bibliotecas de Mi contenido, también en todos los servidores combinados. Una biblioteca oculta también sale de su fila de Novedades."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mukauta aloitusnäyttö -kohdassa järjestät ja piilotat nyt Oma media -kirjastot, myös kaikkien yhdistettyjen palvelimien yli. Piilotettu kirjasto poistuu myös Uusimmat-riviltään."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnaliser l'accueil permet maintenant d'ordonner et de masquer les bibliothèques de Ma médiathèque, y compris sur tous les serveurs combinés. Une bibliothèque masquée quitte aussi sa rangée Nouveautés."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U Prilagodi početnu sada slažeš i skrivaš knjižnice u Moji mediji, i preko svih kombiniranih poslužitelja. Skrivena knjižnica nestaje i iz svog retka Najnovije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Kezdőképernyő testreszabása alatt most rendezheted és elrejtheted a Saját média könyvtárait, az összes egyesített szerveren is. Egy elrejtett könyvtár a Legújabb sorából is eltűnik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Personalizza home ora ordini e nascondi le librerie di I miei contenuti, anche su tutti i server combinati. Una libreria nascosta esce anche dalla sua riga Novità."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームをカスタマイズで、マイメディアのライブラリを並べ替えたり非表示にしたりできるようになりました。統合したすべてのサーバーにまたがって使えます。非表示にしたライブラリは新着の行からも消えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 사용자 지정에서 이제 내 미디어의 라이브러리를 정렬하고 숨길 수 있으며, 통합된 모든 서버에도 적용됩니다. 숨긴 라이브러리는 최신 항목 줄에서도 사라집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Tilpass hjem kan du nå ordne og skjule bibliotekene i Mine medier, også på tvers av alle kombinerte servere. Et skjult bibliotek forsvinner også fra Nyeste-raden sin."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Home aanpassen orden en verberg je nu de bibliotheken in Mijn media, ook over alle gecombineerde servers heen. Een verborgen bibliotheek verdwijnt ook uit zijn rij Nieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W Dostosuj stronę główną możesz teraz porządkować i ukrywać biblioteki w Moje multimedia, także na wszystkich połączonych serwerach. Ukryta biblioteka znika też ze swojego wiersza Najnowsze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em Personalizar início agora você ordena e oculta as bibliotecas de Minha mídia, também em todos os servidores combinados. Uma biblioteca oculta também sai da sua fileira de Novidades."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em Personalizar início podes agora ordenar e ocultar as bibliotecas de A minha biblioteca, também em todos os servidores combinados. Uma biblioteca oculta também sai da sua fila de Novidades."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În Personalizează ecranul principal poți acum ordona și ascunde bibliotecile din Media mea, inclusiv pe toate serverele combinate. O bibliotecă ascunsă dispare și din rândul ei de Noutăți."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В «Настроить главную» теперь можно упорядочивать и скрывать библиотеки в «Моя медиатека», в том числе на всех объединённых серверах. Скрытая библиотека исчезает и из своего ряда «Новое»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V Prispôsobiť domov teraz zoradíš a skryješ knižnice v Moje médiá, aj naprieč všetkými kombinovanými servermi. Skrytá knižnica zmizne aj zo svojho riadka Nové."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I Anpassa hem ordnar och döljer du nu biblioteken i Mina media, även över alla kombinerade servrar. Ett dolt bibliotek försvinner också från sin Senaste-rad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana Ekranı Özelleştir'de artık Medyam'daki kitaplıkları sıralayıp gizleyebilirsin, birleştirilen tüm sunucularda da. Gizlenen bir kitaplık kendi Yeni satırından da çıkar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У «Налаштувати головну» тепер можна впорядковувати й приховувати бібліотеки в «Моя медіатека», зокрема на всіх об’єднаних серверах. Прихована бібліотека зникає і зі свого ряду «Нове»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "现在可以在自定义首页中排列和隐藏我的媒体里的媒体库，合并的所有服务器也适用。隐藏的媒体库也会从其最新行中消失。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在可以在自訂主畫面中排列和隱藏我的媒體裡的媒體庫，合併的所有伺服器也適用。隱藏的媒體庫也會從其最新列中消失。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.libraryOrder.title" : {
+      "comment" : "What's New 1.1.0: title for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uspořádej Moje média"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arranger Mine medier"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Medien anordnen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τακτοποίησε τα Τα πολυμέσα μου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrange My Media"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiza Mi contenido"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Järjestä Oma media"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiser Ma médiathèque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posloži Moji mediji"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Saját média elrendezése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riordina I miei contenuti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイメディアを並べ替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 미디어 정리"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordne Mine medier"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mijn media ordenen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uporządkuj Moje multimedia"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organize Minha mídia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organiza A minha biblioteca"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aranjează Media mea"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Упорядочьте «Моя медиатека»"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usporiadaj Moje médiá"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordna Mina media"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medyam'ı düzenle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Упорядкуйте «Моя медіатека»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理我的媒体"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理我的媒體"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.multiview.body" : {
       "extractionState" : "manual",
       "localizations" : {
