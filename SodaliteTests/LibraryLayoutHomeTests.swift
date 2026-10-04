@@ -35,4 +35,19 @@ struct LibraryLayoutHomeTests {
         ]
         #expect(model.plannedRows(from: configs).map(\.id) == ["libraryLatest:1"])
     }
+
+    private func item(_ id: String, _ name: String, server: String) throws -> JellyfinItem {
+        try JSONDecoder().decode(JellyfinItem.self, from: Data(
+            #"{"Id":"\#(id)","Name":"\#(name)","Type":"BoxSet","ServerId":"\#(server)"}"#.utf8))
+    }
+
+    @Test func sameNameOnTwoServersClashes() throws {
+        let items = [try item("1", "Marvel", server: "a"), try item("2", "marvel", server: "b"), try item("3", "DC", server: "b")]
+        #expect(ServerLabels.clashingItems(items) == [items[0].originKey, items[1].originKey])
+    }
+
+    @Test func sameNameOnOneServerDoesNotClash() throws {
+        let items = [try item("1", "Mix", server: "a"), try item("2", "Mix", server: "a")]
+        #expect(ServerLabels.clashingItems(items).isEmpty)
+    }
 }

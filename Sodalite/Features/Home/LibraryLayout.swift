@@ -99,3 +99,11 @@ extension LibraryLayout {
 
     static func clear(scope: String, defaults: UserDefaults = .standard) { defaults.removeObject(forKey: key(scope)) }
 }
+
+enum ServerLabels {
+    /// Items whose name another server in the same list also uses; those carry their server's name.
+    static func clashingItems(_ items: [JellyfinItem]) -> Set<String> {
+        let groups = Dictionary(grouping: items) { $0.name.lowercased() }
+        return Set(groups.values.filter { Set($0.map { $0.serverID ?? "" }).count > 1 }.flatMap { $0.map(\.originKey) })
+    }
+}

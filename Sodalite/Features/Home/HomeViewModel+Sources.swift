@@ -149,6 +149,13 @@ extension HomeViewModel {
         return sources.first { $0.serverID == owner }?.serverName
     }
 
+    /// Collections and playlists are not deduped, so a same-name pair from two servers needs telling apart.
+    func serverLabel(forItem item: JellyfinItem, in row: HomeRowData) -> String? {
+        guard sources.count > 1, row.type == .collections || row.type == .playlists,
+              ServerLabels.clashingItems(row.items).contains(item.originKey) else { return nil }
+        return sources.first { $0.serverID == (item.serverID ?? sources[0].serverID) }?.serverName
+    }
+
     func serverLabel(forRow row: HomeRowData) -> String? {
         guard let libraryID = row.libraryID else { return nil }
         let matches = myMediaLibraries.filter { $0.id == libraryID }

@@ -355,7 +355,8 @@ struct HomeView: View {
                                 : nil,
                             onItemSelected: { selectedItem = $0 },
                             cardStyle: row.type.cardStyle,
-                            showsSeriesArtwork: cwImage != .still
+                            showsSeriesArtwork: cwImage != .still,
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) }
                         )
                         .focused($focusedRowIndex, equals: idx)
 

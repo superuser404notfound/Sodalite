@@ -13,6 +13,8 @@ struct HorizontalMediaRow: View {
     /// Sodalite#66. The row paints show-level art rather than each item's own still, so the cards
     /// skip the spoiler blur (Continue Watching set to Backdrop or Thumb).
     var showsSeriesArtwork: Bool = false
+    /// Per-card server chip (Sodalite#85).
+    var itemLabel: ((JellyfinItem) -> String?)? = nil
     /// Overrides the tier's row inset so the row can line up with a host screen that insets differently.
     var inset: CGFloat? = nil
 
@@ -55,7 +57,8 @@ struct HorizontalMediaRow: View {
                                 fallbackURL: fallbackURLProvider?(item),
                                 style: cardStyle,
                                 isFocused: isFocused,
-                                showsSeriesArtwork: showsSeriesArtwork
+                                showsSeriesArtwork: showsSeriesArtwork,
+                                serverLabel: itemLabel?(item)
                             )
                         }
                     }
