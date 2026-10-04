@@ -1,0 +1,101 @@
+import Foundation
+
+/// The profile's order and hidden flags for the My Media tiles, one entry per library on each
+/// server (Sodalite#85). Libraries without an entry follow the known ones, visible, in server order.
+nonisolated struct LibraryLayout: Codable, Equatable {
+    struct Entry: Codable, Equatable, Hashable {
+        let serverID: String
+        let libraryID: String
+        var isHidden: Bool
+    }
+
+    var entries: [Entry]
+
+    private static func owner(_ library: JellyfinLibrary, _ fallback: String) -> String {
+        library.serverID ?? fallback
+    }
+
+    private func index(of library: JellyfinLibrary, _ fallback: String) -> Int? {
+        let server = Self.owner(library, fallback)
+        return entries.firstIndex { $0.serverID == server && $0.libraryID == library.id }
+    }
+
+    func ordered(_ libraries: [JellyfinLibrary], fallbackServerID: String) -> [JellyfinLibrary] {
+        let known = libraries.enumerated().compactMap { offset, library in
+            index(of: library, fallbackServerID).map { (position: $0, library: library) }
+        }.sorted { $0.position < $1.position }.map(\.library)
+        let unknown = libraries.filter { index(of: $0, fallbackServerID) == nil }
+        return known + unknown
+    }
+
+    func isHidden(_ library: JellyfinLibrary, fallbackServerID: String) -> Bool {
+        index(of: library, fallbackServerID).map { entries[$0].isHidden } ?? false
+    }
+
+    func visible(_ libraries: [JellyfinLibrary], fallbackServerID: String) -> [JellyfinLibrary] {
+        ordered(libraries, fallbackServerID: fallbackServerID).filter { !isHidden($0, fallbackServerID: fallbackServerID) }
+    }
+
+    /// Writes every listed library into the layout in its current order, keeping entries of
+    /// libraries that are not listed right now (a server that did not answer in time).
+    private func materialized(_ libraries: [JellyfinLibrary], _ fallback: String) -> LibraryLayout {
+        var result = self
+        for library in ordered(libraries, fallbackServerID: fallback) where result.index(of: library, fallback) == nil {
+            result.entries.append(Entry(serverID: Self.owner(library, fallback), libraryID: library.id, isHidden: false))
+        }
+        return result
+    }
+
+    func toggling(_ library: JellyfinLibrary, in libraries: [JellyfinLibrary], fallbackServerID: String) -> LibraryLayout {
+        var result = materialized(libraries, fallbackServerID)
+        if let i = result.index(of: library, fallbackServerID) { result.entries[i].isHidden.toggle() }
+        return result
+    }
+
+    func moving(
+        _ library: JellyfinLibrary, toIndexAmongVisible target: Int, in libraries: [JellyfinLibrary], fallbackServerID: String
+    ) -> LibraryLayout {
+        var result = materialized(libraries, fallbackServerID)
+        guard let from = result.index(of: library, fallbackServerID) else { return result }
+        let moved = result.entries.remove(at: from)
+        let visibleNow = result.visible(libraries, fallbackServerID: fallbackServerID)
+        if target < visibleNow.count, let anchor = result.index(of: visibleNow[target], fallbackServerID) {
+            result.entries.insert(moved, at: anchor)
+        } else if let last = visibleNow.last, let anchor = result.index(of: last, fallbackServerID) {
+            result.entries.insert(moved, at: anchor + 1)
+        } else {
+            result.entries.append(moved)
+        }
+        return result
+    }
+
+    /// A "Latest in X" row goes only while every copy of its library is hidden: one id on two
+    /// servers is one merged row.
+    func hidesLatestRow(libraryID: String) -> Bool {
+        let copies = entries.filter { $0.libraryID == libraryID }
+        return !copies.isEmpty && copies.allSatisfy(\.isHidden)
+    }
+}
+
+extension LibraryLayout {
+    private static func key(_ scope: String) -> String { "homeLibraryLayout.\(scope)" }
+
+    static func load(scope: String, defaults: UserDefaults = .standard) -> LibraryLayout {
+        guard let data = rawData(scope: scope, defaults: defaults),
+              let layout = try? JSONDecoder().decode(LibraryLayout.self, from: data) else { return LibraryLayout(entries: []) }
+        return layout
+    }
+
+    func save(scope: String, defaults: UserDefaults = .standard) {
+        guard let data = try? JSONEncoder().encode(self) else { return }
+        Self.setRawData(data, scope: scope, defaults: defaults)
+    }
+
+    static func rawData(scope: String, defaults: UserDefaults = .standard) -> Data? { defaults.data(forKey: key(scope)) }
+
+    static func setRawData(_ data: Data, scope: String, defaults: UserDefaults = .standard) {
+        defaults.set(data, forKey: key(scope))
+    }
+
+    static func clear(scope: String, defaults: UserDefaults = .standard) { defaults.removeObject(forKey: key(scope)) }
+}
