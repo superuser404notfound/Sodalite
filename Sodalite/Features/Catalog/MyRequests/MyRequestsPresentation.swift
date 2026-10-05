@@ -20,6 +20,51 @@ enum MyRequestsPresentationPolicy {
     }
 }
 
+/// What the panel does on each user or system step. Navigation waits for the cover to be gone,
+/// because a detail cover cannot present while the panel is still on screen.
+struct MyRequestsPanelFlow {
+    enum Action: Equatable {
+        case none
+        case dismissPanel
+        case navigate(String)
+    }
+
+    struct Dismissal: Equatable {
+        let markSeen: Bool
+        let deepLink: String?
+    }
+
+    private var pendingItemID: String?
+    private var silent = false
+
+    mutating func watch(_ itemID: String) -> Action {
+        pendingItemID = itemID
+        return .dismissPanel
+    }
+
+    mutating func bannerOpened(_ itemID: String, panelPresented: Bool) -> Action {
+        guard panelPresented else { return .navigate(itemID) }
+        pendingItemID = itemID
+        return .dismissPanel
+    }
+
+    /// Leaving the app takes the panel down without counting it as read, so it comes back on return
+    /// and never sits under the profile reprompt.
+    mutating func didEnterBackground(panelPresented: Bool) -> Action {
+        guard panelPresented else { return .none }
+        silent = true
+        return .dismissPanel
+    }
+
+    mutating func panelDidDismiss() -> Dismissal {
+        defer {
+            pendingItemID = nil
+            silent = false
+        }
+        return Dismissal(markSeen: !silent, deepLink: silent ? nil : pendingItemID)
+    }
+}
+
 private struct MyRequestsTickKey: Equatable {
     let scope: String?
     let connected: Bool
@@ -32,8 +77,17 @@ private struct MyRequestsPresentation: ViewModifier {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
     @Environment(\.scenePhase) private var scenePhase
-    @State private var isPresented = false
+    @State private var flow = MyRequestsPanelFlow()
     @State private var retryPending = false
+
+    private var isPresented: Bool { appState.isMyRequestsPanelPresented }
+
+    private var presentedBinding: Binding<Bool> {
+        Binding(
+            get: { appState.isMyRequestsPanelPresented },
+            set: { appState.isMyRequestsPanelPresented = $0 }
+        )
+    }
 
     private var watcher: MyRequestsWatcher { dependencies.myRequestsWatcher }
 
@@ -68,27 +122,23 @@ private struct MyRequestsPresentation: ViewModifier {
             }
             .onReceive(NotificationCenter.default.publisher(for: .myRequestNotificationOpened)) { note in
                 guard let itemID = note.userInfo?["itemID"] as? String else { return }
-                clear()
-                appState.pendingDeepLinkItemID = itemID
+                perform(flow.bannerOpened(itemID, panelPresented: isPresented))
             }
             .onChange(of: watcher.unseenEvents.count) { _, _ in evaluate() }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .background, watcher.isEnabled { MyRequestsBackgroundRefresh.schedule() }
+                guard phase == .background else { return }
+                perform(flow.didEnterBackground(panelPresented: isPresented))
+                if watcher.isEnabled { MyRequestsBackgroundRefresh.schedule() }
             }
-            .menuPresentation(isPresented: $isPresented, onDismiss: {
-                if !watcher.unseenEvents.isEmpty { clear() }
+            .menuPresentation(isPresented: presentedBinding, onDismiss: {
+                let dismissal = flow.panelDidDismiss()
+                if dismissal.markSeen { clear() }
+                if let itemID = dismissal.deepLink { appState.pendingDeepLinkItemID = itemID }
             }) {
                 MyRequestsHintView(
                     events: watcher.unseenEvents,
-                    onWatch: { itemID in
-                        isPresented = false
-                        clear()
-                        appState.pendingDeepLinkItemID = itemID
-                    },
-                    onDone: {
-                        isPresented = false
-                        clear()
-                    }
+                    onWatch: { itemID in perform(flow.watch(itemID)) },
+                    onDone: { appState.isMyRequestsPanelPresented = false }
                 )
             }
     }
@@ -102,7 +152,7 @@ private struct MyRequestsPresentation: ViewModifier {
             loading: appState.isLoading,
             modalActive: modalActive
         ) {
-            isPresented = true
+            appState.isMyRequestsPanelPresented = true
         } else if modalActive, !PlayerModalPresence.isPlayerActive, !retryPending {
             // What's New or a picker is up and has no close signal of its own: look again shortly.
             retryPending = true
@@ -111,6 +161,18 @@ private struct MyRequestsPresentation: ViewModifier {
                 retryPending = false
                 evaluate()
             }
+        }
+    }
+
+    private func perform(_ action: MyRequestsPanelFlow.Action) {
+        switch action {
+        case .none:
+            break
+        case .dismissPanel:
+            appState.isMyRequestsPanelPresented = false
+        case .navigate(let itemID):
+            clear()
+            appState.pendingDeepLinkItemID = itemID
         }
     }
 

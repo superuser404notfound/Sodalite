@@ -472,6 +472,12 @@ struct AppRouter: View {
         }
         // The pending id stays: this task re-fires when the reprompt closes, for the profile it let in.
         guard !holdForReprompt() else { return }
+        if appState.isMyRequestsPanelPresented {
+            // Same host: the detail cover cannot land until the panel's own dismissal has finished.
+            appState.isMyRequestsPanelPresented = false
+            try? await Task.sleep(for: .milliseconds(450))
+            guard !Task.isCancelled else { return }
+        }
         // Dismiss any active player before the new sheet (TopShelf often fires over a backgrounded paused player, else its modal stays on top of the new cover). Two-step: (1) bump requestPlayerDismissal so detail views flip showPlayer (keeps the binding path consistent on return); (2) walk the modal chain to dismiss PlayerHostController directly, since binding-driven dismiss proved unreliable across scene-foreground.
         // A deep link is deliberate navigation: drop a server-switch cover (abandon the pending
         // switch) and cancel any PIN challenge started from it, else its continuation later runs a
@@ -525,7 +531,8 @@ struct AppRouter: View {
         guard let backgroundedAt else { return }
         // Never arm over a sibling cover (one fullScreenCover per host view). A deep link in flight
         // does not stop it, it waits behind it.
-        guard deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew, profileCover == nil
+        guard deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew, profileCover == nil,
+              !appState.isMyRequestsPanelPresented
         else { return }
         guard let server = appState.activeServer else { return }
         let should = ProfileRepromptPolicy.shouldReprompt(

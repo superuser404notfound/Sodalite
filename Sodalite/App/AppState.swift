@@ -49,6 +49,10 @@ final class AppState {
     /// True while a deep-link is in flight; AppRouter overlays a loading view so the prior detail view doesn't flash.
     var isResolvingDeepLink: Bool = false
 
+    /// The my-requests panel, a cover on AppRouter's host like the deep-link, What's New and profile
+    /// covers; those check it so two covers never race for the same host.
+    var isMyRequestsPanelPresented = false
+
     /// True while this device withholds Local Network access, which makes every LAN server
     /// unreachable from this app alone while the same address still works in Safari (Sodalite#92).
     /// Written only by `LocalNetworkAccess`, and only after it asked the system rather than read the
