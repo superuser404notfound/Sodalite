@@ -547,6 +547,13 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
     let supportsDirectStream: Bool?
     let supportsTranscoding: Bool?
     let mediaStreams: [MediaStream]?
+    /// `MediaSourceType`: Default, Grouping or Placeholder.
+    let type: String?
+
+    /// A stand-in for versions the server resolves later. AIOMetadata's emulated Jellyfin lists two
+    /// of them on every item ("Streams load when played", "Load the stream list") and swaps the real
+    /// ones in when the item is fetched asking for `MediaSources`.
+    var isPlaceholder: Bool { type == "Placeholder" }
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -559,10 +566,23 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
         case supportsDirectStream = "SupportsDirectStream"
         case supportsTranscoding = "SupportsTranscoding"
         case mediaStreams = "MediaStreams"
+        case type = "Type"
     }
 }
 
 extension JellyfinItem {
+    /// The versions a viewer can choose between. Placeholders are no version.
+    var selectableMediaSources: [MediaSource] {
+        mediaSources?.filter { !$0.isPlaceholder } ?? []
+    }
+
+    /// Whether the item still lacks its per-file detail: a slim list entry carries neither streams
+    /// nor sources, and one that carries only placeholders has not been resolved yet.
+    var awaitsMediaDetail: Bool {
+        guard let sources = mediaSources else { return mediaStreams == nil }
+        return !sources.isEmpty && sources.allSatisfy(\.isPlaceholder)
+    }
+
     /// The `MediaSource` actually playing, resolved from the engine-picked id (`PlayerViewModel.mediaSourceID`).
     /// Multi-version items carry several `mediaSources`; consumers that show per-version detail (Stats overlay,
     /// issue #37) must reflect the picked version, not the primary/first one. Falls back to the first source when

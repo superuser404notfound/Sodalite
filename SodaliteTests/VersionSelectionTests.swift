@@ -140,4 +140,43 @@ struct VersionSelectionTests {
         selection.choose(try #require(item.mediaSources?.first), for: item)
         #expect(selection.preferredSourceID(for: nil) == nil)
     }
+
+    // MARK: - Placeholder sources
+
+    /// AIOMetadata's emulated Jellyfin lists every episode with two placeholder sources and resolves
+    /// the real ones only on a detail fetch. The episode panel enriched only items with no sources at
+    /// all, so it kept the placeholders and offered them as versions.
+    private static let placeholderEpisodeJSON = #"""
+    {"Id":"episode-3","Name":"Threads","Type":"Episode",
+     "MediaSources":[
+       {"Id":"episode-3","Name":"Streams load when played","Type":"Placeholder","Container":"mp4"},
+       {"Id":"marker-3","Name":"Load the stream list","Type":"Placeholder","Container":"mp4"}
+     ]}
+    """#
+
+    @Test func placeholderSourcesAreNoVersions() throws {
+        let item = try decode(Self.placeholderEpisodeJSON)
+        #expect(!VersionSelection.isOffered(for: item))
+        #expect(VersionSelection().preferredSourceID(for: item) == nil)
+    }
+
+    @Test func anItemCarryingOnlyPlaceholdersAwaitsDetail() throws {
+        #expect(try decode(Self.placeholderEpisodeJSON).awaitsMediaDetail)
+        #expect(try decode(#"{"Id":"slim","Name":"Slim","Type":"Episode"}"#).awaitsMediaDetail)
+        #expect(!(try decode(Self.otherEpisodeJSON).awaitsMediaDetail))
+    }
+
+    /// A resolved item can still trail a placeholder (AIOMetadata appends stream notices after the
+    /// playable sources); the choice is between the real ones only.
+    @Test func trailingPlaceholdersStayOutOfTheChoice() throws {
+        let item = try decode(#"""
+        {"Id":"e","Name":"E","Type":"Episode",
+         "MediaSources":[
+           {"Id":"e","Name":"1080p","Type":"Default"},
+           {"Id":"notice","Name":"Not cached yet","Type":"Placeholder"}
+         ]}
+        """#)
+        #expect(!VersionSelection.isOffered(for: item))
+        #expect(!item.awaitsMediaDetail)
+    }
 }

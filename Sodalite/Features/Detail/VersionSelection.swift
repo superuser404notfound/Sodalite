@@ -23,7 +23,9 @@ struct VersionSelection: Equatable {
     /// only where there is nothing to choose, so a single-source item keeps the exact path it had
     /// before any of this existed.
     func preferredSourceID(for item: JellyfinItem?) -> String? {
-        guard let item, let sources = item.mediaSources, sources.count > 1 else { return nil }
+        guard let item else { return nil }
+        let sources = item.selectableMediaSources
+        guard sources.count > 1 else { return nil }
         if targetID == item.id, let chosenID, sources.contains(where: { $0.id == chosenID }) {
             return chosenID
         }
@@ -51,9 +53,9 @@ struct VersionSelection: Equatable {
         #endif
     }
 
-    /// Two sources are what makes a choice; one, or a slim item whose query never asked for
-    /// `MediaSources`, gets no button.
+    /// Two sources are what makes a choice; one, a slim item whose query never asked for
+    /// `MediaSources`, or one still carrying placeholders, gets no button.
     static func isOffered(for item: JellyfinItem) -> Bool {
-        (item.mediaSources?.count ?? 0) > 1
+        item.selectableMediaSources.count > 1
     }
 }
