@@ -20,6 +20,13 @@ nonisolated enum MyRequestsBackgroundRefresh {
         }
     }
 
+    /// A background launch often has no session restored yet; only a profile that switched the
+    /// feature off ends the chain, an unknown one keeps it alive for the next try.
+    static func keepScheduling(scope: String?, notifyEnabled: (String) -> Bool) -> Bool {
+        guard let scope else { return true }
+        return notifyEnabled(scope)
+    }
+
     static func schedule() {
         let request = BGAppRefreshTaskRequest(identifier: identifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: earliestInterval)

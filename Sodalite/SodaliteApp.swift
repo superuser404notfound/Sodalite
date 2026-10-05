@@ -44,11 +44,21 @@ struct SodaliteApp: App {
         let watcherDeps = dependencies
         MyRequestsBackgroundRefresh.register {
             let watcher = watcherDeps.myRequestsWatcher
-            watcher.reloadForActiveProfile()
-            guard watcher.isEnabled else { return false }
-            await watcher.refresh()
-            await watcherDeps.syncAppIconBadge()
-            return true
+            // A cold background launch restores the session (and the Seerr connection) on its own
+            // schedule; give it a bounded moment instead of ending the chain on the first look.
+            let deadline = ContinuousClock.now + .seconds(20)
+            while !watcher.isEnabled, ContinuousClock.now < deadline, !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+            if watcher.isEnabled {
+                watcher.reloadForActiveProfile()
+                await watcher.refresh()
+                await watcherDeps.syncAppIconBadge()
+            }
+            return MyRequestsBackgroundRefresh.keepScheduling(
+                scope: watcherDeps.myRequestsScope,
+                notifyEnabled: { watcherDeps.seerrNotificationPreferences.notifyMyRequests(scope: $0) }
+            )
         }
 
         #if os(iOS)

@@ -33,3 +33,12 @@ struct MyRequestsPresentationTests {
     }
 }
 
+
+@MainActor
+struct MyRequestsBackgroundPolicyTests {
+    @Test func keepsSchedulingUnlessTheProfileSwitchedItOff() {
+        #expect(MyRequestsBackgroundRefresh.keepScheduling(scope: nil, notifyEnabled: { _ in false }))
+        #expect(MyRequestsBackgroundRefresh.keepScheduling(scope: "s_a", notifyEnabled: { _ in true }))
+        #expect(!MyRequestsBackgroundRefresh.keepScheduling(scope: "s_a", notifyEnabled: { _ in false }))
+    }
+}
