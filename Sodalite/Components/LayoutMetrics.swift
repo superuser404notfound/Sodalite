@@ -58,6 +58,12 @@ struct LayoutMetrics: Equatable {
         gridMinimum * cardScale
     }
 
+    /// The same minimum for a grid of another card shape, kept in the poster's card-to-column
+    /// proportion so each tier's tuning carries over.
+    func gridColumnMinimum(for style: MediaCardStyle, cardScale: CGFloat) -> CGFloat {
+        gridColumnMinimum(cardScale: cardScale) * size(for: style).width / posterSize.width
+    }
+
     /// The leading edge a browse row shares with its heading, and through the rows with every
     /// other screen of the app.
     ///

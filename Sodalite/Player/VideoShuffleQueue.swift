@@ -30,6 +30,8 @@ enum VideoShuffleQueue {
         query.filters = nil
         // A library grid may defer collection grouping to the server (Sodalite#44); a collapsed BoxSet in the queue is not playable, so shuffle always takes the flat list.
         query.collapseBoxSetItems = false
+        // A folder-browsed grid lists one level; its shuffle draws from the whole tree beneath it (Sodalite#180).
+        query.recursive = true
         // Never inherit the grid's card-sized field set: these items go to PlayerViewModel as they
         // are, including on auto-advance, and it reads chapters/trickplay/mediaStreams/mediaSources
         // straight off the queue entry (Sodalite#68).

@@ -119,6 +119,20 @@ final class JellyfinImageService {
         return nil
     }
 
+    /// 16:9 card art in a folder-browsed library (Sodalite#180). A video's own primary is already its
+    /// still; a folder's primary is usually a portrait or a square channel avatar, so its thumb and
+    /// backdrop go first and the primary is the last resort.
+    func folderBrowseArtworkURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.wideCard) -> URL? {
+        guard item.type == .folder else { return episodeThumbnailURL(for: item, maxWidth: maxWidth) }
+        if let tag = item.imageTags?.thumb {
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .thumb, tag: tag, maxWidth: maxWidth)
+        }
+        if let tag = item.backdropImageTags?.first {
+            return imageURL(itemID: item.id, serverID: item.serverID, imageType: .backdrop, tag: tag, maxWidth: maxWidth)
+        }
+        return posterURL(for: item, maxWidth: maxWidth)
+    }
+
     func posterURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.card) -> URL? {
         if let tag = item.imageTags?.primary {
             return imageURL(itemID: item.id, serverID: item.serverID, imageType: .primary, tag: tag, maxWidth: maxWidth)
