@@ -2,6 +2,10 @@ import Foundation
 
 /// Turns two looks at the user's own requests into the changes worth telling them about.
 enum MyRequestsDiff {
+    /// Entries kept per profile. Requests outside the fetched page keep theirs, so one that an
+    /// approval bumps back into the page is still compared against what was seen before.
+    static let snapshotLimit = 300
+
     static func apply(
         snapshot: MyRequestsSnapshot?,
         observations: [MyRequestObservation],
@@ -13,6 +17,11 @@ enum MyRequestsDiff {
         for observation in own {
             next.entries[observation.requestID] = entry(for: observation)
         }
+        let carried = (snapshot?.entries ?? [:])
+            .filter { next.entries[$0.key] == nil }
+            .sorted { $0.key > $1.key }
+            .prefix(max(0, snapshotLimit - next.entries.count))
+        for (id, entry) in carried { next.entries[id] = entry }
         guard let snapshot else { return ([], next) }
 
         var events: [MyRequestEvent] = []
@@ -21,8 +30,10 @@ enum MyRequestsDiff {
             if let known = snapshot.entries[observation.requestID] {
                 prior = known
             } else if let created = observation.createdAt, created > snapshot.baselineDate {
-                // Made after we started watching (another device, or while this one slept): it was pending once.
-                prior = .init(requestStatus: SeerrRequestStatus.pendingApproval.rawValue, mediaStatus: nil, availableSeasons: [])
+                // Made after we started watching, on this device or another: its status is news to
+                // nobody (it may be the user's own auto-approved click), but its arrival on the
+                // server is, so only availability is compared.
+                prior = .init(requestStatus: observation.requestStatus.rawValue, mediaStatus: nil, availableSeasons: [])
             } else {
                 continue
             }

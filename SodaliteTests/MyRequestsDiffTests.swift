@@ -107,11 +107,33 @@ struct MyRequestsDiffTests {
         #expect(result.snapshot.entries[5] != nil)
     }
 
-    @Test func vanishedRequestsArePruned() {
-        let snap = baseline([obs(id: 1), obs(id: 2)])
+    @Test func requestsOutsideTheFetchedWindowKeepTheirEntry() {
+        // Users with more than one page: an old request drops out of the window, then an approval
+        // bumps its modification date back in. It must still be compared against what we saw.
+        let snap = baseline([obs(id: 1, created: Date(timeIntervalSince1970: 500)), obs(id: 2)])
+        let windowed = MyRequestsDiff.apply(snapshot: snap, observations: [obs(id: 2)], selfID: me, now: t1)
+        #expect(windowed.snapshot.entries.keys.sorted() == [1, 2])
+        #expect(windowed.snapshot.baselineDate == t0)
+        let back = MyRequestsDiff.apply(snapshot: windowed.snapshot, observations: [obs(id: 1, created: Date(timeIntervalSince1970: 500), status: .approved)], selfID: me, now: t1)
+        #expect(back.events.map(\.kind) == [.approved])
+    }
+
+    @Test func snapshotIsCappedKeepingNewestRequests() {
+        var snap = baseline([])
+        snap.entries = Dictionary(uniqueKeysWithValues: (1...600).map { ($0, MyRequestsSnapshot.Entry(requestStatus: 2, mediaStatus: 3, availableSeasons: [])) })
         let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(id: 1)], selfID: me, now: t1)
-        #expect(result.snapshot.entries.keys.sorted() == [1])
-        #expect(result.snapshot.baselineDate == t0)
+        #expect(result.snapshot.entries.count == MyRequestsDiff.snapshotLimit)
+        #expect(result.snapshot.entries[1] != nil)
+        #expect(result.snapshot.entries[600] != nil)
+        #expect(result.snapshot.entries[2] == nil)
+    }
+
+    @Test func ownFreshAutoApprovedRequestIsNotAnnouncedAsApproved() {
+        // An admin (or auto-approve user) submits on this device: the request is already approved
+        // the first time we see it, and nobody needs to be told about their own click.
+        let snap = baseline([])
+        let fresh = obs(id: 6, created: Date(timeIntervalSince1970: 3_000), status: .approved, media: .processing)
+        #expect(MyRequestsDiff.apply(snapshot: snap, observations: [fresh], selfID: me, now: t1).events.isEmpty)
     }
 
     @Test func observationFromWirePayloadParsesDateAndSeasons() throws {

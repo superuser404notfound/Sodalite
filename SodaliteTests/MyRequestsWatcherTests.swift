@@ -103,6 +103,45 @@ struct MyRequestsWatcherTests {
         #expect(watcher.unseenEvents.isEmpty)
         #expect(prefs.unseenMyRequestEvents(scope: "s_a").isEmpty)
     }
+
+    @Test func showLeavingAvailabilityKeepsItsLandedSeasons() async {
+        let (watcher, _) = makeWatcher()
+        watcher.onNewEvents = { _ in }
+        watcher.fetchRequests = { _ in [Self.request(id: 3, type: "tv", status: 2, media: 3, seasons: [1])] }
+        await watcher.refresh()
+        watcher.fetchRequests = { _ in [Self.request(id: 3, type: "tv", status: 2, media: 5, seasons: [1])] }
+        await watcher.refresh()
+        #expect(watcher.unseenEvents.count == 1)
+        watcher.markAllSeen()
+        // Another user requests a new season: the show drops back to processing, then partial again.
+        watcher.fetchRequests = { _ in [Self.request(id: 3, type: "tv", status: 2, media: 3, seasons: [1])] }
+        await watcher.refresh()
+        watcher.fetchRequests = { _ in [Self.request(id: 3, type: "tv", status: 2, media: 4, seasons: [1])] }
+        watcher.lookupMedia = { _, _ in MyRequestsMediaLookup(title: "Show", posterPath: nil, jellyfinItemID: "jf", availableSeasons: [1]) }
+        await watcher.refresh()
+        #expect(watcher.unseenEvents.isEmpty)
+    }
+
+    @Test func refreshRequestedDuringARefreshRunsAgain() async {
+        let (watcher, _) = makeWatcher()
+        watcher.onNewEvents = { _ in }
+        let calls = ActiveScope()
+        calls.value = "0"
+        watcher.fetchRequests = { _ in
+            let n = Int(calls.value ?? "0")! + 1
+            calls.set(String(n))
+            if n == 1 {
+                // A second trigger lands while the first fetch is still out.
+                Task { await watcher.refresh() }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(50))
+            }
+            return []
+        }
+        await watcher.refresh()
+        #expect(calls.value == "2")
+    }
+
 }
 
 @MainActor

@@ -27,6 +27,7 @@ final class MyRequestsWatcher {
 
     @ObservationIgnored private let preferences: SeerrNotificationPreferences
     @ObservationIgnored private var isRefreshing = false
+    @ObservationIgnored private var rerunRequested = false
     @ObservationIgnored private var lookupCache: [String: MyRequestsMediaLookup] = [:]
 
     init(preferences: SeerrNotificationPreferences) {
@@ -47,11 +48,24 @@ final class MyRequestsWatcher {
         unseenEvents = preferences.unseenMyRequestEvents(scope: scope)
     }
 
+    /// A call that lands while one is in flight is not dropped: the running one goes round once more,
+    /// so a submit or profile switch during a tick still gets a fresh look.
     func refresh() async {
-        guard isEnabled, let scope = scope(), let selfID = selfSeerrID(), !isRefreshing else { return }
+        guard !isRefreshing else {
+            rerunRequested = true
+            return
+        }
         isRefreshing = true
-        lookupCache = [:]
         defer { isRefreshing = false }
+        repeat {
+            rerunRequested = false
+            await refreshOnce()
+        } while rerunRequested
+    }
+
+    private func refreshOnce() async {
+        guard isEnabled, let scope = scope(), let selfID = selfSeerrID() else { return }
+        lookupCache = [:]
 
         guard let requests = try? await fetchRequests(selfID), scope == self.scope() else { return }
         let own = requests.filter { $0.requestedBy?.id == selfID }
@@ -113,7 +127,8 @@ final class MyRequestsWatcher {
             guard let lookup = await lookup(.tv, tmdbID) else { return known }
             return lookup.availableSeasons.intersection(requested)
         default:
-            return []
+            // Dropping back (a new season requested elsewhere, a rescan) does not un-land a season.
+            return known
         }
     }
 
