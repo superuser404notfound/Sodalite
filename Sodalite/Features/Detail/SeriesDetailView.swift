@@ -192,8 +192,7 @@ struct SeriesDetailView: View {
         guard let episode = selectedEpisode else { return false }
         // Mirrors the enrichment trigger: an episode already carrying streams is fully detailed, so
         // a missing overview is final (Sodalite#15).
-        return episode.mediaStreams == nil
-            && episode.mediaSources == nil
+        return episode.awaitsMediaDetail
             && !settledEpisodeDetailIDs.contains(episode.id)
     }
 
@@ -448,10 +447,10 @@ struct SeriesDetailView: View {
         .defaultFocus($playButtonFocused, true)
         .onChange(of: selectedEpisode?.id) { _, newID in
             updateBackdropURL()
-            // Episode lists are slim (no MediaStreams/MediaSources); on opening into episode mode pull full detail and swap in (same id) so the TechInfoBox can render codec/resolution.
+            // Episode lists are slim (no MediaStreams/MediaSources, or placeholder sources on a lazy server); on opening into episode mode pull full detail and swap in (same id) so the TechInfoBox and the version button see the real files.
             guard let newID, let vm = viewModel,
                   let episode = selectedEpisode, episode.id == newID,
-                  episode.mediaStreams == nil, episode.mediaSources == nil else { return }
+                  episode.awaitsMediaDetail else { return }
             Task {
                 let enriched = await vm.enrichedEpisode(for: episode)
                 if selectedEpisode?.id == enriched.id {
@@ -965,8 +964,8 @@ struct SeriesDetailView: View {
             // roots take their target from the slim episode list, which carries no MediaSources, so
             // in practice it appears in the episode panel once enrichment lands (Sodalite#139).
             if let target = playTarget(vm: vm),
-               VersionSelection.isOffered(for: target),
-               let sources = target.mediaSources {
+               VersionSelection.isOffered(for: target) {
+                let sources = target.selectableMediaSources
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
