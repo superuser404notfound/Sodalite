@@ -450,11 +450,11 @@ struct SeerrSettingsView: View {
             if let serverID = dependencies.activeServer?.id, let userID = dependencies.activeUserID {
                 prefs.setLastSeenPendingCount(count, jellyfinServerID: serverID, jellyfinUserID: userID)
             }
-            await PendingRequestsNotifier.setBadgeCount(count)
+            await dependencies.syncAppIconBadge()
         } else {
             prefs.notifyPendingRequests = false
             PendingRequestsBackgroundRefresh.cancel()
-            await PendingRequestsNotifier.setBadgeCount(0)
+            await dependencies.syncAppIconBadge()
         }
     }
     #endif

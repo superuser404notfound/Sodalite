@@ -26,6 +26,9 @@ extension Notification.Name {
     /// so the pending-requests monitor recomputes the Catalog tab badge.
     static let seerrPendingRequestsShouldRefresh = Notification.Name("seerrPendingRequestsShouldRefresh")
 
+    /// iOS: the user tapped a my-request banner; userInfo["itemID"] is the Jellyfin item to open.
+    static let myRequestNotificationOpened = Notification.Name("myRequestNotificationOpened")
+
     /// Posted by CloudSyncService after remote changes were applied locally, so
     /// server lists, pickers, and settings screens refresh.
     static let cloudSyncDidApplyChanges = Notification.Name("cloudSyncDidApplyChanges")

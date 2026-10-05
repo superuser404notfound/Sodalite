@@ -88,7 +88,9 @@ struct CloudSyncSettingsParityTests {
 
     @Test func everySeerrNotificationSettingIsInThePayload() {
         let store = SeerrNotificationPreferences(defaults: scratchDefaults("seerr"))
-        #expect(storedSettingNames(of: store) == payloadFieldNames(.seerrNotifications))
+        // The my-requests switch is per profile and device-local by design; its revision only re-renders rows.
+        let stored = storedSettingNames(of: store).subtracting(["myRequestsRevision"])
+        #expect(stored == payloadFieldNames(.seerrNotifications))
     }
 
     @Test func everyParentalControlsSettingIsInThePayload() {

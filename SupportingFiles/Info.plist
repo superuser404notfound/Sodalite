@@ -39,6 +39,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>de.superuser404.Sodalite.pendingRequestsRefresh</string>
+		<string>de.superuser404.Sodalite.myRequestsRefresh</string>
 		<string>de.superuser404.Sodalite.downloads.progress</string>
 	</array>
 	<key>CFBundleURLTypes</key>

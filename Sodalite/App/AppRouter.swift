@@ -95,7 +95,8 @@ struct AppRouter: View {
             monitor: dependencies.pendingRequestsMonitor,
             preferences: dependencies.seerrNotificationPreferences,
             jellyfinServerID: dependencies.activeServer?.id,
-            jellyfinUserID: dependencies.activeUserID
+            jellyfinUserID: dependencies.activeUserID,
+            syncBadge: { await dependencies.syncAppIconBadge() }
         )
         #else
         await dependencies.pendingRequestsMonitor.refresh()
