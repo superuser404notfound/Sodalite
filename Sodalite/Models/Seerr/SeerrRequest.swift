@@ -32,6 +32,8 @@ struct SeerrRequestMedia: Codable, Sendable, Equatable {
     let status: SeerrMediaStatus?
     /// Sonarr/Radarr server id the media is attached to.
     let serviceId: Int?
+    /// Written by Jellyseerr's library scan; absent on Overseerr and on unmatched titles.
+    let jellyfinMediaId: String?
 }
 
 struct SeerrRequestSeason: Codable, Sendable, Identifiable, Equatable {

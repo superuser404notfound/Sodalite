@@ -48,7 +48,7 @@ protocol SeerrRequestServiceProtocol: Sendable {
         tags: [Int]?
     ) async throws -> SeerrRequest
 
-    func myRequests(userID: Int, take: Int, skip: Int) async throws -> SeerrRequestsResult
+    func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult
 
     /// Admin queue (all users, status-filtered); needs MANAGE_REQUESTS/ADMIN in `SeerrUser.permissions`. A revoked permission surfaces 403 as `APIError.unauthorized`.
     func allRequests(
@@ -128,9 +128,9 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
         }
     }
 
-    func myRequests(userID: Int, take: Int = 50, skip: Int = 0) async throws -> SeerrRequestsResult {
+    func myRequests(userID: Int, take: Int = 50, skip: Int = 0, sort: SeerrRequestSort = .added) async throws -> SeerrRequestsResult {
         try await client.request(
-            endpoint: SeerrEndpoint.myRequests(userID: userID, take: take, skip: skip),
+            endpoint: SeerrEndpoint.myRequests(userID: userID, take: take, skip: skip, sort: sort),
             responseType: SeerrRequestsResult.self
         )
     }

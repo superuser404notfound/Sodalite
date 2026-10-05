@@ -50,7 +50,7 @@ struct MediaDeletionRequestCleanupTests {
         var deleted: [Int] = []
         var throwOnDelete = false
         func createRequest(mediaType: SeerrMediaType, tmdbID: Int, seasons: [Int]?, serverID: Int?, profileID: Int?, rootFolder: String?, languageProfileID: Int?, tags: [Int]?) async throws -> SeerrRequest { throw Boom() }
-        func myRequests(userID: Int, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
+        func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult { throw Boom() }
         func allRequests(filter: SeerrRequestFilter, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
         func approveRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func declineRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
