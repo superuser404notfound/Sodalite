@@ -196,6 +196,8 @@ struct MediaCard: View {
         case .episode: "play.rectangle"
         case .season: "tv"
         case .musicAlbum, .audio: "music.note"
+        case .video: "play.rectangle"
+        case .folder: "folder"
         default: "photo"
         }
     }

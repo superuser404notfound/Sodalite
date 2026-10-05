@@ -23,6 +23,28 @@ enum MyMediaLibraries {
         type == .boxsets || type == .playlists
     }
 
+    /// A home-video library is a tree of folders the server types no further than `Folder` and
+    /// `Video`, so it is walked like Jellyfin's own client does, one level per screen, rather than
+    /// queried by type; a Movie/Series query over it came back empty (Sodalite#180).
+    static func browsesFolders(_ type: LibraryType) -> Bool {
+        type == .homevideos
+    }
+
+    /// One level of a folder-browsed library: the folder's direct children, folders and videos only
+    /// (the photos the library may also hold have nothing to open into).
+    static func folderQuery(parentID: String) -> ItemQuery {
+        var query = ItemQuery(
+            parentID: parentID,
+            includeItemTypes: [.folder, .video],
+            sortBy: "SortName",
+            sortOrder: "Ascending",
+            limit: 200,
+            fields: JellyfinEndpoint.homeRowFields
+        )
+        query.recursive = false
+        return query
+    }
+
     static func itemTypes(for type: LibraryType) -> [ItemType] {
         switch type {
         case .movies: [.movie]

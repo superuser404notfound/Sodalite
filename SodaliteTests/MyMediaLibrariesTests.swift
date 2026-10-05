@@ -42,7 +42,8 @@ struct MyMediaLibrariesTests {
         #expect(MyMediaLibraries.itemTypes(for: .tvshows) == [.series])
         #expect(MyMediaLibraries.itemTypes(for: .boxsets) == [.boxSet])
         #expect(MyMediaLibraries.itemTypes(for: .playlists) == [.playlist])
-        // A mixed or home-video library carries both kinds and has no type of its own to ask for.
+        // A mixed library carries both kinds and has no type of its own to ask for. A home-video
+        // library never asks by type, it browses by folder (FolderBrowseTests).
         #expect(MyMediaLibraries.itemTypes(for: .homevideos) == [.movie, .series])
         #expect(MyMediaLibraries.itemTypes(for: .unknown) == [.movie, .series])
     }

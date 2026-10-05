@@ -64963,6 +64963,330 @@
         }
       }
     },
+    "changelog.1_1_0.homeVideos.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knihovny domácích videí, například stažené kanály YouTube, se nyní otevírají jako složky. Každá složka má vlastní stránku a videa v ní se přehrávají přímo odtud."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker med hjemmevideoer, f.eks. downloadede YouTube-kanaler, åbner nu som mapper. Hver mappe får sin egen side, og videoerne i den afspilles derfra."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heimvideo-Bibliotheken, etwa heruntergeladene YouTube-Kanäle, öffnen sich jetzt als Ordner. Jeder Ordner hat eine eigene Seite, und die Videos darin spielen direkt von dort."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι βιβλιοθήκες οικιακών βίντεο, όπως κατεβασμένα κανάλια YouTube, ανοίγουν πλέον ως φάκελοι. Κάθε φάκελος έχει τη δική του σελίδα και τα βίντεο που περιέχει αναπαράγονται από εκεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home video libraries, such as downloaded YouTube channels, now open as folders. Every folder gets its own page, and the videos inside play from there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las bibliotecas de vídeos caseros, como canales de YouTube descargados, ahora se abren como carpetas. Cada carpeta tiene su propia página y los vídeos que contiene se reproducen desde ahí."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kotivideokirjastot, kuten ladatut YouTube-kanavat, avautuvat nyt kansioina. Jokaisella kansiolla on oma sivunsa, ja sen videot toistetaan suoraan sieltä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les bibliothèques de vidéos personnelles, comme des chaînes YouTube téléchargées, s'ouvrent désormais sous forme de dossiers. Chaque dossier a sa propre page, et les vidéos qu'il contient se lisent directement depuis celle-ci."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knjižnice kućnih videozapisa, primjerice preuzeti YouTube kanali, sada se otvaraju kao mape. Svaka mapa ima vlastitu stranicu, a videozapisi u njoj reproduciraju se izravno odande."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A házi videós könyvtárak, például a letöltött YouTube-csatornák, mostantól mappaként nyílnak meg. Minden mappának saját oldala van, a benne lévő videók pedig onnan játszhatók le."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le librerie di video personali, come i canali YouTube scaricati, ora si aprono come cartelle. Ogni cartella ha la propria pagina e i video al suo interno si riproducono direttamente da lì."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロードしたYouTubeチャンネルなどのホームビデオライブラリがフォルダとして開くようになりました。フォルダごとに専用のページがあり、中のビデオはそこから再生できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드한 YouTube 채널 같은 홈 비디오 라이브러리가 이제 폴더로 열립니다. 폴더마다 자체 페이지가 있으며, 안에 있는 비디오는 그곳에서 바로 재생됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker med hjemmevideoer, for eksempel nedlastede YouTube-kanaler, åpnes nå som mapper. Hver mappe får sin egen side, og videoene i den spilles av derfra."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheken met homevideo's, zoals gedownloade YouTube-kanalen, openen nu als mappen. Elke map krijgt een eigen pagina en de video's erin spelen direct vanaf daar af."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteki filmów domowych, na przykład pobrane kanały YouTube, otwierają się teraz jako foldery. Każdy folder ma własną stronę, a filmy w nim odtwarzane są bezpośrednio stamtąd."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas de vídeos caseiros, como canais do YouTube baixados, agora abrem como pastas. Cada pasta tem sua própria página, e os vídeos dentro dela são reproduzidos a partir dali."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As bibliotecas de vídeos caseiros, como canais do YouTube transferidos, abrem agora como pastas. Cada pasta tem a sua própria página e os vídeos que contém são reproduzidos a partir daí."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecile de videoclipuri personale, cum ar fi canalele YouTube descărcate, se deschid acum ca dosare. Fiecare dosar are propria pagină, iar videoclipurile din el se redau direct de acolo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Библиотеки домашнего видео, например загруженные каналы YouTube, теперь открываются как папки. У каждой папки своя страница, а видео в ней воспроизводятся прямо оттуда."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knižnice domácich videí, napríklad stiahnuté kanály YouTube, sa teraz otvárajú ako priečinky. Každý priečinok má vlastnú stránku a videá v ňom sa prehrávajú priamo odtiaľ."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotek med hemvideor, till exempel nedladdade YouTube-kanaler, öppnas nu som mappar. Varje mapp får en egen sida, och videorna i den spelas upp direkt därifrån."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İndirilmiş YouTube kanalları gibi ev videosu kitaplıkları artık klasör olarak açılıyor. Her klasörün kendi sayfası var ve içindeki videolar doğrudan oradan oynatılıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бібліотеки домашнього відео, наприклад завантажені канали YouTube, тепер відкриваються як папки. Кожна папка має власну сторінку, а відео в ній відтворюються просто звідти."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭视频资料库（例如下载的 YouTube 频道）现在以文件夹形式打开。每个文件夹都有自己的页面，其中的视频可直接从那里播放。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭影片資料庫（例如下載的 YouTube 頻道）現在會以資料夾形式開啟。每個資料夾都有自己的頁面，其中的影片可直接從那裡播放。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.homeVideos.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Složky domácích videí"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapper med hjemmevideoer"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heimvideo-Ordner"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φάκελοι οικιακών βίντεο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home video folders"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpetas de vídeos caseros"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kotivideokansiot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossiers de vidéos personnelles"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mape kućnih videozapisa"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Házi videós mappák"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartelle di video personali"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームビデオのフォルダ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 비디오 폴더"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapper med hjemmevideoer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mappen met homevideo's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foldery filmów domowych"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pastas de vídeos caseiros"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pastas de vídeos caseiros"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosare cu videoclipuri personale"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папки домашнего видео"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priečinky domácich videí"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mappar med hemvideor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ev videosu klasörleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Папки домашнього відео"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭视频文件夹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭影片資料夾"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.libraryOrder.body" : {
       "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
       "extractionState" : "manual",

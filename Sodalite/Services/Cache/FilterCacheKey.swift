@@ -17,6 +17,11 @@ enum FilterCacheKey {
         nonisolated static func library(id: String, grouping: CollectionGrouping) -> String {
             "library_\(id)_\(grouping.rawValue)"
         }
+
+        /// One folder of a folder-browsed library (Sodalite#180). No grouping: collections never form inside it.
+        nonisolated static func folder(id: String) -> String {
+            "folder_\(id)"
+        }
     }
 
     enum Catalog {

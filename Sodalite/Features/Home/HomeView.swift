@@ -500,7 +500,9 @@ struct HomeView: View {
             // for every tile and never read (Sodalite#68).
             fields: JellyfinEndpoint.homeRowFields
         )
-        if !isVirtualView {
+        if MyMediaLibraries.browsesFolders(library.libraryType) {
+            query = MyMediaLibraries.folderQuery(parentID: library.id)
+        } else if !isVirtualView {
             query.collapseBoxSetItems = grouping.queryValue
         }
         return FilterDestination(

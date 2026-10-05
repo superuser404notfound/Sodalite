@@ -581,6 +581,9 @@ struct ItemQuery: Sendable {
     /// config decides (Sodalite#44). Only the My Media library grids pass nil; home rows, search and
     /// shuffle stay flat, else a freshly added movie hides behind a collection tile.
     var collapseBoxSetItems: Bool? = false
+    /// `Recursive`: false lists only the parent's direct children, which is how a folder-browsed
+    /// library walks its tree one level per screen (Sodalite#180).
+    var recursive = true
 
     /// Fixed-format UTC: the server parses this, it is not display text, so no locale-aware formatter.
     private static let premiereDateFormatter = ISO8601DateFormatter()
@@ -624,7 +627,7 @@ struct ItemQuery: Sendable {
         }
 
         items.append(URLQueryItem(name: "Fields", value: fields))
-        items.append(URLQueryItem(name: "Recursive", value: "true"))
+        items.append(URLQueryItem(name: "Recursive", value: String(recursive)))
         // Omitted entirely when nil: Jellyfin only consults its own grouping config while the param is absent (an explicit false overrides the admin's setting). The Collections row uses a dedicated BoxSet query, unaffected either way.
         if let collapseBoxSetItems {
             items.append(URLQueryItem(name: "CollapseBoxSetItems", value: String(collapseBoxSetItems)))

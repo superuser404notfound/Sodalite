@@ -34,6 +34,8 @@ struct FilteredGridView: View {
     @State private var items: [JellyfinItem]
     @State private var isLoading: Bool
     @State private var selectedItem: JellyfinItem?
+    /// A folder tapped in a folder-browsed library; opens its own grid one level down (Sodalite#180).
+    @State private var selectedFolder: JellyfinItem?
     @State private var showPlayer = false
     @State private var playItem: JellyfinItem?
     @State private var playQueue: [JellyfinItem] = []
@@ -89,6 +91,10 @@ struct FilteredGridView: View {
     /// A combined provider grid whose secondary dropped out this round: shown, never cached.
     @State private var combinedIncomplete = false
     private var isMerged: Bool { (sources?.count ?? 0) > 1 }
+    /// One level of a folder tree (Sodalite#180): only `MyMediaLibraries.folderQuery` asks non-recursively.
+    private var browsesFolders: Bool { !query.recursive }
+    /// Home videos are 16:9 stills, so a folder grid lays out wide cards.
+    private var cardStyle: MediaCardStyle { browsesFolders ? .landscape : .poster }
 
     init(
         title: String,
@@ -159,6 +165,7 @@ struct FilteredGridView: View {
                         // library; everything else keeps its own item types.
                         var types = query.includeItemTypes ?? [.movie]
                         if types.contains(.series) { types = [.episode] }
+                        if browsesFolders { types = [.video] }
                         Task {
                             let queue = await VideoShuffleQueue.build(
                                 parentID: query.parentID,
@@ -227,17 +234,25 @@ struct FilteredGridView: View {
                 LazyVGrid(columns: [
                     GridItem(
                         .adaptive(minimum: metrics.gridColumnMinimum(
+                            for: cardStyle,
                             cardScale: dependencies.appearancePreferences.cardScale)),
                         spacing: metrics.gridSpacing
                     )
                 ], spacing: metrics.gridSpacing) {
                     ForEach(items, id: \.originKey) { item in
                         Button {
-                            selectedItem = item
+                            if item.type == .folder {
+                                selectedFolder = item
+                            } else {
+                                selectedItem = item
+                            }
                         } label: {
                             MediaCard(
                                 item: item,
-                                imageURL: dependencies.jellyfinImageService.posterURL(for: item),
+                                imageURL: browsesFolders
+                                    ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
+                                    : dependencies.jellyfinImageService.posterURL(for: item),
+                                style: cardStyle,
                                 isFocused: focusedItemID == item.originKey
                             )
                         }
@@ -283,6 +298,17 @@ struct FilteredGridView: View {
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
                 .detailCoverPush()
+        }
+        .navigationDestination(item: $selectedFolder) { folder in
+            // The library's sort scope carries down, so one choice orders the whole tree.
+            FilteredGridView(
+                title: folder.name,
+                query: MyMediaLibraries.folderQuery(parentID: folder.id),
+                cacheScope: cacheScope.map {
+                    FilterCacheScope(key: FilterCacheKey.Home.folder(id: folder.id), identity: $0.identity)
+                },
+                sortScope: sortScope
+            )
         }
         .menuPresentation(isPresented: $showSortSheet) {
             LibrarySortSheet(

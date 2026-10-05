@@ -374,6 +374,8 @@ enum ItemType: String, Codable, Sendable {
     case folder = "Folder"
     case playlist = "Playlist"
     case tvChannel = "TvChannel"
+    /// A file in a home-video library (and an extra); Jellyfin gives it no richer type (Sodalite#180).
+    case video = "Video"
     case unknown
 
     init(from decoder: Decoder) throws {
