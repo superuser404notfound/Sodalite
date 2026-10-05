@@ -452,6 +452,7 @@
 		4CEAA65DE89D5E94CA5F1942 /* ParticipantPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436766093C62BD0B74176861 /* ParticipantPlannerTests.swift */; };
 		4D070CC40766FA263DCED1A6 /* ImageAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9903945CC1B8F03EC2462EE /* ImageAuth.swift */; };
 		4D0C2882C3D6B0443E961F02 /* SeerrServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D52B58D4E42BF82C030A8DA2 /* SeerrServer.swift */; };
+		4DACF964A931C50DDE064F35 /* MyRequestsPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7AB42E450ED51CBA2CC434 /* MyRequestsPreferencesTests.swift */; };
 		4DCE9F66CB79F359486E3ED7 /* FlowLayoutPackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECD6229FC42DA4622DCC4A8 /* FlowLayoutPackingTests.swift */; };
 		4DE1B48EE23F4EF06B1B16E1 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0AB08ED3A8353A0C245C2DD /* FlowLayout.swift */; };
 		4E3929E4DB2C98A3FD1D393F /* SeerrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763CDF4F0B8FC70934BBB838 /* SeerrClient.swift */; };
@@ -1685,6 +1686,7 @@
 		2B21493210BDCF9D4114173B /* SharedSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSession.swift; sourceTree = "<group>"; };
 		2B60AEAEA1E24DBE622AA94F /* SubtitleMenuLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleMenuLayout.swift; sourceTree = "<group>"; };
 		2B72371460030EB19A5DC39F /* HomeViewModel+Rows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeViewModel+Rows.swift"; sourceTree = "<group>"; };
+		2B7AB42E450ED51CBA2CC434 /* MyRequestsPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRequestsPreferencesTests.swift; sourceTree = "<group>"; };
 		2BF7D71F055445E4E67D1245 /* ServerStatusBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerStatusBanner.swift; sourceTree = "<group>"; };
 		2BF88DF2D226719A36470DB6 /* NowPlayingColumnAlignmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingColumnAlignmentTests.swift; sourceTree = "<group>"; };
 		2C63899F5939722A0956E039 /* Sodalite-tvOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Sodalite-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2912,6 +2914,7 @@
 				3D11D412BD52A560E4B79A33 /* MusicTrackSwitchReportTests.swift */,
 				C26ACDA3C53D401F750A2743 /* MyMediaLibrariesTests.swift */,
 				10D2111D55CECAC809D12E7D /* MyRequestsDiffTests.swift */,
+				2B7AB42E450ED51CBA2CC434 /* MyRequestsPreferencesTests.swift */,
 				2828499E5B006279431CA7F7 /* NavigationStyleTests.swift */,
 				741F6735F2BBBAF0C5648BFB /* NetworkBufferDepthTests.swift */,
 				B0A26FDED27ECFF17CF621D4 /* NextEpisodeCountdownPreferenceTests.swift */,
@@ -4820,6 +4823,7 @@
 				A20412077272C444A69F8A4B /* MusicTrackSwitchReportTests.swift in Sources */,
 				B08FD0488A680FB3ADE0777A /* MyMediaLibrariesTests.swift in Sources */,
 				E733043AA06407DB6C73341A /* MyRequestsDiffTests.swift in Sources */,
+				4DACF964A931C50DDE064F35 /* MyRequestsPreferencesTests.swift in Sources */,
 				A52EEA103D6559D6A9720333 /* NavigationStyleTests.swift in Sources */,
 				C8606BD7F2913B7C4A1DAC6B /* NetworkBufferDepthTests.swift in Sources */,
 				80519425F2D31484A3C39645 /* NextEpisodeCountdownPreferenceTests.swift in Sources */,
