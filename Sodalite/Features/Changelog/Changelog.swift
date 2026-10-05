@@ -87,6 +87,12 @@ enum Changelog {
                     icon: "film.stack"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.playlistSeries.title",
+                    "changelog.1_1_0.playlistSeries.body",
+                    icon: "list.bullet.rectangle"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.multiview.title",
                     "changelog.1_1_0.multiview.body",

@@ -290,10 +290,27 @@ struct CollectionItemRow: View {
         return overview
     }
 
+    private var seriesLine: String? { Self.seriesLine(for: item) }
+
     /// Three overview lines fill the poster height, so the text block tops out next to it.
     /// Without an overview the block is too short for that and stays centered.
     static func verticalAlignment(hasOverview: Bool) -> VerticalAlignment {
         hasOverview ? .top : .center
+    }
+
+    /// `Friends · S3, E15` above an episode's title: a playlist mixes shows, and the episode title
+    /// alone does not say which one it belongs to. Nil for everything that is not an episode.
+    static func seriesLine(for item: JellyfinItem) -> String? {
+        guard item.type == .episode, let series = item.seriesName, !series.isEmpty else { return nil }
+        return EpisodeMetadataFormatter.label(seriesName: series,
+                                              season: item.parentIndexNumber,
+                                              episode: item.indexNumber,
+                                              title: nil)
+    }
+
+    /// The series line costs one overview line, so the text block still ends at the poster.
+    static func overviewLineLimit(hasSeriesLine: Bool) -> Int {
+        hasSeriesLine ? 2 : 3
     }
 
     var body: some View {
@@ -311,6 +328,14 @@ struct CollectionItemRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 6) {
+                    if let seriesLine {
+                        Text(seriesLine)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+
                     Text(item.name)
                         .font(metrics.listTitleFont)
                         .fontWeight(.medium)
@@ -365,7 +390,7 @@ struct CollectionItemRow: View {
                         Text(overview)
                             .font(metrics.listOverviewFont)
                             .foregroundStyle(.tertiary)
-                            .lineLimit(3)
+                            .lineLimit(Self.overviewLineLimit(hasSeriesLine: seriesLine != nil))
                     }
                 }
 
