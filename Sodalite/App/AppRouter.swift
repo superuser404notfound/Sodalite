@@ -174,6 +174,7 @@ struct AppRouter: View {
                 dependencies.pendingRequestsMonitor.reset()
             }
         }
+        .myRequestsPresentation()
         .onReceive(NotificationCenter.default.publisher(for: .seerrPendingRequestsShouldRefresh)) { _ in
             Task { await refreshPending() }
         }
