@@ -40,6 +40,26 @@ struct SodaliteApp: App {
 
         // Now that appState is wired, connect the pending-requests monitor (reads appState + Seerr service).
         dependencies.wirePendingRequestsMonitor()
+        dependencies.wireMyRequestsWatcher()
+        let watcherDeps = dependencies
+        MyRequestsBackgroundRefresh.register {
+            let watcher = watcherDeps.myRequestsWatcher
+            // A cold background launch restores the session (and the Seerr connection) on its own
+            // schedule; give it a bounded moment instead of ending the chain on the first look.
+            let deadline = ContinuousClock.now + .seconds(20)
+            while !watcher.isEnabled, ContinuousClock.now < deadline, !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+            if watcher.isEnabled {
+                watcher.reloadForActiveProfile()
+                await watcher.refresh()
+                await watcherDeps.syncAppIconBadge()
+            }
+            return MyRequestsBackgroundRefresh.keepScheduling(
+                scope: watcherDeps.myRequestsScope,
+                notifyEnabled: { watcherDeps.seerrNotificationPreferences.notifyMyRequests(scope: $0) }
+            )
+        }
 
         #if os(iOS)
         // Register the background refresh that fires a local notification when new requests await approval.
@@ -51,7 +71,8 @@ struct SodaliteApp: App {
                 monitor: deps.pendingRequestsMonitor,
                 preferences: prefs,
                 jellyfinServerID: deps.activeServer?.id,
-                jellyfinUserID: deps.activeUserID
+                jellyfinUserID: deps.activeUserID,
+                syncBadge: { await deps.syncAppIconBadge() }
             )
             return true
         }

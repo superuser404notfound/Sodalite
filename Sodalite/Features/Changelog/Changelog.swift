@@ -57,6 +57,12 @@ enum Changelog {
                     icon: "folder.fill"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.myRequestNotifications.title",
+                    "changelog.1_1_0.myRequestNotifications.body",
+                    icon: "bell.badge"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

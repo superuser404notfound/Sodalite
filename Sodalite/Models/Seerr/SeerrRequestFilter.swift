@@ -9,3 +9,8 @@ enum SeerrRequestFilter: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 }
+
+enum SeerrRequestSort: String, Sendable {
+    case added
+    case modified
+}

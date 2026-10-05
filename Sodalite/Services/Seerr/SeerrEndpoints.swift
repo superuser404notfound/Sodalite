@@ -38,7 +38,7 @@ enum SeerrEndpoint: APIEndpoint {
     case discoverTVByWatchProvider(providerID: Int, region: String, page: Int)
 
     case createRequest(body: SeerrCreateRequestBody)
-    case myRequests(userID: Int, take: Int, skip: Int)
+    case myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort)
 
     /// GET /api/v1/request, all users' requests; needs MANAGE_REQUESTS or ADMIN.
     case allRequests(filter: SeerrRequestFilter, take: Int, skip: Int)
@@ -146,12 +146,12 @@ enum SeerrEndpoint: APIEndpoint {
                 URLQueryItem(name: "page", value: String(page)),
             ]
 
-        case .myRequests(let userID, let take, let skip):
+        case .myRequests(let userID, let take, let skip, let sort):
             return [
                 URLQueryItem(name: "take", value: String(take)),
                 URLQueryItem(name: "skip", value: String(skip)),
                 URLQueryItem(name: "filter", value: "all"),
-                URLQueryItem(name: "sort", value: "added"),
+                URLQueryItem(name: "sort", value: sort.rawValue),
                 // requestedBy takes an integer user ID; "me" silently matched zero requests.
                 URLQueryItem(name: "requestedBy", value: String(userID)),
             ]

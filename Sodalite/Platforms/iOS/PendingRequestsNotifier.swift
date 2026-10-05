@@ -20,17 +20,12 @@ enum PendingRequestsNotifier {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "catalog.notify.pending.title", defaultValue: "Requests awaiting approval")
         content.body = String(localized: "catalog.notify.pending.body", defaultValue: "New requests are waiting for your approval.")
-        content.badge = NSNumber(value: count)
         let request = UNNotificationRequest(
             identifier: "seerr.pendingRequests",
             content: content,
             trigger: nil
         )
         try? await UNUserNotificationCenter.current().add(request)
-    }
-
-    static func setBadgeCount(_ count: Int) async {
-        try? await UNUserNotificationCenter.current().setBadgeCount(count)
     }
 
     /// Install the delegate so notifications also present as a banner while the app is foregrounded
@@ -50,6 +45,17 @@ private final class ForegroundPresentationDelegate: NSObject, UNUserNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .list, .sound, .badge]
     }
+
+    /// A tapped my-request banner carries the Jellyfin item to open.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        guard let itemID = response.notification.request.content.userInfo["itemID"] as? String else { return }
+        await MainActor.run {
+            NotificationCenter.default.post(name: .myRequestNotificationOpened, object: nil, userInfo: ["itemID": itemID])
+        }
+    }
 }
 
 /// Orchestrates a monitor refresh with its notification side effects: keeps the app-icon badge in
@@ -61,14 +67,17 @@ enum PendingRequestsSync {
         monitor: PendingRequestsMonitor,
         preferences: SeerrNotificationPreferences,
         jellyfinServerID: String?,
-        jellyfinUserID: String?
+        jellyfinUserID: String?,
+        syncBadge: @MainActor () async -> Void
     ) async {
         await monitor.refresh()
-        // Notifications off: the tab badge (monitor) still updated above; leave the app-icon badge alone.
-        guard preferences.notifyPendingRequests, let count = monitor.pendingApprovalCount else { return }
+        guard preferences.notifyPendingRequests, let count = monitor.pendingApprovalCount else {
+            await syncBadge()
+            return
+        }
         // No resolvable profile means no baseline this count can be compared against; the badge still tracks it.
         guard let jellyfinServerID, let jellyfinUserID else {
-            await PendingRequestsNotifier.setBadgeCount(count)
+            await syncBadge()
             return
         }
         let lastSeen = preferences.lastSeenPendingCount(
@@ -78,7 +87,7 @@ enum PendingRequestsSync {
         if PendingRequestsMonitor.shouldNotify(current: count, lastSeen: lastSeen) {
             await PendingRequestsNotifier.notifyPendingIncrease(count: count)
         }
-        await PendingRequestsNotifier.setBadgeCount(count)
+        await syncBadge()
         preferences.setLastSeenPendingCount(
             count,
             jellyfinServerID: jellyfinServerID,

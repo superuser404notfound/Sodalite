@@ -366,7 +366,8 @@ final class CatalogViewModel {
             let result = try await requestService.myRequests(
                 userID: userID,
                 take: 50,
-                skip: 0
+                skip: 0,
+                sort: .added
             )
             myRequests = result.results
             myRequestsTotal = result.pageInfo.results
@@ -392,7 +393,8 @@ final class CatalogViewModel {
             let result = try await requestService.myRequests(
                 userID: userID,
                 take: 50,
-                skip: myRequestsSkip
+                skip: myRequestsSkip,
+                sort: .added
             )
             // Dedupe against the visible list: Seerr repeats records across adjacent pages when status counts shift between fetches.
             let existing = Set(myRequests.map(\.id))

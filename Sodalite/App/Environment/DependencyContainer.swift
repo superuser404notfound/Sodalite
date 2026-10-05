@@ -84,6 +84,8 @@ final class DependencyContainer {
     let seerrNotificationPreferences: SeerrNotificationPreferences
     /// Count of requests pending approval (admin only); feeds the Catalog tab badge + background refresh.
     let pendingRequestsMonitor: PendingRequestsMonitor
+    /// Changes to the active profile's own Seerr requests (every user); feeds the badge and the hint panel.
+    let myRequestsWatcher: MyRequestsWatcher
 
     /// File-deletion service fronting Jellyfin + Seerr; gated on JellyfinUser.canDeleteContent.
     let mediaDeletionService: any MediaDeletionServiceProtocol
@@ -245,6 +247,7 @@ final class DependencyContainer {
 
         self.seerrNotificationPreferences = SeerrNotificationPreferences(defaults: defaults)
         self.pendingRequestsMonitor = PendingRequestsMonitor()
+        self.myRequestsWatcher = MyRequestsWatcher(preferences: seerrNotificationPreferences)
 
         self.mediaDeletionService = MediaDeletionService(
             jellyfinItems: self.jellyfinItemService,
@@ -325,6 +328,70 @@ final class DependencyContainer {
             let result = try await self.seerrRequestService.allRequests(filter: .pending, take: 0, skip: 0)
             return result.pageInfo.results
         }
+    }
+
+    /// Scope of the per-profile my-requests state, the same `serverID_userID` the pending baseline uses.
+    var myRequestsScope: String? {
+        guard let serverID = activeServer?.id, let userID = activeUserID else { return nil }
+        return "\(serverID)_\(userID)"
+    }
+
+    /// Connect the my-requests watcher to the live session. Called once from SodaliteApp.init next to
+    /// `wirePendingRequestsMonitor()`.
+    func wireMyRequestsWatcher() {
+        let watcher = myRequestsWatcher
+        watcher.scope = { [weak self] in self?.myRequestsScope }
+        watcher.selfSeerrID = { [weak self] in
+            guard let appState = self?.appState, appState.isSeerrConnected else { return nil }
+            return appState.activeSeerrUser?.id
+        }
+        watcher.fetchRequests = { [weak self] userID in
+            guard let self else { return [] }
+            return try await self.seerrRequestService.myRequests(userID: userID, take: 50, skip: 0, sort: .modified).results
+        }
+        watcher.lookupMedia = { [weak self] type, tmdbID in
+            guard let self else { return MyRequestsMediaLookup(availableSeasons: []) }
+            switch type {
+            case .tv:
+                let detail = try await self.seerrMediaService.tvDetail(tmdbID: tmdbID)
+                let seasons = (detail.mediaInfo?.seasons ?? []).filter { $0.status == .available }.map(\.seasonNumber)
+                return MyRequestsMediaLookup(
+                    title: detail.name,
+                    posterPath: detail.posterPath,
+                    jellyfinItemID: detail.mediaInfo?.jellyfinMediaId,
+                    availableSeasons: Set(seasons)
+                )
+            default:
+                let detail = try await self.seerrMediaService.movieDetail(tmdbID: tmdbID)
+                return MyRequestsMediaLookup(
+                    title: detail.title,
+                    posterPath: detail.posterPath,
+                    jellyfinItemID: detail.mediaInfo?.jellyfinMediaId,
+                    availableSeasons: []
+                )
+            }
+        }
+        watcher.onNewEvents = { [weak self] events in
+            #if os(iOS)
+            await MyRequestsNotifier.post(events)
+            #endif
+            await self?.syncAppIconBadge()
+        }
+    }
+
+    /// Writes the app-icon badge from both Seerr sources; see `AppIconBadge`.
+    func syncAppIconBadge() async {
+        #if os(iOS)
+        let adminOn = seerrNotificationPreferences.notifyPendingRequests
+        #else
+        let adminOn = false
+        #endif
+        let count = AppIconBadge.count(
+            pendingApproval: pendingRequestsMonitor.pendingApprovalCount,
+            adminNotificationsOn: adminOn,
+            unseenMine: myRequestsWatcher.isEnabled ? myRequestsWatcher.unseenEvents.count : 0
+        )
+        await AppIconBadge.apply(count)
     }
 
     /// Probes the active server's session for AppRouter's post-switch routing. Returns the user when
