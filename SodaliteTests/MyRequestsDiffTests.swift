@@ -21,4 +21,113 @@ struct MyRequestsDiffTests {
         #expect(items.contains(URLQueryItem(name: "sort", value: "modified")))
         #expect(items.contains(URLQueryItem(name: "requestedBy", value: "4")))
     }
+
+    private func obs(
+        id: Int = 1, by requester: Int? = 4, created: Date? = Date(timeIntervalSince1970: 2_000),
+        type: SeerrMediaType = .movie, status: SeerrRequestStatus = .pendingApproval,
+        media: SeerrMediaStatus? = .unknown, requested: [Int] = [], available: Set<Int> = []
+    ) -> MyRequestObservation {
+        MyRequestObservation(
+            requestID: id, requesterID: requester, createdAt: created, mediaType: type, tmdbID: 100 + id,
+            jellyfinItemID: nil, requestStatus: status, mediaStatus: media,
+            requestedSeasons: requested, availableSeasons: available
+        )
+    }
+    private let me = 4
+    private let t0 = Date(timeIntervalSince1970: 1_000)
+    private let t1 = Date(timeIntervalSince1970: 5_000)
+
+    private func baseline(_ observations: [MyRequestObservation]) -> MyRequestsSnapshot {
+        MyRequestsDiff.apply(snapshot: nil, observations: observations, selfID: me, now: t0).snapshot
+    }
+
+    @Test func firstRunIsSilent() {
+        let result = MyRequestsDiff.apply(snapshot: nil, observations: [obs(status: .approved, media: .available)], selfID: me, now: t0)
+        #expect(result.events.isEmpty)
+        #expect(result.snapshot.baselineDate == t0)
+        #expect(result.snapshot.entries[1] != nil)
+    }
+
+    @Test func pendingToApprovedEmitsApproved() {
+        let snap = baseline([obs()])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(status: .approved, media: .processing)], selfID: me, now: t1)
+        #expect(result.events.map(\.kind) == [.approved])
+    }
+
+    @Test func declinedAndFailedEmitOnce() {
+        let snap = baseline([obs(id: 1), obs(id: 2, status: .approved)])
+        let first = MyRequestsDiff.apply(snapshot: snap, observations: [obs(id: 1, status: .declined), obs(id: 2, status: .failed)], selfID: me, now: t1)
+        #expect(Set(first.events.map(\.kind)) == [.declined, .failed])
+        let second = MyRequestsDiff.apply(snapshot: first.snapshot, observations: [obs(id: 1, status: .declined), obs(id: 2, status: .failed)], selfID: me, now: t1)
+        #expect(second.events.isEmpty)
+    }
+
+    @Test func movieAvailableSupersedesApproved() {
+        let snap = baseline([obs()])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(status: .completed, media: .available)], selfID: me, now: t1)
+        #expect(result.events.map(\.kind) == [.available])
+    }
+
+    @Test func otherUsersRequestsAreIgnored() {
+        let snap = baseline([])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(id: 9, by: 77, status: .approved, media: .available)], selfID: me, now: t1)
+        #expect(result.events.isEmpty)
+        #expect(result.snapshot.entries[9] == nil)
+    }
+
+    @Test func onlyOwnRequestedSeasonsCount() {
+        // Show partially available because ANOTHER user's season 2 landed; my request is season 1.
+        let mine = obs(type: .tv, status: .approved, media: .processing, requested: [1])
+        let snap = baseline([mine])
+        let stillWaiting = obs(type: .tv, status: .approved, media: .partiallyAvailable, requested: [1], available: [])
+        #expect(MyRequestsDiff.apply(snapshot: snap, observations: [stillWaiting], selfID: me, now: t1).events.isEmpty)
+        let landed = obs(type: .tv, status: .approved, media: .partiallyAvailable, requested: [1], available: [1])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [landed], selfID: me, now: t1)
+        #expect(result.events.map(\.kind) == [.available])
+        #expect(result.events.first?.seasons == [1])
+    }
+
+    @Test func availableSeasonsOutsideRequestAreIgnored() {
+        let snap = baseline([obs(type: .tv, status: .approved, media: .processing, requested: [1])])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(type: .tv, status: .approved, media: .partiallyAvailable, requested: [1], available: [2])], selfID: me, now: t1)
+        #expect(result.events.isEmpty)
+    }
+
+    @Test func newRequestAfterBaselineCountsAsPending() {
+        let snap = baseline([])
+        let late = obs(id: 5, created: Date(timeIntervalSince1970: 3_000), status: .completed, media: .available)
+        #expect(MyRequestsDiff.apply(snapshot: snap, observations: [late], selfID: me, now: t1).events.map(\.kind) == [.available])
+    }
+
+    @Test func unknownRequestFromBeforeBaselineIsRecordedSilently() {
+        let snap = baseline([])
+        let old = obs(id: 5, created: Date(timeIntervalSince1970: 500), status: .declined)
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [old], selfID: me, now: t1)
+        #expect(result.events.isEmpty)
+        #expect(result.snapshot.entries[5] != nil)
+    }
+
+    @Test func vanishedRequestsArePruned() {
+        let snap = baseline([obs(id: 1), obs(id: 2)])
+        let result = MyRequestsDiff.apply(snapshot: snap, observations: [obs(id: 1)], selfID: me, now: t1)
+        #expect(result.snapshot.entries.keys.sorted() == [1])
+        #expect(result.snapshot.baselineDate == t0)
+    }
+
+    @Test func observationFromWirePayloadParsesDateAndSeasons() throws {
+        let request = try JSONDecoder().decode(SeerrRequest.self, from: Data(Self.movieRequestJSON.utf8))
+        let observation = MyRequestObservation(request: request, availableSeasons: [])
+        #expect(observation.requesterID == 4)
+        #expect(observation.jellyfinItemID == "abc123")
+        #expect(observation.createdAt == Date(timeIntervalSince1970: 1_791_191_553))
+    }
+
+    @Test func mergeUnionsSeasonsOfSameRequestAndKind() {
+        let a = MyRequestEvent(requestID: 1, kind: .available, mediaType: .tv, tmdbID: 1, seasons: [1], jellyfinItemID: nil, title: nil, posterPath: nil, date: t0)
+        let b = MyRequestEvent(requestID: 1, kind: .available, mediaType: .tv, tmdbID: 1, seasons: [2], jellyfinItemID: "x", title: "Show", posterPath: nil, date: t1)
+        let merged = MyRequestEvent.merging([b], into: [a])
+        #expect(merged.count == 1)
+        #expect(merged[0].seasons == [1, 2])
+        #expect(merged[0].jellyfinItemID == "x")
+    }
 }
