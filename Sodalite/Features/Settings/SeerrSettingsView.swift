@@ -342,6 +342,8 @@ struct SeerrSettingsView: View {
                     .fill(.white.opacity(0.05))
             )
 
+            myRequestsToggle
+
             #if os(iOS)
             // Admins can approve requests, so only they benefit from a pending-approval notification.
             if appState.activeSeerrUser?.canManageRequests == true {
@@ -458,6 +460,49 @@ struct SeerrSettingsView: View {
         }
     }
     #endif
+
+    @State private var myRequestsDenied = false
+
+    /// Per profile; the setter also refreshes so switching on records a fresh baseline right away.
+    private var myRequestsBinding: Binding<Bool> {
+        Binding(
+            get: {
+                guard let scope = dependencies.myRequestsScope else { return true }
+                return dependencies.seerrNotificationPreferences.notifyMyRequests(scope: scope)
+            },
+            set: { enabled in
+                dependencies.myRequestsWatcher.setEnabled(enabled)
+                Task {
+                    if enabled { await dependencies.myRequestsWatcher.refresh() }
+                    await dependencies.syncAppIconBadge()
+                }
+            }
+        )
+    }
+
+    private var myRequestsToggle: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ValuePickerRow(
+                icon: "bell",
+                title: "catalog.notify.mine.toggle.title",
+                subtitle: "catalog.notify.mine.toggle.subtitle",
+                options: [true, false],
+                selection: myRequestsBinding,
+                label: { $0
+                    ? String(localized: "common.on", defaultValue: "On")
+                    : String(localized: "common.off", defaultValue: "Off") }
+            )
+            if myRequestsDenied {
+                Text("catalog.notify.mine.denied.hint")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .task {
+            myRequestsDenied = await MyRequestsNotifier.authorizationStatus() == .denied
+        }
+    }
 
     private var successOverlay: some View {
         VStack(spacing: 24) {
