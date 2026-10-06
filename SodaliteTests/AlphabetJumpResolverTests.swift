@@ -51,4 +51,14 @@ struct AlphabetJumpResolverTests {
         task.cancel()
         #expect(await task.value == nil)
     }
+
+    @Test func cachedSlotAnswersWithoutARequest() async {
+        let counter = Counter()
+        let resolver = AlphabetJumpResolver(count: { try await counter.count($0) })
+        #expect(resolver.cachedSlot(for: "P", descending: false) == nil)
+        #expect(resolver.cachedSlot(for: "#", descending: false) == 0)
+        _ = await resolver.slot(for: "P", base: base, descending: false)
+        #expect(resolver.cachedSlot(for: "P", descending: false) == 42)
+        #expect(resolver.cachedSlot(for: "P", descending: true) == nil)
+    }
 }

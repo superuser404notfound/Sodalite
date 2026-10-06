@@ -64,8 +64,18 @@ final class AlphabetJumpResolver {
         cache = [:]
     }
 
+    private static func key(_ letter: String, _ descending: Bool) -> String {
+        "\(descending ? "d" : "a")\(letter)"
+    }
+
+    /// A slot known without a request, so a commit can act before the focus engine's own move.
+    func cachedSlot(for letter: String, descending: Bool) -> Int? {
+        if !descending, letter == "#" { return 0 }
+        return cache[Self.key(letter, descending)]
+    }
+
     func slot(for letter: String, base: ItemQuery, descending: Bool) async -> Int? {
-        let key = "\(descending ? "d" : "a")\(letter)"
+        let key = Self.key(letter, descending)
         if let cached = cache[key] { return cached }
         guard let query = AlphabetIndex.countQuery(for: letter, base: base, descending: descending) else {
             return 0
