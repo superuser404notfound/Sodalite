@@ -65449,6 +65449,330 @@
         }
       }
     },
+    "changelog.1_1_0.alphabetRail.body" : {
+      "comment" : "What's New 1.1.0: title for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knihovna řazená podle názvu má nyní na pravém okraji lištu A až Z. Přejděte na písmeno a mřížka skočí na první titul, který jím začíná, a načte jen tuto část knihovny."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et bibliotek sorteret efter titel har nu en A til Z-liste i højre kant. Gå til et bogstav, og gitteret lander på den første titel, der starter med det, og indlæser kun den del af biblioteket."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist eine Bibliothek nach Titel sortiert, trägt sie jetzt eine A-bis-Z-Leiste am rechten Rand. Geh auf einen Buchstaben, und das Raster landet beim ersten Titel damit und lädt nur diesen Teil der Bibliothek."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια βιβλιοθήκη ταξινομημένη κατά τίτλο έχει πλέον μια μπάρα Α έως Ω στη δεξιά άκρη. Μεταβείτε σε ένα γράμμα και το πλέγμα πηγαίνει στον πρώτο τίτλο που ξεκινά με αυτό, φορτώνοντας μόνο εκείνο το τμήμα της βιβλιοθήκης."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorted by title, a library now carries an A to Z rail on its right edge. Move onto a letter and the grid lands on the first title that starts with it, loading only that part of the library."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una biblioteca ordenada por título tiene ahora una barra de la A a la Z en el borde derecho. Ve a una letra y la cuadrícula salta al primer título que empieza por ella, cargando solo esa parte de la biblioteca."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimen mukaan lajitellussa kirjastossa on nyt oikeassa reunassa A–Ö-palkki. Siirry kirjaimeen, niin ruudukko hyppää ensimmäiseen sillä alkavaan nimikkeeseen ja lataa vain sen osan kirjastosta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Triée par titre, une bibliothèque affiche désormais une barre de A à Z sur son bord droit. Placez-vous sur une lettre et la grille arrive sur le premier titre qui commence par elle, en ne chargeant que cette partie de la bibliothèque."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteka poredana po naslovu sada ima traku od A do Z uz desni rub. Prijeđite na slovo i mreža skoči na prvi naslov koji njime počinje, učitavajući samo taj dio biblioteke."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A cím szerint rendezett könyvtár jobb szélén most A–Z sáv található. Lépjen egy betűre, és a rács az első vele kezdődő címre ugrik, csak a könyvtár ezen részét betöltve."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinata per titolo, una libreria ora ha una barra dalla A alla Z sul bordo destro. Spostati su una lettera e la griglia arriva al primo titolo che inizia con essa, caricando solo quella parte della libreria."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトル順に並べたライブラリの右端にA〜Zのバーが表示されるようになりました。文字に移動すると、その文字で始まる最初のタイトルへグリッドが移動し、ライブラリのその部分だけを読み込みます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제목순으로 정렬된 라이브러리 오른쪽 가장자리에 A부터 Z까지의 막대가 생겼습니다. 글자로 이동하면 그 글자로 시작하는 첫 번째 타이틀로 그리드가 이동하며, 라이브러리의 해당 부분만 불러옵니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et bibliotek sortert etter tittel har nå en A til Å-liste langs høyre kant. Gå til en bokstav, så lander rutenettet på den første tittelen som begynner med den, og laster bare den delen av biblioteket."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een bibliotheek gesorteerd op titel heeft nu een A-tot-Z-balk aan de rechterrand. Ga naar een letter en het raster springt naar de eerste titel die ermee begint, en laadt alleen dat deel van de bibliotheek."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteka sortowana według tytułu ma teraz pasek od A do Z przy prawej krawędzi. Przejdź na literę, a siatka przeskoczy do pierwszego tytułu, który się od niej zaczyna, wczytując tylko tę część biblioteki."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordenada por título, uma biblioteca agora tem uma barra de A a Z na borda direita. Vá até uma letra e a grade chega ao primeiro título que começa com ela, carregando só essa parte da biblioteca."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordenada por título, uma biblioteca tem agora uma barra de A a Z na margem direita. Vá até uma letra e a grelha chega ao primeiro título que começa por ela, carregando apenas essa parte da biblioteca."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bibliotecă sortată după titlu are acum o bară de la A la Z pe marginea dreaptă. Treceți pe o literă și grila ajunge la primul titlu care începe cu ea, încărcând doar acea parte a bibliotecii."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В библиотеке, отсортированной по названию, у правого края теперь есть полоса от A до Z. Перейдите на букву, и сетка перейдёт к первому названию на эту букву, загрузив только эту часть библиотеки."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knižnica zoradená podľa názvu má teraz na pravom okraji lištu A až Z. Prejdite na písmeno a mriežka skočí na prvý titul, ktorý ním začína, a načíta len túto časť knižnice."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ett bibliotek sorterat efter titel har nu en A till Ö-list längs högerkanten. Gå till en bokstav så hamnar rutnätet på den första titeln som börjar med den, och bara den delen av biblioteket läses in."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlığa göre sıralanan bir kitaplığın sağ kenarında artık A'dan Z'ye bir çubuk var. Bir harfe gidin, ızgara o harfle başlayan ilk başlığa gelsin ve kitaplığın yalnızca o bölümünü yüklesin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бібліотека, відсортована за назвою, тепер має смугу від A до Z біля правого краю. Перейдіть на літеру, і сітка перейде до першої назви на цю літеру, завантаживши лише цю частину бібліотеки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按标题排序的资料库右侧现在有一条 A 到 Z 字母栏。移到某个字母，网格就会跳到以该字母开头的第一个标题，并且只加载资料库的这一部分。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依標題排序的媒體庫右側現在有一條 A 到 Z 字母列。移到某個字母，格狀檢視就會跳到以該字母開頭的第一個標題，並只載入媒體庫的這一部分。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.alphabetRail.title" : {
+      "comment" : "What's New 1.1.0: title for ordering and hiding My Media libraries.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skok na písmeno"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring til et bogstav"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu einem Buchstaben springen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετάβαση σε γράμμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jump to a letter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta a una letra"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hyppää kirjaimeen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller à une lettre"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skok na slovo"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugrás egy betűre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vai a una lettera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字へジャンプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "글자로 바로 이동"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopp til en bokstav"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring naar een letter"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skok do litery"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pule para uma letra"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saltar para uma letra"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt la o literă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переход к букве"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skok na písmeno"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoppa till en bokstav"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir harfe atla"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перехід до літери"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳到字母"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳到字母"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.channelZap.body" : {
       "comment" : "What's New 1.1.0: channel zap body",
       "extractionState" : "manual",
