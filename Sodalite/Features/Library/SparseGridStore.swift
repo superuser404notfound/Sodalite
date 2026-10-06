@@ -43,6 +43,9 @@ final class SparseGridStore {
     private(set) var slots: [SparseGridSlot] = []
     private(set) var visibleIndices: [Int] = []
     private(set) var firstPage: FirstPageState = .loading
+    /// True once a response has sized the grid; a cached seed is only the first page, so a letter
+    /// past it cannot be reached until then.
+    private(set) var knowsTotal = false
 
     @ObservationIgnored private var fetch: Fetch?
     @ObservationIgnored private var isHidden: (JellyfinItem) -> Bool = { _ in false }
@@ -93,6 +96,7 @@ final class SparseGridStore {
         slots = []
         visibleIndices = []
         firstPage = .loading
+        knowsTotal = false
         fetch = nil
     }
 
@@ -171,6 +175,7 @@ final class SparseGridStore {
             slots[start + offset] = isHidden(item) ? .hidden : .loaded(item)
         }
         loadedPages.insert(page)
+        knowsTotal = true
         if page == 0 { firstPage = .loaded(response.items) }
         rebuildVisibleIndices()
     }

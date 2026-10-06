@@ -194,4 +194,30 @@ struct SparseGridStoreTests {
         #expect(store.item(at: 25)?.id == "changed")
         #expect(server.requests.suffix(2).sorted() == [0, 20])
     }
+
+    @Test func theSeedIsNotTheServerTotal() async {
+        let server = Server(count: 300)
+        let store = SparseGridStore(pageSize: 10, seed: (0..<10).map { Server.item("c\($0)") })
+        #expect(!store.knowsTotal)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: { _ in false }, seed: store.loadedItems)
+        #expect(!store.knowsTotal)
+        await store.waitForIdle()
+        #expect(store.knowsTotal)
+        #expect(store.slots.count == 300)
+    }
+
+    @Test func revalidateAfterAFailedFirstPageKeepsTheGridAndRecovers() async {
+        let server = Server(count: 30)
+        let store = await started(server)
+        server.failing = [0]
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.firstPage == .failed)
+        #expect(store.slots.count == 30)
+        server.failing = []
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.item(at: 0)?.id == "i0")
+        if case .loaded = store.firstPage {} else { Issue.record("first page should recover") }
+    }
 }

@@ -60,7 +60,7 @@ struct FilteredGridView: View {
     @State private var gridLetter: String?
     @State private var rejectedLetter: (letter: String, attempt: Int)?
     /// A committed jump's slot. Leaving the rail to the left also moves focus geometrically, and
-    /// that move lands after ours, so the grid redirects the first arrival here once.
+    /// that move lands after ours, so for half a second any other arrival is sent back here.
     @State private var pendingFocusSlot: Int?
     @Environment(\.dismiss) private var dismiss
 
@@ -166,6 +166,8 @@ struct FilteredGridView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, metrics.gridInset)
+                // The rail runs the full height, so the header keeps out of it too.
+                .padding(.trailing, showsRail ? Self.railClearance : 0)
                 .padding(.top, 8)
 
                 HStack {
@@ -204,6 +206,7 @@ struct FilteredGridView: View {
                     Spacer()
                 }
                 .padding(.horizontal, metrics.gridInset)
+                .padding(.trailing, showsRail ? Self.railClearance : 0)
                 .padding(.top, 8)
 
                 if isLoading {
@@ -371,12 +374,11 @@ struct FilteredGridView: View {
             jumpTask?.cancel()
             gridLetter = nil
             rejectedLetter = nil
+            pendingFocusSlot = nil
         }
         .onChange(of: focusedSlot) { _, slot in
             if let target = pendingFocusSlot, let slot {
-                if slot == target {
-                    pendingFocusSlot = nil
-                } else {
+                if slot != target {
                     // Set inside the engine's own transition the assignment is dropped; one turn
                     // of the main actor later it sticks.
                     Task { focusedSlot = target }
@@ -425,7 +427,8 @@ struct FilteredGridView: View {
     }
 
     private var showsRail: Bool {
-        AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
+        store.knowsTotal
+            && AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
     }
 
     #if os(tvOS)
@@ -466,7 +469,13 @@ struct FilteredGridView: View {
             gridLetter = letter
             proxy.scrollTo(slot, anchor: .topLeading)
             if commit {
+                #if os(tvOS)
                 pendingFocusSlot = slot
+                Task {
+                    try? await Task.sleep(for: .milliseconds(500))
+                    if pendingFocusSlot == slot { pendingFocusSlot = nil }
+                }
+                #endif
                 focusedSlot = slot
             }
         }
@@ -572,8 +581,11 @@ struct FilteredGridView: View {
         )
 
         if usesSparseGrid {
-            if storeKey == reloadKey, !store.slots.isEmpty, store.firstPage != .failed {
+            // Same key: a reappear or a retry. Revalidate in place, even after a failure, so the grid
+            // and its focus stay; counts may have moved (a title just watched under Unwatched).
+            if storeKey == reloadKey {
                 store.revalidate()
+                resolver?.reset()
                 return
             }
             let service = session.libraryService
