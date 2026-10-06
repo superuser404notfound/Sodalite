@@ -250,6 +250,7 @@
 		2707A7F7EDBB9D8DE8E44152 /* AuthDefaultProfilePinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319871CEDEF5EBA6EFCF4C63 /* AuthDefaultProfilePinTests.swift */; };
 		2768C5A0801BEC07999AFBE0 /* NowPlayingWaveIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DDD1EA2510104B724CB32 /* NowPlayingWaveIcon.swift */; };
 		2772E5C80472F81D65C46059 /* CombinedLiveTVReviewFixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D14FCC3A0D48C0FB90D85D /* CombinedLiveTVReviewFixTests.swift */; };
+		27AB44471D3B7E58213E887C /* PlaceholderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ED2E999E17467CDD3364C8 /* PlaceholderCard.swift */; };
 		27AF375084D0B6A15F068F82 /* DetailHeroBudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3B9FFA6B018805118824DE /* DetailHeroBudgetTests.swift */; };
 		27C4BFBA7335228B0E0A3D0F /* DirectPlayProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1FB619B1F615A7F27C1C90 /* DirectPlayProfile.swift */; };
 		28266255B4CE7307E061676E /* JellyfinServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CE69511B110DCCF9EC0603 /* JellyfinServer.swift */; };
@@ -1109,6 +1110,7 @@
 		BD208407B3842C9FFF15BBBD /* CloudSyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05912347F7F8EF15E83E5645 /* CloudSyncSettingsView.swift */; };
 		BD36E6CC476A5BE2E146D08B /* HomeRowIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813BABB8AB0ED10E6E5CAAA5 /* HomeRowIdentityTests.swift */; };
 		BDA63B02C4DD7B139456D9FF /* QueryValueEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266086CA3AD72FDF856FF173 /* QueryValueEncodingTests.swift */; };
+		BDE2D0F9107206496667BFA9 /* PlaceholderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ED2E999E17467CDD3364C8 /* PlaceholderCard.swift */; };
 		BE20731E5E151E88ECC6E9D7 /* PlayerErrorFocusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2509512DE5F3DD304BACE8 /* PlayerErrorFocusTests.swift */; };
 		BE2B9CDC9431A49D317ABCCC /* ProfilePickerOrdering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CC5FDDF0FA315CB336BDA /* ProfilePickerOrdering.swift */; };
 		BE3BCD4FC49341D82EDC37BE /* PersonLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E16222C25BCDA9113A710D7 /* PersonLibraryTests.swift */; };
@@ -1606,6 +1608,7 @@
 		105916A43830F66C8297D56D /* SeerrSearchResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrSearchResults.swift; sourceTree = "<group>"; };
 		1080201B0AE5CD8DE258323B /* CloudSyncAccountTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncAccountTransition.swift; sourceTree = "<group>"; };
 		10D2111D55CECAC809D12E7D /* MyRequestsDiffTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRequestsDiffTests.swift; sourceTree = "<group>"; };
+		10ED2E999E17467CDD3364C8 /* PlaceholderCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderCard.swift; sourceTree = "<group>"; };
 		110F2B63C9BEC116CA7FD5CB /* SiriRemoteEdgeClick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriRemoteEdgeClick.swift; sourceTree = "<group>"; };
 		112D849959DE17DC6C5CEED2 /* LiveDirectStreamMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveDirectStreamMemory.swift; sourceTree = "<group>"; };
 		115506969A587003B4018910 /* DownloadRungDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadRungDialog.swift; sourceTree = "<group>"; };
@@ -2625,6 +2628,7 @@
 				0B0EBC152D80BAC2D6FE9AEF /* LibrarySortSheet.swift */,
 				6D40A04AE6A99D3FD0BE3B02 /* MergedGridState.swift */,
 				B8EA4A7C68D00D08DB75239D /* MergedPager.swift */,
+				10ED2E999E17467CDD3364C8 /* PlaceholderCard.swift */,
 				925EEBD1F614A914B17BA4B7 /* SparseGridStore.swift */,
 			);
 			path = Library;
@@ -4412,6 +4416,7 @@
 				FB711AA1CA90C3F977CB3D1D /* PersonLibrary.swift in Sources */,
 				28471B12D8524D2FA7B6171D /* PersonTMDBMatch.swift in Sources */,
 				2AD0B7DDF9E2613538C279D4 /* PiPSessionCoordinator.swift in Sources */,
+				27AB44471D3B7E58213E887C /* PlaceholderCard.swift in Sources */,
 				DBB9E66797D6562A3E59C7E1 /* PlayActionState.swift in Sources */,
 				8A7F07B760E57FAAC00D14EA /* PlaybackCompletionReport.swift in Sources */,
 				1C945DB50E0DDA9C55ACB403 /* PlaybackModels.swift in Sources */,
@@ -5363,6 +5368,7 @@
 				F3002A9B0777D51357D78594 /* PersonLibrary.swift in Sources */,
 				E51FDACA62E08113C5A29774 /* PersonTMDBMatch.swift in Sources */,
 				1FF0A3BA445586C666FE9254 /* PiPSessionCoordinator.swift in Sources */,
+				BDE2D0F9107206496667BFA9 /* PlaceholderCard.swift in Sources */,
 				D9FFEF8CC15D59F74724BB8E /* PlayActionState.swift in Sources */,
 				E043331469CBDDF8590D3078 /* PlaybackCompletionReport.swift in Sources */,
 				D1B1EB5A7477D4DDC812D788 /* PlaybackModels.swift in Sources */,

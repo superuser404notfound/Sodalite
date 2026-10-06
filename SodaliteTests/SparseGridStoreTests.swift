@@ -174,4 +174,24 @@ struct SparseGridStoreTests {
         let store = await started(Server(count: 10))
         #expect(store.visibleIndex(atOrAfter: 500) == 9)
     }
+
+    @Test func seededInitPaintsWithoutFetching() {
+        let store = SparseGridStore(pageSize: 10, seed: [Server.item("cached")])
+        #expect(store.item(at: 0)?.id == "cached")
+        #expect(store.slots.count == 1)
+    }
+
+    @Test func revalidateRefetchesVisiblePagesAndKeepsTheGrid() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        store.slotAppeared(25)
+        await store.waitForIdle()
+        server.all[25] = Server.item("changed")
+        store.revalidate()
+        #expect(store.item(at: 25)?.id == "i25")
+        #expect(store.slots.count == 100)
+        await store.waitForIdle()
+        #expect(store.item(at: 25)?.id == "changed")
+        #expect(server.requests.suffix(2).sorted() == [0, 20])
+    }
 }

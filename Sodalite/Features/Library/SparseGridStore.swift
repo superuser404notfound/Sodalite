@@ -53,9 +53,12 @@ final class SparseGridStore {
     @ObservationIgnored private var queue: [Int] = []
     @ObservationIgnored private var visibleSlotsPerPage: [Int: Int] = [:]
 
-    init(pageSize: Int, maxInFlight: Int = 2) {
+    /// `seed` paints the cached first page before the session exists to fetch with.
+    init(pageSize: Int, maxInFlight: Int = 2, seed: [JellyfinItem] = []) {
         self.pageSize = max(1, pageSize)
         self.maxInFlight = max(1, maxInFlight)
+        slots = seed.map { .loaded($0) }
+        rebuildVisibleIndices()
     }
 
     var loadedItems: [JellyfinItem] {
@@ -104,6 +107,15 @@ final class SparseGridStore {
         let remaining = (visibleSlotsPerPage[page] ?? 1) - 1
         visibleSlotsPerPage[page] = remaining > 0 ? remaining : nil
         if remaining <= 0 { queue.removeAll { $0 == page } }
+    }
+
+    /// A reappear (back from a detail screen): every page goes stale but stays on screen, and the
+    /// first page plus the visible ones refetch, so a title just watched picks up its new state.
+    func revalidate() {
+        guard fetch != nil else { return }
+        loadedPages = []
+        enqueue(page: 0)
+        for page in visibleSlotsPerPage.keys.sorted() { enqueue(page: page) }
     }
 
     func prioritize(slot: Int) {
