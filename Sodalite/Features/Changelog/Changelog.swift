@@ -22,6 +22,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.alphabetRail.title",
+                    "changelog.1_1_0.alphabetRail.body",
+                    icon: "textformat.abc"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.restingTouch.title",
                     "changelog.1_1_0.restingTouch.body",
                     icon: "hand.tap.fill"

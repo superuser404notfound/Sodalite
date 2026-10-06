@@ -130,6 +130,18 @@ struct PosterBadgeStoreTests {
         #expect(library.queries.first?.fields == "MediaStreams")
     }
 
+    @Test("the same title twice in one pass is asked once and does not trap (Sodalite#86)")
+    func duplicateItemsAreAskedOnce() async throws {
+        let library = LibraryFake()
+        library.respond = { _ in try Self.response(ids: ["m1"]) }
+        let store = store(library)
+
+        await store.enrich(userID: "u1", [try Self.item(id: "m1", type: "Movie"),
+                            try Self.item(id: "m1", type: "Movie")])
+
+        #expect(library.queries.first?.ids == ["m1"])
+    }
+
     @Test("a grid full of movies is split so no single URL carries every id")
     func batchesAreCapped() async throws {
         let library = LibraryFake()

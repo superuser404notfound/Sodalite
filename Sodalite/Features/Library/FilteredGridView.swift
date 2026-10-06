@@ -48,25 +48,31 @@ struct FilteredGridView: View {
     /// no URL editor).
     @State private var showAddURLSheet = false
     @FocusState private var focusedItemID: String?
+    /// The plain grid's slots (Sodalite#86); merged and smart-provider grids keep `items`.
+    @State private var store: SparseGridStore
+    @FocusState private var focusedSlot: Int?
+    /// The reload key the store was started under; a reappear with the same key revalidates instead.
+    @State private var storeKey: ReloadKey?
+    /// Alphabet rail (Sodalite#86): letter to slot, against the same query the grid pages.
+    @State private var resolver: AlphabetJumpResolver?
+    @State private var railBaseQuery: ItemQuery?
+    @State private var jumpTask: Task<Void, Never>?
+    @State private var gridLetter: String?
+    @State private var rejectedLetter: (letter: String, attempt: Int)?
+    /// A committed jump's slot. Leaving the rail to the left also moves focus geometrically, and
+    /// that move lands after ours, so for half a second any other arrival is sent back here.
+    @State private var pendingFocusSlot: Int?
+    @State private var scrollPosition = ScrollPosition()
+    @State private var gridGeometry = GridScrollGeometry(gridTop: 0, gridWidth: 0, cellHeight: 0, columnMinimum: 0, spacing: 0)
     @Environment(\.dismiss) private var dismiss
 
     /// Distinguishes "fetch failed, nothing to show" (retry state) from "server says empty".
     @State private var loadFailed = false
     /// Stamped per loadItems run, checked after each await so a superseded run (filter flip, retry) can't write over the newer one.
     @State private var loadGeneration = 0
-    /// TotalRecordCount from the last phase-1 response, drives load-more; nil until the first fetch lands.
-    @State private var totalRecordCount: Int?
     @State private var isLoadingMore = false
     /// True once loadMore appended a page this cycle; the refresh keeps appended pages instead of truncating to page 1. Explicit flag, not a prefix heuristic: a page-1 server reorder breaks prefix comparison.
     @State private var didPaginate = false
-    /// Raw server cursor for pagination, advanced by the fetched count (NOT items.count): a page that
-    /// returns only already-known ids (SortName ties, library mutated between fetches) must still move
-    /// the cursor past the overlapping window, else it re-requests the same offset forever and the tail
-    /// never loads.
-    @State private var nextStartIndex = 0
-    /// Set once the server returns a short/empty page; stops paginating even when dedup leaves
-    /// items.count short of totalRecordCount.
-    @State private var reachedEnd = false
 
     let title: String
     let query: ItemQuery
@@ -91,6 +97,11 @@ struct FilteredGridView: View {
     /// A combined provider grid whose secondary dropped out this round: shown, never cached.
     @State private var combinedIncomplete = false
     private var isMerged: Bool { (sources?.count ?? 0) > 1 }
+    /// Every grid that pages one server's list: fixed slots, a page fetched where it is looked at.
+    private var usesSparseGrid: Bool { Self.usesSparseGrid(sources: sources, smartProviderID: smartProviderID, query: query) }
+    private static func usesSparseGrid(sources: [HomeSource]?, smartProviderID: Int?, query: ItemQuery) -> Bool {
+        (sources?.count ?? 0) <= 1 && smartProviderID == nil && query.limit != nil
+    }
     /// One level of a folder tree (Sodalite#180): only `MyMediaLibraries.folderQuery` asks non-recursively.
     private var browsesFolders: Bool { !query.recursive }
     /// Home videos are 16:9 stills, so a folder grid lays out wide cards.
@@ -119,14 +130,17 @@ struct FilteredGridView: View {
         // Hydrate from FilterCache in init so the first render paints the cached grid; doing it in .task means a frame with isLoading=true first (the brief loading flash on every tap).
         // Only the default sort: the cache holds one order per key, so a custom sort would paint the
         // alphabetical list and then reshuffle it once the fetch lands.
+        let sparse = Self.usesSparseGrid(sources: sources, smartProviderID: smartProviderID, query: query)
         if storedSort == .default,
            let scope = cacheScope,
            let cached = FilterCache.shared.homeFilterItems(filterKey: scope.key, identity: scope.identity),
            !cached.isEmpty {
-            _items = State(initialValue: cached)
+            _items = State(initialValue: sparse ? [] : cached)
+            _store = State(initialValue: SparseGridStore(pageSize: query.limit ?? 50, seed: sparse ? cached : []))
             _isLoading = State(initialValue: false)
         } else {
             _items = State(initialValue: [])
+            _store = State(initialValue: SparseGridStore(pageSize: query.limit ?? 50))
             _isLoading = State(initialValue: true)
         }
     }
@@ -135,140 +149,174 @@ struct FilteredGridView: View {
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
 
     var body: some View {
-        ScrollView {
-            Text(title)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, metrics.gridInset)
-                .padding(.top, 20)
+        Group {
+            ScrollView {
+                VStack {
+                    Text(title)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, metrics.gridInset)
+                        .padding(.top, 20)
 
-            // Watch-status filter (Sodalite#17). Native segmented
-            // control per the app's section-picker convention
-            // (Catalog tabs, Live TV Guide/Recordings).
-            Picker("", selection: $watchFilter) {
-                ForEach(WatchStatusFilter.allCases, id: \.self) { filter in
-                    Text(filter.localizedTitle).tag(filter)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, metrics.gridInset)
-            .padding(.top, 8)
-
-            HStack {
-                GlassActionButton(
-                    title: "action.shuffle",
-                    systemImage: "shuffle",
-                    action: {
-                        guard let userID = sessionUserID else { return }
-                        // Shows libraries shuffle episodes across the whole
-                        // library; everything else keeps its own item types.
-                        var types = query.includeItemTypes ?? [.movie]
-                        if types.contains(.series) { types = [.episode] }
-                        if browsesFolders { types = [.video] }
-                        Task {
-                            let queue = await VideoShuffleQueue.build(
-                                parentID: query.parentID,
-                                baseQuery: query,
-                                itemTypes: types,
-                                service: session.libraryService,
-                                userID: userID
-                            )
-                            guard let first = queue.first else { return }
-                            playItem = first
-                            playQueue = queue
-                            showPlayer = true
+                    // Watch-status filter (Sodalite#17). Native segmented
+                    // control per the app's section-picker convention
+                    // (Catalog tabs, Live TV Guide/Recordings).
+                    Picker("", selection: $watchFilter) {
+                        ForEach(WatchStatusFilter.allCases, id: \.self) { filter in
+                            Text(filter.localizedTitle).tag(filter)
                         }
                     }
-                )
-                if sortScope != nil {
-                    GlassActionButton(
-                        title: "library.sort.action",
-                        systemImage: "arrow.up.arrow.down",
-                        action: { showSortSheet = true }
-                    )
-                }
-                Spacer()
-            }
-            .padding(.horizontal, metrics.gridInset)
-            .padding(.top, 8)
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, metrics.gridInset)
+                    // The rail runs the full height, so the header keeps out of it too.
+                    .padding(.trailing, showsRail ? Self.railClearance : 0)
+                    .padding(.top, 8)
 
-            if isLoading {
-                VStack(spacing: 16) {
-                    ProgressView()
-                    // Focusable element so Menu button works during loading
-                    Button("") { dismiss() }
-                        .opacity(0)
-                }
-                .frame(maxWidth: .infinity, minHeight: 400)
-            } else if let state = unreachableState {
-                ServerUnreachableView(
-                    state: state,
-                    serverName: appState.activeServer?.name ?? "",
-                    onAddExternalAddress: ServerUnreachableView.addExternalAddressAction(
-                        state: state,
-                        server: appState.activeServer,
-                        present: { showAddURLSheet = true }
-                    ),
-                    onRetry: { await retry() },
-                    onOpenDownloads: dependencies.downloadStore.items.isEmpty ? nil : { appState.requestedTab = .downloads }
-                )
-                .frame(maxWidth: .infinity, minHeight: 400)
-            } else if items.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "film")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.tertiary)
-                    Text("library.empty.message")
-                        .foregroundStyle(.secondary)
-                    Button { dismiss() } label: {
-                        Text("common.back")
-                            .font(.body)
-                            .padding(.horizontal, 32)
-                            .padding(.vertical, 12)
-                    }
-                    .buttonStyle(SettingsTileButtonStyle())
-                }
-                .frame(maxWidth: .infinity, minHeight: 400)
-            } else {
-                LazyVGrid(columns: [
-                    GridItem(
-                        .adaptive(minimum: metrics.gridColumnMinimum(
-                            for: cardStyle,
-                            cardScale: dependencies.appearancePreferences.cardScale)),
-                        spacing: metrics.gridSpacing
-                    )
-                ], spacing: metrics.gridSpacing) {
-                    ForEach(items, id: \.originKey) { item in
-                        Button {
-                            if item.type == .folder {
-                                selectedFolder = item
-                            } else {
-                                selectedItem = item
+                    HStack {
+                        GlassActionButton(
+                            title: "action.shuffle",
+                            systemImage: "shuffle",
+                            action: {
+                                guard let userID = sessionUserID else { return }
+                                // Shows libraries shuffle episodes across the whole
+                                // library; everything else keeps its own item types.
+                                var types = query.includeItemTypes ?? [.movie]
+                                if types.contains(.series) { types = [.episode] }
+                                if browsesFolders { types = [.video] }
+                                Task {
+                                    let queue = await VideoShuffleQueue.build(
+                                        parentID: query.parentID,
+                                        baseQuery: query,
+                                        itemTypes: types,
+                                        service: session.libraryService,
+                                        userID: userID
+                                    )
+                                    guard let first = queue.first else { return }
+                                    playItem = first
+                                    playQueue = queue
+                                    showPlayer = true
+                                }
                             }
-                        } label: {
-                            MediaCard(
-                                item: item,
-                                imageURL: browsesFolders
-                                    ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
-                                    : dependencies.jellyfinImageService.posterURL(for: item),
-                                style: cardStyle,
-                                isFocused: focusedItemID == item.originKey
+                        )
+                        if sortScope != nil {
+                            GlassActionButton(
+                                title: "library.sort.action",
+                                systemImage: "arrow.up.arrow.down",
+                                action: { showSortSheet = true }
                             )
                         }
-                        .buttonStyle(GridCardButtonStyle())
-                        .focused($focusedItemID, equals: item.originKey)
-                        .onAppear { loadMoreIfNeeded(after: item) }
+                        Spacer()
+                    }
+                    .padding(.horizontal, metrics.gridInset)
+                    .padding(.trailing, showsRail ? Self.railClearance : 0)
+                    .padding(.top, 8)
+
+                    if isLoading {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                            // Focusable element so Menu button works during loading
+                            Button("") { dismiss() }
+                                .opacity(0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 400)
+                    } else if let state = unreachableState {
+                        ServerUnreachableView(
+                            state: state,
+                            serverName: appState.activeServer?.name ?? "",
+                            onAddExternalAddress: ServerUnreachableView.addExternalAddressAction(
+                                state: state,
+                                server: appState.activeServer,
+                                present: { showAddURLSheet = true }
+                            ),
+                            onRetry: { await retry() },
+                            onOpenDownloads: dependencies.downloadStore.items.isEmpty ? nil : { appState.requestedTab = .downloads }
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 400)
+                    } else if gridIsEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "film")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.tertiary)
+                            Text("library.empty.message")
+                                .foregroundStyle(.secondary)
+                            Button { dismiss() } label: {
+                                Text("common.back")
+                                    .font(.body)
+                                    .padding(.horizontal, 32)
+                                    .padding(.vertical, 12)
+                            }
+                            .buttonStyle(SettingsTileButtonStyle())
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 400)
+                    } else {
+                        LazyVGrid(columns: [
+                            GridItem(
+                                .adaptive(minimum: metrics.gridColumnMinimum(
+                                    for: cardStyle,
+                                    cardScale: dependencies.appearancePreferences.cardScale)),
+                                spacing: metrics.gridSpacing
+                            )
+                        ], spacing: metrics.gridSpacing) {
+                            if usesSparseGrid {
+                                ForEach(store.visibleIndices, id: \.self) { index in
+                                    sparseCell(index)
+                                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                                            if gridGeometry.cellHeight != height { gridGeometry.cellHeight = height }
+                                        }
+                                        .onAppear { store.slotAppeared(index) }
+                                        .onDisappear { store.slotDisappeared(index) }
+                                }
+                            } else {
+                            ForEach(items, id: \.originKey) { item in
+                                Button {
+                                    open(item)
+                                } label: {
+                                    MediaCard(
+                                        item: item,
+                                        imageURL: browsesFolders
+                                            ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
+                                            : dependencies.jellyfinImageService.posterURL(for: item),
+                                        style: cardStyle,
+                                        isFocused: focusedItemID == item.originKey
+                                    )
+                                }
+                                .buttonStyle(GridCardButtonStyle())
+                                .focused($focusedItemID, equals: item.originKey)
+                                .onAppear { loadMoreIfNeeded(after: item) }
+                            }
+                            }
+                        }
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.gridSpace)) } action: { frame in
+                            gridGeometry.gridTop = frame.minY
+                            gridGeometry.gridWidth = frame.width
+                            gridGeometry.columnMinimum = metrics.gridColumnMinimum(
+                                for: cardStyle, cardScale: dependencies.appearancePreferences.cardScale)
+                            gridGeometry.spacing = metrics.gridSpacing
+                        }
+                        .padding(.horizontal, metrics.gridInset)
+                        .padding(.trailing, showsRail ? Self.railClearance : 0)
+                        .padding(.vertical, 40)
+                        #if os(iOS)
+                        .scrollTargetLayout()
+                        .onScrollTargetVisibilityChange(idType: Int.self) { ids in
+                            guard let top = ids.min(), let item = store.item(at: top) else { return }
+                            gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
+                        }
+                        #endif
+                        .enrichesPosterBadges(usesSparseGrid ? store.loadedItems : items)
+
+                        if isLoadingMore {
+                            ProgressView()
+                                .padding(.bottom, 40)
+                        }
                     }
                 }
-                .padding(.horizontal, metrics.gridInset)
-                .padding(.vertical, 40)
-                .enrichesPosterBadges(items)
-
-                if isLoadingMore {
-                    ProgressView()
-                        .padding(.bottom, 40)
-                }
+                .coordinateSpace(.named(Self.gridSpace))
+            }
+            .scrollPosition($scrollPosition)
+            .overlay(alignment: .trailing) {
+                if showsRail { rail }
             }
         }
         .overlay {
@@ -334,11 +382,45 @@ struct FilteredGridView: View {
             items = []
             isLoading = true
             loadFailed = false
-            totalRecordCount = nil
             didPaginate = false
-            nextStartIndex = 0
-            reachedEnd = false
             mergedGrid.reset()
+            store.reset()
+            storeKey = nil
+            jumpTask?.cancel()
+            gridLetter = nil
+            rejectedLetter = nil
+            pendingFocusSlot = nil
+        }
+        .onChange(of: focusedSlot) { _, slot in
+            if let target = pendingFocusSlot, let slot {
+                if slot != target {
+                    // Set inside the engine's own transition the assignment is dropped; one turn
+                    // of the main actor later it sticks.
+                    Task { focusedSlot = target }
+                    return
+                }
+            }
+            guard let slot, let item = store.item(at: slot) else { return }
+            gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
+        }
+        .onChange(of: store.firstPage) { _, state in
+            guard usesSparseGrid else { return }
+            switch state {
+            case .loading:
+                break
+            case .failed:
+                loadFailed = store.slots.isEmpty
+                isLoading = false
+            case .loaded(let page):
+                loadFailed = false
+                isLoading = false
+                // Same rule as before: only the unfiltered default order feeds init hydration.
+                if let scope = cacheScope, watchFilter == .all, sort == .default {
+                    FilterCache.shared.setHomeFilterItems(
+                        browsable(page), filterKey: scope.key, identity: scope.identity
+                    )
+                }
+            }
         }
         .task(id: reloadKey) {
             await loadItems()
@@ -354,9 +436,118 @@ struct FilteredGridView: View {
     /// the reader to restart a router they are nowhere near.
     private var unreachableState: ServerReachability? {
         appState.serverReachability.blockingState(
-            hasContent: !items.isEmpty,
+            hasContent: usesSparseGrid ? !store.slots.isEmpty : !items.isEmpty,
             loadFailedEntirely: loadFailed
         )
+    }
+
+    private var showsRail: Bool {
+        store.knowsTotal
+            && AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
+    }
+
+    private static let gridSpace = "FilteredGridView.content"
+    /// Room above the landed row for the focused card's lift.
+    private static let jumpTopMargin: CGFloat = 40
+
+    #if os(tvOS)
+    private static let railClearance: CGFloat = 48
+    #else
+    private static let railClearance: CGFloat = 24
+    #endif
+
+    private var rail: some View {
+        AlphabetRail(
+            letters: AlphabetIndex.railLetters(descending: sort.descending),
+            highlighted: gridLetter,
+            rejected: rejectedLetter,
+            onLetter: { jump(to: $0, commit: false) },
+            onCommit: { jump(to: $0, commit: true) }
+        )
+        .padding(.trailing, metrics.gridInset / 2)
+        #if os(iOS)
+        // The cover's close button sits in the top trailing corner; the rail starts below it.
+        .padding(.top, 56)
+        #endif
+    }
+
+    /// A settled letter scrolls the grid to its first slot; a commit also moves focus there. The
+    /// slot's page is pushed to the front, so only the destination is fetched.
+    private func jump(to letter: String, commit: Bool) {
+        jumpTask?.cancel()
+        // A commit on a letter already resolved lands now, ahead of the focus engine's own move
+        // off the rail; anything else waits for the count.
+        if commit, let raw = resolver?.cachedSlot(for: letter, descending: sort.descending) {
+            land(on: raw, letter: letter, commit: true)
+            return
+        }
+        jumpTask = Task {
+            if !commit {
+                try? await Task.sleep(for: .milliseconds(250))
+                guard !Task.isCancelled else { return }
+            }
+            guard let resolver, let base = railBaseQuery else { return }
+            guard let raw = await resolver.slot(for: letter, base: base, descending: sort.descending) else {
+                if !Task.isCancelled {
+                    rejectedLetter = (letter, (rejectedLetter?.attempt ?? 0) + 1)
+                }
+                return
+            }
+            guard !Task.isCancelled else { return }
+            land(on: raw, letter: letter, commit: commit)
+        }
+    }
+
+    private func land(on raw: Int, letter: String, commit: Bool) {
+        guard let slot = store.visibleIndex(atOrAfter: raw) else { return }
+        store.prioritize(slot: slot)
+        gridLetter = letter
+        if let position = store.visibleIndices.firstIndex(of: slot),
+           let rowTop = gridGeometry.rowTop(forPosition: position) {
+            // The vertical axis alone, so the grid never slides sideways (see GridScrollGeometry).
+            scrollPosition.scrollTo(y: max(0, rowTop - Self.jumpTopMargin))
+        }
+        guard commit else { return }
+        #if os(tvOS)
+        pendingFocusSlot = slot
+        Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            if pendingFocusSlot == slot { pendingFocusSlot = nil }
+        }
+        #endif
+        focusedSlot = slot
+    }
+
+    private var gridIsEmpty: Bool {
+        usesSparseGrid ? store.visibleIndices.isEmpty : items.isEmpty
+    }
+
+    private func open(_ item: JellyfinItem) {
+        if item.type == .folder { selectedFolder = item } else { selectedItem = item }
+    }
+
+    /// A slot's card, or its placeholder until the page lands. Both focusable under the slot index,
+    /// so focus survives the swap and a jump can land before the page has.
+    @ViewBuilder
+    private func sparseCell(_ index: Int) -> some View {
+        if let item = store.item(at: index) {
+            Button { open(item) } label: {
+                MediaCard(
+                    item: item,
+                    imageURL: browsesFolders
+                        ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
+                        : dependencies.jellyfinImageService.posterURL(for: item),
+                    style: cardStyle,
+                    isFocused: focusedSlot == index
+                )
+            }
+            .buttonStyle(GridCardButtonStyle())
+            .focused($focusedSlot, equals: index)
+        } else {
+            Button {} label: { PlaceholderCard(style: cardStyle, isFocused: focusedSlot == index) }
+                .buttonStyle(GridCardButtonStyle())
+                .focused($focusedSlot, equals: index)
+        }
     }
 
     /// Re-probe before re-fetching, else the reload runs against the same stale verdict and paints
@@ -392,8 +583,8 @@ struct FilteredGridView: View {
 
     private var reloadKey: ReloadKey { ReloadKey(filter: watchFilter, sort: sort) }
 
-    /// Narrowing the server cannot express. `totalRecordCount` stays the raw server count, so a page
-    /// can come back empty after filtering; `reachedEnd` (short page) closes the pagination anyway.
+    /// Narrowing the server cannot express. On the sparse grid the same rule hides a slot instead
+    /// (`SparseGridStore` keeps the server's count).
     private func browsable(_ items: [JellyfinItem]) -> [JellyfinItem] {
         hidesAudioPlaylists ? items.filter { !$0.isAudioPlaylist } : items
     }
@@ -425,6 +616,34 @@ struct FilteredGridView: View {
         let reusePhase2 = Self.canReuseCachedPhase2(
             smartProviderID: smartProviderID, cacheFilter: phase2CacheFilter, currentFilter: watchFilter
         )
+
+        if usesSparseGrid {
+            // Same key: a reappear or a retry. Revalidate in place, even after a failure, so the grid
+            // and its focus stay; counts may have moved (a title just watched under Unwatched).
+            if storeKey == reloadKey {
+                store.revalidate()
+                resolver?.reset()
+                return
+            }
+            let service = session.libraryService
+            let seed = storeKey == nil ? store.loadedItems : []
+            storeKey = reloadKey
+            railBaseQuery = effectiveQuery
+            resolver = AlphabetJumpResolver(count: { query in
+                try await service.getItems(userID: userID, query: query).totalRecordCount
+            })
+            store.start(
+                fetch: { [effectiveQuery] start, limit in
+                    var page = effectiveQuery
+                    page.startIndex = start
+                    page.limit = limit
+                    return try await service.getItems(userID: userID, query: page)
+                },
+                isHidden: { [hidesAudioPlaylists] in hidesAudioPlaylists && $0.isAudioPlaylist },
+                seed: seed
+            )
+            return
+        }
 
         // A combined Home's genre or studio grid: every server, one sort order (Sodalite#85).
         if isMerged, smartProviderID == nil, let sources {
@@ -513,7 +732,6 @@ struct FilteredGridView: View {
         loadFailed = false
         let phase1 = browsable(phase1Response.items)
         studioItems = phase1
-        totalRecordCount = phase1Response.totalRecordCount
 
         var tmdbMap: [String: JellyfinItem] = combinedTmdbMap ?? [:]
         if combinedTmdbMap == nil {
@@ -571,12 +789,9 @@ struct FilteredGridView: View {
 
     // MARK: - Pagination
 
-    /// More pages exist server-side. Only the plain path paginates: smart-provider grids are merged from the full library map and complete by construction.
+    /// More pages exist server-side. Only the merged grid paginates here: smart-provider grids are complete by construction, single-server grids fill slots.
     private var canLoadMore: Bool {
-        if isMerged, smartProviderID == nil { return mergedGrid.hasMore }
-        guard smartProviderID == nil, query.limit != nil else { return false }
-        guard !reachedEnd, let total = totalRecordCount else { return false }
-        return items.count < total
+        isMerged && smartProviderID == nil && mergedGrid.hasMore
     }
 
     private func loadMoreIfNeeded(after item: JellyfinItem) {
@@ -588,43 +803,15 @@ struct FilteredGridView: View {
         Task { await loadMore() }
     }
 
+    /// Only the merged grid still pages by cursor; the single-server grid fills slots (Sodalite#86).
     private func loadMore() async {
         defer { isLoadingMore = false }
-        if isMerged, smartProviderID == nil {
-            let generation = loadGeneration
-            guard await mergedGrid.loadMore(filter: browsable),
-                  !Task.isCancelled, generation == loadGeneration else { return }
-            items = mergedGrid.items
-            didPaginate = true
-            return
-        }
-        guard let userID = sessionUserID else { return }
+        guard isMerged, smartProviderID == nil else { return }
         let generation = loadGeneration
-
-        var pageQuery = sort.applied(to: query)
-        if let filter = watchFilter.jellyfinFilter {
-            pageQuery.filters = [filter]
-        }
-        // Seed the cursor from the already-loaded first page, then advance it by the raw fetched count
-        // below so an all-duplicate page can't pin it.
-        if nextStartIndex == 0 { nextStartIndex = items.count }
-        pageQuery.startIndex = nextStartIndex
-
-        guard let response = try? await session.libraryService.getItems(
-            userID: userID, query: pageQuery
-        ) else { return }
-        guard !Task.isCancelled, generation == loadGeneration else { return }
-
-        totalRecordCount = response.totalRecordCount
-        nextStartIndex += response.items.count
-        let known = Set(items.map(\.originKey))
-        items += browsable(response.items).filter { !known.contains($0.originKey) }
+        guard await mergedGrid.loadMore(filter: browsable),
+              !Task.isCancelled, generation == loadGeneration else { return }
+        items = mergedGrid.items
         didPaginate = true
-        // A short/empty page means the server has no more rows; stop even if dedup left items.count
-        // below totalRecordCount, so canLoadMore can't loop on the same overlapping window.
-        if let limit = query.limit, response.items.count < limit {
-            reachedEnd = true
-        }
     }
 
     /// Refresh the TMDB watch-provider id list, re-resolve against the local map, cache the fresh ids. Stale entries drop out because the merged grid is rebuilt from scratch.

@@ -584,6 +584,10 @@ struct ItemQuery: Sendable {
     /// `Recursive`: false lists only the parent's direct children, which is how a folder-browsed
     /// library walks its tree one level per screen (Sodalite#180).
     var recursive = true
+    /// `NameLessThan` / `NameStartsWithOrGreater`: with `Limit=0` the count is the slot a letter
+    /// starts at, which is how the alphabet rail jumps without loading the gap (Sodalite#86).
+    var nameLessThan: String?
+    var nameStartsWithOrGreater: String?
 
     /// Fixed-format UTC: the server parses this, it is not display text, so no locale-aware formatter.
     private static let premiereDateFormatter = ISO8601DateFormatter()
@@ -603,6 +607,10 @@ struct ItemQuery: Sendable {
         if let limit { items.append(URLQueryItem(name: "Limit", value: String(limit))) }
         if let startIndex { items.append(URLQueryItem(name: "StartIndex", value: String(startIndex))) }
         if let searchTerm { items.append(URLQueryItem(name: "SearchTerm", value: searchTerm)) }
+        if let nameLessThan { items.append(URLQueryItem(name: "NameLessThan", value: nameLessThan)) }
+        if let nameStartsWithOrGreater {
+            items.append(URLQueryItem(name: "NameStartsWithOrGreater", value: nameStartsWithOrGreater))
+        }
         if let genres {
             items.append(URLQueryItem(name: "Genres", value: genres.joined(separator: "|")))
         }

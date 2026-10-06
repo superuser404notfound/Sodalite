@@ -60,8 +60,11 @@ final class PosterBadgeStore {
         var series: [JellyfinItem] = []
         // An item that already carries its streams (anything fetched with detailFields) answers
         // itself; asking the server again would buy nothing.
+        // A sparse grid can hold one title in two slots when the server's order shifts between
+        // pages (Sodalite#86); asking twice would trap the batch's keyed seed below.
+        var seen: Set<String> = []
         for item in items where enriched[item.originKey] == nil && !inFlight.contains(item.originKey)
-                                && item.mediaStreams == nil {
+                                && item.mediaStreams == nil && seen.insert(item.originKey).inserted {
             switch item.type {
             case .movie, .episode: direct.append(item)
             case .series:          series.append(item)
