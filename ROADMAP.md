@@ -17,13 +17,6 @@ not on this page has not been rejected, it has simply not been picked up yet.
 
 ## Later
 
-### Jump to a letter ([#86](https://github.com/superuser404notfound/Sodalite/issues/86))
-
-A slim A to Z rail down the right edge of a library grid: move onto it, slide to P, and the grid
-lands on the first title starting with P instead of coasting past ninety-five posters. Plex has
-this on Apple TV and almost no other Jellyfin client does. It only means anything while a library
-is sorted by title, so it appears with that sort and stays out of the way otherwise.
-
 ### Something to browse before you type ([#107](https://github.com/superuser404notfound/Sodalite/issues/107))
 
 Search is the only tab that shows nothing at all until you start typing, which on a remote is the
