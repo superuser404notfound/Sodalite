@@ -465,6 +465,10 @@ struct FilteredGridView: View {
             onCommit: { jump(to: $0, commit: true) }
         )
         .padding(.trailing, metrics.gridInset / 2)
+        #if os(iOS)
+        // The cover's close button sits in the top trailing corner; the rail starts below it.
+        .padding(.top, 56)
+        #endif
     }
 
     /// A settled letter scrolls the grid to its first slot; a commit also moves focus there. The
