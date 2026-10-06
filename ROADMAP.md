@@ -80,6 +80,22 @@ Plex has been weighed next to it and would be larger again. Neither goes in fron
 
 ## Considering
 
+### A Mac app ([#181](https://github.com/superuser404notfound/Sodalite/issues/181))
+
+Sodalite on the Mac, built from the same sources as the iPhone and iPad app (Mac Catalyst), with
+your servers, profiles and settings coming along through iCloud the way they already do between an
+Apple TV and an iPhone.
+
+The app code is the smaller part. The video engine underneath already compiles for the Mac, but
+the FFmpeg libraries it ships with do not exist in a Mac Catalyst build yet, and adding them makes
+the download bigger for every platform, Apple TV included. On top of that, several things the
+engine does on iOS mean something else on a desktop: an iPhone app leaving the screen is about to
+be suspended, a Mac window losing focus is not, and playback must not tear itself down every time
+you switch to another window. Each of those has to be decided on purpose rather than inherited.
+
+Whether that is worth it next to everything in Later is the open question. Thoughts welcome in the
+issue, especially how you would watch on a Mac: a window next to your work, or full screen.
+
 ### A Home that keeps up on its own ([#117](https://github.com/superuser404notfound/Sodalite/issues/117))
 
 Jellyfin can say what changed instead of being asked. The server keeps a socket open and announces
