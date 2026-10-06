@@ -17,16 +17,6 @@ not on this page has not been rejected, it has simply not been picked up yet.
 
 ## Later
 
-### One home across every server ([#85](https://github.com/superuser404notfound/Sodalite/issues/85))
-
-An opt-in mode that keeps more than one Jellyfin session alive at the same time and merges the
-Home tab across them: one Continue Watching row in true chronological order, one My Media grid
-holding every library from every box, and the Live TV tab present when any connected server has
-a tuner. Search stays scoped to one server you pick, because merging relevance rankings from two
-servers invents an order neither of them meant.
-
-Off by default. With the switch off, Sodalite behaves exactly as it does today.
-
 ### Jump to a letter ([#86](https://github.com/superuser404notfound/Sodalite/issues/86))
 
 A slim A to Z rail down the right edge of a library grid: move onto it, slide to P, and the grid
