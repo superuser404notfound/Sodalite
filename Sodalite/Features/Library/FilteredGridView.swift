@@ -59,6 +59,9 @@ struct FilteredGridView: View {
     @State private var jumpTask: Task<Void, Never>?
     @State private var gridLetter: String?
     @State private var rejectedLetter: (letter: String, attempt: Int)?
+    /// A committed jump's slot. Leaving the rail to the left also moves focus geometrically, and
+    /// that move lands after ours, so the grid redirects the first arrival here once.
+    @State private var pendingFocusSlot: Int?
     @Environment(\.dismiss) private var dismiss
 
     /// Distinguishes "fetch failed, nothing to show" (retry state) from "server says empty".
@@ -370,6 +373,16 @@ struct FilteredGridView: View {
             rejectedLetter = nil
         }
         .onChange(of: focusedSlot) { _, slot in
+            if let target = pendingFocusSlot, let slot {
+                if slot == target {
+                    pendingFocusSlot = nil
+                } else {
+                    // Set inside the engine's own transition the assignment is dropped; one turn
+                    // of the main actor later it sticks.
+                    Task { focusedSlot = target }
+                    return
+                }
+            }
             guard let slot, let item = store.item(at: slot) else { return }
             gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
         }
@@ -451,8 +464,11 @@ struct FilteredGridView: View {
             guard !Task.isCancelled, let slot = store.visibleIndex(atOrAfter: raw) else { return }
             store.prioritize(slot: slot)
             gridLetter = letter
-            proxy.scrollTo(slot, anchor: .top)
-            if commit { focusedSlot = slot }
+            proxy.scrollTo(slot, anchor: .topLeading)
+            if commit {
+                pendingFocusSlot = slot
+                focusedSlot = slot
+            }
         }
     }
 

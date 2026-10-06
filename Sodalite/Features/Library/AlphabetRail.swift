@@ -13,6 +13,7 @@ struct AlphabetRail: View {
 
     #if os(tvOS)
     @FocusState private var focused: String?
+    @State private var redirect: String?
     #else
     @State private var dragged: String?
     #endif
@@ -27,8 +28,23 @@ struct AlphabetRail: View {
             }
         }
         .focusSection()
-        .onChange(of: focused) { _, letter in
-            if let letter { onLetter(letter) }
+        // Entering the rail lands on the grid's current letter and does not jump; only a move along
+        // the rail does. The focus engine enters geometrically and ignores defaultFocus inside a
+        // focus section, so the entry is redirected by hand.
+        .onChange(of: focused) { previous, letter in
+            guard let letter else { return }
+            if previous == nil {
+                if let highlighted, highlighted != letter, letters.contains(highlighted) {
+                    redirect = highlighted
+                    focused = highlighted
+                }
+                return
+            }
+            if letter == redirect {
+                redirect = nil
+                return
+            }
+            onLetter(letter)
         }
         .onMoveCommand { direction in
             if direction == .left, let focused { onCommit(focused) }
