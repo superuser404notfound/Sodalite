@@ -47,3 +47,31 @@ enum AlphabetIndex {
         return String(Character(next))
     }
 }
+
+/// Runs and remembers the count queries; the cache lives until the grid's filter or sort changes.
+@MainActor
+final class AlphabetJumpResolver {
+    typealias Count = @MainActor @Sendable (ItemQuery) async throws -> Int
+
+    private let count: Count
+    private var cache: [String: Int] = [:]
+
+    init(count: @escaping Count) {
+        self.count = count
+    }
+
+    func reset() {
+        cache = [:]
+    }
+
+    func slot(for letter: String, base: ItemQuery, descending: Bool) async -> Int? {
+        let key = "\(descending ? "d" : "a")\(letter)"
+        if let cached = cache[key] { return cached }
+        guard let query = AlphabetIndex.countQuery(for: letter, base: base, descending: descending) else {
+            return 0
+        }
+        guard !Task.isCancelled, let result = try? await count(query), !Task.isCancelled else { return nil }
+        cache[key] = result
+        return result
+    }
+}
