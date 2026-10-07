@@ -75,6 +75,10 @@ struct SubtitleOverlayView: View {
                 reloadSignal: assReloadSignal,
                 currentOffset: currentTime
             )
+            // Same pin as the bitmap layer: AVKit's invisible chrome widens contentOverlayView's
+            // safe-area insets around an audio-switch reload, and the libass canvas follows the
+            // bounds, so every line was redrawn on a shorter canvas, mid-screen and resized.
+            .ignoresSafeArea()
             .allowsHitTesting(false)
         } else {
             cueOverlay
