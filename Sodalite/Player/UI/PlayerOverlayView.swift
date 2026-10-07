@@ -50,7 +50,7 @@ struct PlayerOverlayView: View {
             if viewModel.isLoading {
                 // Inner ZStack + whole-stack ignoresSafeArea so the spinner shares the backdrop's coord space; centering on Color.black's layout bounds (which respect safe-area) drifted the spinner top-half when an outgoing next-episode card shifted the parent's insets.
                 ZStack {
-                    Color.black
+                    viewModel.spinnerKeepsPicture ? Color.Theme.scrim : Color.black
                     ProgressView()
                         // ProgressView doesn't reliably inherit the overlay's `.tint(...)` on tvOS (falls back to white); set it explicitly.
                         .tint(tintColor)

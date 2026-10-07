@@ -65773,6 +65773,330 @@
         }
       }
     },
+    "changelog.1_1_0.audioSwitchPicture.body" : {
+      "comment" : "What's New 1.1.0: body for the audio switch that holds the picture instead of going black.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Při změně zvukové stopy během přehrávání zůstane aktuální obraz na obrazovce, místo aby po dobu načítání nové stopy zčernal. Platí to i pro tituly v Dolby Vision."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når du skifter lydspor midt i afspilningen, bliver det aktuelle billede stående i stedet for at blive sort, mens det nye spor indlæses. Det gælder også titler i Dolby Vision."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Wechsel der Tonspur bleibt das aktuelle Bild stehen, statt schwarz zu werden, während die neue Spur lädt. Das gilt auch für Titel in Dolby Vision."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όταν αλλάζετε κομμάτι ήχου κατά την αναπαραγωγή, η τρέχουσα εικόνα παραμένει στην οθόνη αντί να μαυρίσει όσο φορτώνει το νέο κομμάτι. Ισχύει και για τίτλους Dolby Vision."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changing the audio track mid-playback holds the current picture on screen instead of going black while the new track loads, Dolby Vision titles included."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al cambiar la pista de audio durante la reproducción, la imagen actual se mantiene en pantalla en lugar de quedarse en negro mientras se carga la nueva pista. También en títulos Dolby Vision."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun vaihdat ääniraitaa kesken toiston, nykyinen kuva pysyy näytöllä eikä muutu mustaksi uuden raidan latautuessa. Tämä koskee myös Dolby Vision -nimikkeitä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En changeant de piste audio pendant la lecture, l’image actuelle reste affichée au lieu de passer au noir pendant le chargement de la nouvelle piste, y compris pour les titres Dolby Vision."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri promjeni zvučnog zapisa tijekom reprodukcije trenutna slika ostaje na zaslonu umjesto da se zacrni dok se novi zapis učitava. Vrijedi i za naslove u Dolby Visionu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha lejátszás közben hangsávot váltasz, az aktuális kép a képernyőn marad, és nem sötétül el, amíg az új sáv betöltődik. Dolby Vision címeknél is."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiando traccia audio durante la riproduzione, l’immagine attuale resta sullo schermo invece di diventare nera mentre la nuova traccia si carica, anche per i titoli Dolby Vision."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生中に音声トラックを切り替えても、新しいトラックの読み込み中に画面が黒くならず、現在の映像が表示されたままになります。Dolby Vision のタイトルにも対応しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 중 오디오 트랙을 바꿔도 새 트랙을 불러오는 동안 화면이 검게 바뀌지 않고 현재 화면이 유지됩니다. Dolby Vision 타이틀도 포함됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når du bytter lydspor under avspilling, blir det gjeldende bildet stående i stedet for å bli svart mens det nye sporet lastes inn. Det gjelder også titler i Dolby Vision."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als je tijdens het afspelen van audiospoor wisselt, blijft het huidige beeld staan in plaats van zwart te worden terwijl het nieuwe spoor laadt. Ook bij titels in Dolby Vision."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po zmianie ścieżki dźwiękowej w trakcie odtwarzania bieżący obraz pozostaje na ekranie zamiast robić się czarny podczas wczytywania nowej ścieżki. Dotyczy to także tytułów w Dolby Vision."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao trocar a faixa de áudio durante a reprodução, a imagem atual permanece na tela em vez de ficar preta enquanto a nova faixa carrega, inclusive em títulos Dolby Vision."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao mudar a faixa de áudio durante a reprodução, a imagem atual mantém-se no ecrã em vez de ficar preta enquanto a nova faixa carrega, incluindo títulos Dolby Vision."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La schimbarea pistei audio în timpul redării, imaginea curentă rămâne pe ecran în loc să devină neagră cât timp se încarcă noua pistă, inclusiv la titlurile Dolby Vision."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При смене звуковой дорожки во время воспроизведения текущий кадр остаётся на экране, а не сменяется чёрным, пока загружается новая дорожка. Это касается и тайтлов в Dolby Vision."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri zmene zvukovej stopy počas prehrávania zostane aktuálny obraz na obrazovke namiesto toho, aby počas načítania novej stopy sčernel. Platí to aj pre tituly v Dolby Vision."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När du byter ljudspår mitt i uppspelningen ligger den aktuella bilden kvar i stället för att bli svart medan det nya spåret laddas. Det gäller även titlar i Dolby Vision."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma sırasında ses parçasını değiştirdiğinizde, yeni parça yüklenirken ekran kararmaz ve mevcut görüntü ekranda kalır. Dolby Vision içerikler de buna dahildir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Під час зміни звукової доріжки посеред відтворення поточний кадр залишається на екрані, а не стає чорним, поки завантажується нова доріжка. Це стосується й тайтлів у Dolby Vision."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放中切换音轨时，新音轨加载期间当前画面会保留在屏幕上，而不是变黑。Dolby Vision 影片同样适用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放中切換音軌時，新音軌載入期間目前畫面會保留在螢幕上，而不是變黑。Dolby Vision 影片同樣適用。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.audioSwitchPicture.title" : {
+      "comment" : "What's New 1.1.0: title for the audio switch that holds the picture instead of going black.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přepnutí zvuku drží obraz"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydskift beholder billedet"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tonspurwechsel ohne Schwarzbild"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η αλλαγή ήχου κρατά την εικόνα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio switches keep the picture"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El cambio de audio mantiene la imagen"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ääniraidan vaihto pitää kuvan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le changement d’audio garde l’image"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promjena zvuka zadržava sliku"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangsávváltás kép megtartásával"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il cambio audio mantiene l’immagine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声切り替えで映像が途切れません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오디오 전환 시 화면 유지"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydbytte beholder bildet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiowissel houdt het beeld vast"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmiana ścieżki dźwiękowej bez czarnego ekranu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A troca de áudio mantém a imagem"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mudança de áudio mantém a imagem"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schimbarea audio păstrează imaginea"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смена звука без чёрного экрана"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepnutie zvuku drží obraz"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ljudbyte behåller bilden"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses değişiminde görüntü korunur"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зміна звуку без чорного екрана"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换音轨时画面保持"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切換音軌時畫面保持"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.channelZap.body" : {
       "comment" : "What's New 1.1.0: channel zap body",
       "extractionState" : "manual",

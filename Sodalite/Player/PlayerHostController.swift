@@ -54,6 +54,10 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Engine render surface, mounted into `contentOverlayView` only for the SW (dav1d) backend; the native path renders off `self.player`'s own AVPlayerLayer.
     private let aetherView = AetherPlayerView()
+    /// AetherEngine#711 follow-up: where the engine holds the picture across the item swap of an audio
+    /// switch. The native path renders through AVKit here, not through `aetherView`, so the engine
+    /// needs a surface of its own above the video; top of `contentOverlayView`, under our overlay.
+    private let stillView = AetherStillView()
     private var aetherViewMounted = false
 
     #if os(tvOS) || os(iOS)
@@ -182,6 +186,12 @@ final class PlayerHostController: AVPlayerViewController {
             overlay.addSubview(pipController.sourceView)
         }
         #endif
+        if let overlay = contentOverlayView {
+            stillView.frame = overlay.bounds
+            stillView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            overlay.addSubview(stillView)
+            viewModel.player.bindStillView(stillView)
+        }
 
         // The nil case is load-bearing: the SW (dav1d/VP9) path never sets currentAVPlayer, so without `self.player = nil` AVKit keeps the old item-less player and renders its own spinner over our frames ("AV1 plays but loading never goes away").
         let engine = viewModel.player
@@ -483,6 +493,7 @@ final class PlayerHostController: AVPlayerViewController {
         case .original: self.videoGravity = .resizeAspect
         case .fill:     self.videoGravity = .resizeAspectFill
         }
+        stillView.videoGravity = videoGravity
         #if os(tvOS)
         // The PiP source layer covers AVKit's video; mismatched gravity would visibly double-expose.
         pipController.setVideoGravity(videoGravity)
@@ -911,6 +922,7 @@ final class PlayerHostController: AVPlayerViewController {
     private func unbindForDismissal(path: String, stops: Bool) {
         let before = nowPlayingFacts
         unmountAetherViewIfNeeded()
+        viewModel.player.unbindStillView(stillView)
         player = nil
         let bound = playerBoundAt.map { String(format: "%.1fs", Date().timeIntervalSince($0)) } ?? "never"
         LogTap.shared.note(

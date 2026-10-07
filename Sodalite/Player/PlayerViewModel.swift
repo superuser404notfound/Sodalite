@@ -17,6 +17,12 @@ final class PlayerViewModel {
     // MARK: - UI State
 
     var isLoading = true
+    /// The rebuild behind the spinner keeps the current picture mounted (an audio switch on the native
+    /// path, AetherEngine#711), so the spinner sits on a scrim over it instead of on black. Decided when
+    /// the spinner appears and left alone while it fades out, or the fade-out would run on black.
+    var spinnerKeepsPicture = false
+    /// Set by an audio switch just before the engine raises `.loading`, read by the spinner it raises.
+    private var rebuildKeepsPictureRequested = false
     /// True while the host is bringing a session up (fetching playback info, calling `player.load()`, or
     /// running a live retune), independent of the engine phase. ORed with `playbackPhase` so the pre-engine
     /// load window still shows the spinner (AetherEngine#85). `didSet` keeps `isLoading` in sync. Not private:
@@ -1592,6 +1598,14 @@ final class PlayerViewModel {
     /// `playbackPhase`. `.seeking` is left to the scrub UI. The live cold-transcode first `.playing` is
     /// premature (a stall follows ~700ms later), so a would-be clear inside that window is held and a
     /// delayed recompute settles it, preserving the old debounce without the former 15s heuristic.
+    /// The engine holds the outgoing picture across an audio switch on both video paths (AetherEngine
+    /// #711 follow-up, Dolby Vision included), so the spinner belongs on a scrim over it, not on black.
+    private func markRebuildKeepsPicture() {
+        guard player.playbackBackend == .native || player.playbackBackend == .software,
+              player.activeAudioTrackIndex != nil else { return }
+        rebuildKeepsPictureRequested = true
+    }
+
     private func recomputeLoadingIndicator() {
         let wantsSpinner = PlayerLoadingIndicator.showsSpinner(hostLoadActive: hostLoadActive,
                                                                phase: player.playbackPhase,
@@ -1608,6 +1622,11 @@ final class PlayerViewModel {
                 }
             }
             return
+        }
+        if hostLoadActive { rebuildKeepsPictureRequested = false }
+        if wantsSpinner && !isLoading {
+            spinnerKeepsPicture = rebuildKeepsPictureRequested
+            rebuildKeepsPictureRequested = false
         }
         isLoading = wantsSpinner
     }
@@ -2640,6 +2659,7 @@ final class PlayerViewModel {
         }
         // No optimistic `activeAudioIndex = id`: the $activeAudioTrackIndex sink updates the picker once
         // the engine settles, else it claims the switch happened while the pipeline is still mid-reload.
+        markRebuildKeepsPicture()
         player.selectAudioTrack(index: id)
         // Re-run auto-subtitle resolution so a manual mid-playback language switch behaves like load-time
         // (else DE → EN kept subs off even though autoSubtitleForForeignAudio would have turned them on).
@@ -2762,6 +2782,7 @@ final class PlayerViewModel {
         // Raw engine select, not selectAudioTrack: the wrapper re-runs the automatic
         // subtitle resolution, which would overwrite the remembered subtitle below.
         if let audioTrackID = plan.audioTrackID, audioTrackID != player.activeAudioTrackIndex {
+            markRebuildKeepsPicture()
             player.selectAudioTrack(index: audioTrackID)
         }
 

@@ -110,6 +110,12 @@ enum Changelog {
                     "changelog.1_1_0.multiview.body",
                     icon: "rectangle.split.2x2"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.audioSwitchPicture.title",
+                    "changelog.1_1_0.audioSwitchPicture.body",
+                    icon: "waveform"
+                ),
             ]
         ),
         // MARK: 1.0.0
