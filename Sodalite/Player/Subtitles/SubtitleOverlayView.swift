@@ -105,39 +105,69 @@ struct SubtitleOverlayView: View {
             .ignoresSafeArea()
 
             // Text cues share ONE bottom-anchored stack so secondary sits above primary
-            // regardless of wrap count (a fixed offset fails on a 2-line primary). Stays
-            // safe-area-aware.
+            // regardless of wrap count (a fixed offset fails on a 2-line primary).
+            #if os(tvOS)
+            // Laid out inside the window's safe area, not the overlay's: AVKit's invisible chrome
+            // widens contentOverlayView's insets around an audio-switch reload, which lifted every
+            // line by that amount for a few seconds. The window's insets are the resting values,
+            // so the settled position is unchanged.
             GeometryReader { geo in
-                Color.clear
-                    .overlay(alignment: .topLeading) {
-                        let activePrimary = activeCues(in: cues, maxDuration: maxCueDuration)
-                        // A cue that asks for its own spot (AetherEngine #233: teletext pages,
-                        // WebVTT cue settings, ASS `\an`/`\pos`) leaves the shared stack and is
-                        // drawn where it asked. That also keeps it clear of the secondary track
-                        // by construction, which is what the stack exists to guarantee (#47).
-                        let placedCues = activePrimary.filter { $0.placement != nil && renderLine(for: $0) != nil }
-                        let primaryRenderLines: [RenderLine] = activePrimary.compactMap { cue in
-                            cue.placement == nil ? renderLine(for: cue) : nil
-                        }
-                        let secondaryLines: [String] = activeCues(in: secondaryCues, maxDuration: secondaryMaxCueDuration).compactMap { cue in
-                            guard case .text(let raw) = cue.body, !raw.isEmpty else { return nil }
-                            return raw
-                        }
-                        if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
-                            stackedText(
-                                primary: primaryRenderLines,
-                                secondary: secondaryLines,
-                                in: geo.size,
-                                safeAreaInsets: geo.safeAreaInsets
-                            )
-                        }
-                        ForEach(placedCues, id: \.id) { cue in
-                            placedText(cue, in: geo.size)
-                        }
-                    }
+                let insets = Self.windowSafeAreaInsets
+                let size = CGSize(width: max(0, geo.size.width - insets.leading - insets.trailing),
+                                  height: max(0, geo.size.height - insets.top - insets.bottom))
+                textCues(in: size, safeAreaInsets: insets)
+                    .frame(width: size.width, height: size.height)
+                    .position(x: insets.leading + size.width / 2, y: insets.top + size.height / 2)
             }
+            .ignoresSafeArea()
+            #else
+            GeometryReader { geo in
+                textCues(in: geo.size, safeAreaInsets: geo.safeAreaInsets)
+            }
+            #endif
         }
         .allowsHitTesting(false)
+    }
+
+    #if os(tvOS)
+    private static var windowSafeAreaInsets: EdgeInsets {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+        let i = window?.safeAreaInsets ?? .zero
+        return EdgeInsets(top: i.top, leading: i.left, bottom: i.bottom, trailing: i.right)
+    }
+    #endif
+
+    private func textCues(in size: CGSize, safeAreaInsets: EdgeInsets) -> some View {
+        Color.clear
+            .overlay(alignment: .topLeading) {
+                let activePrimary = activeCues(in: cues, maxDuration: maxCueDuration)
+                // A cue that asks for its own spot (AetherEngine #233: teletext pages,
+                // WebVTT cue settings, ASS `\an`/`\pos`) leaves the shared stack and is
+                // drawn where it asked. That also keeps it clear of the secondary track
+                // by construction, which is what the stack exists to guarantee (#47).
+                let placedCues = activePrimary.filter { $0.placement != nil && renderLine(for: $0) != nil }
+                let primaryRenderLines: [RenderLine] = activePrimary.compactMap { cue in
+                    cue.placement == nil ? renderLine(for: cue) : nil
+                }
+                let secondaryLines: [String] = activeCues(in: secondaryCues, maxDuration: secondaryMaxCueDuration).compactMap { cue in
+                    guard case .text(let raw) = cue.body, !raw.isEmpty else { return nil }
+                    return raw
+                }
+                if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
+                    stackedText(
+                        primary: primaryRenderLines,
+                        secondary: secondaryLines,
+                        in: size,
+                        safeAreaInsets: safeAreaInsets
+                    )
+                }
+                ForEach(placedCues, id: \.id) { cue in
+                    placedText(cue, in: size)
+                }
+            }
     }
 
     /// True while the selected stream is ASS/SSA. In the cue path (styled renderer nil) the
