@@ -38,6 +38,10 @@ enum PlayerEngineErrorPresentation {
         /// accept. The only face here whose fix is a decision rather than a retry, which is why it
         /// exists rather than folding into the generic classified line.
         case certificateRejected
+        /// The device ran out of storage for the segments the engine writes while it plays
+        /// (AetherEngine#720). Neither the file nor the server is at fault, and the same title plays once
+        /// space is freed, so the advice is about the device rather than a retry or another track.
+        case storageFull
         /// The engine classified the failure but the host has no sentence for that kind. The viewer gets
         /// a translated line, and `identifier` carries the classification so a screenshot is still worth
         /// something in a bug report. It is deliberately NOT translated: it is a stable API token, and a
@@ -80,6 +84,7 @@ enum PlayerEngineErrorPresentation {
         if info.kind == .sourceCertificateRejected { return .certificateRejected }
         if info.kind == .dolbyVisionRequiresHardware { return .dolbyVisionUnsupported }
         if info.kind == .liveSourceUnavailable { return .liveChannelUnavailable }
+        if info.kind == .storageExhausted { return .storageFull }
 
         // `.nativeItemFailed` keeps the engine's sentence on purpose: it is AVFoundation's
         // `localizedDescription`, already in the device's language and more specific than anything the
@@ -215,6 +220,18 @@ enum PlayerEngineErrorPresentation {
                 message: String(
                     localized: "player.error.certificateRejected.body",
                     defaultValue: "This server presented a certificate this device does not trust, so the stream was not started. Add the server again in Settings to look at its certificate and accept it."
+                )
+            )
+        case .storageFull:
+            return Trio(
+                icon: "externaldrive.badge.exclamationmark",
+                title: String(
+                    localized: "player.error.storageFull.title",
+                    defaultValue: "Storage full"
+                ),
+                message: String(
+                    localized: "player.error.storageFull.body",
+                    defaultValue: "This device does not have enough free storage to prepare the video for playback. Free up some space, for example by removing apps you no longer use, and try again."
                 )
             )
         case .engineClassified(let identifier):

@@ -49,6 +49,13 @@ struct PlayerEngineErrorFaceTests {
         #expect(PlayerEngineErrorPresentation.face(for: info(.dolbyVisionRequiresHardware)) == .dolbyVisionUnsupported)
     }
 
+    /// A full segment volume used to arrive as a source that cannot be muxed or as a silent audio
+    /// bridge, which pointed the viewer at the file or the track. It is the device (AetherEngine#720).
+    @Test func aFullSegmentVolumeNamesTheDeviceStorage() {
+        #expect(PlayerEngineErrorPresentation.face(for: info(.storageExhausted, status: -28)) == .storageFull)
+        #expect(PlayerEngineErrorPresentation.liveFace(for: info(.storageExhausted)) == .storageFull)
+    }
+
     @Test func aLiveProbeThatBurnedItsBudgetReadsAsAnUnavailableChannel() {
         #expect(PlayerEngineErrorPresentation.face(for: info(.liveSourceUnavailable)) == .liveChannelUnavailable)
     }

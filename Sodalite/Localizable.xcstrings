@@ -70307,6 +70307,330 @@
         }
       }
     },
+    "changelog.1_1_0.storageFull.body" : {
+      "comment" : "What's New 1.1.0: body for the clear message when the device is out of storage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Když v zařízení dojde místo, přehrávání to nyní řekne přímo, místo aby vinilo zvukovou stopu nebo soubor."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når enheden løber tør for lagerplads, siger afspilningen det nu direkte i stedet for at give lydsporet eller filen skylden."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist der Speicher des Geräts voll, sagt die Wiedergabe das jetzt direkt, statt die Tonspur oder die Datei verantwortlich zu machen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όταν η συσκευή μείνει χωρίς χώρο, η αναπαραγωγή το λέει πλέον ξεκάθαρα αντί να κατηγορεί το κομμάτι ήχου ή το αρχείο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the device runs out of storage, playback now says so instead of blaming the audio track or the file."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando el dispositivo se queda sin almacenamiento, la reproducción ahora lo indica en lugar de culpar a la pista de audio o al archivo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun laitteen tallennustila loppuu, toisto kertoo sen nyt suoraan eikä syytä ääniraitaa tai tiedostoa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsque l’appareil manque d’espace, la lecture l’indique désormais au lieu d’accuser la piste audio ou le fichier."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kad uređaju ponestane pohrane, reprodukcija to sada izravno kaže umjesto da okrivljuje audiozapis ili datoteku."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha az eszközön elfogy a tárhely, a lejátszás most ezt jelzi, ahelyett hogy a hangsávot vagy a fájlt okolná."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando il dispositivo esaurisce lo spazio, la riproduzione ora lo dice chiaramente invece di incolpare la traccia audio o il file."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デバイスのストレージが不足した場合、オーディオトラックやファイルのせいにせず、そのことを直接表示するようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기기의 저장 공간이 부족하면 이제 오디오 트랙이나 파일 문제로 표시하지 않고 그대로 알려 줍니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når enheten går tom for lagringsplass, sier avspillingen nå fra om det i stedet for å skylde på lydsporet eller filen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als het apparaat geen opslag meer heeft, zegt het afspelen dat nu ook, in plaats van het audiospoor of het bestand de schuld te geven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gdy na urządzeniu zabraknie miejsca, odtwarzanie mówi teraz o tym wprost, zamiast obwiniać ścieżkę dźwiękową lub plik."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando o dispositivo fica sem armazenamento, a reprodução agora informa isso em vez de culpar a faixa de áudio ou o arquivo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando o dispositivo fica sem armazenamento, a reprodução agora indica-o em vez de culpar a faixa de áudio ou o ficheiro."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Când dispozitivul rămâne fără spațiu, redarea spune acum acest lucru, în loc să dea vina pe pista audio sau pe fișier."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда на устройстве заканчивается место, воспроизведение теперь прямо сообщает об этом, а не винит аудиодорожку или файл."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keď v zariadení dôjde miesto, prehrávanie to teraz povie priamo namiesto toho, aby vinilo zvukovú stopu alebo súbor."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När enheten får slut på lagringsutrymme säger uppspelningen nu det i stället för att skylla på ljudspåret eller filen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihazın depolama alanı dolduğunda oynatma artık ses parçasını veya dosyayı suçlamak yerine bunu doğrudan söylüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коли на пристрої закінчується місце, відтворення тепер прямо про це повідомляє, а не звинувачує аудіодоріжку чи файл."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当设备存储空间不足时，播放现在会直接说明，而不再归咎于音轨或文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "當裝置儲存空間不足時，播放現在會直接說明，而不再歸咎於音軌或檔案。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.storageFull.title" : {
+      "comment" : "What's New 1.1.0: title for the clear message when the device is out of storage.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jasná zpráva při plném úložišti"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tydelig besked ved fuld lagerplads"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klare Meldung bei vollem Speicher"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σαφές μήνυμα όταν ο χώρος είναι πλήρης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear message when storage is full"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensaje claro con el almacenamiento lleno"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selkeä ilmoitus, kun tila on täynnä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message clair quand le stockage est saturé"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jasna poruka kad je pohrana puna"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egyértelmű üzenet, ha megtelt a tárhely"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messaggio chiaro con spazio esaurito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストレージ不足をわかりやすく表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 공간 부족 시 명확한 안내"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tydelig melding når lagringen er full"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duidelijke melding bij volle opslag"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jasny komunikat przy braku miejsca"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem clara com armazenamento cheio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem clara com armazenamento cheio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesaj clar când spațiul este plin"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Понятное сообщение при заполненном хранилище"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jasná správa pri plnom úložisku"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tydligt meddelande när lagringen är full"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depolama dolduğunda net mesaj"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зрозуміле повідомлення про заповнене сховище"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储空间已满时清楚提示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存空間已滿時清楚提示"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.streamFormat.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -136172,6 +136496,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "與伺服器的連線已中斷"
+          }
+        }
+      }
+    },
+    "player.error.storageFull.body" : {
+      "comment" : "Advice when the device is out of storage: neither the file nor the server is at fault, free space and retry",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V tomto zařízení není dost volného místa na přípravu videa k přehrání. Uvolněte místo, například odstraněním aplikací, které už nepoužíváte, a zkuste to znovu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der er ikke nok ledig lagerplads på denne enhed til at gøre videoen klar til afspilning. Frigør noget plads, for eksempel ved at fjerne apps, du ikke længere bruger, og prøv igen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf diesem Gerät ist nicht genug Speicher frei, um das Video für die Wiedergabe vorzubereiten. Etwas Speicher freigeben, zum Beispiel nicht mehr genutzte Apps entfernen, und erneut versuchen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν υπάρχει αρκετός ελεύθερος χώρος σε αυτή τη συσκευή για την προετοιμασία του βίντεο για αναπαραγωγή. Ελευθερώστε χώρο, για παράδειγμα αφαιρώντας εφαρμογές που δεν χρησιμοποιείτε πια, και δοκιμάστε ξανά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device does not have enough free storage to prepare the video for playback. Free up some space, for example by removing apps you no longer use, and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no tiene suficiente almacenamiento libre para preparar el vídeo para su reproducción. Libera algo de espacio, por ejemplo eliminando apps que ya no uses, y vuelve a intentarlo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tässä laitteessa ei ole tarpeeksi vapaata tallennustilaa videon valmistelemiseksi toistoa varten. Vapauta tilaa, esimerkiksi poistamalla apit, joita et enää käytä, ja yritä uudelleen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil n’a pas assez d’espace libre pour préparer la vidéo à la lecture. Libérez de l’espace, par exemple en supprimant des apps que vous n’utilisez plus, puis réessayez."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na ovom uređaju nema dovoljno slobodne pohrane za pripremu videozapisa za reprodukciju. Oslobodite malo prostora, na primjer uklanjanjem aplikacija koje više ne koristite, i pokušajte ponovno."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ezen az eszközön nincs elég szabad tárhely a videó lejátszásra való előkészítéséhez. Szabadíts fel helyet, például a már nem használt appok eltávolításával, majd próbáld újra."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo dispositivo non ha abbastanza spazio libero per preparare il video alla riproduzione. Libera un po’ di spazio, ad esempio rimuovendo le app che non usi più, e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデバイスには、再生用にビデオを準備するための空き容量が足りません。使わなくなったAppを削除するなどして空き容量を増やしてから、もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기에 동영상 재생을 준비할 여유 저장 공간이 부족합니다. 더 이상 사용하지 않는 앱을 삭제하는 등 공간을 확보한 후 다시 시도하세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det er ikke nok ledig lagringsplass på denne enheten til å gjøre videoen klar for avspilling. Frigjør litt plass, for eksempel ved å fjerne apper du ikke lenger bruker, og prøv igjen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit apparaat heeft niet genoeg vrije opslag om de video voor afspelen voor te bereiden. Maak wat ruimte vrij, bijvoorbeeld door apps te verwijderen die je niet meer gebruikt, en probeer het opnieuw."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na tym urządzeniu brakuje wolnego miejsca, aby przygotować wideo do odtwarzania. Zwolnij trochę miejsca, na przykład usuwając nieużywane aplikacje, i spróbuj ponownie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo não tem armazenamento livre suficiente para preparar o vídeo para reprodução. Libere espaço, por exemplo removendo apps que você não usa mais, e tente novamente."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo não tem armazenamento livre suficiente para preparar o vídeo para reprodução. Liberte algum espaço, por exemplo removendo apps que já não utiliza, e tente novamente."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acest dispozitiv nu are suficient spațiu liber pentru a pregăti videoclipul pentru redare. Eliberează spațiu, de exemplu eliminând aplicațiile pe care nu le mai folosești, și încearcă din nou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этом устройстве недостаточно свободного места, чтобы подготовить видео к воспроизведению. Освободите место, например удалив приложения, которыми больше не пользуетесь, и повторите попытку."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V tomto zariadení nie je dosť voľného miesta na prípravu videa na prehrávanie. Uvoľnite miesto, napríklad odstránením aplikácií, ktoré už nepoužívate, a skúste to znova."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det finns inte tillräckligt med ledigt lagringsutrymme på den här enheten för att förbereda videon för uppspelning. Frigör lite utrymme, till exempel genom att ta bort appar du inte längre använder, och försök igen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihazda videoyu oynatmaya hazırlamak için yeterli boş depolama alanı yok. Örneğin artık kullanmadığınız uygulamaları kaldırarak biraz yer açın ve tekrar deneyin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На цьому пристрої недостатньо вільного місця, щоб підготувати відео до відтворення. Звільніть місце, наприклад видаливши застосунки, якими більше не користуєтеся, і спробуйте ще раз."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此设备没有足够的可用存储空间来准备播放视频。请释放一些空间（例如移除不再使用的 App），然后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此裝置沒有足夠的可用儲存空間來準備播放影片。請釋放一些空間（例如移除不再使用的 App），然後再試一次。"
+          }
+        }
+      }
+    },
+    "player.error.storageFull.title" : {
+      "comment" : "Headline when the device ran out of storage for the video segments the player writes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úložiště je plné"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lagerpladsen er fuld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speicher voll"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ο χώρος αποθήκευσης είναι πλήρης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage full"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almacenamiento lleno"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tallennustila täynnä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stockage saturé"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pohrana je puna"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megtelt a tárhely"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spazio di archiviazione esaurito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストレージがいっぱいです"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 공간 부족"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lagringsplassen er full"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opslag vol"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brak miejsca w pamięci"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Armazenamento cheio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Armazenamento cheio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spațiu de stocare plin"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хранилище заполнено"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úložisko je plné"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lagringsutrymmet är fullt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depolama alanı dolu"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сховище заповнене"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储空间已满"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存空間已滿"
           }
         }
       }

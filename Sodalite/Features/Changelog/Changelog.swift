@@ -116,6 +116,12 @@ enum Changelog {
                     "changelog.1_1_0.audioSwitchPicture.body",
                     icon: "waveform"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.storageFull.title",
+                    "changelog.1_1_0.storageFull.body",
+                    icon: "externaldrive.badge.exclamationmark"
+                ),
             ]
         ),
         // MARK: 1.0.0
