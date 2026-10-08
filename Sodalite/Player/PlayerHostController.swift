@@ -1336,9 +1336,27 @@ final class PlayerHostController: AVPlayerViewController {
         } else {
             // Sodalite#58, unconditional since #114: a click on hidden controls pauses or resumes, the
             // way the system player behaves. togglePlayPause raises the transport itself, so the click
-            // still gives feedback, and Up/Down still opens it without touching playback.
-            viewModel.togglePlayPause()
+            // still gives feedback. Live differs, see `hiddenControlsSelect`.
+            switch Self.hiddenControlsSelect(isLive: viewModel.isLiveSession, controlsVisible: viewModel.showControls) {
+            case .showControls: viewModel.showControlsTemporarily()
+            case .togglePlayback: viewModel.togglePlayPause()
+            }
         }
+    }
+
+    /// What a click does once nothing above it has claimed the press.
+    ///
+    /// On VOD, Up and Down open the bar without touching playback, so the click can pause. On live
+    /// they change the channel (Sodalite#173), which left a long press as the only way to the bar.
+    /// So on live the first click opens it, and the second, with the bar up on the progress bar,
+    /// pauses as before.
+    enum HiddenControlsSelect: Equatable {
+        case showControls
+        case togglePlayback
+    }
+
+    nonisolated static func hiddenControlsSelect(isLive: Bool, controlsVisible: Bool) -> HiddenControlsSelect {
+        isLive && !controlsVisible ? .showControls : .togglePlayback
     }
 
     /// Sodalite#104: what the Play/Pause button means while a scrub is pending.
