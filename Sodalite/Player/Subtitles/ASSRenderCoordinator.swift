@@ -49,6 +49,18 @@ final class ASSRenderCoordinator {
         self.player = player
     }
 
+    /// The viewer's subtitle delay (global plus per title). Positive draws later, so the renderer
+    /// is asked for an earlier script time. Read on every clock tick, so a change lands at once.
+    var delaySeconds: () -> Double = { 0 }
+
+    /// Script time the renderer draws at; the overlay queries the same time for its hide logic.
+    var scriptTime: Double { lastOffset - delaySeconds() }
+
+    /// Re-apply the delay without waiting for the clock, which does not tick while paused.
+    func refreshTimeOffset() {
+        renderer?.setTimeOffset(scriptTime)
+    }
+
     /// Fired when the renderer becomes available asynchronously (first activation with unwritten
     /// fonts) or is torn down; PlayerViewModel mirrors it onto its observable surface.
     var onRendererChanged: ((AssSubtitlesRenderer?) -> Void)?
@@ -96,7 +108,7 @@ final class ASSRenderCoordinator {
             .sink { [weak self] t in
                 guard let self else { return }
                 self.lastOffset = t
-                self.renderer?.setTimeOffset(t)
+                self.renderer?.setTimeOffset(self.scriptTime)
                 self.flushPendingEventsIfDue()
             }
             .store(in: &cancellables)

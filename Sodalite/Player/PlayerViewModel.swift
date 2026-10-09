@@ -280,7 +280,37 @@ final class PlayerViewModel {
     var subtitleMenuRows: [SubtitleMenuRow] {
         SubtitleMenuLayout.rows(streams: displaySubtitleStreams,
                                 supportsSecondary: !isLiveSession,
-                                supportsSearch: supportsSubtitleSearch)
+                                supportsSearch: supportsSubtitleSearch,
+                                supportsOffset: supportsSubtitleOffset)
+    }
+
+    /// The offset only moves subtitles Sodalite draws itself; AVKit's own rendition ignores it.
+    var supportsSubtitleOffset: Bool {
+        subtitleOffsetKey != nil && activeSubtitleIndex != nil && !nativeSubtitleRenderingActive
+    }
+
+    /// Per file, not per series, and not behind `rememberTrackSelections`: the viewer set this
+    /// value for this title on purpose, it is not an inferred pick.
+    var subtitleOffsetKey: String? {
+        guard trackMemory != nil, !isLiveSession else { return nil }
+        return TrackSelectionMemory.itemKey(userID: userID, itemID: item.id)
+    }
+
+    var itemSubtitleOffset: Double {
+        subtitleOffsetKey.flatMap { trackMemory?.entry(for: $0)?.subtitleOffset } ?? 0
+    }
+
+    /// What every subtitle renderer shifts by: the global delay plus this title's own offset.
+    var effectiveSubtitleDelay: Double { preferences.subtitleDelaySeconds + itemSubtitleOffset }
+
+    func stepSubtitleOffset(by steps: Int) {
+        setSubtitleOffset(SubtitleOffset.stepped(itemSubtitleOffset, by: steps))
+    }
+
+    func setSubtitleOffset(_ seconds: Double) {
+        guard let key = subtitleOffsetKey, seconds != itemSubtitleOffset else { return }
+        trackMemory?.recordSubtitleOffset(seconds, for: key)
+        assCoordinator.refreshTimeOffset()
     }
 
     /// In-player subtitle-search reachability; VOD-only (live has no searchable library item).
@@ -721,7 +751,11 @@ final class PlayerViewModel {
     var forcedSubtitleFallback: ForcedSubtitleFallback.Mode = .none
     /// Styled ASS rendering bridge, active only while the selected embedded track is ASS/SSA
     /// (AetherEngine#30). Lazy to capture `player`; @ObservationIgnored, observable surface is `assRenderer`.
-    @ObservationIgnored private lazy var assCoordinator = ASSRenderCoordinator(player: player)
+    @ObservationIgnored private lazy var assCoordinator: ASSRenderCoordinator = {
+        let coordinator = ASSRenderCoordinator(player: player)
+        coordinator.delaySeconds = { [weak self] in self?.effectiveSubtitleDelay ?? 0 }
+        return coordinator
+    }()
     /// Observable mirror of `assCoordinator.renderer` (coordinator isn't @Observable), updated at
     /// every activate/deactivate so the overlay swaps between styled ASS and cue path reactively.
     private(set) var assRenderer: AssSubtitlesRenderer?
@@ -3346,7 +3380,7 @@ final class PlayerViewModel {
         }
         guard SkipBackSubtitleWindow.shouldClose(state: window, playhead: time) else { return }
         guard let lingerUntil = SkipBackSubtitleWindow.lingerEnd(
-            cues: subtitleCues, subtitleTime: subtitleTime, delay: preferences.subtitleDelaySeconds
+            cues: subtitleCues, subtitleTime: subtitleTime, delay: effectiveSubtitleDelay
         ) else {
             endSkipBackSubtitleWindow()
             return
@@ -3905,6 +3939,9 @@ final class PlayerViewModel {
                 selectSubtitleTrack(id: streamIndex, userInitiated: true)
                 trackDropdown = .none
                 scheduleControlsHide()
+            case .offset:
+                // Left/right step the value; Select resets it and keeps the menu open.
+                setSubtitleOffset(0)
             case .searchOnline:
                 trackDropdown = .none
                 presentSubtitleSearch()

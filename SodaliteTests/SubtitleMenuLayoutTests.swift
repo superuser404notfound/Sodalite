@@ -38,6 +38,20 @@ struct SubtitleMenuLayoutTests {
                 == [.off, .searchOnline])
     }
 
+    @Test("the offset row sits directly above the search footer")
+    func offsetAboveSearch() {
+        let rows = SubtitleMenuLayout.rows(streams: [stream(3)], supportsSecondary: true,
+                                           supportsSearch: true, supportsOffset: true)
+        #expect(rows == [.secondaryHeader, .off, .track(streamIndex: 3), .offset, .searchOnline])
+    }
+
+    @Test("the offset row closes the menu where there is no search footer")
+    func offsetWithoutSearch() {
+        let rows = SubtitleMenuLayout.rows(streams: [stream(3)], supportsSecondary: false,
+                                           supportsSearch: false, supportsOffset: true)
+        #expect(rows == [.off, .track(streamIndex: 3), .offset])
+    }
+
     @Test("the menu opens on the active track")
     func opensOnTheActiveTrack() {
         let rows = SubtitleMenuLayout.rows(streams: [stream(3), stream(4)],

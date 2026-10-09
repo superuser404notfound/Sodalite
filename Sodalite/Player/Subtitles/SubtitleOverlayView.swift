@@ -73,7 +73,7 @@ struct SubtitleOverlayView: View {
             ASSRenderedSubtitles(
                 renderer: assRenderer,
                 reloadSignal: assReloadSignal,
-                currentOffset: currentTime
+                currentOffset: currentTime - delaySeconds
             )
             // Same pin as the bitmap layer: AVKit's invisible chrome widens contentOverlayView's
             // safe-area insets around an audio-switch reload, and the libass canvas follows the

@@ -409,42 +409,46 @@ struct PlayerTouchControls: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(panelRows.enumerated()), id: \.offset) { _, row in
-                        HStack(spacing: 0) {
-                            Button {
-                                if let submenu = row.opensSubmenu {
-                                    activePicker = submenu
-                                } else {
-                                    row.action()
-                                    activePicker = nil
-                                }
-                            } label: {
-                                HStack(spacing: 12) {
-                                    thumbnail(for: row)
-                                    Text(row.label)
-                                        .foregroundStyle(row.isActive ? tint : .white)
-                                        .lineLimit(1)
-                                    Spacer()
-                                    if row.isActive {
-                                        Image(systemName: "checkmark").foregroundStyle(tint)
-                                    }
-                                }
-                                .padding(.horizontal, 14)
-                                .frame(height: rowHeight)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-
-                            if let deleteIndex = row.deleteStreamIndex {
+                        if row.isOffsetStepper {
+                            offsetStepperRow(row, height: rowHeight)
+                        } else {
+                            HStack(spacing: 0) {
                                 Button {
-                                    activePicker = nil
-                                    viewModel.requestSubtitleDeletion(streamIndex: deleteIndex)
+                                    if let submenu = row.opensSubmenu {
+                                        activePicker = submenu
+                                    } else {
+                                        row.action()
+                                        activePicker = nil
+                                    }
                                 } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundStyle(Color.Theme.destructive)
-                                        .frame(width: 44, height: rowHeight)
-                                        .contentShape(Rectangle())
+                                    HStack(spacing: 12) {
+                                        thumbnail(for: row)
+                                        Text(row.label)
+                                            .foregroundStyle(row.isActive ? tint : .white)
+                                            .lineLimit(1)
+                                        Spacer()
+                                        if row.isActive {
+                                            Image(systemName: "checkmark").foregroundStyle(tint)
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .frame(height: rowHeight)
+                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+
+                                if let deleteIndex = row.deleteStreamIndex {
+                                    Button {
+                                        activePicker = nil
+                                        viewModel.requestSubtitleDeletion(streamIndex: deleteIndex)
+                                    } label: {
+                                        Image(systemName: "trash")
+                                            .foregroundStyle(Color.Theme.destructive)
+                                            .frame(width: 44, height: rowHeight)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
                     }
@@ -458,6 +462,32 @@ struct PlayerTouchControls: View {
             .padding(.bottom, isPad ? 150 : 120)
         }
         .transition(.opacity)
+    }
+
+    private func offsetStepperRow(_ row: PickerRow, height: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            offsetStepButton("minus", steps: -1, height: height)
+            Button(action: row.action) {
+                Text(row.label)
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, minHeight: height)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            offsetStepButton("plus", steps: 1, height: height)
+        }
+    }
+
+    private func offsetStepButton(_ symbol: String, steps: Int, height: CGFloat) -> some View {
+        Button { viewModel.stepSubtitleOffset(by: steps) } label: {
+            Image(systemName: symbol)
+                .foregroundStyle(tint)
+                .frame(width: 52, height: height)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -485,6 +515,8 @@ struct PlayerTouchControls: View {
         var opensSubmenu: PickerKind? = nil
         /// Non-nil on a deletable (external/downloaded) subtitle row: shows a trailing trash button.
         var deleteStreamIndex: Int? = nil
+        /// The subtitle timing row: minus and plus buttons step it, the label resets it, the panel stays.
+        var isOffsetStepper = false
         let action: () -> Void
     }
 
@@ -523,6 +555,15 @@ struct PlayerTouchControls: View {
                           deleteStreamIndex: stream.isExternal == true ? stream.index : nil) {
                     viewModel.selectSubtitleTrack(id: stream.index, userInitiated: true)
                 }
+            }
+            if viewModel.supportsSubtitleOffset {
+                rows.append(PickerRow(
+                    label: String(format: String(localized: "player.subtitle.offset.value", defaultValue: "Timing: %@"),
+                                  PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
+                    isActive: false,
+                    isOffsetStepper: true) {
+                    viewModel.setSubtitleOffset(0)
+                })
             }
             if viewModel.supportsSubtitleSearch {
                 rows.append(PickerRow(label: String(localized: "player.subtitle.searchOnline", defaultValue: "Search online..."), isActive: false) {

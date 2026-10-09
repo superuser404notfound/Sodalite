@@ -71277,6 +71277,330 @@
         }
       }
     },
+    "changelog.1_1_0.subtitleTiming.body" : {
+      "comment" : "What's New 1.1.0: body for shifting subtitle timing per movie or episode from the player.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titulky, které běží napřed nebo pozadu, lze nyní posunout přímo v nabídce titulků v přehrávači. Posun se uloží pro daný film nebo epizodu a přičte se ke globálnímu zpoždění v Nastavení."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekster, der kommer for tidligt eller for sent, kan nu forskydes direkte i undertekstmenuen i afspilleren. Forskydningen gemmes for den pågældende film eller episode og lægges oven i den globale forsinkelse i Indstillinger."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untertitel, die zu früh oder zu spät kommen, lassen sich jetzt direkt im Untertitelmenü des Players verschieben. Die Verschiebung wird für diesen Film oder diese Folge gespeichert und kommt zur globalen Verzögerung aus den Einstellungen hinzu."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μπορούν πλέον να μετατοπιστούν απευθείας από το μενού υποτίτλων στο πρόγραμμα αναπαραγωγής. Η μετατόπιση αποθηκεύεται για τη συγκεκριμένη ταινία ή το επεισόδιο και προστίθεται στη γενική καθυστέρηση των Ρυθμίσεων."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitles that run early or late can now be shifted right from the subtitle menu in the player. The shift is saved for that movie or episode and adds to the global delay in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los subtítulos que van adelantados o retrasados ahora se pueden desplazar desde el menú de subtítulos del reproductor. El ajuste se guarda para esa película o episodio y se suma al retardo global de Ajustes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liian aikaisin tai myöhään näkyviä tekstityksiä voi nyt siirtää suoraan soittimen tekstitysvalikosta. Siirto tallennetaan kyseiselle elokuvalle tai jaksolle, ja se lisätään Asetusten yleiseen viiveeseen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les sous-titres en avance ou en retard peuvent désormais être décalés directement depuis le menu des sous-titres du lecteur. Le décalage est enregistré pour ce film ou cet épisode et s’ajoute au délai global des Réglages."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlovi koji kasne ili žure sada se mogu pomaknuti izravno u izborniku titlova u playeru. Pomak se sprema za taj film ili epizodu i dodaje se globalnoj odgodi iz Postavki."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A túl korán vagy túl későn megjelenő feliratok mostantól közvetlenül a lejátszó feliratmenüjéből eltolhatók. Az eltolás az adott filmhez vagy epizódhoz mentődik, és hozzáadódik a Beállításokban megadott általános késleltetéshez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I sottotitoli in anticipo o in ritardo ora si possono spostare direttamente dal menu dei sottotitoli del player. Lo spostamento viene salvato per quel film o episodio e si somma al ritardo globale nelle Impostazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "早すぎたり遅すぎたりする字幕を、プレーヤーの字幕メニューから直接ずらせるようになりました。調整はその映画やエピソードごとに保存され、設定の全体の遅延に加算されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "너무 빠르거나 늦게 나오는 자막을 이제 플레이어의 자막 메뉴에서 바로 조정할 수 있습니다. 조정값은 해당 영화나 에피소드에 저장되며 설정의 전체 지연에 더해집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekster som kommer for tidlig eller for sent, kan nå forskyves rett fra undertekstmenyen i avspilleren. Forskyvningen lagres for den aktuelle filmen eller episoden og legges til den globale forsinkelsen i Innstillinger."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ondertitels die te vroeg of te laat komen, kun je nu direct verschuiven in het ondertitelmenu van de speler. De verschuiving wordt bewaard voor die film of aflevering en telt op bij de algemene vertraging in Instellingen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napisy, które wyświetlają się za wcześnie lub za późno, można teraz przesunąć bezpośrednio w menu napisów w odtwarzaczu. Przesunięcie jest zapisywane dla danego filmu lub odcinka i dodawane do globalnego opóźnienia z Ustawień."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legendas adiantadas ou atrasadas agora podem ser deslocadas direto no menu de legendas do player. O ajuste fica salvo para aquele filme ou episódio e se soma ao atraso global dos Ajustes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As legendas adiantadas ou atrasadas podem agora ser deslocadas diretamente no menu de legendas do leitor. O ajuste fica guardado para esse filme ou episódio e soma-se ao atraso global das Definições."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitrările care apar prea devreme sau prea târziu pot fi acum decalate direct din meniul de subtitrări al playerului. Decalajul se salvează pentru filmul sau episodul respectiv și se adaugă la întârzierea globală din Setări."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Субтитры, которые спешат или отстают, теперь можно сдвинуть прямо в меню субтитров в плеере. Сдвиг сохраняется для этого фильма или серии и прибавляется к общей задержке из Настроек."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titulky, ktoré idú dopredu alebo meškajú, sa teraz dajú posunúť priamo v ponuke titulkov v prehrávači. Posun sa uloží pre daný film alebo epizódu a pripočíta sa ku globálnemu oneskoreniu v Nastaveniach."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertexter som kommer för tidigt eller för sent kan nu förskjutas direkt i undertextmenyn i spelaren. Förskjutningen sparas för den filmen eller det avsnittet och läggs till den globala fördröjningen i Inställningar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erken veya geç gelen altyazılar artık oynatıcıdaki altyazı menüsünden doğrudan kaydırılabiliyor. Kaydırma o film veya bölüm için kaydedilir ve Ayarlar’daki genel gecikmeye eklenir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Субтитри, які поспішають або відстають, тепер можна зсунути просто в меню субтитрів у плеєрі. Зсув зберігається для цього фільму чи серії й додається до загальної затримки з Налаштувань."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "过早或过晚出现的字幕现在可以直接在播放器的字幕菜单中调整。调整会针对该影片或剧集保存，并叠加在设置中的全局延迟之上。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過早或過晚出現的字幕現在可以直接在播放器的字幕選單中調整。調整會針對該影片或劇集儲存，並疊加在設定中的全域延遲之上。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.subtitleTiming.title" : {
+      "comment" : "What's New 1.1.0: title for shifting subtitle timing per movie or episode from the player.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Časování titulků pro každý titul"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekst-timing pr. titel"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untertitel-Timing pro Titel"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός υποτίτλων ανά τίτλο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitle timing per title"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronía de subtítulos por título"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstitysten ajoitus nimikekohtaisesti"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décalage des sous-titres par titre"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vremenski pomak titlova po naslovu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feliratidőzítés címenként"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia dei sottotitoli per titolo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルごとの字幕タイミング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타이틀별 자막 타이밍"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekst-timing per tittel"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ondertiteltiming per titel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizacja napisów dla każdego tytułu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia de legendas por título"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia de legendas por título"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizarea subtitrărilor pentru fiecare titlu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сдвиг субтитров для каждого фильма и серии"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Časovanie titulkov pre každý titul"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertexttiming per titel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlık başına altyazı zamanlaması"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зсув субтитрів для кожного фільму та серії"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按影片调整字幕时间"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依影片調整字幕時間"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.versionLabel.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -148404,6 +148728,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "刪除此字幕？"
+          }
+        }
+      }
+    },
+    "player.subtitle.offset.value" : {
+      "comment" : "Player subtitle menu: per-title subtitle timing row. %@ is a signed duration such as +0.5 s.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Časování: %@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronía: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoitus: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décalage : %@"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vremenski pomak: %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Időzítés: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイミング: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타이밍: %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizacja: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronia: %@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizare: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сдвиг: %@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Časovanie: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timing: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanlama: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зсув: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时间调整：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間調整：%@"
           }
         }
       }

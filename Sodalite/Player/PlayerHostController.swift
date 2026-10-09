@@ -1428,7 +1428,7 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.errorMessage != nil { viewModel.moveErrorFocus(by: -1); return }
         // Stats panel: horizontal nav is inert (no rows behind it to target).
         if statsOverlayCapturesPresses { return }
-        if viewModel.isDropdownOpen { return }
+        if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: -1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: -1)
             viewModel.scheduleControlsHide()
@@ -1442,13 +1442,21 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveRight(); return }
         if viewModel.errorMessage != nil { viewModel.moveErrorFocus(by: 1); return }
         if statsOverlayCapturesPresses { return }
-        if viewModel.isDropdownOpen { return }
+        if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: 1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: 1)
             viewModel.scheduleControlsHide()
         } else {
             viewModel.seekJumpByConfiguredInterval(direction: 1)
         }
+    }
+
+    /// Left/right are otherwise inert in a dropdown; on the subtitle menu's timing row they step it.
+    private func stepHighlightedSubtitleOffset(by steps: Int) {
+        guard case .subtitle(let idx) = viewModel.trackDropdown,
+              viewModel.subtitleMenuRows.indices.contains(idx),
+              viewModel.subtitleMenuRows[idx] == .offset else { return }
+        viewModel.stepSubtitleOffset(by: steps)
     }
 
     @objc private func leftHeld(_ gesture: UILongPressGestureRecognizer) {
@@ -1510,6 +1518,8 @@ final class PlayerHostController: AVPlayerViewController {
     private func handleHold(_ gesture: UILongPressGestureRecognizer, direction: Int) {
         switch gesture.state {
         case .began:
+            // A held press on the timing row jumps a whole second instead of spooling the video.
+            if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: direction * 10); return }
             if statsOverlayCapturesPresses || viewModel.isDropdownOpen || viewModel.subtitleSearchVisible || viewModel.isSubtitleDeletePromptVisible { return }
             if viewModel.showControls && viewModel.controlsFocus != .progressBar { return }
             viewModel.beginContinuousSeek(direction: direction)
