@@ -45,7 +45,7 @@ settingGroups:
 packages:
   AetherEngine:
     url: https://github.com/superuser404notfound/AetherEngine
-    revision: 4f46e68918264ff83e5f19956ee78d280d7fc969
+    revision: d28f89d654c64856f22cf1e8f3135df82fd014cc
   SwiftAssRenderer:
     url: https://github.com/mihai8804858/swift-ass-renderer
     version: 1.3.1
