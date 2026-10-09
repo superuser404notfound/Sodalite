@@ -402,6 +402,7 @@
 		424308DE3BF409FF649E5D3D /* TrackSelectionMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507BD61D174F40D1EAE62DE4 /* TrackSelectionMatcher.swift */; };
 		425610C9703C301A13C3D301 /* LiveZapInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 024CCD2E4F1245EEDD09600E /* LiveZapInput.swift */; };
 		42AAD75B15450068CFCE524F /* PlayerHostController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14BCB912099E52F189D68C89 /* PlayerHostController.swift */; };
+		42D0C8CA3C588BECE8C191AE /* SubtitleOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B06ED4A787780BCF7302D1 /* SubtitleOffset.swift */; };
 		430E94460CF5B9CD57E89253 /* SubtitleVideoRectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F59CA1F816823614CF9DC59 /* SubtitleVideoRectTests.swift */; };
 		43234C0D9410353C5529D4A5 /* BackgroundRenderPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C776DE4B8C3614888AD0E4 /* BackgroundRenderPrimitives.swift */; };
 		433AF78B1BC6BA2FD4030D75 /* ProfileSettingsRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C632D3BA7C55E41736EF68 /* ProfileSettingsRegistry.swift */; };
@@ -890,6 +891,7 @@
 		93CB08BD8BDCA634E0CFF328 /* SessionRestorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368B32F98097EE977BFBB373 /* SessionRestorer.swift */; };
 		9428196814E03BA641782011 /* ServerAddressEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7940D0EDA65B631385D51B /* ServerAddressEntryViewModel.swift */; };
 		9443BA05036A7675455D4811 /* LiveDirectStreamMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112D849959DE17DC6C5CEED2 /* LiveDirectStreamMemory.swift */; };
+		9457C6F5E5572CD77DFFEC5A /* SubtitleOffsetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1942006C1226C7DC98248F6C /* SubtitleOffsetTests.swift */; };
 		949E87BD002C5B02FC56F29E /* PosterBadgeStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A07AA09138D51EDE17FE24 /* PosterBadgeStoreTests.swift */; };
 		94AF23D42F28230330D3EA99 /* DownloadRungDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115506969A587003B4018910 /* DownloadRungDialog.swift */; };
 		94B9DDD56065F7DC61F7BAD1 /* SeerrRequestUpdateBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02176F860C385FC701EC46A /* SeerrRequestUpdateBody.swift */; };
@@ -1426,6 +1428,7 @@
 		F30983835CC6077C6E5B3098 /* FactoryResetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE6263F8B395AF7142714C4 /* FactoryResetTests.swift */; };
 		F3584E99C97BABBD34CEEE07 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A7B7D602013C25E4A2E2DB /* HomeView.swift */; };
 		F379FB58FADBED778F1CF1E6 /* ProfileRepromptPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFE58604D4DF8220F85FEE11 /* ProfileRepromptPolicy.swift */; };
+		F399934177ABF45F4EF76F95 /* SubtitleOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B06ED4A787780BCF7302D1 /* SubtitleOffset.swift */; };
 		F3A66259381E12340F2A7758 /* MusicAlbumLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBB8A2288349CD1F679DE0 /* MusicAlbumLoadTests.swift */; };
 		F3AD3AF218543D521A5859EB /* MultiviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42649A3E73297CE08ABDE533 /* MultiviewSession.swift */; };
 		F3FAB17E58CBC268E7603C64 /* GuardianPINRecoveryCandidates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 497B7BADCDE76F771616D13D /* GuardianPINRecoveryCandidates.swift */; };
@@ -1650,6 +1653,7 @@
 		1866253FFA373B3CD3E2C1BE /* ParticipantPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantPlanner.swift; sourceTree = "<group>"; };
 		18AAF677978748A967A480D1 /* SidebarMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarMetrics.swift; sourceTree = "<group>"; };
 		18D0C28B757C74756405843E /* StableTapHoldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StableTapHoldTests.swift; sourceTree = "<group>"; };
+		1942006C1226C7DC98248F6C /* SubtitleOffsetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleOffsetTests.swift; sourceTree = "<group>"; };
 		194B5AEB74D5B8FE374A0C3E /* SubtitlePlacementGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitlePlacementGeometryTests.swift; sourceTree = "<group>"; };
 		197C056F3F41EFB53CDD2345 /* PlayerTouchControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTouchControls.swift; sourceTree = "<group>"; };
 		1A0FE73FC03DB46281475278 /* SeerrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequest.swift; sourceTree = "<group>"; };
@@ -2357,6 +2361,7 @@
 		E168730BECFF639441E313F3 /* AlphabetIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetIndexTests.swift; sourceTree = "<group>"; };
 		E16CB1DBF0F096E8267D8D08 /* LicenseText-MIT.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LicenseText-MIT.txt"; sourceTree = "<group>"; };
 		E1880A3F02893B1FBE1825FB /* GuideGridLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideGridLayout.swift; sourceTree = "<group>"; };
+		E1B06ED4A787780BCF7302D1 /* SubtitleOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleOffset.swift; sourceTree = "<group>"; };
 		E1BEA274EA0022F3035946EF /* ServerAddressResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAddressResolution.swift; sourceTree = "<group>"; };
 		E1ED651FA4E10DF6FB410894 /* SidebarItemState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarItemState.swift; sourceTree = "<group>"; };
 		E22D02CCB243103E21F36E05 /* SeerrCollectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrCollectionTests.swift; sourceTree = "<group>"; };
@@ -2701,6 +2706,7 @@
 				442B310F29B45D8FE16B9A9C /* SourceOutageWatchdog.swift */,
 				F520648C64297EA0903FE276 /* StatsSection.swift */,
 				2B60AEAEA1E24DBE622AA94F /* SubtitleMenuLayout.swift */,
+				E1B06ED4A787780BCF7302D1 /* SubtitleOffset.swift */,
 				3D4882D1BC8E4F94975349FA /* SystemCaptionWindow.swift */,
 				FA4E2D3105F03481EC52A653 /* TrackDisplayFormatter.swift */,
 				507BD61D174F40D1EAE62DE4 /* TrackSelectionMatcher.swift */,
@@ -3113,6 +3119,7 @@
 				90C2AE8D85DBE3B1849DDD3B /* StreamingQualitySwitchTests.swift */,
 				C2408D38990EC4843B382E23 /* StreamingQualityTests.swift */,
 				EBE0F6D8866846382C3DF5D1 /* SubtitleMenuLayoutTests.swift */,
+				1942006C1226C7DC98248F6C /* SubtitleOffsetTests.swift */,
 				194B5AEB74D5B8FE374A0C3E /* SubtitlePlacementGeometryTests.swift */,
 				BBB91CE16FE6545745E26DC6 /* SubtitleSidecarOnTranscodeTests.swift */,
 				0985DCFAB677410753AE9644 /* SubtitlesOnSkipBackPreferenceTests.swift */,
@@ -4618,6 +4625,7 @@
 				A5914BD2C54353FBDF0F5C45 /* StreamingQuality.swift in Sources */,
 				9A4DDDFB4BEF630FF10E964B /* SubtitleDeletePromptView.swift in Sources */,
 				8F7D38415AFF78337D91247C /* SubtitleMenuLayout.swift in Sources */,
+				F399934177ABF45F4EF76F95 /* SubtitleOffset.swift in Sources */,
 				F17DF67CBB42ACF6D8280931 /* SubtitleOverlayView.swift in Sources */,
 				863DA31B92070976C49E11BB /* SubtitleSearchView.swift in Sources */,
 				E4333721A6579565BCA27BC7 /* SupportDevelopmentView.swift in Sources */,
@@ -5047,6 +5055,7 @@
 				46F3F45612625E71CD730587 /* StreamingQualitySwitchTests.swift in Sources */,
 				C2E68215E126B2FC3BB2048B /* StreamingQualityTests.swift in Sources */,
 				FC1DDFB27E42D11894D35672 /* SubtitleMenuLayoutTests.swift in Sources */,
+				9457C6F5E5572CD77DFFEC5A /* SubtitleOffsetTests.swift in Sources */,
 				B7D0740ACEADBECA23AA93B3 /* SubtitlePlacementGeometryTests.swift in Sources */,
 				6629DC14B5448BCF4B23006F /* SubtitleSidecarOnTranscodeTests.swift in Sources */,
 				430E94460CF5B9CD57E89253 /* SubtitleVideoRectTests.swift in Sources */,
@@ -5566,6 +5575,7 @@
 				9C80E482AE3298B25A8B11C5 /* StreamingQuality.swift in Sources */,
 				C1ACC9927CC55023E210EFF2 /* SubtitleDeletePromptView.swift in Sources */,
 				F01B3523DA803BCF532A6C48 /* SubtitleMenuLayout.swift in Sources */,
+				42D0C8CA3C588BECE8C191AE /* SubtitleOffset.swift in Sources */,
 				01CEB262E9546D056F039E5F /* SubtitleOverlayView.swift in Sources */,
 				BCCA98F65EB9930E16778303 /* SubtitleSearchView.swift in Sources */,
 				13ED94198C07BDF38F985E9D /* SupportDevelopmentView.swift in Sources */,

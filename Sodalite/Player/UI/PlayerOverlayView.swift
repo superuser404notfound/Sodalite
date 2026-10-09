@@ -828,7 +828,7 @@ private struct SubtitleLayer: View {
                 fontSize: viewModel.preferences.subtitleFontSize,
                 textColor: viewModel.preferences.subtitleColor,
                 background: viewModel.preferences.subtitleBackground,
-                delaySeconds: viewModel.preferences.subtitleDelaySeconds,
+                delaySeconds: viewModel.effectiveSubtitleDelay,
                 verticalPosition: viewModel.preferences.subtitleVerticalPosition,
                 font: viewModel.preferences.subtitleFont,
                 weight: viewModel.preferences.subtitleWeight,

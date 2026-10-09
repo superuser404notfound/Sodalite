@@ -40,6 +40,11 @@ final class TrackSelectionMemory {
         return "\(userID)|item|\(itemID)"
     }
 
+    /// The per-file key: an episode's subtitle timing belongs to its release, not to its series.
+    static func itemKey(userID: String, itemID: String) -> String {
+        scopeKey(userID: userID, itemID: itemID, seriesID: nil)
+    }
+
     func entry(for key: String) -> TrackMemoryEntry? { entries[key] }
 
     func recordSubtitle(_ value: RememberedSubtitle, for key: String, now: Date = Date()) {
@@ -52,6 +57,13 @@ final class TrackSelectionMemory {
     func recordAudio(_ signature: TrackSignature, for key: String, now: Date = Date()) {
         var entry = entries[key] ?? TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: now)
         entry.audio = signature
+        entry.updatedAt = now
+        write(entry, for: key)
+    }
+
+    func recordSubtitleOffset(_ seconds: Double, for key: String, now: Date = Date()) {
+        var entry = entries[key] ?? TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: now)
+        entry.subtitleOffset = seconds == 0 ? nil : seconds
         entry.updatedAt = now
         write(entry, for: key)
     }

@@ -70,14 +70,23 @@ struct SubtitleOverlayView: View {
         // libass styling used ONLY without a secondary track; with one the primary
         // falls back to the plain-text overlay so both share one stack (issue #47).
         if let assRenderer, !hasSecondaryTrack {
-            ASSRenderedSubtitles(
-                renderer: assRenderer,
-                reloadSignal: assReloadSignal,
-                currentOffset: currentTime
-            )
             // Same pin as the bitmap layer: AVKit's invisible chrome widens contentOverlayView's
             // safe-area insets around an audio-switch reload, and the libass canvas follows the
             // bounds, so every line was redrawn on a shorter canvas, mid-screen and resized.
+            GeometryReader { geo in
+                // libass scales PlayResX/Y onto its canvas per axis, so the canvas has to be the
+                // picture, not the screen: on a portrait iPhone the screen-sized canvas stretched
+                // every glyph tall and narrow and sat the lines under the bottom bar.
+                let rect = Self.videoRect(videoSize: videoSize, in: geo.size,
+                                          fillsSurface: pictureMode == .fill)
+                ASSRenderedSubtitles(
+                    renderer: assRenderer,
+                    reloadSignal: assReloadSignal,
+                    currentOffset: currentTime - delaySeconds
+                )
+                .frame(width: rect.width, height: rect.height)
+                .position(x: rect.midX, y: rect.midY)
+            }
             .ignoresSafeArea()
             .allowsHitTesting(false)
         } else {

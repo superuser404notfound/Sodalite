@@ -624,6 +624,16 @@ struct TransportBar: View {
                         ? String(localized: "player.subtitle.delete.hint", defaultValue: "Hold to delete")
                         : nil
                 )
+            case .offset:
+                return DropdownItem(
+                    title: String(format: String(localized: "player.subtitle.offset.value", defaultValue: "Timing: %@"),
+                                  PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
+                    isActive: false,
+                    isHighlighted: highlighted == index,
+                    hint: highlighted == index ? "\u{2039} \u{203A}" : nil,
+                    isPinnedFooter: true,
+                    separatorAbove: true
+                )
             case .searchOnline:
                 return DropdownItem(
                     title: String(localized: "player.subtitle.searchOnline", defaultValue: "Search online..."),

@@ -97,7 +97,7 @@ struct LiveTransportBar: View {
                 return DropdownItem(title: TrackDisplayFormatter.subtitleStreamDisplayName(for: stream),
                                     isActive: streamIndex == viewModel.activeSubtitleIndex,
                                     isHighlighted: highlighted == index)
-            case .secondaryHeader, .searchOnline:
+            case .secondaryHeader, .offset, .searchOnline:
                 return nil
             }
         }

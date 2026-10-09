@@ -69,6 +69,12 @@ enum Changelog {
                     icon: "bell.badge"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.subtitleTiming.title",
+                    "changelog.1_1_0.subtitleTiming.body",
+                    icon: "captions.bubble"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

@@ -28,6 +28,9 @@ struct TrackMemoryEntry: Codable, Equatable, Sendable {
     var audio: TrackSignature?
     /// Per entry, not per store: the cloud merge unions entries and compares these.
     var updatedAt: Date
+    /// Seconds added to the global subtitle delay for this one file, nil when none is set. Only
+    /// ever written under `TrackSelectionMemory.itemKey`, never under a series key.
+    var subtitleOffset: Double? = nil
 }
 
 struct TrackSelectionPlan: Equatable {
