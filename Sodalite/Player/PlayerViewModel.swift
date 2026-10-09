@@ -310,6 +310,8 @@ final class PlayerViewModel {
     func setSubtitleOffset(_ seconds: Double) {
         guard let key = subtitleOffsetKey, seconds != itemSubtitleOffset else { return }
         trackMemory?.recordSubtitleOffset(seconds, for: key)
+        LogTap.shared.note(String(format: "[Subtitles] per-title offset %.1fs (global %.2fs, ass=%@)",
+                                  seconds, preferences.subtitleDelaySeconds, assRenderer != nil ? "yes" : "no"))
         assCoordinator.refreshTimeOffset()
     }
 
