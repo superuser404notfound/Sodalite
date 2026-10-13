@@ -31,7 +31,22 @@ struct HomeHeroCarousel: View {
     @State private var topExtension: CGFloat = 0
 
     /// Long enough to read an overview, short enough that the banner visibly moves.
-    private static let dwell: Duration = .seconds(8)
+    private static let dwell: TimeInterval = 8
+    /// The dwell already spent on this page before a pause, so a pause holds the timing line where it
+    /// is instead of starting it over.
+    @State private var dwellSpent: TimeInterval = 0
+    /// When the running stretch of the dwell began; nil while paused or with a single page.
+    @State private var dwellRunningSince: Date?
+
+    /// Pages whose artwork is decoded in `ImageCache` and whose colour has been read. A page is drawn
+    /// from here, never through `AsyncCachedImage`: that view starts every new URL empty and fades the
+    /// image in, so a page change showed the placeholder, then the art, then the colour, each on its
+    /// own clock, and the seams of the top and bottom transitions flickered black in between.
+    @State private var readyKeys: Set<String> = []
+    @State private var palettes: [String: ArtworkPalette] = [:]
+    /// The page being left, kept fully opaque underneath while the new one fades in over it, so the
+    /// change never uncovers what lies behind the banner.
+    @State private var outgoing: JellyfinItem?
 
     private var isCompact: Bool { hSizeClass == .compact }
 
@@ -68,10 +83,19 @@ struct HomeHeroCarousel: View {
                 // hang below the banner as well.
                 .background(alignment: .bottom) {
                     ZStack {
-                        backdrop(for: current)
-                        scrim
+                        ForEach([outgoing, current].compactMap { $0 }, id: \.originKey) { item in
+                            artworkLayer(for: item)
+                                // One picture per page before it fades: without it the opacity lands on
+                                // the artwork, the colour strip and both dissolves separately, and half
+                                // a dissolve over half a poster let the art show through both seams.
+                                .compositingGroup()
+                                .transition(.asymmetric(insertion: .opacity, removal: .identity))
+                        }
                     }
                     .padding(.top, -topExtension)
+                    .overlay(alignment: .bottom) {
+                        if isPortrait { portraitTail(near: palette(for: current).near) }
+                    }
                 }
                 .onGeometryChange(for: CGFloat.self) { max(0, $0.frame(in: .global).minY) } action: {
                     topExtension = $0
@@ -118,15 +142,40 @@ struct HomeHeroCarousel: View {
                 #endif
                 .animation(.easeInOut(duration: 0.6), value: index)
                 // Restarted by every page change, so a click on an arrow gets a full dwell before the
-                // banner moves on by itself. Held while the pointer is over it, so nothing slides away
-                // from under someone reading it.
+                // banner moves on by itself. Paused while the pointer is over it, so nothing slides
+                // away from under someone reading it, and resumed with what was left.
                 .task(id: "\(index)|\(isHovering)|\(items.count)") {
-                    guard !isHovering, items.count > 1 else { return }
-                    try? await Task.sleep(for: Self.dwell)
+                    guard !isHovering, items.count > 1 else {
+                        dwellRunningSince = nil
+                        return
+                    }
+                    dwellRunningSince = .now
+                    try? await Task.sleep(for: .seconds(max(0, Self.dwell - dwellSpent)))
+                    guard !Task.isCancelled else { return }
+                    // A page whose art is still on its way would fade in as a dark slab first.
+                    await prepare(items[(index + 1) % items.count])
                     guard !Task.isCancelled else { return }
                     step(1)
                 }
-                .onChange(of: items.map(\.originKey)) { _, _ in index = 0 }
+                .onChange(of: isHovering) { _, paused in
+                    guard paused, let since = dwellRunningSince else { return }
+                    dwellSpent += Date.now.timeIntervalSince(since)
+                    dwellRunningSince = nil
+                }
+                .onChange(of: items.map(\.originKey)) { _, _ in show(0) }
+                // Every page is made ready as soon as the banner knows its titles, the one on screen
+                // first, so paging never waits on the network or on a colour still being read.
+                .task(id: "\(items.map(\.originKey))|\(isPortrait)") {
+                    readyKeys = []
+                    palettes = [:]
+                    await prepare(current)
+                    let rest = items.dropFirst(index + 1) + items.prefix(index)
+                    await ImageCache.prefetch(rest.compactMap(artworkURL(for:)), auth: imageAuth)
+                    for item in rest {
+                        guard !Task.isCancelled else { return }
+                        await prepare(item)
+                    }
+                }
         }
     }
 
@@ -149,39 +198,74 @@ struct HomeHeroCarousel: View {
         }
     }
 
-    private func backdrop(for item: JellyfinItem) -> some View {
-        AsyncCachedImage(url: isPortrait ? (posterURL(item) ?? backdropURL(item)) : backdropURL(item)) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-        } placeholder: {
-            Color.black
+    private func artworkURL(for item: JellyfinItem) -> URL? {
+        isPortrait ? (posterURL(item) ?? backdropURL(item)) : backdropURL(item)
+    }
+
+    private var imageAuth: ImageAuth { ImageAuth.snapshot(dependencies.sessionRegistry) }
+
+    /// Decodes a page's art into `ImageCache` (or finds it there) and reads its colour, then marks it
+    /// ready. Both land together, so the art and the colour it dissolves into appear in one step.
+    private func prepare(_ item: JellyfinItem) async {
+        let key = item.originKey
+        guard let url = artworkURL(for: item) else { return }
+        if readyKeys.contains(key), ImageCache.shared.image(for: url) != nil { return }
+        if ImageCache.shared.image(for: url) == nil {
+            await ImageCache.prefetch([url], auth: imageAuth)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .clipped()
-        .id(item.originKey)
-        .transition(.opacity)
+        guard let image = ImageCache.shared.image(for: url) else { return }
+        let palette = await Task.detached(priority: .userInitiated) {
+            ArtworkTint.bottomEdgePalette(of: image)
+        }.value
+        withAnimation(.easeIn(duration: 0.3)) {
+            if let palette { palettes[key] = palette }
+            readyKeys.insert(key)
+        }
+    }
+
+    @ViewBuilder
+    private func artworkLayer(for item: JellyfinItem) -> some View {
+        if isPortrait {
+            portraitArtwork(for: item)
+        } else {
+            ZStack {
+                backdrop(for: item)
+                scrim
+            }
+        }
+    }
+
+    private func backdrop(for item: JellyfinItem, alignment: Alignment = .center) -> some View {
+        let image = readyKeys.contains(item.originKey)
+            ? artworkURL(for: item).flatMap { ImageCache.shared.image(for: $0) }
+            : nil
+        // The art lies over a surface that takes exactly the space it is offered. Framed directly, a
+        // filled image grows its frame to the overflow, the page outgrew the banner, and centring it
+        // pushed the strip and the art up under the island by however far that poster's shape ran over.
+        return Color.clear
+            .overlay(alignment: alignment) {
+                if let image {
+                    Image(platformImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .transition(.opacity)
+                } else {
+                    isPortrait ? palette(for: item).near : Color.black
+                }
+            }
+            .clipped()
     }
 
     private var scrim: some View {
         ZStack {
-            if isPortrait {
-                // The text is centred over the bottom third, so the darkening starts higher and
-                // there is no leading side to shade.
-                LinearGradient(
-                    stops: [.init(color: .clear, location: 0.45), .init(color: .black.opacity(0.9), location: 1)],
-                    startPoint: .top, endPoint: .bottom
-                )
-            } else {
-                LinearGradient(
-                    stops: [.init(color: .clear, location: 0.35), .init(color: .black.opacity(0.85), location: 1)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                LinearGradient(
-                    stops: [.init(color: .black.opacity(0.6), location: 0), .init(color: .clear, location: 0.55)],
-                    startPoint: .leading, endPoint: .trailing
-                )
-            }
+            LinearGradient(
+                stops: [.init(color: .clear, location: 0.35), .init(color: .black.opacity(0.85), location: 1)],
+                startPoint: .top, endPoint: .bottom
+            )
+            LinearGradient(
+                stops: [.init(color: .black.opacity(0.6), location: 0), .init(color: .clear, location: 0.55)],
+                startPoint: .leading, endPoint: .trailing
+            )
         }
         .allowsHitTesting(false)
     }
@@ -305,16 +389,125 @@ struct HomeHeroCarousel: View {
         if items.count > 1 {
             HStack(spacing: 8) {
                 ForEach(items.indices, id: \.self) { page in
-                    Circle()
-                        .fill(.white.opacity(page == index ? 1 : 0.4))
-                        .frame(width: 7, height: 7)
+                    pagerMark(isCurrent: page == index)
                         .contentShape(Rectangle().inset(by: -4))
                         #if !os(tvOS)
-                        .onTapGesture { index = page }
+                        .onTapGesture { show(page) }
                         #endif
                 }
             }
         }
+    }
+
+    /// A dot, or for the page on screen a short track that fills until the banner moves on.
+    private func pagerMark(isCurrent: Bool) -> some View {
+        Capsule()
+            .fill(.white.opacity(0.4))
+            .frame(width: isCurrent ? 26 : 7, height: 7)
+            .overlay(alignment: .leading) {
+                if isCurrent {
+                    TimelineView(.animation(paused: dwellRunningSince == nil)) { context in
+                        Capsule()
+                            .fill(.white)
+                            .frame(width: max(7, 26 * dwellProgress(at: context.date)))
+                    }
+                }
+            }
+            .animation(.easeInOut(duration: 0.3), value: isCurrent)
+    }
+
+    private func dwellProgress(at date: Date) -> CGFloat {
+        let running = dwellRunningSince.map { date.timeIntervalSince($0) } ?? 0
+        return CGFloat(min(1, (dwellSpent + running) / Self.dwell))
+    }
+
+    /// The upright iPhone's artwork. The poster hangs from just under the Dynamic Island, top edge
+    /// first, so its top (where most posters carry their title) is never behind the island or the
+    /// corner buttons; the overflow is cropped at the bottom, under the dissolve. Behind the island
+    /// sits a heavily blurred copy of the same art, and the poster emerges out of it. The bottom follows the detail page's recipe (DetailBackdrop's heroBand, tuned on
+    /// the device): it dissolves into the artwork's colour, which then lets go into the page below.
+    /// Every stop is that colour at some opacity, never `.clear`, which is transparent black and drags
+    /// the art through a grey band on the way.
+    private func portraitArtwork(for item: JellyfinItem) -> some View {
+        let near = palette(for: item).near
+        return VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                backdrop(for: item)
+                    .blur(radius: 30, opaque: true)
+                    // Keeps the clock legible on a bright poster.
+                    .overlay(alignment: .top) {
+                        LinearGradient(colors: [.black.opacity(0.25), .black.opacity(0)], startPoint: .top, endPoint: .bottom)
+                            .frame(height: safeTop)
+                    }
+                backdrop(for: item, alignment: .top)
+                    .mask {
+                        VStack(spacing: 0) {
+                            LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
+                                .frame(height: 28)
+                            Color.black
+                        }
+                    }
+                    .padding(.top, safeTop)
+            }
+            .overlay(alignment: .bottom) {
+                LinearGradient(
+                    stops: [
+                        .init(color: near.opacity(0), location: 0),
+                        .init(color: near.opacity(0.12), location: 0.30),
+                        .init(color: near.opacity(0.45), location: 0.58),
+                        .init(color: near.opacity(0.85), location: 0.82),
+                        .init(color: near, location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 220)
+            }
+        }
+        .animation(.easeInOut(duration: 0.4), value: near)
+        .allowsHitTesting(false)
+    }
+
+    private static let portraitTail: CGFloat = 160
+
+    /// The colour handing over to the page's own background below the banner, behind the first row.
+    /// One for the banner rather than one per page: it is the only part of a page that is see-through,
+    /// so two pages' tails stacked during a change read darker, and the old one vanishing when its
+    /// page was removed made the hand-over jump. A single one changes its colour instead.
+    private func portraitTail(near: Color) -> some View {
+        LinearGradient(
+            stops: [
+                .init(color: near, location: 0),
+                .init(color: near.opacity(0.6), location: 0.30),
+                .init(color: near.opacity(0.2), location: 0.65),
+                .init(color: near.opacity(0), location: 1)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: Self.portraitTail)
+        .offset(y: Self.portraitTail)
+        .animation(.easeInOut(duration: 0.6), value: near)
+        .allowsHitTesting(false)
+    }
+
+    /// The status bar and Dynamic Island. Read from the key window: inside the scroll view the
+    /// environment's top inset is already spent.
+    private var safeTop: CGFloat {
+        #if os(iOS)
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)?.safeAreaInsets.top ?? 0
+        #else
+        0
+        #endif
+    }
+
+    /// The artwork's colour once it has been read, black until then, so a page that has not been read
+    /// yet is a dark banner rather than a seam.
+    private func palette(for item: JellyfinItem) -> ArtworkPalette {
+        palettes[item.originKey] ?? .base
     }
 
     @ViewBuilder
@@ -349,7 +542,30 @@ struct HomeHeroCarousel: View {
 
     private func step(_ delta: Int) {
         guard !items.isEmpty else { return }
-        index = (index + delta + items.count) % items.count
+        show((index + delta + items.count) % items.count)
+    }
+
+    /// Every page change goes through here, so each page starts its dwell from zero. The page being
+    /// left stays underneath, opaque, until the new one has faded in over it.
+    private func show(_ page: Int) {
+        dwellSpent = 0
+        dwellRunningSince = nil
+        guard page != index, items.indices.contains(page), let leaving = current else {
+            index = page
+            return
+        }
+        let target = items[page]
+        // Evicted from the cache since it was read: fetch it again, it fades in over its colour.
+        if let url = artworkURL(for: target), ImageCache.shared.image(for: url) == nil {
+            readyKeys.remove(target.originKey)
+            Task { await prepare(target) }
+        }
+        outgoing = leaving
+        withAnimation(.easeInOut(duration: 0.6)) {
+            index = page
+        } completion: {
+            if outgoing?.originKey == leaving.originKey { outgoing = nil }
+        }
     }
 
     /// "Movie · 2025 · Drama · Thriller · PG-13", with whatever the server knows.
