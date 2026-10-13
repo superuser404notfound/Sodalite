@@ -16,6 +16,16 @@ struct ActiveUserBadge: View {
 
     private let diameter: CGFloat = 36
 
+    /// tvOS: the tab bar beside it is near-opaque dark on any page, and `.thickMaterial` lands on the
+    /// same grey (measured 50 against the bar's 46 over a white backdrop). `.ultraThinMaterial` went
+    /// pale there and left the white name unreadable over bright artwork. iOS keeps the thin frost
+    /// its chrome circles share.
+    #if os(tvOS)
+    private static let material: Material = .thickMaterial
+    #else
+    private static let material: Material = .ultraThinMaterial
+    #endif
+
     var body: some View {
         Group {
             if let user = appState.activeUser, rememberedCount > 1 {
@@ -42,8 +52,7 @@ struct ActiveUserBadge: View {
         .padding(.leading, 18)
         .padding(.trailing, 6)
         .padding(.vertical, 6)
-        // .ultraThinMaterial matches the detail-view frosted bubbles: more presence than plain white, lighter than .regularMaterial (read too dark).
-        .background(Capsule().fill(.ultraThinMaterial))
+        .background(Capsule().fill(Self.material))
         .overlay(
             Capsule().strokeBorder(Color.Theme.panelEdge, lineWidth: 1)
         )
