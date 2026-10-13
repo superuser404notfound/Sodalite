@@ -13,6 +13,9 @@ struct SettingsView: View {
     @State private var showResetConfirm = false
     /// Latches the buttons while the reset runs; deleting the iCloud copy is a round trip.
     @State private var isResetting = false
+    /// False while a sub-settings page is pushed over the root, so the gear sheet's swipe-down
+    /// cannot throw away the whole stack from three levels deep.
+    @State private var isAtRoot = true
 
     var body: some View {
         ThemeNavigationStack {
@@ -36,8 +39,13 @@ struct SettingsView: View {
                     closeButton(onClose)
                 }
             }
+            .onAppear { isAtRoot = true }
+            .onDisappear { isAtRoot = false }
             #endif
         }
+        #if os(iOS)
+        .interactiveDismissDisabled(onClose != nil && !isAtRoot)
+        #endif
         // Both session actions ask first. Log Out reads far milder than it is: it does not just end
         // this session, it drops every server, profile and saved login on the device.
         .alert(
