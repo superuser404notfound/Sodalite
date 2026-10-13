@@ -220,7 +220,6 @@ struct HomeHeroCarousel: View {
                 .contentShape(Rectangle())
                 .onTapGesture { onOpen(current) }
                 .mediaContextMenu(for: current) { onOpen(current) }
-                .onHover { isHovering = $0 }
                 #endif
                 #if os(iOS)
                 .simultaneousGesture(
@@ -622,6 +621,12 @@ struct HomeHeroCarousel: View {
             // above it wear the accent, so it reads as selected from across the room.
             .overlay(Capsule().strokeBorder(.tint, lineWidth: 3).opacity(pagerFocused ? 1 : 0))
             .scaleEffect(pagerFocused ? 1.15 : 1)
+            #if !os(tvOS)
+            // Only the dots hold the banner for the pointer, as they do for the remote. Held for the
+            // pointer anywhere over it, a banner filling most of a Mac window never moved, and even
+            // the text and buttons were too much of it.
+            .onHover { isHovering = $0 }
+            #endif
             .animation(.easeInOut(duration: 0.2), value: pagerFocused)
         }
     }
@@ -782,6 +787,11 @@ struct HomeHeroCarousel: View {
     private func show(_ page: Int) {
         dwellSpent = 0
         dwellRunningSince = nil
+        #if !os(tvOS)
+        // The details block is rebuilt for the new page, and a view removed under the pointer never
+        // reports the pointer leaving it, which would hold the banner for good.
+        isHovering = false
+        #endif
         Self.rememberedPage[Self.pageMemoryKey(items)] = page
         guard page != index, items.indices.contains(page), let leaving = current else {
             index = page
