@@ -528,7 +528,6 @@ struct SettingsTile<Destination: View>: View {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -561,7 +560,7 @@ struct GatedSettingsTile<Destination: View>: View {
                 Image(systemName: icon).font(.title2).frame(width: 56, alignment: .center).foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.body).fontWeight(.medium)
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)

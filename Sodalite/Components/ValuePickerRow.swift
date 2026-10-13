@@ -110,7 +110,6 @@ struct ValuePickerRow<Value: Hashable>: View {
             Text(subtitle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             // Inside the card, so it cannot read as belonging to the next row (measured both ways on
             // 2026-09-17; a caption between two cards did).
