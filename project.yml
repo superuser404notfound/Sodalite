@@ -7,6 +7,9 @@ options:
     macOS: "26.0"
   createIntermediateGroups: true
   groupSortPosition: top
+  # Writes LastUpgradeCheck, so Xcode stops offering its "recommended settings" upgrade, which
+  # would only edit the generated project.
+  xcodeVersion: "27.0"
 settings:
   base:
     MARKETING_VERSION: "1.1.0"
@@ -132,6 +135,9 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
+        # Xcode's recommended setting: lets automatic signing register the group.* app group in
+        # the profile, which macOS checks and the other platforms do not.
+        REGISTER_APP_GROUPS: YES
       configs:
         Debug:
           ENABLE_PREVIEWS: YES

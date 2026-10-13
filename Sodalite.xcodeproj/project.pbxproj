@@ -4676,7 +4676,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					58F0D943E445E3EC2FE13CAC = {
 						DevelopmentTeam = 4NY63S72W9;
@@ -7028,6 +7028,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.superuser404.Sodalite;
 				PRODUCT_NAME = Sodalite;
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -7050,6 +7051,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.superuser404.Sodalite;
 				PRODUCT_NAME = Sodalite;
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;
