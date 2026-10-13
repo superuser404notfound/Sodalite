@@ -159,6 +159,12 @@ enum Changelog {
                     icon: "square.grid.2x2"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.swipeBack.title",
+                    "changelog.1_1_0.swipeBack.body",
+                    icon: "hand.draw"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.guideGenres.title",
                     "changelog.1_1_0.guideGenres.body",

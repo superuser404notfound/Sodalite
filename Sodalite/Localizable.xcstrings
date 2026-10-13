@@ -74193,6 +74193,330 @@
         }
       }
     },
+    "changelog.1_1_0.swipeBack.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tituly, kolekce a seznamy Zobrazit vše se nyní otevírají jako stránky místo překrytí obrazovky, takže přejetím od levého okraje se vrátíte zpět jako všude jinde v iOS. Nastavení se již nezavře přejetím dolů, když je otevřená některá z jeho stránek."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titler, samlinger og Vis alle-lister åbner nu som sider i stedet for at dække skærmen, så et stryg fra venstre kant går tilbage som alle andre steder i iOS. Indstillinger lukker ikke længere ved et stryg nedad, mens en af dens sider er åben."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titel, Sammlungen und Alle-anzeigen-Listen öffnen sich jetzt als Seiten, statt den Bildschirm zu überdecken. Ein Wisch vom linken Rand führt also zurück, wie überall sonst auf iOS. Die Einstellungen schließen sich nicht mehr durch Wischen nach unten, solange eine ihrer Seiten offen ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι τίτλοι, οι συλλογές και οι λίστες Εμφάνιση όλων ανοίγουν πλέον ως σελίδες αντί να καλύπτουν την οθόνη, έτσι μια σάρωση από την αριστερή άκρη σας επιστρέφει, όπως παντού στο iOS. Οι Ρυθμίσεις δεν κλείνουν πια με σάρωση προς τα κάτω όσο είναι ανοιχτή μία από τις σελίδες τους."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titles, collections and Show All lists now open as pages instead of covering the screen, so a swipe from the left edge goes back, as everywhere else on iOS. Settings no longer closes on a downward swipe while one of its pages is open."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los títulos, las colecciones y las listas Ver todo ahora se abren como páginas en lugar de cubrir la pantalla, así que deslizar desde el borde izquierdo vuelve atrás, como en el resto de iOS. Ajustes ya no se cierra al deslizar hacia abajo mientras una de sus páginas está abierta."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimikkeet, kokoelmat ja Näytä kaikki -luettelot avautuvat nyt sivuina eivätkä peitä näyttöä, joten pyyhkäisy vasemmasta reunasta vie takaisin kuten muuallakin iOS:ssä. Asetukset eivät enää sulkeudu alaspäin pyyhkäisemällä, kun jokin sen sivuista on auki."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les titres, les collections et les listes Tout afficher s'ouvrent désormais comme des pages au lieu de recouvrir l'écran : un balayage depuis le bord gauche permet de revenir en arrière, comme partout ailleurs sur iOS. Les Réglages ne se ferment plus d'un balayage vers le bas lorsqu'une de leurs pages est ouverte."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naslovi, kolekcije i popisi Prikaži sve sada se otvaraju kao stranice umjesto da prekriju zaslon, pa povlačenje od lijevog ruba vraća natrag kao i drugdje u iOS-u. Postavke se više ne zatvaraju povlačenjem prema dolje dok je otvorena neka od njihovih stranica."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A címek, gyűjtemények és az Összes megjelenítése listák mostantól oldalként nyílnak meg a képernyő eltakarása helyett, így a bal szélről húzva vissza lehet lépni, mint bárhol máshol az iOS-ben. A Beállítások már nem záródnak be lefelé húzással, amíg valamelyik oldaluk nyitva van."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titoli, raccolte ed elenchi Mostra tutto ora si aprono come pagine invece di coprire lo schermo, quindi uno scorrimento dal bordo sinistro torna indietro, come ovunque su iOS. Le Impostazioni non si chiudono più scorrendo verso il basso mentre una delle loro pagine è aperta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作品、コレクション、「すべて表示」のリストが画面を覆うのではなくページとして開くようになり、iOSの他の場所と同じく左端からスワイプして戻れます。設定のページを開いている間は、下にスワイプしても設定が閉じなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작품, 컬렉션 및 모두 보기 목록이 이제 화면을 덮는 대신 페이지로 열리므로 iOS의 다른 곳처럼 왼쪽 가장자리에서 스와이프하여 뒤로 갈 수 있습니다. 설정의 하위 페이지가 열려 있는 동안에는 아래로 스와이프해도 설정이 닫히지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titler, samlinger og Vis alle-lister åpnes nå som sider i stedet for å dekke skjermen, så et sveip fra venstre kant går tilbake, som ellers i iOS. Innstillinger lukkes ikke lenger med et sveip nedover mens en av sidene er åpen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titels, collecties en Alles tonen-lijsten openen nu als pagina's in plaats van het scherm te bedekken, dus vegen vanaf de linkerrand gaat terug, zoals overal in iOS. Instellingen sluit niet meer met een veeg omlaag terwijl een van de pagina's open is."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tytuły, kolekcje i listy Pokaż wszystko otwierają się teraz jako strony zamiast zakrywać ekran, więc przesunięcie od lewej krawędzi wraca, jak wszędzie w iOS. Ustawienia nie zamykają się już po przesunięciu w dół, gdy otwarta jest jedna z ich stron."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos, coleções e listas Mostrar tudo agora abrem como páginas em vez de cobrir a tela, então deslizar a partir da borda esquerda volta, como em todo o iOS. Os Ajustes não fecham mais ao deslizar para baixo enquanto uma de suas páginas estiver aberta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos, coleções e listas Mostrar tudo abrem agora como páginas em vez de cobrir o ecrã, por isso deslizar a partir da margem esquerda volta atrás, como em todo o iOS. As Definições já não fecham ao deslizar para baixo enquanto uma das suas páginas estiver aberta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlurile, colecțiile și listele Afișează tot se deschid acum ca pagini în loc să acopere ecranul, așa că o glisare de la marginea stângă te duce înapoi, ca peste tot în iOS. Setările nu se mai închid la glisarea în jos cât timp una dintre paginile lor este deschisă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фильмы, коллекции и списки «Показать все» теперь открываются как страницы, а не поверх экрана, поэтому свайп от левого края возвращает назад, как везде в iOS. Настройки больше не закрываются свайпом вниз, пока открыта одна из их страниц."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tituly, kolekcie a zoznamy Zobraziť všetko sa teraz otvárajú ako stránky namiesto prekrytia obrazovky, takže potiahnutím od ľavého okraja sa vrátite späť ako všade inde v iOS. Nastavenia sa už nezatvoria potiahnutím nadol, keď je otvorená niektorá z ich stránok."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlar, samlingar och Visa alla-listor öppnas nu som sidor i stället för att täcka skärmen, så ett svep från vänsterkanten går tillbaka, som överallt i iOS. Inställningar stängs inte längre med ett svep nedåt medan en av dess sidor är öppen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlıklar, koleksiyonlar ve Tümünü Göster listeleri artık ekranı kaplamak yerine sayfa olarak açılıyor; böylece iOS'un her yerinde olduğu gibi sol kenardan kaydırarak geri dönebilirsiniz. Ayarlar, sayfalarından biri açıkken aşağı kaydırıldığında artık kapanmıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фільми, колекції та списки «Показати все» тепер відкриваються як сторінки, а не поверх екрана, тож свайп від лівого краю повертає назад, як усюди в iOS. Налаштування більше не закриваються свайпом униз, поки відкрита одна з їхніх сторінок."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作品、合集和“显示全部”列表现在以页面形式打开，而不是覆盖整个屏幕，因此可以像 iOS 其他地方一样从左边缘轻扫返回。打开设置中的某个页面时，向下轻扫不会再关闭设置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作品、合集與「顯示全部」列表現在以頁面形式開啟，而不是覆蓋整個螢幕，因此可以像 iOS 其他地方一樣從左邊緣滑動返回。開啟設定中的某個頁面時，向下滑動不會再關閉設定。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.swipeBack.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Návrat přejetím na iPhonu a iPadu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stryg tilbage på iPhone og iPad"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurückwischen auf iPhone und iPad"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σάρωση για επιστροφή σε iPhone και iPad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe back on iPhone and iPad"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza para volver en iPhone y iPad"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pyyhkäise takaisin iPhonessa ja iPadissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balayer pour revenir sur iPhone et iPad"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povratak povlačenjem na iPhoneu i iPadu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visszalépés húzással iPhone-on és iPaden"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorri per tornare indietro su iPhone e iPad"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneとiPadでスワイプして戻る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone 및 iPad에서 스와이프로 뒤로 가기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sveip tilbake på iPhone og iPad"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terugvegen op iPhone en iPad"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Powrót przesunięciem na iPhonie i iPadzie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize para voltar no iPhone e iPad"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize para voltar no iPhone e iPad"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisează înapoi pe iPhone și iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возврат свайпом на iPhone и iPad"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Návrat potiahnutím na iPhone a iPade"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svep tillbaka på iPhone och iPad"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone ve iPad'de kaydırarak geri dön"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повернення свайпом на iPhone та iPad"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上轻扫返回"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 與 iPad 上滑動返回"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.versionLabel.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

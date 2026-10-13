@@ -43,6 +43,9 @@ struct TabRootView: View {
     /// Profiles remembered for the active server, for ActiveUserBadge. Read here because this view is
     /// always on screen and the badge is not until it knows the count (Sodalite#169).
     @State private var rememberedProfileCount = 0
+    #if os(iOS)
+    @State private var pushStacks = TabPushStacks()
+    #endif
 
     private var iconColor: Color {
         appearanceTheme.palette.navigation.color
@@ -191,6 +194,11 @@ struct TabRootView: View {
                 }
                 .padding(.trailing, 16)
                 .padding(.top, 6)
+                // A pushed page has its own bar up here; hidden, not removed, so the badge keeps
+                // its state for the way back.
+                .opacity(chromeIsPushedAway ? 0 : 1)
+                .allowsHitTesting(!chromeIsPushedAway)
+                .animation(.easeInOut(duration: 0.2), value: chromeIsPushedAway)
             } else {
                 ActiveUserBadge(rememberedCount: rememberedProfileCount,
                                 onTap: { appState.requestProfilePicker = true })
@@ -559,11 +567,12 @@ struct TabRootView: View {
             case .liveTV:
                 // Selection is passed rather than inferred from onAppear: a tab that is not selected
                 // keeps its content in the hierarchy, so its clocks have to be told (#96).
-                #if os(macOS)
+                #if os(macOS) || os(iOS)
                 // Every other tab roots its own stack; this one did not need one while its program
-                // pages were covers, and on the Mac they are pushes (see detailCover).
+                // pages were covers, and on the Mac and iOS they are pushes (see detailCover).
                 ThemeNavigationStack {
                     LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
+                        .reservesShellChrome()
                 }
                 #else
                 LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
@@ -593,13 +602,14 @@ struct TabRootView: View {
         // has one is in Settings, and the bar is the way there.
         .serverStatusBanner()
         #if os(iOS)
-        // Reserve space for the floating settings gear so content never slides under it.
-        // padding reliably repositions content, including screens rooted in a NavigationStack
-        // (Catalog/Search/...) which ignore a parent safeAreaInset and so would overlap.
-        // Not for the pages that scroll under the chrome: their inset is a content margin instead
-        // (`scrollsUnderShellChrome`), since a padding here shrinks the page and it clips its rows
-        // at the line below the buttons.
-        .padding(.top, hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
+        // Room for the floating settings gear, taken by each tab's root page (`reservesShellChrome`)
+        // rather than padded around the stack: a pushed detail hides the chrome and owns the top
+        // edge. Not for the pages that scroll under the chrome: their inset is a content margin
+        // instead (`scrollsUnderShellChrome`), since a padding shrinks the page and it clips its
+        // rows at the line below the buttons.
+        .environment(\.shellChromeTopInset,
+                     hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
+        .environment(\.detailCoverStack, pushStacks.stack(for: tab))
         #endif
         #if !os(tvOS)
         .background {
@@ -623,6 +633,8 @@ struct TabRootView: View {
     }
 
     #if os(iOS)
+    private var chromeIsPushedAway: Bool { pushStacks.stack(for: selectedTab).isPushed }
+
     static let gearChromeHeight: CGFloat = 56
     /// The tabs whose root scroll view sits directly under the chrome (`scrollsUnderShellChrome`).
     /// The others start with a fixed header (Live TV's and Catalog's pickers, the search field),

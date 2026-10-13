@@ -5,15 +5,17 @@ extension View {
     ///
     /// A static themed background sits behind the stack. Detail views draw their own full-screen backdrop over it, while backdrop-less pages show the selected theme.
     ///
-    /// On the Mac it is a push onto the enclosing NavigationStack instead. A window has no tab bar to
-    /// keep on screen, and a sheet there is a modal panel floating over the window, which is the wrong
-    /// shape for browsing: the toolbar's back button, the back gesture and Cmd-[ all expect a stack.
+    /// On the Mac and on iOS it is a push onto the enclosing NavigationStack instead. A window has no
+    /// tab bar to keep on screen, and a sheet there is a modal panel floating over the window, which
+    /// is the wrong shape for browsing: the toolbar's back button, the back gesture and Cmd-[ all
+    /// expect a stack. iOS does not have the gray-icon bug either, and a cover there takes away the
+    /// edge-swipe back that every other app's detail page answers to.
     @ViewBuilder
     func detailCover<Item: Identifiable, Content: View>(
         item: Binding<Item?>,
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View {
-        #if os(macOS)
+        #if os(macOS) || os(iOS)
         modifier(DetailPushPresenter(item: item, destination: content))
         #else
         detailCoverModal(item: item, content: content)
@@ -30,7 +32,7 @@ extension View {
     }
 }
 
-#if os(macOS)
+#if os(macOS) || os(iOS)
 /// `navigationDestination(item:)` wants a Hashable item and these are only Identifiable, so the push
 /// is driven by presence instead. The pushed value is held here rather than read back from the
 /// binding: a pop clears the binding before the page has finished sliding out, and a destination
@@ -50,7 +52,7 @@ private struct DetailPushPresenter<Item: Identifiable, Destination: View>: ViewM
                 if let value = item ?? pushed {
                     destination(value)
                         .themedStaticBackground()
-                        .pushedPage()
+                        .detailCoverPush()
                 }
             }
             .onChange(of: item?.id, initial: true) { _, _ in

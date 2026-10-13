@@ -342,7 +342,8 @@ struct FilteredGridView: View {
         .onChange(of: appState.requestPlayerDismissal) { _, _ in
             if showPlayer { showPlayer = false }
         }
-        .hidesNavigationBar()
+        // iOS keeps the bar: the grid is pushed there, and the bar carries its way back.
+        .hidesNavigationBarChrome()
         .hidesShellTabBar()
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
@@ -358,6 +359,7 @@ struct FilteredGridView: View {
                 },
                 sortScope: sortScope
             )
+            .detailCoverPush()
         }
         .menuPresentation(isPresented: $showSortSheet) {
             LibrarySortSheet(
