@@ -203,7 +203,9 @@ struct HomeHeroCarousel: View {
                 .overlay(alignment: .bottom) {
                     // Upright iPhone only: in the wide banner the dots sit under the buttons (see
                     // `details`), where the floating tab bar of an iPad cannot cover them.
-                    if isPortrait { pager.padding(.bottom, 12) }
+                    // Below the box's edge, in the dissolve: the glass pill made the row tall enough
+                    // to touch Play from where the bare dots used to sit.
+                    if isPortrait { pager.padding(.bottom, -12) }
                 }
                 .overlay { if !isPortrait { arrows } }
                 #if os(tvOS)
