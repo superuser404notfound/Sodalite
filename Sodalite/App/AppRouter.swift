@@ -256,6 +256,9 @@ struct AppRouter: View {
         .task(id: scenePhase) {
             if scenePhase == .background {
                 lastBackgroundedAt = ContinuousClock().now
+                #if os(tvOS)
+                TopShelfRefresher.refreshBeforeSuspension()
+                #endif
             }
             guard scenePhase == .active else { return }
             consumeBackgroundInstant()
