@@ -67393,6 +67393,330 @@
         }
       }
     },
+    "changelog.1_1_0.detailPoster.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu na výšku nyní stránky filmů, seriálů a kolekcí začínají celým plakátem, stejně jako banner na domovské obrazovce. Když stránku potáhnete dolů za její horní okraj, plakát se protáhne s ní."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone på højkant åbner film-, serie- og samlingssider nu med hele plakaten, ligesom banneret på Hjem. Træk siden ned forbi toppen, så strækker plakaten sig med."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem iPhone im Hochformat beginnen Film-, Serien- und Sammlungsseiten jetzt mit dem ganzen Poster, wie das Banner auf der Startseite. Ziehst du die Seite über den oberen Rand hinaus, dehnt sich das Poster mit."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone σε κατακόρυφο προσανατολισμό, οι σελίδες ταινιών, σειρών και συλλογών ανοίγουν πλέον με ολόκληρη την αφίσα, όπως το banner στην Αρχική. Τραβήξτε τη σελίδα προς τα κάτω πέρα από την κορυφή και η αφίσα τεντώνεται μαζί της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On an upright iPhone, film, series and collection pages now open on the full poster, like the banner on Home. Pull the page down past its top and the poster stretches with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En un iPhone en vertical, las páginas de películas, series y colecciones ahora se abren con el póster completo, como el banner de Inicio. Tira de la página hacia abajo más allá de su parte superior y el póster se estira con ella."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pystyasennossa olevassa iPhonessa elokuvien, sarjojen ja kokoelmien sivut alkavat nyt koko julisteella, kuten Koti-näkymän banneri. Vedä sivua alas yläreunan yli, niin juliste venyy mukana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur un iPhone en position verticale, les pages de films, de séries et de collections s'ouvrent désormais sur l'affiche entière, comme la bannière de l'Accueil. Tirez la page vers le bas au-delà de son sommet et l'affiche s'étire avec elle."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na uspravnom iPhoneu stranice filmova, serija i kolekcija sada počinju cijelim plakatom, kao banner na početnom zaslonu. Povucite stranicu prema dolje preko vrha i plakat se rasteže s njom."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Álló iPhone-on a filmek, sorozatok és gyűjtemények oldalai mostantól a teljes plakáttal nyílnak meg, mint a Kezdőlap bannere. Ha az oldalt a tetején túl lefelé húzza, a plakát vele együtt nyúlik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su un iPhone in verticale, le pagine di film, serie e raccolte ora si aprono sulla locandina intera, come il banner della Home. Trascina la pagina verso il basso oltre la sua cima e la locandina si allunga insieme a essa."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縦向きのiPhoneでは、映画、シリーズ、コレクションのページがホームのバナーと同じようにポスター全体で始まるようになりました。ページを上端より下に引っ張ると、ポスターも一緒に伸びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세로 방향 iPhone에서 영화, 시리즈 및 컬렉션 페이지가 이제 홈 배너처럼 전체 포스터로 시작합니다. 페이지를 맨 위보다 더 아래로 당기면 포스터도 함께 늘어납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone på høykant åpner film-, serie- og samlingssider nå med hele plakaten, som banneret på Hjem. Dra siden ned forbi toppen, så strekker plakaten seg med."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op een rechtop gehouden iPhone openen film-, serie- en collectiepagina's nu met de volledige poster, net als de banner op Thuis. Trek de pagina voorbij de bovenkant omlaag en de poster rekt mee."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie w pionie strony filmów, seriali i kolekcji otwierają się teraz pełnym plakatem, jak baner na ekranie głównym. Pociągnij stronę w dół poza jej górną krawędź, a plakat rozciągnie się razem z nią."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em um iPhone na vertical, as páginas de filmes, séries e coleções agora abrem com o pôster inteiro, como o banner do Início. Puxe a página para baixo além do topo e o pôster se estica junto."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Num iPhone na vertical, as páginas de filmes, séries e coleções abrem agora com o cartaz inteiro, como o banner do Início. Puxe a página para baixo para além do topo e o cartaz estica-se com ela."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe un iPhone ținut vertical, paginile filmelor, serialelor și colecțiilor se deschid acum cu afișul întreg, ca bannerul de pe ecranul principal. Trage pagina în jos dincolo de partea de sus și afișul se întinde odată cu ea."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone в вертикальном положении страницы фильмов, сериалов и коллекций теперь открываются полным постером, как баннер на главном экране. Потяните страницу вниз за её верхний край, и постер растянется вместе с ней."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone na výšku sa stránky filmov, seriálov a kolekcií teraz otvárajú celým plagátom, rovnako ako banner na domovskej obrazovke. Keď stránku potiahnete nadol za jej horný okraj, plagát sa natiahne s ňou."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone i stående läge öppnas film-, serie- och samlingssidor nu med hela affischen, som bannern på Hem. Dra sidan nedåt förbi toppen så sträcks affischen med."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dik tutulan iPhone'da film, dizi ve koleksiyon sayfaları artık Ana Sayfa'daki afiş gibi tam afişle açılıyor. Sayfayı üst kenarının ötesine aşağı çektiğinizde afiş de onunla birlikte uzar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone у вертикальному положенні сторінки фільмів, серіалів і колекцій тепер відкриваються повним постером, як банер на головному екрані. Потягніть сторінку вниз за її верхній край, і постер розтягнеться разом із нею."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在竖握的 iPhone 上，电影、剧集和合集页面现在像主页横幅一样以完整海报开头。将页面拉过顶部继续下拉，海报会随之拉伸。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在直向握持的 iPhone 上，電影、影集與合集頁面現在會像首頁橫幅一樣以完整海報開頭。將頁面拉過頂部繼續下拉，海報會隨之延展。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.detailPoster.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakát v horní části stránky"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakaten øverst på siden"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Poster oben auf der Seite"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η αφίσα στην κορυφή της σελίδας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The poster on top of the page"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El póster en lo alto de la página"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juliste sivun yläosassa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'affiche en haut de la page"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakat na vrhu stranice"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A plakát az oldal tetején"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La locandina in cima alla pagina"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ページ上部にポスター"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페이지 상단의 포스터"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakaten øverst på siden"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De poster bovenaan de pagina"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakat na górze strony"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O pôster no topo da página"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O cartaz no topo da página"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișul în partea de sus a paginii"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постер в верхней части страницы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plagát v hornej časti stránky"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affischen högst upp på sidan"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfanın üstünde afiş"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постер у верхній частині сторінки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "页面顶部的海报"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頁面頂部的海報"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.durations.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

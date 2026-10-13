@@ -586,6 +586,7 @@ struct SeriesDetailView: View {
         DetailContentOverlay(
             heroImageURL: backdropURL,
             heroPosterURL: vm.heroPosterURL(for: vm.item),
+            portraitHero: vm.item.type == .series,
             hero: {
             // Series logo, both modes (episode has none); observes the VM so it appears once an episode deep-link's series stub loads imageTags, no scroll needed.
             DetailHeroLogo(viewModel: vm)

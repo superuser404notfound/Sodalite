@@ -21,6 +21,12 @@ enum Changelog {
                     icon: "rectangle.topthird.inset.filled"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.detailPoster.title",
+                    "changelog.1_1_0.detailPoster.body",
+                    icon: "rectangle.portrait"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.combinedServers.title",
                     "changelog.1_1_0.combinedServers.body",
