@@ -11,6 +11,10 @@ enum SidebarMetrics {
     static let itemVerticalPadding: CGFloat = 14
     static let horizontalPadding: CGFloat = 20
     static let cornerRadius: CGFloat = 16
+    /// The glass panel behind the rail: room above the first row and below the last, and corners
+    /// that keep the collapsed rail a pill (its rows' own focus pills sit inside with `cornerRadius`).
+    static let panelVerticalPadding: CGFloat = 16
+    static let panelCornerRadius: CGFloat = 32
 
     /// The collapsed row is square around its icon: the same padding on all four sides, so the
     /// focus pill reads as a tile rather than a stretched capsule, and the rail costs the content

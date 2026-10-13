@@ -351,8 +351,19 @@ private struct ShellPaysLeadingInsetKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct ShellLeadingSlotKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
 extension EnvironmentValues {
     /// Set by the sidebar shell on its content: the leading margin is already accounted for.
+    /// Set by the sidebar shell on a full-bleed tab (`SidebarShell.fullBleedTabs`): the width of the
+    /// rail's slot, which that page insets its own content by while its art runs on under the rail.
+    var shellLeadingSlot: CGFloat {
+        get { self[ShellLeadingSlotKey.self] }
+        set { self[ShellLeadingSlotKey.self] = newValue }
+    }
+
     var shellPaysLeadingInset: Bool {
         get { self[ShellPaysLeadingInsetKey.self] }
         set { self[ShellPaysLeadingInsetKey.self] = newValue }

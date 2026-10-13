@@ -34,12 +34,19 @@ struct SidebarShell<Content: View>: View {
         SidebarMetrics.railLeadingInset + SidebarMetrics.width(isExpanded: focusIsInRail)
     }
 
+    /// Tabs whose page runs full width under the rail and insets its own content by the slot
+    /// (`shellLeadingSlot`): Home, whose banner art fills the screen. Placed beside the rail instead,
+    /// the art was cut at the slot, by the tab's NavigationStack, which on tvOS is UIKit and clips.
+    static var fullBleedTabs: Set<AppTab> { [.home] }
+
+    private var isFullBleed: Bool { Self.fullBleedTabs.contains(selectedTab) }
+
     var body: some View {
         HStack(spacing: 0) {
             // Layout placeholder only. The rail itself is an overlay, so it can move freely while
             // this width changes in one step underneath it.
             Color.clear
-                .frame(width: slotWidth)
+                .frame(width: isFullBleed ? 0 : slotWidth)
                 .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInRail)
 
             content(selectedTab)
@@ -47,6 +54,7 @@ struct SidebarShell<Content: View>: View {
                 // Unconditional: the margins stay put when the rail leaves, so a pushed screen
                 // does not re-lay-out itself on the way in or out.
                 .environment(\.shellPaysLeadingInset, true)
+                .environment(\.shellLeadingSlot, isFullBleed ? slotWidth : 0)
                 .focusSectionCompat()
                 // The shell opens on the content, not on the rail, which is what the top bar does.
                 .prefersDefaultFocus(true, in: shellFocus)

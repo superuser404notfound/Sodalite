@@ -189,6 +189,7 @@ final class HomeViewModel {
         self.rowConfigs = HomeRowConfig.loadFromStorage(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
         self.libraryLayout = LibraryLayout.load(scope: ProfileKey(serverID: serverID, userID: userID).storageScope)
         hydrateFeedFromCache()
+        recallHero()
     }
 
     /// Paints the last feed this identity saw before the first request goes out (Sodalite#117).

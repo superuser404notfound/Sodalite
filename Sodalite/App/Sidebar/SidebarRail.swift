@@ -52,10 +52,15 @@ struct SidebarRail: View {
             }
         }
         .frame(width: SidebarMetrics.width(isExpanded: isExpanded))
+        // A glass panel behind the rail, the same frosted dark the top bar sits on. It was dropped
+        // once, when the rail only ever lay over the app background and the icons were legible there
+        // on their own; Home's banner now runs under the rail, and over bright artwork they were not.
+        .padding(.vertical, SidebarMetrics.panelVerticalPadding)
+        .background(
+            RoundedRectangle(cornerRadius: SidebarMetrics.panelCornerRadius, style: .continuous)
+                .fill(.regularMaterial)
+        )
         .frame(maxHeight: .infinity, alignment: .center)
-        // No panel behind the expanded rail. It was there out of habit, and on device it earned
-        // nothing: white labels and an accent icon are legible over the app background on their
-        // own, while the panel only ever drew a second edge for the labels to overrun.
         .focusSectionCompat()
     }
 }

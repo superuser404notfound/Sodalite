@@ -6,6 +6,7 @@ extension HomeViewModel {
     /// every return to the tab would swap the banner out from under someone about to tap it.
     func reloadHero() {
         let mode = HomeHeroMode.stored(scope: homeScope)
+        recallHero(mode)
         if mode == .discover, heroLoadedMode == .discover, !heroItems.isEmpty { return }
         heroTask?.cancel()
         guard mode != .off else {
@@ -14,6 +15,33 @@ extension HomeViewModel {
             return
         }
         heroTask = Task { [weak self] in await self?.loadHero(mode) }
+    }
+
+    /// The banner's last titles per profile and mode, for this run of the app. Home is rebuilt from
+    /// scratch on every return to the tab in the sidebar layout (the shell swaps its content), and
+    /// sometimes with the top bar too; without this the banner then came back empty, refetched and
+    /// faded its art in again, while the rows beside it repainted at once from their feed cache.
+    private static var heroMemory: [String: [JellyfinItem]] = [:]
+
+    private func heroMemoryKey(_ mode: HomeHeroMode) -> String { "\(homeScope)|\(mode.rawValue)" }
+
+    /// Puts the remembered titles up before any request, the banner's half of `hydrateFeedFromCache`:
+    /// this run's own first, else what the last run stored on disk. The disk copy is painted but not
+    /// counted as loaded, so the request still goes out; that is what keeps Discover reshuffling on
+    /// every launch, and a changed list then crossfades in rather than the banner popping in late and
+    /// pushing the rows down.
+    func recallHero(_ mode: HomeHeroMode? = nil) {
+        let mode = mode ?? HomeHeroMode.stored(scope: homeScope)
+        guard heroLoadedMode != mode, mode != .off else { return }
+        if let remembered = Self.heroMemory[heroMemoryKey(mode)] {
+            heroItems = remembered
+            heroLoadedMode = mode
+        } else if heroItems.isEmpty,
+                  let stored = FilterCache.shared.homeFilterItems(
+                      filterKey: FilterCacheKey.Home.hero(mode: mode.rawValue), identity: feedIdentity
+                  ), !stored.isEmpty {
+            heroItems = stored
+        }
     }
 
     /// How many titles the carousel pages through.
@@ -49,8 +77,18 @@ extension HomeViewModel {
         case .discover, .favorites: candidates.shuffled()
         case .off: []
         }
-        heroItems = Array(ordered.prefix(Self.heroLimit))
+        let fresh = Array(ordered.prefix(Self.heroLimit))
+        // The same titles again leave the banner alone: a new array of the same pages would only
+        // ask it to redraw what it already shows.
+        if fresh.map(\.originKey) != heroItems.map(\.originKey) || heroLoadedMode != mode {
+            heroItems = fresh
+        }
         heroLoadedMode = mode
+        Self.heroMemory[heroMemoryKey(mode)] = fresh
+        // On the main actor, like the precompute's writes: eight items of JSON.
+        FilterCache.shared.setHomeFilterItems(
+            fresh, filterKey: FilterCacheKey.Home.hero(mode: mode.rawValue), identity: feedIdentity
+        )
     }
 
     private static func heroQuery(_ mode: HomeHeroMode) -> ItemQuery {

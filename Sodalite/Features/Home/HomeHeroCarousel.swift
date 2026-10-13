@@ -17,12 +17,43 @@ struct HomeHeroCarousel: View {
     @Environment(\.verticalSizeClass) private var vSizeClass
     #endif
 
-    @State private var index = 0
+    @State private var index: Int
+
+    init(
+        items: [JellyfinItem],
+        backdropURL: @escaping (JellyfinItem) -> URL?,
+        posterURL: @escaping (JellyfinItem) -> URL?,
+        onOpen: @escaping (JellyfinItem) -> Void,
+        onPlay: @escaping (JellyfinItem) -> Void
+    ) {
+        self.items = items
+        self.backdropURL = backdropURL
+        self.posterURL = posterURL
+        self.onOpen = onOpen
+        self.onPlay = onPlay
+        // A rebuilt banner (a return to the Home tab) picks up on the page it was showing.
+        let remembered = Self.rememberedPage[Self.pageMemoryKey(items)] ?? 0
+        _index = State(initialValue: items.indices.contains(remembered) ? remembered : 0)
+    }
+
+    /// The page each set of titles was last on, and each artwork's colour, for this run of the app,
+    /// so a rebuilt banner shows the same page in the same colour on its first frame.
+    private static var rememberedPage: [String: Int] = [:]
+    private static var rememberedPalettes: [URL: ArtworkPalette] = [:]
+
+    private static func pageMemoryKey(_ items: [JellyfinItem]) -> String {
+        items.map(\.originKey).joined(separator: ",")
+    }
+
     /// The pointer is over the banner, or on tvOS focus is on its buttons; either way it holds still.
     @State private var isHovering = false
     #if os(tvOS)
-    @FocusState private var buttonsFocused: Bool
+    private enum HeroFocus: Hashable { case play, info, page(Int) }
+    @FocusState private var focus: HeroFocus?
+    @State private var claimedOpeningFocus = false
     #endif
+    /// The sidebar shell's rail slot, which the art reaches back under so it fills the screen.
+    @Environment(\.shellLeadingSlot) private var leadingSlot
     /// How far below the window's top edge the banner starts: the toolbar's inset plus the stack
     /// spacing above it, and more while the page is pulled past its top. The art grows upward by
     /// exactly that. Measured in window space because every scroll-relative reading falls short:
@@ -42,11 +73,26 @@ struct HomeHeroCarousel: View {
     /// from here, never through `AsyncCachedImage`: that view starts every new URL empty and fades the
     /// image in, so a page change showed the placeholder, then the art, then the colour, each on its
     /// own clock, and the seams of the top and bottom transitions flickered black in between.
-    @State private var readyKeys: Set<String> = []
+    /// Decoded art held for the pages around the one on screen (see `trimHeld`). Held here, not only
+    /// in `ImageCache`: that cache may drop an image under memory pressure, and a page read from it on
+    /// every redraw then fell back to its placeholder until the banner was rebuilt by scrolling away.
+    @State private var held: [String: PlatformImage] = [:]
     @State private var palettes: [String: ArtworkPalette] = [:]
-    /// The page being left, kept fully opaque underneath while the new one fades in over it, so the
-    /// change never uncovers what lies behind the banner.
-    @State private var outgoing: JellyfinItem?
+    /// One drawn page. Every change adds a new one with an identity of its own, even when it shows a
+    /// title that is already underneath: keyed by the title, paging back and forth quickly brought a
+    /// half faded-in layer forward instead of fading a fresh one in, and two see-through layers with
+    /// nothing opaque under them made the dissolves look cut off.
+    private struct HeroLayer: Identifiable {
+        var id = UUID()
+        let item: JellyfinItem
+    }
+    /// Oldest first, the newest fading in on top. The oldest is always a finished, opaque page, since
+    /// layers are only cleared once the latest change has completed. Empty at rest: then the page on
+    /// screen is drawn as the one `baseLayerID` layer.
+    @State private var layers: [HeroLayer] = []
+    @State private var baseLayerID = UUID()
+    /// Which change is the latest, so only its completion clears the layers beneath it.
+    @State private var changeGeneration = 0
 
     private var isCompact: Bool { hSizeClass == .compact }
 
@@ -73,6 +119,25 @@ struct HomeHeroCarousel: View {
     }
 
     var body: some View {
+        // A ZStack rather than a bare `if`, so the modifier below exists while there is no banner yet.
+        ZStack {
+            banner
+        }
+        #if os(tvOS)
+        // A cold start paints the rows from their feed cache before the banner has titles (its
+        // memory lasts one run of the app), so tvOS put the opening focus on the first card. When the
+        // titles arrive into a banner that started empty, focus goes to Play once; a banner rebuilt
+        // on a tab return already has them and leaves focus where the system puts it.
+        .onChange(of: items.isEmpty) { _, isEmpty in
+            guard !isEmpty, !claimedOpeningFocus else { return }
+            claimedOpeningFocus = true
+            Task { @MainActor in focus = .play }
+        }
+        #endif
+    }
+
+    @ViewBuilder
+    private var banner: some View {
         if let current {
             // The box is a placeholder sized off the window, and everything else is laid onto it, so
             // the art, the text and the pager all agree on one height. Built the other way round, the
@@ -83,8 +148,12 @@ struct HomeHeroCarousel: View {
                 // hang below the banner as well.
                 .background(alignment: .bottom) {
                     ZStack {
-                        ForEach([outgoing, current].compactMap { $0 }, id: \.originKey) { item in
-                            artworkLayer(for: item)
+                        ForEach(layers.isEmpty ? [HeroLayer(id: baseLayerID, item: current)] : layers) { layer in
+                            // The top layer always draws the page on screen, the one whose text and
+                            // buttons sit over it; only the layers beneath it draw what they were
+                            // made with. Stored for the top as well, a reshuffled title list could
+                            // leave one title's art under another's name.
+                            artworkLayer(for: layer.id == layers.last?.id ? current : layer.item)
                                 // One picture per page before it fades: without it the opacity lands on
                                 // the artwork, the colour strip and both dissolves separately, and half
                                 // a dissolve over half a poster let the art show through both seams.
@@ -92,10 +161,20 @@ struct HomeHeroCarousel: View {
                                 .transition(.asymmetric(insertion: .opacity, removal: .identity))
                         }
                     }
-                    .padding(.top, -topExtension)
+                    .padding(.top, -(topExtension + artShift))
                     .overlay(alignment: .bottom) {
-                        if isPortrait { portraitTail(near: palette(for: current).near) }
+                        tail(near: palette(for: current).near)
                     }
+                    // The wide banner's whole composition, art, dissolve and tail unchanged, sits this
+                    // much lower, toward the first row, so more of the picture shows above the
+                    // dissolve. Drawn taller at the top by the same amount, so it still meets the
+                    // screen's edge. Moved as one, because stretching only the art pulled the dissolve
+                    // and the tail apart and cut both.
+                    .offset(y: artShift)
+                    // Edge to edge: the rows keep the overscan margin on tvOS, the art does not, and
+                    // with the sidebar it runs on under the rail.
+                    .padding(.leading, -leadingSlot)
+                    .ignoresSafeArea(edges: .horizontal)
                 }
                 .onGeometryChange(for: CGFloat.self) { max(0, $0.frame(in: .global).minY) } action: {
                     topExtension = $0
@@ -111,20 +190,31 @@ struct HomeHeroCarousel: View {
                                 // Lined up with the rows' titles below it.
                                 .padding(.leading, LayoutMetrics.current(hSizeClass).rowInset)
                                 .padding(.trailing, isCompact ? LayoutMetrics.current(hSizeClass).rowInset : 160)
-                                .padding(.bottom, 52)
+                                // Lower by part of the art's shift, so the text keeps its place
+                                // on the picture rather than floating up into it.
+                                .padding(.bottom, 52 - artShift * 0.375)
                         }
                     }
+                    #if !os(tvOS)
                     .id(current.originKey)
                     .transition(.opacity)
+                    #endif
                 }
                 .overlay(alignment: .bottom) {
-                    pager.padding(.bottom, isPortrait ? 12 : 20)
+                    // Upright iPhone only: in the wide banner the dots sit under the buttons (see
+                    // `details`), where the floating tab bar of an iPad cannot cover them.
+                    if isPortrait { pager.padding(.bottom, 12) }
                 }
                 .overlay { if !isPortrait { arrows } }
                 #if os(tvOS)
                 // Focus stands in for the pointer: a page change rebuilds the buttons, which would
                 // throw focus off the one the viewer is on.
-                .onChange(of: buttonsFocused) { _, focused in isHovering = focused }
+                .onChange(of: focus) { old, new in handleFocusChange(from: old, to: new) }
+                // The whole banner width is one section, so Up from any card in the first row lands on
+                // the buttons; with only the buttons' own frame to aim at, the focus engine found
+                // nothing above a card to their right and Up did nothing until the row was scrolled
+                // back to its start.
+                .focusSection()
                 #else
                 .contentShape(Rectangle())
                 .onTapGesture { onOpen(current) }
@@ -162,18 +252,23 @@ struct HomeHeroCarousel: View {
                     dwellSpent += Date.now.timeIntervalSince(since)
                     dwellRunningSince = nil
                 }
-                .onChange(of: items.map(\.originKey)) { _, _ in show(0) }
+                .onChange(of: items.map(\.originKey)) { _, _ in
+                    layers = []
+                    show(0)
+                }
                 // Every page is made ready as soon as the banner knows its titles, the one on screen
                 // first, so paging never waits on the network or on a colour still being read.
                 .task(id: "\(items.map(\.originKey))|\(isPortrait)") {
-                    readyKeys = []
+                    held = [:]
                     palettes = [:]
                     await prepare(current)
-                    let rest = items.dropFirst(index + 1) + items.prefix(index)
-                    await ImageCache.prefetch(rest.compactMap(artworkURL(for:)), auth: imageAuth)
-                    for item in rest {
+                    let rest = Array(items.dropFirst(index + 1) + items.prefix(index))
+                    if let next = rest.first { await prepare(next) }
+                    // The others only into the cache and for their colour; they are held once they
+                    // come next to the page on screen.
+                    for item in rest.dropFirst() {
                         guard !Task.isCancelled else { return }
-                        await prepare(item)
+                        _ = await loadArt(for: item)
                     }
                 }
         }
@@ -204,23 +299,50 @@ struct HomeHeroCarousel: View {
 
     private var imageAuth: ImageAuth { ImageAuth.snapshot(dependencies.sessionRegistry) }
 
-    /// Decodes a page's art into `ImageCache` (or finds it there) and reads its colour, then marks it
-    /// ready. Both land together, so the art and the colour it dissolves into appear in one step.
+    /// Holds a page's art and its colour, so both appear in one step.
     private func prepare(_ item: JellyfinItem) async {
         let key = item.originKey
-        guard let url = artworkURL(for: item) else { return }
-        if readyKeys.contains(key), ImageCache.shared.image(for: url) != nil { return }
-        if ImageCache.shared.image(for: url) == nil {
-            await ImageCache.prefetch([url], auth: imageAuth)
-        }
-        guard let image = ImageCache.shared.image(for: url) else { return }
-        let palette = await Task.detached(priority: .userInitiated) {
-            ArtworkTint.bottomEdgePalette(of: image)
-        }.value
+        guard held[key] == nil, let image = await loadArt(for: item) else { return }
         withAnimation(.easeIn(duration: 0.3)) {
-            if let palette { palettes[key] = palette }
-            readyKeys.insert(key)
+            held[key] = image
         }
+    }
+
+    /// The page's art from `ImageCache`, fetched (three tries, the way `AsyncCachedImage` retries)
+    /// when the cache does not have it, with its colour read once. Nil only when every try failed;
+    /// the next page change or auto-advance asks again.
+    private func loadArt(for item: JellyfinItem) async -> PlatformImage? {
+        guard let url = artworkURL(for: item) else { return nil }
+        var image = ImageCache.shared.image(for: url)
+        for delay in [0, 1, 3] where image == nil {
+            if delay > 0 { try? await Task.sleep(for: .seconds(delay)) }
+            guard !Task.isCancelled else { return nil }
+            await ImageCache.prefetch([url], auth: imageAuth)
+            image = ImageCache.shared.image(for: url)
+        }
+        guard let image else { return nil }
+        let key = item.originKey
+        if palettes[key] == nil {
+            let palette = await Task.detached(priority: .userInitiated) {
+                ArtworkTint.bottomEdgePalette(of: image)
+            }.value
+            if let palette {
+                Self.rememberedPalettes[url] = palette
+                withAnimation(.easeIn(duration: 0.3)) { palettes[key] = palette }
+            }
+        }
+        return image
+    }
+
+    /// Keeps the page on screen, its neighbours and the page fading out, and lets the rest go back
+    /// to living in `ImageCache` alone: eight held 1920 px backdrops are some 66 MB on an Apple TV.
+    private func trimHeld() {
+        guard !items.isEmpty else { return }
+        var keep: Set<String> = [items[index].originKey]
+        keep.insert(items[(index + 1) % items.count].originKey)
+        keep.insert(items[(index - 1 + items.count) % items.count].originKey)
+        keep.formUnion(layers.map(\.item.originKey))
+        held = held.filter { keep.contains($0.key) }
     }
 
     @ViewBuilder
@@ -228,17 +350,14 @@ struct HomeHeroCarousel: View {
         if isPortrait {
             portraitArtwork(for: item)
         } else {
-            ZStack {
-                backdrop(for: item)
-                scrim
-            }
+            wideArtwork(for: item)
         }
     }
 
     private func backdrop(for item: JellyfinItem, alignment: Alignment = .center) -> some View {
-        let image = readyKeys.contains(item.originKey)
-            ? artworkURL(for: item).flatMap { ImageCache.shared.image(for: $0) }
-            : nil
+        // Held first; on a rebuilt banner's first frames, before `prepare` has held anything, the
+        // cache's copy, so the page is there at once instead of fading in over its placeholder.
+        let image = held[item.originKey] ?? artworkURL(for: item).flatMap { ImageCache.shared.image(for: $0) }
         // The art lies over a surface that takes exactly the space it is offered. Framed directly, a
         // filled image grows its frame to the overflow, the page outgrew the banner, and centring it
         // pushed the strip and the art up under the island by however far that poster's shape ran over.
@@ -256,18 +375,45 @@ struct HomeHeroCarousel: View {
             .clipped()
     }
 
-    private var scrim: some View {
-        ZStack {
-            LinearGradient(
-                stops: [.init(color: .clear, location: 0.35), .init(color: .black.opacity(0.85), location: 1)],
-                startPoint: .top, endPoint: .bottom
-            )
-            LinearGradient(
-                stops: [.init(color: .black.opacity(0.6), location: 0), .init(color: .clear, location: 0.55)],
-                startPoint: .leading, endPoint: .trailing
-            )
-        }
-        .allowsHitTesting(false)
+    /// The wide banner (iPad, Apple TV, Mac, a landscape iPhone), on the upright iPhone's recipe: the
+    /// backdrop dissolves at the bottom into its own colour, which the shared tail hands over to the
+    /// page. The text needs no shade on the art, it sits in a glass panel (see `detailsText`).
+    private func wideArtwork(for item: JellyfinItem) -> some View {
+        let near = palette(for: item).near
+        return backdrop(for: item)
+            .overlay(alignment: .bottom) {
+                LinearGradient(
+                    stops: [
+                        .init(color: near.opacity(0), location: 0),
+                        .init(color: near.opacity(0.12), location: 0.30),
+                        .init(color: near.opacity(0.45), location: 0.58),
+                        .init(color: near.opacity(0.85), location: 0.82),
+                        .init(color: near, location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: Self.wideBottomDissolve)
+            }
+            .animation(.easeInOut(duration: 0.4), value: near)
+            .allowsHitTesting(false)
+    }
+
+    private static var wideBottomDissolve: CGFloat {
+        #if os(tvOS)
+        360
+        #else
+        240
+        #endif
+    }
+
+    private var artShift: CGFloat {
+        guard !isPortrait else { return 0 }
+        #if os(tvOS)
+        return 160
+        #else
+        return 80
+        #endif
     }
 
     /// The upright iPhone's text: logo, facts and the two buttons, centred. No overview, the poster
@@ -290,6 +436,10 @@ struct HomeHeroCarousel: View {
                     .font(.footnote.weight(.medium))
                     .foregroundStyle(.white.opacity(0.85))
                     .lineLimit(1)
+                    // The same glass the wide banner's panel and the detail page carry.
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
             }
 
             heroButtons(for: item)
@@ -302,6 +452,36 @@ struct HomeHeroCarousel: View {
 
     private func details(for item: JellyfinItem) -> some View {
         VStack(alignment: .leading, spacing: 14) {
+            detailsText(for: item)
+                #if os(tvOS)
+                // Only the text changes with the page: the buttons stay the same views, so focus
+                // stays on the one the viewer is on while Left and Right page through the banner.
+                .id(item.originKey)
+                .transition(.opacity)
+                #endif
+            #if os(tvOS)
+            tvButtons(for: item)
+                .padding(.top, 8)
+            #else
+            VStack(alignment: .leading, spacing: 20) {
+                heroButtons(for: item)
+                pager
+                    .padding(.leading, 8)
+            }
+            .padding(.top, 4)
+            #endif
+        }
+        .foregroundStyle(.white)
+        // The serverSession a combined Home's secondary title needs for its logo request.
+        .environment(\.serverSession, item.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
+    }
+
+    private func detailsText(for item: JellyfinItem) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // The component sizes the mark off this column (42% of it on tvOS) and lends it the detail
+            // page's glow and drop shadow. On tvOS the column is wider than elsewhere: at 420 pt the
+            // marks came out some 176 pt wide, small from a sofa, while the detail page's full column
+            // would make the banner's mark as big as the page's own.
             ContentLogoTitle(
                 itemID: item.id,
                 logo: .from(imageTags: item.imageTags, hasFullDetail: true)
@@ -310,47 +490,70 @@ struct HomeHeroCarousel: View {
                     .font(.system(size: titleSize, weight: .bold))
                     .lineLimit(2)
             }
-            .frame(maxWidth: 420, maxHeight: 130, alignment: .bottomLeading)
+            .frame(maxWidth: Self.logoColumn.width, maxHeight: Self.logoColumn.height, alignment: .bottomLeading)
 
-            if let facts = facts(for: item) {
-                Text(verbatim: facts)
-                    .font(.callout.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-
-            if let overview = item.overview, !overview.isEmpty {
-                Text(verbatim: overview)
-                    .font(.body)
-                    .foregroundStyle(.white.opacity(0.8))
-                    .lineLimit(2)
-                    .frame(maxWidth: 520, alignment: .leading)
-            }
-
-            #if os(tvOS)
-            // The system styles, because they carry the focus lift a remote needs to see where it is.
-            HStack(spacing: 24) {
-                Button { onPlay(item) } label: {
-                    Label("detail.play", systemImage: "play.fill")
+            // The detail page's glass panel (MovieDetailView.glassPanel): the facts and the overview
+            // carry their own material, so the art needs no shade of its own to keep them legible.
+            VStack(alignment: .leading, spacing: 10) {
+                if let facts = facts(for: item) {
+                    Text(verbatim: facts)
+                        .font(.callout.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.85))
                 }
-                .buttonStyle(.borderedProminent)
-                Button { onOpen(item) } label: {
-                    Image(systemName: "info")
+                if let overview = item.overview, !overview.isEmpty {
+                    Text(verbatim: overview)
+                        .font(.body)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .lineLimit(2)
+                        .frame(maxWidth: 520, alignment: .leading)
                 }
-                .buttonStyle(.bordered)
-                .accessibilityLabel(Text(verbatim: item.name))
             }
-            .focused($buttonsFocused)
-            .focusSection()
-            .padding(.top, 8)
-            #else
-            heroButtons(for: item)
-                .padding(.top, 4)
-            #endif
+            .padding(isCompact ? 16 : 30)
+            .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
         }
-        .foregroundStyle(.white)
-        // The serverSession a combined Home's secondary title needs for its logo request.
-        .environment(\.serverSession, item.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
     }
+
+    #if os(tvOS)
+    /// The detail page's own buttons (GlassActionButton), so the banner's Play reads like every other
+    /// Play in the app, and under them the page dots, which take focus: Left and Right on them page
+    /// through the banner. They sit under the buttons rather than centred at the bottom, or Down from
+    /// Play would aim past them into the rows.
+    private func tvButtons(for item: JellyfinItem) -> some View {
+        VStack(alignment: .leading, spacing: 28) {
+            HStack(spacing: 20) {
+                GlassActionButton(title: "detail.play", systemImage: "play.fill", isProminent: true) {
+                    onPlay(item)
+                }
+                .focused($focus, equals: .play)
+                GlassActionButton(title: "detail.episode.showDetails", systemImage: "info") {
+                    onOpen(item)
+                }
+                .focused($focus, equals: .info)
+                // The detail page's trick (Sodalite#53): out of reach until focus is in the banner, so
+                // coming in from anywhere the engine can only land on Play, rather than landing on the
+                // nearer info button and being corrected afterwards, which twitched.
+                .focusSuppressed(focus == nil)
+            }
+            .collapsesActionButtonLabel(true)
+            pager
+                .padding(.leading, 8)
+        }
+    }
+
+    /// Moving along the dots shows the page under focus. Where focus lands in the first place is
+    /// decided by what is reachable (see the focusSuppressed calls), not corrected here.
+    private func handleFocusChange(from old: HeroFocus?, to new: HeroFocus?) {
+        // Only the dots hold the banner: the viewer is choosing there. On Play it keeps moving, as
+        // the TV app's does, and since Home opens with focus on Play it never moved at all otherwise.
+        isHovering = isOnDots
+        if case .page(let page)? = new, page != index { show(page) }
+    }
+
+    private var isOnDots: Bool {
+        if case .page? = focus { return true }
+        return false
+    }
+    #endif
 
     #if !os(tvOS)
     private func heroButtons(for item: JellyfinItem) -> some View {
@@ -387,29 +590,69 @@ struct HomeHeroCarousel: View {
     @ViewBuilder
     private var pager: some View {
         if items.count > 1 {
-            HStack(spacing: 8) {
+            HStack(spacing: Self.dot * 8 / 7) {
                 ForEach(items.indices, id: \.self) { page in
+                    #if os(tvOS)
+                    pagerMark(isCurrent: page == index)
+                        .focusable()
+                        .focused($focus, equals: .page(page))
+                        // Reachable from outside the banner never, and from the buttons only on the
+                        // page on screen; once focus is on the dots, every dot is.
+                        .focusSuppressed(!isOnDots && (focus == nil || page != index))
+                    #else
                     pagerMark(isCurrent: page == index)
                         .contentShape(Rectangle().inset(by: -4))
-                        #if !os(tvOS)
                         .onTapGesture { show(page) }
-                        #endif
+                    #endif
                 }
             }
+            // The glass the text panel carries, so the dots read on bright art too. With the remote on
+            // the dots the whole pill lifts, brighter and a little larger: the dot under focus is
+            // always the page on screen, so a ring around that one dot only collided with its
+            // neighbours.
+            .padding(.horizontal, Self.dot * 1.4)
+            .padding(.vertical, Self.dot)
+            .background(
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                    .overlay(Capsule().fill(Color.Theme.focusFill).opacity(pagerFocused ? 1 : 0))
+            )
+            // An accent ring round the whole pill while it has focus, the way the focused buttons
+            // above it wear the accent, so it reads as selected from across the room.
+            .overlay(Capsule().strokeBorder(.tint, lineWidth: 3).opacity(pagerFocused ? 1 : 0))
+            .scaleEffect(pagerFocused ? 1.15 : 1)
+            .animation(.easeInOut(duration: 0.2), value: pagerFocused)
         }
+    }
+
+    private var pagerFocused: Bool {
+        #if os(tvOS)
+        isOnDots
+        #else
+        false
+        #endif
+    }
+
+    /// A dot's size; the line and the gaps scale with it. Larger on tvOS, read from across the room.
+    private static var dot: CGFloat {
+        #if os(tvOS)
+        12
+        #else
+        7
+        #endif
     }
 
     /// A dot, or for the page on screen a short track that fills until the banner moves on.
     private func pagerMark(isCurrent: Bool) -> some View {
         Capsule()
             .fill(.white.opacity(0.4))
-            .frame(width: isCurrent ? 26 : 7, height: 7)
+            .frame(width: isCurrent ? Self.dot * 26 / 7 : Self.dot, height: Self.dot)
             .overlay(alignment: .leading) {
                 if isCurrent {
                     TimelineView(.animation(paused: dwellRunningSince == nil)) { context in
                         Capsule()
                             .fill(.white)
-                            .frame(width: max(7, 26 * dwellProgress(at: context.date)))
+                            .frame(width: max(Self.dot, Self.dot * 26 / 7 * dwellProgress(at: context.date)))
                     }
                 }
             }
@@ -468,13 +711,27 @@ struct HomeHeroCarousel: View {
         .allowsHitTesting(false)
     }
 
-    private static let portraitTail: CGFloat = 160
+    private static var logoColumn: CGSize {
+        #if os(tvOS)
+        CGSize(width: 680, height: 170)
+        #else
+        CGSize(width: 420, height: 130)
+        #endif
+    }
+
+    private static var tailHeight: CGFloat {
+        #if os(tvOS)
+        240
+        #else
+        160
+        #endif
+    }
 
     /// The colour handing over to the page's own background below the banner, behind the first row.
     /// One for the banner rather than one per page: it is the only part of a page that is see-through,
     /// so two pages' tails stacked during a change read darker, and the old one vanishing when its
     /// page was removed made the hand-over jump. A single one changes its colour instead.
-    private func portraitTail(near: Color) -> some View {
+    private func tail(near: Color) -> some View {
         LinearGradient(
             stops: [
                 .init(color: near, location: 0),
@@ -485,8 +742,8 @@ struct HomeHeroCarousel: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: Self.portraitTail)
-        .offset(y: Self.portraitTail)
+        .frame(height: Self.tailHeight)
+        .offset(y: Self.tailHeight)
         .animation(.easeInOut(duration: 0.6), value: near)
         .allowsHitTesting(false)
     }
@@ -507,7 +764,9 @@ struct HomeHeroCarousel: View {
     /// The artwork's colour once it has been read, black until then, so a page that has not been read
     /// yet is a dark banner rather than a seam.
     private func palette(for item: JellyfinItem) -> ArtworkPalette {
-        palettes[item.originKey] ?? .base
+        palettes[item.originKey]
+            ?? artworkURL(for: item).flatMap { Self.rememberedPalettes[$0] }
+            ?? .base
     }
 
     @ViewBuilder
@@ -545,26 +804,32 @@ struct HomeHeroCarousel: View {
         show((index + delta + items.count) % items.count)
     }
 
-    /// Every page change goes through here, so each page starts its dwell from zero. The page being
-    /// left stays underneath, opaque, until the new one has faded in over it.
+    /// Every page change goes through here, so each page starts its dwell from zero. The pages being
+    /// left stay underneath until the latest change has faded in over them.
     private func show(_ page: Int) {
         dwellSpent = 0
         dwellRunningSince = nil
+        Self.rememberedPage[Self.pageMemoryKey(items)] = page
         guard page != index, items.indices.contains(page), let leaving = current else {
             index = page
             return
         }
-        let target = items[page]
-        // Evicted from the cache since it was read: fetch it again, it fades in over its colour.
-        if let url = artworkURL(for: target), ImageCache.shared.image(for: url) == nil {
-            readyKeys.remove(target.originKey)
-            Task { await prepare(target) }
-        }
-        outgoing = leaving
+        // The page at rest becomes the bottom layer under its own identity, so it does not redraw.
+        if layers.isEmpty { layers = [HeroLayer(id: baseLayerID, item: leaving)] }
+        changeGeneration += 1
+        let generation = changeGeneration
         withAnimation(.easeInOut(duration: 0.6)) {
             index = page
+            layers.append(HeroLayer(item: items[page]))
         } completion: {
-            if outgoing?.originKey == leaving.originKey { outgoing = nil }
+            guard generation == changeGeneration, let top = layers.last else { return }
+            layers = [top]
+            trimHeld()
+        }
+        // The page shown (if it was not held yet, it fades in over its colour) and its neighbours.
+        let around = [page, (page + 1) % items.count, (page - 1 + items.count) % items.count].map { items[$0] }
+        Task {
+            for item in around { await prepare(item) }
         }
     }
 

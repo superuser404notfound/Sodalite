@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var selectedItem: JellyfinItem?
     /// The hero's Play: the same detail page as a click on it, told to start playing once it is ready.
     @State private var heroPlayItem: JellyfinItem?
+    @Environment(\.shellLeadingSlot) private var shellLeadingSlot
     @State private var selectedFilter: FilterDestination?
 
     /// Spinner accent: HomeView's NavigationStack resets the inherited TabView tint to white, so re-apply the effective tint to match the Live TV spinner.
@@ -59,6 +60,14 @@ struct HomeView: View {
                         .tint(spinnerTint)
                 }
             }
+            // Home runs full width under the sidebar rail and makes room for it here; the banner's
+            // art reaches back under it (SidebarShell.fullBleedTabs). Starting at the screen edge
+            // puts the page inside tvOS's 80 pt overscan margin, and the NavigationStack hands that
+            // margin to this root view, which then sat 80 pt further in on top of the slot. Only
+            // here does ignoring it take (measured in a harness: on the shell's side of the stack,
+            // and as scroll content margins, it changed nothing).
+            .padding(.leading, shellLeadingSlot)
+            .ignoresSafeArea(.container, edges: shellLeadingSlot > 0 ? .leading : [])
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $selectedItem) { item in
                 DetailRouterView(item: item)
@@ -422,6 +431,9 @@ struct HomeView: View {
             }
             .scrollsUnderShellChrome()
             #if os(tvOS)
+            // The banner's art reaches past the scroll view's left edge, under the sidebar rail. The
+            // rows clip themselves, so nothing else spills.
+            .scrollClipDisabled()
             // tvOS only: the move it answers is the focus engine handing Up to the tab bar. On the Mac
             // the hero rebuilds its buttons on every page, focus left the first row each time, and
             // the page jumped back to the top while someone was scrolling it.

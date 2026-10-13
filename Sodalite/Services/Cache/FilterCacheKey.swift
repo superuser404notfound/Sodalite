@@ -13,6 +13,11 @@ enum FilterCacheKey {
             "home-genre-\(name)"
         }
 
+        /// The Home banner's titles in one of its modes, so a launch paints the banner with the rows.
+        nonisolated static func hero(mode: String) -> String {
+            "home-hero-\(mode)"
+        }
+
         /// The full list behind a capped Home row ("All Movies", "All Series").
         nonisolated static func row(_ type: String) -> String {
             "home-row-\(type)"
