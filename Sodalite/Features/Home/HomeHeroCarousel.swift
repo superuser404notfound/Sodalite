@@ -207,7 +207,6 @@ struct HomeHeroCarousel: View {
                     // to touch Play from where the bare dots used to sit.
                     if isPortrait { pager.padding(.bottom, -12) }
                 }
-                .overlay { if !isPortrait { arrows } }
                 #if os(tvOS)
                 // Focus stands in for the pointer: a page change rebuilds the buttons, which would
                 // throw focus off the one the viewer is on.
@@ -233,7 +232,7 @@ struct HomeHeroCarousel: View {
                 )
                 #endif
                 .animation(.easeInOut(duration: 0.6), value: index)
-                // Restarted by every page change, so a click on an arrow gets a full dwell before the
+                // Restarted by every page change, so a click on a dot gets a full dwell before the
                 // banner moves on by itself. Paused while the pointer is over it, so nothing slides
                 // away from under someone reading it, and resumed with what was left.
                 .task(id: "\(index)|\(isHovering)|\(items.count)") {
@@ -769,34 +768,6 @@ struct HomeHeroCarousel: View {
         palettes[item.originKey]
             ?? artworkURL(for: item).flatMap { Self.rememberedPalettes[$0] }
             ?? .base
-    }
-
-    @ViewBuilder
-    private var arrows: some View {
-        #if !os(tvOS)
-        if items.count > 1 {
-            HStack {
-                arrow("chevron.left") { step(-1) }
-                Spacer()
-                arrow("chevron.right") { step(1) }
-            }
-            .padding(.horizontal, 12)
-            .frame(maxHeight: .infinity)
-            .opacity(isHovering ? 1 : 0)
-            .animation(.easeInOut(duration: 0.2), value: isHovering)
-        }
-        #endif
-    }
-
-    private func arrow(_ systemImage: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.title.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 88)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Helpers
