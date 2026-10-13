@@ -1529,6 +1529,13 @@ struct SeriesDetailView: View {
                     focusRequest: $pendingSeasonOverviewFocus
                 )
                 .padding(.horizontal, metrics.rowInset)
+                // Starts where the first episode card would without a synopsis, below the hero's fade
+                // rather than on it: the bridge and its gap (tvOS only) plus the episode row's own padding.
+                #if os(tvOS)
+                .padding(.top, 24 + 20 + 16)
+                #else
+                .padding(.top, 16)
+                #endif
             }
 
             // Full-width invisible focus bridge between the season bar and episode row: an up-swipe from a far-right episode lands here before tvOS's picker continues up into the overview/tech-info cards, then redirects by which row the user came from on the next cycle.
