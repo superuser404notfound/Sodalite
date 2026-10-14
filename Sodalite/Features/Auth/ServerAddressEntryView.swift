@@ -8,7 +8,30 @@ struct ServerAddressEntryView: View {
     var addMode: Bool = false
     var onCompletion: (() -> Void)? = nil
 
+    @FocusState private var addressFocused: Bool
+
     var body: some View {
+        screen
+            .onAppear {
+                if viewModel == nil {
+                    viewModel = ServerAddressEntryViewModel(
+                        discoveryService: dependencies.serverDiscoveryService,
+                        trustStore: dependencies.serverTrustStore
+                    )
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var screen: some View {
+        #if os(iOS)
+        touchScreen
+        #else
+        focusScreen
+        #endif
+    }
+
+    private var focusScreen: some View {
         VStack(spacing: 40) {
             Spacer()
 
@@ -91,13 +114,65 @@ struct ServerAddressEntryView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            if viewModel == nil {
-                viewModel = ServerAddressEntryViewModel(
-                    discoveryService: dependencies.serverDiscoveryService,
-                    trustStore: dependencies.serverTrustStore
-                )
-            }
-        }
     }
+
+    #if os(iOS)
+    private var canConnect: Bool {
+        guard let vm = viewModel else { return false }
+        return !vm.isLoading && !vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var touchScreen: some View {
+        OnboardingScaffold(
+            title: Text("auth.server.title"),
+            subtitle: Text("auth.server.subtitle")
+        ) {
+            if let vm = viewModel {
+                OnboardingCard {
+                    HStack(spacing: 12) {
+                        Image(systemName: "globe")
+                            .foregroundStyle(.tint)
+                            .frame(width: 26)
+                        TextField(String(localized: "auth.server.placeholder"), text: Bindable(vm).serverAddress)
+                            .autocorrectionDisabled()
+                            .verbatimTextEntry(.url)
+                            .submitLabel(.go)
+                            .focused($addressFocused)
+                            .onSubmit {
+                                guard canConnect else { return }
+                                Task { await vm.connectToServer() }
+                            }
+                    }
+                    .padding(16)
+                }
+                .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
+                    CertificateTrustSheet(
+                        pending: pending,
+                        serverAddress: vm.serverAddress,
+                        onTrust: { Task { await vm.trustPendingCertificate() } },
+                        onCancel: { vm.pendingTrust = nil }
+                    )
+                }
+                .navigationDestination(isPresented: Bindable(vm).showLogin) {
+                    if let server = vm.discoveredServer {
+                        UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
+                            .themedNavigationDestination()
+                    }
+                }
+
+                if let error = vm.errorMessage {
+                    OnboardingFootnote(text: Text(verbatim: error), isError: true)
+                    DiagnosticLogLink(style: .inline)
+                }
+            }
+        } actions: {
+            OnboardingPrimaryButton(title: "auth.server.connect", isLoading: viewModel?.isLoading ?? false) {
+                guard let vm = viewModel else { return }
+                Task { await vm.connectToServer() }
+            }
+            .disabled(!canConnect && viewModel?.isLoading != true)
+        }
+        .onAppear { addressFocused = true }
+    }
+    #endif
 }

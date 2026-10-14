@@ -11,24 +11,47 @@ import SwiftUI
 /// Placed only where a failure is already on screen. A log button next to a scan that is working
 /// is noise, and the lines mean nothing to somebody who has no question yet.
 struct DiagnosticLogLink: View {
+    /// `.inline` is a quiet text link for the touch sign-in screens, where a tile beside the
+    /// screen's real actions reads as one of them.
+    enum Style { case tile, inline }
+    var style: Style = .tile
+
     @State private var isPresented = false
 
     var body: some View {
-        Button {
-            isPresented = true
-        } label: {
-            Text("settings.log.title")
-                .font(.callout)
-                .fontWeight(.semibold)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 10)
-        }
-        .buttonStyle(SettingsTileButtonStyle())
-        .menuPresentation(isPresented: $isPresented, panel: .plain) {
-            // The log dismisses itself: Menu on tvOS through its own onExitCommandCompat, the
-            // gesture on iOS.
-            DiagnosticLogView()
-                .themedPresentationBackground()
+        button
+            .menuPresentation(isPresented: $isPresented, panel: .plain) {
+                // The log dismisses itself: Menu on tvOS through its own onExitCommandCompat, the
+                // gesture on iOS.
+                DiagnosticLogView()
+                    .themedPresentationBackground()
+            }
+    }
+
+    @ViewBuilder
+    private var button: some View {
+        switch style {
+        case .tile:
+            Button {
+                isPresented = true
+            } label: {
+                Text("settings.log.title")
+                    .font(.callout)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+            }
+            .buttonStyle(SettingsTileButtonStyle())
+        case .inline:
+            Button {
+                isPresented = true
+            } label: {
+                Label("settings.log.title", systemImage: "doc.text.magnifyingglass")
+                    .font(.footnote.weight(.semibold))
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.tint)
         }
     }
 }

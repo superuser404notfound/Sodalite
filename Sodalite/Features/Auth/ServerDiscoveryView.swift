@@ -20,33 +20,7 @@ struct ServerDiscoveryView: View {
 
     var body: some View {
         ThemeNavigationPathStack(path: $path) {
-            VStack(spacing: 32) {
-                header
-
-                if let vm = viewModel {
-                    switch vm.phase {
-                    case .scanning:
-                        scanning(vm)
-                    case .results:
-                        results(vm)
-                    case .empty:
-                        empty
-                    }
-                }
-
-                manualButton
-                    .padding(.top, 8)
-
-                cloudLoadButton
-
-                if addMode {
-                    cancelButton
-                }
-
-                Spacer(minLength: 0)
-            }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            screen
             .menuPresentation(item: Binding(
                 get: { viewModel?.pendingTrust },
                 set: { viewModel?.pendingTrust = $0 }
@@ -87,6 +61,121 @@ struct ServerDiscoveryView: View {
             }
         }
     }
+
+    @ViewBuilder
+    private var screen: some View {
+        #if os(iOS)
+        touchScreen
+        #else
+        focusScreen
+        #endif
+    }
+
+    private var focusScreen: some View {
+        VStack(spacing: 32) {
+            header
+
+            if let vm = viewModel {
+                switch vm.phase {
+                case .scanning:
+                    scanning(vm)
+                case .results:
+                    results(vm)
+                case .empty:
+                    empty
+                }
+            }
+
+            manualButton
+                .padding(.top, 8)
+
+            cloudLoadButton
+
+            if addMode {
+                cancelButton
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    #if os(iOS)
+    private var touchScreen: some View {
+        OnboardingScaffold(
+            title: Text("auth.welcome.title"),
+            subtitle: Text("auth.welcome.subtitle")
+        ) {
+            if let vm = viewModel {
+                OnboardingCard {
+                    ForEach(Array(vm.servers.enumerated()), id: \.element.id) { index, server in
+                        if index > 0 { OnboardingCardDivider(leadingInset: 56) }
+                        OnboardingServerRow(server: server, alreadyAdded: vm.isAlreadyAdded(server)) {
+                            Task {
+                                if let resolved = await vm.selectServer(server) {
+                                    path.append(Route.login(resolved))
+                                }
+                            }
+                        }
+                    }
+                    switch vm.phase {
+                    case .scanning:
+                        if !vm.servers.isEmpty { OnboardingCardDivider() }
+                        HStack(spacing: 12) {
+                            ProgressView()
+                            Text("auth.discovery.scanning")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
+                    case .empty:
+                        Text("auth.discovery.empty.title")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(16)
+                    case .results:
+                        EmptyView()
+                    }
+                }
+                if vm.phase == .empty {
+                    DiagnosticLogLink(style: .inline)
+                }
+            }
+            if let status = cloudStatusText {
+                OnboardingFootnote(text: Text(verbatim: status))
+            }
+        } actions: {
+            OnboardingPrimaryButton(title: "auth.discovery.manual") {
+                path.append(Route.manual)
+            }
+            if dependencies.cloudSync != nil {
+                OnboardingSecondaryButton(title: "cloudSync.discovery.load", isLoading: cloudLoadState == .loading) {
+                    loadFromCloud()
+                }
+            }
+        }
+        .toolbar {
+            if addMode {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("common.cancel") { onCompletion?() }
+                }
+            }
+        }
+    }
+
+    private var cloudStatusText: String? {
+        switch cloudLoadState {
+        case .nothingFound: String(localized: "cloudSync.discovery.nothingFound")
+        case .noAccount: String(localized: "settings.cloudSync.status.noAccount")
+        case .failed(let message): failureText(message)
+        case .idle, .loading: nil
+        }
+    }
+    #endif
 
     private var header: some View {
         VStack(spacing: 24) {
@@ -292,3 +381,43 @@ private struct DiscoveredServerRow: View {
         .stableTap(isFocused: focused, perform: onSelect)
     }
 }
+
+#if os(iOS)
+/// A discovered server as one row of the touch layout's card.
+private struct OnboardingServerRow: View {
+    let server: DiscoveredServer
+    let alreadyAdded: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(spacing: 14) {
+                Image(systemName: "server.rack")
+                    .font(.title3)
+                    .foregroundStyle(.tint)
+                    .frame(width: 26)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(server.name)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    Text(server.address.host() ?? server.address.absoluteString)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 12)
+                if alreadyAdded {
+                    StatusPill("auth.discovery.alreadyAdded")
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+#endif
