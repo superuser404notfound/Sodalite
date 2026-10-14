@@ -379,7 +379,8 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                     VStack(alignment: .leading, spacing: 0) {
                         primary()
                     }
-                    .padding(.top, 20)
+                    // Over the poster's dissolve by `posterOverlap`: see there.
+                    .padding(.top, usesPosterHero ? 20 - Self.posterOverlap : 20)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 40) {
@@ -417,7 +418,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             .overlay(alignment: .top) {
                 hero()
                     .padding(.horizontal, metrics.rowInset)
-                    .frame(height: max(0, safeTop + heroHeight - 12), alignment: .bottom)
+                    .frame(height: max(0, safeTop + heroHeight - 12 - (usesPosterHero ? Self.posterOverlap : 0)), alignment: .bottom)
                     .allowsHitTesting(false)
             }
         }
@@ -667,8 +668,9 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         usesPosterHero ? posterHeight : bandHeight
     }
 
-    /// 4:5 off the window width, as Home's upright banner: it holds a 2:3 poster with little lost at
-    /// the sides and still leaves the title and Play on the first screen.
+    /// 4:5 off the window width, as Home's upright banner, and the same on every page: a height
+    /// derived from the panel below gave each title its own crop and resized the art whenever the
+    /// panel's text changed (device, 2026-10-14).
     private var posterHeight: CGFloat {
         #if os(iOS)
         let width = UIApplication.shared.connectedScenes
@@ -678,6 +680,12 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         return 0
         #endif
     }
+
+    /// How far the logo and the panel reach up over the poster's bottom. That stretch is already the
+    /// dissolve into the page colour (220 pt), so it reads as the page rather than the picture, and
+    /// taking the room from there is what keeps Play on the first screen under a full 4:5 poster with
+    /// an episode's title in the panel.
+    private static var posterOverlap: CGFloat { 56 }
 
     private var portraitBandUsesPoster: Bool {
         heroImageURL == nil && heroPosterURL != nil

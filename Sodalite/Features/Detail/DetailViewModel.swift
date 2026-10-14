@@ -656,6 +656,15 @@ final class DetailViewModel {
         imageService.posterURL(for: item, maxWidth: 1290)
     }
 
+    /// The series poster while `item` may still be the stub an episode link opens on: the stub has
+    /// no image tags, but the episode names its series' primary image, and that is the same URL the
+    /// loaded series produces, so the hero does not swap pictures when the series arrives.
+    func seriesHeroPosterURL(for item: JellyfinItem, episode: JellyfinItem?) -> URL? {
+        if let url = heroPosterURL(for: item) { return url }
+        guard let episode, let seriesID = episode.seriesId, let tag = episode.seriesPrimaryImageTag else { return nil }
+        return imageService.imageURL(itemID: seriesID, serverID: episode.serverID, imageType: .primary, tag: tag, maxWidth: 1290)
+    }
+
     func backdropURL(for item: JellyfinItem) -> URL? {
         imageService.backdropURL(for: item)
     }

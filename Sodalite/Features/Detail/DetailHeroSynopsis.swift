@@ -22,13 +22,16 @@ struct DetailHeroSynopsis: View {
     var spoilerItem: JellyfinItem?
 
     @Environment(\.verticalSizeClass) private var vSizeClass
+    @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
 
     /// Two lines in a short viewport (iPhone landscape), where the first page is not viewport-locked
-    /// and every added line pushes the action row further past the fold.
+    /// and every added line pushes the action row further past the fold, and in the upright
+    /// iPhone's column, which shares its first screen with the poster. The rest is behind the info
+    /// button.
     private var lineCount: Int {
-        vSizeClass == .compact ? 2 : 3
+        vSizeClass == .compact || hSizeClass == .compact ? 2 : 3
     }
 
     private var isSpoilerHidden: Bool {
