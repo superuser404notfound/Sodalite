@@ -610,6 +610,12 @@ struct TabRootView: View {
         .environment(\.shellChromeTopInset,
                      hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
         .environment(\.detailCoverStack, pushStacks.stack(for: tab))
+        // The iPhone's tab bar belongs to the tab pages; a pushed detail takes the whole screen, as
+        // the cover it replaced did. Owned here at the tab root, like tvOS's ShellChromeHost, rather
+        // than by the pushed page: a hide a page applies to itself outlives the page (Sodalite#141),
+        // and this one is recomputed from the stack that exists. .visible rather than .automatic,
+        // which is what a stranded hide survives in.
+        .toolbar(hSizeClass == .compact && pushStacks.stack(for: tab).isPushed ? .hidden : .visible, for: .tabBar)
         #endif
         #if !os(tvOS)
         .background {
