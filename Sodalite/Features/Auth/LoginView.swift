@@ -187,12 +187,12 @@ struct LoginView: View {
 
     #if os(tvOS)
     private var tvLoginContent: some View {
-        TVOnboardingSplit(
+        TVOnboardingLayout(
             title: Text(verbatim: preSelectedUser?.name ?? server.name),
             subtitle: Text("auth.login.subtitle")
         ) {
             if let preSelectedUser {
-                userAvatar(for: preSelectedUser, diameter: 180)
+                userAvatar(for: preSelectedUser, diameter: 140)
             } else {
                 TVOnboardingLogo()
             }

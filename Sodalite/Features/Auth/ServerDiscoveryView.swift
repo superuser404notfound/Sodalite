@@ -105,7 +105,7 @@ struct ServerDiscoveryView: View {
 
     #if os(tvOS)
     private var tvScreen: some View {
-        TVOnboardingSplit(
+        TVOnboardingLayout(
             title: Text("auth.welcome.title"),
             subtitle: Text("auth.welcome.subtitle")
         ) {

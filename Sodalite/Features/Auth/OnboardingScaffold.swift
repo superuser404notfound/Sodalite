@@ -199,53 +199,52 @@ struct OnboardingFootnote: View {
 #if os(tvOS)
 import SwiftUI
 
-/// The Apple TV shape of the sign-in screens, on the layout tvOS's own sign-in screens use: the
-/// mark, title and line on the left half, never focused, and one column of content and actions on
-/// the right, so focus only ever travels up and down. Before, the screens were the same centred
-/// stack of grey tiles as on the iPhone, with most of the television left empty.
-struct TVOnboardingSplit<Mark: View, Content: View>: View {
+/// The Apple TV shape of the sign-in screens: the iPhone's order at television size, the mark,
+/// title and line centred on top and one column of content and actions under them, so focus only
+/// ever travels up and down. Before, the screens were a stack of grey tiles with the primary action
+/// told apart only by focus. A split with the title on the left was tried and dropped (Vincent,
+/// device, 2026-10-14).
+struct TVOnboardingLayout<Mark: View, Content: View>: View {
     let title: Text
     var subtitle: Text? = nil
     @ViewBuilder let mark: () -> Mark
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        HStack(alignment: .center, spacing: 100) {
-            VStack(alignment: .leading, spacing: 32) {
-                mark()
-                VStack(alignment: .leading, spacing: 16) {
-                    title
-                        .font(.title2.bold())
-                    if let subtitle {
-                        subtitle
-                            .font(.body)
-                            .foregroundStyle(.secondary)
+        // Centred on the screen while it fits, scrolling once it does not.
+        GeometryReader { geo in
+            ScrollView {
+                VStack(spacing: 48) {
+                    VStack(spacing: 24) {
+                        mark()
+                        VStack(spacing: 12) {
+                            title
+                                .font(.title2.bold())
+                                .multilineTextAlignment(.center)
+                            if let subtitle {
+                                subtitle
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
                     }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            // Centred against the left half while it fits, scrolling once it does not.
-            GeometryReader { geo in
-                ScrollView {
                     VStack(spacing: 24) {
                         content()
                     }
                     // Room for the focus lift and ring, which the scroll view would otherwise clip.
-                    .padding(.vertical, 60)
                     .padding(.horizontal, 24)
-                    .frame(minHeight: geo.size.height)
+                    .frame(width: 800)
                 }
-                .scrollClipDisabled()
+                .padding(.vertical, 60)
+                .frame(maxWidth: .infinity, minHeight: geo.size.height)
             }
-            .frame(width: 800)
+            .scrollClipDisabled()
         }
-        .padding(.horizontal, 80)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-extension TVOnboardingSplit where Mark == TVOnboardingLogo {
+extension TVOnboardingLayout where Mark == TVOnboardingLogo {
     init(title: Text, subtitle: Text? = nil, @ViewBuilder content: @escaping () -> Content) {
         self.init(title: title, subtitle: subtitle, mark: { TVOnboardingLogo() }, content: content)
     }
@@ -256,7 +255,7 @@ struct TVOnboardingLogo: View {
         Image("Logo")
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: 160, height: 160)
+            .frame(width: 120, height: 120)
             .accessibilityHidden(true)
     }
 }

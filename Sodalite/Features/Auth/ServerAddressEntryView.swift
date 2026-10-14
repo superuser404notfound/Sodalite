@@ -180,7 +180,7 @@ struct ServerAddressEntryView: View {
 
     #if os(tvOS)
     private var tvScreen: some View {
-        TVOnboardingSplit(
+        TVOnboardingLayout(
             title: Text("auth.server.title"),
             subtitle: Text("auth.server.subtitle")
         ) {
