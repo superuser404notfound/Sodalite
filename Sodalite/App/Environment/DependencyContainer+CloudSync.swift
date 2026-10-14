@@ -342,7 +342,8 @@ extension DependencyContainer {
                 touchpadScrubbing: p.touchpadScrubbing,
                 nextEpisodeCountdownAnchor: p.nextEpisodeCountdownAnchor.rawValue,
                 skipForwardSeconds: p.skipForwardSeconds,
-                skipBackwardSeconds: p.skipBackwardSeconds
+                skipBackwardSeconds: p.skipBackwardSeconds,
+                showNextEpisodeCard: p.showNextEpisodeCard
             ))
         case .appearance:
             let a = stores.appearance
@@ -448,6 +449,7 @@ extension DependencyContainer {
             if let autoSkipRecap = p.autoSkipRecap { store.autoSkipRecap = autoSkipRecap }
             if let skipBackSubs = p.subtitlesOnSkipBack { store.subtitlesOnSkipBack = skipBackSubs }
             if let countdown = p.autoplayCountdown { store.autoplayCountdown = countdown }
+            if let card = p.showNextEpisodeCard { store.showNextEpisodeCard = card }
             if let touchpadScrub = p.touchpadScrubbing { store.touchpadScrubbing = touchpadScrub }
             if let anchor = p.nextEpisodeCountdownAnchor {
                 store.nextEpisodeCountdownAnchor =

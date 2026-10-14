@@ -139,6 +139,17 @@ struct ProfileSyncPayloadsTests {
         #expect(store.skipForwardSeconds == 45)
     }
 
+    @Test func aRecordWithoutTheCardSwitchKeepsTheLocalValue() {
+        let store = PlaybackPreferences(store: scratch("noCardSwitch"))
+        store.showNextEpisodeCard = false
+        var payload = ProfilePlaybackPayload(collecting: store, stamp: .now)
+        payload.showNextEpisodeCard = nil
+
+        payload.apply(to: store)
+
+        #expect(!store.showNextEpisodeCard)
+    }
+
     @Test func aDecodeFailureNamesTheKeyAndNoValue() {
         let data = Data(#"{"schemaVersion":1,"secret":"hunter2"}"#.utf8)
         do {

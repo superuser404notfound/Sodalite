@@ -117,7 +117,8 @@ enum NextEpisodePolicy {
     ///
     /// `advanceCancelled` is a rejection taken ON the terminal state (the card was parked at the end);
     /// `overlayDismissed` is the card being closed while the source still runs, which is a different
-    /// wish and must not cost the advance (Sodalite#67).
+    /// wish and must not cost the advance (Sodalite#67). `cardEnabled` off routes like a card that
+    /// was dismissed on every pass.
     static func endOfPlaybackOutcome(
         hasStartedPlaying: Bool,
         pictureInPictureActive: Bool,
@@ -125,12 +126,14 @@ enum NextEpisodePolicy {
         hasNextEpisode: Bool,
         advanceCancelled: Bool,
         overlayDismissed: Bool,
+        cardEnabled: Bool,
         autoplayEnabled: Bool,
         countdownEnabled: Bool,
         countdownRunning: Bool,
         overlayVisible: Bool
     ) -> EndOfPlaybackOutcome {
         guard hasStartedPlaying else { return .ignore }
+        let overlayDismissed = overlayDismissed || !cardEnabled
 
         // Dismissing the card means two different things by setting: with autoplay ON it only clears
         // the screen for the credits, with autoplay OFF the card was the entire offer, so closing it

@@ -31,6 +31,18 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                // Off never shows the card: autoplay then switches at the real end, without autoplay
+                // the player closes there. The countdown below lives on the card, so it greys out too.
+                boolRow(
+                    icon: "rectangle.on.rectangle",
+                    title: "settings.playback.nextEpisodeCard",
+                    subtitle: "settings.playback.nextEpisodeCard.subtitle",
+                    value: Binding(
+                        get: { prefs.showNextEpisodeCard },
+                        set: { prefs.showNextEpisodeCard = $0 }
+                    )
+                )
+
                 // Off plays the episode out (credits, post-credit scenes) and switches at its real end
                 // instead of counting down over the outro (Sodalite#67). Inert without autoplay, so it
                 // greys out with it rather than offering a switch that cannot do anything.
@@ -51,8 +63,8 @@ struct PlaybackSettingsView: View {
                             : "\(seconds) s"
                     }
                 )
-                .disabled(!prefs.autoplayNextEpisode)
-                .opacity(prefs.autoplayNextEpisode ? 1 : 0.4)
+                .disabled(!countdownApplies)
+                .opacity(countdownApplies ? 1 : 0.4)
 
                 // Where that countdown sits (Sodalite#133). Greys out with the countdown itself: without
                 // one there is no placement to make, the switch is at the end of the episode either way.
@@ -76,8 +88,8 @@ struct PlaybackSettingsView: View {
                         }
                     }
                 )
-                .disabled(!prefs.autoplayNextEpisode || prefs.nextEpisodeCountdownLength == 0)
-                .opacity(prefs.autoplayNextEpisode && prefs.nextEpisodeCountdownLength > 0 ? 1 : 0.4)
+                .disabled(!countdownApplies || prefs.nextEpisodeCountdownLength == 0)
+                .opacity(countdownApplies && prefs.nextEpisodeCountdownLength > 0 ? 1 : 0.4)
 
                 boolRow(
                     icon: "forward.end.fill",
@@ -525,6 +537,10 @@ struct PlaybackSettingsView: View {
     }
 
     // MARK: - Rows
+
+    private var countdownApplies: Bool {
+        prefs.autoplayNextEpisode && prefs.showNextEpisodeCard
+    }
 
     private func boolRow(
         icon: String,

@@ -1738,6 +1738,7 @@ final class PlayerViewModel {
                         hasNextEpisode: self.nextEpisode != nil,
                         advanceCancelled: self.nextEpisodeCancelled,
                         overlayDismissed: self.nextEpisodeOverlayDismissed,
+                        cardEnabled: self.preferences.showNextEpisodeCard,
                         autoplayEnabled: self.preferences.autoplayNextEpisode,
                         countdownEnabled: self.preferences.autoplayCountdown,
                         countdownRunning: self.nextEpisodeTimer != nil,
@@ -1925,7 +1926,7 @@ final class PlayerViewModel {
                 if dur > 0, remaining > 0 {
                     self.warmSuccessorIfDue(remainingSeconds: remaining)
                 }
-                if self.nextEpisode != nil && !self.nextEpisodeCancelled
+                if self.nextEpisode != nil && !self.nextEpisodeCancelled && self.preferences.showNextEpisodeCard
                     && !self.nextEpisodeOverlayDismissed && dur > 0 && remaining > 0 {
                     // The card opens at the outro marker, or 30s from the end without one. WHERE the
                     // countdown then sits is the user's call (Sodalite#133): anchored to the credits it
