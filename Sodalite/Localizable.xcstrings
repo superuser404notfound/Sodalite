@@ -73869,6 +73869,330 @@
         }
       }
     },
+    "changelog.1_1_0.sleepClose.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po více než deseti minutách v režimu spánku nebo na pozadí se přehrávač zavře, místo aby se vrátil na pozastavený snímek. Průběh uložený mezitím na jiném zařízení se už nepřepisuje."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter mere end ti minutter i dvale eller i baggrunden lukker afspilleren i stedet for at vende tilbage til det sat-på-pause billede. Fremskridt gemt på en anden enhed i mellemtiden bliver ikke længere overskrevet."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach mehr als zehn Minuten im Ruhezustand oder im Hintergrund schließt sich der Player, statt zum pausierten Bild zurückzukehren. Fortschritt, der inzwischen auf einem anderen Gerät gespeichert wurde, wird nicht mehr überschrieben."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετά από περισσότερα από δέκα λεπτά σε αναστολή ή στο παρασκήνιο, η αναπαραγωγή κλείνει αντί να επιστρέψει στο παγωμένο καρέ. Η πρόοδος που αποθηκεύτηκε στο μεταξύ σε άλλη συσκευή δεν αντικαθίσταται πλέον."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After more than ten minutes asleep or in the background, the player closes instead of returning to the paused frame. Progress saved on another device in the meantime is no longer overwritten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tras más de diez minutos en reposo o en segundo plano, el reproductor se cierra en lugar de volver al fotograma en pausa. El progreso guardado mientras tanto en otro dispositivo ya no se sobrescribe."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yli kymmenen minuutin lepotilan tai taustalla olon jälkeen toistin sulkeutuu sen sijaan, että palaisi keskeytettyyn kuvaan. Toisella laitteella sillä välin tallennettua edistymistä ei enää korvata."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après plus de dix minutes en veille ou en arrière-plan, le lecteur se ferme au lieu de revenir sur l’image en pause. La progression enregistrée entre-temps sur un autre appareil n’est plus écrasée."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nakon više od deset minuta u mirovanju ili u pozadini reproduktor se zatvara umjesto da se vrati na pauzirani kadar. Napredak spremljen u međuvremenu na drugom uređaju više se ne prepisuje."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Több mint tíz perc alvó állapot vagy háttérben töltött idő után a lejátszó bezárul ahelyett, hogy visszatérne a szüneteltetett képkockához. A közben másik eszközön mentett előrehaladás többé nem íródik felül."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dopo più di dieci minuti in stop o in background, il player si chiude invece di tornare al fotogramma in pausa. I progressi salvati nel frattempo su un altro dispositivo non vengono più sovrascritti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープまたはバックグラウンドで10分以上経過すると、一時停止したフレームに戻らずプレーヤーが閉じます。その間に別のデバイスで保存された再生位置が上書きされることはなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠자기 또는 백그라운드 상태로 10분 넘게 지나면 일시 정지된 화면으로 돌아가지 않고 플레이어가 닫힙니다. 그동안 다른 기기에서 저장된 진행 상황을 더 이상 덮어쓰지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etter mer enn ti minutter i dvale eller i bakgrunnen lukkes spilleren i stedet for å gå tilbake til det pausede bildet. Fremdrift lagret på en annen enhet i mellomtiden blir ikke lenger overskrevet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na meer dan tien minuten in sluimerstand of op de achtergrond sluit de speler in plaats van terug te keren naar het gepauzeerde beeld. Voortgang die intussen op een ander apparaat is opgeslagen, wordt niet meer overschreven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po ponad dziesięciu minutach uśpienia lub pracy w tle odtwarzacz zamyka się zamiast wracać do wstrzymanej klatki. Postęp zapisany w międzyczasie na innym urządzeniu nie jest już nadpisywany."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois de mais de dez minutos em repouso ou em segundo plano, o player fecha em vez de voltar ao quadro pausado. O progresso salvo nesse meio-tempo em outro dispositivo não é mais sobrescrito."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Após mais de dez minutos em repouso ou em segundo plano, o leitor fecha em vez de voltar à imagem em pausa. O progresso guardado entretanto noutro dispositivo deixa de ser substituído."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "După mai mult de zece minute în repaus sau în fundal, playerul se închide în loc să revină la cadrul pus pe pauză. Progresul salvat între timp pe alt dispozitiv nu mai este suprascris."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После более чем десяти минут в режиме сна или в фоне плеер закрывается, а не возвращается к кадру на паузе. Прогресс, сохранённый за это время на другом устройстве, больше не перезаписывается."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po viac ako desiatich minútach v režime spánku alebo na pozadí sa prehrávač zavrie namiesto návratu na pozastavený snímok. Priebeh uložený medzitým na inom zariadení sa už neprepisuje."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter mer än tio minuter i viloläge eller i bakgrunden stängs spelaren i stället för att återgå till den pausade bilden. Förlopp som sparats på en annan enhet under tiden skrivs inte längre över."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On dakikadan uzun süre uykuda veya arka planda kaldıktan sonra oynatıcı duraklatılmış kareye dönmek yerine kapanır. Bu sırada başka bir cihazda kaydedilen ilerleme artık üzerine yazılmaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Після понад десяти хвилин у режимі сну або у фоні плеєр закривається, а не повертається до кадру на паузі. Прогрес, збережений за цей час на іншому пристрої, більше не перезаписується."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "睡眠或在后台超过十分钟后，播放器会关闭，而不是回到暂停的画面。期间在其他设备上保存的进度不会再被覆盖。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "睡眠或在背景超過十分鐘後，播放器會關閉，而不是回到暫停的畫面。期間在其他裝置上儲存的進度不會再被覆寫。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.sleepClose.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrávač se po dlouhém spánku zavře"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspilleren lukker efter lang dvale"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player schließt nach langem Ruhezustand"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η αναπαραγωγή κλείνει μετά από μεγάλη αδράνεια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player closes after a long sleep"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reproductor se cierra tras un reposo largo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toistin sulkeutuu pitkän lepotilan jälkeen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le lecteur se ferme après une longue veille"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduktor se zatvara nakon dugog mirovanja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszó bezárul hosszú alvás után"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il player si chiude dopo un lungo stop"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長時間のスリープ後はプレーヤーを閉じます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오랜 잠자기 후 플레이어가 닫힘"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spilleren lukkes etter lang dvale"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speler sluit na lange sluimerstand"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarzacz zamyka się po długim uśpieniu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player fecha após repouso longo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leitor fecha após repouso longo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playerul se închide după un repaus lung"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плеер закрывается после долгого сна"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehrávač sa po dlhom spánku zavrie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelaren stängs efter lång vila"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatıcı uzun uykudan sonra kapanır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плеєр закривається після тривалого сну"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长时间睡眠后关闭播放器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長時間睡眠後關閉播放器"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.statusPill.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
