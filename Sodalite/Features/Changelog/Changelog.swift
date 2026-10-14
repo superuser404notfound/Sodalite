@@ -177,6 +177,12 @@ enum Changelog {
                     icon: "person.badge.key"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.tvLogin.title",
+                    "changelog.1_1_0.tvLogin.body",
+                    icon: "appletv"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.guideGenres.title",
                     "changelog.1_1_0.guideGenres.body",

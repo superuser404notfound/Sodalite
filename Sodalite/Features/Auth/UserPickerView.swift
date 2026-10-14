@@ -133,7 +133,12 @@ struct UserPickerView: View {
         VStack(spacing: 12) {
             Text(server.name)
                 .font(.title2)
+                // Bold on the TV, like the title of the sign-in screens around it.
+                #if os(tvOS)
+                .fontWeight(.bold)
+                #else
                 .fontWeight(.semibold)
+                #endif
 
             Text(String(
                 localized: "auth.users.title",

@@ -141,6 +141,8 @@ struct LoginView: View {
         Group {
             #if os(iOS)
             touchLoginContent
+            #elseif os(tvOS)
+            tvLoginContent
             #else
             focusLoginContent
             #endif
@@ -182,6 +184,96 @@ struct LoginView: View {
         }
         .padding()
     }
+
+    #if os(tvOS)
+    private var tvLoginContent: some View {
+        TVOnboardingSplit(
+            title: Text(verbatim: preSelectedUser?.name ?? server.name),
+            subtitle: Text("auth.login.subtitle")
+        ) {
+            if let preSelectedUser {
+                userAvatar(for: preSelectedUser, diameter: 180)
+            } else {
+                TVOnboardingLogo()
+            }
+        } content: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    tvQuickConnect(vm: vm)
+                } else {
+                    // Username already in the title when picked from the user grid.
+                    if preSelectedUser == nil {
+                        TextField(String(localized: "auth.login.username"), text: Bindable(vm).username)
+                            .verbatimTextEntry()
+                    }
+                    SecureField(String(localized: "auth.login.password"), text: Bindable(vm).password)
+
+                    if let error = vm.errorMessage {
+                        TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+                    }
+
+                    TVOnboardingPrimaryButton(title: "auth.login.signIn", isLoading: vm.isLoading) {
+                        Task { await vm.login() }
+                    }
+                    .disabled(vm.isLoading || vm.username.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .padding(.top, 8)
+
+                    // Equal to Sign In here, not a link under it: typing a password with the remote
+                    // is the slow way in, confirming a code on the phone the quick one.
+                    TVOnboardingPillButton(title: "auth.login.quickConnect") {
+                        showQuickConnect = true
+                        Task { await vm.startQuickConnect() }
+                    }
+                }
+            }
+        }
+    }
+
+    private func tvQuickConnect(vm: LoginViewModel) -> some View {
+        VStack(spacing: 24) {
+            VStack(spacing: 20) {
+                Text("auth.quickConnect.title")
+                    .font(.headline)
+                if let code = vm.quickConnectCode {
+                    Text("auth.quickConnect.instruction")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Text(code)
+                        .font(.system(size: 88, weight: .bold, design: .monospaced))
+                    if vm.isPollingQuickConnect {
+                        HStack(spacing: 12) {
+                            ProgressView()
+                            Text("auth.quickConnect.waiting")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if vm.isLoading {
+                        ProgressView()
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(36)
+            .background(Color.Theme.restFill, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(Color.Theme.panelEdge, lineWidth: 1)
+            }
+
+            if let error = vm.errorMessage {
+                TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+            }
+
+            TVOnboardingPillButton(title: "auth.quickConnect.cancel") {
+                vm.stopQuickConnect()
+                showQuickConnect = false
+            }
+        }
+    }
+    #endif
 
     #if os(iOS)
     private enum Field { case username, password }

@@ -66,6 +66,8 @@ struct ServerDiscoveryView: View {
     private var screen: some View {
         #if os(iOS)
         touchScreen
+        #elseif os(tvOS)
+        tvScreen
         #else
         focusScreen
         #endif
@@ -100,6 +102,49 @@ struct ServerDiscoveryView: View {
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+
+    #if os(tvOS)
+    private var tvScreen: some View {
+        TVOnboardingSplit(
+            title: Text("auth.welcome.title"),
+            subtitle: Text("auth.welcome.subtitle")
+        ) {
+            if let vm = viewModel {
+                switch vm.phase {
+                case .scanning:
+                    scanning(vm)
+                case .results:
+                    results(vm)
+                case .empty:
+                    TVOnboardingFootnote(text: Text("auth.discovery.empty.title"))
+                }
+            }
+
+            TVOnboardingPrimaryButton(title: "auth.discovery.manual") {
+                path.append(Route.manual)
+            }
+            .padding(.top, 8)
+
+            VStack(spacing: 8) {
+                if dependencies.cloudSync != nil {
+                    TVOnboardingLinkButton(title: "cloudSync.discovery.load", isLoading: cloudLoadState == .loading) {
+                        loadFromCloud()
+                    }
+                    .disabled(cloudLoadState == .loading)
+                }
+                if let status = cloudStatusText {
+                    TVOnboardingFootnote(text: Text(verbatim: status))
+                }
+                if viewModel?.phase == .empty {
+                    DiagnosticLogLink(style: .inline)
+                }
+                if addMode {
+                    TVOnboardingLinkButton(title: "common.cancel") { onCompletion?() }
+                }
+            }
+        }
+    }
+    #endif
 
     #if os(iOS)
     private var touchScreen: some View {
@@ -166,7 +211,9 @@ struct ServerDiscoveryView: View {
             }
         }
     }
+    #endif
 
+    #if os(iOS) || os(tvOS)
     private var cloudStatusText: String? {
         switch cloudLoadState {
         case .nothingFound: String(localized: "cloudSync.discovery.nothingFound")
