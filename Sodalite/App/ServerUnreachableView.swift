@@ -29,6 +29,7 @@ struct ServerUnreachableView: View {
     private var symbol: String {
         switch state {
         case .noNetwork: "wifi.slash"
+        case .foreignNetwork: "wifi.exclamationmark"
         default: "network.slash"
         }
     }
@@ -39,6 +40,8 @@ struct ServerUnreachableView: View {
             Text("server.noNetwork.title")
         case .offNetwork:
             Text("server.offNetwork.title \(serverName)")
+        case .foreignNetwork:
+            Text("server.foreignNetwork.title \(serverName)")
         default:
             Text("server.unreachable.title \(serverName)")
         }
@@ -48,7 +51,11 @@ struct ServerUnreachableView: View {
     /// the sentence explains the button, and a button with no explanation, or an explanation with no
     /// button, is the half that reads as a dead end.
     private var subtitle: Text? {
-        onAddExternalAddress == nil ? nil : Text("server.offNetwork.body")
+        let address: Text? = onAddExternalAddress == nil ? nil : Text("server.offNetwork.body")
+        guard state == .foreignNetwork else { return address }
+        let network = Text("server.foreignNetwork.body")
+        guard let address else { return network }
+        return Text("\(network) \(address)")
     }
 
     var body: some View {
@@ -146,7 +153,7 @@ extension ServerUnreachableView {
         present: @escaping () -> Void
     ) -> (() -> Void)? {
         #if os(iOS)
-        guard state == .offNetwork || state == .unreachable,
+        guard state == .offNetwork || state == .foreignNetwork || state == .unreachable,
               server?.emptyURLSlot == .external
         else { return nil }
         return present

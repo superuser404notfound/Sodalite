@@ -152,4 +152,21 @@ struct LocalNetworkAccessTests {
     @Test func theDiagnosticLineNamesTheDenial() {
         #expect(DiscoveryProbeRace.logLabel(for: .localNetworkDenied) == "local network denied")
     }
+
+    // MARK: Which path reading may allow the accusation
+
+    @Test func cellularOnlyNeverAllowsTheAccusation() {
+        let cellular = NetworkPathSnapshot.Reading(isSatisfied: true, usesLocalInterface: false, hasLocalInterface: false)
+        #expect(!LocalNetworkAccess.mayAccuse(reading: cellular))
+    }
+
+    @Test func aLocalInterfaceAllowsTheAccusation() {
+        let wifi = NetworkPathSnapshot.Reading(isSatisfied: true, usesLocalInterface: false, hasLocalInterface: true)
+        #expect(LocalNetworkAccess.mayAccuse(reading: wifi))
+    }
+
+    /// A missing reading is not evidence, so a real denial is never suppressed for want of one.
+    @Test func noReadingFailsOpen() {
+        #expect(LocalNetworkAccess.mayAccuse(reading: nil))
+    }
 }

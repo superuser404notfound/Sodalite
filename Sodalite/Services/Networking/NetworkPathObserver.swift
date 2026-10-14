@@ -86,6 +86,9 @@ nonisolated final class NetworkPathSnapshot: @unchecked Sendable {
         /// Cellular, or a path the system marks expensive (a phone hotspot). Picks the cellular
         /// streaming rung on iOS (Sodalite#87).
         var isMetered: Bool = false
+
+        /// The IPv4 subnets on those local interfaces, empty where none could be read.
+        var subnets: [LocalSubnet] = []
     }
 
     private let lock = NSLock()
@@ -113,7 +116,8 @@ extension NetworkPathSnapshot.Reading {
             isSatisfied: path.status == .satisfied,
             usesLocalInterface: localTypes.contains(where: path.usesInterfaceType),
             hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) },
-            isMetered: path.usesInterfaceType(.cellular) || path.isExpensive
+            isMetered: path.usesInterfaceType(.cellular) || path.isExpensive,
+            subnets: LocalSubnet.current(path: path)
         )
     }
 }

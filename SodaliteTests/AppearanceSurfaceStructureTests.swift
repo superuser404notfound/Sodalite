@@ -117,7 +117,7 @@ struct AppearanceSurfaceStructureTests {
         let expectedCounts = [
             "Sodalite/Features/Auth/ServerDiscoveryView.swift": 2,
             "Sodalite/Features/Auth/LaunchProfilePickerView.swift": 1,
-            "Sodalite/Features/Auth/ServerAddressEntryView.swift": 1,
+            "Sodalite/Features/Auth/ServerAddressEntryView.swift": 3,
             "Sodalite/Features/Auth/UserPickerView.swift": 1
         ]
 
