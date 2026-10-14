@@ -138,12 +138,21 @@ extension DependencyContainer {
     private func publishReachability(url: URL, isReachable: Bool, server: JellyfinServer) {
         guard let appState else { return }
         let reading = NetworkPathSnapshot.shared.current
+        let isLANAddress = LocalNetworkAccess.isGoverned(url)
+        if isReachable, isLANAddress, let subnets = reading?.subnets {
+            ServerHomeNetworks.record(subnets, serverID: server.id)
+        }
         let verdict = ServerReachability.classify(
             probedURL: url,
             answered: isReachable,
             hasAlternateSlot: server.internalURL != nil && server.externalURL != nil,
             pathIsSatisfied: reading?.isSatisfied,
-            isAttachedToALocalNetwork: reading?.isAttachedToALocalNetwork
+            isAttachedToALocalNetwork: reading?.isAttachedToALocalNetwork,
+            isOnAForeignLocalNetwork: !isReachable && isLANAddress && ServerHomeNetworks.isForeign(
+                current: reading?.subnets ?? [],
+                known: ServerHomeNetworks.known(serverID: server.id),
+                serverHost: url.host() ?? ""
+            )
         )
         let previous = appState.serverReachability
         guard verdict != previous else { return }

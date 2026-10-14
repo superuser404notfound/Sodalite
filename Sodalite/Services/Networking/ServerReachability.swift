@@ -31,12 +31,16 @@ nonisolated enum ServerReachability: Equatable, Sendable {
     /// back to. The one failure with a fix the user can act on.
     case offNetwork
 
+    /// The address did not answer, it is a LAN address, and the device is on a Wi-Fi or Ethernet
+    /// network the server has never answered from: a car's CarPlay Wi-Fi, a hotel, a hotspot.
+    case foreignNetwork
+
     /// The address did not answer, for a reason the app cannot narrow any further.
     case unreachable
 
     var isFailure: Bool {
         switch self {
-        case .noNetwork, .offNetwork, .unreachable: true
+        case .noNetwork, .offNetwork, .foreignNetwork, .unreachable: true
         case .unknown, .reachable: false
         }
     }
@@ -69,7 +73,8 @@ extension ServerReachability {
         answered: Bool,
         hasAlternateSlot: Bool,
         pathIsSatisfied: Bool?,
-        isAttachedToALocalNetwork: Bool?
+        isAttachedToALocalNetwork: Bool?,
+        isOnAForeignLocalNetwork: Bool = false
     ) -> ServerReachability {
         if answered { return .reachable }
         if pathIsSatisfied == false { return .noNetwork }
@@ -79,6 +84,15 @@ extension ServerReachability {
            isAttachedToALocalNetwork == false,
            LocalNetworkAccess.isGoverned(probedURL) {
             return .offNetwork
+        }
+        // On a local network, which is where `.offNetwork` must not speak. Only a network the
+        // server has never answered from is named as the wrong one; home with the server off stays
+        // `.unreachable`.
+        if !hasAlternateSlot,
+           isAttachedToALocalNetwork == true,
+           isOnAForeignLocalNetwork,
+           LocalNetworkAccess.isGoverned(probedURL) {
+            return .foreignNetwork
         }
         return .unreachable
     }

@@ -95,6 +95,10 @@ struct LocalNetworkDeniedView: View {
                 }
                 .buttonStyle(SettingsTileButtonStyle())
                 .disabled(isRetrying)
+
+                // The overlay covers Settings, so without this the log that says why it is up is
+                // out of reach exactly while it is up.
+                DiagnosticLogLink(style: .inline)
             }
 
             Spacer()

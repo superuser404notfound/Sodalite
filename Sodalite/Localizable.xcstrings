@@ -161821,6 +161821,330 @@
         }
       }
     },
+    "server.foreignNetwork.body" : {
+      "comment" : "Shown when the device is on a Wi-Fi the server has never answered from, e.g. a car's CarPlay Wi-Fi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto zařízení je připojeno k jiné Wi-Fi, například k CarPlay v autě, v hotelu nebo k hotspotu. Přepni se do domácí sítě nebo se připoj přes VPN."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne enhed er på et andet Wi-Fi, f.eks. en bils CarPlay-forbindelse, et hotel eller et hotspot. Skift til dit hjemmenetværk, eller forbind via VPN."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Gerät ist mit einem anderen WLAN verbunden, etwa der CarPlay-Verbindung eines Autos, einem Hotel oder einem Hotspot. Wechsle in dein Heimnetz oder verbinde dich per VPN."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτή η συσκευή είναι σε άλλο Wi-Fi, όπως τη σύνδεση CarPlay ενός αυτοκινήτου, ενός ξενοδοχείου ή ένα hotspot. Μετάβαση στο οικιακό σου δίκτυο ή σύνδεση μέσω VPN."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device is on a different Wi-Fi, such as a car's CarPlay connection, a hotel or a hotspot. Switch to your home network or connect through a VPN."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo está en otra red Wi-Fi, como la conexión CarPlay de un coche, un hotel o un punto de acceso. Cambia a tu red doméstica o conéctate mediante una VPN."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tämä laite on toisessa Wi-Fi-verkossa, kuten auton CarPlay-yhteydessä, hotellissa tai hotspotissa. Vaihda kotiverkkoon tai yhdistä VPN:n kautta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil est sur un autre Wi-Fi, par exemple la connexion CarPlay d'une voiture, un hôtel ou un partage de connexion. Passe sur ton réseau domestique ou connecte-toi via un VPN."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovaj uređaj je na drugoj Wi-Fi mreži, primjerice CarPlay vezi automobila, hotelu ili hotspotu. Prebaci se na kućnu mrežu ili se poveži putem VPN-a."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az eszköz másik Wi-Fi-hálózaton van, például egy autó CarPlay-kapcsolatán, egy szállodában vagy egy hotspoton. Válts az otthoni hálózatodra, vagy csatlakozz VPN-en keresztül."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo dispositivo è su un'altra rete Wi-Fi, come la connessione CarPlay di un'auto, un hotel o un hotspot. Passa alla rete di casa o connettiti tramite VPN."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデバイスは別のWi-Fi(車のCarPlay接続、ホテル、ホットスポットなど)に接続されています。自宅のネットワークに切り替えるか、VPN経由で接続してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기는 자동차의 CarPlay 연결, 호텔 또는 핫스팟 같은 다른 Wi-Fi에 연결되어 있습니다. 홈 네트워크로 전환하거나 VPN으로 연결하세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne enheten er på et annet Wi-Fi-nett, for eksempel en bils CarPlay-tilkobling, et hotell eller en hotspot. Bytt til hjemmenettverket ditt eller koble til via VPN."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit apparaat zit op een ander wifinetwerk, zoals de CarPlay-verbinding van een auto, een hotel of een hotspot. Schakel over naar je thuisnetwerk of maak verbinding via een VPN."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To urządzenie jest połączone z inną siecią Wi-Fi, na przykład z CarPlay w samochodzie, w hotelu lub z hotspotem. Przełącz się na sieć domową lub połącz się przez VPN."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo está em outra rede Wi-Fi, como a conexão CarPlay de um carro, um hotel ou um hotspot. Mude para sua rede doméstica ou conecte-se por uma VPN."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo está noutra rede Wi-Fi, como a ligação CarPlay de um carro, um hotel ou um hotspot. Muda para a tua rede doméstica ou liga-te através de uma VPN."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acest dispozitiv este conectat la altă rețea Wi-Fi, de exemplu conexiunea CarPlay a unei mașini, un hotel sau un hotspot. Treci la rețeaua de acasă sau conectează-te printr-un VPN."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это устройство подключено к другой сети Wi-Fi, например к CarPlay в машине, в отеле или к точке доступа. Подключись к домашней сети или используй VPN."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto zariadenie je pripojené k inej sieti Wi-Fi, napríklad k CarPlay v aute, v hoteli alebo k hotspotu. Prepni sa do domácej siete alebo sa pripoj cez VPN."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den här enheten är på ett annat wifi-nätverk, till exempel en bils CarPlay-anslutning, ett hotell eller en hotspot. Byt till ditt hemnätverk eller anslut via VPN."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihaz başka bir Wi-Fi ağına bağlı, örneğin bir arabanın CarPlay bağlantısı, bir otel ya da bir hotspot. Ev ağına geç veya bir VPN üzerinden bağlan."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей пристрій підключено до іншої мережі Wi-Fi, наприклад CarPlay в авто, у готелі чи до точки доступу. Перейди до домашньої мережі або підключися через VPN."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此设备连接的是其他 Wi-Fi,例如汽车的 CarPlay 连接、酒店或热点。请切换到你的家庭网络,或通过 VPN 连接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此裝置連接的是其他 Wi-Fi,例如汽車的 CarPlay 連線、飯店或熱點。請切換到你的家用網路,或透過 VPN 連線。"
+          }
+        }
+      }
+    },
+    "server.foreignNetwork.title %@" : {
+      "comment" : "Shown when the device is on a Wi-Fi the server has never answered from, e.g. a car's CarPlay Wi-Fi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ není v této Wi-Fi síti dostupný."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kan ikke nås på dette Wi-Fi."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist in diesem WLAN nicht erreichbar."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το %@ δεν είναι προσβάσιμο σε αυτό το Wi-Fi."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ isn't reachable on this Wi-Fi."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está disponible en esta red Wi-Fi."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ei ole tavoitettavissa tässä Wi-Fi-verkossa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n'est pas joignable sur ce Wi-Fi."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nije dostupan na ovoj Wi-Fi mreži."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A(z) %@ nem érhető el ezen a Wi-Fi-hálózaton."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non è raggiungibile su questa rete Wi-Fi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このWi-Fiでは%@に接続できません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Wi-Fi에서는 %@에 연결할 수 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kan ikke nås på dette Wi-Fi-nettet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is niet bereikbaar op deze wifi."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jest niedostępny w tej sieci Wi-Fi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não está acessível nesta rede Wi-Fi."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ não está acessível nesta rede Wi-Fi."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nu poate fi accesat în această rețea Wi-Fi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ недоступен в этой сети Wi-Fi."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nie je v tejto sieti Wi-Fi dostupný."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ går inte att nå på det här wifi-nätverket."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bu Wi-Fi ağında erişilebilir değil."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ недоступний у цій мережі Wi-Fi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此 Wi-Fi 网络上无法访问 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此 Wi-Fi 網路上無法存取 %@。"
+          }
+        }
+      }
+    },
     "server.noNetwork.title" : {
       "comment" : "Shown instead of Home when the device has no network path at all (airplane mode, Wi-Fi off on a Wi-Fi-only iPad). Never names a server or an address: the fix has nothing to do with either.",
       "extractionState" : "manual",

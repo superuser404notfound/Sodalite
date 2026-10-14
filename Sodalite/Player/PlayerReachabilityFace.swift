@@ -62,6 +62,15 @@ enum PlayerReachabilityFace {
                     serverName
                 )
             )
+        case .foreignNetwork:
+            return Trio(
+                icon: "wifi.exclamationmark",
+                title: String(localized: "player.error.offNetwork.title", defaultValue: "Server not on this network"),
+                message: String(
+                    format: String(localized: "server.foreignNetwork.title %@"),
+                    serverName
+                )
+            )
         case .unreachable:
             // The vague half. It keeps the old headline, because the app genuinely does not know
             // why, and improves only on the body, which now names which server did not answer.

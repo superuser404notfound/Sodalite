@@ -35,6 +35,7 @@ struct ServerStatusBanner: View {
     private var symbol: String {
         switch state {
         case .noNetwork: "wifi.slash"
+        case .foreignNetwork: "wifi.exclamationmark"
         default: "network.slash"
         }
     }
@@ -47,6 +48,8 @@ struct ServerStatusBanner: View {
             Text("server.noNetwork.title")
         case .offNetwork:
             Text("server.offNetwork.title \(serverName)")
+        case .foreignNetwork:
+            Text("server.foreignNetwork.title \(serverName)")
         default:
             Text("server.unreachable.title \(serverName)")
         }
