@@ -16,14 +16,23 @@ struct OnboardingScaffold<Mark: View, Content: View, Actions: View>: View {
     @ViewBuilder let content: () -> Content
     @ViewBuilder let actions: () -> Actions
 
+    /// The actions ride up on the keyboard, and with the mark and a large title above them a
+    /// two-field form no longer fits between the two: the fields ran under the buttons (device,
+    /// 2026-10-14). While the keyboard is up the mark steps aside and the title shrinks, the way
+    /// the system's own setup screens make room.
+    @State private var keyboardIsUp = false
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 28) {
+            VStack(spacing: keyboardIsUp ? 20 : 28) {
                 VStack(spacing: 16) {
-                    mark()
+                    if !keyboardIsUp {
+                        mark()
+                            .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                    }
                     VStack(spacing: 8) {
                         title
-                            .font(.largeTitle.bold())
+                            .font(keyboardIsUp ? .title2.bold() : .largeTitle.bold())
                             .multilineTextAlignment(.center)
                         if let subtitle {
                             subtitle
@@ -36,7 +45,7 @@ struct OnboardingScaffold<Mark: View, Content: View, Actions: View>: View {
                 content()
             }
             .padding(.horizontal, 20)
-            .padding(.top, 24)
+            .padding(.top, keyboardIsUp ? 8 : 24)
             .padding(.bottom, 16)
             .frame(maxWidth: Self.columnWidth)
             .frame(maxWidth: .infinity)
@@ -52,6 +61,12 @@ struct OnboardingScaffold<Mark: View, Content: View, Actions: View>: View {
             .padding(.bottom, 8)
             .frame(maxWidth: Self.columnWidth)
             .frame(maxWidth: .infinity)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.25)) { keyboardIsUp = true }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.25)) { keyboardIsUp = false }
         }
     }
 
