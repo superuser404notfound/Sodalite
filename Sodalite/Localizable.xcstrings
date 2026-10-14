@@ -75489,6 +75489,330 @@
         }
       }
     },
+    "changelog.1_1_0.tvLogin.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přihlašovací obrazovky na Apple TV jsou přehlednější: vše je v jednom vystředěném sloupci a hlavní akce vyniká barvou zvýraznění. Quick Connect je nyní jako rovnocenná volba hned pod Přihlásit, takže můžete potvrdit kód v telefonu místo psaní hesla ovladačem."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login-skærmene på Apple TV er mere overskuelige: alt står i én centreret kolonne, og hovedhandlingen skiller sig ud i accentfarven. Quick Connect står nu som et ligeværdigt valg lige under Log ind, så du kan bekræfte en kode på telefonen i stedet for at taste en adgangskode med fjernbetjeningen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anmeldeseiten auf dem Apple TV sind übersichtlicher: Alles steht in einer zentrierten Spalte, die Hauptaktion hebt sich in der Akzentfarbe ab. Quick Connect steht jetzt gleichrangig direkt unter Anmelden, damit du einen Code am Handy bestätigen kannst, statt ein Passwort mit der Fernbedienung zu tippen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι οθόνες σύνδεσης στο Apple TV είναι πιο ξεκάθαρες: όλα βρίσκονται σε μία κεντραρισμένη στήλη και η κύρια ενέργεια ξεχωρίζει στο χρώμα έμφασης. Το Quick Connect βρίσκεται πλέον ως ισότιμη επιλογή ακριβώς κάτω από τη Σύνδεση, ώστε να επιβεβαιώνετε έναν κωδικό στο τηλέφωνο αντί να πληκτρολογείτε κωδικό πρόσβασης με το τηλεχειριστήριο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The sign-in screens on Apple TV are clearer: everything sits in one centred column, the main action standing out in the accent colour. Quick Connect now sits right under Sign In as an equal choice, so you can confirm a code on your phone instead of typing a password with the remote."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las pantallas de inicio de sesión en Apple TV son más claras: todo está en una columna centrada y la acción principal destaca en el color de acento. Quick Connect está ahora justo debajo de Iniciar sesión como opción equivalente, para que confirmes un código en el móvil en lugar de escribir una contraseña con el mando."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:n kirjautumisnäkymät ovat selkeämpiä: kaikki on yhdessä keskitetyssä sarakkeessa, ja päätoiminto erottuu korostusvärillä. Quick Connect on nyt tasavertaisena vaihtoehtona heti Kirjaudu-painikkeen alla, joten voit vahvistaa koodin puhelimella sen sijaan, että kirjoittaisit salasanan kaukosäätimellä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les écrans de connexion sur Apple TV sont plus clairs : tout tient dans une colonne centrée, l'action principale ressortant dans la couleur d'accent. Quick Connect se trouve désormais juste sous Se connecter, à égalité, pour valider un code sur votre téléphone au lieu de saisir un mot de passe avec la télécommande."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zasloni za prijavu na Apple TV-u pregledniji su: sve je u jednom centriranom stupcu, a glavna radnja ističe se bojom naglaska. Quick Connect sada stoji kao ravnopravan izbor odmah ispod Prijava, pa kôd možete potvrditi na telefonu umjesto da lozinku upisujete daljinskim upravljačem."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Apple TV bejelentkezési képernyői áttekinthetőbbek: minden egy középre igazított oszlopban van, a fő művelet kiemelőszínnel tűnik ki. A Quick Connect most egyenrangú lehetőségként közvetlenül a Bejelentkezés alatt van, így a telefonon erősíthet meg egy kódot ahelyett, hogy a távirányítóval gépelné be a jelszót."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le schermate di accesso su Apple TV sono più chiare: tutto è in un'unica colonna centrata, con l'azione principale in evidenza nel colore di accento. Quick Connect ora si trova subito sotto Accedi come scelta equivalente, così puoi confermare un codice sul telefono invece di digitare una password con il telecomando."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVのサインイン画面がわかりやすくなりました。すべてが中央の1列にまとまり、メインの操作はアクセントカラーで目立ちます。Quick Connectは「サインイン」のすぐ下に同等の選択肢として並び、リモコンでパスワードを入力する代わりにスマートフォンでコードを確認できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV의 로그인 화면이 더 깔끔해졌습니다. 모든 항목이 가운데 정렬된 한 열에 있으며 주요 동작은 강조 색상으로 돋보입니다. 이제 Quick Connect가 로그인 바로 아래에 동등한 선택지로 있어 리모컨으로 암호를 입력하는 대신 휴대폰에서 코드를 확인할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Påloggingsskjermene på Apple TV er mer oversiktlige: alt står i én sentrert kolonne, og hovedhandlingen skiller seg ut i aksentfargen. Quick Connect står nå som et likeverdig valg rett under Logg på, så du kan bekrefte en kode på telefonen i stedet for å taste et passord med fjernkontrollen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De aanmeldschermen op Apple TV zijn overzichtelijker: alles staat in één gecentreerde kolom, waarbij de hoofdactie opvalt in de accentkleur. Quick Connect staat nu als gelijkwaardige keuze direct onder Aanmelden, zodat je een code op je telefoon bevestigt in plaats van een wachtwoord met de afstandsbediening te typen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekrany logowania na Apple TV są czytelniejsze: wszystko jest w jednej wyśrodkowanej kolumnie, a główna akcja wyróżnia się kolorem akcentu. Quick Connect jest teraz równorzędną opcją tuż pod Zaloguj, więc możesz potwierdzić kod na telefonie zamiast wpisywać hasło pilotem."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As telas de login na Apple TV estão mais claras: tudo fica em uma coluna centralizada, com a ação principal em destaque na cor de realce. O Quick Connect agora fica logo abaixo de Entrar como opção equivalente, para você confirmar um código no celular em vez de digitar uma senha com o controle."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os ecrãs de início de sessão na Apple TV estão mais claros: tudo fica numa coluna centrada, com a ação principal em destaque na cor de realce. O Quick Connect está agora logo abaixo de Iniciar sessão como opção equivalente, para confirmar um código no telemóvel em vez de escrever uma palavra-passe com o comando."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ecranele de autentificare pe Apple TV sunt mai clare: totul stă într-o coloană centrată, iar acțiunea principală iese în evidență în culoarea de accent. Quick Connect stă acum chiar sub Autentificare, ca opțiune egală, ca să confirmi un cod pe telefon în loc să tastezi o parolă cu telecomanda."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экраны входа на Apple TV стали понятнее: всё расположено в одной колонке по центру, а главное действие выделено акцентным цветом. Quick Connect теперь находится сразу под кнопкой «Войти» как равноценный вариант, чтобы подтвердить код на телефоне вместо ввода пароля пультом."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prihlasovacie obrazovky na Apple TV sú prehľadnejšie: všetko je v jednom vycentrovanom stĺpci a hlavná akcia vyniká farbou zvýraznenia. Quick Connect je teraz ako rovnocenná voľba hneď pod Prihlásiť, takže môžete potvrdiť kód v telefóne namiesto písania hesla ovládačom."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inloggningsskärmarna på Apple TV är tydligare: allt står i en centrerad kolumn, där huvudåtgärden sticker ut i accentfärgen. Quick Connect står nu som ett likvärdigt val direkt under Logga in, så att du kan bekräfta en kod på telefonen i stället för att skriva ett lösenord med fjärrkontrollen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'deki oturum açma ekranları daha net: her şey ortalanmış tek bir sütunda ve ana eylem vurgu rengiyle öne çıkıyor. Quick Connect artık Oturum Aç'ın hemen altında eşit bir seçenek olarak yer alıyor; böylece kumandayla parola yazmak yerine telefonunuzda bir kodu onaylayabilirsiniz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Екрани входу на Apple TV стали зрозумілішими: усе розташовано в одній колонці по центру, а головна дія виділена акцентним кольором. Quick Connect тепер розміщено одразу під кнопкою «Увійти» як рівноцінний варіант, щоб підтвердити код на телефоні замість введення пароля пультом."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上的登录页面更清晰了：所有内容位于居中的一列中，主要操作以强调色突出显示。Quick Connect 现在作为同等选项位于“登录”正下方，你可以在手机上确认代码，而不必用遥控器输入密码。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上的登入頁面更清楚了：所有內容位於置中的一欄中，主要操作以強調色突顯。Quick Connect 現在作為同等選項位於「登入」正下方，你可以在手機上確認代碼，而不必用遙控器輸入密碼。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.tvLogin.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehlednější přihlášení na Apple TV"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mere overskuelig login på Apple TV"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übersichtlichere Anmeldung auf dem Apple TV"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πιο ξεκάθαρη σύνδεση στο Apple TV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A clearer sign-in on Apple TV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio de sesión más claro en Apple TV"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selkeämpi kirjautuminen Apple TV:ssä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une connexion plus claire sur Apple TV"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preglednija prijava na Apple TV-u"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Áttekinthetőbb bejelentkezés Apple TV-n"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesso più chiaro su Apple TV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVのサインインがわかりやすく"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 더 깔끔해진 로그인"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mer oversiktlig pålogging på Apple TV"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overzichtelijkere aanmelding op Apple TV"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Czytelniejsze logowanie na Apple TV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login mais claro na Apple TV"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início de sessão mais claro na Apple TV"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autentificare mai clară pe Apple TV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более понятный вход на Apple TV"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehľadnejšie prihlásenie na Apple TV"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tydligare inloggning på Apple TV"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'de daha net oturum açma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зрозуміліший вхід на Apple TV"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上更清晰的登录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上更清楚的登入"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.versionLabel.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

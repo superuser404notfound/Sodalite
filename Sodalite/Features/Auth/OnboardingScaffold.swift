@@ -195,3 +195,152 @@ struct OnboardingFootnote: View {
     }
 }
 #endif
+
+#if os(tvOS)
+import SwiftUI
+
+/// The Apple TV shape of the sign-in screens: the iPhone's order at television size, the mark,
+/// title and line centred on top and one column of content and actions under them, so focus only
+/// ever travels up and down. Before, the screens were a stack of grey tiles with the primary action
+/// told apart only by focus. A split with the title on the left was tried and dropped (Vincent,
+/// device, 2026-10-14).
+struct TVOnboardingLayout<Mark: View, Content: View>: View {
+    let title: Text
+    var subtitle: Text? = nil
+    @ViewBuilder let mark: () -> Mark
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        // Centred on the screen while it fits, scrolling once it does not.
+        GeometryReader { geo in
+            ScrollView {
+                VStack(spacing: 48) {
+                    VStack(spacing: 24) {
+                        mark()
+                        VStack(spacing: 12) {
+                            title
+                                .font(.title2.bold())
+                                .multilineTextAlignment(.center)
+                            if let subtitle {
+                                subtitle
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                    }
+                    VStack(spacing: 24) {
+                        content()
+                    }
+                    // Room for the focus lift and ring, which the scroll view would otherwise clip.
+                    .padding(.horizontal, 24)
+                    .frame(width: 800)
+                }
+                .padding(.vertical, 60)
+                .frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollClipDisabled()
+        }
+    }
+}
+
+extension TVOnboardingLayout where Mark == TVOnboardingLogo {
+    init(title: Text, subtitle: Text? = nil, @ViewBuilder content: @escaping () -> Content) {
+        self.init(title: title, subtitle: subtitle, mark: { TVOnboardingLogo() }, content: content)
+    }
+}
+
+struct TVOnboardingLogo: View {
+    var body: some View {
+        Image("Logo")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 120, height: 120)
+            .accessibilityHidden(true)
+    }
+}
+
+/// The screen's one primary action: the accent pill of the detail page's Play button, full width.
+struct TVOnboardingPrimaryButton: View {
+    let title: LocalizedStringKey
+    var isLoading: Bool = false
+    let action: () -> Void
+
+    @Environment(\.appearanceTheme) private var appearanceTheme
+
+    var body: some View {
+        let contentColor = appearanceTheme.palette.foreground.color
+        Button(action: action) {
+            ZStack {
+                if isLoading {
+                    ProgressView().tint(contentColor)
+                } else {
+                    Text(title).font(.headline)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 76)
+        }
+        .buttonStyle(GlassButtonStyle(isProminent: true, contentColor: contentColor))
+    }
+}
+
+/// A second action of equal weight (Quick Connect beside Sign In): the detail page's glass pill.
+struct TVOnboardingPillButton: View {
+    let title: LocalizedStringKey
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.headline)
+                .frame(maxWidth: .infinity, minHeight: 76)
+        }
+        .buttonStyle(GlassButtonStyle())
+    }
+}
+
+/// A quiet way on: plain text at rest, a fill only under focus, so it never competes with the
+/// primary action the way a resting grey tile did.
+struct TVOnboardingLinkButton: View {
+    let title: LocalizedStringKey
+    var isLoading: Bool = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                if isLoading { ProgressView() }
+                Text(title).font(.callout.weight(.semibold))
+            }
+        }
+        .buttonStyle(TVOnboardingLinkStyle())
+    }
+}
+
+struct TVOnboardingLinkStyle: ButtonStyle {
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(isFocused ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+            .padding(.horizontal, 28)
+            .padding(.vertical, 14)
+            .background(Capsule().fill(isFocused ? Color.Theme.focusFill : .clear))
+            .focusResponse(.chip, isFocused: isFocused, isPressed: configuration.isPressed, pressedScale: 0.97)
+    }
+}
+
+/// A status or error line in the right column.
+struct TVOnboardingFootnote: View {
+    let text: Text
+    var isError: Bool = false
+
+    var body: some View {
+        text
+            .font(.callout)
+            .foregroundStyle(isError ? AnyShapeStyle(Color.Theme.destructive) : AnyShapeStyle(.secondary))
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+    }
+}
+#endif

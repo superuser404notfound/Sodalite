@@ -50,8 +50,12 @@ struct DiagnosticLogLink: View {
                     .font(.footnote.weight(.semibold))
                     .padding(.vertical, 6)
             }
+            #if os(tvOS)
+            .buttonStyle(TVOnboardingLinkStyle())
+            #else
             .buttonStyle(.plain)
             .foregroundStyle(.tint)
+            #endif
         }
     }
 }

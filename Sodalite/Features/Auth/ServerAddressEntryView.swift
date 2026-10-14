@@ -26,6 +26,8 @@ struct ServerAddressEntryView: View {
     private var screen: some View {
         #if os(iOS)
         touchScreen
+        #elseif os(tvOS)
+        tvScreen
         #else
         focusScreen
         #endif
@@ -173,6 +175,54 @@ struct ServerAddressEntryView: View {
             .disabled(!canConnect && viewModel?.isLoading != true)
         }
         .onAppear { addressFocused = true }
+    }
+    #endif
+
+    #if os(tvOS)
+    private var tvScreen: some View {
+        TVOnboardingLayout(
+            title: Text("auth.server.title"),
+            subtitle: Text("auth.server.subtitle")
+        ) {
+            if let vm = viewModel {
+                TextField(String(localized: "auth.server.placeholder"), text: Bindable(vm).serverAddress)
+                    .autocorrectionDisabled()
+                    .verbatimTextEntry(.url)
+                    .submitLabel(.go)
+                    .onSubmit {
+                        guard !vm.isLoading, !vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                        Task { await vm.connectToServer() }
+                    }
+                    .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
+                        CertificateTrustSheet(
+                            pending: pending,
+                            serverAddress: vm.serverAddress,
+                            onTrust: { Task { await vm.trustPendingCertificate() } },
+                            onCancel: { vm.pendingTrust = nil }
+                        )
+                    }
+                    .navigationDestination(isPresented: Bindable(vm).showLogin) {
+                        if let server = vm.discoveredServer {
+                            UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
+                                .themedNavigationDestination()
+                        }
+                    }
+
+                if let error = vm.errorMessage {
+                    TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+                }
+
+                TVOnboardingPrimaryButton(title: "auth.server.connect", isLoading: vm.isLoading) {
+                    Task { await vm.connectToServer() }
+                }
+                .disabled(vm.isLoading || vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty)
+                .padding(.top, 8)
+
+                if vm.errorMessage != nil {
+                    DiagnosticLogLink(style: .inline)
+                }
+            }
+        }
     }
     #endif
 }
