@@ -7,6 +7,9 @@ struct LoginView: View {
     @State private var showQuickConnect = false
     @State private var showSuccess = false
     #if os(iOS)
+    @FocusState private var focusedField: Field?
+    #endif
+    #if os(iOS)
     @Environment(\.appearanceTheme) private var appearanceTheme
     @State private var promptServer: JellyfinServer?
     @State private var showAddURLDialog = false
@@ -135,6 +138,21 @@ struct LoginView: View {
     #endif
 
     private var loginContent: some View {
+        Group {
+            #if os(iOS)
+            touchLoginContent
+            #else
+            focusLoginContent
+            #endif
+        }
+        .onChange(of: viewModel?.loginSucceeded) { _, succeeded in
+            if succeeded == true {
+                showSuccessAndFinalize()
+            }
+        }
+    }
+
+    private var focusLoginContent: some View {
         VStack(spacing: 40) {
             Spacer()
 
@@ -163,16 +181,132 @@ struct LoginView: View {
             Spacer()
         }
         .padding()
-        .onChange(of: viewModel?.loginSucceeded) { _, succeeded in
-            if succeeded == true {
-                showSuccessAndFinalize()
+    }
+
+    #if os(iOS)
+    private enum Field { case username, password }
+
+    private var touchLoginContent: some View {
+        OnboardingScaffold(
+            title: Text(verbatim: preSelectedUser?.name ?? server.name),
+            subtitle: Text("auth.login.subtitle")
+        ) {
+            if let preSelectedUser {
+                userAvatar(for: preSelectedUser, diameter: 112)
+            } else {
+                OnboardingLogo()
             }
+        } content: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    touchQuickConnect(vm: vm)
+                } else {
+                    touchCredentials(vm: vm)
+                }
+                if let error = vm.errorMessage {
+                    OnboardingFootnote(text: Text(verbatim: error), isError: true)
+                }
+            }
+        } actions: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    OnboardingSecondaryButton(title: "auth.quickConnect.cancel") {
+                        vm.stopQuickConnect()
+                        showQuickConnect = false
+                    }
+                } else {
+                    OnboardingPrimaryButton(title: "auth.login.signIn", isLoading: vm.isLoading) {
+                        Task { await vm.login() }
+                    }
+                    .disabled(!canSignIn(vm) && !vm.isLoading)
+                    OnboardingSecondaryButton(title: "auth.login.quickConnect") {
+                        focusedField = nil
+                        showQuickConnect = true
+                        Task { await vm.startQuickConnect() }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            focusedField = preSelectedUser == nil ? .username : .password
         }
     }
 
+    private func canSignIn(_ vm: LoginViewModel) -> Bool {
+        !vm.isLoading && !vm.username.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func touchCredentials(vm: LoginViewModel) -> some View {
+        OnboardingCard {
+            // Username already in the title when picked from the user grid.
+            if preSelectedUser == nil {
+                HStack(spacing: 12) {
+                    Image(systemName: "person")
+                        .foregroundStyle(.tint)
+                        .frame(width: 26)
+                    TextField(String(localized: "auth.login.username"), text: Bindable(vm).username)
+                        .verbatimTextEntry()
+                        .textContentType(.username)
+                        .submitLabel(.next)
+                        .focused($focusedField, equals: .username)
+                        .onSubmit { focusedField = .password }
+                }
+                .padding(16)
+                OnboardingCardDivider(leadingInset: 54)
+            }
+            HStack(spacing: 12) {
+                Image(systemName: "lock")
+                    .foregroundStyle(.tint)
+                    .frame(width: 26)
+                SecureField(String(localized: "auth.login.password"), text: Bindable(vm).password)
+                    .textContentType(.password)
+                    .submitLabel(.go)
+                    .focused($focusedField, equals: .password)
+                    .onSubmit {
+                        guard canSignIn(vm) else { return }
+                        Task { await vm.login() }
+                    }
+            }
+            .padding(16)
+        }
+    }
+
+    private func touchQuickConnect(vm: LoginViewModel) -> some View {
+        OnboardingCard {
+            VStack(spacing: 14) {
+                Text("auth.quickConnect.title")
+                    .font(.headline)
+                if let code = vm.quickConnectCode {
+                    Text("auth.quickConnect.instruction")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Text(code)
+                        .font(.system(size: 44, weight: .bold, design: .monospaced))
+                        .textSelection(.enabled)
+                    if vm.isPollingQuickConnect {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("auth.quickConnect.waiting")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if vm.isLoading {
+                        ProgressView()
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(20)
+        }
+    }
+    #endif
+
     // Identical composition to the UserPicker card so the transition reads as "same user, now enter password".
     @ViewBuilder
-    private func userAvatar(for user: JellyfinUser) -> some View {
+    private func userAvatar(for user: JellyfinUser, diameter: CGFloat = 140) -> some View {
         // On the server being signed in to and without a token, like the picker card: the live
         // session's host and token belong to another server.
         let url = viewModel.flatMap { vm in
@@ -188,11 +322,11 @@ struct LoginView: View {
                 } placeholder: {
                     initialsCircle(for: user.name)
                 }
-                .frame(width: 140, height: 140)
+                .frame(width: diameter, height: diameter)
                 .clipShape(Circle())
             } else {
                 initialsCircle(for: user.name)
-                    .frame(width: 140, height: 140)
+                    .frame(width: diameter, height: diameter)
             }
         }
     }

@@ -171,6 +171,12 @@ enum Changelog {
                     icon: "hand.draw"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.iosLogin.title",
+                    "changelog.1_1_0.iosLogin.body",
+                    icon: "person.badge.key"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.guideGenres.title",
                     "changelog.1_1_0.guideGenres.body",

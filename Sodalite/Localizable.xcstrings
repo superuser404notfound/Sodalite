@@ -11243,6 +11243,330 @@
         }
       }
     },
+    "auth.welcome.subtitle" : {
+      "comment" : "Line under the iOS sign-in welcome title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Začněte připojením svého serveru Jellyfin."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbind din Jellyfin-server for at komme i gang."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde deinen Jellyfin-Server, um loszulegen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συνδέστε τον διακομιστή Jellyfin σας για να ξεκινήσετε."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect your Jellyfin server to get started."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecta tu servidor de Jellyfin para empezar."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aloita yhdistämällä Jellyfin-palvelimesi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez votre serveur Jellyfin pour commencer."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povežite svoj Jellyfin poslužitelj za početak."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kezdéshez csatlakoztassa a Jellyfin-szerverét."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collega il tuo server Jellyfin per iniziare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jellyfinサーバーに接続して始めましょう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작하려면 Jellyfin 서버를 연결하세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koble til Jellyfin-serveren din for å komme i gang."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbind je Jellyfin-server om te beginnen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połącz swój serwer Jellyfin, aby zacząć."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte seu servidor Jellyfin para começar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ligue o seu servidor Jellyfin para começar."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectează serverul Jellyfin pentru a începe."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключите свой сервер Jellyfin, чтобы начать."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Začnite pripojením svojho servera Jellyfin."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anslut din Jellyfin-server för att komma igång."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlamak için Jellyfin sunucunuzu bağlayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підключіть свій сервер Jellyfin, щоб почати."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接你的 Jellyfin 服务器即可开始。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連接你的 Jellyfin 伺服器即可開始。"
+          }
+        }
+      }
+    },
+    "auth.welcome.title" : {
+      "comment" : "Title of the iOS sign-in welcome screen (server discovery)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vítejte v Sodalite"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velkommen til Sodalite"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen bei Sodalite"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καλώς ήρθατε στο Sodalite"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome to Sodalite"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te damos la bienvenida a Sodalite"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tervetuloa Sodaliteen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenue dans Sodalite"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dobro došli u Sodalite"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üdvözli a Sodalite"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benvenuto in Sodalite"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodaliteへようこそ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite에 오신 것을 환영합니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velkommen til Sodalite"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welkom bij Sodalite"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Witamy w Sodalite"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boas-vindas ao Sodalite"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bem-vindo ao Sodalite"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bun venit în Sodalite"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро пожаловать в Sodalite"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitajte v Sodalite"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välkommen till Sodalite"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite'a hoş geldiniz"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ласкаво просимо до Sodalite"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎使用 Sodalite"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歡迎使用 Sodalite"
+          }
+        }
+      }
+    },
     "catalog.allRequests.action.approve" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -69333,6 +69657,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "家庭影片資料夾"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.iosLogin.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hledání serveru, zadání adresy, výběr profilu a přihlášení jsou nově navrženy pro dotykové ovládání: přehledné rozvržení s hlavní akcí dole na dosah palce a klávesnice sama přejde od uživatelského jména k heslu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At finde din server, indtaste adressen, vælge en profil og logge ind er designet om til touch: et klart layout med hovedhandlingen nederst inden for tommelfingerens rækkevidde, og tastaturet går selv fra brugernavn til adgangskode."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server finden, Adresse eingeben, Profil wählen und anmelden sind neu für Touch gestaltet: ein klares Layout mit der Hauptaktion unten in Daumenreichweite, und die Tastatur springt von selbst vom Benutzernamen zum Passwort."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η εύρεση του διακομιστή, η εισαγωγή διεύθυνσης, η επιλογή προφίλ και η σύνδεση έχουν επανασχεδιαστεί για αφή: καθαρή διάταξη με την κύρια ενέργεια κάτω, στην εμβέλεια του αντίχειρα, και το πληκτρολόγιο περνά μόνο του από το όνομα χρήστη στον κωδικό."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finding your server, entering its address, picking a profile and signing in are redesigned for touch: a clear layout with the main action at the bottom, within reach of your thumb, and the keyboard moving from username to password on its own."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar tu servidor, introducir su dirección, elegir un perfil e iniciar sesión se han rediseñado para pantallas táctiles: un diseño claro con la acción principal abajo, al alcance del pulgar, y el teclado pasa solo del usuario a la contraseña."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palvelimen etsiminen, osoitteen syöttäminen, profiilin valinta ja kirjautuminen on suunniteltu uudelleen kosketukselle: selkeä asettelu, jossa päätoiminto on alhaalla peukalon ulottuvilla, ja näppäimistö siirtyy itse käyttäjänimestä salasanaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver votre serveur, saisir son adresse, choisir un profil et vous connecter ont été repensés pour le tactile : une mise en page claire avec l'action principale en bas, à portée de pouce, et le clavier passe seul du nom d'utilisateur au mot de passe."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pronalaženje poslužitelja, unos adrese, odabir profila i prijava redizajnirani su za dodir: jasan raspored s glavnom radnjom dolje na dohvat palca, a tipkovnica sama prelazi s korisničkog imena na lozinku."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A szerver keresése, a cím megadása, a profil kiválasztása és a bejelentkezés új, érintésre tervezett kialakítást kapott: áttekinthető elrendezés a fő művelettel alul, hüvelykujjnyi távolságra, a billentyűzet pedig magától lép a felhasználónévről a jelszóra."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trovare il server, inserire l'indirizzo, scegliere un profilo e accedere sono stati ridisegnati per il touch: un layout chiaro con l'azione principale in basso, a portata di pollice, e la tastiera che passa da sola dal nome utente alla password."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの検索、アドレス入力、プロファイル選択、サインインがタッチ向けに再設計されました。メインの操作は親指の届く下部に配置され、キーボードはユーザー名からパスワードへ自動で移動します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 찾기, 주소 입력, 프로필 선택, 로그인이 터치에 맞게 새로 디자인되었습니다. 주요 동작은 엄지가 닿는 하단에 있고, 키보드는 사용자 이름에서 암호로 자동으로 넘어갑니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Å finne serveren, skrive inn adressen, velge profil og logge på er designet på nytt for berøring: et ryddig oppsett med hovedhandlingen nederst innen rekkevidde for tommelen, og tastaturet går selv fra brukernavn til passord."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je server zoeken, het adres invoeren, een profiel kiezen en aanmelden zijn opnieuw ontworpen voor aanraking: een overzichtelijke indeling met de hoofdactie onderaan binnen bereik van je duim, en het toetsenbord springt vanzelf van gebruikersnaam naar wachtwoord."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyszukiwanie serwera, wpisywanie adresu, wybór profilu i logowanie zostały zaprojektowane od nowa z myślą o dotyku: przejrzysty układ z główną akcją na dole, w zasięgu kciuka, a klawiatura sama przechodzi od nazwy użytkownika do hasła."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar o servidor, digitar o endereço, escolher um perfil e entrar foram redesenhados para toque: um layout claro com a ação principal embaixo, ao alcance do polegar, e o teclado passa sozinho do usuário para a senha."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar o servidor, introduzir o endereço, escolher um perfil e iniciar sessão foram redesenhados para toque: um esquema claro com a ação principal em baixo, ao alcance do polegar, e o teclado passa sozinho do utilizador para a palavra-passe."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Găsirea serverului, introducerea adresei, alegerea profilului și autentificarea au fost reproiectate pentru atingere: un aspect clar, cu acțiunea principală jos, la îndemâna degetului mare, iar tastatura trece singură de la numele de utilizator la parolă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск сервера, ввод адреса, выбор профиля и вход переработаны для сенсорного управления: понятная компоновка с главным действием внизу, под большим пальцем, а клавиатура сама переходит от имени пользователя к паролю."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hľadanie servera, zadanie adresy, výber profilu a prihlásenie sú nanovo navrhnuté pre dotykové ovládanie: prehľadné rozloženie s hlavnou akciou dole na dosah palca a klávesnica sama prejde od používateľského mena k heslu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Att hitta servern, ange adressen, välja profil och logga in är omgjort för pekskärm: en tydlig layout med huvudåtgärden längst ned inom räckhåll för tummen, och tangentbordet går själv från användarnamn till lösenord."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunuzu bulma, adresini girme, profil seçme ve oturum açma dokunmatik için yeniden tasarlandı: ana eylemin altta, başparmağınızın ulaşabileceği yerde olduğu net bir düzen ve klavye kullanıcı adından parolaya kendiliğinden geçiyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук сервера, введення адреси, вибір профілю та вхід перероблено для сенсорного керування: зрозуміле компонування з головною дією внизу, під великим пальцем, а клавіатура сама переходить від імені користувача до пароля."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查找服务器、输入地址、选择个人资料和登录都已针对触控重新设计：布局清晰，主要操作位于底部，拇指即可触及，键盘还会自动从用户名跳到密码。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尋找伺服器、輸入位址、選擇個人檔案與登入都已針對觸控重新設計：版面清楚，主要操作位於底部，拇指即可觸及，鍵盤也會自動從使用者名稱跳到密碼。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.iosLogin.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové přihlášení na iPhonu a iPadu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny login på iPhone og iPad"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Anmeldung auf iPhone und iPad"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέα σύνδεση σε iPhone και iPad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new sign-in on iPhone and iPad"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo inicio de sesión en iPhone y iPad"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uusi kirjautuminen iPhonessa ja iPadissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle connexion sur iPhone et iPad"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova prijava na iPhoneu i iPadu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Új bejelentkezés iPhone-on és iPaden"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo accesso su iPhone e iPad"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneとiPadの新しいサインイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone 및 iPad의 새로운 로그인"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny pålogging på iPhone og iPad"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieuwe aanmelding op iPhone en iPad"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowe logowanie na iPhonie i iPadzie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo login no iPhone e iPad"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo início de sessão no iPhone e iPad"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autentificare nouă pe iPhone și iPad"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый вход на iPhone и iPad"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové prihlásenie na iPhone a iPade"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny inloggning på iPhone och iPad"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone ve iPad'de yeni oturum açma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новий вхід на iPhone та iPad"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone 和 iPad 上的全新登录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone 與 iPad 上的全新登入"
           }
         }
       }
