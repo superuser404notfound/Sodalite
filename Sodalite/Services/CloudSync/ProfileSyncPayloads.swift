@@ -61,6 +61,8 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     /// later build and the profile's playback settings never reached another device. nil keeps the
     /// local value.
     var touchpadScrubbing: Bool?
+    /// Optional for the same reason. nil keeps the local value.
+    var showNextEpisodeCard: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -94,7 +96,8 @@ extension ProfilePlaybackPayload {
             preferServerTrickplay: p.preferServerTrickplay,
             rememberTrackSelections: p.rememberTrackSelections,
             subtitlesOnSkipBack: p.subtitlesOnSkipBack,
-            touchpadScrubbing: p.touchpadScrubbing
+            touchpadScrubbing: p.touchpadScrubbing,
+            showNextEpisodeCard: p.showNextEpisodeCard
         )
     }
 
@@ -128,6 +131,7 @@ extension ProfilePlaybackPayload {
         p.rememberTrackSelections = rememberTrackSelections
         p.subtitlesOnSkipBack = subtitlesOnSkipBack
         if let touchpadScrubbing { p.touchpadScrubbing = touchpadScrubbing }
+        if let showNextEpisodeCard { p.showNextEpisodeCard = showNextEpisodeCard }
     }
 }
 

@@ -49,6 +49,7 @@ struct NextEpisodePolicyTests {
         hasNextEpisode: Bool = true,
         advanceCancelled: Bool = false,
         overlayDismissed: Bool = false,
+        cardEnabled: Bool = true,
         autoplayEnabled: Bool = true,
         countdownEnabled: Bool = true,
         countdownRunning: Bool = false,
@@ -61,6 +62,7 @@ struct NextEpisodePolicyTests {
             hasNextEpisode: hasNextEpisode,
             advanceCancelled: advanceCancelled,
             overlayDismissed: overlayDismissed,
+            cardEnabled: cardEnabled,
             autoplayEnabled: autoplayEnabled,
             countdownEnabled: countdownEnabled,
             countdownRunning: countdownRunning,
@@ -139,6 +141,33 @@ struct NextEpisodePolicyTests {
     /// A cancel taken ON the terminal `.ended` state stays a rejection, whatever the settings say.
     @Test func terminalCancelOutranksTheDismissedCard() {
         #expect(outcome(advanceCancelled: true, overlayDismissed: true) == .dismissPlayer)
+    }
+
+    // MARK: - Card switched off
+
+    /// Autoplay on, card off: the episode plays out and the successor follows at the real end,
+    /// with no card at the seam.
+    @Test func cardOffAdvancesAtTheEnd() {
+        #expect(outcome(cardEnabled: false) == .advanceWithoutOverlay)
+    }
+
+    /// Autoplay off, card off: nothing is offered, so the player closes like at a movie's end and the
+    /// viewer lands back on the series page.
+    @Test func cardOffWithAutoplayOffEndsTheSession() {
+        #expect(outcome(cardEnabled: false, autoplayEnabled: false) == .dismissPlayer)
+    }
+
+    @Test func cardOffWithoutASuccessorEndsTheSession() {
+        #expect(outcome(hasNextEpisode: false, cardEnabled: false) == .dismissPlayer)
+    }
+
+    @Test func cardOffInPiPAdvancesInPlace() {
+        #expect(outcome(pictureInPictureActive: true, cardEnabled: false) == .advanceWithoutOverlay)
+    }
+
+    @Test func cardOffWithAutoplayOffClosesPiP() {
+        #expect(outcome(pictureInPictureActive: true, cardEnabled: false, autoplayEnabled: false)
+                == .endPictureInPicture)
     }
 
     // MARK: - Countdown switched off (Sodalite#67)

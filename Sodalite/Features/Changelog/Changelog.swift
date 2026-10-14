@@ -99,6 +99,12 @@ enum Changelog {
                     icon: "hifispeaker.2.fill"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.nextEpisodeCard.title",
+                    "changelog.1_1_0.nextEpisodeCard.body",
+                    icon: "rectangle.on.rectangle"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.durations.title",
                     "changelog.1_1_0.durations.body",

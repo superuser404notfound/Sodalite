@@ -71603,6 +71603,328 @@
         }
       }
     },
+    "changelog.1_1_0.nextEpisodeCard.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové nastavení v Přehrávání skryje kartu další epizody. S automatickým přehráváním začne další epizoda hned na konci, bez něj se přehrávač vrátí na stránku seriálu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny indstilling under Afspilning skjuler kortet for næste afsnit. Med automatisk afspilning starter næste afsnit lige ved slutningen, ellers vender afspilleren tilbage til serien."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine neue Einstellung unter Wiedergabe blendet die Karte zur nächsten Folge aus. Mit Autoplay startet die nächste Folge direkt am Ende, ohne kehrt der Player zur Serienseite zurück."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια νέα ρύθμιση στην Αναπαραγωγή κρύβει την κάρτα του επόμενου επεισοδίου. Με αυτόματη αναπαραγωγή το επόμενο επεισόδιο ξεκινά αμέσως στο τέλος, χωρίς αυτή η αναπαραγωγή επιστρέφει στη σελίδα της σειράς."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new setting under Playback hides the next episode card. With autoplay the next episode starts right at the end, without it the player returns to the series page."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nuevo ajuste en Reproducción oculta la tarjeta del siguiente episodio. Con la reproducción automática, el siguiente empieza justo al final; sin ella, el reproductor vuelve a la página de la serie."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uusi Toisto-asetus piilottaa seuraavan jakson kortin. Automaattisella toistolla seuraava jakso alkaa heti lopussa, ilman sitä soitin palaa sarjan sivulle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nouveau réglage dans Lecture masque la carte de l'épisode suivant. Avec la lecture automatique, l'épisode suivant démarre dès la fin ; sinon, le lecteur revient à la page de la série."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova postavka u Reprodukciji skriva karticu sljedeće epizode. Uz automatsku reprodukciju sljedeća epizoda počinje odmah na kraju, bez nje reproduktor se vraća na stranicu serije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy új Lejátszás-beállítás elrejti a következő epizód kártyáját. Automatikus lejátszással a következő epizód rögtön a végén indul, nélküle a lejátszó visszatér a sorozat oldalára."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una nuova impostazione in Riproduzione nasconde la scheda del prossimo episodio. Con la riproduzione automatica il prossimo episodio parte subito alla fine, altrimenti il player torna alla pagina della serie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生設定の新しい項目で次のエピソードのカードを非表示にできます。自動再生がオンなら終了と同時に次のエピソードが始まり、オフならプレーヤーはシリーズのページに戻ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 설정의 새 항목으로 다음 에피소드 카드를 숨길 수 있습니다. 자동 재생이 켜져 있으면 끝나는 즉시 다음 에피소드가 시작되고, 꺼져 있으면 플레이어가 시리즈 페이지로 돌아갑니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny innstilling under Avspilling skjuler kortet for neste episode. Med automatisk avspilling starter neste episode rett ved slutten, ellers går spilleren tilbake til serien."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een nieuwe instelling onder Afspelen verbergt de kaart voor de volgende aflevering. Met automatisch afspelen start de volgende aflevering direct aan het einde, zonder keert de speler terug naar de seriepagina."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowe ustawienie w sekcji Odtwarzanie ukrywa kartę następnego odcinka. Z autoodtwarzaniem następny odcinek startuje od razu na końcu, bez niego odtwarzacz wraca do strony serialu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um novo ajuste em Reprodução oculta o cartão do próximo episódio. Com a reprodução automática, o próximo começa logo no fim; sem ela, o player volta para a página da série."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma nova definição em Reprodução oculta o cartão do episódio seguinte. Com a reprodução automática, o seguinte começa logo no fim; sem ela, o leitor volta à página da série."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O setare nouă în Redare ascunde cardul episodului următor. Cu redarea automată, episodul următor pornește imediat la final, fără ea playerul revine la pagina serialului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая настройка в разделе «Воспроизведение» скрывает карточку следующего эпизода. С автовоспроизведением следующий эпизод начинается сразу в конце, без него плеер возвращается на страницу сериала."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové nastavenie v Prehrávaní skryje kartu ďalšej epizódy. S automatickým prehrávaním sa ďalšia epizóda spustí hneď na konci, bez neho sa prehrávač vráti na stránku seriálu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny inställning under Uppspelning döljer kortet för nästa avsnitt. Med automatisk uppspelning startar nästa avsnitt direkt vid slutet, annars går spelaren tillbaka till serien."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma altındaki yeni bir ayar sonraki bölüm kartını gizler. Otomatik oynatma açıkken sonraki bölüm hemen sonda başlar, kapalıyken oynatıcı dizi sayfasına döner."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нове налаштування в розділі «Відтворення» приховує картку наступного епізоду. З автовідтворенням наступний епізод починається одразу наприкінці, без нього плеєр повертається на сторінку серіалу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“播放”中的新设置可隐藏下一集卡片。开启自动播放时，下一集会在结束时立即开始；未开启时，播放器返回剧集页面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「播放」中的新設定可隱藏下一集卡片。開啟自動播放時，下一集會在結束時立即開始；未開啟時，播放器返回影集頁面。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.nextEpisodeCard.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta další epizody volitelná"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort for næste afsnit er valgfrit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte zur nächsten Folge abschaltbar"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προαιρετική κάρτα επόμενου επεισοδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next episode card is optional"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarjeta del siguiente episodio opcional"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuraavan jakson kortti valinnainen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte de l'épisode suivant facultative"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartica sljedeće epizode po izboru"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kikapcsolható a következő epizód kártyája"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheda del prossimo episodio facoltativa"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のエピソードのカードをオフにできます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 에피소드 카드 끄기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort for neste episode er valgfritt"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaart volgende aflevering optioneel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta następnego odcinka opcjonalna"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartão do próximo episódio opcional"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartão do episódio seguinte opcional"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cardul episodului următor opțional"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карточку следующего эпизода можно отключить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta ďalšej epizódy voliteľná"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort för nästa avsnitt valfritt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki bölüm kartı isteğe bağlı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картку наступного епізоду можна вимкнути"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一集卡片可关闭"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一集卡片可關閉"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.offlineDownloads.body" : {
       "comment" : "What's New 1.1.0: offline downloads body",
       "extractionState" : "manual",
@@ -194751,6 +195073,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "3 小時"
+          }
+        }
+      }
+    },
+    "settings.playback.nextEpisodeCard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta další epizody"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort for næste afsnit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte zur nächsten Folge"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάρτα επόμενου επεισοδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Episode Card"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarjeta del siguiente episodio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuraavan jakson kortti"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte de l'épisode suivant"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartica sljedeće epizode"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Következő epizód kártyája"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheda del prossimo episodio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のエピソードのカード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 에피소드 카드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort for neste episode"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaart volgende aflevering"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta następnego odcinka"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartão do próximo episódio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartão do episódio seguinte"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cardul episodului următor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карточка следующего эпизода"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karta ďalšej epizódy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort för nästa avsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki Bölüm Kartı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Картка наступного епізоду"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一集卡片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一集卡片"
+          }
+        }
+      }
+    },
+    "settings.playback.nextEpisodeCard.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazí kartu další epizody před koncem. Vypnuto: s automatickým přehráváním pokračuje na konci rovnou, bez něj se vrátí na stránku seriálu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viser kortet for næste afsnit mod slutningen. Fra: med automatisk afspilning fortsætter det direkte ved slutningen, ellers går det tilbage til serien."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt gegen Ende die Karte zur nächsten Folge. Aus: mit Autoplay geht es am Ende direkt weiter, ohne zurück zur Serienseite."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δείχνει την κάρτα του επόμενου επεισοδίου κοντά στο τέλος. Απενεργοποιημένο: με την αυτόματη αναπαραγωγή συνεχίζει απευθείας στο τέλος, χωρίς αυτή επιστρέφει στη σειρά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the card for the next episode near the end. Off: with autoplay the next one starts right at the end, without it the player returns to the series page."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra la tarjeta del siguiente episodio cerca del final. Desactivado: con la reproducción automática continúa directamente al final; sin ella, vuelve a la página de la serie."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näyttää seuraavan jakson kortin lopun lähestyessä. Pois: automaattisella toistolla jatketaan suoraan lopussa, ilman sitä palataan sarjan sivulle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche la carte de l'épisode suivant vers la fin. Désactivé : avec la lecture automatique, l'épisode suivant démarre directement à la fin ; sinon, retour à la page de la série."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikazuje karticu sljedeće epizode pred kraj. Isključeno: uz automatsku reprodukciju nastavlja se izravno na kraju, bez nje vraća se na stranicu serije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A vége felé megjeleníti a következő epizód kártyáját. Ki: automatikus lejátszással a végén azonnal folytatódik, nélküle visszatér a sorozat oldalára."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra la scheda del prossimo episodio verso la fine. Disattivato: con la riproduzione automatica prosegue direttamente alla fine, altrimenti torna alla pagina della serie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終盤に次のエピソードのカードを表示します。オフの場合、自動再生がオンなら終了時にそのまま次へ進み、オフならシリーズのページに戻ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "끝부분에 다음 에피소드 카드를 표시합니다. 끔: 자동 재생이 켜져 있으면 끝에서 바로 이어지고, 꺼져 있으면 시리즈 페이지로 돌아갑니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viser kortet for neste episode mot slutten. Av: med automatisk avspilling fortsetter det rett videre ved slutten, ellers går det tilbake til serien."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toont tegen het einde de kaart voor de volgende aflevering. Uit: met automatisch afspelen gaat het aan het einde direct verder, zonder ga je terug naar de seriepagina."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokazuje kartę następnego odcinka pod koniec. Wył.: z autoodtwarzaniem przechodzi od razu na końcu, bez niego wraca do strony serialu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra o cartão do próximo episódio perto do fim. Desativado: com a reprodução automática segue direto no fim; sem ela, volta para a página da série."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra o cartão do episódio seguinte perto do fim. Desativado: com a reprodução automática continua diretamente no fim; sem ela, volta à página da série."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează cardul episodului următor spre final. Dezactivat: cu redarea automată continuă direct la final, fără ea revine la pagina serialului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает карточку следующего эпизода ближе к концу. «Выкл.»: с автовоспроизведением в конце сразу начинается следующий, без него возврат на страницу сериала."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazí kartu ďalšej epizódy pred koncom. Vypnuté: s automatickým prehrávaním pokračuje na konci priamo, bez neho sa vráti na stránku seriálu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visar kortet för nästa avsnitt mot slutet. Av: med automatisk uppspelning fortsätter det direkt vid slutet, annars går det tillbaka till serien."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sona doğru sonraki bölümün kartını gösterir. Kapalı: otomatik oynatma açıkken sonda doğrudan devam eder, kapalıyken dizi sayfasına döner."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показує картку наступного епізоду ближче до кінця. «Вимкнено»: з автовідтворенням наприкінці одразу починається наступний, без нього повернення на сторінку серіалу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在接近结尾时显示下一集卡片。关闭时：开启自动播放会在结束后直接继续，未开启则返回剧集页面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在接近結尾時顯示下一集卡片。關閉時：開啟自動播放會在結束後直接繼續，未開啟則返回影集頁面。"
           }
         }
       }

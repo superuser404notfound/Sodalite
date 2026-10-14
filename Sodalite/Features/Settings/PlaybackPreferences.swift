@@ -13,6 +13,7 @@ final class PlaybackPreferences {
     private enum Keys {
         static let autoplayNextEpisode = "playback.autoplayNextEpisode"
         static let autoplayCountdown = "playback.autoplayCountdown"
+        static let showNextEpisodeCard = "playback.showNextEpisodeCard"
         static let nextEpisodeCountdownSeconds = "playback.nextEpisodeCountdownSeconds"
         static let nextEpisodeCountdownAnchor = "playback.nextEpisodeCountdownAnchor"
         static let skipForwardSeconds = "playback.skipForwardSeconds"
@@ -259,6 +260,13 @@ final class PlaybackPreferences {
     /// post-credit scenes) before the switch (Sodalite#67). Inert while `autoplayNextEpisode` is off.
     var autoplayCountdown: Bool {
         didSet { store.set(autoplayCountdown, forKey: Keys.autoplayCountdown) }
+    }
+
+    /// Off never puts the next-episode card up: with autoplay the successor follows at the real
+    /// end, without it the player closes there like at a movie's end. Same routing as a card the
+    /// user dismissed, only for every episode.
+    var showNextEpisodeCard: Bool {
+        didSet { store.set(showNextEpisodeCard, forKey: Keys.showNextEpisodeCard) }
     }
 
     var autoSkipIntro: Bool {
@@ -517,6 +525,7 @@ final class PlaybackPreferences {
         self.device = device
         self.autoplayNextEpisode = store.object(forKey: Keys.autoplayNextEpisode) as? Bool ?? true
         self.autoplayCountdown = store.object(forKey: Keys.autoplayCountdown) as? Bool ?? true
+        self.showNextEpisodeCard = store.object(forKey: Keys.showNextEpisodeCard) as? Bool ?? true
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false

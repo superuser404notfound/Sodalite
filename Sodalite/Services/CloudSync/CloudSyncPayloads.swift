@@ -175,6 +175,8 @@ struct PlaybackSettingsPayload: Codable, Equatable {
     /// older build is making a statement about both jumps, not staying silent about them.
     var skipForwardSeconds: Int?
     var skipBackwardSeconds: Int?
+    /// The next-episode card switch, optional for the same reason as the late fields above.
+    var showNextEpisodeCard: Bool?
     /// Retired with the in-player log overlay (41cf02e5), and still written, always false: 1.0.0
     /// decodes this payload synthesized and requires both keys, so a record created without them
     /// (after a zone reset, an account change, a first upload) failed to decode there as a whole.
