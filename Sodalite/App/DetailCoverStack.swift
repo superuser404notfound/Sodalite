@@ -66,3 +66,55 @@ extension View {
         modifier(DetailCoverPush())
     }
 }
+
+#if os(iOS)
+/// One `DetailCoverStack` per tab, for the iPhone shell: details push onto the tab's own stack
+/// there (see detailCover), and the corner chrome above the tab stands down while one is pushed,
+/// the way the cover's close button does. Built for every tab up front so no stack is created
+/// while a body is being evaluated.
+@MainActor
+final class TabPushStacks {
+    private let stacks: [AppTab: DetailCoverStack] = Dictionary(
+        uniqueKeysWithValues: AppTab.allCases.map { ($0, DetailCoverStack()) })
+
+    func stack(for tab: AppTab) -> DetailCoverStack { stacks[tab] ?? DetailCoverStack() }
+}
+
+private struct ShellChromeTopInsetKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+extension EnvironmentValues {
+    /// Room a tab's root page keeps clear for the iPhone's floating corner chrome. Zero where the
+    /// chrome is not drawn or the page scrolls under it (`scrollsUnderShellChrome`).
+    var shellChromeTopInset: CGFloat {
+        get { self[ShellChromeTopInsetKey.self] }
+        set { self[ShellChromeTopInsetKey.self] = newValue }
+    }
+}
+#endif
+
+extension View {
+    /// Keeps a tab's root page clear of the iPhone's corner chrome. Applied INSIDE the tab's
+    /// NavigationStack, on the root only: a pushed page hides the chrome and runs to the top edge,
+    /// and a padding around the whole stack would leave it an empty band there and make the root
+    /// jump when it slides back in.
+    @ViewBuilder
+    func reservesShellChrome() -> some View {
+        #if os(iOS)
+        modifier(ReservesShellChrome())
+        #else
+        self
+        #endif
+    }
+}
+
+#if os(iOS)
+private struct ReservesShellChrome: ViewModifier {
+    @Environment(\.shellChromeTopInset) private var inset
+
+    func body(content: Content) -> some View {
+        content.padding(.top, inset)
+    }
+}
+#endif

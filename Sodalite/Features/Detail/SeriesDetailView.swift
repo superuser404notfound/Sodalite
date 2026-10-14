@@ -585,7 +585,8 @@ struct SeriesDetailView: View {
     private func contentOverlay(vm: DetailViewModel) -> some View {
         DetailContentOverlay(
             heroImageURL: backdropURL,
-            heroPosterURL: vm.heroPosterURL(for: vm.item),
+            heroPosterURL: vm.seriesHeroPosterURL(for: vm.item, episode: initialEpisode),
+            portraitHero: true,
             hero: {
             // Series logo, both modes (episode has none); observes the VM so it appears once an episode deep-link's series stub loads imageTags, no scroll needed.
             DetailHeroLogo(viewModel: vm)
@@ -723,8 +724,10 @@ struct SeriesDetailView: View {
             // Panel title is the episode name in episode mode; the series root has none (logo lives in the hero slot, see DetailContentOverlay).
             if isShowingEpisode {
                 Text(selectedEpisode?.name ?? "")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    // Smaller in the upright iPhone's narrow column, where the large title ran to two
+                    // lines and pushed Play off the first screen under the poster.
+                    .font(isPhonePortrait ? .title3 : .largeTitle)
+                    .fontWeight(isPhonePortrait ? .semibold : .bold)
                     .lineLimit(2)
                     .multilineTextAlignment(isPhonePortrait ? .center : .leading)
                     .frame(maxWidth: .infinity, alignment: isPhonePortrait ? .center : .leading)

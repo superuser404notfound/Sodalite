@@ -53,6 +53,7 @@ struct SearchView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .reservesShellChrome()
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $destination) { destination in
                 switch destination {

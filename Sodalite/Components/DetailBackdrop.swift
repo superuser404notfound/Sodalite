@@ -92,6 +92,10 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// `DetailBackdrop` owns the artwork). Same two URLs that surface passes to the backdrop.
     var heroImageURL: URL? = nil
     var heroPosterURL: URL? = nil
+    /// iPhone portrait: the poster stands as the hero instead of the 16:9 band, the shape Home's
+    /// banner takes on an upright iPhone. Only for items whose poster is a real upright poster
+    /// (films, series, collections); an episode still or a home video's thumb is wide.
+    var portraitHero: Bool = false
     @ViewBuilder let hero: () -> Hero
     @ViewBuilder let primary: () -> Primary
     @ViewBuilder let content: () -> Content
@@ -200,12 +204,14 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder primary: @escaping () -> Primary,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.heroImageURL = heroImageURL
         self.heroPosterURL = heroPosterURL
+        self.portraitHero = portraitHero
         self.hero = hero
         self.primary = primary
         self.content = content
@@ -363,13 +369,18 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     private var portraitBody: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                heroBand
+                if usesPosterHero {
+                    posterHero
+                } else {
+                    heroBand
+                }
 
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
                         primary()
                     }
-                    .padding(.top, 20)
+                    // Over the poster's dissolve by `posterOverlap`: see there.
+                    .padding(.top, usesPosterHero ? 20 - Self.posterOverlap : 20)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 40) {
@@ -407,7 +418,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             .overlay(alignment: .top) {
                 hero()
                     .padding(.horizontal, metrics.rowInset)
-                    .frame(height: max(0, safeTop + bandHeight - 12), alignment: .bottom)
+                    .frame(height: max(0, safeTop + heroHeight - 12 - (usesPosterHero ? Self.posterOverlap : 0)), alignment: .bottom)
                     .allowsHitTesting(false)
             }
         }
@@ -421,7 +432,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         // on the page's rows pass under the status bar and the close button, and they blur out there
         // like everywhere else instead of running under them sharp.
         .onScrollGeometryChange(for: Bool.self) { geometry in
-            geometry.contentOffset.y + geometry.contentInsets.top > bandHeight * 0.6
+            geometry.contentOffset.y + geometry.contentInsets.top > heroHeight * 0.6
         } action: { _, hasLeft in
             bandHasLeftTop = hasLeft
         }
@@ -432,6 +443,83 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         }
         .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
         .animation(.easeInOut(duration: 0.4), value: artworkPalette)
+    }
+
+    /// The upright poster, on Home's upright banner recipe (HomeHeroCarousel.portraitArtwork): the
+    /// poster hangs from just under the Dynamic Island, so its top, where most posters carry their
+    /// title, is never behind the island or the back button, and a heavily blurred copy of the same
+    /// art fills the island strip. The bottom dissolves into the artwork's colour like the band does.
+    ///
+    /// Pulling the page down past its top stretches the artwork instead of uncovering what is above
+    /// it: the whole hero scales up from its bottom edge by exactly the overscroll, so its top stays
+    /// on the screen's edge. Read per frame in `visualEffect` rather than through scroll state, which
+    /// lags a drag (see the trailing filler's note).
+    private var posterHero: some View {
+        let near = artworkPalette.near
+        return ZStack(alignment: .top) {
+            posterImage(alignment: .center)
+                .blur(radius: 30, opaque: true)
+                // Keeps the clock legible on a bright poster.
+                .overlay(alignment: .top) {
+                    LinearGradient(colors: [.black.opacity(0.25), .black.opacity(0)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: safeTop)
+                }
+            posterImage(alignment: .top)
+                .mask {
+                    VStack(spacing: 0) {
+                        LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
+                            .frame(height: 28)
+                        Color.black
+                    }
+                }
+                .padding(.top, safeTop)
+        }
+        .frame(maxWidth: .infinity, minHeight: safeTop + posterHeight, maxHeight: safeTop + posterHeight)
+        .overlay(alignment: .bottom) {
+            LinearGradient(
+                stops: [
+                    .init(color: near.opacity(0), location: 0),
+                    .init(color: near.opacity(0.12), location: 0.30),
+                    .init(color: near.opacity(0.45), location: 0.58),
+                    .init(color: near.opacity(0.85), location: 0.82),
+                    .init(color: near, location: 1)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 220)
+            .allowsHitTesting(false)
+        }
+        // Global, not the scroll view's space: the page runs under the top safe area and carries a
+        // top bar inset, so at rest the hero sits at the screen's edge but not at the scroll space's
+        // zero, and only the screen's edge is what the stretch has to hold.
+        .visualEffect { content, proxy in
+            let pull = max(0, proxy.frame(in: .global).minY)
+            return content.scaleEffect(1 + pull / max(1, proxy.size.height), anchor: .bottom)
+        }
+        .allowsHitTesting(false)
+    }
+
+    /// The poster laid over a surface that takes exactly the space it is offered: framed directly, a
+    /// filled image grows its frame to the overflow, as on Home's banner.
+    private func posterImage(alignment: Alignment) -> some View {
+        Color.clear
+            .overlay(alignment: alignment) {
+                AsyncCachedImage(url: heroPosterURL, onImageLoaded: { image in
+                    #if canImport(UIKit)
+                    if let url = heroPosterURL {
+                        ArtworkTintStore.shared.resolve(image, for: url)
+                    }
+                    #endif
+                }) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    artworkPalette.near
+                }
+            }
+            .clipped()
     }
 
     /// The band: the artwork's own top edge continued across the Dynamic Island, then the artwork.
@@ -568,8 +656,36 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     }
 
     private var artworkURL: URL? {
-        heroImageURL ?? heroPosterURL
+        usesPosterHero ? heroPosterURL : (heroImageURL ?? heroPosterURL)
     }
+
+    private var usesPosterHero: Bool {
+        portraitHero && heroPosterURL != nil
+    }
+
+    /// The artwork's height below the island: the 16:9 band, or the poster's 4:5 box.
+    private var heroHeight: CGFloat {
+        usesPosterHero ? posterHeight : bandHeight
+    }
+
+    /// 4:5 off the window width, as Home's upright banner, and the same on every page: a height
+    /// derived from the panel below gave each title its own crop and resized the art whenever the
+    /// panel's text changed (device, 2026-10-14).
+    private var posterHeight: CGFloat {
+        #if os(iOS)
+        let width = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.bounds.width ?? 390
+        return (width * 5 / 4).rounded()
+        #else
+        return 0
+        #endif
+    }
+
+    /// How far the logo and the panel reach up over the poster's bottom. That stretch is already the
+    /// dissolve into the page colour (220 pt), so it reads as the page rather than the picture, and
+    /// taking the room from there is what keeps Play on the first screen under a full 4:5 poster with
+    /// an episode's title in the panel.
+    private static var posterOverlap: CGFloat { 56 }
 
     private var portraitBandUsesPoster: Bool {
         heroImageURL == nil && heroPosterURL != nil
@@ -705,12 +821,14 @@ extension DetailContentOverlay where Primary == EmptyView {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.init(
             heroImageURL: heroImageURL,
             heroPosterURL: heroPosterURL,
+            portraitHero: portraitHero,
             hero: hero,
             primary: { EmptyView() },
             content: content
