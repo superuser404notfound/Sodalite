@@ -85,7 +85,7 @@ nonisolated enum LocalNetworkAccess {
     /// somebody with such a server could close by measuring what the reading actually is.
     static func isDenied(for url: URL) async -> Bool {
         guard isGoverned(url), let host = url.host(), let port = port(for: url) else { return false }
-        guard isAttachedToALocalNetwork(host: host, port: port) else { return false }
+        guard await isAttachedToALocalNetwork(host: host, port: port) else { return false }
         let denied = await LocalNetworkProber.shared.isDenied(host: host, port: port)
         guard denied else { return false }
         LogTap.shared.note("[network] local network access denied by this device for \(host):\(port)")
@@ -107,17 +107,32 @@ nonisolated enum LocalNetworkAccess {
     /// why it is safe where a "cellular means unreachable" rule would not be: it can only ever
     /// withdraw a claim the app was about to make about the DEVICE.
     ///
-    /// Fails open on an unknown path. The monitor's first callback may not have landed yet, and a
-    /// missing reading is not evidence of anything.
-    private static func isAttachedToALocalNetwork(host: String, port: UInt16) -> Bool {
-        guard let reading = NetworkPathSnapshot.shared.current else { return true }
-        guard !reading.isAttachedToALocalNetwork else { return true }
+    /// Reads the path NOW rather than the monitor's snapshot. The snapshot is only as fresh as the
+    /// monitor's last callback, and a suspended app gets none: an iPhone that left the house with
+    /// Sodalite in the background comes back on 5G still holding the Wi-Fi reading from home, and
+    /// its first requests fire before the monitor catches up. The guard then waved the accusation
+    /// through, nothing had answered in the last 20 s because the app had been asleep, and the
+    /// overlay told a phone on cellular to switch on a permission that was on.
+    ///
+    /// Fails open only when neither a fresh nor a cached reading exists: a missing reading is not
+    /// evidence of anything.
+    private static func isAttachedToALocalNetwork(host: String, port: UInt16) async -> Bool {
+        let fresh = await FreshPathReading.take()
+        if let fresh { NetworkPathSnapshot.shared.record(fresh) }
+        guard !mayAccuse(fresh: fresh, cached: NetworkPathSnapshot.shared.current) else { return true }
+        let reading = fresh ?? NetworkPathSnapshot.shared.current
         LogTap.shared.note(
             "[network] not accusing this device over \(host):\(port): no local network to be denied "
-            + "(satisfied=\(reading.isSatisfied) usesLocal=\(reading.usesLocalInterface) "
-            + "hasLocal=\(reading.hasLocalInterface))"
+            + "(fresh=\(fresh != nil) satisfied=\(reading?.isSatisfied ?? false) "
+            + "usesLocal=\(reading?.usesLocalInterface ?? false) hasLocal=\(reading?.hasLocalInterface ?? false))"
         )
         return false
+    }
+
+    /// Whether the path allows the accusation at all. A fresh reading beats the cached one, and only
+    /// the absence of both fails open. Split out so the precedence is testable without a monitor.
+    static func mayAccuse(fresh: NetworkPathSnapshot.Reading?, cached: NetworkPathSnapshot.Reading?) -> Bool {
+        (fresh ?? cached)?.isAttachedToALocalNetwork ?? true
     }
 
     /// A denial is true about the address it was measured on, and the error case says so. Whether it
@@ -159,6 +174,10 @@ nonisolated enum LocalNetworkAccess {
         guard let url = await MainActor.run(body: { lastDeniedURL }) else { return false }
         await forgetVerdict()
         guard isGoverned(url), let host = url.host(), let port = port(for: url) else { return false }
+        // The same coherence check as the first accusation. Without it, an overlay raised at home
+        // stays up on every return to the foreground after the phone has left for cellular, since
+        // the probe reports a LAN endpoint as denied there too.
+        guard await isAttachedToALocalNetwork(host: host, port: port) else { return false }
         return await LocalNetworkProber.shared.isDenied(host: host, port: port)
     }
 
@@ -271,17 +290,38 @@ private actor LocalNetworkProber {
     }
 }
 
+/// One path reading taken on demand from a short-lived monitor, whose first callback reports the
+/// current path. Bounded, because the answer is only worth having before the error it qualifies.
+private nonisolated enum FreshPathReading {
+    private static let timeout: TimeInterval = 0.5
+
+    static func take() async -> NetworkPathSnapshot.Reading? {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue(label: "de.superuser404.Sodalite.freshPathReading")
+        let reading = await withCheckedContinuation { (continuation: CheckedContinuation<NetworkPathSnapshot.Reading?, Never>) in
+            let answer = OneShotValue(continuation)
+            monitor.pathUpdateHandler = { path in answer.resume(NetworkPathSnapshot.Reading(path)) }
+            monitor.start(queue: queue)
+            queue.asyncAfter(deadline: .now() + timeout) { answer.resume(nil) }
+        }
+        monitor.cancel()
+        return reading
+    }
+}
+
 /// One-shot continuation. The connection's state handler and the timeout both race to answer, and
 /// exactly one of them may.
-private nonisolated final class OneShotAnswer: @unchecked Sendable {
-    private let lock = NSLock()
-    private var continuation: CheckedContinuation<Bool, Never>?
+private typealias OneShotAnswer = OneShotValue<Bool>
 
-    init(_ continuation: CheckedContinuation<Bool, Never>) {
+private nonisolated final class OneShotValue<Value: Sendable>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Value, Never>?
+
+    init(_ continuation: CheckedContinuation<Value, Never>) {
         self.continuation = continuation
     }
 
-    func resume(_ value: Bool) {
+    func resume(_ value: Value) {
         lock.lock()
         let pending = continuation
         continuation = nil
