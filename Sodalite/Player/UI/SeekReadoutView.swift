@@ -9,11 +9,11 @@ import UIKit
 
 /// Sodalite#104: a press and a hold, in the two languages they actually speak.
 ///
-/// A press names its interval, because the destination is known before it lands, and counts itself,
-/// because a burst of four is the thing a viewer is keeping track of. A hold names its rate and
-/// nothing else: a 15x to 240x scan has no countable step, so a fixed-interval glyph over it would be
-/// a lie. Nothing draws here on the touch transport, where a skip commits on the tap that asked for
-/// it and flashes its own HUD.
+/// A press names its interval, because the destination is known before it lands, and a burst adds
+/// up what it has covered (Sodalite#186: a count printed as "4x" read as a speed). A hold names its
+/// rate and nothing else: a scan stepping 15x to 480x has no countable step, so a fixed-interval
+/// glyph over it would be a lie. Nothing draws here on the touch transport, where a skip commits on
+/// the tap that asked for it and flashes its own HUD.
 ///
 /// Both readouts stay on ONE line, beside the clock rather than over it: a column of glyph over
 /// count is 66 pt against the clock's 37 on tvOS, and a stack centred on the clock's line spends the
@@ -34,7 +34,7 @@ struct SeekReadoutView: View {
                 Image(systemName: SkipGlyph.name(seconds: seconds, direction: direction))
                     .font(font)
                 if count > 1 {
-                    Text(verbatim: "\(count)x")
+                    Text(verbatim: SeekReadout.burstTotal(seconds: seconds, count: count, direction: direction))
                         .font(font)
                         .monospacedDigit()
                 }
@@ -55,14 +55,15 @@ struct SeekReadoutView: View {
     }
 }
 
-/// Sodalite#104: what the gesture has covered, drawn the way the gesture works. A countable comb of
-/// notches for a burst of presses, one continuous sweep for a hold, whose weight ramps with the rate.
+/// Sodalite#104: what the gesture has covered, as one continuous sweep from where it started to the
+/// knob, whose weight follows a hold's rate. Sodalite#186: a burst of presses used to draw a comb of
+/// notches here, and a comb on a timeline reads as chapter marks.
 ///
 /// Sodalite#151: one implementation for both transports. Everything it needs is the knob, the
 /// position the gesture started from and the readout, which either bar has to hand, and a second copy
 /// of rail arithmetic is the mistake #104 already made once and paid for on a device round.
 ///
-/// Drawn above the played fill and below the knob, so on a stored title the comb melts into the tint
+/// Drawn above the played fill and below the knob, so on a stored title the sweep melts into the tint
 /// behind the playhead exactly as the chapter ticks beside it do.
 struct SeekTrail: View {
     let readout: SeekReadout?
@@ -74,21 +75,20 @@ struct SeekTrail: View {
 
     var body: some View {
         switch readout {
-        case .press(_, let count, _) where count > 1:
-            ForEach(1..<count, id: \.self) { step in
-                Capsule()
-                    .fill(.white.opacity(0.75))
-                    .frame(width: 2, height: trackHeight + 4)
-                    .offset(x: originX + (knobX - originX) * CGFloat(step) / CGFloat(count) - 1)
-            }
+        case .press:
+            sweep(opacity: 0.3)
         case .hold(let rate, _):
-            Capsule()
-                .fill(.white.opacity(0.15 + 0.35 * min(1, Double(rate) / 240)))
-                .frame(width: abs(knobX - originX), height: trackHeight)
-                .offset(x: min(originX, knobX))
-        default:
+            sweep(opacity: 0.15 + 0.35 * min(1, Double(rate) / Double(SeekReadout.holdStages.last?.rate ?? rate)))
+        case nil:
             EmptyView()
         }
+    }
+
+    private func sweep(opacity: Double) -> some View {
+        Capsule()
+            .fill(.white.opacity(opacity))
+            .frame(width: abs(knobX - originX), height: trackHeight)
+            .offset(x: min(originX, knobX))
     }
 }
 

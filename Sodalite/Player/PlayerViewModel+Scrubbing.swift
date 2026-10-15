@@ -4,7 +4,7 @@ import AetherEngine
 /// Sodalite#104: the two seek gestures, as the transport reports them.
 ///
 /// A press of the d-pad is a discrete step of a known length, and its destination is known before it
-/// lands; a hold is a scan ramping 15x to 240x that you stop when the picture looks right. Nothing
+/// lands; a hold is a scan stepping 15x to 480x that you stop when the picture looks right. Nothing
 /// about the second is countable, so a fixed-interval glyph over it would be a lie, and the bar used
 /// to draw both as the same knob sliding along the same track.
 enum SeekReadout: Equatable {
@@ -17,6 +17,27 @@ enum SeekReadout: Equatable {
         switch self {
         case .press(_, _, let direction), .hold(_, let direction): return direction
         }
+    }
+
+    /// Sodalite#186: the rates a hold steps through, and how long it has to be held to reach each.
+    ///
+    /// A rate that climbed every 80 ms read as a counter running for as long as the button was down,
+    /// and a burst count printed as "4x" next to it read as one more speed. Six stages a viewer can
+    /// see change are a speed; a number that never settles is not.
+    static let holdStages: [(after: Double, rate: Int)] = [
+        (0, 15), (1.5, 30), (3, 60), (5, 120), (7, 240), (10, 480),
+    ]
+
+    /// The rate a hold runs at once it has been held `seconds` of real time.
+    static func holdRate(heldFor seconds: Double) -> Int {
+        holdStages.last(where: { seconds >= $0.after })?.rate ?? holdStages[0].rate
+    }
+
+    /// Sodalite#186: what a burst of presses has covered, signed, in place of how many presses it took.
+    static func burstTotal(seconds: Int, count: Int, direction: Int) -> String {
+        let total = Duration.seconds(seconds * count)
+            .formatted(.units(allowed: [.hours, .minutes, .seconds], width: .narrow))
+        return (direction < 0 ? "\u{2212}" : "+") + total
     }
 
     /// Every symbol `SeekReadoutView` can put on screen, so the rail row can ask how tall the
@@ -234,25 +255,30 @@ extension PlayerViewModel {
 
         let dir = Float(direction < 0 ? -1 : 1)
         continuousSeekTask = Task { @MainActor [weak self] in
-            let tick = 0.08
-            var held = 0.0
+            // Sodalite#186: both the stage and the distance come off the clock, not off a tick count.
+            // A tick that ran late used to move the knob one nominal tick and age the hold by one, so
+            // under load the scan crawled below the rate the readout claimed.
+            let clock = ContinuousClock()
+            let start = clock.now
+            var last = start
             while !Task.isCancelled {
                 guard let self else { return }
                 // Live re-reads the growing DVR window each tick; VOD is fixed.
                 let dur = self.scrubReferenceDuration
                 guard dur > 0 else { return }
-                // Media-seconds per real second: ramps 15x -> 240x ceiling
-                // (~8.6s held) so long films spool quickly.
-                let rate = min(15 + held * 26, 240)
-                self.seekReadout = .hold(rate: Int(rate.rounded()), direction: direction < 0 ? -1 : 1)
-                let deltaProgress = dir * Float(rate * tick / dur)
+                let now = clock.now
+                let rate = SeekReadout.holdRate(heldFor: start.duration(to: now) / .seconds(1))
+                let elapsed = last.duration(to: now) / .seconds(1)
+                last = now
+                let readout = SeekReadout.hold(rate: rate, direction: direction < 0 ? -1 : 1)
+                if self.seekReadout != readout { self.seekReadout = readout }
+                let deltaProgress = dir * Float(Double(rate) * elapsed / dur)
                 self.scrubProgress = max(0, min(1, self.scrubProgress + deltaProgress))
                 if !self.isLiveSession {
                     self.scrubTime = self.formatSeconds(Double(self.scrubProgress) * dur)
                     self.scrubPreview.update(fraction: self.scrubProgress, durationSeconds: dur)
                 } else { self.updateLiveScrubPreview() }
-                try? await Task.sleep(for: .seconds(tick))
-                held += tick
+                try? await Task.sleep(for: .milliseconds(80))
             }
         }
     }

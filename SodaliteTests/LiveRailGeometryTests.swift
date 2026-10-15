@@ -431,12 +431,12 @@ struct PlayerTitleLinesTests {
 
 /// Sodalite#104: left and right on the d-pad already did two different things, and the bar drew them
 /// identically. A press is a discrete step whose destination is known before it lands; a hold is a
-/// scan ramping 15x to 240x that you stop when the picture looks right, and nothing about it is
+/// scan stepping 15x to 480x that you stop when the picture looks right, and nothing about it is
 /// countable, so a fixed-interval glyph over it would be a lie.
 @Suite("The two seek gestures speak two languages (Sodalite#104)")
 struct SeekReadoutTests {
 
-    @Test("a burst of presses counts itself")
+    @Test("a burst of presses keeps its count, which the readout turns into a distance")
     func abursCounts() {
         var readout: SeekReadout = .press(seconds: 10, count: 1, direction: -1)
         // Three more presses of the same interval, the same way.
@@ -456,11 +456,37 @@ struct SeekReadoutTests {
     @Test("a hold names a rate, and a press never does")
     func thetwoAreNotTheSameShape() {
         #expect(SeekReadout.hold(rate: 96, direction: 1) != SeekReadout.press(seconds: 96, count: 1, direction: 1))
-        // The rate the continuous scan ramps through, which has no countable step in it.
-        for held in stride(from: 0.0, through: 10.0, by: 0.5) {
-            let rate = min(15 + held * 26, 240)
-            #expect(rate >= 15 && rate <= 240)
+    }
+
+    /// Sodalite#186: a rate redrawn every tick read as a counter running for as long as the button
+    /// was down. A hold shows six stages and nothing between them.
+    @Test("a hold steps through six rates, never between them")
+    func aHoldSteps() {
+        let stages = SeekReadout.holdStages.map(\.rate)
+        #expect(stages == [15, 30, 60, 120, 240, 480])
+        #expect(SeekReadout.holdRate(heldFor: 0) == 15)
+        #expect(SeekReadout.holdRate(heldFor: 1.49) == 15)
+        #expect(SeekReadout.holdRate(heldFor: 1.5) == 30)
+        #expect(SeekReadout.holdRate(heldFor: 6.9) == 120)
+        #expect(SeekReadout.holdRate(heldFor: 7) == 240)
+        #expect(SeekReadout.holdRate(heldFor: 9.9) == 240)
+        #expect(SeekReadout.holdRate(heldFor: 10) == 480)
+        #expect(SeekReadout.holdRate(heldFor: 600) == 480)
+        for held in stride(from: 0.0, through: 10.0, by: 0.05) {
+            #expect(stages.contains(SeekReadout.holdRate(heldFor: held)))
         }
+    }
+
+    /// Sodalite#186: a burst says how far it went, signed, so "4x" can no longer read as a fifth speed.
+    @Test("a burst names the distance it covered, not how many presses it took")
+    func aBurstNamesItsDistance() {
+        let forward = SeekReadout.burstTotal(seconds: 10, count: 4, direction: 1)
+        let back = SeekReadout.burstTotal(seconds: 30, count: 3, direction: -1)
+        #expect(forward.hasPrefix("+"))
+        #expect(forward.contains("40"))
+        #expect(!forward.contains("x"))
+        #expect(back.hasPrefix("\u{2212}"))
+        #expect(back.contains("1"))
     }
 
     @Test("every skip interval the settings offer has a glyph to draw it with")
