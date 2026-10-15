@@ -89,10 +89,10 @@ enum TrackDisplayFormatter {
             && (track.profile?.localizedCaseInsensitiveContains("Dolby Atmos") ?? false)
     }
 
-    /// AetherEngine#744: DTS:X keeps its heights the same way, told by the profile FFmpeg reads off the
-    /// stream ("DTS-HD MA + DTS:X", "... IMAX"). The codec is the decoder's name, `dca` in libavcodec.
+    /// AetherEngine#744: DTS:X keeps its heights the same way. The engine's flag covers the profile
+    /// FFmpeg reads and a track LibDTSX confirmed while it played, which FFmpeg labels plain DTS-HD MA.
     static func isDTSX(_ track: TrackInfo) -> Bool {
-        isDTS(track.codec) && (track.profile?.localizedCaseInsensitiveContains("DTS:X") ?? false)
+        track.isDTSX
     }
 
     private static func isDTS(_ codec: String) -> Bool {
