@@ -196856,157 +196856,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bezeztrátové FLAC až do 7.1 kanálů. Doporučeno pro AVR s vícekanálovým LPCM přes HDMI. Vypnuto použije EAC3 5.1 pro soundbary."
+            "value" : "Bezeztrátové FLAC až do 7.1 kanálů. Doporučeno pro AVR a soundbary přes eARC, např. Sonos Arc. Vypnuto použije Dolby Digital+ 5.1 pro soundbary přes ARC."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tabsfri FLAC op til 7.1 kanaler. Anbefales til AVR'er med flerkanals LPCM via HDMI. Fra bruger EAC3 5.1 til soundbar-kompatibilitet."
+            "value" : "Tabsfri FLAC op til 7.1 kanaler. Anbefales til AVR'er og soundbars via eARC, f.eks. Sonos Arc. Fra bruger Dolby Digital+ 5.1 til soundbars via ARC."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verlustfreies FLAC bis zu 7.1 Kanäle. Empfohlen für AVRs mit Mehrkanal-LPCM über HDMI. Aus nutzt EAC3 5.1 für Soundbar-Kompatibilität."
+            "value" : "Verlustfreies FLAC bis zu 7.1 Kanäle. Empfohlen für AVRs und Soundbars an eARC, z. B. Sonos Arc. Aus nutzt Dolby Digital+ 5.1 für Soundbars an ARC."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC χωρίς απώλειες έως 7.1 κανάλια. Προτείνεται για AVR με πολυκάναλο LPCM μέσω HDMI. Ανενεργό: EAC3 5.1 για soundbar."
+            "value" : "FLAC χωρίς απώλειες έως 7.1 κανάλια. Προτείνεται για AVR και soundbar μέσω eARC, π.χ. Sonos Arc. Ανενεργό: Dolby Digital+ 5.1 για soundbar μέσω ARC."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lossless FLAC up to 7.1 channels. Recommended for AVRs with multichannel LPCM over HDMI. Off uses EAC3 5.1 for soundbar compatibility."
+            "value" : "Lossless FLAC up to 7.1 channels. Recommended for AVRs and soundbars on eARC, such as Sonos Arc. Off uses Dolby Digital+ 5.1 for soundbars on ARC."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC sin pérdida hasta 7.1 canales. Recomendado para AVR con LPCM multicanal por HDMI. Desactivado usa EAC3 5.1 para barras de sonido."
+            "value" : "FLAC sin pérdida hasta 7.1 canales. Recomendado para AVR y barras de sonido por eARC, como Sonos Arc. Desactivado usa Dolby Digital+ 5.1 para barras de sonido por ARC."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Häviötön FLAC jopa 7.1 kanavaa. Suositellaan AVR-laitteille, joissa monikanavainen LPCM HDMI:n kautta. Pois: EAC3 5.1 soundbareille."
+            "value" : "Häviötön FLAC jopa 7.1 kanavaa. Suositellaan AVR-laitteille ja eARC-soundbareille, kuten Sonos Arc. Pois: Dolby Digital+ 5.1 ARC-soundbareille."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC sans perte jusqu'à 7.1 canaux. Recommandé pour AVR avec LPCM multicanal via HDMI. Désactivé utilise EAC3 5.1 pour les barres de son."
+            "value" : "FLAC sans perte jusqu'à 7.1 canaux. Recommandé pour les AVR et les barres de son en eARC, comme la Sonos Arc. Désactivé utilise le Dolby Digital+ 5.1 pour les barres de son en ARC."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bezgubitni FLAC do 7.1 kanala. Preporučeno za AVR uređaje s višekanalnim LPCM preko HDMI. Isključeno koristi EAC3 5.1 za soundbarove."
+            "value" : "Bezgubitni FLAC do 7.1 kanala. Preporučeno za AVR uređaje i soundbarove na eARC-u, npr. Sonos Arc. Isključeno koristi Dolby Digital+ 5.1 za soundbarove na ARC-u."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veszteségmentes FLAC akár 7.1 csatornáig. AVR-ekhez ajánlott többcsatornás LPCM HDMI-n át. Ki: EAC3 5.1 hangprojektorokhoz."
+            "value" : "Veszteségmentes FLAC akár 7.1 csatornáig. AVR-ekhez és eARC-os hangprojektorokhoz ajánlott, pl. Sonos Arc. Ki: Dolby Digital+ 5.1 ARC-os hangprojektorokhoz."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC senza perdita fino a 7.1 canali. Consigliato per AVR con LPCM multicanale via HDMI. Off usa EAC3 5.1 per le soundbar."
+            "value" : "FLAC senza perdita fino a 7.1 canali. Consigliato per AVR e soundbar su eARC, come Sonos Arc. Off usa Dolby Digital+ 5.1 per le soundbar su ARC."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ロスレスFLAC、最大7.1チャンネル。HDMI経由のマルチチャンネルLPCM対応AVRに推奨。オフではサウンドバー互換のEAC3 5.1を使用。"
+            "value" : "ロスレスFLAC、最大7.1チャンネル。AVRやeARC接続のサウンドバー（Sonos Arcなど）に推奨。オフではARC接続のサウンドバー向けにDolby Digital+ 5.1を使用。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "무손실 FLAC, 최대 7.1채널. HDMI 멀티채널 LPCM AVR에 권장. 끄면 사운드바 호환을 위해 EAC3 5.1 사용."
+            "value" : "무손실 FLAC, 최대 7.1채널. AVR 및 eARC 사운드바(예: Sonos Arc)에 권장. 끄면 ARC 사운드바를 위해 Dolby Digital+ 5.1 사용."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tapsfri FLAC opptil 7.1 kanaler. Anbefales for AVR-er med flerkanals LPCM over HDMI. Av bruker EAC3 5.1 for soundbar-kompatibilitet."
+            "value" : "Tapsfri FLAC opptil 7.1 kanaler. Anbefales for AVR-er og soundbarer via eARC, f.eks. Sonos Arc. Av bruker Dolby Digital+ 5.1 for soundbarer via ARC."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lossless FLAC tot 7.1 kanalen. Aanbevolen voor AVR's met meerkanaals LPCM via HDMI. Uit gebruikt EAC3 5.1 voor soundbar-compatibiliteit."
+            "value" : "Lossless FLAC tot 7.1 kanalen. Aanbevolen voor AVR's en soundbars via eARC, zoals Sonos Arc. Uit gebruikt Dolby Digital+ 5.1 voor soundbars via ARC."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bezstratny FLAC do 7.1 kanałów. Zalecane dla AVR z wielokanałowym LPCM przez HDMI. Wył.: EAC3 5.1 dla zgodności z soundbarami."
+            "value" : "Bezstratny FLAC do 7.1 kanałów. Zalecane dla AVR i soundbarów przez eARC, np. Sonos Arc. Wył.: Dolby Digital+ 5.1 dla soundbarów przez ARC."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC sem perdas até 7.1 canais. Recomendado para AVRs com LPCM multicanal via HDMI. Desativado usa EAC3 5.1 para soundbars."
+            "value" : "FLAC sem perdas até 7.1 canais. Recomendado para AVRs e soundbars via eARC, como o Sonos Arc. Desativado usa Dolby Digital+ 5.1 para soundbars via ARC."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC sem perdas até 7.1 canais. Recomendado para AVRs com LPCM multicanal via HDMI. Desativado usa EAC3 5.1 para soundbars."
+            "value" : "FLAC sem perdas até 7.1 canais. Recomendado para AVRs e soundbars via eARC, como a Sonos Arc. Desativado usa Dolby Digital+ 5.1 para soundbars via ARC."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC fără pierderi până la 7.1 canale. Recomandat pentru AVR cu LPCM multicanal prin HDMI. Dezactivat: EAC3 5.1 pentru soundbar."
+            "value" : "FLAC fără pierderi până la 7.1 canale. Recomandat pentru AVR și soundbaruri prin eARC, de ex. Sonos Arc. Dezactivat: Dolby Digital+ 5.1 pentru soundbaruri prin ARC."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC без потерь до 7.1 каналов. Рекомендуется для AVR с многоканальным LPCM через HDMI. Выкл.: EAC3 5.1 для саундбаров."
+            "value" : "FLAC без потерь до 7.1 каналов. Рекомендуется для AVR и саундбаров через eARC, например Sonos Arc. Выкл.: Dolby Digital+ 5.1 для саундбаров через ARC."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bezstratové FLAC až do 7.1 kanálov. Odporúčané pre AVR s viackanálovým LPCM cez HDMI. Vypnuté použije EAC3 5.1 pre soundbary."
+            "value" : "Bezstratové FLAC až do 7.1 kanálov. Odporúčané pre AVR a soundbary cez eARC, napr. Sonos Arc. Vypnuté použije Dolby Digital+ 5.1 pre soundbary cez ARC."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Förlustfri FLAC upp till 7.1 kanaler. Rekommenderas för AVR med flerkanals LPCM via HDMI. Av använder EAC3 5.1 för soundbars."
+            "value" : "Förlustfri FLAC upp till 7.1 kanaler. Rekommenderas för AVR och soundbars via eARC, t.ex. Sonos Arc. Av använder Dolby Digital+ 5.1 för soundbars via ARC."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kayıpsız FLAC, 7.1 kanala kadar. HDMI üzerinden çok kanallı LPCM destekli AVR'ler için önerilir. Kapalı: soundbar için EAC3 5.1."
+            "value" : "Kayıpsız FLAC, 7.1 kanala kadar. AVR'ler ve eARC soundbar'lar (ör. Sonos Arc) için önerilir. Kapalı: ARC soundbar'lar için Dolby Digital+ 5.1."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLAC без втрат до 7.1 каналів. Рекомендовано для AVR з багатоканальним LPCM через HDMI. Вимк.: EAC3 5.1 для саундбарів."
+            "value" : "FLAC без втрат до 7.1 каналів. Рекомендовано для AVR і саундбарів через eARC, наприклад Sonos Arc. Вимк.: Dolby Digital+ 5.1 для саундбарів через ARC."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无损 FLAC,最高 7.1 声道。建议用于通过 HDMI 支持多声道 LPCM 的 AVR。关闭时使用 EAC3 5.1 以兼容条形音箱。"
+            "value" : "无损 FLAC,最高 7.1 声道。建议用于 AVR 和通过 eARC 连接的条形音箱(如 Sonos Arc)。关闭时为通过 ARC 连接的条形音箱使用 Dolby Digital+ 5.1。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "無損 FLAC,最高 7.1 聲道。建議用於透過 HDMI 支援多聲道 LPCM 的 AVR。關閉時使用 EAC3 5.1 以相容 Soundbar。"
+            "value" : "無損 FLAC,最高 7.1 聲道。建議用於 AVR 及透過 eARC 連接的 Soundbar(如 Sonos Arc)。關閉時為透過 ARC 連接的 Soundbar 使用 Dolby Digital+ 5.1。"
           }
         }
       }
