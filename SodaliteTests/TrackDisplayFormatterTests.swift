@@ -73,6 +73,25 @@ struct TrackDisplayFormatterTests {
         #expect(TrackDisplayFormatter.audioDisplayName(for: plain) != "Dolby TrueHD Atmos")
     }
 
+    /// AetherEngine#744: DTS:X keeps its heights like TrueHD Atmos. libavcodec's decoder is `dca`,
+    /// which the menu used to print as "DCA 7.1".
+    @Test("DTS:X names itself, the rest of the DTS family names its member")
+    func dtsFamily() {
+        func dts(_ profile: String?) -> TrackInfo {
+            TrackInfo(id: 3, name: "Track 3 (dca)", codec: "dca", language: nil, channels: 8,
+                      isDefault: true, profile: profile)
+        }
+        for profile in ["DTS-HD MA + DTS:X", "DTS-HD MA + DTS:X IMAX"] {
+            #expect(TrackDisplayFormatter.isDTSX(dts(profile)))
+            #expect(TrackDisplayFormatter.shortName(for: dts(profile)) == "DTS:X")
+            #expect(TrackDisplayFormatter.audioDisplayName(for: dts(profile)) == "DTS:X")
+        }
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-HD MA")) == "DTS-HD MA 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-HD HRA")) == "DTS-HD HRA 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-ES")) == "DTS 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts(nil)) == "DTS 7.1")
+    }
+
     @Test("a track with neither language nor a describable format keeps its name")
     func lastResortIsTheName() {
         let track = audio(language: nil, codec: "", channels: 0, name: "Commentary")
