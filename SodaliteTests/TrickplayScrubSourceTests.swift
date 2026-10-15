@@ -16,6 +16,14 @@ struct TrickplayScrubSourceTests {
         #expect(PlayerViewModel.shouldUseServerTrickplay(preferServer: false, tileSet: tileSet()) == false)
         #expect(PlayerViewModel.shouldUseServerTrickplay(preferServer: false, tileSet: nil) == false)
     }
+
+    @Test("a disc folder takes the tiles without the preference, it has no extractor (#185)")
+    func discFolderPrefersTiles() {
+        #expect(PlayerViewModel.shouldUseServerTrickplay(preferServer: false, tileSet: tileSet(),
+                                                         isDiscFolder: true) == true)
+        #expect(PlayerViewModel.shouldUseServerTrickplay(preferServer: false, tileSet: nil,
+                                                         isDiscFolder: true) == false)
+    }
 }
 
 @MainActor

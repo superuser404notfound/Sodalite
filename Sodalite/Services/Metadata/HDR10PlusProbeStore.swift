@@ -79,7 +79,8 @@ final class HDR10PlusProbeStore {
     /// HDR10+ is not asked again, and SDR / HLG have no HDR10 base layer to upgrade.
     static func shouldProbe(item: JellyfinItem, sourceID: String?) -> Bool {
         guard item.type == .movie || item.type == .episode else { return false }
-        guard item.effectiveMediaSource(id: sourceID) != nil else { return false }
+        // A disc folder has no file to open: the server would start an encode for it (Sodalite#185).
+        guard let source = item.effectiveMediaSource(id: sourceID), !source.isDiscFolder else { return false }
         let badges = MediaBadgeResolver.badges(
             width: item.width,
             height: item.height,

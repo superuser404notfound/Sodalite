@@ -654,8 +654,10 @@ final class PlayerViewModel {
     }
 
     /// Use server trickplay only when the user opted in AND the item actually has tiles.
-    nonisolated static func shouldUseServerTrickplay(preferServer: Bool, tileSet: TrickplayTileSet?) -> Bool {
-        preferServer && tileSet != nil
+    /// A disc folder takes the tiles regardless of the preference: it has no extractor (Sodalite#185).
+    nonisolated static func shouldUseServerTrickplay(preferServer: Bool, tileSet: TrickplayTileSet?,
+                                                     isDiscFolder: Bool = false) -> Bool {
+        (preferServer || isDiscFolder) && tileSet != nil
     }
 
     /// Open-time routing-probe budget for the engine on remote direct-play / direct-stream sources (#68).
@@ -1054,7 +1056,8 @@ final class PlayerViewModel {
         let trickplayTileSet = TrickplayTileSet(
             trickplay: item.trickplay, mediaSourceID: source.id, targetWidth: 320)
         if !isLocalSession, Self.shouldUseServerTrickplay(
-            preferServer: preferences.preferServerTrickplay, tileSet: trickplayTileSet),
+            preferServer: preferences.preferServerTrickplay, tileSet: trickplayTileSet,
+            isDiscFolder: source.isDiscFolder),
            let tileSet = trickplayTileSet {
             let itemID = item.id
             let service = playbackService
@@ -1197,6 +1200,9 @@ final class PlayerViewModel {
             if isLocalSession {
                 // The engine's still extractor reads a file:// source like any other (Sodalite#81).
                 frameExtractor = player.makeFrameExtractor(url: url)
+            } else if source.isDiscFolder {
+                // Sodalite#185: the server answers Static=true on a disc folder with an ffmpeg session.
+                frameExtractor = nil
             } else if let previewURL = playbackService.buildStreamURL(
                 itemID: item.id, mediaSourceID: source.id,
                 container: source.container, isStatic: true

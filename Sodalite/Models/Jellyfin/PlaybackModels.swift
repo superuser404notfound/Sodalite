@@ -50,6 +50,10 @@ struct PlaybackMediaSource: Codable, Sendable, Identifiable {
     let liveStreamId: String?
     /// Transcode reason(s) (e.g. `ContainerNotSupported`, `VideoCodecNotSupported`, `VideoBitrateNotSupported`); decisive signal for full video re-encode vs cheap remux, drives live copy-vs-encode tuning.
     let transcodeReasons: [String]?
+    /// Jellyfin's `VideoType`, see `DiscFolder`.
+    var videoType: String? = nil
+
+    var isDiscFolder: Bool { DiscFolder.matches(videoType: videoType) }
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -65,6 +69,7 @@ struct PlaybackMediaSource: Codable, Sendable, Identifiable {
         case mediaStreams = "MediaStreams"
         case liveStreamId = "LiveStreamId"
         case transcodeReasons = "TranscodeReasons"
+        case videoType = "VideoType"
     }
 }
 
