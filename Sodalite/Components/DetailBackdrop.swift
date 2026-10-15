@@ -659,8 +659,11 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         usesPosterHero ? heroPosterURL : (heroImageURL ?? heroPosterURL)
     }
 
+    /// Upright iPhone only. Every other tier draws the fixed `DetailBackdrop`, which keys its colour
+    /// by the backdrop URL, so asking for the poster's colour there found none and the page under
+    /// the fold went black.
     private var usesPosterHero: Bool {
-        portraitHero && heroPosterURL != nil
+        isPhonePortrait && portraitHero && heroPosterURL != nil
     }
 
     /// The artwork's height below the island: the 16:9 band, or the poster's 4:5 box.
