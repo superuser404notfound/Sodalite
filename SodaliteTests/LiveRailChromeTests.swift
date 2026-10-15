@@ -63,7 +63,7 @@ struct LiveRailChromeTests {
     }
 
     @Test func aHoldReadoutFitsInsideItsRow() {
-        #expect(size(SeekReadoutView(readout: .hold(rate: 96, direction: 1))).height
+        #expect(size(SeekReadoutView(readout: .hold(rate: 64, direction: 1))).height
                 <= LiveRailLabels.defaultRowHeight)
     }
 

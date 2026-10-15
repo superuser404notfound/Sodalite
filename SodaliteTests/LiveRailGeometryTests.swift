@@ -431,7 +431,7 @@ struct PlayerTitleLinesTests {
 
 /// Sodalite#104: left and right on the d-pad already did two different things, and the bar drew them
 /// identically. A press is a discrete step whose destination is known before it lands; a hold is a
-/// scan stepping 15x to 480x that you stop when the picture looks right, and nothing about it is
+/// scan doubling 2x to 128x that you stop when the picture looks right, and nothing about it is
 /// countable, so a fixed-interval glyph over it would be a lie.
 @Suite("The two seek gestures speak two languages (Sodalite#104)")
 struct SeekReadoutTests {
@@ -450,28 +450,29 @@ struct SeekReadoutTests {
     @Test("the side of travel is what puts the glyph beside the clock")
     func directionIsCarried() {
         #expect(SeekReadout.press(seconds: 30, count: 1, direction: 1).direction == 1)
-        #expect(SeekReadout.hold(rate: 96, direction: -1).direction == -1)
+        #expect(SeekReadout.hold(rate: 64, direction: -1).direction == -1)
     }
 
     @Test("a hold names a rate, and a press never does")
     func thetwoAreNotTheSameShape() {
-        #expect(SeekReadout.hold(rate: 96, direction: 1) != SeekReadout.press(seconds: 96, count: 1, direction: 1))
+        #expect(SeekReadout.hold(rate: 64, direction: 1) != SeekReadout.press(seconds: 64, count: 1, direction: 1))
     }
 
     /// Sodalite#186: a rate redrawn every tick read as a counter running for as long as the button
-    /// was down. A hold shows six stages and nothing between them.
-    @Test("a hold steps through six rates, never between them")
+    /// was down. A hold doubles from 2x to 128x, the ladder other players use, and shows nothing between.
+    @Test("a hold doubles through seven rates, never between them")
     func aHoldSteps() {
         let stages = SeekReadout.holdStages.map(\.rate)
-        #expect(stages == [15, 30, 60, 120, 240, 480])
-        #expect(SeekReadout.holdRate(heldFor: 0) == 15)
-        #expect(SeekReadout.holdRate(heldFor: 1.49) == 15)
-        #expect(SeekReadout.holdRate(heldFor: 1.5) == 30)
-        #expect(SeekReadout.holdRate(heldFor: 6.9) == 120)
-        #expect(SeekReadout.holdRate(heldFor: 7) == 240)
-        #expect(SeekReadout.holdRate(heldFor: 9.9) == 240)
-        #expect(SeekReadout.holdRate(heldFor: 10) == 480)
-        #expect(SeekReadout.holdRate(heldFor: 600) == 480)
+        #expect(stages == [2, 4, 8, 16, 32, 64, 128])
+        #expect(SeekReadout.holdRate(heldFor: 0) == 2)
+        #expect(SeekReadout.holdRate(heldFor: 1.49) == 2)
+        #expect(SeekReadout.holdRate(heldFor: 1.5) == 4)
+        #expect(SeekReadout.holdRate(heldFor: 8.99) == 64)
+        #expect(SeekReadout.holdRate(heldFor: 9) == 128)
+        #expect(SeekReadout.holdRate(heldFor: 600) == 128)
+        #expect(SeekReadout.holdStageFraction(2) == 0)
+        #expect(SeekReadout.holdStageFraction(16) == 0.5)
+        #expect(SeekReadout.holdStageFraction(128) == 1)
         for held in stride(from: 0.0, through: 10.0, by: 0.05) {
             #expect(stages.contains(SeekReadout.holdRate(heldFor: held)))
         }

@@ -11,7 +11,7 @@ import UIKit
 ///
 /// A press names its interval, because the destination is known before it lands, and a burst adds
 /// up what it has covered (Sodalite#186: a count printed as "4x" read as a speed). A hold names its
-/// rate and nothing else: a scan stepping 15x to 480x has no countable step, so a fixed-interval
+/// rate and nothing else: a scan doubling 2x to 128x has no countable step, so a fixed-interval
 /// glyph over it would be a lie. Nothing draws here on the touch transport, where a skip commits on
 /// the tap that asked for it and flashes its own HUD.
 ///
@@ -78,7 +78,7 @@ struct SeekTrail: View {
         case .press:
             sweep(opacity: 0.3)
         case .hold(let rate, _):
-            sweep(opacity: 0.15 + 0.35 * min(1, Double(rate) / Double(SeekReadout.holdStages.last?.rate ?? rate)))
+            sweep(opacity: 0.15 + 0.35 * SeekReadout.holdStageFraction(rate))
         case nil:
             EmptyView()
         }
