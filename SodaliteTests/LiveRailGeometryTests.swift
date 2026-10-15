@@ -431,7 +431,7 @@ struct PlayerTitleLinesTests {
 
 /// Sodalite#104: left and right on the d-pad already did two different things, and the bar drew them
 /// identically. A press is a discrete step whose destination is known before it lands; a hold is a
-/// scan stepping 15x to 240x that you stop when the picture looks right, and nothing about it is
+/// scan stepping 15x to 480x that you stop when the picture looks right, and nothing about it is
 /// countable, so a fixed-interval glyph over it would be a lie.
 @Suite("The two seek gestures speak two languages (Sodalite#104)")
 struct SeekReadoutTests {
@@ -459,17 +459,19 @@ struct SeekReadoutTests {
     }
 
     /// Sodalite#186: a rate redrawn every tick read as a counter running for as long as the button
-    /// was down. A hold shows five stages and nothing between them.
-    @Test("a hold steps through five rates, never between them")
+    /// was down. A hold shows six stages and nothing between them.
+    @Test("a hold steps through six rates, never between them")
     func aHoldSteps() {
         let stages = SeekReadout.holdStages.map(\.rate)
-        #expect(stages == [15, 30, 60, 120, 240])
+        #expect(stages == [15, 30, 60, 120, 240, 480])
         #expect(SeekReadout.holdRate(heldFor: 0) == 15)
         #expect(SeekReadout.holdRate(heldFor: 1.49) == 15)
         #expect(SeekReadout.holdRate(heldFor: 1.5) == 30)
         #expect(SeekReadout.holdRate(heldFor: 6.9) == 120)
         #expect(SeekReadout.holdRate(heldFor: 7) == 240)
-        #expect(SeekReadout.holdRate(heldFor: 600) == 240)
+        #expect(SeekReadout.holdRate(heldFor: 9.9) == 240)
+        #expect(SeekReadout.holdRate(heldFor: 10) == 480)
+        #expect(SeekReadout.holdRate(heldFor: 600) == 480)
         for held in stride(from: 0.0, through: 10.0, by: 0.05) {
             #expect(stages.contains(SeekReadout.holdRate(heldFor: held)))
         }

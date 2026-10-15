@@ -27,7 +27,7 @@ struct SeekReadoutChromeTests {
         .press(seconds: 90, count: 1, direction: 1),
         .press(seconds: 30, count: 12, direction: -1),
         .hold(rate: 15, direction: -1),
-        .hold(rate: 240, direction: 1),
+        .hold(rate: 480, direction: 1),
     ]
 
     // MARK: - One gesture, one size

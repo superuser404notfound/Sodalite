@@ -4,7 +4,7 @@ import AetherEngine
 /// Sodalite#104: the two seek gestures, as the transport reports them.
 ///
 /// A press of the d-pad is a discrete step of a known length, and its destination is known before it
-/// lands; a hold is a scan stepping 15x to 240x that you stop when the picture looks right. Nothing
+/// lands; a hold is a scan stepping 15x to 480x that you stop when the picture looks right. Nothing
 /// about the second is countable, so a fixed-interval glyph over it would be a lie, and the bar used
 /// to draw both as the same knob sliding along the same track.
 enum SeekReadout: Equatable {
@@ -22,10 +22,10 @@ enum SeekReadout: Equatable {
     /// Sodalite#186: the rates a hold steps through, and how long it has to be held to reach each.
     ///
     /// A rate that climbed every 80 ms read as a counter running for as long as the button was down,
-    /// and a burst count printed as "4x" next to it read as a fifth speed. Five stages a viewer can
+    /// and a burst count printed as "4x" next to it read as one more speed. Six stages a viewer can
     /// see change are a speed; a number that never settles is not.
     static let holdStages: [(after: Double, rate: Int)] = [
-        (0, 15), (1.5, 30), (3, 60), (5, 120), (7, 240),
+        (0, 15), (1.5, 30), (3, 60), (5, 120), (7, 240), (10, 480),
     ]
 
     /// The rate a hold runs at once it has been held `seconds` of real time.
