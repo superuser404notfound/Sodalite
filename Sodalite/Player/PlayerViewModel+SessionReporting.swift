@@ -68,7 +68,10 @@ extension PlayerViewModel {
         }
     }
 
-    func reportProgress() async {
+    /// `whileHeld` is for the one report that belongs to the suspension itself, the position sent on
+    /// the way out (`progressReportsHeldForSuspension`).
+    func reportProgress(whileHeld: Bool = false) async {
+        guard whileHeld || !progressReportsHeldForSuspension || isPlaying else { return }
         let ticks = currentPositionTicks
         guard ticks > 0 else { return } // Don't report position 0
         recordLocalProgress(positionTicks: ticks, played: false)
@@ -159,5 +162,27 @@ extension PlayerViewModel {
     func stopProgressReporting() {
         progressTimer?.cancel()
         progressTimer = nil
+    }
+
+    /// Sodalite#184: asks the server whether another client played this item while the session was
+    /// suspended. nil when there is no answer in time: a television that just woke may not have its
+    /// network back yet, and the viewer is looking at the player while this runs.
+    func serverMovedOnWhileSuspended(since suspendedAt: Date, positionTicks: Int64) async -> Bool? {
+        guard let service = itemService as? UserItemDataServing else { return nil }
+        let itemID = item.id
+        let userID = userID
+        let server = await withTaskGroup(of: UserItemData?.self) { group in
+            group.addTask { try? await service.userData(itemID: itemID, userID: userID) }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(5))
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        guard let server else { return nil }
+        return SuspendedSessionReturn.serverMovedOn(server: server, suspendedAt: suspendedAt,
+                                                    positionTicks: positionTicks)
     }
 }

@@ -1032,6 +1032,11 @@ final class PlayerHostController: AVPlayerViewController {
         // Background audio / PiP keep the session running on purpose; the outage watchdog must not end one
         // the viewer cannot see, so it stops probing until we are back.
         viewModel.setAppActive(false)
+        // Sodalite#184: from here until the way back has asked the server, a session that is not
+        // playing writes nothing. See `SuspendedSessionReturn`.
+        if viewModel.hasStartedPlaying, !viewModel.isLiveSession {
+            viewModel.progressReportsHeldForSuspension = true
+        }
         armLiveSuspensionRelease()
         refreshTopShelfForSuspension()
     }
@@ -1051,7 +1056,7 @@ final class PlayerHostController: AVPlayerViewController {
             self.endShelfRefreshAssertion()
         }
         Task { @MainActor in
-            await self.viewModel.reportProgress()
+            await self.viewModel.reportProgress(whileHeld: true)
             await TopShelfRefresher.refresh()
             self.endShelfRefreshAssertion()
         }
@@ -1245,16 +1250,40 @@ final class PlayerHostController: AVPlayerViewController {
             return
         }
 
-        guard needsReload else { return }
-
-        // tvOS deactivates the AVAudioSession on background; without re-arming it the post-reload resume drives a synchronizer with no live session (state .playing but no audio, no frames advance).
-        try? AVAudioSession.sharedInstance().setActive(true)
+        guard needsReload else {
+            viewModel.progressReportsHeldForSuspension = false
+            return
+        }
 
         // Real background return: VT + AVIO are dead, reload from current position then hold paused on the resumed frame (auto-resume after a sleep gap is startling). load() returns once the panel handshake settles, NOT once audio flows, so the trailing pause can land while AVPlayer is still waitingToPlayAtSpecifiedRate re-buffering the AVIO reconnect. If the user presses Play during the slow reload that intent must win or it clobbers the resume ("play does nothing, press again"); beginBackgroundReload/finishBackgroundReload arbitrate.
+        // Sodalite#184: the server is asked first, since another client may have moved this item on
+        // while the session slept. See `SuspendedSessionReturn`.
+        let suspendedAt = backgroundedAt ?? Date()
+        let awaySeconds = Date().timeIntervalSince(suspendedAt)
+        let positionTicks = viewModel.currentPositionTicks
         viewModel.beginBackgroundReload()
         Task { @MainActor in
-            try? await viewModel.player.reloadAtCurrentPosition()
-            viewModel.finishBackgroundReload()
+            let movedOn = await viewModel.serverMovedOnWhileSuspended(since: suspendedAt,
+                                                                      positionTicks: positionTicks)
+            // Back pressed while the server was being asked: that dismissal already ran, held.
+            guard !viewModel.didStopPlayback else { return }
+            let decision = SuspendedSessionReturn.decide(awaySeconds: awaySeconds, serverMovedOn: movedOn)
+            LogTap.shared.note(String(
+                format: "[Lifecycle] #184 return after %.0fs: server %@ -> %@",
+                awaySeconds,
+                movedOn.map { $0 ? "moved on" : "unchanged" } ?? "did not answer",
+                decision.logLabel))
+            switch decision {
+            case .close(let reportsStop):
+                if reportsStop { viewModel.progressReportsHeldForSuspension = false }
+                dismissPlayer()
+            case .reload:
+                viewModel.progressReportsHeldForSuspension = false
+                // tvOS deactivates the AVAudioSession on background; without re-arming it the post-reload resume drives a synchronizer with no live session (state .playing but no audio, no frames advance).
+                try? AVAudioSession.sharedInstance().setActive(true)
+                try? await viewModel.player.reloadAtCurrentPosition()
+                viewModel.finishBackgroundReload()
+            }
         }
     }
 

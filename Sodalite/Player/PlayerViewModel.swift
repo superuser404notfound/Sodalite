@@ -714,6 +714,10 @@ final class PlayerViewModel {
     /// viewWillDisappear), and the second pass reads a playhead `player.stop()` already zeroed.
     /// Separate from `isTearingDown`, which other paths latch too. Reset by `startPlayback`.
     var didStopPlayback = false
+    /// Sodalite#184: set while the app is suspended and until the way back has asked the server. A
+    /// session that is not playing says nothing in that time, neither progress nor a stop report, nor
+    /// a local download record, because what it would say may be older than what the server knows.
+    var progressReportsHeldForSuspension = false
     var hasReportedStart = false
     var hasStartedPlaying = false
     /// Resume position, used as minimum for progress reports so Jellyfin doesn't reset progress on early stop.
@@ -1570,7 +1574,8 @@ final class PlayerViewModel {
         // so leaving by hand during the credits files the episode as watched instead of parking it on
         // the Continue Watching shelf with a nearly full bar.
         let finalTicks = completionAwarePositionTicks
-        let closeServerSession = makeServerSessionClose(positionTicks: finalTicks)
+        let closeServerSession = makeServerSessionClose(positionTicks: finalTicks,
+                                                        reportsPosition: !progressReportsHeldForSuspension)
         // Engine does native teardown + HLS server shutdown + AVDisplayManager criteria reset in stopInternal().
         player.stop()
         // Tuner-release safety net: frees the server-side tuner even if the stop report fails to deliver. No-op for VOD.
@@ -1581,8 +1586,10 @@ final class PlayerViewModel {
     /// The server half of ending a session: the stop report (only if a start went out) and the
     /// explicit encode kill. Captures every value now and dispatches when called, because
     /// `player.stop()` and the tuner release in between clear what the report needs.
-    func makeServerSessionClose(positionTicks finalTicks: Int64) -> () -> Void {
-        if hasStartedPlaying { recordLocalProgress(positionTicks: finalTicks, played: hasReachedEndOfContent) }
+    func makeServerSessionClose(positionTicks finalTicks: Int64, reportsPosition: Bool = true) -> () -> Void {
+        if hasStartedPlaying, reportsPosition {
+            recordLocalProgress(positionTicks: finalTicks, played: hasReachedEndOfContent)
+        }
         // Snapshot the payload + service and detach with a STRONG capture: a [weak self] task could be
         // deallocated by PlayerHostController's dismissal before the @MainActor hop ran, silently dropping
         // the position write.
@@ -1601,7 +1608,7 @@ final class PlayerViewModel {
         let sessionToKill = playSessionID
         // No start went out (Back before PlaybackInfo answered, or a load that failed), so the server
         // has no session to close, and a stop here would write position 0 over the resume point.
-        let sendsStopReport = hasReportedStart
+        let sendsStopReport = hasReportedStart && reportsPosition
         let reportWork: @Sendable () async -> Void = {
             if sendsStopReport {
                 do {
