@@ -235,7 +235,7 @@ Sodalite is a thin native shell over a custom video stack: Apple's frameworks pl
 | UI | SwiftUI + UIKit interop where needed, one universal target for Apple TV, iPhone and iPad |
 | Video engine | [AetherEngine](https://github.com/superuser404notfound/AetherEngine): FFmpeg demux, AVPlayer + VideoToolbox for HEVC / H.264 / HW-AV1, dav1d + libavcodec for AV1 / VP9 / VP8 / MPEG-4 Part 2 / MPEG-2 / VC-1 / MS-MPEG4 / WMV software fallback; live TV ingested directly from HLS upstreams with engine-side DVR |
 | Display | `AVPlayer` + `AVPlayerLayer` for the native path; `AVSampleBufferDisplayLayer` + `AVSampleBufferRenderSynchronizer` for the software path |
-| Audio | `AVPlayer` over local HLS-fMP4 for the native path (Atmos as MAT 2.0, EAC3 5.1 bridge by default for Opus / TrueHD / MLP / DTS / DTS-HD MA / MP2 / MP3 so surround works on every modern soundbar via the bitstream tunnel; optional lossless FLAC bridge for AVRs that accept multichannel LPCM over HDMI); `AVSampleBufferAudioRenderer` for the software path |
+| Audio | `AVPlayer` over local HLS-fMP4 for the native path (Atmos as MAT 2.0, EAC3 5.1 bridge by default for Opus / TrueHD / MLP / DTS / DTS-HD MA / MP2 / MP3 so surround also works on a soundbar behind legacy ARC; optional lossless FLAC bridge for AVRs and eARC soundbars, which take multichannel LPCM. tvOS does not tell the two apart (with Continuous Audio Connection on, every HDMI route reports 32 channels), so the choice stays a setting); `AVSampleBufferAudioRenderer` for the software path |
 | Networking | `URLSession` against the Jellyfin REST API |
 | Persistence | Keychain for credentials, no telemetry storage |
 | Media server | [Jellyfin](https://jellyfin.org) |
