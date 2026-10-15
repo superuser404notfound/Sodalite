@@ -19,8 +19,10 @@ enum TrackDisplayFormatter {
             parts.append("Dolby Atmos")
         } else if isTrueHDAtmos(track) {
             parts.append("Dolby TrueHD Atmos")
+        } else if isDTSX(track) {
+            parts.append("DTS:X")
         } else {
-            let quality = audioQuality(codec: track.codec, channels: track.channels)
+            let quality = audioQuality(for: track)
             if !quality.isEmpty {
                 parts.append(quality)
             }
@@ -74,7 +76,8 @@ enum TrackDisplayFormatter {
         if let lang = languageName(for: track) { return lang }
         if track.isAtmos { return "Dolby Atmos" }
         if isTrueHDAtmos(track) { return "Dolby TrueHD Atmos" }
-        let quality = audioQuality(codec: track.codec, channels: track.channels)
+        if isDTSX(track) { return "DTS:X" }
+        let quality = audioQuality(for: track)
         return quality.isEmpty ? track.name : quality
     }
 
@@ -84,6 +87,16 @@ enum TrackDisplayFormatter {
     static func isTrueHDAtmos(_ track: TrackInfo) -> Bool {
         track.codec.lowercased() == "truehd"
             && (track.profile?.localizedCaseInsensitiveContains("Dolby Atmos") ?? false)
+    }
+
+    /// AetherEngine#744: DTS:X keeps its heights the same way, told by the profile FFmpeg reads off the
+    /// stream ("DTS-HD MA + DTS:X", "... IMAX"). The codec is the decoder's name, `dca` in libavcodec.
+    static func isDTSX(_ track: TrackInfo) -> Bool {
+        isDTS(track.codec) && (track.profile?.localizedCaseInsensitiveContains("DTS:X") ?? false)
+    }
+
+    private static func isDTS(_ codec: String) -> Bool {
+        ["dca", "dts"].contains(codec.lowercased())
     }
 
     // MARK: - Private
@@ -110,9 +123,9 @@ enum TrackDisplayFormatter {
         return code.uppercased()
     }
 
-    private static func audioQuality(codec: String, channels: Int) -> String {
-        let codecDisplay = codecDisplayName(codec)
-        let channelDisplay = channelLayout(channels)
+    private static func audioQuality(for track: TrackInfo) -> String {
+        let codecDisplay = isDTS(track.codec) ? dtsDisplayName(profile: track.profile) : codecDisplayName(track.codec)
+        let channelDisplay = channelLayout(track.channels)
 
         if !codecDisplay.isEmpty && !channelDisplay.isEmpty {
             return "\(codecDisplay) \(channelDisplay)"
@@ -135,6 +148,13 @@ enum TrackDisplayFormatter {
         case "pcm_s16le", "pcm_s24le", "pcm_s32le": return "PCM"
         default: return codec.uppercased()
         }
+    }
+
+    /// The DTS family shares one codec, so the profile is what says which member a track is.
+    private static func dtsDisplayName(profile: String?) -> String {
+        guard let profile else { return "DTS" }
+        for name in ["DTS-HD MA", "DTS-HD HRA"] where profile.hasPrefix(name) { return name }
+        return "DTS"
     }
 
     private static func channelLayout(_ channels: Int) -> String {
