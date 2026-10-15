@@ -549,11 +549,15 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
     let mediaStreams: [MediaStream]?
     /// `MediaSourceType`: Default, Grouping or Placeholder.
     let type: String?
+    /// Jellyfin's `VideoType`, see `DiscFolder`.
+    let videoType: String?
 
     /// A stand-in for versions the server resolves later. AIOMetadata's emulated Jellyfin lists two
     /// of them on every item ("Streams load when played", "Load the stream list") and swaps the real
     /// ones in when the item is fetched asking for `MediaSources`.
     var isPlaceholder: Bool { type == "Placeholder" }
+
+    var isDiscFolder: Bool { DiscFolder.matches(videoType: videoType) }
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -567,6 +571,18 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
         case supportsTranscoding = "SupportsTranscoding"
         case mediaStreams = "MediaStreams"
         case type = "Type"
+        case videoType = "VideoType"
+    }
+}
+
+/// A Blu-ray (BDMV) or DVD (VIDEO_TS) folder, which Jellyfin reports through `VideoType` (Sodalite#185).
+///
+/// The server has no single file to hand over for one. It refuses direct play, and it answers even a
+/// `Static=true` stream request by starting ffmpeg, so every request that expects the original bytes
+/// (scrub stills, the HDR10+ probe) costs the server an encode session instead.
+enum DiscFolder {
+    static func matches(videoType: String?) -> Bool {
+        videoType == "BluRay" || videoType == "Dvd"
     }
 }
 
