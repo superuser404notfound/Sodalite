@@ -67,6 +67,7 @@ final class AppearancePreferences {
         static let spoilerProtectionEnabled = "appearance.spoilerProtection"
         static let spoilerHideEpisodes = "appearance.spoilerHideEpisodes"
         static let spoilerHideMovies = "appearance.spoilerHideMovies"
+        static let spoilerHideEpisodeTitles = "appearance.spoilerHideEpisodeTitles"
         static let hiddenTabs = "appearance.hiddenTabs"
         static let hiddenTabsFromNewerBuilds = "appearance.hiddenTabs.newerBuilds"
         static let navigationStyle = "appearance.navigationStyle"
@@ -121,6 +122,12 @@ final class AppearancePreferences {
 
     var spoilerHideMovies: Bool {
         didSet { store.set(spoilerHideMovies, forKey: Keys.spoilerHideMovies) }
+    }
+
+    /// Unlike the two above, this one also acts while protection is off: it rides a per-series
+    /// "always hide" rule, which is how a single game show gets its names covered.
+    var spoilerHideEpisodeTitles: Bool {
+        didSet { store.set(spoilerHideEpisodeTitles, forKey: Keys.spoilerHideEpisodeTitles) }
     }
 
     /// Device value, see DevicePreferences.
@@ -275,6 +282,7 @@ final class AppearancePreferences {
         self.spoilerProtectionEnabled = store.object(forKey: Keys.spoilerProtectionEnabled) as? Bool ?? false
         self.spoilerHideEpisodes = store.object(forKey: Keys.spoilerHideEpisodes) as? Bool ?? true
         self.spoilerHideMovies = store.object(forKey: Keys.spoilerHideMovies) as? Bool ?? false
+        self.spoilerHideEpisodeTitles = store.object(forKey: Keys.spoilerHideEpisodeTitles) as? Bool ?? false
         self.showPosterBadges = store.object(forKey: Keys.showPosterBadges) as? Bool ?? false
         self.showDetailBadges = store.object(forKey: Keys.showDetailBadges) as? Bool ?? true
         self.showLibraryNames = store.object(forKey: Keys.showLibraryNames) as? Bool ?? false

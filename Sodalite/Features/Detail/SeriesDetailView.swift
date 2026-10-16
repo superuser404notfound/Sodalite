@@ -462,7 +462,7 @@ struct SeriesDetailView: View {
         }
         .menuPresentation(isPresented: $isPresentingMoreDetails, panel: .plain) {
             DetailMoreOverlay(
-                title: displayItem.name,
+                title: dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: displayItem),
                 // Veiled stays veiled: the reader is not a way around the spoiler rule, and the box
                 // below the fold is where it gets lifted.
                 synopsis: SpoilerReveal.isHidden(displayItem, dependencies: dependencies, appState: appState)
@@ -723,7 +723,7 @@ struct SeriesDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Panel title is the episode name in episode mode; the series root has none (logo lives in the hero slot, see DetailContentOverlay).
             if isShowingEpisode {
-                Text(selectedEpisode?.name ?? "")
+                Text(selectedEpisode.map { dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: $0) } ?? "")
                     // Smaller in the upright iPhone's narrow column, where the large title ran to two
                     // lines and pushed Play off the first screen under the poster.
                     .font(isPhonePortrait ? .title3 : .largeTitle)

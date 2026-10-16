@@ -180,6 +180,13 @@ struct SodaliteApp: App {
                 }
                 // Third crossing of the same bridge. The shelf is redrawn afterwards because the
                 // cells it is holding were built from the old choice and nothing else will ask.
+                // Fourth crossing: an episode title the app veils must not sit on the home screen.
+                .task(id: dependencies.spoilerPolicy(userID: appState.activeUser?.id).topShelfTitleVeil) {
+                    let veil = dependencies.spoilerPolicy(userID: appState.activeUser?.id).topShelfTitleVeil
+                    guard veil != TopShelfTitleVeil.read() else { return }
+                    TopShelfTitleVeil.write(veil)
+                    TopShelfRefresher.invalidate()
+                }
                 .task(id: dependencies.appearancePreferences.topShelfImage) {
                     TopShelfArtwork.write(rawValue: dependencies.appearancePreferences.topShelfImage.rawValue)
                     TopShelfRefresher.invalidate()

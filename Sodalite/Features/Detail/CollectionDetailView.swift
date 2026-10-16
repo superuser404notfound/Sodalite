@@ -205,7 +205,9 @@ struct CollectionDetailView: View {
             title: "detail.play",
             systemImage: "play.fill",
             isProminent: true,
-            subtitle: queue.indices.contains(start) ? queue[start].name : nil,
+            subtitle: queue.indices.contains(start)
+                ? dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: queue[start])
+                : nil,
             action: {
                 guard queue.indices.contains(start) else { return }
                 playItem = queue[start]
@@ -278,6 +280,7 @@ struct CollectionDetailView: View {
 
 struct CollectionItemRow: View {
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     let item: JellyfinItem
@@ -337,7 +340,7 @@ struct CollectionItemRow: View {
                             .lineLimit(1)
                     }
 
-                    Text(item.name)
+                    Text(dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: item))
                         .font(metrics.listTitleFont)
                         .fontWeight(.medium)
                         .lineLimit(1)

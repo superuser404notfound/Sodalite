@@ -82,8 +82,8 @@ extension PlayerViewModel {
         guard item.type == .episode else { return item.name }
         let label = EpisodeMetadataFormatter.label(season: item.parentIndexNumber,
                                                    episode: item.indexNumber,
-                                                   title: item.name)
-        return label.isEmpty ? item.name : label
+                                                   title: spoilerPolicy.visibleTitle(of: item))
+        return label.isEmpty ? spoilerPolicy.displayName(of: item) : label
     }
 
     /// Series name for the second Now-Playing line. Episodes only;

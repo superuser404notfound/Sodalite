@@ -175,7 +175,7 @@ struct PlayerTouchControls: View {
         .accessibilityLabel(Text("player.lock.engage"))
     }
 
-    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item) }
+    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy) }
 
     private var titleText: String { titleLines.header }
 
@@ -609,7 +609,7 @@ struct PlayerTouchControls: View {
             }
         case .episodes:
             return viewModel.seasonEpisodes.enumerated().map { idx, ep in
-                PickerRow(label: ep.name, isActive: ep.id == viewModel.item.id, imageURL: episodeImageURL(ep)) {
+                PickerRow(label: viewModel.spoilerPolicy.displayName(of: ep), isActive: ep.id == viewModel.item.id, imageURL: episodeImageURL(ep)) {
                     Task { await viewModel.selectEpisode(at: idx) }
                 }
             }

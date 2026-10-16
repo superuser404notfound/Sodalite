@@ -126,12 +126,13 @@ nonisolated extension TopShelfItem {
     }
 
     /// Card headline: movies render bare name; episodes prefix series + S/E breadcrumb (the still alone doesn't identify the show).
-    var topShelfTitle: String {
+    /// A title veiled by `TopShelfTitleVeil` drops out and leaves the series and the numbers.
+    func topShelfTitle(veil: TopShelfTitleVeil = .off) -> String {
         guard type == .episode, let series = seriesName else { return name }
         return EpisodeMetadataFormatter.label(seriesName: series,
                                               season: parentIndexNumber,
                                               episode: indexNumber,
-                                              title: name)
+                                              title: veil.hidesTitle(of: self) ? nil : name)
     }
 
     /// format=Jpg so the image-cache daemon never hits a WebP/AVIF response ImageIO can choke on in

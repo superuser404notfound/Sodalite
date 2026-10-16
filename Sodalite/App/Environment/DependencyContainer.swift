@@ -617,7 +617,8 @@ final class DependencyContainer {
             hideMovies: appearancePreferences.spoilerHideMovies,
             userID: userID ?? "",
             revealedKeys: spoilerRevealMemory.revealedKeys,
-            seriesOverrides: spoilerSeriesRules.overrides
+            seriesOverrides: spoilerSeriesRules.overrides,
+            hideEpisodeTitles: appearancePreferences.spoilerHideEpisodeTitles
         )
     }
 

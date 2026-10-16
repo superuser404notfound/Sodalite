@@ -367,6 +367,7 @@ extension DependencyContainer {
                 showCommunityRating: a.showCommunityRating,
                 showCriticRating: a.showCriticRating,
                 showTagline: a.showTagline,
+                spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
                 hiddenTabs: a.syncedHiddenTabs,
                 navigationStyle: a.navigationStyle.rawValue
             ))
@@ -477,6 +478,7 @@ extension DependencyContainer {
             store.showCommunityRating = a.showCommunityRating
             store.showCriticRating = a.showCriticRating
             store.showTagline = a.showTagline
+            store.spoilerHideEpisodeTitles = a.spoilerHideEpisodeTitles
             // Absent field = sender predates tab visibility, so it carries no opinion; applying an empty set would silently unhide the receiver's tabs (Sodalite#62).
             if let tabs = a.hiddenTabs {
                 store.applySyncedHiddenTabs(tabs)

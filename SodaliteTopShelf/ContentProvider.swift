@@ -48,6 +48,7 @@ final class ContentProvider: TVTopShelfContentProvider {
         // every cell is a local file or the row keeps its remote artwork with the system bar, never a
         // mix (Sodalite#128). The extension does not render; see `ResumeBarArtwork.existing`.
         let artwork = TopShelfArtwork.read()
+        let titleVeil = TopShelfTitleVeil.read()
         let bars = ResumeBarArtwork.existing(cells: (resumeItems + nextUpItems)
                                                  .compactMap { $0.artworkCell(session: session, artwork: artwork) },
                                              accent: TopShelfAccent.read())
@@ -57,7 +58,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
         if !resumeItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: resumeItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork)
+                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork, titleVeil: titleVeil)
             })
             collection.title = String(
                 localized: "TopShelf.ContinueWatching",
@@ -68,7 +69,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
         if !nextUpItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: nextUpItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork)
+                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork, titleVeil: titleVeil)
             })
             collection.title = String(
                 localized: "TopShelf.NextUp",
@@ -87,9 +88,10 @@ final class ContentProvider: TVTopShelfContentProvider {
     private func makeItem(item: TopShelfItem,
                           session: SharedSession,
                           barURL: URL?,
-                          artwork: TopShelfArtwork.Choice) -> TVTopShelfSectionedItem {
+                          artwork: TopShelfArtwork.Choice,
+                          titleVeil: TopShelfTitleVeil) -> TVTopShelfSectionedItem {
         let cell = TVTopShelfSectionedItem(identifier: item.id)
-        cell.title = item.topShelfTitle
+        cell.title = item.topShelfTitle(veil: titleVeil)
         cell.imageShape = .hdtv
         // Both actions play. A shelf cell is an invitation to keep watching, not a link to a
         // page, and nobody guesses that the detail route hides behind Select while Play starts.

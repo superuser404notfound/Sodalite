@@ -171,6 +171,9 @@ struct ContentLogoTitle<Fallback: View>: View {
 struct DetailHeroLogo: View {
     let viewModel: DetailViewModel
 
+    @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
+
     var body: some View {
         ContentLogoTitle(
             itemID: viewModel.item.id,
@@ -179,7 +182,7 @@ struct DetailHeroLogo: View {
                 hasFullDetail: viewModel.hasFullDetail
             )
         ) {
-            Text(viewModel.item.name)
+            Text(dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: viewModel.item))
                 .font(.largeTitle)
                 .fontWeight(.bold)
         }

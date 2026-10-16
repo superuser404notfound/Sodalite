@@ -206,6 +206,12 @@ enum Changelog {
                     "changelog.1_1_0.liveReconnect.body",
                     icon: "antenna.radiowaves.left.and.right"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.episodeTitles.title",
+                    "changelog.1_1_0.episodeTitles.body",
+                    icon: "eye.slash"
+                ),
             ]
         ),
         // MARK: 1.0.0

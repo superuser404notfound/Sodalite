@@ -12,8 +12,9 @@ nonisolated struct PlayerTitleLines: Equatable, Sendable {
     let header: String
     let subtitle: String?
 
-    init(item: JellyfinItem) {
-        header = item.seriesName ?? item.name
+    /// `spoilerPolicy` is the player's own, read once at launch like the synopsis it already drops.
+    init(item: JellyfinItem, spoilerPolicy: SpoilerPolicy = .disabled) {
+        header = item.seriesName ?? spoilerPolicy.displayName(of: item)
         guard item.seriesName != nil else {
             // A movie, stored or live (Sodalite#159): its name over its year.
             subtitle = item.productionYear.map { String($0) }
@@ -22,7 +23,7 @@ nonisolated struct PlayerTitleLines: Equatable, Sendable {
         let line = EpisodeMetadataFormatter.episodeLine(under: item.seriesName,
                                                         season: item.parentIndexNumber,
                                                         episode: item.indexNumber,
-                                                        title: item.name)
+                                                        title: spoilerPolicy.visibleTitle(of: item))
         subtitle = line.isEmpty ? nil : line
     }
 }
