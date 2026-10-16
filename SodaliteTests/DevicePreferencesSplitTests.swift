@@ -110,4 +110,24 @@ struct DevicePreferencesSplitTests {
         device.reloadFromStore()
         #expect(device.trueHDAtmosHeights, "a wiped store lands on the default again")
     }
+
+    /// AetherEngine#702: the dual-layer route is opt-in, and the box decides, not the profile.
+    @Test func dualLayerDolbyVisionIsOffByDefaultAndADeviceValue() {
+        let defaults = scratch("dualLayer")
+        let device = DevicePreferences(store: defaults)
+        let alice = PlaybackPreferences(store: defaults, scope: "s:alice", device: device)
+        let bob = PlaybackPreferences(store: defaults, scope: "s:bob", device: device)
+
+        #expect(!device.preferDualLayerDolbyVision)
+
+        alice.preferDualLayerDolbyVision = true
+
+        #expect(bob.preferDualLayerDolbyVision)
+        #expect(defaults.object(forKey: "playback.preferDualLayerDolbyVision") as? Bool == true)
+        #expect(defaults.object(forKey: "s:alice/playback.preferDualLayerDolbyVision") == nil)
+
+        defaults.removePersistentDomain(forName: "deviceSplit.dualLayer")
+        device.reloadFromStore()
+        #expect(!device.preferDualLayerDolbyVision, "a wiped store lands on the default again")
+    }
 }

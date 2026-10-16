@@ -106,6 +106,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.dualLayerDolbyVision.title",
+                    "changelog.1_1_0.dualLayerDolbyVision.body",
+                    icon: "square.2.layers.3d"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.nextEpisodeCard.title",
                     "changelog.1_1_0.nextEpisodeCard.body",
                     icon: "rectangle.on.rectangle"
