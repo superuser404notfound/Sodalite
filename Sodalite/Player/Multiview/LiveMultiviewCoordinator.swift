@@ -200,7 +200,7 @@ final class LiveMultiviewCoordinator {
                 // Back during the zoom in: UIKit drops a dismiss that overlaps a presentation, so it waits for
                 // the presentation to land, one turn later, and gets one more try if it still did not take.
                 if let transition = shown.transitionCoordinator, shown.isBeingPresented {
-                    transition.animate(alongsideTransition: nil) { _ in
+                    transition.animate(alongsideTransition: nil) { [weak grid] _ in
                         DispatchQueue.main.async { [weak grid] in
                             dismiss()
                             guard let grid, grid.presentedViewController === shown, !shown.isBeingDismissed else { return }

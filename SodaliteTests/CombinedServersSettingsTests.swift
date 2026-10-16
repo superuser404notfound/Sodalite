@@ -22,7 +22,7 @@ struct CombinedServersSettingsTests {
 
     @Test func switchingOnBringsTheOtherServerInAndAnnouncesIt() async throws {
         let container = try twoServers()
-        var notified = 0
+        nonisolated(unsafe) var notified = 0
         let token = NotificationCenter.default.addObserver(forName: .homeConfigDidChange, object: nil, queue: nil) { _ in notified += 1 }
         defer { NotificationCenter.default.removeObserver(token) }
         container.setCombiningServers(true)

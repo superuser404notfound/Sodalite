@@ -364,7 +364,7 @@ struct LogRedactionEngineAuditTests {
             .addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
         let failing = "http://127.0.0.1:1/live/playlist.m3u8?u=\(upstream)"
         let error = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut,
-                            userInfo: [NSURLErrorFailingURLStringErrorKey: failing,
+                            userInfo: ["NSErrorFailingURLStringKey": failing,
                                        NSURLErrorFailingURLErrorKey: URL(string: failing)!])
         let out = LogRedaction.redact("[HLSIngest] carriage probe inconclusive: \(error)")
         #expect(!out.contains("SECRETpass"), "\(out)")
