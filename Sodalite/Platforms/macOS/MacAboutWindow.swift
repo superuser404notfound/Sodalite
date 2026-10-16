@@ -10,7 +10,7 @@ struct MacAboutWindowScene: Scene {
     static let windowID = "about"
 
     var body: some Scene {
-        Window("About Sodalite", id: Self.windowID) {
+        Window("about.title", id: Self.windowID) {
             MacAboutView()
         }
         .windowStyle(.hiddenTitleBar)
@@ -30,7 +30,7 @@ private struct AboutMenuItem: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Button("About Sodalite") {
+        Button("about.title") {
             openWindow(id: MacAboutWindowScene.windowID)
         }
     }

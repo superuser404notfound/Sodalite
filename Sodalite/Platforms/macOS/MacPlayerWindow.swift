@@ -81,7 +81,7 @@ struct MacPlayerWindowScene: Scene {
     }
 
     var body: some Scene {
-        WindowGroup("Player", id: MacPlayerWindowSession.windowID, for: String.self) { _ in
+        WindowGroup("player.window.title", id: MacPlayerWindowSession.windowID, for: String.self) { _ in
             MacPlayerWindowContent()
         }
         .windowStyle(.hiddenTitleBar)

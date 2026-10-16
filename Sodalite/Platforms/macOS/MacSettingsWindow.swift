@@ -13,7 +13,7 @@ struct MacSettingsWindowScene<Content: View>: Scene {
     @ViewBuilder let content: () -> Content
 
     var body: some Scene {
-        Window("Sodalite Settings", id: Self.windowID, content: content)
+        Window("settings.window.title", id: Self.windowID, content: content)
             .windowResizability(.contentMinSize)
             .restorationBehavior(.disabled)
             .defaultLaunchBehavior(.suppressed)
