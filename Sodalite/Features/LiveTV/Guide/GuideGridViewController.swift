@@ -225,12 +225,14 @@ final class GuideGridViewController: UIViewController,
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Inset by the per-side safe area so the column and the programs clear the Dynamic Island
-        // and the rounded corners in landscape. The window's insets, not the controller's: the
-        // hosting SwiftUI view ignores the safe area horizontally, which zeroes ours.
+        // and the rounded corners in landscape. Both sets of insets, because each misses one case:
+        // the hosting SwiftUI view ignores the safe area horizontally, which zeroes the
+        // controller's own for the Dynamic Island, and the iPad sidebar only shows up in the
+        // controller's own (280 pt), never in the window's, so the channel column sat under it.
         #if os(iOS)
-        let safe = view.window?.safeAreaInsets ?? view.safeAreaInsets
-        let leftInset = safe.left
-        let rightInset = safe.right
+        let window = view.window?.safeAreaInsets ?? .zero
+        let leftInset = max(window.left, view.safeAreaInsets.left)
+        let rightInset = max(window.right, view.safeAreaInsets.right)
         #else
         let leftInset: CGFloat = 0
         let rightInset: CGFloat = 0
