@@ -172,7 +172,11 @@ struct EpisodeLandscapeCard: View {
 
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    private var spoilerPolicy: SpoilerPolicy {
+        dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+    }
     private var cardSize: CGSize {
         LayoutMetrics.current(hSizeClass)
             .tileSize(cardScale: dependencies.appearancePreferences.cardScale)
@@ -244,9 +248,16 @@ struct EpisodeLandscapeCard: View {
                             .foregroundStyle(.tint)
                             .fontWeight(.semibold)
                     }
-                    Text(episode.name)
-                        .font(.caption)
-                        .lineLimit(1)
+                    // A veiled name next to its own number token says nothing, so it draws nothing.
+                    if let title = spoilerPolicy.visibleTitle(of: episode) {
+                        Text(title)
+                            .font(.caption)
+                            .lineLimit(1)
+                    } else if token.isEmpty {
+                        Text(spoilerPolicy.displayName(of: episode))
+                            .font(.caption)
+                            .lineLimit(1)
+                    }
                 }
 
                 if let runtime = episode.runTimeTicks {

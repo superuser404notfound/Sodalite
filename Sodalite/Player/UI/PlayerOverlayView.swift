@@ -38,7 +38,7 @@ struct PlayerOverlayView: View {
             // nothing to show but what is running and where. Below the spinner and the error screen,
             // which both still speak for the session, and below the transport, which still drives it.
             if let destination = viewModel.externalPlaybackDestination {
-                let lines = PlayerTitleLines(item: viewModel.item)
+                let lines = PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy)
                 ExternalPlaybackBackdrop(
                     destination: destination,
                     title: lines.header,
@@ -439,7 +439,7 @@ struct PlayerOverlayView: View {
     private func nextEpisodeMetadata(for episode: JellyfinItem) -> String? {
         let token = EpisodeMetadataFormatter.seasonEpisode(
             season: episode.parentIndexNumber, episode: episode.indexNumber)
-        let name = episode.name
+        let name = viewModel.spoilerPolicy.visibleTitle(of: episode) ?? ""
         if name.isEmpty { return token.isEmpty ? nil : token }
         return token.isEmpty ? name : "\(token) · \(name)"
     }
@@ -643,7 +643,7 @@ struct PlayerOverlayView: View {
             // Title (top left); HDR + Speed badges live in topRightInfoColumn so the speed badge can persist after the transport hides.
             VStack {
                 HStack(alignment: .top) {
-                    PlayerTitleOverlay(item: viewModel.item)
+                    PlayerTitleOverlay(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy)
                     Spacer()
                 }
                 Spacer()

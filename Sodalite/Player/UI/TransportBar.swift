@@ -561,8 +561,9 @@ struct TransportBar: View {
 
     /// "E5 · Title": the dropdown lists one season, so the season number is implied by the row above it.
     private func episodeRowTitle(for episode: JellyfinItem) -> String {
-        EpisodeMetadataFormatter.label(season: nil, episode: episode.indexNumber,
-                                       title: episode.name)
+        let label = EpisodeMetadataFormatter.label(season: nil, episode: episode.indexNumber,
+                                                   title: viewModel.spoilerPolicy.visibleTitle(of: episode))
+        return label.isEmpty ? viewModel.spoilerPolicy.displayName(of: episode) : label
     }
 
     /// "1×" / "1.5×", deliberately not localized (× glyph + arabic digits are universal).
@@ -796,9 +797,10 @@ struct TransportBar: View {
 
 struct PlayerTitleOverlay: View {
     let item: JellyfinItem
+    let spoilerPolicy: SpoilerPolicy
 
     var body: some View {
-        let lines = PlayerTitleLines(item: item)
+        let lines = PlayerTitleLines(item: item, spoilerPolicy: spoilerPolicy)
         VStack(alignment: .leading, spacing: 4) {
             Text(lines.header)
                 .font(.title3)

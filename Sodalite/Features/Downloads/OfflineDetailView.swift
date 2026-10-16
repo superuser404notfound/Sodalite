@@ -8,6 +8,10 @@ struct OfflineDetailView: View {
     @Environment(\.appState) private var appState
     @State private var showPlayer = false
 
+    private var displayName: String {
+        dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: item.snapshot.item)
+    }
+
     var body: some View {
         let snapshot = item.snapshot.item
         ScrollView {
@@ -18,7 +22,7 @@ struct OfflineDetailView: View {
                 if let seriesName = snapshot.seriesName {
                     Text(seriesName).font(.headline).foregroundStyle(.secondary)
                 }
-                Text(snapshot.name).font(.title2).fontWeight(.bold)
+                Text(displayName).font(.title2).fontWeight(.bold)
                 if let ticks = snapshot.runTimeTicks {
                     Text(Duration.seconds(Double(ticks) / 10_000_000)
                         .formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)))
@@ -34,7 +38,7 @@ struct OfflineDetailView: View {
             }
             .padding()
         }
-        .navigationTitle(snapshot.name)
+        .navigationTitle(displayName)
         .inlineNavigationTitle()
         .overlay {
             if let userID = appState.activeUser?.id ?? appState.profileKey?.userID {

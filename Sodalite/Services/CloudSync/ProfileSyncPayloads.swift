@@ -160,6 +160,8 @@ struct ProfileAppearancePayload: Codable, Equatable {
     /// when absent, the rule this file states at the top: a sender that has no opinion must not
     /// hand one over.
     var showTagline: Bool?
+    /// nil from a build without the episode-title veil, unapplied for the same reason.
+    var spoilerHideEpisodeTitles: Bool? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -186,7 +188,8 @@ extension ProfileAppearancePayload {
             showPosterProgress: a.showPosterProgress,
             showCommunityRating: a.showCommunityRating,
             showCriticRating: a.showCriticRating,
-            showTagline: a.showTagline
+            showTagline: a.showTagline,
+            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles
         )
     }
 
@@ -210,6 +213,7 @@ extension ProfileAppearancePayload {
         a.showCommunityRating = showCommunityRating
         a.showCriticRating = showCriticRating
         if let showTagline { a.showTagline = showTagline }
+        if let spoilerHideEpisodeTitles { a.spoilerHideEpisodeTitles = spoilerHideEpisodeTitles }
     }
 }
 

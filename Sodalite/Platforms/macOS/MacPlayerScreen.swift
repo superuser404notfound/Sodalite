@@ -21,7 +21,7 @@ struct MacPlayerScreen: View {
     @State private var keyMonitor: Any?
     @State private var hostWindow = HostWindowReference()
 
-    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item) }
+    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy) }
 
     var body: some View {
         ZStack {

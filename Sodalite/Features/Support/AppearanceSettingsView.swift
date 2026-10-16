@@ -215,6 +215,14 @@ struct AppearanceSettingsView: View {
                 value: Binding(get: { appearance.spoilerHideMovies },
                                set: { appearance.spoilerHideMovies = $0 })
             )
+
+            boolRow(
+                icon: "textformat",
+                title: "settings.appearance.spoilerEpisodeTitles",
+                subtitle: "settings.appearance.spoilerEpisodeTitles.subtitle",
+                value: Binding(get: { appearance.spoilerHideEpisodeTitles },
+                               set: { appearance.spoilerHideEpisodeTitles = $0 })
+            )
         }
     }
 

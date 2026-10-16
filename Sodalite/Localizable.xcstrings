@@ -68537,6 +68537,330 @@
         }
       }
     },
+    "changelog.1_1_0.episodeTitles.body" : {
+      "comment" : "Changelog 1.1.0 body for hidden episode titles",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro seriály, jejichž názvy epizod prozradí příliš, třeba soutěž se jmény soutěžících: v Nastavení > Vzhled mohou nezhlédnuté epizody ukazovat jen své číslo, všude nebo jen u seriálů s trvalým skrýváním spoilerů."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Til serier, hvor afsnitstitlerne afslører for meget, som et quizprogram med deltagernes navne: under Indstillinger > Udseende kan usete afsnit vise kun deres nummer, overalt eller kun i serier, der altid skjuler spoilere."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für Serien, deren Episodennamen zu viel verraten, etwa eine Quizshow mit den Namen der Kandidaten: Unter Einstellungen > Darstellung zeigen ungesehene Episoden nur ihre Nummer, überall oder nur in Serien, die Spoiler immer verdecken."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για σειρές όπου οι τίτλοι των επεισοδίων λένε πολλά, όπως ένα τηλεπαιχνίδι με τα ονόματα των διαγωνιζομένων: στις Ρυθμίσεις > Εμφάνιση, τα επεισόδια που δεν έχετε δει μπορούν να δείχνουν μόνο τον αριθμό τους, παντού ή μόνο στις σειρές που κρύβουν πάντα τα spoiler."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For shows whose episode names give it away, like a quiz show naming its contestants: under Settings > Appearance, unwatched episodes can show only their number, everywhere or only in the shows set to always hide spoilers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para series cuyos títulos de episodio lo revelan todo, como un concurso que nombra a sus concursantes: en Ajustes > Apariencia, los episodios no vistos pueden mostrar solo su número, en todas partes o solo en las series configuradas para ocultar siempre los spoilers."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sarjoille, joiden jaksonimet paljastavat liikaa, kuten visailu, joka kertoo kilpailijoiden nimet: Asetukset > Ulkoasu -kohdassa katsomattomista jaksoista voi näkyä vain numero, kaikkialla tai vain sarjoissa, jotka piilottavat juonipaljastukset aina."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour les séries dont les titres d’épisodes en disent trop, comme un jeu télévisé qui nomme ses candidats : dans Réglages > Apparence, les épisodes non vus peuvent n’afficher que leur numéro, partout ou seulement dans les séries réglées pour toujours masquer les spoilers."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za serije čiji nazivi epizoda otkrivaju previše, poput kviza s imenima natjecatelja: u Postavkama > Izgled neodgledane epizode mogu prikazivati samo svoj broj, svugdje ili samo u serijama koje uvijek skrivaju spojlere."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azokhoz a sorozatokhoz, amelyeknek epizódcímei túl sokat elárulnak, például egy vetélkedő a versenyzők nevével: a Beállítások > Megjelenés alatt a meg nem nézett epizódok csak a számukat mutathatják, mindenhol vagy csak a mindig spoilermentes sorozatokban."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per le serie i cui titoli degli episodi svelano troppo, come un quiz che nomina i concorrenti: in Impostazioni > Aspetto gli episodi non visti possono mostrare solo il numero, ovunque o solo nelle serie impostate per nascondere sempre gli spoiler."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クイズ番組の出場者名のように、エピソード名がネタバレになる番組向けです。設定 > 外観で、未視聴のエピソードを番号だけの表示にできます。すべての番組、または常にネタバレを隠すよう設定した番組だけに適用できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "퀴즈 쇼의 참가자 이름처럼 에피소드 제목이 너무 많은 것을 알려주는 시리즈를 위한 기능입니다. 설정 > 모양에서 보지 않은 에피소드를 번호만 표시할 수 있으며, 모든 시리즈 또는 항상 스포일러를 숨기도록 설정한 시리즈에만 적용할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For serier der episodetitlene avslører for mye, som et quizprogram med deltakernes navn: under Innstillinger > Utseende kan usette episoder vise bare nummeret, overalt eller bare i serier som alltid skjuler spoilere."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor series waarvan de afleveringstitels te veel verraden, zoals een quiz die de kandidaten noemt: onder Instellingen > Uiterlijk kunnen niet-bekeken afleveringen alleen hun nummer tonen, overal of alleen in series die spoilers altijd verbergen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dla seriali, których tytuły odcinków zdradzają za dużo, jak teleturniej z imionami uczestników: w Ustawieniach > Wygląd nieobejrzane odcinki mogą pokazywać tylko swój numer, wszędzie lub tylko w serialach ze stałym ukrywaniem spoilerów."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para séries cujos títulos de episódio entregam tudo, como um programa de perguntas que cita os participantes: em Configurações > Aparência, episódios não assistidos podem mostrar só o número, em todo lugar ou só nas séries configuradas para sempre ocultar spoilers."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para séries cujos títulos de episódio revelam demasiado, como um concurso que nomeia os concorrentes: em Definições > Aparência, os episódios não vistos podem mostrar apenas o número, em todo o lado ou só nas séries configuradas para ocultar sempre spoilers."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pentru seriale ale căror titluri de episod dezvăluie prea mult, cum ar fi un concurs care își numește concurenții: în Setări > Aspect, episoadele nevizionate pot afișa doar numărul, peste tot sau doar în serialele setate să ascundă mereu spoilerele."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для сериалов, где названия эпизодов выдают слишком много, например викторина с именами участников: в разделе «Настройки > Внешний вид» непросмотренные эпизоды могут показывать только номер, везде или только в сериалах, где спойлеры скрываются всегда."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pre seriály, ktorých názvy epizód prezradia priveľa, napríklad súťaž s menami súťažiacich: v Nastaveniach > Vzhľad môžu nepozreté epizódy zobrazovať iba svoje číslo, všade alebo len v seriáloch s trvalým skrývaním spoilerov."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "För serier där avsnittstitlarna avslöjar för mycket, som ett frågesportprogram med deltagarnas namn: under Inställningar > Utseende kan osedda avsnitt visa bara sitt nummer, överallt eller bara i serier som alltid döljer spoilers."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm adları fazla şey ele veren diziler için, örneğin yarışmacıların adlarını veren bir bilgi yarışması: Ayarlar > Görünüm bölümünde izlenmemiş bölümler yalnızca numaralarını gösterebilir; her yerde ya da yalnızca spoiler'ları her zaman gizleyen dizilerde."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для серіалів, де назви епізодів видають забагато, наприклад вікторина з іменами учасників: у розділі «Налаштування > Зовнішній вигляд» непереглянуті епізоди можуть показувати лише номер, усюди або лише в серіалах, де спойлери приховуються завжди."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "适用于剧集标题会透露太多的节目，比如列出参赛者姓名的问答节目：在“设置 > 外观”中，未观看的剧集可以只显示编号，可应用于所有节目，或仅应用于设为始终隐藏剧透的节目。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "適用於劇集標題會透露太多的節目，例如列出參賽者姓名的問答節目：在「設定 > 外觀」中，未觀看的劇集可以只顯示編號，可套用至所有節目，或僅套用至設為一律隱藏劇透的節目。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.episodeTitles.title" : {
+      "comment" : "Changelog 1.1.0: episode titles can be hidden as spoilers",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Názvy epizod mohou zůstat skryté"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afsnitstitler kan forblive skjulte"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodentitel können verborgen bleiben"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι τίτλοι επεισοδίων μπορούν να μένουν κρυφοί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode titles can stay hidden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los títulos de episodios pueden quedar ocultos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jaksojen nimet voivat pysyä piilossa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les titres des épisodes peuvent rester masqués"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naslovi epizoda mogu ostati skriveni"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az epizódcímek rejtve maradhatnak"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I titoli degli episodi possono restare nascosti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソードのタイトルを隠しておけます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드 제목을 숨길 수 있습니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodetitler kan forbli skjult"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afleveringstitels kunnen verborgen blijven"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tytuły odcinków mogą pozostać ukryte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos de episódios podem ficar ocultos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os títulos dos episódios podem ficar ocultos"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlurile episoadelor pot rămâne ascunse"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Названия эпизодов можно скрыть"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Názvy epizód môžu zostať skryté"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avsnittstitlar kan förbli dolda"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm adları gizli kalabilir"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назви епізодів можна приховати"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剧集标题可以保持隐藏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "劇集標題可以保持隱藏"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.extras.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -169119,6 +169443,330 @@
         }
       }
     },
+    "settings.appearance.spoilerEpisodeTitles" : {
+      "comment" : "Appearance toggle: also hide the names of unwatched episodes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrýt názvy epizod"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul afsnitstitler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodentitel ausblenden"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη τίτλων επεισοδίων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide episode titles"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar títulos de episodios"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilota jaksojen nimet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les titres des épisodes"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakrij naslove epizoda"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizódcímek elrejtése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi i titoli degli episodi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソードのタイトルを隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드 제목 숨기기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul episodetitler"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afleveringstitels verbergen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryj tytuły odcinków"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar títulos dos episódios"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar títulos dos episódios"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunde titlurile episoadelor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрывать названия эпизодов"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryť názvy epizód"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj avsnittstitlar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm adlarını gizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховувати назви епізодів"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏剧集标题"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏劇集標題"
+          }
+        }
+      }
+    },
+    "settings.appearance.spoilerEpisodeTitles.subtitle" : {
+      "comment" : "Subtitle for the episode title spoiler toggle",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nezhlédnuté epizody ukazují jen své číslo. Platí i pro seriál nastavený na trvalé skrývání spoilerů, i když je ochrana vypnutá."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usete afsnit viser kun deres nummer. Gælder også for en serie, der altid skjuler spoilere, selv når beskyttelsen er slået fra."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungesehene Episoden zeigen nur ihre Nummer. Gilt auch für Serien, die Spoiler immer verdecken, selbst wenn der Schutz aus ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα επεισόδια που δεν έχετε δει δείχνουν μόνο τον αριθμό τους. Ισχύει και για σειρά που κρύβει πάντα τα spoiler, ακόμη και με την προστασία ανενεργή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unwatched episodes show only their number. Also applies to a show set to always hide spoilers, even with protection off."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los episodios no vistos solo muestran su número. También se aplica a una serie configurada para ocultar siempre los spoilers, aunque la protección esté desactivada."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Katsomattomista jaksoista näkyy vain numero. Koskee myös sarjaa, joka piilottaa juonipaljastukset aina, vaikka suojaus olisi pois päältä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les épisodes non vus n’affichent que leur numéro. S’applique aussi à une série réglée pour toujours masquer les spoilers, même protection désactivée."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neodgledane epizode prikazuju samo svoj broj. Vrijedi i za seriju postavljenu da uvijek skriva spojlere, čak i kad je zaštita isključena."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meg nem nézett epizódok csak a számukat mutatják. A mindig spoilermentes sorozatokra is érvényes, kikapcsolt védelem mellett is."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli episodi non visti mostrano solo il numero. Vale anche per una serie impostata per nascondere sempre gli spoiler, anche con la protezione disattivata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未視聴のエピソードは番号だけを表示します。保護がオフでも、常にネタバレを隠すよう設定した番組には適用されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보지 않은 에피소드는 번호만 표시합니다. 보호가 꺼져 있어도 항상 스포일러를 숨기도록 설정한 시리즈에는 적용됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usette episoder viser bare nummeret. Gjelder også for en serie som alltid skjuler spoilere, selv når beskyttelsen er av."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet-bekeken afleveringen tonen alleen hun nummer. Geldt ook voor een serie die spoilers altijd verbergt, zelfs als de bescherming uit staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieobejrzane odcinki pokazują tylko swój numer. Dotyczy też serialu ustawionego na stałe ukrywanie spoilerów, nawet przy wyłączonej ochronie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódios não assistidos mostram só o número. Também vale para uma série configurada para sempre ocultar spoilers, mesmo com a proteção desativada."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os episódios não vistos mostram apenas o número. Também se aplica a uma série configurada para ocultar sempre spoilers, mesmo com a proteção desativada."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episoadele nevizionate afișează doar numărul. Se aplică și unui serial setat să ascundă mereu spoilerele, chiar și cu protecția dezactivată."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Непросмотренные эпизоды показывают только номер. Действует и для сериала, в котором спойлеры скрываются всегда, даже при выключенной защите."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nepozreté epizódy zobrazujú iba svoje číslo. Platí aj pre seriál nastavený na trvalé skrývanie spoilerov, aj keď je ochrana vypnutá."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Osedda avsnitt visar bara sitt nummer. Gäller även en serie som alltid döljer spoilers, även när skyddet är av."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzlenmemiş bölümler yalnızca numaralarını gösterir. Koruma kapalıyken bile spoiler'ları her zaman gizleyen diziler için de geçerlidir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Непереглянуті епізоди показують лише номер. Діє й для серіалу, у якому спойлери приховуються завжди, навіть коли захист вимкнено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未观看的剧集只显示编号。即使关闭了保护，设为始终隐藏剧透的剧集也同样适用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未觀看的劇集只顯示編號。即使關閉了保護，設為一律隱藏劇透的劇集也同樣適用。"
+          }
+        }
+      }
+    },
     "settings.appearance.spoilerMovies" : {
       "comment" : "Appearance toggle: apply spoiler protection to movies",
       "extractionState" : "manual",
@@ -221083,6 +221731,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sodalite %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "spoiler.episode" : {
+      "comment" : "Stands in for an episode title hidden as a spoiler, when the episode has no number",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizoda"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afsnit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επεισόδιο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jakso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisode"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizoda"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizód"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aflevering"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odcinek"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episod"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эпизод"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizóda"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Епізод"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剧集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "劇集"
+          }
+        }
+      }
+    },
+    "spoiler.episodeNumber %lld" : {
+      "comment" : "Stands in for an episode title hidden as a spoiler, e.g. Episode 12",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizoda %lld"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afsnit %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode %lld"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επεισόδιο %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodio %lld"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jakso %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisode %lld"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizoda %lld"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. epizód"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodio %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソード %lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드 %lld"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episode %lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aflevering %lld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odcinek %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio %lld"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio %lld"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episod %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эпизод %lld"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizóda %lld"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avsnitt %lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. Bölüm"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Епізод %lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 集"
           }
         }
       }

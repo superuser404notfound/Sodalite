@@ -292,6 +292,9 @@ struct AppearanceSettingsPayload: Codable, Equatable {
     /// nil from a build without the tagline switch (Sodalite#146 round 4). Same reading as the two
     /// scores above: those builds drew the tagline unconditionally, so absent means "shown".
     var showTagline: Bool
+    /// Absent from a build without the episode-title veil, and those builds never covered a
+    /// title, so absent reads as off.
+    var spoilerHideEpisodeTitles: Bool
     /// nil from a device on a build without tab visibility (Sodalite#62); applying nil would reset
     /// the receiver's hidden tabs, so it means "no opinion", not "nothing hidden".
     var hiddenTabs: [String]?
@@ -321,6 +324,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         showCommunityRating: Bool = true,
         showCriticRating: Bool = true,
         showTagline: Bool = true,
+        spoilerHideEpisodeTitles: Bool = false,
         hiddenTabs: [String]? = nil,
         navigationStyle: String? = nil
     ) {
@@ -344,6 +348,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         self.showCommunityRating = showCommunityRating
         self.showCriticRating = showCriticRating
         self.showTagline = showTagline
+        self.spoilerHideEpisodeTitles = spoilerHideEpisodeTitles
         self.hiddenTabs = hiddenTabs
         self.navigationStyle = navigationStyle
     }
@@ -369,6 +374,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         case showCommunityRating
         case showCriticRating
         case showTagline
+        case spoilerHideEpisodeTitles
         case hiddenTabs
         case navigationStyle
     }
@@ -399,6 +405,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         showCommunityRating = try values.decodeIfPresent(Bool.self, forKey: .showCommunityRating) ?? true
         showCriticRating = try values.decodeIfPresent(Bool.self, forKey: .showCriticRating) ?? true
         showTagline = try values.decodeIfPresent(Bool.self, forKey: .showTagline) ?? true
+        spoilerHideEpisodeTitles = try values.decodeIfPresent(Bool.self, forKey: .spoilerHideEpisodeTitles) ?? false
         hiddenTabs = try values.decodeIfPresent([String].self, forKey: .hiddenTabs)
         navigationStyle = try values.decodeIfPresent(String.self, forKey: .navigationStyle)
     }
@@ -425,6 +432,7 @@ struct AppearanceSettingsPayload: Codable, Equatable {
         try values.encode(showCommunityRating, forKey: .showCommunityRating)
         try values.encode(showCriticRating, forKey: .showCriticRating)
         try values.encode(showTagline, forKey: .showTagline)
+        try values.encode(spoilerHideEpisodeTitles, forKey: .spoilerHideEpisodeTitles)
         try values.encodeIfPresent(hiddenTabs, forKey: .hiddenTabs)
         try values.encodeIfPresent(navigationStyle, forKey: .navigationStyle)
     }

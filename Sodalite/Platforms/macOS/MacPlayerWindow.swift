@@ -108,7 +108,7 @@ private struct MacPlayerWindowContent: View {
                 }
                 // A replaced session is a new screen, so the old one's onDisappear stops its engine.
                 .id(ObjectIdentifier(entry.viewModel))
-                .navigationTitle(PlayerTitleLines(item: entry.viewModel.item).header)
+                .navigationTitle(PlayerTitleLines(item: entry.viewModel.item, spoilerPolicy: entry.viewModel.spoilerPolicy).header)
             } else {
                 Color.black
             }

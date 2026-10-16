@@ -272,7 +272,7 @@ struct MovieDetailView: View {
         .menuPresentation(isPresented: $isPresentingMoreDetails, panel: .plain) {
             if let vm = viewModel {
                 DetailMoreOverlay(
-                    title: vm.item.name,
+                    title: dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: vm.item),
                     // Veiled stays veiled: the reader is not a way around the spoiler rule, and the
                     // box below the fold is where it gets lifted.
                     synopsis: SpoilerReveal.isHidden(vm.item, dependencies: dependencies, appState: appState)

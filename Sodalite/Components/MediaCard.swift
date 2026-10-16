@@ -24,6 +24,7 @@ struct MediaCard: View {
     let serverLabel: String?
 
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     /// Enlarge factor from Appearance settings (1.0 normal), applied to every style so rows stay proportional.
@@ -138,9 +139,11 @@ struct MediaCard: View {
     }
 
     private var displayTitle: String {
-        guard style == .landscape, item.type == .episode else { return item.name }
-        return EpisodeMetadataFormatter.label(season: nil, episode: item.indexNumber,
-                                              title: item.name)
+        let policy = dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+        guard style == .landscape, item.type == .episode else { return policy.displayName(of: item) }
+        let label = EpisodeMetadataFormatter.label(season: nil, episode: item.indexNumber,
+                                                   title: policy.visibleTitle(of: item))
+        return label.isEmpty ? policy.displayName(of: item) : label
     }
 
     private var displaySubtitle: String? {

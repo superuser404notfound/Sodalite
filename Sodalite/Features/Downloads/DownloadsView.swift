@@ -107,6 +107,7 @@ struct DownloadsView: View {
 struct DownloadRow: View {
     let item: DownloadedItem
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
 
     var body: some View {
         let state = DownloadButtonState.from(item, liveProgress: dependencies.downloadManager?.liveProgress[item.id])
@@ -138,8 +139,10 @@ struct DownloadRow: View {
 
     private var title: String {
         let snapshot = item.snapshot.item
-        guard snapshot.seriesId != nil, let index = snapshot.indexNumber else { return snapshot.name }
-        return "\(index). \(snapshot.name)"
+        let policy = dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+        guard let name = policy.visibleTitle(of: snapshot) else { return policy.displayName(of: snapshot) }
+        guard snapshot.seriesId != nil, let index = snapshot.indexNumber else { return name }
+        return "\(index). \(name)"
     }
 
     private func caption(state: DownloadButtonState) -> String {
