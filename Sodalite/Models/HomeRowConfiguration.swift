@@ -176,9 +176,13 @@ extension HomeRowConfig {
     /// tiles under the library's name (device report, 2026-08-23). A row that loses that reason
     /// (second library removed, or it predates this rule) is retired, and if the user had it on,
     /// the aggregated row is switched on in its place rather than leaving them one shelf short.
+    ///
+    /// `isFreshInstall` (nothing stored for the scope yet) lays the result out with
+    /// `applyingSplitDefault`, the same rule Reset applies, so the two still land on one page.
     static func reconciled(
         stored: [HomeRowConfig],
-        libraries: [JellyfinLibrary]
+        libraries: [JellyfinLibrary],
+        isFreshInstall: Bool = false
     ) -> [HomeRowConfig] {
         let latestLibs = libraries.filter {
             perLibraryLatestTypes.contains($0.collectionType ?? "")
@@ -251,10 +255,38 @@ extension HomeRowConfig {
             result[index].isEnabled = true
         }
 
-        return result
+        return isFreshInstall ? applyingSplitDefault(result) : result
     }
 
-    /// Reset static rows to default order/enabled state; keep discovered `.libraryLatest` rows (at the end, disabled) so they don't vanish before the next reconcile.
+    /// The default for a type with several libraries: each library gets its own "Latest in X" row,
+    /// standing where the aggregated row stood, and the aggregated row goes off. Mixing a second
+    /// library into one shelf is what hid a TMDB Trending library inside Latest Movies (Discord,
+    /// 2026-10-16). Only a fresh install and Reset apply it; a saved layout keeps its rows.
+    static func applyingSplitDefault(_ configs: [HomeRowConfig]) -> [HomeRowConfig] {
+        let perLibrary = configs.filter { $0.type == .libraryLatest }
+        let splitTypes = Dictionary(grouping: perLibrary) { $0.collectionType ?? "" }
+            .filter { $0.value.count > 1 }
+            .keys
+        guard !splitTypes.isEmpty else { return configs }
+
+        var ordered = configs.sorted { $0.sortOrder < $1.sortOrder }
+        for collectionType in splitTypes.sorted() {
+            guard let aggregate = aggregatedLatestRow(forCollectionType: collectionType) else { continue }
+            let isSplitRow = { (config: HomeRowConfig) in
+                config.type == .libraryLatest && config.collectionType == collectionType
+            }
+            var split = ordered.filter(isSplitRow)
+            ordered.removeAll(where: isSplitRow)
+            guard let anchor = ordered.firstIndex(where: { $0.type == aggregate }) else { continue }
+            ordered[anchor].isEnabled = false
+            for index in split.indices { split[index].isEnabled = true }
+            ordered.insert(contentsOf: split, at: anchor + 1)
+        }
+        for index in ordered.indices { ordered[index].sortOrder = index }
+        return ordered
+    }
+
+    /// Reset static rows to default order/enabled state and keep the discovered `.libraryLatest` rows, laid out by `applyingSplitDefault` exactly as a fresh install lays them out.
     static func resetToDefault(current: [HomeRowConfig]) -> [HomeRowConfig] {
         var result = defaultConfig()
         var order = result.count
@@ -271,6 +303,6 @@ extension HomeRowConfig {
             )
             order += 1
         }
-        return result
+        return applyingSplitDefault(result)
     }
 }

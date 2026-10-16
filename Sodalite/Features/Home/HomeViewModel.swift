@@ -460,7 +460,11 @@ final class HomeViewModel {
                     // A server missing from the list would read as a server whose libraries are
                     // gone, and retire its per-library rows for good (Sodalite#85).
                     guard complete else { break }
-                    let reconciled = HomeRowConfig.reconciled(stored: rowConfigs, libraries: libraries)
+                    let reconciled = HomeRowConfig.reconciled(
+                        stored: rowConfigs,
+                        libraries: libraries,
+                        isFreshInstall: !HomeRowConfig.hasStoredConfig(scope: homeScope)
+                    )
                     guard reconciled != rowConfigs else { break }
                     rowConfigs = reconciled
                     HomeRowConfig.saveToStorage(reconciled, scope: homeScope)

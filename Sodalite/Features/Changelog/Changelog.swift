@@ -39,6 +39,12 @@ enum Changelog {
                     icon: "square.grid.2x2"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.latestPerLibrary.title",
+                    "changelog.1_1_0.latestPerLibrary.body",
+                    icon: "rectangle.stack"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.alphabetRail.title",
                     "changelog.1_1_0.alphabetRail.body",

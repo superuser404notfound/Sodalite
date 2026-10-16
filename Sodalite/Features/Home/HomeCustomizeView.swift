@@ -63,7 +63,11 @@ struct HomeCustomizeView: View {
         libraries = MyMediaLibraries.browsable(result.libraries)
         // A server missing from the list would retire its per-library rows for good.
         guard result.complete else { return }
-        let reconciled = HomeRowConfig.reconciled(stored: configs, libraries: result.libraries)
+        let reconciled = HomeRowConfig.reconciled(
+            stored: configs,
+            libraries: result.libraries,
+            isFreshInstall: !HomeRowConfig.hasStoredConfig(scope: scope)
+        )
         if reconciled != configs {
             configs = reconciled
             HomeRowConfig.saveToStorage(reconciled, scope: scope)
@@ -610,6 +614,13 @@ extension HomeRowConfig {
     private static let legacyKey = "homeRowConfigs"
     private static func storageKey(scope: String) -> String {
         "homeRowConfigs.\(scope)"
+    }
+
+    /// False until the scope's rows are first saved, which the first reconcile with the server's
+    /// libraries does. Mirrors the legacy fallback in `loadFromStorage`.
+    static func hasStoredConfig(scope: String) -> Bool {
+        UserDefaults.standard.data(forKey: storageKey(scope: scope)) != nil
+            || UserDefaults.standard.data(forKey: legacyKey) != nil
     }
 
     static func loadFromStorage(scope: String) -> [HomeRowConfig] {
