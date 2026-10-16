@@ -3,7 +3,17 @@ import SwiftUI
 extension EnvironmentValues {
     /// Starts playback of an item from a card's context menu, where the screen can (Home opens the
     /// detail page with autoplay). Nil leaves Play out of the menu.
-    @Entry var playMediaItem: ((JellyfinItem) -> Void)?
+    @Entry var playMediaItem: PlayMediaItemAction?
+}
+
+/// Always equal: its one publisher (Home) routes into state storage that outlives every render, so
+/// a fresh closure per render changes nothing a reader needs to see.
+struct PlayMediaItemAction: Equatable {
+    let perform: (JellyfinItem) -> Void
+
+    func callAsFunction(_ item: JellyfinItem) { perform(item) }
+
+    static func == (lhs: Self, rhs: Self) -> Bool { true }
 }
 
 extension View {

@@ -27,7 +27,7 @@ struct PosterBadgeStoreCancellationTests {
             do {
                 try await Task.sleep(for: .milliseconds(200))
             } catch {
-                lock.withLock { _cancelledSeries.insert(seriesID) }
+                _ = lock.withLock { _cancelledSeries.insert(seriesID) }
                 throw error
             }
             return JellyfinItemsResponse(items: [], totalRecordCount: 0)

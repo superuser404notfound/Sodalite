@@ -449,7 +449,7 @@ struct FilteredGridView: View {
             && AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
     }
 
-    private static let gridSpace = "FilteredGridView.content"
+    nonisolated private static let gridSpace = "FilteredGridView.content"
     /// Room above the landed row for the focused card's lift.
     private static let jumpTopMargin: CGFloat = 40
 

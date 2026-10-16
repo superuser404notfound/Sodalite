@@ -67,7 +67,7 @@ struct MyRequestsWatcherTests {
         watcher.scope = { active.value }
         watcher.onNewEvents = { _ in }
         watcher.fetchRequests = { _ in
-            await active.set("s_b")
+            active.set("s_b")
             return [Self.request(id: 1, status: 1, media: 2)]
         }
         await watcher.refresh()
@@ -80,12 +80,12 @@ struct MyRequestsWatcherTests {
         let counter = ActiveScope()
         watcher.onNewEvents = { _ in }
         watcher.fetchRequests = { _ in
-            await counter.set("fetched")
+            counter.set("fetched")
             return []
         }
         await watcher.refresh()
         #expect(prefs.myRequestsSnapshot(scope: "s_a") != nil)
-        await counter.set(nil)
+        counter.set(nil)
         watcher.setEnabled(false)
         await watcher.refresh()
         #expect(counter.value == nil)

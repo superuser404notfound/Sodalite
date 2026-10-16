@@ -2,7 +2,17 @@ import SwiftUI
 
 extension FocusedValues {
     /// Pops the page on screen. Published by the visible pushed page, read by the Back command.
-    @Entry var navigateBack: (() -> Void)?
+    @Entry var navigateBack: NavigateBackAction?
+}
+
+/// Equal per publishing page, so a re-render of the same page does not invalidate the Back command.
+struct NavigateBackAction: Equatable {
+    let page: UUID
+    let perform: () -> Void
+
+    func callAsFunction() { perform() }
+
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.page == rhs.page }
 }
 
 extension View {
@@ -26,12 +36,13 @@ private struct PushedPage: ViewModifier {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isPresented) private var isPresented
     @State private var isVisible = false
+    @State private var page = UUID()
 
     func body(content: Content) -> some View {
         content
             .onAppear { isVisible = true }
             .onDisappear { isVisible = false }
-            .focusedSceneValue(\.navigateBack, isPresented && isVisible ? { dismiss() } : nil)
+            .focusedSceneValue(\.navigateBack, isPresented && isVisible ? NavigateBackAction(page: page) { dismiss() } : nil)
     }
 }
 
