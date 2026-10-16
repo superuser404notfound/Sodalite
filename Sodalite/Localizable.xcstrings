@@ -70481,6 +70481,330 @@
         }
       }
     },
+    "changelog.1_1_0.latestPerLibrary.body" : {
+      "comment" : "What's New 1.1.0: body for the per-library Latest rows a multi-library Home now starts with.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S více než jednou knihovnou filmů nebo seriálů začíná domovská obrazovka řádkem Nejnovější pro každou z nich místo jednoho společného. Platí pro nové nastavení a pro Obnovit výchozí v Přizpůsobit řádky, stávající domovská obrazovka si své řádky ponechá."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Med mere end ét film- eller seriebibliotek starter forsiden nu med en Nyeste-række for hvert af dem i stedet for den samlede. Det gælder nye opsætninger og Gendan standardindstillinger i Tilpas rækker, en eksisterende forside beholder sine rækker."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei mehr als einer Film- oder Serienbibliothek beginnt die Startseite jetzt mit einer Neu-in-Reihe für jede davon, statt einer zusammengefassten. Das gilt für neue Einrichtungen und für Standard wiederherstellen in Reihen anpassen, eine bestehende Startseite behält ihre Reihen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Με περισσότερες από μία βιβλιοθήκες ταινιών ή σειρών, η αρχική οθόνη ξεκινά τώρα με μια σειρά Πρόσφατα για καθεμία, αντί για μία κοινή. Ισχύει για νέες ρυθμίσεις και για την Επαναφορά προεπιλογών στην Προσαρμογή σειρών, μια υπάρχουσα αρχική οθόνη κρατά τις σειρές της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With more than one movies or shows library, Home now starts with a Latest row for each of them instead of one combined row. This applies to new setups and to Restore Defaults in Customize Rows, an existing Home keeps its rows."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con más de una biblioteca de películas o series, Inicio empieza ahora con una fila de novedades para cada una en lugar de una fila combinada. Se aplica a las configuraciones nuevas y a Restaurar valores predeterminados en Personalizar filas, un Inicio existente conserva sus filas."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun elokuva- tai sarjakirjastoja on useampi kuin yksi, kotinäkymä alkaa nyt Uusimmat-rivillä jokaiselle niistä yhdistetyn rivin sijaan. Tämä koskee uusia asennuksia ja Palauta oletukset -toimintoa kohdassa Mukauta rivit, olemassa oleva kotinäkymä säilyttää rivinsä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec plus d'une bibliothèque de films ou de séries, l'accueil commence désormais par une ligne Derniers ajouts pour chacune, au lieu d'une ligne combinée. Cela s'applique aux nouvelles installations et à Rétablir les réglages par défaut dans Personnaliser les lignes, un accueil existant garde ses lignes."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S više od jedne knjižnice filmova ili serija početni zaslon sada počinje retkom Najnovije za svaku od njih umjesto jednog zajedničkog. Vrijedi za nova postavljanja i za Vrati zadano u Prilagodi retke, postojeći početni zaslon zadržava svoje retke."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha egynél több film- vagy sorozatkönyvtár van, a kezdőlap most mindegyikhez külön Legújabb sorral indul az egyetlen összevont sor helyett. Ez az új beállításokra és a Sorok testreszabása Alapértékek visszaállítása funkciójára vonatkozik, a meglévő kezdőlap megtartja a sorait."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con più di una libreria di film o serie, la Home ora inizia con una riga Novità per ciascuna invece di una riga combinata. Vale per le nuove configurazioni e per Ripristina impostazioni predefinite in Personalizza righe, una Home esistente mantiene le sue righe."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "映画またはシリーズのライブラリが複数ある場合、ホームはまとめた行の代わりに、ライブラリごとの最新の行で始まるようになりました。新しいセットアップと、行をカスタマイズの「デフォルトに戻す」に適用され、既存のホームの行はそのまま残ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영화 또는 시리즈 라이브러리가 두 개 이상이면 이제 홈이 하나로 합친 행 대신 라이브러리마다 최신 항목 행으로 시작합니다. 새 설정과 행 사용자 지정의 기본값 복원에 적용되며, 기존 홈은 행을 그대로 유지합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Med mer enn ett film- eller seriebibliotek starter Hjem nå med en Nyeste-rad for hvert av dem i stedet for én samlet rad. Det gjelder nye oppsett og Gjenopprett standard i Tilpass rader, et eksisterende Hjem beholder radene sine."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met meer dan één film- of seriebibliotheek begint Home nu met een Nieuw-in-rij voor elk ervan in plaats van één gecombineerde rij. Dit geldt voor nieuwe installaties en voor Standaard herstellen in Rijen aanpassen, een bestaande Home houdt zijn rijen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przy więcej niż jednej bibliotece filmów lub seriali ekran główny zaczyna się teraz od wiersza Najnowsze dla każdej z nich zamiast jednego wspólnego. Dotyczy to nowych konfiguracji i opcji Przywróć domyślne w Dostosuj wiersze, istniejący ekran główny zachowuje swoje wiersze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com mais de uma biblioteca de filmes ou séries, o Início agora começa com uma linha de recentes para cada uma, em vez de uma linha combinada. Vale para novas configurações e para Restaurar padrões em Personalizar linhas, um Início existente mantém suas linhas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com mais de uma biblioteca de filmes ou séries, o Início começa agora com uma linha de recentes para cada uma, em vez de uma linha combinada. Aplica-se a novas configurações e a Restaurar padrões em Personalizar linhas, um Início existente mantém as suas linhas."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cu mai mult de o bibliotecă de filme sau seriale, ecranul principal începe acum cu un rând Recente pentru fiecare, în locul unui rând combinat. Se aplică noilor configurări și opțiunii Restabilește valorile implicite din Personalizează rândurile, un ecran principal existent își păstrează rândurile."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если медиатек фильмов или сериалов больше одной, главный экран теперь начинается со строки «Новое» для каждой из них вместо одной общей. Это относится к новой настройке и к «Сбросить по умолчанию» в «Настроить строки», существующий главный экран сохраняет свои строки."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri viac ako jednej knižnici filmov alebo seriálov sa domovská obrazovka teraz začína riadkom Najnovšie pre každú z nich namiesto jedného spoločného. Platí to pre nové nastavenie a pre Obnoviť predvolené v Prispôsobiť riadky, existujúca domovská obrazovka si svoje riadky ponechá."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Med mer än ett film- eller seriebibliotek börjar Hem nu med en Senaste-rad för vart och ett i stället för en sammanslagen rad. Det gäller nya inställningar och Återställ standard i Anpassa rader, ett befintligt Hem behåller sina rader."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla film veya dizi kütüphanesi olduğunda Ana Sayfa artık tek bir birleşik satır yerine her biri için bir En Yeniler satırıyla başlıyor. Bu, yeni kurulumlar ve Satırları Özelleştir içindeki Varsayılanları Geri Yükle için geçerlidir, mevcut bir Ana Sayfa satırlarını korur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо медіатек фільмів чи серіалів більше однієї, головний екран тепер починається з рядка «Нове» для кожної з них замість одного спільного. Це стосується нового налаштування та «Відновити за замовчуванням» у «Налаштувати рядки», наявний головний екран зберігає свої рядки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果有多个电影或剧集媒体库，主页现在会为每个媒体库显示一行最新内容，而不是一行合并内容。这适用于新设置以及“自定义行”中的“恢复默认设置”，现有主页会保留原有的行。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果有多個電影或影集媒體庫，主頁現在會為每個媒體庫顯示一列最新內容，而不是一列合併內容。這適用於新設定以及「自訂列」中的「還原預設值」，現有主頁會保留原有的列。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.latestPerLibrary.title" : {
+      "comment" : "What's New 1.1.0: title for the per-library Latest rows a multi-library Home now starts with.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Řádek Nejnovější pro každou knihovnu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Nyeste-række pr. bibliotek"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu-in-Reihe pro Bibliothek"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια σειρά Πρόσφατα ανά βιβλιοθήκη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Latest row per library"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una fila de novedades por biblioteca"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uusimmat-rivi jokaiselle kirjastolle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une ligne Derniers ajouts par bibliothèque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redak Najnovije za svaku knjižnicu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legújabb sor könyvtáranként"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una riga Novità per libreria"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリごとの最新の行"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리별 최신 항목 행"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Nyeste-rad per bibliotek"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een Nieuw-in-rij per bibliotheek"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiersz Najnowsze dla każdej biblioteki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma linha de recentes por biblioteca"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma linha de recentes por biblioteca"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un rând Recente pentru fiecare bibliotecă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строка «Новое» для каждой медиатеки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riadok Najnovšie pre každú knižnicu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Senaste-rad per bibliotek"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kütüphane başına bir En Yeniler satırı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рядок «Нове» для кожної медіатеки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个媒体库一行最新内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每個媒體庫一列最新內容"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.libraryOrder.body" : {
       "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
       "extractionState" : "manual",
