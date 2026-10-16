@@ -6,7 +6,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/AetherEngine",
       "state" : {
-        "revision" : "a3db0d7559da85542a974415ab59697e9faa6d08"
+        "revision" : "80339d247625161fb0c81d240bbeef378b4d440f"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/LibDTSX",
       "state" : {
-        "revision" : "9906f8fe9b72eb4d79a85754adbba6fa52cfe7b2",
-        "version" : "1.0.1"
+        "revision" : "1f0dd2daaaeb899b694e8502a5bb6f570046f4f3",
+        "version" : "2.0.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/LibTrueHD",
       "state" : {
-        "revision" : "577de495184254e2c660ebfd6ce3f7d97f45899d",
-        "version" : "2.3.0"
+        "revision" : "3eab2e7c10ff1b3c2078afbab138471f2511859b",
+        "version" : "2.3.1"
       }
     },
     {
