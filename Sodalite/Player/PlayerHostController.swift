@@ -122,6 +122,8 @@ final class PlayerHostController: AVPlayerViewController {
     private let externalSubtitleWindow = ExternalSubtitleWindowController()
     /// UIScene connect/disconnect observer tokens, registered once per player bind (idempotent).
     private var externalScreenObservers: [NSObjectProtocol] = []
+    /// Sodalite#189: the software path's picture on a wired external screen.
+    private let externalSoftwareVideo = ExternalSoftwareVideoWindowController()
     #endif
 
     init(
@@ -173,6 +175,11 @@ final class PlayerHostController: AVPlayerViewController {
         #if os(iOS)
         allowsPictureInPicturePlayback = mode.offersPictureInPicture
         canStartPictureInPictureAutomaticallyFromInline = mode.offersPictureInPicture
+        // Sodalite#189: unlike the per-player observers below, the software path binds no AVPlayer.
+        for name in [UIScene.willConnectNotification, UIScene.didDisconnectNotification] {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(externalSceneDidChange(_:)), name: name, object: nil)
+        }
         #else
         allowsPictureInPicturePlayback = false
         #endif
@@ -327,6 +334,9 @@ final class PlayerHostController: AVPlayerViewController {
                     // .audio is the audio-only path: no video surface to mount.
                     self.unmountAetherViewIfNeeded()
                 }
+                #if os(iOS)
+                self.updateExternalSoftwareVideo()
+                #endif
             }
             .store(in: &engineSubscriptions)
 
@@ -516,6 +526,12 @@ final class PlayerHostController: AVPlayerViewController {
     }
 
     private func unmountAetherViewIfNeeded() {
+        #if os(iOS)
+        if externalSoftwareVideo.isShowingVideo {
+            externalSoftwareVideo.tearDown(engine: viewModel.player)
+            syncExternalPlaybackDestination()
+        }
+        #endif
         guard aetherViewMounted else { return }
         viewModel.player.unbind(view: aetherView)
         aetherView.removeFromSuperview()
@@ -590,6 +606,10 @@ final class PlayerHostController: AVPlayerViewController {
     /// every external-playback edge and on every route change, because switching receivers mid-session
     /// changes the name without touching the flag.
     private func syncExternalPlaybackDestination() {
+        if externalSoftwareVideo.isShowingVideo {
+            viewModel.setExternalPlaybackDestination(.externalDisplay)
+            return
+        }
         guard externalPlaybackActive else {
             viewModel.setExternalPlaybackDestination(nil)
             return
@@ -597,6 +617,27 @@ final class PlayerHostController: AVPlayerViewController {
         let ports = AVAudioSession.sharedInstance().currentRoute.outputs
             .map { (type: $0.portType, name: $0.portName) }
         viewModel.setExternalPlaybackDestination(ExternalPlaybackPresentation.destination(ports: ports))
+    }
+
+    /// Sodalite#189: the software path has no AVKit external playback, so a wired display only mirrors
+    /// the device until the picture is moved into a window on the display's own scene.
+    private func updateExternalSoftwareVideo(connecting: UIWindowScene? = nil) {
+        guard !detached else { return }
+        externalSoftwareVideo.update(engine: viewModel.player, viewModel: viewModel, connecting: connecting)
+        syncExternalPlaybackDestination()
+    }
+
+    @objc private func externalSceneDidChange(_ note: Notification) {
+        guard (note.object as? UIWindowScene)?.session.role == .windowExternalDisplayNonInteractive else { return }
+        let event = note.name == UIScene.willConnectNotification ? "connect" : "disconnect"
+        LogTap.shared.note("[ExternalVideo] scene \(event) backend=\(viewModel.player.playbackBackend)")
+        // A disconnecting scene can still be listed among the connected ones while this runs.
+        if note.name == UIScene.didDisconnectNotification {
+            externalSoftwareVideo.tearDown(engine: viewModel.player)
+            syncExternalPlaybackDestination()
+            return
+        }
+        updateExternalSoftwareVideo(connecting: note.object as? UIWindowScene)
     }
 
     /// Sodalite#98: draw the subtitle overlay on a wired external screen, which the app can only do by
