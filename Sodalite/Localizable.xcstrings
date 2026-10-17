@@ -66600,157 +66600,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stopy TrueHD Atmos a DTS:X si nyní zachovají výškové kanály. Sodalite vykreslí výšky a objekty a pošle je do receiveru nebo soundbaru jako Dolby Atmos, případně do AirPods jako prostorový zvuk, a když film takovou stopu má, vybere ji ve vašem jazyce. Zapnuto ve výchozím stavu, vypnout lze v nastavení přehrávání."
+            "value" : "Stopy TrueHD a DTS s objektovým zvukem si nyní mohou zachovat výškové kanály: Sodalite je na zařízení vykreslí do mixu 7.1.4 a zvolí takovou stopu ve vašem jazyce, pokud ji film má. Experimentální a ve výchozím stavu vypnuté, zapnete v nastavení přehrávání v části Zvuk."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos- og DTS:X-spor beholder nu deres højdekanaler. Sodalite gengiver højder og objekter og sender dem til din receiver eller soundbar som Dolby Atmos eller til AirPods som rumlig lyd, og vælger et sådant spor på dit sprog, når en film har et. Slået til som standard og kan slås fra i indstillingerne for afspilning."
+            "value" : "TrueHD- og DTS-spor med objektlyd kan nu beholde deres højdekanaler: Sodalite renderer dem på enheden til et 7.1.4-mix og vælger et sådant spor på dit sprog, når en film har et. Eksperimentel og slået fra som standard, slå den til i afspilningsindstillingerne under Lyd."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD-Atmos- und DTS:X-Spuren behalten jetzt ihre Höhenkanäle. Sodalite rendert Höhen und Objekte und gibt sie als Dolby Atmos an Receiver oder Soundbar weiter, an AirPods als 3D-Audio, und wählt eine solche Spur in deiner Sprache, wenn ein Film eine hat. Standardmäßig an, abschaltbar in den Wiedergabeeinstellungen."
+            "value" : "TrueHD- und DTS-Spuren mit Objekt-Audio können jetzt ihre Höhenkanäle behalten: Sodalite rendert sie auf dem Gerät zu einem 7.1.4-Mix und wählt eine solche Spur in deiner Sprache, wenn ein Film eine hat. Experimentell und standardmäßig aus, einschaltbar in den Wiedergabe-Einstellungen unter Audio."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Τα κομμάτια TrueHD Atmos και DTS:X διατηρούν πλέον τα κανάλια ύψους τους. Το Sodalite αποδίδει τα ύψη και τα αντικείμενα και τα στέλνει στον δέκτη ή στο soundbar ως Dolby Atmos ή στα AirPods ως χωρικό ήχο, και επιλέγει τέτοιο κομμάτι στη γλώσσα σας όταν μια ταινία έχει. Ενεργό από προεπιλογή, απενεργοποιείται στις ρυθμίσεις αναπαραγωγής."
+            "value" : "Τα κομμάτια TrueHD και DTS με ήχο αντικειμένων μπορούν τώρα να κρατούν τα κανάλια ύψους: το Sodalite τα αποδίδει στη συσκευή σε μίξη 7.1.4 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας, όταν μια ταινία έχει. Πειραματικό και ανενεργό από προεπιλογή, ενεργοποιείται στις ρυθμίσεις αναπαραγωγής στην ενότητα Ήχος."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos and DTS:X tracks now keep their height channels. Sodalite renders the heights and objects and sends them to your receiver or soundbar as Dolby Atmos, or to AirPods as Spatial Audio, and picks such a track in your language when a film has one. On by default, and switchable in the playback settings."
+            "value" : "TrueHD and DTS tracks with object audio can now keep their height channels: Sodalite renders them on the device into a 7.1.4 mix and picks such a track in your language when a film has one. Experimental and off by default, switch it on in the playback settings under Audio."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las pistas TrueHD Atmos y DTS:X ahora conservan sus canales de altura. Sodalite renderiza las alturas y los objetos y los envía a tu receptor o barra de sonido como Dolby Atmos, o a los AirPods como audio espacial, y elige una pista así en tu idioma cuando la película tiene una. Activado por defecto, se puede desactivar en los ajustes de reproducción."
+            "value" : "Las pistas TrueHD y DTS con audio de objetos ahora pueden conservar sus canales de altura: Sodalite los renderiza en el dispositivo en una mezcla 7.1.4 y elige una pista así en tu idioma cuando la película la tiene. Experimental y desactivado por defecto, actívalo en los ajustes de reproducción, en Audio."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos- ja DTS:X-raidat säilyttävät nyt korkeuskanavansa. Sodalite renderöi korkeudet ja objektit ja lähettää ne vastaanottimeen tai soundbariin Dolby Atmosina tai AirPodeihin tilaäänenä, ja valitsee tällaisen raidan kielelläsi, kun elokuvassa sellainen on. Oletuksena päällä, poistettavissa toistoasetuksista."
+            "value" : "Objektiääntä sisältävät TrueHD- ja DTS-raidat voivat nyt säilyttää korkeuskanavansa: Sodalite renderöi ne laitteella 7.1.4-miksaukseksi ja valitsee tällaisen raidan kielelläsi, jos elokuvassa sellainen on. Kokeellinen ja oletuksena pois päältä, kytke päälle toistoasetusten kohdasta Ääni."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les pistes TrueHD Atmos et DTS:X conservent désormais leurs canaux de hauteur. Sodalite effectue le rendu des hauteurs et des objets et les envoie à votre ampli ou barre de son en Dolby Atmos, ou aux AirPods en audio spatial, et choisit une telle piste dans votre langue quand un film en a une. Activé par défaut, désactivable dans les réglages de lecture."
+            "value" : "Les pistes TrueHD et DTS à audio objet peuvent désormais conserver leurs canaux de hauteur : Sodalite les calcule sur l’appareil en un mixage 7.1.4 et choisit une telle piste dans votre langue quand un film en a une. Expérimental et désactivé par défaut, à activer dans les réglages de lecture, sous Audio."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos i DTS:X zapisi sada zadržavaju visinske kanale. Sodalite renderira visine i objekte i šalje ih prijemniku ili soundbaru kao Dolby Atmos, a AirPodsima kao prostorni zvuk, te bira takav zapis na vašem jeziku kad ga film ima. Uključeno prema zadanim postavkama, isključuje se u postavkama reprodukcije."
+            "value" : "TrueHD i DTS zapisi s objektnim zvukom sada mogu zadržati visinske kanale: Sodalite ih na uređaju renderira u miks 7.1.4 i bira takav zapis na vašem jeziku kada ga film ima. Eksperimentalno i isključeno prema zadanim postavkama, uključite u postavkama reprodukcije pod Zvuk."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A TrueHD Atmos és DTS:X sávok mostantól megtartják a magassági csatornáikat. A Sodalite rendereli a magassági csatornákat és az objektumokat, Dolby Atmosként küldi őket az erősítőnek vagy hangprojektornak, térhatású hangként az AirPodsnak, és ilyen sávot választ a nyelveden, ha a filmben van. Alapból bekapcsolva, a lejátszási beállításokban kikapcsolható."
+            "value" : "Az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok mostantól megtarthatják magassági csatornáikat: a Sodalite az eszközön 7.1.4-es keverékké rendereli őket, és ilyen sávot választ az Ön nyelvén, ha a filmben van. Kísérleti és alapértelmezésben ki van kapcsolva, a lejátszási beállítások Hang részében kapcsolható be."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le tracce TrueHD Atmos e DTS:X ora mantengono i canali di altezza. Sodalite esegue il rendering di altezze e oggetti e li invia al ricevitore o alla soundbar come Dolby Atmos, oppure agli AirPods come audio spaziale, e sceglie una traccia simile nella tua lingua quando un film ne ha una. Attivo per impostazione predefinita, disattivabile nelle impostazioni di riproduzione."
+            "value" : "Le tracce TrueHD e DTS con audio a oggetti ora possono mantenere i canali di altezza: Sodalite ne esegue il rendering sul dispositivo in un mix 7.1.4 e sceglie una traccia simile nella tua lingua quando un film ne ha una. Sperimentale e disattivato per impostazione predefinita, attivalo nelle impostazioni di riproduzione, sezione Audio."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD AtmosとDTS:Xのトラックで、ハイトチャンネルが保持されるようになりました。Sodaliteがハイトとオブジェクトをレンダリングし、レシーバーやサウンドバーにはDolby Atmosとして、AirPodsには空間オーディオとして送り、映画にそのようなトラックがあればあなたの言語のものを選びます。デフォルトでオン、再生設定で切り替えられます。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックでハイトチャンネルを保持できるようになりました。Sodalite がデバイス上で 7.1.4 ミックスにレンダリングし、映画にあればあなたの言語のそのようなトラックを選びます。実験的な機能で、デフォルトはオフです。再生設定の「オーディオ」でオンにできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos 및 DTS:X 트랙이 이제 높이 채널을 유지합니다. Sodalite가 높이 채널과 오브젝트를 렌더링하여 리시버나 사운드바에는 Dolby Atmos로, AirPods에는 공간 음향으로 보내고, 영화에 해당 트랙이 있으면 사용자 언어의 트랙을 선택합니다. 기본적으로 켜져 있으며 재생 설정에서 끌 수 있습니다."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙이 이제 높이 채널을 유지할 수 있습니다. Sodalite가 기기에서 7.1.4 믹스로 렌더링하고, 영화에 있으면 사용자 언어의 해당 트랙을 선택합니다. 실험적 기능이며 기본값은 꺼짐이고, 재생 설정의 오디오에서 켤 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos- og DTS:X-spor beholder nå høydekanalene sine. Sodalite gjengir høyder og objekter og sender dem til receiveren eller lydplanken som Dolby Atmos, eller til AirPods som romlig lyd, og velger et slikt spor på ditt språk når en film har et. På som standard, kan slås av i avspillingsinnstillingene."
+            "value" : "TrueHD- og DTS-spor med objektlyd kan nå beholde høydekanalene: Sodalite rendrer dem på enheten til en 7.1.4-miks og velger et slikt spor på ditt språk når en film har et. Eksperimentell og av som standard, slå den på i avspillingsinnstillingene under Lyd."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos- en DTS:X-sporen behouden nu hun hoogtekanalen. Sodalite rendert de hoogtes en objecten en stuurt ze als Dolby Atmos naar je receiver of soundbar, of als ruimtelijke audio naar AirPods, en kiest zo'n spoor in jouw taal als een film er een heeft. Standaard aan, uit te zetten in de afspeelinstellingen."
+            "value" : "TrueHD- en DTS-sporen met objectaudio kunnen nu hun hoogtekanalen behouden: Sodalite rendert ze op het apparaat tot een 7.1.4-mix en kiest zo’n spoor in jouw taal als een film er een heeft. Experimenteel en standaard uit, zet het aan in de afspeelinstellingen onder Audio."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ścieżki TrueHD Atmos i DTS:X zachowują teraz kanały wysokości. Sodalite renderuje kanały wysokości i obiekty i wysyła je do amplitunera lub soundbara jako Dolby Atmos, a do AirPods jako dźwięk przestrzenny, oraz wybiera taką ścieżkę w Twoim języku, gdy film ją ma. Domyślnie włączone, można wyłączyć w ustawieniach odtwarzania."
+            "value" : "Ścieżki TrueHD i DTS z dźwiękiem obiektowym mogą teraz zachować kanały wysokości: Sodalite renderuje je na urządzeniu do miksu 7.1.4 i wybiera taką ścieżkę w Twoim języku, jeśli film ją ma. Eksperymentalne i domyślnie wyłączone, włączysz je w ustawieniach odtwarzania w sekcji Audio."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Faixas TrueHD Atmos e DTS:X agora mantêm seus canais de altura. O Sodalite renderiza as alturas e os objetos e os envia ao seu receiver ou soundbar como Dolby Atmos, ou aos AirPods como Áudio Espacial, e escolhe uma faixa assim no seu idioma quando um filme tem uma. Ativado por padrão, pode ser desativado nos ajustes de reprodução."
+            "value" : "Faixas TrueHD e DTS com áudio de objetos agora podem manter os canais de altura: o Sodalite os renderiza no dispositivo em uma mixagem 7.1.4 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Experimental e desativado por padrão, ative nos ajustes de reprodução, em Áudio."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As faixas TrueHD Atmos e DTS:X mantêm agora os canais de altura. O Sodalite processa as alturas e os objetos e envia-os para o recetor ou barra de som como Dolby Atmos, ou para os AirPods como áudio espacial, e escolhe uma faixa assim no seu idioma quando um filme tem uma. Ativado por predefinição, pode ser desativado nas definições de reprodução."
+            "value" : "As faixas TrueHD e DTS com áudio de objetos podem agora manter os canais de altura: o Sodalite renderiza-os no dispositivo numa mistura 7.1.4 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Experimental e desativado por omissão, ative nas definições de reprodução, em Áudio."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pistele TrueHD Atmos și DTS:X își păstrează acum canalele de înălțime. Sodalite randează înălțimile și obiectele și le trimite receiverului sau soundbarului ca Dolby Atmos, ori căștilor AirPods ca audio spațial, și alege o astfel de pistă în limba ta când un film are una. Activat implicit, se poate dezactiva din setările de redare."
+            "value" : "Pistele TrueHD și DTS cu audio pe obiecte își pot păstra acum canalele de înălțime: Sodalite le randează pe dispozitiv într-un mix 7.1.4 și alege o astfel de pistă în limba ta când filmul are una. Experimental și dezactivat implicit, îl activezi în setările de redare, la Audio."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дорожки TrueHD Atmos и DTS:X теперь сохраняют высотные каналы. Sodalite рендерит высоты и объекты и передаёт их на ресивер или саундбар как Dolby Atmos, а на AirPods как пространственное аудио, и выбирает такую дорожку на вашем языке, если она есть в фильме. Включено по умолчанию, отключается в настройках воспроизведения."
+            "value" : "Дорожки TrueHD и DTS с объектным звуком теперь могут сохранять высотные каналы: Sodalite рендерит их на устройстве в микс 7.1.4 и выбирает такую дорожку на вашем языке, если она есть в фильме. Экспериментально и по умолчанию выключено, включается в настройках воспроизведения в разделе «Аудио»."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stopy TrueHD Atmos a DTS:X si teraz zachovajú výškové kanály. Sodalite vykreslí výšky a objekty a pošle ich do prijímača alebo soundbaru ako Dolby Atmos, prípadne do AirPods ako priestorový zvuk, a keď film takú stopu má, vyberie ju vo vašom jazyku. Predvolene zapnuté, vypnúť sa dá v nastaveniach prehrávania."
+            "value" : "Stopy TrueHD a DTS s objektovým zvukom si teraz môžu zachovať výškové kanály: Sodalite ich na zariadení vykreslí do mixu 7.1.4 a zvolí takú stopu vo vašom jazyku, ak ju film má. Experimentálne a predvolene vypnuté, zapnete v nastaveniach prehrávania v časti Zvuk."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos- och DTS:X-spår behåller nu sina höjdkanaler. Sodalite renderar höjder och objekt och skickar dem till din receiver eller soundbar som Dolby Atmos, eller till AirPods som rumsligt ljud, och väljer ett sådant spår på ditt språk när en film har ett. På som standard, kan stängas av i uppspelningsinställningarna."
+            "value" : "TrueHD- och DTS-spår med objektljud kan nu behålla sina höjdkanaler: Sodalite renderar dem på enheten till en 7.1.4-mix och väljer ett sådant spår på ditt språk när en film har ett. Experimentell och avstängd som standard, slå på den i uppspelningsinställningarna under Ljud."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos ve DTS:X parçaları artık yükseklik kanallarını koruyor. Sodalite yükseklikleri ve nesneleri işler ve alıcınıza ya da ses çubuğunuza Dolby Atmos olarak, AirPods'a uzamsal ses olarak gönderir ve bir filmde varsa dilinizdeki böyle bir parçayı seçer. Varsayılan olarak açık, oynatma ayarlarından kapatılabilir."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçaları artık yükseklik kanallarını koruyabilir: Sodalite bunları cihazda 7.1.4 miksine dönüştürür ve filmde varsa dilinizde böyle bir parça seçer. Deneyseldir ve varsayılan olarak kapalıdır, oynatma ayarlarında Ses bölümünden açabilirsiniz."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Доріжки TrueHD Atmos і DTS:X тепер зберігають висотні канали. Sodalite рендерить висоти й об’єкти і передає їх на ресивер або саундбар як Dolby Atmos, а на AirPods як просторове аудіо, та вибирає таку доріжку вашою мовою, якщо вона є у фільмі. Увімкнено за замовчуванням, вимикається в налаштуваннях відтворення."
+            "value" : "Доріжки TrueHD і DTS з об’єктним звуком тепер можуть зберігати висотні канали: Sodalite рендерить їх на пристрої у мікс 7.1.4 і вибирає таку доріжку вашою мовою, якщо вона є у фільмі. Експериментально й типово вимкнено, вмикається в налаштуваннях відтворення в розділі «Аудіо»."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos 和 DTS:X 音轨现在会保留其高度声道。Sodalite 会渲染高度声道和对象，并以 Dolby Atmos 发送到你的功放或回音壁，或以空间音频发送到 AirPods；影片有此类音轨时，会选择你的语言的那条。默认开启，可在播放设置中关闭。"
+            "value" : "带对象音频的 TrueHD 和 DTS 音轨现在可以保留高度声道：Sodalite 在设备上将其渲染为 7.1.4 混音，并在影片有此类音轨时选择你所用语言的音轨。此功能为实验性，默认关闭，可在播放设置的“音频”中开启。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos 和 DTS:X 音軌現在會保留其高度聲道。Sodalite 會渲染高度聲道和物件，並以 Dolby Atmos 傳送至你的擴大機或聲霸，或以空間音訊傳送至 AirPods；影片有此類音軌時，會選擇你的語言的那條。預設開啟，可在播放設定中關閉。"
+            "value" : "帶物件音訊的 TrueHD 與 DTS 音軌現在可以保留高度聲道：Sodalite 在裝置上將其算繪為 7.1.4 混音，並在影片有此類音軌時選擇你所用語言的音軌。此功能為實驗性，預設關閉，可在播放設定的「音訊」中開啟。"
           }
         }
       }
@@ -66762,157 +66762,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD a DTS:X"
+            "value" : "Výškové kanály z TrueHD a DTS, experimentální"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos fra TrueHD og DTS:X"
+            "value" : "Højdekanaler fra TrueHD og DTS, eksperimentel"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos aus TrueHD und DTS:X"
+            "value" : "Höhenkanäle aus TrueHD und DTS, experimentell"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos από TrueHD και DTS:X"
+            "value" : "Κανάλια ύψους από TrueHD και DTS, πειραματικό"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos from TrueHD and DTS:X"
+            "value" : "Height Channels from TrueHD and DTS, Experimental"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos desde TrueHD y DTS:X"
+            "value" : "Canales de altura de TrueHD y DTS, experimental"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos TrueHD:stä ja DTS:X:stä"
+            "value" : "Korkeuskanavat TrueHD:stä ja DTS:stä, kokeellinen"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos depuis TrueHD et DTS:X"
+            "value" : "Canaux de hauteur depuis TrueHD et DTS, expérimental"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos iz TrueHD-a i DTS:X-a"
+            "value" : "Visinski kanali iz TrueHD i DTS, eksperimentalno"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos TrueHD-ból és DTS:X-ből"
+            "value" : "Magassági csatornák TrueHD-ből és DTS-ből, kísérleti"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos da TrueHD e DTS:X"
+            "value" : "Canali di altezza da TrueHD e DTS, sperimentale"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHDとDTS:XからDolby Atmos"
+            "value" : "TrueHD と DTS のハイトチャンネル（実験的）"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD 및 DTS:X의 Dolby Atmos"
+            "value" : "TrueHD 및 DTS의 높이 채널 (실험적)"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos fra TrueHD og DTS:X"
+            "value" : "Høydekanaler fra TrueHD og DTS, eksperimentell"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos uit TrueHD en DTS:X"
+            "value" : "Hoogtekanalen uit TrueHD en DTS, experimenteel"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD i DTS:X"
+            "value" : "Kanały wysokości z TrueHD i DTS, eksperymentalne"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos a partir de TrueHD e DTS:X"
+            "value" : "Canais de altura de TrueHD e DTS, experimental"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos a partir de TrueHD e DTS:X"
+            "value" : "Canais de altura de TrueHD e DTS, experimental"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos din TrueHD și DTS:X"
+            "value" : "Canale de înălțime din TrueHD și DTS, experimental"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos из TrueHD и DTS:X"
+            "value" : "Высотные каналы из TrueHD и DTS, экспериментально"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD a DTS:X"
+            "value" : "Výškové kanály z TrueHD a DTS, experimentálne"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos från TrueHD och DTS:X"
+            "value" : "Höjdkanaler från TrueHD och DTS, experimentell"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD ve DTS:X'ten Dolby Atmos"
+            "value" : "TrueHD ve DTS yükseklik kanalları, deneysel"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos із TrueHD і DTS:X"
+            "value" : "Висотні канали з TrueHD і DTS, експериментально"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "来自 TrueHD 和 DTS:X 的 Dolby Atmos"
+            "value" : "TrueHD 与 DTS 的高度声道（实验性）"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "來自 TrueHD 和 DTS:X 的 Dolby Atmos"
+            "value" : "TrueHD 與 DTS 的高度聲道（實驗性）"
           }
         }
       }
@@ -68380,157 +68380,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvouvrstvé Dolby Vision, experimentální"
+            "value" : "Dvouvrstvé FEL, experimentální"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med to lag, eksperimentel"
+            "value" : "FEL med to lag, eksperimentel"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision mit zwei Ebenen, experimentell"
+            "value" : "FEL mit zwei Ebenen, experimentell"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision δύο επιπέδων, πειραματικό"
+            "value" : "FEL δύο επιπέδων, πειραματικό"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dual-Layer Dolby Vision, Experimental"
+            "value" : "Dual-Layer FEL, Experimental"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de doble capa, experimental"
+            "value" : "FEL de doble capa, experimental"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaksikerroksinen Dolby Vision, kokeellinen"
+            "value" : "Kaksikerroksinen FEL, kokeellinen"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision double couche, expérimental"
+            "value" : "FEL double couche, expérimental"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvoslojni Dolby Vision, eksperimentalno"
+            "value" : "Dvoslojni FEL, eksperimentalno"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kétrétegű Dolby Vision, kísérleti"
+            "value" : "Kétrétegű FEL, kísérleti"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision a doppio strato, sperimentale"
+            "value" : "FEL a doppio strato, sperimentale"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "デュアルレイヤー Dolby Vision（実験的）"
+            "value" : "デュアルレイヤー FEL（実験的）"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "듀얼 레이어 Dolby Vision (실험적)"
+            "value" : "듀얼 레이어 FEL (실험적)"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med to lag, eksperimentell"
+            "value" : "FEL med to lag, eksperimentell"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision met twee lagen, experimenteel"
+            "value" : "FEL met twee lagen, experimenteel"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dwuwarstwowe Dolby Vision, eksperymentalne"
+            "value" : "Dwuwarstwowe FEL, eksperymentalne"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de duas camadas, experimental"
+            "value" : "FEL de duas camadas, experimental"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de duas camadas, experimental"
+            "value" : "FEL de duas camadas, experimental"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision cu două straturi, experimental"
+            "value" : "FEL cu două straturi, experimental"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Двухслойный Dolby Vision, экспериментально"
+            "value" : "Двухслойный FEL, экспериментально"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvojvrstvové Dolby Vision, experimentálne"
+            "value" : "Dvojvrstvové FEL, experimentálne"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med två lager, experimentell"
+            "value" : "FEL med två lager, experimentell"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Çift katmanlı Dolby Vision, deneysel"
+            "value" : "Çift katmanlı FEL, deneysel"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Двошаровий Dolby Vision, експериментально"
+            "value" : "Двошаровий FEL, експериментально"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "双层 Dolby Vision（实验性）"
+            "value" : "双层 FEL（实验性）"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "雙層 Dolby Vision（實驗性）"
+            "value" : "雙層 FEL（實驗性）"
           }
         }
       }
@@ -190735,157 +190735,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvouvrstvé Dolby Vision (FEL)"
+            "value" : "Dvouvrstvé FEL (experimentální)"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med to lag (FEL)"
+            "value" : "FEL med to lag (eksperimentel)"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision mit zwei Ebenen (FEL)"
+            "value" : "FEL mit zwei Ebenen (experimentell)"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision δύο επιπέδων (FEL)"
+            "value" : "FEL δύο επιπέδων (πειραματικό)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dual-Layer Dolby Vision (FEL)"
+            "value" : "Dual-Layer FEL (Experimental)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de doble capa (FEL)"
+            "value" : "FEL de doble capa (experimental)"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaksikerroksinen Dolby Vision (FEL)"
+            "value" : "Kaksikerroksinen FEL (kokeellinen)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision double couche (FEL)"
+            "value" : "FEL double couche (expérimental)"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvoslojni Dolby Vision (FEL)"
+            "value" : "Dvoslojni FEL (eksperimentalno)"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kétrétegű Dolby Vision (FEL)"
+            "value" : "Kétrétegű FEL (kísérleti)"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision a doppio strato (FEL)"
+            "value" : "FEL a doppio strato (sperimentale)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "デュアルレイヤー Dolby Vision (FEL)"
+            "value" : "デュアルレイヤー FEL（実験的）"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "듀얼 레이어 Dolby Vision (FEL)"
+            "value" : "듀얼 레이어 FEL (실험적)"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med to lag (FEL)"
+            "value" : "FEL med to lag (eksperimentell)"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision met twee lagen (FEL)"
+            "value" : "FEL met twee lagen (experimenteel)"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dwuwarstwowe Dolby Vision (FEL)"
+            "value" : "Dwuwarstwowe FEL (eksperymentalne)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de duas camadas (FEL)"
+            "value" : "FEL de duas camadas (experimental)"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision de duas camadas (FEL)"
+            "value" : "FEL de duas camadas (experimental)"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision cu două straturi (FEL)"
+            "value" : "FEL cu două straturi (experimental)"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Двухслойный Dolby Vision (FEL)"
+            "value" : "Двухслойный FEL (экспериментально)"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dvojvrstvové Dolby Vision (FEL)"
+            "value" : "Dvojvrstvové FEL (experimentálne)"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Vision med två lager (FEL)"
+            "value" : "FEL med två lager (experimentell)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Çift katmanlı Dolby Vision (FEL)"
+            "value" : "Çift katmanlı FEL (deneysel)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Двошаровий Dolby Vision (FEL)"
+            "value" : "Двошаровий FEL (експериментально)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "双层 Dolby Vision (FEL)"
+            "value" : "双层 FEL（实验性）"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "雙層 Dolby Vision (FEL)"
+            "value" : "雙層 FEL（實驗性）"
           }
         }
       }
@@ -212176,157 +212176,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD a DTS:X"
+            "value" : "Výškové kanály (experimentální)"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos fra TrueHD og DTS:X"
+            "value" : "Højdekanaler (eksperimentel)"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos aus TrueHD und DTS:X"
+            "value" : "Höhenkanäle (experimentell)"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos από TrueHD και DTS:X"
+            "value" : "Κανάλια ύψους (πειραματικό)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos from TrueHD and DTS:X"
+            "value" : "Height Channels (Experimental)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos desde TrueHD y DTS:X"
+            "value" : "Canales de altura (experimental)"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos TrueHD:stä ja DTS:X:stä"
+            "value" : "Korkeuskanavat (kokeellinen)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos depuis TrueHD et DTS:X"
+            "value" : "Canaux de hauteur (expérimental)"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos iz TrueHD-a i DTS:X-a"
+            "value" : "Visinski kanali (eksperimentalno)"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos TrueHD-ból és DTS:X-ből"
+            "value" : "Magassági csatornák (kísérleti)"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos da TrueHD e DTS:X"
+            "value" : "Canali di altezza (sperimentale)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHDとDTS:XからDolby Atmos"
+            "value" : "ハイトチャンネル（実験的）"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD 및 DTS:X의 Dolby Atmos"
+            "value" : "높이 채널 (실험적)"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos fra TrueHD og DTS:X"
+            "value" : "Høydekanaler (eksperimentell)"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos uit TrueHD en DTS:X"
+            "value" : "Hoogtekanalen (experimenteel)"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD i DTS:X"
+            "value" : "Kanały wysokości (eksperymentalne)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos a partir de TrueHD e DTS:X"
+            "value" : "Canais de altura (experimental)"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos a partir de TrueHD e DTS:X"
+            "value" : "Canais de altura (experimental)"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos din TrueHD și DTS:X"
+            "value" : "Canale de înălțime (experimental)"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos из TrueHD и DTS:X"
+            "value" : "Высотные каналы (экспериментально)"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos z TrueHD a DTS:X"
+            "value" : "Výškové kanály (experimentálne)"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos från TrueHD och DTS:X"
+            "value" : "Höjdkanaler (experimentell)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD ve DTS:X'ten Dolby Atmos"
+            "value" : "Yükseklik kanalları (deneysel)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dolby Atmos із TrueHD і DTS:X"
+            "value" : "Висотні канали (експериментально)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "来自 TrueHD 和 DTS:X 的 Dolby Atmos"
+            "value" : "高度声道（实验性）"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "來自 TrueHD 和 DTS:X 的 Dolby Atmos"
+            "value" : "高度聲道（實驗性）"
           }
         }
       }
@@ -212338,157 +212338,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zachová výškové kanály stop TrueHD Atmos a DTS:X a pošle je jako Dolby Atmos, do AirPods jako prostorový zvuk, a vybere takovou stopu ve vašem jazyce. Ztrátové. Vypnuto přehraje stopy podle nastavení výše."
+            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 7.1.4 a zvolí takovou stopu ve vašem jazyce. Ztrátové. Vypnuto přehrává podle nastavení výše."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bevarer højdekanalerne i TrueHD Atmos- og DTS:X-spor og sender dem som Dolby Atmos, til AirPods som rumlig lyd, og vælger et sådant spor på dit sprog. Med tab. Slået fra afspilles de efter indstillingen ovenfor."
+            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 7.1.4-mix og vælger et sådant spor på dit sprog. Tabsgivende. Fra afspiller dem efter indstillingen ovenfor."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Behält die Höhenkanäle von TrueHD-Atmos- und DTS:X-Spuren und gibt sie als Dolby Atmos aus, an AirPods als 3D-Audio, und wählt eine solche Spur in deiner Sprache. Verlustbehaftet. Aus: Wiedergabe nach der Einstellung darüber."
+            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 7.1.4-Mix und wählt eine solche Spur in deiner Sprache. Verlustbehaftet. Aus: Wiedergabe nach der Einstellung darüber."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Διατηρεί τα κανάλια ύψους των κομματιών TrueHD Atmos και DTS:X και τα στέλνει ως Dolby Atmos, στα AirPods ως χωρικό ήχο, και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Με απώλειες. Όταν είναι ανενεργό, παίζουν σύμφωνα με την παραπάνω ρύθμιση."
+            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 7.1.4 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Με απώλειες. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keeps the height channels of TrueHD Atmos and DTS:X tracks and sends them as Dolby Atmos, to AirPods as Spatial Audio, and picks such a track in your language. Lossy. Off plays them through the setting above."
+            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 7.1.4 mix, and picks such a track in your language. Lossy. Off plays them through the setting above."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conserva los canales de altura de las pistas TrueHD Atmos y DTS:X y los envía como Dolby Atmos, a los AirPods como audio espacial, y elige una pista así en tu idioma. Con pérdida. Desactivado, se reproducen según el ajuste de arriba."
+            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 7.1.4 y elige una pista así en tu idioma. Con pérdida. Desactivado, se reproducen según el ajuste anterior."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Säilyttää TrueHD Atmos- ja DTS:X-raitojen korkeuskanavat ja lähettää ne Dolby Atmosina, AirPodeihin tilaäänenä, ja valitsee tällaisen raidan kielelläsi. Häviöllinen. Pois päältä ne toistetaan yllä olevan asetuksen mukaan."
+            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 7.1.4-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviöllinen. Pois päältä toistaa ne yllä olevan asetuksen mukaan."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conserve les canaux de hauteur des pistes TrueHD Atmos et DTS:X et les envoie en Dolby Atmos, aux AirPods en audio spatial, et choisit une telle piste dans votre langue. Avec perte. Désactivé, elles suivent le réglage ci-dessus."
+            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 7.1.4 et choisit une telle piste dans votre langue. Avec perte. Désactivé, elles sont lues selon le réglage ci-dessus."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zadržava visinske kanale TrueHD Atmos i DTS:X zapisa i šalje ih kao Dolby Atmos, AirPodsima kao prostorni zvuk, te bira takav zapis na vašem jeziku. S gubicima. Isključeno ih reproducira prema postavci iznad."
+            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 7.1.4 i bira takav zapis na vašem jeziku. S gubicima. Isključeno reproducira ih prema postavci iznad."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Megtartja a TrueHD Atmos és DTS:X sávok magassági csatornáit, Dolby Atmosként küldi őket, az AirPodsnak térhatású hangként, és ilyen sávot választ a nyelveden. Veszteséges. Kikapcsolva a fenti beállítás szerint szólnak."
+            "value" : "Ezen az eszközön 7.1.4-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. Veszteséges. Kikapcsolva a fenti beállítás szerint szólnak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantiene i canali di altezza delle tracce TrueHD Atmos e DTS:X e li invia come Dolby Atmos, agli AirPods come audio spaziale, e sceglie una traccia simile nella tua lingua. Con perdita. Disattivato, seguono l'impostazione sopra."
+            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 7.1.4 e sceglie una traccia simile nella tua lingua. Con perdita. Se disattivato, vengono riprodotte secondo l’impostazione sopra."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD AtmosとDTS:Xトラックのハイトチャンネルを保持してDolby Atmosとして、AirPodsには空間オーディオとして送り、あなたの言語のそのようなトラックを選びます。非可逆です。オフにすると上の設定に従って再生します。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 7.1.4 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。非可逆。オフの場合は上の設定に従って再生します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos 및 DTS:X 트랙의 높이 채널을 유지해 Dolby Atmos로, AirPods에는 공간 음향으로 보내고, 사용자 언어의 해당 트랙을 선택합니다. 손실 압축입니다. 끄면 위 설정에 따라 재생됩니다."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 7.1.4 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. 손실 압축. 끄면 위 설정에 따라 재생됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beholder høydekanalene i TrueHD Atmos- og DTS:X-spor og sender dem som Dolby Atmos, til AirPods som romlig lyd, og velger et slikt spor på ditt språk. Med tap. Av spiller dem etter innstillingen over."
+            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 7.1.4-miks og velger et slikt spor på ditt språk. Tapsbasert. Av spiller dem etter innstillingen over."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Behoudt de hoogtekanalen van TrueHD Atmos- en DTS:X-sporen en stuurt ze als Dolby Atmos, naar AirPods als ruimtelijke audio, en kiest zo'n spoor in jouw taal. Met verlies. Uit speelt ze af volgens de instelling hierboven."
+            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 7.1.4-mix en kiest zo’n spoor in jouw taal. Met verlies. Uit speelt ze af volgens de instelling hierboven."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zachowuje kanały wysokości ścieżek TrueHD Atmos i DTS:X i wysyła je jako Dolby Atmos, do AirPods jako dźwięk przestrzenny, oraz wybiera taką ścieżkę w Twoim języku. Stratne. Wyłączone odtwarza je według ustawienia powyżej."
+            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 7.1.4 i wybiera taką ścieżkę w Twoim języku. Stratne. Wyłączone odtwarza je według ustawienia powyżej."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantém os canais de altura das faixas TrueHD Atmos e DTS:X e os envia como Dolby Atmos, aos AirPods como Áudio Espacial, e escolhe uma faixa assim no seu idioma. Com perda. Desativado, elas seguem o ajuste acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 7.1.4 e escolhe uma faixa assim no seu idioma. Com perdas. Desativado, elas tocam conforme o ajuste acima."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantém os canais de altura das faixas TrueHD Atmos e DTS:X e envia-os como Dolby Atmos, para os AirPods como áudio espacial, e escolhe uma faixa assim no seu idioma. Com perda. Desativado, seguem a definição acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 7.1.4 e escolhe uma faixa assim no seu idioma. Com perdas. Desativado, são reproduzidas conforme a definição acima."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Păstrează canalele de înălțime ale pistelor TrueHD Atmos și DTS:X și le trimite ca Dolby Atmos, către AirPods ca audio spațial, și alege o astfel de pistă în limba ta. Cu pierderi. Dezactivat, se redau după setarea de mai sus."
+            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 7.1.4 și alege o astfel de pistă în limba ta. Cu pierderi. Dezactivat, sunt redate conform setării de mai sus."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сохраняет высотные каналы дорожек TrueHD Atmos и DTS:X и передаёт их как Dolby Atmos, на AirPods как пространственное аудио, и выбирает такую дорожку на вашем языке. С потерями. Если выключено, они воспроизводятся по настройке выше."
+            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 7.1.4 и выбирает такую дорожку на вашем языке. С потерями. Выключено: воспроизведение по настройке выше."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zachová výškové kanály stôp TrueHD Atmos a DTS:X a pošle ich ako Dolby Atmos, do AirPods ako priestorový zvuk, a vyberie takú stopu vo vašom jazyku. Stratové. Vypnuté ich prehrá podľa nastavenia vyššie."
+            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 7.1.4 a zvolí takú stopu vo vašom jazyku. Stratové. Vypnuté prehráva podľa nastavenia vyššie."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Behåller höjdkanalerna i TrueHD Atmos- och DTS:X-spår och skickar dem som Dolby Atmos, till AirPods som rumsligt ljud, och väljer ett sådant spår på ditt språk. Med förlust. Av spelar dem enligt inställningen ovan."
+            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 7.1.4-mix och väljer ett sådant spår på ditt språk. Förstörande. Av spelar dem enligt inställningen ovan."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD Atmos ve DTS:X parçalarının yükseklik kanallarını korur, Dolby Atmos olarak, AirPods'a uzamsal ses olarak gönderir ve dilinizdeki böyle bir parçayı seçer. Kayıplı. Kapalıyken yukarıdaki ayara göre çalınır."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 7.1.4 miksine dönüştürür ve dilinizde böyle bir parça seçer. Kayıplı. Kapalıyken yukarıdaki ayara göre çalınır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Зберігає висотні канали доріжок TrueHD Atmos і DTS:X і передає їх як Dolby Atmos, на AirPods як просторове аудіо, та вибирає таку доріжку вашою мовою. Із втратами. Якщо вимкнено, вони відтворюються за налаштуванням вище."
+            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 7.1.4 і вибирає таку доріжку вашою мовою. Із втратами. Вимкнено: відтворення за налаштуванням вище."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "保留 TrueHD Atmos 和 DTS:X 音轨的高度声道，以 Dolby Atmos 发送，发送到 AirPods 时为空间音频，并选择你的语言中的此类音轨。有损。关闭时按上方设置播放。"
+            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 7.1.4 混音，并选择你所用语言的此类音轨。有损。关闭时按上方设置播放。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "保留 TrueHD Atmos 和 DTS:X 音軌的高度聲道，以 Dolby Atmos 傳送，傳送至 AirPods 時為空間音訊，並選擇你的語言中的此類音軌。有損。關閉時依上方設定播放。"
+            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 7.1.4 混音，並選擇你所用語言的此類音軌。有損。關閉時依上方設定播放。"
           }
         }
       }

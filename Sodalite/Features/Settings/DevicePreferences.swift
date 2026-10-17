@@ -41,10 +41,11 @@ final class DevicePreferences {
         didSet { store.set(preferLosslessAudioBridge, forKey: Keys.preferLosslessAudioBridge) }
     }
 
-    /// AetherEngine#731 and #744, default ON. A TrueHD Atmos or DTS:X track keeps its heights: the engine renders the
-    /// objects into a 7.1.4 bed and hands tvOS Apple Positional Audio, which reaches an Atmos receiver
-    /// as Dolby MAT and AirPods as Spatial Audio. Lossy, so OFF falls back to `preferLosslessAudioBridge`'s
-    /// choice. A device value: it describes the speakers behind this box.
+    /// AetherEngine#731 and #744, default OFF and labelled experimental since 2026-10-17 (patent and trademark
+    /// exposure of rendering the objects on device, pending legal advice). ON keeps a TrueHD Atmos or DTS:X
+    /// track's heights: the engine renders the objects into a 7.1.4 bed and hands tvOS Apple Positional Audio.
+    /// Lossy, so OFF falls back to `preferLosslessAudioBridge`'s choice. A device value: it describes the
+    /// speakers behind this box.
     var trueHDAtmosHeights: Bool {
         didSet { store.set(trueHDAtmosHeights, forKey: Keys.trueHDAtmosHeights) }
     }
@@ -119,7 +120,7 @@ final class DevicePreferences {
         self.showStatsForNerds = store.object(forKey: Keys.showStatsForNerds) as? Bool ?? false
         self.showEngineDiagnostics = store.object(forKey: Keys.showEngineDiagnostics) as? Bool ?? false
         self.preferLosslessAudioBridge = store.object(forKey: Keys.preferLosslessAudioBridge) as? Bool ?? false
-        self.trueHDAtmosHeights = store.object(forKey: Keys.trueHDAtmosHeights) as? Bool ?? true
+        self.trueHDAtmosHeights = store.object(forKey: Keys.trueHDAtmosHeights) as? Bool ?? false
         self.playerRotationLocked = store.object(forKey: Keys.playerRotationLocked) as? Bool ?? true
         self.networkBufferDepth = store.string(forKey: Keys.networkBufferDepth)
             .flatMap(PlaybackPreferences.NetworkBufferDepth.init(rawValue:)) ?? .system
