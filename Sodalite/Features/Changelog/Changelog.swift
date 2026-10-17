@@ -100,12 +100,6 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.atmosHeights.title",
-                    "changelog.1_1_0.atmosHeights.body",
-                    icon: "hifispeaker.2.fill"
-                ),
-                ChangelogHighlight(
-                    .new,
                     "changelog.1_1_0.nextEpisodeCard.title",
                     "changelog.1_1_0.nextEpisodeCard.body",
                     icon: "rectangle.on.rectangle"

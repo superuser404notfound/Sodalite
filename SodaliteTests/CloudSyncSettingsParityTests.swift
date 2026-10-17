@@ -61,12 +61,11 @@ struct CloudSyncSettingsParityTests {
         #expect(profile.union(device.intersection(payload)) == payload)
     }
 
-    /// Named exemptions: the two streaming-quality rungs (Sodalite#87) and the TrueHD Atmos heights
-    /// switch (AetherEngine#731) postdate the legacy records. Those records exist only for builds that
-    /// already read them, and no such build knows either.
+    /// Named exemptions: the two streaming-quality rungs (Sodalite#87) postdate the legacy records.
+    /// Those records exist only for builds that already read them, and no such build knows either.
     @Test func everyDeviceValueTravelsInOneLegacyRecord() {
         let device = storedSettingNames(of: DevicePreferences(store: scratchDefaults("device")))
-            .subtracting(["streamingQualityWifi", "streamingQualityCellular", "trueHDAtmosHeights"])
+            .subtracting(["streamingQualityWifi", "streamingQualityCellular"])
         let playback = device.intersection(payloadFieldNames(.playback))
         let appearance = device.intersection(payloadFieldNames(.appearance))
         #expect(playback.isDisjoint(with: appearance))

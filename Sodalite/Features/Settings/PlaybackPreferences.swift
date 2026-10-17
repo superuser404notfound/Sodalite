@@ -435,11 +435,6 @@ final class PlaybackPreferences {
         set { device.preferLosslessAudioBridge = newValue }
     }
 
-    var trueHDAtmosHeights: Bool {
-        get { device.trueHDAtmosHeights }
-        set { device.trueHDAtmosHeights = newValue }
-    }
-
     var playerRotationLocked: Bool {
         get { device.playerRotationLocked }
         set { device.playerRotationLocked = newValue }
@@ -490,12 +485,6 @@ final class PlaybackPreferences {
 
     var audioBridgeMode: AudioBridgeMode {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
-    }
-
-    /// 7.1.4 whatever the room: the receiver renders the bed onto the speakers it really has, and a
-    /// larger bed mostly costs bitrate.
-    var objectAudioRendering: ObjectAudioRendering {
-        trueHDAtmosHeights ? .apac(.l714) : .off
     }
 
     // MARK: - Init
