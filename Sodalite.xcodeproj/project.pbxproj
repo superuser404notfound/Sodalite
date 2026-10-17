@@ -182,7 +182,6 @@
 		157657F35F677975F07D54D4 /* ProfileKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11735278116778A1D183DA55 /* ProfileKey.swift */; };
 		15B14350AF829AE28FC47044 /* PosterBadgeOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01696A03EAD1FC14EEA5F35 /* PosterBadgeOverlay.swift */; };
 		15C34E99D196187732782D01 /* PlayerLockProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A49C90E145510D9212683F8 /* PlayerLockProgress.swift */; };
-		15D1DA1FC18AFFBC76A9D860 /* LicenseText-LibTrueHD.txt in Resources */ = {isa = PBXBuildFile; fileRef = CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */; };
 		15DA534F27F4A0737375F772 /* TranscodeCodecProbeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED00772BA6037D8EF6217F /* TranscodeCodecProbeTests.swift */; };
 		1608EF17D783B60904119316 /* StudioFilterCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040EDF3725D5CC852770F1CD /* StudioFilterCheck.swift */; };
 		16B4AAE7D361E42944720241 /* MultiviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42649A3E73297CE08ABDE533 /* MultiviewSession.swift */; };
@@ -250,7 +249,6 @@
 		1DAF2936EC2F37D049F7F075 /* TopShelfTitleVeil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E01BDFD248355FD167C2D3 /* TopShelfTitleVeil.swift */; };
 		1DD9EBCAB06E334496CE11C8 /* CatalogProviderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58ABF4558D8BC04D3D114DBB /* CatalogProviderRow.swift */; };
 		1E294628EF88DCBB0D1A300E /* LiveTunerGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC26AA8655AB4CC74F3C0793 /* LiveTunerGate.swift */; };
-		1E2B373B6DBCFAE15A9B61C1 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		1E57BADCCFE70704CCBEAAE3 /* AppActivityNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6FF875EAE37B6450F32055 /* AppActivityNotifications.swift */; };
 		1EA942ED1C82BB847BCD7866 /* CloudSyncProfileRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13EAF84BDC15DE641CED31FE /* CloudSyncProfileRecordTests.swift */; };
 		1EBB978B708B4D4AA9B0C148 /* MyRequestsPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479EE34E49C3C55F37A07746 /* MyRequestsPresentation.swift */; };
@@ -827,7 +825,6 @@
 		6155CE6952F1F51D5F7CBC54 /* LogExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378EC7F381338358EE8D8737 /* LogExportPanel.swift */; };
 		61684D095067EF7AAC450970 /* LiveTVSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 639865ECEC5C0110DA86B090 /* LiveTVSource.swift */; };
 		61C0F0CA36D78611EA6BBE54 /* ParticipantPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1866253FFA373B3CD3E2C1BE /* ParticipantPlanner.swift */; };
-		61D9B884AD01EFE60410D9E6 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		61F0D1FC2AAFDB1C15C59421 /* TopShelfCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D955E208D3CD0779141D95 /* TopShelfCachePolicy.swift */; };
 		61FAA923450C58737A33862F /* LiveAudioSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680E5F6755B5EDFEA1F37C0 /* LiveAudioSwitch.swift */; };
 		62233FB36CBA95FD70E7A7E0 /* LogExportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F7442383C534C1B4B4A45D /* LogExportSession.swift */; };
@@ -1368,7 +1365,6 @@
 		A20C0561B17DEDAE79BAB4C2 /* TopShelfProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1986FAE23765CA9C8B1537 /* TopShelfProgress.swift */; };
 		A21E53A76E2221CB504EC15E /* SidebarItemState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1ED651FA4E10DF6FB410894 /* SidebarItemState.swift */; };
 		A24739449FE2624E4C4CD1BA /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156BEF96DC9EC1E45C59CE8B /* LicensesView.swift */; };
-		A24FD4694A445920199FBE79 /* LicenseText-LibTrueHD.txt in Resources */ = {isa = PBXBuildFile; fileRef = CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */; };
 		A254E90ABD1A190287B5ED8E /* SodaliteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241980A7FAAC5D70827F795D /* SodaliteApp.swift */; };
 		A275507840860A51E643E220 /* DownloadRungDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115506969A587003B4018910 /* DownloadRungDialog.swift */; };
 		A292EECE9C98817BE68B9D73 /* DiagnosticLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84FFA0F16CB71960B207129 /* DiagnosticLogView.swift */; };
@@ -1567,7 +1563,6 @@
 		BC3363C9D225960A56F6A542 /* MainQueueDefer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2009D3A6B35520280B2E8329 /* MainQueueDefer.swift */; };
 		BC394DC2F7FD3FADB5F542A3 /* SerialRequestQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88656BC295B74B8BCA7950E5 /* SerialRequestQueue.swift */; };
 		BC59CA7F196489AC9FD28ADC /* AlphabetIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E168730BECFF639441E313F3 /* AlphabetIndexTests.swift */; };
-		BC8C55399AACEBF219FA42B9 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		BC9958FB9C48FDC846075BE2 /* VersionDistinguishingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C873364734DF9D2D7E3465B /* VersionDistinguishingLabel.swift */; };
 		BCCA98F65EB9930E16778303 /* SubtitleSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ACBA3D2A39D41E0D6463FB /* SubtitleSearchView.swift */; };
 		BCDD8F5406D81BBBC6BABE3E /* DownloadActivitySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5591D34A72BB99474F72BB /* DownloadActivitySummary.swift */; };
@@ -1790,7 +1785,6 @@
 		D7635B8DC590B3DBA8783FE7 /* FocusableCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C631A6EC153641E1CAF0F5A3 /* FocusableCard.swift */; };
 		D7887FCCEBCA1A51A8BB7290 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4F6464C543DFF6027F96CB /* JSONValue.swift */; };
 		D7D1CB793DA1D3B733D664F1 /* SodaliteIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F52845EFD489AE02A52FF2 /* SodaliteIntents.swift */; };
-		D7E7187229B233A5F347AB0E /* LicenseText-LibTrueHD.txt in Resources */ = {isa = PBXBuildFile; fileRef = CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */; };
 		D7F513FCEDC7055BFF9B13A1 /* ProfileShellLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF124E4A12D50287B1BDD93 /* ProfileShellLayout.swift */; };
 		D87D9B4F890A53A2745D10F2 /* View+PlatformCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90188D1665D501580A98615 /* View+PlatformCompat.swift */; };
 		D8980C2DA8F047F5D447E1A9 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEBCF0AA238DAB1924A48D3 /* AppRouter.swift */; };
@@ -2666,7 +2660,6 @@
 		7F01E69FDD2E8F31796ACA3B /* CombinedServersReviewFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedServersReviewFixTests.swift; sourceTree = "<group>"; };
 		7F32B40C7469D099A08AE6FD /* ServerSwitchResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSwitchResumeTests.swift; sourceTree = "<group>"; };
 		7FD145192044D97F650B4405 /* CollectionPlaybackQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionPlaybackQueue.swift; sourceTree = "<group>"; };
-		8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LicenseText-LibDTSX.txt"; sourceTree = "<group>"; };
 		8045FAEEA02DFFFAF1D2E465 /* ChangelogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangelogEntry.swift; sourceTree = "<group>"; };
 		805C6914767AC1469126A3BD /* PlayerReachabilityFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerReachabilityFace.swift; sourceTree = "<group>"; };
 		813BABB8AB0ED10E6E5CAAA5 /* HomeRowIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRowIdentityTests.swift; sourceTree = "<group>"; };
@@ -2951,7 +2944,6 @@
 		CF8250566C8B98F2644E3CB6 /* DownloadCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCleanup.swift; sourceTree = "<group>"; };
 		CF85D7F0021838472DCD2F72 /* Changelog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Changelog.swift; sourceTree = "<group>"; };
 		CF86D3DE2B8143869C31D4CC /* RowScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowScrollView.swift; sourceTree = "<group>"; };
-		CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LicenseText-LibTrueHD.txt"; sourceTree = "<group>"; };
 		D00EFF9852627141E97BDC41 /* AuthPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPreferences.swift; sourceTree = "<group>"; };
 		D0A32585FD29384ECF80D919 /* AlphabetIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlphabetIndex.swift; sourceTree = "<group>"; };
 		D0DB7BDD0D155B9EAB4D58A8 /* AtkinsonHyperlegible-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "AtkinsonHyperlegible-Bold.ttf"; sourceTree = "<group>"; };
@@ -3848,8 +3840,6 @@
 				7E6FC57C0434B0E5A844A312 /* LicenseText-dav1d.txt */,
 				01C12B24850C327CD8373DB8 /* LicenseText-ISC-libass.txt */,
 				F49AA15F4541B18B03730DEF /* LicenseText-LGPL-2.1.txt */,
-				8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */,
-				CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */,
 				E16CB1DBF0F096E8267D8D08 /* LicenseText-MIT.txt */,
 				51C8ACDBF478C0267CFAE44C /* LicenseText-WTFPL.txt */,
 			);
@@ -4823,8 +4813,6 @@
 				6CD4329A2FF702EFF3A5ECD4 /* LicenseText-AetherEngine.txt in Resources */,
 				88EE6900705FF3EB24532855 /* LicenseText-ISC-libass.txt in Resources */,
 				6540637AAEF6D363C5EC219F /* LicenseText-LGPL-2.1.txt in Resources */,
-				BC8C55399AACEBF219FA42B9 /* LicenseText-LibDTSX.txt in Resources */,
-				D7E7187229B233A5F347AB0E /* LicenseText-LibTrueHD.txt in Resources */,
 				6C0ADA6EE072933263ED5510 /* LicenseText-MIT.txt in Resources */,
 				82718D52B0B18494B92B9219 /* LicenseText-WTFPL.txt in Resources */,
 				FB686134F9B4CC3D05FE4ABB /* LicenseText-dav1d.txt in Resources */,
@@ -4847,8 +4835,6 @@
 				FEC7094E718910B6D04487EA /* LicenseText-AetherEngine.txt in Resources */,
 				E50C8E9A2BF14F89FA2478B8 /* LicenseText-ISC-libass.txt in Resources */,
 				AAFA6FD004F90C1D56D8BAF6 /* LicenseText-LGPL-2.1.txt in Resources */,
-				61D9B884AD01EFE60410D9E6 /* LicenseText-LibDTSX.txt in Resources */,
-				15D1DA1FC18AFFBC76A9D860 /* LicenseText-LibTrueHD.txt in Resources */,
 				A4BFA36B843326A7EC932BFF /* LicenseText-MIT.txt in Resources */,
 				86DAC04B4D70E624E775C452 /* LicenseText-WTFPL.txt in Resources */,
 				26B5D4E903FC69F5D686FEF7 /* LicenseText-dav1d.txt in Resources */,
@@ -4872,8 +4858,6 @@
 				7DD3E4C2939E4A83C7581697 /* LicenseText-AetherEngine.txt in Resources */,
 				F14ABC8BA2EC86EF899D26A4 /* LicenseText-ISC-libass.txt in Resources */,
 				00541D39AB9C7F73B2031840 /* LicenseText-LGPL-2.1.txt in Resources */,
-				1E2B373B6DBCFAE15A9B61C1 /* LicenseText-LibDTSX.txt in Resources */,
-				A24FD4694A445920199FBE79 /* LicenseText-LibTrueHD.txt in Resources */,
 				0D5A0CE3CEDD4B602E517610 /* LicenseText-MIT.txt in Resources */,
 				F7DDD121DD8A20E436AC0C70 /* LicenseText-WTFPL.txt in Resources */,
 				7CF307CDF9959660934B0EFA /* LicenseText-dav1d.txt in Resources */,
