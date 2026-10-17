@@ -458,6 +458,17 @@ struct PlaybackSettingsView: View {
                 .disabled(displayHasDolbyVision)
                 .opacity(displayHasDolbyVision ? 0.4 : 1)
 
+                boolRow(
+                    icon: "square.2.layers.3d",
+                    title: "settings.playback.dualLayerDolbyVision",
+                    subtitle: "settings.playback.dualLayerDolbyVision.subtitle",
+                    value: Binding(
+                        get: { prefs.preferDualLayerDolbyVision },
+                        set: { prefs.preferDualLayerDolbyVision = $0 }
+                    )
+                )
+                .settingsValueScope(.device)
+
                 sectionHeader("settings.playback.section.audio")
 
                 boolRow(

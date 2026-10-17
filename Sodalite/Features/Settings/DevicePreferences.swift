@@ -22,6 +22,7 @@ final class DevicePreferences {
         static let streamingQualityWifi = "playback.streamingQualityWifi"
         static let streamingQualityCellular = "playback.streamingQualityCellular"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
+        static let preferDualLayerDolbyVision = "playback.preferDualLayerDolbyVision"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
     }
@@ -87,6 +88,14 @@ final class DevicePreferences {
         didSet { store.set(forceDolbyVisionOnNonDVDisplay, forKey: Keys.forceDolbyVisionOnNonDVDisplay) }
     }
 
+    /// AetherEngine#702, experimental, default OFF. A Profile 7 FEL source decodes both layers and
+    /// composes them on the GPU instead of playing the base layer with the RPU. The engine keeps the
+    /// native route for MEL, live, and anything the device cannot decode twice in real time. Costs the
+    /// Atmos objects of an E-AC-3 track on those titles (software host audio).
+    var preferDualLayerDolbyVision: Bool {
+        didSet { store.set(preferDualLayerDolbyVision, forKey: Keys.preferDualLayerDolbyVision) }
+    }
+
     /// tvOS Top Shelf row. On by default; see TopShelfEnabled for why it can be turned off at all.
     var showTopShelfRow: Bool {
         didSet { store.set(showTopShelfRow, forKey: Keys.showTopShelfRow) }
@@ -123,6 +132,7 @@ final class DevicePreferences {
         self.streamingQualityCellular = store.string(forKey: Keys.streamingQualityCellular)
             .flatMap(StreamingQuality.init(rawValue:)) ?? .original
         self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool ?? false
+        self.preferDualLayerDolbyVision = store.object(forKey: Keys.preferDualLayerDolbyVision) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
             .flatMap(AppearancePreferences.ContinueWatchingImage.init(rawValue:)) ?? .thumb
@@ -147,6 +157,7 @@ final class DevicePreferences {
         update(\.streamingQualityWifi)
         update(\.streamingQualityCellular)
         update(\.forceDolbyVisionOnNonDVDisplay)
+        update(\.preferDualLayerDolbyVision)
         update(\.showTopShelfRow)
         update(\.topShelfImage)
     }

@@ -488,6 +488,11 @@ final class PlaybackPreferences {
         set { device.forceDolbyVisionOnNonDVDisplay = newValue }
     }
 
+    var preferDualLayerDolbyVision: Bool {
+        get { device.preferDualLayerDolbyVision }
+        set { device.preferDualLayerDolbyVision = newValue }
+    }
+
     var audioBridgeMode: AudioBridgeMode {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
     }
