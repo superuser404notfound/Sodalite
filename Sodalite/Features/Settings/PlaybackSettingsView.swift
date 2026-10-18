@@ -471,6 +471,17 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
+                boolRow(
+                    icon: "hifispeaker.2",
+                    title: "settings.playback.trueHDAtmos",
+                    subtitle: "settings.playback.trueHDAtmos.subtitle",
+                    value: Binding(
+                        get: { prefs.trueHDAtmosHeights },
+                        set: { prefs.trueHDAtmosHeights = $0 }
+                    )
+                )
+                .settingsValueScope(.device)
+
                 sectionHeader("settings.playback.section.advanced")
 
                 boolRow(

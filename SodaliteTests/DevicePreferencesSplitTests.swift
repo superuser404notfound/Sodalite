@@ -89,4 +89,25 @@ struct DevicePreferencesSplitTests {
         #expect(device.forceDolbyVisionOnNonDVDisplay == virgin.forceDolbyVisionOnNonDVDisplay)
         #expect(device.showStatsForNerds == virgin.showStatsForNerds)
     }
+
+    /// AetherEngine#731, 2026-10-17: object rendering is opt-in until the patent question is settled.
+    @Test func trueHDAtmosHeightsAreOnByDefaultAndADeviceValue() {
+        let defaults = scratch("atmosHeights")
+        let device = DevicePreferences(store: defaults)
+        let alice = PlaybackPreferences(store: defaults, scope: "s:alice", device: device)
+        let bob = PlaybackPreferences(store: defaults, scope: "s:bob", device: device)
+
+        #expect(device.trueHDAtmosHeights)
+        #expect(alice.objectAudioRendering == .apac(.l714))
+
+        alice.trueHDAtmosHeights = false
+
+        #expect(bob.objectAudioRendering == .off)
+        #expect(defaults.object(forKey: "playback.trueHDAtmosHeights") as? Bool == false)
+        #expect(defaults.object(forKey: "s:alice/playback.trueHDAtmosHeights") == nil)
+
+        defaults.removePersistentDomain(forName: "deviceSplit.atmosHeights")
+        device.reloadFromStore()
+        #expect(device.trueHDAtmosHeights, "a wiped store lands on the default again")
+    }
 }

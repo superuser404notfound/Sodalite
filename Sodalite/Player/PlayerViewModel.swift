@@ -1297,6 +1297,7 @@ final class PlayerViewModel {
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,
+                    objectAudioRendering: preferences.objectAudioRendering,
                     // A transcode is a Jellyfin HLS master (Sodalite#87): AVPlayer plays it directly,
                     // no probe of a playlist the demuxer would only hand back.
                     nativeRemoteHLS: activePlayMethod == .transcode,

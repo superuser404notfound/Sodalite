@@ -14,6 +14,7 @@ final class DevicePreferences {
         static let showStatsForNerds = "playback.showStatsForNerds"
         static let showEngineDiagnostics = "playback.showEngineDiagnostics"
         static let preferLosslessAudioBridge = "playback.preferLosslessAudioBridge"
+        static let trueHDAtmosHeights = "playback.trueHDAtmosHeights"
         static let playerRotationLocked = "playback.playerRotationLocked"
         static let networkBufferDepth = "playback.networkBufferDepth"
         static let liveBufferDepth = "playback.liveBufferDepth"
@@ -37,6 +38,15 @@ final class DevicePreferences {
     /// ON = lossless FLAC for non-stream-copyable (TrueHD/DTS/DTS-HD MA/MP3/Opus), but AVPlayer decodes to LPCM, downmixed to stereo on stereo-only HDMI sinks. OFF (default) = lossy EAC3 5.1 384 kbps, works on all soundbars but caps 7.1->5.1. Recommend ON only with multichannel-LPCM AVR.
     var preferLosslessAudioBridge: Bool {
         didSet { store.set(preferLosslessAudioBridge, forKey: Keys.preferLosslessAudioBridge) }
+    }
+
+    /// AetherEngine#731 and #744, one switch for both formats, default ON. ON keeps a TrueHD Atmos or DTS:X
+    /// track's heights in a 7.1.4 bed handed to tvOS as Apple Positional Audio: TrueHD's from its own 7.1
+    /// presentation split by where the objects' energy lies, DTS:X's from its four height channels. Lossy, so
+    /// OFF falls back to `preferLosslessAudioBridge`'s choice. A device value: it describes the speakers
+    /// behind this box.
+    var trueHDAtmosHeights: Bool {
+        didSet { store.set(trueHDAtmosHeights, forKey: Keys.trueHDAtmosHeights) }
     }
 
     /// iPhone player orientation (the in-player lock icon's remembered state): true pins the session
@@ -101,6 +111,7 @@ final class DevicePreferences {
         self.showStatsForNerds = store.object(forKey: Keys.showStatsForNerds) as? Bool ?? false
         self.showEngineDiagnostics = store.object(forKey: Keys.showEngineDiagnostics) as? Bool ?? false
         self.preferLosslessAudioBridge = store.object(forKey: Keys.preferLosslessAudioBridge) as? Bool ?? false
+        self.trueHDAtmosHeights = store.object(forKey: Keys.trueHDAtmosHeights) as? Bool ?? true
         self.playerRotationLocked = store.object(forKey: Keys.playerRotationLocked) as? Bool ?? true
         self.networkBufferDepth = store.string(forKey: Keys.networkBufferDepth)
             .flatMap(PlaybackPreferences.NetworkBufferDepth.init(rawValue:)) ?? .system
@@ -129,6 +140,7 @@ final class DevicePreferences {
         update(\.showStatsForNerds)
         update(\.showEngineDiagnostics)
         update(\.preferLosslessAudioBridge)
+        update(\.trueHDAtmosHeights)
         update(\.playerRotationLocked)
         update(\.networkBufferDepth)
         update(\.liveBufferDepth)
