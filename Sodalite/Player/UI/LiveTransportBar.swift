@@ -276,7 +276,7 @@ struct LiveTransportBar: View {
     private var scrubber: some View {
         GeometryReader { geo in
             let width = geo.size.width
-            let active = viewModel.isScrubbing
+            let active = viewModel.isScrubbing || viewModel.controlsFocus == .progressBar
             let trackHeight: CGFloat = active ? 10 : 6
             let knobSize: CGFloat = active ? 22 : 14
             let knobX = clamp(liveProgress, width)
