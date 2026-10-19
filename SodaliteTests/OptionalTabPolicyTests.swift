@@ -38,7 +38,7 @@ struct OptionalTabPolicyTests {
         return published
     }
 
-    private let full: [AppTab] = [.home, .liveTV, .catalog, .search, .music, .settings]
+    private let full: [AppTab] = [.home, .liveTV, .music, .catalog, .search, .settings]
 
     // MARK: - The assembled sets
 
@@ -47,11 +47,11 @@ struct OptionalTabPolicyTests {
         #expect(AppTab.baseTabs == [.home, .catalog, .search, .settings])
     }
 
-    @Test("Live TV sits after Home, Music before Settings")
+    @Test("Live TV sits after Home, Music after Live TV and before Catalog")
     func probedOrder() {
         #expect(AppTab.probedTabs(hasLiveTV: false, hasMusic: false) == [.home, .catalog, .search, .settings])
         #expect(AppTab.probedTabs(hasLiveTV: true, hasMusic: false) == [.home, .liveTV, .catalog, .search, .settings])
-        #expect(AppTab.probedTabs(hasLiveTV: false, hasMusic: true) == [.home, .catalog, .search, .music, .settings])
+        #expect(AppTab.probedTabs(hasLiveTV: false, hasMusic: true) == [.home, .music, .catalog, .search, .settings])
         #expect(AppTab.probedTabs(hasLiveTV: true, hasMusic: true) == full)
     }
 

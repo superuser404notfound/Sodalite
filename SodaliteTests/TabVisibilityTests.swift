@@ -16,7 +16,7 @@ struct TabVisibilityTests {
 
     @Test("Home and Settings are not hideable, the other four are")
     func hideableCases() {
-        #expect(AppTab.hideableCases == [.liveTV, .catalog, .search, .music])
+        #expect(AppTab.hideableCases == [.liveTV, .music, .catalog, .search])
         #expect(AppTab.home.isHideable == false)
         #expect(AppTab.settings.isHideable == false)
     }

@@ -3,9 +3,9 @@ import SwiftUI
 enum AppTab: String, CaseIterable, Sendable {
     case home
     case liveTV
+    case music
     case catalog
     case search
-    case music
     /// Sodalite#81, iOS only, and only while the profile has downloads.
     case downloads
     case settings
@@ -65,14 +65,15 @@ extension AppTab {
         allCases.filter { $0 != .music && $0 != .liveTV && $0 != .downloads }
     }
 
-    /// Order: Home, [Live TV,] Catalog, Search, [Music,] [Downloads,] Settings.
+    /// Order: Home, [Live TV,] [Music,] Catalog, Search, [Downloads,] Settings. The media tabs sit
+    /// together after Home, so the bar keeps its order whichever server offers them (Sodalite#85).
     static func probedTabs(hasLiveTV: Bool, hasMusic: Bool, hasDownloads: Bool = false) -> [AppTab] {
         var tabs = baseTabs
         if hasLiveTV, let homeIndex = tabs.firstIndex(of: .home) {
             tabs.insert(.liveTV, at: homeIndex + 1)
         }
-        if hasMusic, let settingsIndex = tabs.firstIndex(of: .settings) {
-            tabs.insert(.music, at: settingsIndex)
+        if hasMusic, let catalogIndex = tabs.firstIndex(of: .catalog) {
+            tabs.insert(.music, at: catalogIndex)
         }
         return withDownloads(tabs, hasDownloads: hasDownloads)
     }
