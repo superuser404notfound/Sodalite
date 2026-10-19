@@ -50,7 +50,7 @@ struct HorizontalMediaRow: View {
                 LazyHStack(spacing: metrics.itemSpacing) {
                     // Per server: two servers can carry the same id, and a repeated identity draws a blank card.
                     ForEach(items, id: \.originKey) { item in
-                        FocusableCard {
+                        FocusableCard(opensMenuOnHold: true) {
                             onItemSelected?(item)
                         } content: { isFocused in
                             MediaCard(
@@ -63,7 +63,7 @@ struct HorizontalMediaRow: View {
                                 serverLabel: itemLabel?(item)
                             )
                         }
-                        .mediaContextMenu(for: item) { onItemSelected?(item) }
+                        .mediaContextMenu(for: item) { onItemSelected?($0) }
                     }
                     if let onShowAll {
                         FocusableCard(action: onShowAll, exposesButtonSemantics: true) { isFocused in

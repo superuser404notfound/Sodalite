@@ -50,6 +50,7 @@ struct MovieDetailView: View {
     let item: JellyfinItem
     /// TopShelf playAction: fire the primary play action once, as soon as full detail has settled.
     var autoPlay: Bool = false
+    var autoPlayFromBeginning: Bool = false
     @State private var didAutoPlay = false
 
     /// Whether this page offers deletion at all, and the item's own `CanDelete` is the whole answer
@@ -159,7 +160,7 @@ struct MovieDetailView: View {
         .task(id: viewModel?.hasFullDetail) {
             guard autoPlay, !didAutoPlay, viewModel?.hasFullDetail == true else { return }
             didAutoPlay = true
-            requestPlay(fromBeginning: false)
+            requestPlay(fromBeginning: autoPlayFromBeginning)
         }
         // AE#579. After the detail round trip, because the media sources it needs arrive with it,
         // and again when the viewer picks another version.

@@ -240,6 +240,8 @@ struct ProfileHomePayload: Codable, Equatable {
     /// The Home banner's HomeHeroMode. Optional so a record from an older build decodes, and nil
     /// while the profile never chose, so the default stays a default on every device.
     var heroMode: String?
+    /// DroppedSeriesStore's list. Optional so a record from an older build decodes.
+    var droppedSeriesJSON: Data?
 }
 
 /// Type-erased profile payload, the per-profile counterpart of `SettingsSyncPayload`.

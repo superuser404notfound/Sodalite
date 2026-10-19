@@ -112,14 +112,13 @@ extension PlayerViewModel {
             try await playbackService.reportPlaybackStopped(report)
             // Payload lets detail/Home patch this item's resume position in
             // place, race-free, instead of re-fetching (issue #24).
-            NotificationCenter.default.post(
-                name: .playbackProgressDidChange,
-                object: nil,
-                userInfo: [
-                    PlaybackProgressKey.itemID: item.id,
-                    PlaybackProgressKey.positionTicks: ticks
-                ]
-            )
+            var userInfo: [String: Any] = [
+                PlaybackProgressKey.itemID: item.id,
+                PlaybackProgressKey.positionTicks: ticks
+            ]
+            userInfo[PlaybackProgressKey.seriesID] = item.seriesId
+            userInfo[PlaybackProgressKey.serverID] = item.serverID
+            NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: userInfo)
             // Inside the do: a failed report means the server never learned the new
             // position, so the shelf has nothing new to fetch.
             TopShelfRefresher.invalidate()

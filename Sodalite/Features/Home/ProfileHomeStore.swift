@@ -15,7 +15,8 @@ enum ProfileHomeStore {
             combineServers: CombinedServersPreferences(defaults: .standard).isEnabled(scope: scope),
             combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted(),
             libraryLayoutJSON: LibraryLayout.rawData(scope: scope),
-            heroMode: HomeHeroMode.rawStored(scope: scope)
+            heroMode: HomeHeroMode.rawStored(scope: scope),
+            droppedSeriesJSON: DroppedSeriesStore.rawData(scope: scope)
         )
     }
 
@@ -38,14 +39,17 @@ enum ProfileHomeStore {
         if let layout = payload.libraryLayoutJSON { LibraryLayout.setRawData(layout, scope: scope) }
         // An unknown mode is a newer build's: the local one stays.
         if let mode = payload.heroMode.flatMap(HomeHeroMode.init(rawValue:)) { HomeHeroMode.setStored(mode, scope: scope) }
+        if let dropped = payload.droppedSeriesJSON { DroppedSeriesStore.setRawData(dropped, scope: scope) }
     }
 
     /// Combine servers stays behind: it names another profile's accounts on other servers, and a
-    /// profile used for the first time must not start showing them (Sodalite#85).
+    /// profile used for the first time must not start showing them (Sodalite#85). Dropped shows stay
+    /// behind too: they are what one viewer gave up on, not a layout.
     static func copy(fromScope source: String, toScope target: String) {
         var payload = collect(scope: source, stamp: .distantPast)
         payload.combineServers = nil
         payload.combineServersExcluded = nil
+        payload.droppedSeriesJSON = nil
         apply(payload, scope: target)
     }
 }

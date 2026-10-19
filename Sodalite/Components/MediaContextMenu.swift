@@ -4,11 +4,26 @@ extension EnvironmentValues {
     /// Starts playback of an item from a card's context menu, where the screen can (Home opens the
     /// detail page with autoplay). Nil leaves Play out of the menu.
     @Entry var playMediaItem: PlayMediaItemAction?
+    /// Takes a card's show out of Continue Watching and Next Up. Set only on those rows, where the
+    /// entry means something.
+    @Entry var dropSeries: DropSeriesAction?
+    /// Told when a card's hold is about to open its menu, which takes focus off the row. Home needs
+    /// to tell that apart from the move to the tab bar, which looks the same to its focus state.
+    @Entry var cardMenuWillOpen: (() -> Void)?
 }
 
 /// Always equal: its one publisher (Home) routes into state storage that outlives every render, so
 /// a fresh closure per render changes nothing a reader needs to see.
 struct PlayMediaItemAction: Equatable {
+    let perform: (JellyfinItem, _ fromBeginning: Bool) -> Void
+
+    func callAsFunction(_ item: JellyfinItem, fromBeginning: Bool = false) { perform(item, fromBeginning) }
+
+    static func == (lhs: Self, rhs: Self) -> Bool { true }
+}
+
+/// Always equal, for the same reason as `PlayMediaItemAction`.
+struct DropSeriesAction: Equatable {
     let perform: (JellyfinItem) -> Void
 
     func callAsFunction(_ item: JellyfinItem) { perform(item) }
@@ -17,25 +32,22 @@ struct PlayMediaItemAction: Equatable {
 }
 
 extension View {
-    /// The Mac's right-click menu on a media card: open it, play it, and the two per-user marks
-    /// the detail page offers. A Mac-only addition; elsewhere this returns the card unchanged.
-    @ViewBuilder
-    func mediaContextMenu(for item: JellyfinItem, onOpen: @escaping () -> Void) -> some View {
-        #if os(macOS)
-        contextMenu { MediaContextMenu(item: item, onOpen: onOpen) }
-        #else
-        self
-        #endif
+    /// A media card's hold (tvOS, iOS) or right-click (Mac) menu: open it, its show, play it, and the
+    /// per-user marks the detail page offers. `open` takes the item to show, which for Go to Show is
+    /// the card's series rather than the card. A card whose tap goes through `stableTap` must set
+    /// `longPressOpensMenu`, or the press opens the card on its way into the menu (Sodalite#75).
+    func mediaContextMenu(for item: JellyfinItem, open: @escaping (JellyfinItem) -> Void) -> some View {
+        contextMenu { MediaContextMenu(item: item, open: open) }
     }
 }
 
-#if os(macOS)
 private struct MediaContextMenu: View {
     let item: JellyfinItem
-    let onOpen: () -> Void
+    let open: (JellyfinItem) -> Void
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.playMediaItem) private var playMediaItem
+    @Environment(\.dropSeries) private var dropSeries
 
     private var isPlayed: Bool { item.userData?.played ?? false }
     private var isFavorite: Bool { item.userData?.isFavorite ?? false }
@@ -46,11 +58,24 @@ private struct MediaContextMenu: View {
     private var offersWatched: Bool { item.type == .movie || item.type == .episode }
 
     var body: some View {
-        Button("detail.episode.showDetails", systemImage: "info.circle", action: onOpen)
+        Button("detail.episode.showDetails", systemImage: "info.circle") { open(item) }
+
+        if item.type == .episode, let seriesID = item.seriesId {
+            Button("contextMenu.goToShow", systemImage: "tv") {
+                var series = JellyfinItem(seriesStub: seriesID, name: item.seriesName ?? "")
+                series.serverID = item.serverID
+                open(series)
+            }
+        }
 
         if let playMediaItem, item.type == .movie || item.type == .episode || item.type == .series {
             Button(hasPosition ? "detail.resume" : "detail.play", systemImage: "play.fill") {
                 playMediaItem(item)
+            }
+            if hasPosition, offersWatched {
+                Button("contextMenu.playFromBeginning", systemImage: "arrow.counterclockwise") {
+                    playMediaItem(item, fromBeginning: true)
+                }
             }
         }
 
@@ -70,6 +95,16 @@ private struct MediaContextMenu: View {
             systemImage: isFavorite ? "heart.slash" : "heart"
         ) {
             setFavorite(!isFavorite)
+        }
+
+        if hasPosition, offersWatched {
+            Button("contextMenu.removeFromContinueWatching", systemImage: "xmark.circle") {
+                clearPosition()
+            }
+        }
+
+        if let dropSeries, item.seriesId != nil {
+            Button("contextMenu.hideShow", systemImage: "minus.circle") { dropSeries(item) }
         }
     }
 
@@ -92,5 +127,13 @@ private struct MediaContextMenu: View {
             NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
         }
     }
+
+    private func clearPosition() {
+        let session = dependencies.sessionRegistry.session(for: item)
+        let itemID = item.id
+        Task {
+            try? await session.itemService.clearPlaybackPosition(userID: session.userID, itemID: itemID)
+            NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+        }
+    }
 }
-#endif

@@ -15,6 +15,7 @@ struct HomeCustomizeView: View {
     @State private var librarySources: [HomeSource] = []
     @State private var layout = LibraryLayout(entries: [])
     @State private var movingLibrary: String?
+    @State private var droppedSeries: [DroppedSeries] = []
 
     private var scope: String {
         appState.profileKey?.storageScope ?? ""
@@ -33,6 +34,7 @@ struct HomeCustomizeView: View {
                 collectionGroupingRow
                 rowList
                 librarySection
+                droppedSeriesSection
             }
             .padding(.vertical, 40)
         }
@@ -45,6 +47,7 @@ struct HomeCustomizeView: View {
             collectionGrouping = HomeRowConfig.collectionGrouping(scope: scope)
             heroMode = HomeHeroMode.stored(scope: scope)
             layout = LibraryLayout.load(scope: scope)
+            droppedSeries = DroppedSeriesStore.load(scope: scope)
             // Per-library rows are otherwise discovered only on Home load, so Customize showed a stale list right after a server add/switch. Reconcile here too.
             Task { await reconcileLibraries() }
         }
@@ -533,6 +536,56 @@ struct HomeCustomizeView: View {
             layout = layout.toggling(library, in: libraries, fallbackServerID: activeServerID)
         }
         saveLayout()
+    }
+
+    // MARK: - Hidden shows
+
+    /// The shows dropped from a card's menu, each a click away from coming back.
+    @ViewBuilder
+    private var droppedSeriesSection: some View {
+        if !droppedSeries.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("home.customize.hiddenShows")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("home.customize.hiddenShows.description")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, hInset)
+                .padding(.top, 28)
+                .padding(.bottom, 10)
+
+                ForEach(droppedSeries) { series in
+                    HStack(spacing: 16) {
+                        FocusableTile(action: { restore(series) }) { isFocused in
+                            tileShell(isFocused: isFocused, isMoving: false, isEnabled: false) {
+                                Image(systemName: "tv")
+                                    .font(.title3)
+                                    .frame(width: 44)
+                                    .foregroundStyle(.tertiary)
+                                Text(series.name)
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        RowToggleButton(isOn: false) { restore(series) }
+                    }
+                    .padding(.horizontal, hInset)
+                }
+            }
+        }
+    }
+
+    private func restore(_ series: DroppedSeries) {
+        movingID = nil
+        movingLibrary = nil
+        DroppedSeriesStore.restore(series.id, scope: scope)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            droppedSeries = DroppedSeriesStore.load(scope: scope)
+        }
     }
 
     private func saveLayout() {

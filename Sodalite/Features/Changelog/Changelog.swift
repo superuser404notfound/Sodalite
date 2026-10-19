@@ -230,6 +230,12 @@ enum Changelog {
                     "changelog.1_1_0.dvScrubPreview.body",
                     icon: "film"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.cardMenu.title",
+                    "changelog.1_1_0.cardMenu.body",
+                    icon: "contextualmenu.and.cursorarrow"
+                ),
             ]
         ),
         // MARK: 1.0.0

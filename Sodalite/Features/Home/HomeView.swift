@@ -8,6 +8,8 @@ struct HomeView: View {
     @State private var selectedItem: JellyfinItem?
     /// The hero's Play: the same detail page as a click on it, told to start playing once it is ready.
     @State private var heroPlayItem: JellyfinItem?
+    /// A card menu's Play from Beginning rides the same route, told to start at zero.
+    @State private var heroPlayFromBeginning = false
     @Environment(\.shellLeadingSlot) private var shellLeadingSlot
     @State private var selectedFilter: FilterDestination?
 
@@ -23,6 +25,8 @@ struct HomeView: View {
 
     /// Debounce for the focus-left-rows → scroll-to-top, cancelled/respawned on focus change; without it transient nils between row transitions trigger spurious scroll-to-top snaps.
     @State private var scrollResetTask: Task<Void, Never>?
+    /// Set by a card's hold: the focus leaving the top row next is its context menu, not the tab bar.
+    @State private var focusLeavesForMenu = false
 
     /// Same latch for requestContentReload, and for the same reason: without it every reappear would
     /// reload the whole feed on a signal that was already answered.
@@ -73,10 +77,14 @@ struct HomeView: View {
                 DetailRouterView(item: item)
             }
             .detailCover(item: $heroPlayItem) { item in
-                DetailRouterView(item: item, autoPlay: true)
+                DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: heroPlayFromBeginning)
             }
-            // The cards' context-menu Play (Mac) takes the same autoplay route as the hero's.
-            .environment(\.playMediaItem, PlayMediaItemAction { heroPlayItem = $0 })
+            // The cards' context-menu Play takes the same autoplay route as the hero's.
+            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+                heroPlayFromBeginning = fromBeginning
+                heroPlayItem = item
+            })
+            .environment(\.cardMenuWillOpen) { focusLeavesForMenu = true }
             .detailCover(item: $selectedFilter) { filter in
                 FilteredGridView(
                     title: filter.title,
@@ -167,7 +175,13 @@ struct HomeView: View {
             // regress the bar (issue #24).
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            let seriesID = note.userInfo?[PlaybackProgressKey.seriesID] as? String
+            let serverID = note.userInfo?[PlaybackProgressKey.serverID] as? String
             Task { @MainActor in
+                // Watching a dropped show again is the way back for it.
+                if let seriesID, let vm = viewModel {
+                    DroppedSeriesStore.restore("\(serverID ?? vm.serverID)|\(seriesID)", scope: vm.homeScope)
+                }
                 if let itemID, let ticks {
                     viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
                 }
@@ -335,7 +349,10 @@ struct HomeView: View {
                     backdropURL: vm.heroBackdropURL(for:),
                     posterURL: vm.heroPosterURL(for:),
                     onOpen: { selectedItem = $0 },
-                    onPlay: { heroPlayItem = $0 }
+                    onPlay: {
+                        heroPlayFromBeginning = false
+                        heroPlayItem = $0
+                    }
                 )
                 LazyVStack(alignment: .leading, spacing: 40) {
                     if !vm.unreachableServerNames.isEmpty {
@@ -382,6 +399,12 @@ struct HomeView: View {
                             itemLabel: { vm.serverLabel(forItem: $0, in: row) },
                             onShowAll: showAllFilter(for: row).map { filter in { selectedFilter = filter } }
                         )
+                        .environment(\.dropSeries, row.type == .continueWatching || row.type == .nextUp
+                            ? DropSeriesAction { item in
+                                DroppedSeriesStore.drop(item, fallbackServerID: vm.serverID, scope: vm.homeScope)
+                                withAnimation(.easeInOut(duration: 0.25)) { vm.removeDroppedSeries() }
+                            }
+                            : nil)
                         .focused($focusedRowIndex, equals: idx)
 
                     case .tags(let tagRow):
@@ -442,6 +465,12 @@ struct HomeView: View {
                 // 1. oldValue == 0: the focus engine routes Up to the tab bar only from the top row; a row-N→nil (N>0) is a transient between LazyVStack row materializations, not a tab-bar arrival.
                 // 2. 200ms debounce: even a legit row-0→tab-bar transition (and a down-scroll past row 0) passes through nil for a beat; 200ms outlasts those transients but still feels immediate.
                 scrollResetTask?.cancel()
+                // 3. A card's context menu takes focus off the row the same way; scrolling then
+                //    slid the page down under the lifted card, which read as the card jumping up.
+                if focusLeavesForMenu {
+                    focusLeavesForMenu = false
+                    if newValue == nil { return }
+                }
                 guard newValue == nil, oldValue == 0 else { return }
                 scrollResetTask = Task { @MainActor in
                     try? await Task.sleep(for: .milliseconds(200))
