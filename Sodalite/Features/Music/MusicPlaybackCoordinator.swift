@@ -23,6 +23,9 @@ final class MusicPlaybackCoordinator {
     private let playbackService: JellyfinPlaybackServiceProtocol
     let imageService: JellyfinImageService
     private let userIDProvider: () -> String?
+    /// A track from another server in a combined setup is streamed from, and reported to, its own
+    /// server as that server's user (Sodalite#85). nil means the active server.
+    private let secondaryRoute: (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)?
 
     private(set) var queue: [JellyfinItem] = []
     private(set) var currentIndex: Int = 0
@@ -91,11 +94,13 @@ final class MusicPlaybackCoordinator {
     init(engine: AetherEngine,
          playbackService: JellyfinPlaybackServiceProtocol,
          imageService: JellyfinImageService,
-         userIDProvider: @escaping () -> String?) {
+         userIDProvider: @escaping () -> String?,
+         secondaryRoute: @escaping (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)? = { _ in nil }) {
         self.engine = engine
         self.playbackService = playbackService
         self.imageService = imageService
         self.userIDProvider = userIDProvider
+        self.secondaryRoute = secondaryRoute
         subscribeToEngine()
     }
 
@@ -222,7 +227,10 @@ final class MusicPlaybackCoordinator {
     }
 
     private func loadAndPlayCurrent(generation: Int) async {
-        guard let item = currentItem, let userID = userIDProvider() else { return }
+        guard let item = currentItem else { return }
+        let route = secondaryRoute(item)
+        guard let userID = route?.userID ?? userIDProvider() else { return }
+        let playbackService = route?.service ?? self.playbackService
 
         configureAudioSessionIfNeeded()
 
@@ -435,7 +443,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = playbackService
+        let svc = secondaryRoute(item)?.service ?? playbackService
         Task { try? await svc.reportPlaybackStart(report) }
     }
 
@@ -454,7 +462,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = playbackService
+        let svc = secondaryRoute(item)?.service ?? playbackService
         Task { try? await svc.reportPlaybackProgress(report) }
     }
 
@@ -467,7 +475,7 @@ final class MusicPlaybackCoordinator {
             positionTicks: positionTicks,
             liveStreamId: nil
         )
-        let svc = playbackService
+        let svc = secondaryRoute(item)?.service ?? playbackService
         Task { try? await svc.reportPlaybackStopped(report) }
     }
 }

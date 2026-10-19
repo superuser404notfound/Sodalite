@@ -99,6 +99,15 @@ extension DependencyContainer {
         combinedServers.setLiveTVServerID(serverID, scope: scope)
     }
 
+    func rememberedMusicServerID() -> String? {
+        combineScope.flatMap { combinedServers.musicServerID(scope: $0) }
+    }
+
+    func rememberMusicServer(_ serverID: String) {
+        guard let scope = combineScope else { return }
+        combinedServers.setMusicServerID(serverID, scope: scope)
+    }
+
     func combinedServerStatus(_ server: JellyfinServer) -> CombinedServerStatus {
         if server.id == activeServer?.id { return .active }
         guard let credential = secondaryCredential(serverID: server.id) else { return .noSession }
@@ -141,5 +150,34 @@ extension DependencyContainer {
         await LiveTVProbe.capableServerIDs(
             liveTVSources(activeUserID: activeUserID), secondaryDeadline: .seconds(4),
             previouslyCapable: previouslyCapable)
+    }
+}
+
+extension DependencyContainer {
+    /// Music's sources, active first (Sodalite#85).
+    func musicSources(activeUserID: String) -> [MusicSource] {
+        sessionRegistry.participants.map { session in
+            MusicSource(
+                serverID: session.server?.id ?? "",
+                serverName: session.server?.name ?? "",
+                userID: session.isActive ? activeUserID : session.userID,
+                musicService: session.musicService,
+                isActive: session.isActive
+            )
+        }
+    }
+
+    /// Gates the Music tab: the participants with a music library. Empty on any error.
+    func musicServerIDs(activeUserID: String, previouslyCapable: Set<String> = []) async -> [String] {
+        await MusicProbe.capableServerIDs(
+            musicSources(activeUserID: activeUserID), secondaryDeadline: .seconds(4),
+            previouslyCapable: previouslyCapable)
+    }
+
+    /// The service and user an album's or a track's own server answers with; the active profile's
+    /// for an item without a server stamp.
+    func musicRoute(for item: JellyfinItem) -> (service: JellyfinMusicServiceProtocol, userID: String?) {
+        let session = sessionRegistry.session(for: item)
+        return session.isActive ? (jellyfinMusicService, activeUserID) : (session.musicService, session.userID)
     }
 }

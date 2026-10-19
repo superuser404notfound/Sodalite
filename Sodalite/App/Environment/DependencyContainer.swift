@@ -191,7 +191,8 @@ final class DependencyContainer {
             libraryService: jellyfinLibraryService,
             itemService: jellyfinItemService,
             playbackService: jellyfinPlaybackService,
-            liveTvService: jellyfinLiveTvService
+            liveTvService: jellyfinLiveTvService,
+            musicService: jellyfinMusicService
         )
         self.sessionRegistry = sessionRegistry
         self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
@@ -270,6 +271,10 @@ final class DependencyContainer {
                 guard let serverID = try? capturedKeychain.loadString(for: KeychainKeys.activeServerID)
                 else { return nil }
                 return try? capturedKeychain.loadString(for: KeychainKeys.userID(serverID: serverID))
+            },
+            secondaryRoute: { [weak sessionRegistry] item in
+                guard let session = sessionRegistry?.session(for: item), !session.isActive else { return nil }
+                return (session.playbackService, session.userID)
             }
         )
 

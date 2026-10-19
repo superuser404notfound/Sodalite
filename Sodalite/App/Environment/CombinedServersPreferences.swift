@@ -27,4 +27,11 @@ final class CombinedServersPreferences {
     func setLiveTVServerID(_ serverID: String, scope: String) {
         defaults.set(serverID, forKey: "combineServersLiveTV.\(scope)")
     }
+
+    /// The Music tab's server, device-local for the same reason.
+    func musicServerID(scope: String) -> String? { defaults.string(forKey: "combineServersMusic.\(scope)") }
+
+    func setMusicServerID(_ serverID: String, scope: String) {
+        defaults.set(serverID, forKey: "combineServersMusic.\(scope)")
+    }
 }

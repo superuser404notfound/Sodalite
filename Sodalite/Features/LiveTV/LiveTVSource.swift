@@ -12,34 +12,52 @@ struct LiveTVSource {
 }
 
 nonisolated enum LiveTVProbe {
-    /// Participants exposing at least one channel, in participant order. The active server is asked
-    /// without a deadline, as before combining existed. A secondary that fails counts as having none;
-    /// one that misses `secondaryDeadline` keeps its last answer from `previouslyCapable`, so one slow
-    /// reply does not pull the tab out from under the user.
+    /// Participants exposing at least one channel, in participant order. See `ParticipantProbe`.
     static func capableServerIDs(
         _ sources: [LiveTVSource], secondaryDeadline: Duration, previouslyCapable: Set<String> = []
     ) async -> [String] {
-        let targets = sources.map { (service: $0.liveTvService, userID: $0.userID, isActive: $0.isActive) }
-        let ids = sources.map(\.serverID)
-        let keepOnTimeout = ids.map { previouslyCapable.contains($0) }
+        await ParticipantProbe.capableServerIDs(
+            sources.map { source in
+                let service = source.liveTvService
+                let userID = source.userID
+                return ParticipantProbe.Target(serverID: source.serverID, isActive: source.isActive) {
+                    let response = try? await service.getChannels(
+                        userID: userID, startIndex: 0, limit: 1, filter: .any)
+                    return !(response?.items.isEmpty ?? true)
+                }
+            },
+            secondaryDeadline: secondaryDeadline, previouslyCapable: previouslyCapable)
+    }
+}
+
+/// Asks every participant one yes/no question for a tab gate (Sodalite#85). The active server is
+/// asked without a deadline, as before combining existed. A secondary that fails counts as no; one
+/// that misses `secondaryDeadline` keeps its last answer from `previouslyCapable`, so one slow reply
+/// does not pull the tab out from under the user.
+nonisolated enum ParticipantProbe {
+    struct Target: Sendable {
+        let serverID: String
+        let isActive: Bool
+        let probe: @Sendable () async -> Bool
+    }
+
+    static func capableServerIDs(
+        _ targets: [Target], secondaryDeadline: Duration, previouslyCapable: Set<String> = []
+    ) async -> [String] {
+        let keepOnTimeout = targets.map { previouslyCapable.contains($0.serverID) }
         // Every child that can hang sits inside Deadline.race, so the group cannot outlive the deadline.
         let capable = await withTaskGroup(of: (Int, Bool).self) { group in
             for (index, target) in targets.enumerated() {
                 group.addTask {
-                    let probe: @Sendable () async -> Bool = {
-                        let response = try? await target.service.getChannels(
-                            userID: target.userID, startIndex: 0, limit: 1, filter: .any)
-                        return !(response?.items.isEmpty ?? true)
-                    }
-                    if target.isActive { return (index, await probe()) }
-                    return (index, await Deadline.race(secondaryDeadline, probe) ?? keepOnTimeout[index])
+                    if target.isActive { return (index, await target.probe()) }
+                    return (index, await Deadline.race(secondaryDeadline, target.probe) ?? keepOnTimeout[index])
                 }
             }
             var found: [Int] = []
-            for await (index, hasLive) in group where hasLive { found.append(index) }
+            for await (index, isCapable) in group where isCapable { found.append(index) }
             return found
         }
-        return capable.sorted().map { ids[$0] }
+        return capable.sorted().map { targets[$0].serverID }
     }
 }
 

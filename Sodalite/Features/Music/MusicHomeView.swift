@@ -21,11 +21,9 @@ import SwiftUI
     /// service says in the log when it had to cut.
     static let songLimit = 500
 
-    func load(using dependencies: DependencyContainer) async {
-        await load(service: dependencies.jellyfinMusicService, userID: dependencies.activeUserID)
-    }
-
-    func load(service: JellyfinMusicServiceProtocol, userID: String?) async {
+    /// `serverID` stamps items a server returned without one, so their artwork and playback route
+    /// to the server they came from (Sodalite#85).
+    func load(service: JellyfinMusicServiceProtocol, userID: String?, serverID: String? = nil) async {
         guard let userID else {
             LogTap.shared.note("[music] albums: no active user, nothing requested")
             return
@@ -33,12 +31,12 @@ import SwiftUI
         isLoading = true
         defer { isLoading = false }
         do {
-            let fetched = try await service.getAlbums(userID: userID)
+            let fetched = Self.stamped(try await service.getAlbums(userID: userID), serverID: serverID)
             albums = fetched
             errorMessage = nil
             LogTap.shared.note("[music] albums: \(fetched.count) returned")
             if fetched.isEmpty {
-                await loadSongs(service: service, userID: userID)
+                await loadSongs(service: service, userID: userID, serverID: serverID)
             } else {
                 songs = []
             }
@@ -57,29 +55,80 @@ import SwiftUI
     ///
     /// A failure here does not become the tab's verdict: the server already answered the first
     /// question, and "no albums" stays what it said.
-    private func loadSongs(service: JellyfinMusicServiceProtocol, userID: String) async {
+    private func loadSongs(service: JellyfinMusicServiceProtocol, userID: String, serverID: String?) async {
         do {
-            songs = try await service.getAllSongs(userID: userID, limit: Self.songLimit)
+            songs = Self.stamped(try await service.getAllSongs(userID: userID, limit: Self.songLimit), serverID: serverID)
         } catch is CancellationError {
             // A cancelled reload is not an outcome. The next one answers.
         } catch {
             LogTap.shared.note("[music] all songs failed: \(HTTPDiagnostics.describe(error))")
         }
     }
+
+    static func stamped(_ items: [JellyfinItem], serverID: String?) -> [JellyfinItem] {
+        guard let serverID, !serverID.isEmpty else { return items }
+        return items.map { item in
+            var item = item
+            if item.serverID == nil { item.serverID = serverID }
+            return item
+        }
+    }
 }
 
 struct MusicHomeView: View {
+    /// Participants with a music library, active first (Sodalite#85).
+    let capableServerIDs: [String]
+
+    @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @State private var viewModel = MusicHomeViewModel()
     @State private var selectedAlbum: JellyfinItem?
     @FocusState private var focusedAlbumID: String?
+    @State private var rememberedServerID: String?
+    /// The profile `rememberedServerID` was read for; nothing loads before it matches, so a stored
+    /// secondary is not preceded by a throwaway load from the active server.
+    @State private var rememberedLoadedFor: ProfileKey?
+    @State private var isServerPickerPresented = false
+
+    private var sources: [MusicSource] {
+        dependencies.activeUserID.map { dependencies.musicSources(activeUserID: $0) } ?? []
+    }
+
+    private var chosenServerID: String? {
+        LiveTVServerChoice.resolve(
+            capable: capableServerIDs, available: sources.map(\.serverID), remembered: rememberedServerID)
+    }
+
+    /// Before the first probe lands this is the active server, exactly as before Sodalite#85.
+    private var source: MusicSource? {
+        let all = sources
+        return all.first { $0.serverID == chosenServerID } ?? all.first { $0.isActive }
+    }
+
+    private var tint: Color {
+        dependencies.appearancePreferences.effectiveTint(
+            isSupporter: dependencies.storeKitService.isSupporter)
+    }
+
+    private func load() async {
+        guard rememberedLoadedFor == appState.profileKey, let source else { return }
+        await viewModel.load(service: source.musicService, userID: source.userID, serverID: source.serverID)
+    }
 
     var body: some View {
         let metrics = LayoutMetrics.current(hSizeClass)
         ThemeNavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
+                    if MusicSwitcher.isVisible(capable: capableServerIDs), let source {
+                        ServerChip(name: source.serverName, tint: tint, isFocusable: true) {
+                            isServerPickerPresented = true
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, metrics.gridInset)
+                        .padding(.top, hSizeClass == .compact ? 16 : 40)
+                    }
                     if dependencies.musicPlaybackCoordinator.currentItem != nil {
                         NowPlayingCard()
                             .padding(.horizontal, metrics.gridInset)
@@ -97,8 +146,24 @@ struct MusicHomeView: View {
                 AlbumDetailView(album: album)
             }
         }
-        .task {
-            await viewModel.load(using: dependencies)
+        .menuPresentation(isPresented: $isServerPickerPresented) {
+            CatalogPickerSheet(
+                title: String(localized: "multiServer.picker.header.label"),
+                options: MusicSwitcher.options(capable: capableServerIDs, sources: sources),
+                selectedID: chosenServerID,
+                onSelect: { serverID in
+                    dependencies.rememberMusicServer(serverID)
+                    rememberedServerID = serverID
+                    isServerPickerPresented = false
+                },
+                onCancel: { isServerPickerPresented = false })
+        }
+        .task(id: appState.profileKey) {
+            rememberedServerID = dependencies.rememberedMusicServerID()
+            rememberedLoadedFor = appState.profileKey
+        }
+        .task(id: source.map { "\($0.serverID)|\($0.userID)|\(rememberedLoadedFor?.storageScope ?? "")" }) {
+            await load()
             // Do NOT force focus into the grid: entering a tab should leave focus on the tab bar
             // (descends only on press-down). Auto-setting focusedAlbumID yanked focus into content and
             // disrupted the engine when an album was open; it still tracks the focused card for styling, system-driven.
@@ -121,7 +186,7 @@ struct MusicHomeView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 Button {
-                    Task { await viewModel.load(using: dependencies) }
+                    Task { await load() }
                 } label: {
                     Text("home.retry")
                         .font(.body)

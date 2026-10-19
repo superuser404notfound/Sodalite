@@ -8,6 +8,8 @@ struct TabRootView: View {
     @State private var availableTabs: [AppTab] = AppTab.baseTabs
     /// Participants with Live TV, from the last tab probe (Sodalite#85).
     @State private var liveTVServerIDs: [String] = []
+    /// Participants with a music library, active first (Sodalite#85).
+    @State private var musicServerIDs: [String] = []
     /// Last requestContentReload this view answered, so a reappear does not re-probe a signal it
     /// already handled.
     @State private var lastHandledContentReload = 0
@@ -267,6 +269,7 @@ struct TabRootView: View {
                 let base = AppTab.baseTabs
                 availableTabs = base
                 liveTVServerIDs = []
+                musicServerIDs = []
                 if !base.contains(selectedTab) {
                     selectedTab = .home
                 }
@@ -279,16 +282,12 @@ struct TabRootView: View {
             let hasLive = !liveIDs.isEmpty
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
-            // Swallow a music-probe error into false so it doesn't skip the assignment and leave Live TV hidden.
-            var hasMusic = false
-            do {
-                hasMusic = try await dependencies.jellyfinMusicService.hasMusicLibrary(userID: userID)
-            } catch {
-                // No music library confirmed; tab stays hidden.
-            }
+            let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
+            let hasMusic = !musicIDs.isEmpty
             guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
 
             liveTVServerIDs = liveIDs
+            musicServerIDs = musicIDs
             tabsProbedForServerID = appState.activeServer?.id
             if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
                 onScreen: availableTabs,
@@ -435,15 +434,12 @@ struct TabRootView: View {
         let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
         let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
-        var hasMusic = false
-        do {
-            hasMusic = try await dependencies.jellyfinMusicService.hasMusicLibrary(userID: userID)
-        } catch {
-            // No music library confirmed; tab stays hidden.
-        }
+        let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
+        let hasMusic = !musicIDs.isEmpty
         if Task.isCancelled { return }
 
         liveTVServerIDs = liveIDs
+        musicServerIDs = musicIDs
         tabsProbedForServerID = appState.activeServer?.id
         if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
             onScreen: availableTabs,
@@ -468,15 +464,12 @@ struct TabRootView: View {
         let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
         let hasLive = !liveIDs.isEmpty
         if Task.isCancelled { return }
-        var hasMusic = false
-        do {
-            hasMusic = try await dependencies.jellyfinMusicService.hasMusicLibrary(userID: userID)
-        } catch {
-            // No music library confirmed; tab stays hidden.
-        }
+        let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
+        let hasMusic = !musicIDs.isEmpty
         if Task.isCancelled { return }
 
         liveTVServerIDs = liveIDs
+        musicServerIDs = musicIDs
         tabsProbedForServerID = appState.activeServer?.id
         if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
             onScreen: availableTabs,
@@ -582,7 +575,7 @@ struct TabRootView: View {
             case .search:
                 SearchView()
             case .music:
-                MusicHomeView()
+                MusicHomeView(capableServerIDs: musicServerIDs)
             case .downloads:
                 #if !os(tvOS)
                 DownloadsView()

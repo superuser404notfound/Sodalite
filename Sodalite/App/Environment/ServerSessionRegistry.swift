@@ -26,15 +26,18 @@ final class ServerSessionRegistry {
         libraryService: JellyfinLibraryServiceProtocol? = nil,
         itemService: JellyfinItemServiceProtocol? = nil,
         playbackService: JellyfinPlaybackServiceProtocol? = nil,
-        liveTvService: JellyfinLiveTvServiceProtocol? = nil
+        liveTvService: JellyfinLiveTvServiceProtocol? = nil,
+        musicService: JellyfinMusicServiceProtocol? = nil
     ) {
         self.httpClient = httpClient
+        let activeLibraryService = libraryService ?? JellyfinLibraryService(client: activeClient)
         let active = ServerSession(
             client: activeClient,
-            libraryService: libraryService ?? JellyfinLibraryService(client: activeClient),
+            libraryService: activeLibraryService,
             itemService: itemService ?? JellyfinItemService(client: activeClient),
             playbackService: playbackService ?? JellyfinPlaybackService(client: activeClient),
             liveTvService: liveTvService ?? JellyfinLiveTvService(client: activeClient),
+            musicService: musicService ?? JellyfinMusicService(client: activeClient, libraryService: activeLibraryService),
             isActive: true,
             server: nil,
             userID: ""

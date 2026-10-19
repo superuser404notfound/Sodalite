@@ -9,6 +9,7 @@ final class ServerSession {
     let itemService: JellyfinItemServiceProtocol
     let playbackService: JellyfinPlaybackServiceProtocol
     let liveTvService: JellyfinLiveTvServiceProtocol
+    let musicService: JellyfinMusicServiceProtocol
     let isActive: Bool
     private(set) var server: JellyfinServer?
     private(set) var userID: String
@@ -19,6 +20,7 @@ final class ServerSession {
         itemService: JellyfinItemServiceProtocol,
         playbackService: JellyfinPlaybackServiceProtocol,
         liveTvService: JellyfinLiveTvServiceProtocol,
+        musicService: JellyfinMusicServiceProtocol,
         isActive: Bool,
         server: JellyfinServer?,
         userID: String
@@ -28,6 +30,7 @@ final class ServerSession {
         self.itemService = itemService
         self.playbackService = playbackService
         self.liveTvService = liveTvService
+        self.musicService = musicService
         self.isActive = isActive
         self.server = server
         self.userID = userID
@@ -40,12 +43,14 @@ final class ServerSession {
         client.onAccessTokenSet = { LogSecrets.register($0) }
         client.baseURL = baseURL
         client.accessToken = candidate.credential.token
+        let libraryService = JellyfinLibraryService(client: client)
         return ServerSession(
             client: client,
-            libraryService: JellyfinLibraryService(client: client),
+            libraryService: libraryService,
             itemService: JellyfinItemService(client: client),
             playbackService: JellyfinPlaybackService(client: client),
             liveTvService: JellyfinLiveTvService(client: client),
+            musicService: JellyfinMusicService(client: client, libraryService: libraryService),
             isActive: false,
             server: candidate.server,
             userID: candidate.credential.userID

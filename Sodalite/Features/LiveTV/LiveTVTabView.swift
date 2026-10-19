@@ -280,7 +280,7 @@ struct LiveTVTabView: View {
         HStack(spacing: hSizeClass == .compact ? 12 : 24) {
             sectionPicker
             if LiveTVSwitcher.isVisible(capable: capableServerIDs), let source {
-                LiveServerChip(name: source.serverName, tint: tint,
+                ServerChip(name: source.serverName, tint: tint,
                                isFocusable: !chromeFocusSuppressed) {
                     guard !isPlayerPresented else { return }
                     isServerPickerPresented = true
@@ -301,31 +301,5 @@ struct LiveTVTabView: View {
                 },
                 onCancel: { isServerPickerPresented = false })
         }
-    }
-}
-
-/// The Live TV server switcher (Sodalite#85), shaped like the guide's filter chips.
-private struct LiveServerChip: View {
-    let name: String
-    let tint: Color
-    let isFocusable: Bool
-    let action: () -> Void
-
-    @FocusState private var focused: Bool
-
-    var body: some View {
-        Label(name, systemImage: "server.rack")
-            .font(.caption)
-            .fontWeight(.semibold)
-            .lineLimit(1)
-            .foregroundStyle(focused ? Color.black : .white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Capsule().fill(focused ? AnyShapeStyle(tint) : AnyShapeStyle(Color.Theme.restFillStrong)))
-            .focusResponse(.chip, isFocused: focused)
-            .focusableSurface(isFocusable)
-            .focused($focused)
-            .stableTap(isFocused: focused) { action() }
-            .fixedSize()
     }
 }
