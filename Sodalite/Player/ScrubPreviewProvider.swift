@@ -12,6 +12,11 @@ final class ScrubPreviewProvider {
 
     /// Frame to draw above the playhead; nil = show time only.
     private(set) var previewImage: CGImage?
+    /// True while `previewView` holds the picture for the position under the knob. Dolby Vision
+    /// Profile 5 / 10.0 only: the system compositor colours those, so they come as a view, not an image.
+    private(set) var showsPreviewView = false
+    /// The compositor-drawn preview, created on the first session that needs one.
+    @ObservationIgnored private(set) var previewView: AetherScrubPreviewView?
 
     @ObservationIgnored private var enabled = false
     @ObservationIgnored private var extractor: FrameExtractor?
@@ -25,6 +30,9 @@ final class ScrubPreviewProvider {
     /// with the FrameExtractor source; reset() clears it. Mirrors `liveThumbnail`: a
     /// MainActor closure that does its placement/URL work, then hops off-actor to fetch.
     @ObservationIgnored private var serverThumbnail: ((Double) async -> CGImage?)?
+    /// Compositor preview: shows `seconds` in the view and answers whether it did. Asked before the
+    /// still sources, so a session it does not apply to has to answer false at once.
+    @ObservationIgnored private var viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)?
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var generation = 0
@@ -40,10 +48,12 @@ final class ScrubPreviewProvider {
     /// is tried before the extractor: a resident segment decodes with no second connection.
     func configure(extractor: FrameExtractor?,
                    cacheThumbnail: ((Double, Int) async -> CGImage?)? = nil,
+                   viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)? = nil,
                    enabled: Bool) {
         reset()
         self.extractor = extractor
         self.cacheThumbnail = cacheThumbnail
+        self.viewPreview = viewPreview
         self.enabled = enabled
     }
 
@@ -98,12 +108,29 @@ final class ScrubPreviewProvider {
         return nil
     }
 
+    /// The compositor view when the session draws its preview there, the still sources otherwise.
+    /// Publishes only while `gen` is current.
+    private func resolveAndPublish(seconds: Double, gen: Int) async {
+        if let viewPreview {
+            let view = previewView ?? AetherScrubPreviewView(frame: .zero)
+            previewView = view
+            if await viewPreview(seconds, view) {
+                if gen == generation { showsPreviewView = true; previewImage = nil }
+                return
+            }
+        }
+        let image = await resolveThumbnail(seconds: seconds)
+        guard gen == generation else { return }
+        previewImage = image
+        showsPreviewView = false
+    }
+
     /// Drive the preview to a scrub position (`fraction` 0...1). Debounced so a
     /// fast swipe doesn't decode per frame; `generation` guard drops stale results.
     func update(fraction: Float, durationSeconds: Double) {
         guard enabled, durationSeconds > 0 else { return }
         let seconds = Double(max(0, min(1, fraction))) * durationSeconds
-        guard serverThumbnail != nil || cacheThumbnail != nil || extractor != nil else { return }
+        guard serverThumbnail != nil || cacheThumbnail != nil || extractor != nil || viewPreview != nil else { return }
 
         generation += 1
         let gen = generation
@@ -112,8 +139,7 @@ final class ScrubPreviewProvider {
             try? await Task.sleep(for: .milliseconds(60))
             if Task.isCancelled { return }
             guard let self else { return }
-            let image = await self.resolveThumbnail(seconds: seconds)
-            if gen == self.generation { self.previewImage = image }
+            await self.resolveAndPublish(seconds: seconds, gen: gen)
         }
     }
 
@@ -123,7 +149,7 @@ final class ScrubPreviewProvider {
     /// to ~keyframe spacing; shares the `generation` guard with update(fraction:).
     func warm(toSeconds seconds: Double) {
         guard enabled, seconds >= 0,
-              (extractor != nil || cacheThumbnail != nil || serverThumbnail != nil) else { return }
+              (extractor != nil || cacheThumbnail != nil || serverThumbnail != nil || viewPreview != nil) else { return }
         guard abs(seconds - lastWarmedSeconds) >= warmThresholdSeconds else { return }
         lastWarmedSeconds = seconds
 
@@ -132,8 +158,7 @@ final class ScrubPreviewProvider {
         loadTask?.cancel()
         loadTask = Task { [weak self] in
             guard let self else { return }
-            let image = await self.resolveThumbnail(seconds: seconds)
-            if gen == self.generation { self.previewImage = image }
+            await self.resolveAndPublish(seconds: seconds, gen: gen)
         }
     }
 
@@ -154,6 +179,9 @@ final class ScrubPreviewProvider {
         loadTask?.cancel()
         loadTask = nil
         previewImage = nil
+        showsPreviewView = false
+        previewView?.clear()
+        viewPreview = nil
         extractor = nil
         cacheThumbnail = nil
         liveThumbnail = nil

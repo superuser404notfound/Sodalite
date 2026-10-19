@@ -4,6 +4,7 @@
 // transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 import AetherEngine
+import AVFoundation
 import UIKit
 
 /// Native tvOS-style transport bar with progress bar, time labels,
@@ -77,6 +78,9 @@ struct TransportBar: View {
     let isStatsOverlayOpen: Bool
     /// Scrub-position preview frame; nil falls back to the time-only label.
     let previewImage: CGImage?
+    /// The compositor-drawn preview (Dolby Vision Profile 5 / 10.0), set only while it holds the
+    /// picture for the knob's position. Takes the image's place in the same card.
+    var previewView: AetherScrubPreviewView? = nil
 
     /// What the time row needs to know about itself to let the readout cross it (Sodalite#151).
     @State private var readoutWidth: CGFloat = 0
@@ -365,8 +369,26 @@ struct TransportBar: View {
                 let half = Self.scrubCardWidth / 2
                 let knobX = max(0, min(width, width * CGFloat(progress)))
                 let clampedX = max(half, min(width - half, knobX))
-                scrubPreviewCard(image: previewImage, imageHeight: imageHeight)
-                    .position(x: clampedX, y: cardHeight / 2)
+                scrubPreviewCard(imageHeight: imageHeight) {
+                    Image(decorative: previewImage, scale: 1.0).resizable()
+                }
+                .position(x: clampedX, y: cardHeight / 2)
+            }
+            .frame(height: cardHeight)
+            .padding(.bottom, 12)
+            .transition(.opacity)
+        } else if let previewView {
+            let imageHeight = Self.scrubCardWidth * 9 / 16
+            let cardHeight = imageHeight + Self.cardClockSpacing + Self.cardClockRowHeight
+            GeometryReader { geo in
+                let width = geo.size.width
+                let half = Self.scrubCardWidth / 2
+                let knobX = max(0, min(width, width * CGFloat(progress)))
+                let clampedX = max(half, min(width - half, knobX))
+                scrubPreviewCard(imageHeight: imageHeight) {
+                    ScrubPreviewViewHost(view: previewView)
+                }
+                .position(x: clampedX, y: cardHeight / 2)
             }
             .frame(height: cardHeight)
             .padding(.bottom, 12)
@@ -399,10 +421,10 @@ struct TransportBar: View {
         return min(max(h, scrubCardWidth * 9 / 21), scrubCardWidth)
     }
 
-    private func scrubPreviewCard(image: CGImage, imageHeight: CGFloat) -> some View {
+    private func scrubPreviewCard<Picture: View>(imageHeight: CGFloat,
+                                                @ViewBuilder picture: () -> Picture) -> some View {
         VStack(spacing: Self.cardClockSpacing) {
-            Image(decorative: image, scale: 1.0)
-                .resizable()
+            picture()
                 .frame(width: Self.scrubCardWidth, height: imageHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(
@@ -834,4 +856,16 @@ struct PausedGlyph: View {
             .transition(.opacity.combined(with: .scale(scale: 0.6)))
     }
 }
+/// Hosts the engine's compositor preview view inside the scrub card.
+private struct ScrubPreviewViewHost: UIViewRepresentable {
+    let view: AetherScrubPreviewView
+
+    func makeUIView(context: Context) -> AetherScrubPreviewView {
+        view.videoGravity = .resizeAspectFill
+        return view
+    }
+
+    func updateUIView(_ uiView: AetherScrubPreviewView, context: Context) {}
+}
+
 #endif

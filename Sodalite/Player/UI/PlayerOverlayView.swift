@@ -687,7 +687,8 @@ struct PlayerOverlayView: View {
                     showsPiPButton: viewModel.isPiPAvailable,
                     isPiPEnabled: viewModel.isPiPPossible,
                     isStatsOverlayOpen: viewModel.showStatsOverlay,
-                    previewImage: viewModel.scrubPreview.previewImage
+                    previewImage: viewModel.scrubPreview.previewImage,
+                    previewView: viewModel.scrubPreview.showsPreviewView ? viewModel.scrubPreview.previewView : nil
                 )
                 }
             }
