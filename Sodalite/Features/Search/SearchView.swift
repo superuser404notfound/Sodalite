@@ -202,21 +202,6 @@ struct SearchView: View {
     }
     #endif
 
-    private func libraryCard(_ item: JellyfinItem, isFocused: Bool, showsInfo: Bool = true) -> MediaCard {
-        MediaCard(
-            item: item,
-            imageURL: dependencies.jellyfinImageService.imageURL(
-                itemID: item.id,
-                imageType: .primary,
-                tag: item.imageTags?.primary,
-                maxWidth: ImageWidth.card
-            ),
-            style: .poster,
-            isFocused: isFocused,
-            showsInfo: showsInfo
-        )
-    }
-
     @ViewBuilder
     private func resultsView(vm: SearchViewModel) -> some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -257,11 +242,19 @@ struct SearchView: View {
                         FocusableCard(opensMenuOnHold: true) {
                             destination = .library(item)
                         } content: { isFocused in
-                            libraryCard(item, isFocused: isFocused)
+                            MediaCard(
+                                item: item,
+                                imageURL: dependencies.jellyfinImageService.imageURL(
+                                    itemID: item.id,
+                                    imageType: .primary,
+                                    tag: item.imageTags?.primary,
+                                    maxWidth: ImageWidth.card
+                                ),
+                                style: .poster,
+                                isFocused: isFocused
+                            )
                         }
-                        .mediaContextMenu(for: item, open: { destination = .library($0) }) {
-                            libraryCard(item, isFocused: false, showsInfo: false)
-                        }
+                        .mediaContextMenu(for: item) { destination = .library($0) }
                     }
                 }
                 .enrichesPosterBadges(items)

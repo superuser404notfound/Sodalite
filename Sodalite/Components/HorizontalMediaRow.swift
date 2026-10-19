@@ -53,11 +53,17 @@ struct HorizontalMediaRow: View {
                         FocusableCard(opensMenuOnHold: true) {
                             onItemSelected?(item)
                         } content: { isFocused in
-                            card(item, isFocused: isFocused)
+                            MediaCard(
+                                item: item,
+                                imageURL: imageURLProvider(item),
+                                fallbackURL: fallbackURLProvider?(item),
+                                style: cardStyle,
+                                isFocused: isFocused,
+                                showsSeriesArtwork: showsSeriesArtwork,
+                                serverLabel: itemLabel?(item)
+                            )
                         }
-                        .mediaContextMenu(for: item, open: { onItemSelected?($0) }) {
-                            card(item, isFocused: false, showsInfo: false)
-                        }
+                        .mediaContextMenu(for: item) { onItemSelected?($0) }
                     }
                     if let onShowAll {
                         FocusableCard(action: onShowAll, exposesButtonSemantics: true) { isFocused in
@@ -70,18 +76,5 @@ struct HorizontalMediaRow: View {
             .focusSectionCompat()
             .enrichesPosterBadges(items)
         }
-    }
-
-    private func card(_ item: JellyfinItem, isFocused: Bool, showsInfo: Bool = true) -> MediaCard {
-        MediaCard(
-            item: item,
-            imageURL: imageURLProvider(item),
-            fallbackURL: fallbackURLProvider?(item),
-            style: cardStyle,
-            isFocused: isFocused,
-            showsSeriesArtwork: showsSeriesArtwork,
-            serverLabel: itemLabel?(item),
-            showsInfo: showsInfo
-        )
     }
 }

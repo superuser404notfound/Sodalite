@@ -22,8 +22,6 @@ struct MediaCard: View {
     let showsSeriesArtwork: Bool
     /// Server name for a same-name collection or playlist from another server (Sodalite#85).
     let serverLabel: String?
-    /// Off for the artwork-only copy tvOS lifts next to a card's context menu.
-    let showsInfo: Bool
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
@@ -54,8 +52,7 @@ struct MediaCard: View {
         style: MediaCardStyle = .poster,
         isFocused: Bool = false,
         showsSeriesArtwork: Bool = false,
-        serverLabel: String? = nil,
-        showsInfo: Bool = true
+        serverLabel: String? = nil
     ) {
         self.item = item
         self.imageURL = imageURL
@@ -64,15 +61,19 @@ struct MediaCard: View {
         self.isFocused = isFocused
         self.showsSeriesArtwork = showsSeriesArtwork
         self.serverLabel = serverLabel
-        self.showsInfo = showsInfo
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             posterImage
-            if showsInfo { itemInfo }
+            itemInfo
         }
         .frame(width: cardWidth)
+        #if !os(macOS)
+        // tvOS lifts a copy of the card next to its context menu, and the title lines rode along
+        // across the row heading. Only the artwork is the preview; a `preview:` view is ignored there.
+        .contentShape(.contextMenuPreview, ArtworkPreviewShape(size: cardSize, cornerRadius: ArtworkCorner.radius))
+        #endif
         .accessibilityElement(children: .combine)
         .accessibilityValue(accessibilityProgress)
     }
@@ -207,5 +208,15 @@ struct MediaCard: View {
         case .folder: "folder"
         default: "photo"
         }
+    }
+}
+
+/// The artwork's rounded rectangle at the top of a card, whatever the card's full height.
+private nonisolated struct ArtworkPreviewShape: Shape {
+    let size: CGSize
+    let cornerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        RoundedRectangle(cornerRadius: cornerRadius).path(in: CGRect(origin: .zero, size: size))
     }
 }
