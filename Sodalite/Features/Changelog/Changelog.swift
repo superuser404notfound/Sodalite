@@ -88,6 +88,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.legacyFormats.title",
+                    "changelog.1_1_0.legacyFormats.body",
+                    icon: "film.stack"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.myRequestNotifications.title",
                     "changelog.1_1_0.myRequestNotifications.body",
                     icon: "bell.badge"
