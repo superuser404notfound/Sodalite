@@ -31,6 +31,7 @@ struct DetailViewModelPlaylistItemsTests {
         func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
         func setRating(userID: String, itemID: String, rating: Double?) async throws {}
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func findByTmdbID(userID: String, tmdbID: Int, searchTerm: String?) async throws -> JellyfinItem? { nil }
         func findByProviderIDs(
             userID: String, tmdbID: Int?, tvdbID: Int?, imdbID: String?, includeItemTypes: [ItemType], searchTerm: String?

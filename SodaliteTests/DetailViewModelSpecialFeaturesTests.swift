@@ -37,6 +37,7 @@ struct DetailViewModelSpecialFeaturesTests {
         func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
         func setRating(userID: String, itemID: String, rating: Double?) async throws {}
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }

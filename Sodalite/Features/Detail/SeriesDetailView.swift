@@ -122,6 +122,7 @@ struct SeriesDetailView: View {
     var initialEpisode: JellyfinItem? = nil
     /// TopShelf playAction: fire the primary play action once, as soon as a play target exists.
     var autoPlay: Bool = false
+    var autoPlayFromBeginning: Bool = false
     @State private var didAutoPlay = false
     /// Play was pressed while the target was still resolving; the target-keyed task honours it on arrival.
     @State private var pendingPlayRequest = false
@@ -139,7 +140,7 @@ struct SeriesDetailView: View {
         guard autoPlay, !didAutoPlay, let vm = viewModel,
               let target = playTarget(vm: vm) else { return }
         didAutoPlay = true
-        requestPlay(target, fromBeginning: false, fromPlayButton: true)
+        requestPlay(target, fromBeginning: autoPlayFromBeginning, fromPlayButton: true)
     }
 
     /// Honour a Play press that arrived while the target was still resolving. Same key as autoplay, so it runs the moment getNextUp lands.

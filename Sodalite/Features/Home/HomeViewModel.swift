@@ -258,6 +258,13 @@ final class HomeViewModel {
         }
     }
 
+    /// A show dropped from a card's menu leaves its rows at once, without waiting for the reload.
+    func removeDroppedSeries() {
+        for rowIndex in rows.indices where rows[rowIndex].type == .continueWatching || rows[rowIndex].type == .nextUp {
+            rows[rowIndex].items = DroppedSeriesStore.filter(rows[rowIndex].items, serverID: serverID, scope: homeScope)
+        }
+    }
+
     /// Outcome of one entry in Home's fan-out.
     enum RowResult: Sendable {
         case media(HomeRowData)

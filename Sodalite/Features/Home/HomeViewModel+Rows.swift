@@ -81,15 +81,19 @@ extension HomeViewModel {
                     let response = try await resumeResponse
                     let nextUp = (try? await nextUpResponse)?.items ?? []
                     var seen = Set(response.items.map(\.id))
-                    items = response.items + nextUp.filter { seen.insert($0.id).inserted }
+                    items = DroppedSeriesStore.filter(
+                        response.items + nextUp.filter { seen.insert($0.id).inserted },
+                        serverID: source.serverID, scope: homeScope
+                    )
                 } else {
-                    items = try await source.libraryService.getResumeItems(userID: source.userID, mediaType: "Video", limit: 16).items
+                    let resume = try await source.libraryService.getResumeItems(userID: source.userID, mediaType: "Video", limit: 16).items
+                    items = DroppedSeriesStore.filter(resume, serverID: source.serverID, scope: homeScope)
                 }
 
             case .nextUp:
                 let rewatching = HomeRowConfig.enableRewatchingNextUp(scope: homeScope)
                 let response = try await source.libraryService.getNextUp(userID: source.userID, seriesID: nil, limit: 16, rewatching: rewatching)
-                items = response.items
+                items = DroppedSeriesStore.filter(response.items, serverID: source.serverID, scope: homeScope)
 
             case .latestMovies:
                 // Native /Items/Latest for web-UI parity. ParentId omitted so multiple movie libraries all surface, which makes IncludeItemTypes=Movie mandatory (else Jellyfin jumbles movies/series/music into one row).

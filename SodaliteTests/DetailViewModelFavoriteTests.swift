@@ -45,6 +45,7 @@ struct DetailViewModelFavoriteTests {
             if shouldThrow { throw ServiceFailure() }
             ratingCalls.append((itemID, rating))
         }
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }

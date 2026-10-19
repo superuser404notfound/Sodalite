@@ -219,7 +219,7 @@ struct HomeHeroCarousel: View {
                 #else
                 .contentShape(Rectangle())
                 .onTapGesture { onOpen(current) }
-                .mediaContextMenu(for: current) { onOpen(current) }
+                .mediaContextMenu(for: current) { onOpen($0) }
                 #endif
                 #if os(iOS)
                 .simultaneousGesture(

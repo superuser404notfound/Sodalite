@@ -239,7 +239,7 @@ struct SearchView: View {
             RowScrollView(leading: leadingInset, trailing: 50, vertical: 20) {
                 LazyHStack(spacing: 30) {
                     ForEach(items) { item in
-                        FocusableCard {
+                        FocusableCard(opensMenuOnHold: true) {
                             destination = .library(item)
                         } content: { isFocused in
                             MediaCard(
@@ -254,7 +254,7 @@ struct SearchView: View {
                                 isFocused: isFocused
                             )
                         }
-                        .mediaContextMenu(for: item) { destination = .library(item) }
+                        .mediaContextMenu(for: item) { destination = .library($0) }
                     }
                 }
                 .enrichesPosterBadges(items)

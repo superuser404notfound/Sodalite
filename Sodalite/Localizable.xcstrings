@@ -67241,6 +67241,330 @@
         }
       }
     },
+    "changelog.1_1_0.cardMenu.body" : {
+      "comment" : "Changelog 1.1.0 highlight body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržte kartu na Domů nebo v knihovně: přejít na seriál, přehrát od začátku, označit jako zhlédnuté, odebrat z Pokračovat ve sledování nebo skrýt celý seriál z Pokračovat ve sledování a Další. Skryté seriály najdete v Přizpůsobit domov."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold et kort på Hjem eller i biblioteket: gå til serien, afspil fra begyndelsen, markér som set, fjern fra Fortsæt med at se, eller skjul hele serien fra Fortsæt med at se og Næste. Skjulte serier ligger under Tilpas hjem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Karte auf der Startseite oder in der Bibliothek gedrückt halten: zur Serie, von vorne abspielen, als gesehen markieren, aus Weiterschauen entfernen oder die ganze Serie aus Weiterschauen und Als Nächstes ausblenden. Ausgeblendete Serien stehen unter Startseite anpassen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κρατήστε πατημένη μια κάρτα στην Αρχική ή στη βιβλιοθήκη: μετάβαση στη σειρά, αναπαραγωγή από την αρχή, σήμανση ως προβεβλημένο, αφαίρεση από τη Συνέχιση παρακολούθησης ή απόκρυψη ολόκληρης της σειράς από τη Συνέχιση παρακολούθησης και το Επόμενο. Οι κρυμμένες σειρές βρίσκονται στην Προσαρμογή αρχικής."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold a card on Home or in the library: go to the show, play from the beginning, mark it watched, remove it from Continue Watching, or hide the whole show from Continue Watching and Next Up. Hidden shows live under Customize Home."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsada una tarjeta en Inicio o en la biblioteca: ir a la serie, reproducir desde el principio, marcar como visto, quitar de Seguir viendo u ocultar toda la serie de Seguir viendo y Siguiente. Las series ocultas están en Personalizar inicio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pidä korttia painettuna Koti-näkymässä tai kirjastossa: siirry sarjaan, toista alusta, merkitse katsotuksi, poista Jatka katselua -riviltä tai piilota koko sarja Jatka katselua- ja Seuraavaksi-riveiltä. Piilotetut sarjat löytyvät kohdasta Mukauta aloitusnäyttö."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenez une vignette sur l'accueil ou dans la bibliothèque : aller à la série, lire depuis le début, marquer comme vu, retirer de Continuer à regarder ou masquer toute la série de Continuer à regarder et À suivre. Les séries masquées se trouvent dans Personnaliser l'accueil."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Držite karticu na Početnoj ili u knjižnici: idi na seriju, reproduciraj od početka, označi kao pogledano, ukloni iz Nastavi gledanje ili sakrij cijelu seriju iz Nastavi gledanje i Sljedeće. Skrivene serije nalaze se pod Prilagodi početnu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tartson lenyomva egy kártyát a Kezdőlapon vagy a könyvtárban: ugrás a sorozatra, lejátszás az elejéről, megjelölés megnézettként, eltávolítás a Folytatás sorból, vagy az egész sorozat elrejtése a Folytatás és a Következő sorból. Az elrejtett sorozatok a Kezdőképernyő testreszabása alatt találhatók."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni premuta una scheda nella Home o nella libreria: vai alla serie, riproduci dall'inizio, segna come visto, rimuovi da Continua a guardare o nascondi l'intera serie da Continua a guardare e Prossimo. Le serie nascoste si trovano in Personalizza home."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームやライブラリでカードを長押しすると、番組へ移動、最初から再生、視聴済みにする、視聴を続けるから削除、または番組全体を視聴を続けると次の再生から非表示にできます。非表示の番組はホームをカスタマイズにあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈이나 라이브러리에서 카드를 길게 누르면 시리즈로 이동, 처음부터 재생, 시청함으로 표시, 계속 시청에서 제거, 또는 시리즈 전체를 계속 시청과 다음에서 숨길 수 있습니다. 숨긴 시리즈는 홈 사용자 지정에 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold inne et kort på Hjem eller i biblioteket: gå til serien, spill av fra starten, merk som sett, fjern fra Fortsett å se, eller skjul hele serien fra Fortsett å se og Neste. Skjulte serier finner du under Tilpass hjem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd een kaart ingedrukt op Home of in de bibliotheek: naar de serie, afspelen vanaf begin, markeren als bekeken, verwijderen uit Verder kijken of de hele serie verbergen uit Verder kijken en Volgende. Verborgen series staan onder Home aanpassen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przytrzymaj kartę na ekranie głównym lub w bibliotece: przejdź do serialu, odtwórz od początku, oznacz jako obejrzane, usuń z Kontynuuj oglądanie lub ukryj cały serial w Kontynuuj oglądanie i Następne. Ukryte seriale znajdziesz w Dostosuj stronę główną."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha pressionado um cartão no Início ou na biblioteca: ir para a série, reproduzir do início, marcar como assistido, remover de Continuar assistindo ou ocultar a série inteira de Continuar assistindo e Próximo. As séries ocultas ficam em Personalizar início."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha premido um cartão no Início ou na biblioteca: ir para a série, reproduzir desde o início, marcar como visto, remover de Continuar a ver ou ocultar a série inteira de Continuar a ver e A seguir. As séries ocultas ficam em Personalizar início."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ține apăsat pe un card în Acasă sau în bibliotecă: mergi la serial, redă de la început, marchează ca vizionat, elimină din Continuă vizionarea sau ascunde tot serialul din Continuă vizionarea și Următorul. Serialele ascunse se află în Personalizează ecranul principal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удерживайте карточку на главной или в медиатеке: перейти к сериалу, воспроизвести сначала, отметить как просмотренное, убрать из «Продолжить просмотр» или скрыть весь сериал из «Продолжить просмотр» и «Далее». Скрытые сериалы находятся в разделе «Настроить главную»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržte kartu na Domov alebo v knižnici: prejsť na seriál, prehrať od začiatku, označiť ako pozreté, odstrániť z Pokračovať v sledovaní alebo skryť celý seriál z Pokračovať v sledovaní a Ďalšie. Skryté seriály nájdete v Prispôsobiť domov."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Håll in ett kort på Hem eller i biblioteket: gå till serien, spela upp från början, markera som sedd, ta bort från Fortsätt titta eller dölj hela serien från Fortsätt titta och Nästa. Dolda serier finns under Anpassa hem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana sayfada veya kitaplıkta bir karta basılı tutun: diziye git, baştan oynat, izlendi olarak işaretle, İzlemeye Devam Et'ten kaldır veya tüm diziyi İzlemeye Devam Et ve Sırada satırlarından gizle. Gizlenen diziler Ana Ekranı Özelleştir altında."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Утримуйте картку на головній або в медіатеці: перейти до серіалу, відтворити спочатку, позначити як переглянуте, прибрати з «Продовжити перегляд» або приховати весь серіал із «Продовжити перегляд» і «Наступне». Приховані серіали знаходяться в розділі «Налаштувати головну»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在首页或媒体库中按住卡片：前往剧集、从头播放、标记为已观看、从继续观看中移除，或将整部剧集从继续观看和接下来中隐藏。已隐藏的剧集位于自定义首页中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在首頁或媒體庫中按住卡片：前往影集、從頭播放、標示為已觀看、從繼續觀看中移除，或將整部影集從繼續觀看和接下來中隱藏。已隱藏的影集位於自訂主畫面中。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.cardMenu.title" : {
+      "comment" : "Changelog 1.1.0 highlight title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu na kartách"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu på kort"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menü auf den Karten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μενού στις κάρτες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card menu"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menú en las tarjetas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korttien valikko"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu sur les vignettes"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izbornik na karticama"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menü a kártyákon"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu sulle schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カードのメニュー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카드 메뉴"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meny på kortene"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu op de kaarten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu na kartach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu nos cartões"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu nos cartões"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meniu pe carduri"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Меню на карточках"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu na kartách"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meny på korten"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartlarda menü"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Меню на картках"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卡片菜单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卡片選單"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.channelZap.body" : {
       "comment" : "What's New 1.1.0: channel zap body",
       "extractionState" : "manual",
@@ -80829,6 +81153,330 @@
         }
       }
     },
+    "contextMenu.goToShow" : {
+      "comment" : "Media card menu on an episode: opens its series",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přejít na seriál"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gå til serie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zur Serie"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετάβαση στη σειρά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to Show"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir a la serie"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siirry sarjaan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller à la série"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idi na seriju"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugrás a sorozatra"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vai alla serie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "番組へ移動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시리즈로 이동"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gå til serien"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naar serie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przejdź do serialu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir para a série"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir para a série"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mergi la serial"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти к сериалу"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prejsť na seriál"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gå till serien"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diziye git"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейти до серіалу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往剧集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往影集"
+          }
+        }
+      }
+    },
+    "contextMenu.hideShow" : {
+      "comment" : "Menu on a Continue Watching or Next Up card: hides the whole show from both rows until it is played again",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrýt seriál"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul serie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie ausblenden"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη σειράς"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide Show"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar serie"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilota sarja"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer la série"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakrij seriju"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorozat elrejtése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi serie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "番組を非表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시리즈 숨기기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul serien"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie verbergen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryj serial"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar série"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar série"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunde serialul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть сериал"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryť seriál"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj serien"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diziyi gizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховати серіал"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏剧集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏影集"
+          }
+        }
+      }
+    },
     "contextMenu.markUnwatched" : {
       "comment" : "Mac right-click menu on a media card",
       "extractionState" : "manual",
@@ -81149,6 +81797,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "標記為已觀看"
+          }
+        }
+      }
+    },
+    "contextMenu.playFromBeginning" : {
+      "comment" : "Media card menu: plays the title from zero instead of the resume position",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrát od začátku"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspil fra begyndelsen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von vorne abspielen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναπαραγωγή από την αρχή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play from Beginning"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir desde el principio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toista alusta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire depuis le début"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduciraj od početka"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátszás az elejéről"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci dall'inizio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初から再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "처음부터 재생"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spill av fra starten"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspelen vanaf begin"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwórz od początku"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir do início"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir desde o início"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redă de la început"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизвести сначала"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehrať od začiatku"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela upp från början"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baştan oynat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити спочатку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从头播放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從頭播放"
+          }
+        }
+      }
+    },
+    "contextMenu.removeFromContinueWatching" : {
+      "comment" : "Media card menu: forgets the resume position so the title leaves Continue Watching",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odebrat z Pokračovat ve sledování"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern fra Fortsæt med at se"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus Weiterschauen entfernen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αφαίρεση από τη Συνέχιση παρακολούθησης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from Continue Watching"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar de Seguir viendo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poista Jatka katselua -riviltä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de Continuer à regarder"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukloni iz Nastavi gledanje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eltávolítás a Folytatás sorból"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi da Continua a guardare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視聴を続けるから削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속 시청에서 제거"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern fra Fortsett å se"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen uit Verder kijken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuń z Kontynuuj oglądanie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover de Continuar assistindo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover de Continuar a ver"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimină din Continuă vizionarea"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Убрать из «Продолжить просмотр»"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odstrániť z Pokračovať v sledovaní"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta bort från Fortsätt titta"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzlemeye Devam Et'ten kaldır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прибрати з «Продовжити перегляд»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从继续观看中移除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從繼續觀看中移除"
           }
         }
       }
@@ -104936,6 +105908,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "首頁頂部大橫幅顯示的內容"
+          }
+        }
+      }
+    },
+    "home.customize.hiddenShows" : {
+      "comment" : "Customize Home section header: shows hidden from Continue Watching and Next Up",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryté seriály"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjulte serier"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgeblendete Serien"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κρυμμένες σειρές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden Shows"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Series ocultas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilotetut sarjat"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries masquées"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrivene serije"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elrejtett sorozatok"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie nascoste"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非表示の番組"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "숨긴 시리즈"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjulte serier"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verborgen series"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryte seriale"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries ocultas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries ocultas"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriale ascunse"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрытые сериалы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryté seriály"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolda serier"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizlenen diziler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховані серіали"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已隐藏的剧集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已隱藏的影集"
+          }
+        }
+      }
+    },
+    "home.customize.hiddenShows.description" : {
+      "comment" : "Customize Home: explains the hidden shows list",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriály skryté z Pokračovat ve sledování a Další. Výběrem se seriál vrátí, stejně jako když ho znovu pustíte."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serier skjult fra Fortsæt med at se og Næste. Vælg en for at hente den tilbage; det gør afspilning af den også."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serien, die aus Weiterschauen und Als Nächstes ausgeblendet sind. Auswählen holt sie zurück, Abspielen ebenso."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρές κρυμμένες από τη Συνέχιση παρακολούθησης και το Επόμενο. Επιλέξτε μία για να επιστρέψει· το ίδιο κάνει και η αναπαραγωγή της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows hidden from Continue Watching and Next Up. Select one to bring it back; playing it does the same."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Series ocultas de Seguir viendo y Siguiente. Selecciona una para recuperarla; reproducirla también lo hace."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jatka katselua- ja Seuraavaksi-riveiltä piilotetut sarjat. Valitse sarja palauttaaksesi sen; toistaminen palauttaa sen myös."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries masquées de Continuer à regarder et À suivre. Sélectionnez-en une pour la faire revenir ; la lire fait de même."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serije skrivene iz Nastavi gledanje i Sljedeće. Odaberite jednu da je vratite; reprodukcija čini isto."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Folytatás és a Következő sorból elrejtett sorozatok. Válasszon ki egyet a visszahozásához; a lejátszása is visszahozza."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serie nascoste da Continua a guardare e Prossimo. Selezionane una per riportarla; riprodurla fa lo stesso."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視聴を続けると次の再生から非表示にした番組です。選択すると元に戻ります。再生しても戻ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속 시청과 다음에서 숨긴 시리즈입니다. 선택하면 다시 표시되며, 재생해도 다시 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serier skjult fra Fortsett å se og Neste. Velg en for å hente den tilbake; å spille den av gjør det samme."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Series verborgen uit Verder kijken en Volgende. Kies er een om hem terug te halen; afspelen doet hetzelfde."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriale ukryte w Kontynuuj oglądanie i Następne. Wybierz jeden, aby go przywrócić; odtworzenie działa tak samo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries ocultas de Continuar assistindo e Próximo. Selecione uma para trazê-la de volta; reproduzi-la faz o mesmo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries ocultas de Continuar a ver e A seguir. Selecione uma para a trazer de volta; reproduzi-la faz o mesmo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriale ascunse din Continuă vizionarea și Următorul. Selectează unul pentru a-l readuce; redarea lui face același lucru."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сериалы, скрытые из «Продолжить просмотр» и «Далее». Выберите сериал, чтобы вернуть его; воспроизведение тоже его вернёт."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriály skryté z Pokračovať v sledovaní a Ďalšie. Výberom sa seriál vráti, rovnako ako keď ho znova pustíte."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serier dolda från Fortsätt titta och Nästa. Välj en för att ta tillbaka den; att spela upp den gör detsamma."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzlemeye Devam Et ve Sırada satırlarından gizlenen diziler. Geri getirmek için birini seçin; oynatmak da aynısını yapar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серіали, приховані з «Продовжити перегляд» і «Наступне». Виберіть серіал, щоб повернути його; відтворення теж його поверне."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已从继续观看和接下来中隐藏的剧集。选择一部即可恢复，播放它也会恢复。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已從繼續觀看和接下來中隱藏的影集。選擇一部即可恢復，播放它也會恢復。"
           }
         }
       }

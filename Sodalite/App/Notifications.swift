@@ -82,4 +82,8 @@ enum PlaybackProgressKey {
     static let itemID = "itemID"
     /// `Int64` position (in Jellyfin ticks) the player stopped at.
     static let positionTicks = "positionTicks"
+    /// `String`, the episode's show, set only by the stop at the end of a session.
+    static let seriesID = "seriesID"
+    /// `String`, the item's `ServerId` when it carries one.
+    static let serverID = "serverID"
 }
