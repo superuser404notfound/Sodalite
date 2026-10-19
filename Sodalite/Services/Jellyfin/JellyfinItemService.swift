@@ -15,6 +15,8 @@ protocol JellyfinItemServiceProtocol: MovieCatalogQuerying {
     func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse
     func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws
     func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws
+    /// The viewer's own rating, 0 to 10; nil clears it.
+    func setRating(userID: String, itemID: String, rating: Double?) async throws
     /// Resolves a library item by TMDB id; first verified match or nil. `searchTerm` narrows the candidate set (see findByProviderIDs).
     func findByTmdbID(userID: String, tmdbID: Int, searchTerm: String?) async throws -> JellyfinItem?
     /// People matching a name, carrying ProviderIds so the caller can tell same-named people apart. People live in their own namespace, so an /Items search never returns them.
@@ -154,6 +156,17 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
             ? .markPlayed(userID: userID, itemID: itemID)
             : .unmarkPlayed(userID: userID, itemID: itemID)
         try await client.request(endpoint: endpoint)
+    }
+
+    func setRating(userID: String, itemID: String, rating: Double?) async throws {
+        guard let rating else {
+            try await client.request(endpoint: JellyfinEndpoint.clearUserRating(itemID: itemID, userID: userID))
+            return
+        }
+        // Rating alone: the server writes only the fields present, so played state, position and
+        // favorite stay as they are. Not `/Rating?likes=`, which stores a like as a 10 and a dislike as a 1.
+        let payload = try JSONValue(jsonObject: ["Rating": min(10, max(0, rating))])
+        try await client.request(endpoint: JellyfinEndpoint.updateUserItemData(itemID: itemID, userID: userID, payload: payload))
     }
 
     func deleteItem(itemID: String) async throws {

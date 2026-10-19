@@ -121,6 +121,18 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                sectionHeader("settings.playback.section.movies")
+
+                boolRow(
+                    icon: "star",
+                    title: "settings.playback.askForRating",
+                    subtitle: "settings.playback.askForRating.subtitle",
+                    value: Binding(
+                        get: { prefs.askForRatingAfterMovie },
+                        set: { prefs.askForRatingAfterMovie = $0 }
+                    )
+                )
+
                 sectionHeader("settings.playback.section.controls")
 
                 ValuePickerRow(

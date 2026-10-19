@@ -14,6 +14,7 @@ final class PlaybackPreferences {
         static let autoplayNextEpisode = "playback.autoplayNextEpisode"
         static let autoplayCountdown = "playback.autoplayCountdown"
         static let showNextEpisodeCard = "playback.showNextEpisodeCard"
+        static let askForRatingAfterMovie = "playback.askForRatingAfterMovie"
         static let nextEpisodeCountdownSeconds = "playback.nextEpisodeCountdownSeconds"
         static let nextEpisodeCountdownAnchor = "playback.nextEpisodeCountdownAnchor"
         static let skipForwardSeconds = "playback.skipForwardSeconds"
@@ -267,6 +268,11 @@ final class PlaybackPreferences {
     /// user dismissed, only for every episode.
     var showNextEpisodeCard: Bool {
         didSet { store.set(showNextEpisodeCard, forKey: Keys.showNextEpisodeCard) }
+    }
+
+    /// Sodalite#48: a film played to its end, unrated, asks for the viewer's rating once the player closes.
+    var askForRatingAfterMovie: Bool {
+        didSet { store.set(askForRatingAfterMovie, forKey: Keys.askForRatingAfterMovie) }
     }
 
     var autoSkipIntro: Bool {
@@ -526,6 +532,7 @@ final class PlaybackPreferences {
         self.autoplayNextEpisode = store.object(forKey: Keys.autoplayNextEpisode) as? Bool ?? true
         self.autoplayCountdown = store.object(forKey: Keys.autoplayCountdown) as? Bool ?? true
         self.showNextEpisodeCard = store.object(forKey: Keys.showNextEpisodeCard) as? Bool ?? true
+        self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false

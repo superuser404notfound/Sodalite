@@ -451,6 +451,9 @@ struct UserItemData: Codable, Sendable, Equatable {
     let playedPercentage: Double?
     /// ISO-8601 last-play timestamp; kept raw (model convention) and unparsed (recency ordering is server-side via SortBy=DatePlayed).
     let lastPlayedDate: String?
+    /// The viewer's own 0 to 10 rating. Jellyfin stores it per user and derives `Likes` from it
+    /// (6.5 and up), and its web client never shows it; tools like Scrob read and write the same field.
+    var rating: Double? = nil
 
     enum CodingKeys: String, CodingKey {
         case playbackPositionTicks = "PlaybackPositionTicks"
@@ -460,6 +463,7 @@ struct UserItemData: Codable, Sendable, Equatable {
         case unplayedItemCount = "UnplayedItemCount"
         case playedPercentage = "PlayedPercentage"
         case lastPlayedDate = "LastPlayedDate"
+        case rating = "Rating"
     }
 
     /// Copy with resume position (and, if known, played percentage) replaced; in-memory patch after playback stops (issue #24). `played` defaults to keep-current, the watched-threshold patch passes it.
@@ -471,7 +475,8 @@ struct UserItemData: Codable, Sendable, Equatable {
             played: newPlayed ?? played,
             unplayedItemCount: unplayedItemCount,
             playedPercentage: pct,
-            lastPlayedDate: lastPlayedDate
+            lastPlayedDate: lastPlayedDate,
+            rating: rating
         )
     }
 }

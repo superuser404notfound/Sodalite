@@ -1782,6 +1782,9 @@ final class PlayerViewModel {
                         // Real end-of-content (movie / last episode), or an advance the user rejected:
                         // `.ended` is terminal in the engine (seek and play are no-ops), so an open
                         // player here would be a dead screen.
+                        NotificationCenter.default.post(
+                            name: .playbackDidReachEnd, object: nil,
+                            userInfo: [PlaybackEndKey.itemID: self.item.id])
                         self.onPlaybackReachedEnd?()
                     }
                 case .idle:

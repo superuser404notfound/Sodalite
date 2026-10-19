@@ -63,6 +63,8 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     var touchpadScrubbing: Bool?
     /// Optional for the same reason. nil keeps the local value.
     var showNextEpisodeCard: Bool?
+    /// Optional for the same reason. nil keeps the local value.
+    var askForRatingAfterMovie: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -97,7 +99,8 @@ extension ProfilePlaybackPayload {
             rememberTrackSelections: p.rememberTrackSelections,
             subtitlesOnSkipBack: p.subtitlesOnSkipBack,
             touchpadScrubbing: p.touchpadScrubbing,
-            showNextEpisodeCard: p.showNextEpisodeCard
+            showNextEpisodeCard: p.showNextEpisodeCard,
+            askForRatingAfterMovie: p.askForRatingAfterMovie
         )
     }
 
@@ -132,6 +135,7 @@ extension ProfilePlaybackPayload {
         p.subtitlesOnSkipBack = subtitlesOnSkipBack
         if let touchpadScrubbing { p.touchpadScrubbing = touchpadScrubbing }
         if let showNextEpisodeCard { p.showNextEpisodeCard = showNextEpisodeCard }
+        if let askForRatingAfterMovie { p.askForRatingAfterMovie = askForRatingAfterMovie }
     }
 }
 

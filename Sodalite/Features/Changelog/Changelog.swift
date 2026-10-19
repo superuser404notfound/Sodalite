@@ -218,6 +218,12 @@ enum Changelog {
                     "changelog.1_1_0.episodeTitles.body",
                     icon: "eye.slash"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.userRating.title",
+                    "changelog.1_1_0.userRating.body",
+                    icon: "star"
+                ),
             ]
         ),
         // MARK: 1.0.0

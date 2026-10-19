@@ -50,6 +50,16 @@ extension Notification.Name {
     /// item and every list still holding the old id would keep failing on it. Carries
     /// LibraryItemReplacementKey.staleID + .item.
     static let libraryItemDidReplace = Notification.Name("libraryItemDidReplace")
+
+    /// Posted by PlayerViewModel when an item played to its real end and the player is about to
+    /// close, not on a stop. Carries PlaybackEndKey.itemID.
+    static let playbackDidReachEnd = Notification.Name("playbackDidReachEnd")
+}
+
+/// userInfo keys for `.playbackDidReachEnd`.
+enum PlaybackEndKey {
+    /// `String` id of the item that finished.
+    static let itemID = "itemID"
 }
 
 /// userInfo keys for `.libraryItemDidReplace`.
