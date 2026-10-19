@@ -105,11 +105,15 @@ enum DirectPlayProfile {
             // (Sorenson Spark) and the VP6 family below, plus Nellymoser,
             // ADPCM-SWF, Speex and FLV's G.711 / big-endian PCM, close it.
             // Requested in the Discord.
+            // FFmpegBuild 3.8.0 (FFmpegBuild#7) adds the 2000s tail on the same terms:
+            // RealMedia (rm / rmvb, RealVideo 1-4 with every RealAudio), the 3GP of a
+            // feature phone (h263 with AMR), Theora and DVD LPCM.
+            // DirectPlayProfileLegacyFormatTests pins that.
             "DirectPlayProfiles": [
                 [
-                    "Container": "mp4,m4v,mov,mkv,matroska,avi,mpegts,ts,m2ts,mts,3gp,3g2,vob,ogg,webm,flv,asf,wmv",
+                    "Container": "mp4,m4v,mov,mkv,matroska,avi,mpegts,ts,m2ts,mts,3gp,3g2,vob,ogg,ogv,webm,flv,asf,wmv,rm,rmvb",
                     "Type": "Video",
-                    "VideoCodec": "h264,hevc,av1,vp9,vp8,mpeg4,mpeg2video,vc1,qtrle,msmpeg4v1,msmpeg4v2,msmpeg4v3,wmv1,wmv2,wmv3,flv1,flv,vp6,vp6f,vp6a",
+                    "VideoCodec": "h264,hevc,av1,vp9,vp8,mpeg4,mpeg2video,vc1,qtrle,msmpeg4v1,msmpeg4v2,msmpeg4v3,wmv1,wmv2,wmv3,flv1,flv,vp6,vp6f,vp6a,rv10,rv20,rv30,rv40,h263,theora",
                     // DTS spelled every way Jellyfin reports it (dts/dca/dts-hd
                     // vary by build) so it won't transcode DTS-HD MA over a
                     // string mismatch. mp2 pairs with MPEG-2 (broadcast/VOB).
@@ -123,7 +127,7 @@ enum DirectPlayProfile {
                     // unsigned 8-bit and G.711 A-law / mu-law. AudioCodecCompat
                     // already routed those ids to the bridge, but no decoder was
                     // compiled in before 3.2.0, so the bridge had nothing to open.
-                    "AudioCodec": "aac,aac_latm,ac3,eac3,mp3,mp2,flac,opus,vorbis,alac,truehd,mlp,dts,dca,dts-hd,dtshd,pcm_s16le,pcm_s24le,pcm_f32le,pcm_s16be,pcm_u8,pcm_alaw,pcm_mulaw,pcm_bluray,wmav1,wmav2,wmapro,wmalossless,wmavoice,nellymoser,adpcm_swf,speex",
+                    "AudioCodec": "aac,aac_latm,ac3,eac3,mp3,mp2,flac,opus,vorbis,alac,truehd,mlp,dts,dca,dts-hd,dtshd,pcm_s16le,pcm_s24le,pcm_f32le,pcm_s16be,pcm_u8,pcm_alaw,pcm_mulaw,pcm_bluray,wmav1,wmav2,wmapro,wmalossless,wmavoice,nellymoser,adpcm_swf,speex,cook,atrac3,sipr,ralf,ra_144,ra_288,amr_nb,amr_wb,pcm_dvd",
                 ],
                 [
                     "Container": "mp3,aac,m4a,m4b,flac,alac,wav,opus,ogg",

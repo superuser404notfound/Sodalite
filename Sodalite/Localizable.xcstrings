@@ -71451,6 +71451,330 @@
         }
       }
     },
+    "changelog.1_1_0.legacyFormats.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), videa z telefonů ve formátu 3GP a Theora (.ogv) se nyní přehrávají přímo, aniž by je server musel nejprve převádět."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), telefonvideoer i 3GP og Theora (.ogv) afspilles nu direkte, uden at serveren først skal konvertere dem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), Handyvideos im 3GP-Format und Theora (.ogv) spielen jetzt direkt ab, ohne dass der Server sie erst umwandeln muss."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα RealMedia (.rm, .rmvb), τα βίντεο κινητού σε 3GP και τα Theora (.ogv) αναπαράγονται πλέον απευθείας, χωρίς να χρειάζεται πρώτα μετατροπή από τον διακομιστή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), phone videos in 3GP and Theora (.ogv) now play directly, without the server converting them first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), los vídeos de móvil en 3GP y Theora (.ogv) ahora se reproducen directamente, sin que el servidor tenga que convertirlos antes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), puhelinten 3GP-videot ja Theora (.ogv) toistuvat nyt suoraan ilman, että palvelimen tarvitsee ensin muuntaa niitä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), les vidéos de téléphone en 3GP et Theora (.ogv) se lisent désormais directement, sans conversion préalable par le serveur."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), videozapisi s mobitela u 3GP formatu i Theora (.ogv) sada se reproduciraju izravno, bez prethodne pretvorbe na poslužitelju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A RealMedia (.rm, .rmvb), a 3GP formátumú telefonos videók és a Theora (.ogv) mostantól közvetlenül lejátszhatók, a szervernek nem kell előbb átalakítania őket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), i video da telefono in 3GP e Theora (.ogv) ora vengono riprodotti direttamente, senza che il server debba prima convertirli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia（.rm、.rmvb）、3GP 形式の携帯電話の動画、Theora（.ogv）が、サーバーでの変換なしで直接再生されるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia(.rm, .rmvb), 3GP 형식의 휴대폰 동영상, Theora(.ogv)를 이제 서버 변환 없이 바로 재생합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), mobilvideoer i 3GP og Theora (.ogv) spilles nå av direkte, uten at serveren må konvertere dem først."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), telefoonvideo's in 3GP en Theora (.ogv) spelen nu direct af, zonder dat de server ze eerst hoeft om te zetten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), filmy z telefonów w formacie 3GP i Theora (.ogv) odtwarzają się teraz bezpośrednio, bez wcześniejszej konwersji na serwerze."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), vídeos de celular em 3GP e Theora (.ogv) agora são reproduzidos diretamente, sem que o servidor precise convertê-los antes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), vídeos de telemóvel em 3GP e Theora (.ogv) são agora reproduzidos diretamente, sem que o servidor tenha de os converter primeiro."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), videoclipurile de pe telefon în format 3GP și Theora (.ogv) se redau acum direct, fără ca serverul să le convertească mai întâi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), видео с телефонов в формате 3GP и Theora (.ogv) теперь воспроизводятся напрямую, без предварительного преобразования на сервере."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), videá z telefónov vo formáte 3GP a Theora (.ogv) sa teraz prehrávajú priamo, bez toho, aby ich server musel najprv prevádzať."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), mobilvideor i 3GP och Theora (.ogv) spelas nu upp direkt, utan att servern först behöver konvertera dem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), 3GP biçimindeki telefon videoları ve Theora (.ogv) artık sunucunun önce dönüştürmesine gerek kalmadan doğrudan oynatılıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia (.rm, .rmvb), відео з телефонів у форматі 3GP і Theora (.ogv) тепер відтворюються напряму, без попереднього перетворення на сервері."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia（.rm、.rmvb）、3GP 格式的手机视频和 Theora（.ogv）现在可直接播放，无需服务器先行转换。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RealMedia（.rm、.rmvb）、3GP 格式的手機影片和 Theora（.ogv）現在可直接播放，無需伺服器先行轉換。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.legacyFormats.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starší formáty videa"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ældre videoformater"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ältere Videoformate"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παλαιότερες μορφές βίντεο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Older video formats"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formatos de vídeo antiguos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vanhemmat videomuodot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anciens formats vidéo"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stariji video formati"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Régebbi videóformátumok"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formati video meno recenti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "古い動画フォーマット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오래된 동영상 형식"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eldre videoformater"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oudere videoformaten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starsze formaty wideo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formatos de vídeo antigos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formatos de vídeo antigos"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formate video mai vechi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Старые видеоформаты"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staršie formáty videa"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Äldre videoformat"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eski video biçimleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Старіші відеоформати"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旧视频格式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "舊影片格式"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.libraryOrder.body" : {
       "comment" : "What's New 1.1.0: body for ordering and hiding My Media libraries.",
       "extractionState" : "manual",
