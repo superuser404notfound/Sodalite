@@ -22,6 +22,8 @@ struct MediaCard: View {
     let showsSeriesArtwork: Bool
     /// Server name for a same-name collection or playlist from another server (Sodalite#85).
     let serverLabel: String?
+    /// Off for the artwork-only copy tvOS lifts next to a card's context menu.
+    let showsInfo: Bool
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
@@ -52,7 +54,8 @@ struct MediaCard: View {
         style: MediaCardStyle = .poster,
         isFocused: Bool = false,
         showsSeriesArtwork: Bool = false,
-        serverLabel: String? = nil
+        serverLabel: String? = nil,
+        showsInfo: Bool = true
     ) {
         self.item = item
         self.imageURL = imageURL
@@ -61,12 +64,13 @@ struct MediaCard: View {
         self.isFocused = isFocused
         self.showsSeriesArtwork = showsSeriesArtwork
         self.serverLabel = serverLabel
+        self.showsInfo = showsInfo
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             posterImage
-            itemInfo
+            if showsInfo { itemInfo }
         }
         .frame(width: cardWidth)
         .accessibilityElement(children: .combine)

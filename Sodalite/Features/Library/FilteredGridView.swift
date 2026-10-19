@@ -272,18 +272,13 @@ struct FilteredGridView: View {
                                 Button {
                                     open(item)
                                 } label: {
-                                    MediaCard(
-                                        item: item,
-                                        imageURL: browsesFolders
-                                            ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
-                                            : dependencies.jellyfinImageService.posterURL(for: item),
-                                        style: cardStyle,
-                                        isFocused: focusedItemID == item.originKey
-                                    )
+                                    gridCard(item, isFocused: focusedItemID == item.originKey)
                                 }
                                 .buttonStyle(GridCardButtonStyle())
                                 .focused($focusedItemID, equals: item.originKey)
-                                .mediaContextMenu(for: item) { open($0) }
+                                .mediaContextMenu(for: item, open: { open($0) }) {
+                                    gridCard(item, isFocused: false, showsInfo: false)
+                                }
                                 .onAppear { loadMoreIfNeeded(after: item) }
                             }
                             }
@@ -529,24 +524,31 @@ struct FilteredGridView: View {
         if item.type == .folder { selectedFolder = item } else { selectedItem = item }
     }
 
+    private func gridCard(_ item: JellyfinItem, isFocused: Bool, showsInfo: Bool = true) -> MediaCard {
+        MediaCard(
+            item: item,
+            imageURL: browsesFolders
+                ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
+                : dependencies.jellyfinImageService.posterURL(for: item),
+            style: cardStyle,
+            isFocused: isFocused,
+            showsInfo: showsInfo
+        )
+    }
+
     /// A slot's card, or its placeholder until the page lands. Both focusable under the slot index,
     /// so focus survives the swap and a jump can land before the page has.
     @ViewBuilder
     private func sparseCell(_ index: Int) -> some View {
         if let item = store.item(at: index) {
             Button { open(item) } label: {
-                MediaCard(
-                    item: item,
-                    imageURL: browsesFolders
-                        ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
-                        : dependencies.jellyfinImageService.posterURL(for: item),
-                    style: cardStyle,
-                    isFocused: focusedSlot == index
-                )
+                gridCard(item, isFocused: focusedSlot == index)
             }
             .buttonStyle(GridCardButtonStyle())
             .focused($focusedSlot, equals: index)
-            .mediaContextMenu(for: item) { open($0) }
+            .mediaContextMenu(for: item, open: { open($0) }) {
+                gridCard(item, isFocused: false, showsInfo: false)
+            }
         } else {
             Button {} label: { PlaceholderCard(style: cardStyle, isFocused: focusedSlot == index) }
                 .buttonStyle(GridCardButtonStyle())

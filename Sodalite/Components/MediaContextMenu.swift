@@ -36,6 +36,22 @@ extension View {
     func mediaContextMenu(for item: JellyfinItem, open: @escaping (JellyfinItem) -> Void) -> some View {
         contextMenu { MediaContextMenu(item: item, open: open) }
     }
+
+    /// tvOS lifts a copy of the card out of its row next to the menu, and a whole card carries its
+    /// title lines across the row heading, so the copy there is `artwork` alone. Elsewhere the
+    /// system preview stays.
+    @ViewBuilder
+    func mediaContextMenu<Artwork: View>(
+        for item: JellyfinItem,
+        open: @escaping (JellyfinItem) -> Void,
+        @ViewBuilder artwork: () -> Artwork
+    ) -> some View {
+        #if os(tvOS)
+        contextMenu { MediaContextMenu(item: item, open: open) } preview: { artwork() }
+        #else
+        contextMenu { MediaContextMenu(item: item, open: open) }
+        #endif
+    }
 }
 
 private struct MediaContextMenu: View {
