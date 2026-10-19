@@ -68537,6 +68537,328 @@
         }
       }
     },
+    "changelog.1_1_0.dvScrubPreview.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tituly v Dolby Vision profilu 5 opět zobrazují při posouvání náhled, kdekoli na časové ose a ve správných barvách, a při přepínání zvukové stopy si ponechají obraz na obrazovce."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titler i Dolby Vision profil 5 viser igen et billede, når du spoler, hvor som helst på tidslinjen og i de rigtige farver, og beholder billedet på skærmen, mens lydsporet skiftes."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titel in Dolby Vision Profil 5 zeigen beim Scrubben wieder ein Vorschaubild, überall auf der Zeitleiste und in den richtigen Farben, und behalten ihr Bild, während die Tonspur wechselt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι τίτλοι σε Dolby Vision προφίλ 5 δείχνουν ξανά εικόνα προεπισκόπησης κατά την κύλιση, σε οποιοδήποτε σημείο της γραμμής χρόνου και με τα σωστά χρώματα, και κρατούν την εικόνα τους στην οθόνη όσο αλλάζει το κομμάτι ήχου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision Profile 5 titles show a preview picture again while scrubbing, anywhere on the timeline and in the right colours, and keep their picture on screen while the audio track switches."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los títulos en Dolby Vision perfil 5 vuelven a mostrar una imagen de vista previa al desplazarte, en cualquier punto de la línea de tiempo y con los colores correctos, y mantienen la imagen en pantalla mientras cambia la pista de audio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision -profiilin 5 nimikkeet näyttävät taas esikatselukuvan selattaessa, missä tahansa aikajanalla ja oikeissa väreissä, ja pitävät kuvansa näytöllä ääniraidan vaihtuessa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les titres en Dolby Vision profil 5 affichent de nouveau une image d'aperçu pendant la navigation, partout sur la timeline et dans les bonnes couleurs, et gardent leur image à l'écran pendant le changement de piste audio."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naslovi u Dolby Vision profilu 5 ponovno prikazuju sliku pregleda pri premotavanju, bilo gdje na vremenskoj crti i u ispravnim bojama, te zadržavaju sliku na zaslonu dok se mijenja audiozapis."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Dolby Vision 5-ös profilú címek tekerés közben ismét előnézeti képet mutatnak, az idővonal bármely pontján és a helyes színekkel, és a hangsáv váltása alatt is a képernyőn tartják a képet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I titoli in Dolby Vision profilo 5 mostrano di nuovo un'immagine di anteprima durante lo scorrimento, in qualsiasi punto della timeline e con i colori corretti, e mantengono l'immagine sullo schermo mentre cambia la traccia audio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision プロファイル5のタイトルで、スクラブ中にプレビュー画像が再び表示されます。タイムラインのどこでも正しい色で表示され、音声トラックの切り替え中も画面に映像が残ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 프로필 5 타이틀에서 탐색 중 미리보기 이미지가 다시 표시됩니다. 타임라인 어디에서나 올바른 색상으로 보이며, 오디오 트랙을 바꾸는 동안에도 화면이 유지됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titler i Dolby Vision profil 5 viser igjen et forhåndsbilde når du spoler, hvor som helst på tidslinjen og i riktige farger, og beholder bildet på skjermen mens lydsporet byttes."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titels in Dolby Vision profiel 5 tonen tijdens het scrubben weer een voorbeeldbeeld, overal op de tijdlijn en in de juiste kleuren, en houden hun beeld in beeld terwijl het audiospoor wisselt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tytuły w Dolby Vision profil 5 znów pokazują obraz podglądu podczas przewijania, w dowolnym miejscu osi czasu i we właściwych kolorach, oraz zachowują obraz na ekranie podczas zmiany ścieżki dźwiękowej."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos em Dolby Vision perfil 5 voltam a mostrar uma imagem de prévia ao avançar, em qualquer ponto da linha do tempo e nas cores certas, e mantêm a imagem na tela enquanto a faixa de áudio muda."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os títulos em Dolby Vision perfil 5 voltam a mostrar uma imagem de pré-visualização ao percorrer, em qualquer ponto da linha temporal e nas cores certas, e mantêm a imagem no ecrã enquanto a faixa de áudio muda."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlurile în Dolby Vision profil 5 afișează din nou o imagine de previzualizare la derulare, oriunde pe cronologie și în culorile corecte, și își păstrează imaginea pe ecran cât timp se schimbă pista audio."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фильмы в Dolby Vision профиль 5 снова показывают превью при перемотке, в любом месте шкалы и в правильных цветах, а при смене звуковой дорожки изображение остаётся на экране."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tituly v Dolby Vision profile 5 opäť zobrazujú pri posúvaní náhľad, kdekoľvek na časovej osi a v správnych farbách, a pri prepínaní zvukovej stopy si ponechajú obraz na obrazovke."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlar i Dolby Vision profil 5 visar åter en förhandsbild när du spolar, var som helst på tidslinjen och i rätt färger, och behåller bilden på skärmen medan ljudspåret byts."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision profil 5 başlıkları, sararken zaman çizelgesinin her yerinde ve doğru renklerde yeniden önizleme görüntüsü gösterir; ses parçası değişirken de görüntü ekranda kalır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фільми в Dolby Vision профіль 5 знову показують попередній перегляд під час перемотування, у будь-якому місці шкали та в правильних кольорах, а під час зміни звукової доріжки зображення залишається на екрані."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 配置文件 5 的影片在拖动时重新显示预览画面，时间轴上任意位置均可，颜色准确；切换音轨时画面也会保留在屏幕上。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 設定檔 5 的影片在拖曳時重新顯示預覽畫面，時間軸上任何位置皆可，顏色準確；切換音軌時畫面也會保留在螢幕上。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.dvScrubPreview.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Náhled při posouvání pro Dolby Vision 5"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forhåndsvisning ved spoling for Dolby Vision 5"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrub-Vorschau für Dolby Vision 5"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προεπισκόπηση κατά την κύλιση για Dolby Vision 5"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrub previews for Dolby Vision 5"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vista previa al desplazarte en Dolby Vision 5"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selauksen esikatselu Dolby Vision 5:lle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçus de navigation pour Dolby Vision 5"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregled pri premotavanju za Dolby Vision 5"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekerési előnézet Dolby Vision 5-höz"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anteprime di scorrimento per Dolby Vision 5"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 5のスクラブプレビュー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 5 탐색 미리보기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forhåndsvisning ved spoling for Dolby Vision 5"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrubvoorbeelden voor Dolby Vision 5"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podgląd przewijania dla Dolby Vision 5"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prévias ao avançar em Dolby Vision 5"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pré-visualizações ao percorrer em Dolby Vision 5"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previzualizări la derulare pentru Dolby Vision 5"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Превью при перемотке для Dolby Vision 5"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Náhľad pri posúvaní pre Dolby Vision 5"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förhandsvisning vid spolning för Dolby Vision 5"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 5 için sarma önizlemeleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попередній перегляд під час перемотування для Dolby Vision 5"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 5 拖动预览"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolby Vision 5 拖曳預覽"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.episodeTitles.body" : {
       "comment" : "Changelog 1.1.0 body for hidden episode titles",
       "extractionState" : "manual",
