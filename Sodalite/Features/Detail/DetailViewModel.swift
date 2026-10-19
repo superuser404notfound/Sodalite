@@ -6,6 +6,10 @@ final class DetailViewModel {
     var item: JellyfinItem
     var isFavorite: Bool
     var isPlayed: Bool
+    /// The viewer's own 0 to 10 rating of the top-level item, nil when unrated.
+    var rating: Double?
+    /// A rating write is in flight, so a detail refetch landing meanwhile must not put the old value back.
+    private var isWritingRating = false
     /// Played overrides keyed by item/episode/season ID; live-updates the watched badge without mutating the immutable JellyfinItem (same "pass state to the card" pattern as isFocused/isCurrent).
     var playedOverrides: [String: Bool] = [:]
     /// Favorite overrides keyed by episode ID; same reason as playedOverrides, the heart badge has to update without mutating the item.
@@ -86,6 +90,7 @@ final class DetailViewModel {
         self.item = item
         self.isFavorite = item.userData?.isFavorite ?? false
         self.isPlayed = item.userData?.played ?? false
+        self.rating = item.userData?.rating
         self.itemService = itemService
         self.libraryService = libraryService
         self.playbackService = playbackService
@@ -153,6 +158,7 @@ final class DetailViewModel {
             item = detail
             isFavorite = detail.userData?.isFavorite ?? false
             isPlayed = detail.userData?.played ?? false
+            if !isWritingRating { rating = detail.userData?.rating }
             if (detail.specialFeatureCount ?? 0) > 0 {
                 loadSpecialFeatures(for: itemID)
             }
@@ -339,6 +345,7 @@ final class DetailViewModel {
                     item = detail
                     isFavorite = detail.userData?.isFavorite ?? false
                     isPlayed = detail.userData?.played ?? false
+                    if !isWritingRating { rating = detail.userData?.rating }
                 }
             }
         }
@@ -523,6 +530,20 @@ final class DetailViewModel {
             NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
         } catch {
             isFavorite = oldValue
+        }
+    }
+
+    /// nil clears the rating. Optimistic like the favorite toggle, rolled back if the server refuses.
+    func setRating(_ newValue: Double?) async {
+        let oldValue = rating
+        guard newValue != oldValue else { return }
+        rating = newValue
+        isWritingRating = true
+        defer { isWritingRating = false }
+        do {
+            try await itemService.setRating(userID: userID, itemID: item.id, rating: newValue)
+        } catch {
+            rating = oldValue
         }
     }
 

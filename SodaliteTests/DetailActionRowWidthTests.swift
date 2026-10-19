@@ -24,7 +24,7 @@ struct DetailActionRowWidthTests {
     }
 
     /// The row a resumed multi-version movie draws, as finished by Sodalite#146 (More Details after
-    /// Watched). Play is labelled, the rest icon-only. The version pill collapses with them at rest
+    /// Watched), plus the rating pill (Sodalite#48). Play is labelled, the rest icon-only. The version pill collapses with them at rest
     /// and opens on focus (Sodalite#172); `versionFocused` stands in for that focus, which a hosted
     /// view never receives, by lifting the row's collapse off that one pill.
     private func movieRow(versionLabel: String, versionFocused: Bool) -> CGFloat {
@@ -37,6 +37,7 @@ struct DetailActionRowWidthTests {
             GlassActionButton(title: "detail.replay", systemImage: "arrow.counterclockwise", action: {})
             GlassActionButton(title: "detail.favorite", systemImage: "heart", action: {})
             GlassActionButton(title: "detail.markWatched", systemImage: "checkmark.circle", action: {})
+            GlassActionButton(title: "detail.rating", systemImage: "star.fill", subtitle: "8 / 10", action: {})
             GlassActionButton(title: "detail.moreDetails", systemImage: "info.circle", action: {})
             GlassActionButton(title: "detail.delete.button", systemImage: "trash",
                               isDestructive: true, action: {})

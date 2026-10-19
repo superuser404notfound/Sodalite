@@ -23,6 +23,9 @@ struct MovieDetailView: View {
     /// Sodalite#81: one launch that streams a downloaded item instead of playing the file.
     @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
+    @State private var ratingPrompt: RatingPrompt?
+    /// The film just played to its end unrated; the prompt goes up once the player has closed.
+    @State private var ratingPromptAfterPlayer: RatingPrompt?
     /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
     @State private var versionSelection = VersionSelection()
     @State private var showExtra = false
@@ -189,7 +192,20 @@ struct MovieDetailView: View {
                 deferOnMain(by: 0.1) {
                     playButtonFocused = true
                 }
+                if let prompt = ratingPromptAfterPlayer {
+                    ratingPromptAfterPlayer = nil
+                    // After the cover's dismissal has run, or the panel presents on a page still covered.
+                    deferOnMain(by: 0.6) { ratingPrompt = prompt }
+                }
             }
+        }
+        // Sodalite#48: a film played to its end, not stopped early, is the moment to ask.
+        .onReceive(NotificationCenter.default.publisher(for: .playbackDidReachEnd)) { note in
+            guard let itemID = note.userInfo?[PlaybackEndKey.itemID] as? String,
+                  let vm = viewModel, itemID == vm.item.id, vm.item.type == .movie,
+                  vm.rating == nil,
+                  dependencies.playbackPreferences.askForRatingAfterMovie else { return }
+            ratingPromptAfterPlayer = RatingPrompt(itemID: itemID, title: vm.item.name)
         }
         // The player continued on the item that replaced this one (a Radarr upgrade rewrote the file, so
         // the library minted a new id). Swap it in, else this screen keeps describing the file that is
@@ -268,6 +284,18 @@ struct MovieDetailView: View {
             }
             // Open the animation gate once the cover's present transition has settled.
             deferOnMain(by: 0.35) { didSettleIn = true }
+        }
+        .menuPresentation(item: $ratingPrompt) { prompt in
+            RatingPickerSheet(
+                rating: viewModel?.rating,
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                ),
+                title: prompt.title
+            ) { value in
+                ratingPrompt = nil
+                Task { await viewModel?.setRating(value) }
+            }
         }
         .menuPresentation(isPresented: $isPresentingMoreDetails, panel: .plain) {
             if let vm = viewModel {
@@ -694,6 +722,15 @@ struct MovieDetailView: View {
                 action: { Task { await vm.togglePlayed() } }
             )
             .focused($focusedAction, equals: .watched)
+
+            // Sodalite#48: the viewer's own score, Jellyfin's UserData.Rating, so Scrob and the like see it.
+            GlassActionButton(
+                title: vm.rating == nil ? "detail.rate" : "detail.rating",
+                systemImage: vm.rating == nil ? "star" : "star.fill",
+                subtitle: vm.rating.map(RatingPickerSheet.label),
+                action: { ratingPrompt = RatingPrompt(itemID: vm.item.id) }
+            )
+            .focused($focusedAction, equals: .rating)
 
             #if os(iOS)
             if session.allowsDeleteAndDownload {

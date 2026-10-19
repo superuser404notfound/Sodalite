@@ -118,7 +118,8 @@ struct CloudSyncForwardCompatTests {
                 forceDolbyVisionOnNonDVDisplay: true, touchpadScrubbing: true,
                 nextEpisodeCountdownAnchor: "end",
                 skipForwardSeconds: 30, skipBackwardSeconds: 10,
-                showNextEpisodeCard: false
+                showNextEpisodeCard: false,
+                askForRatingAfterMovie: false
             ))
         case .appearance:
             return .appearance(AppearanceSettingsPayload(

@@ -65,6 +65,9 @@ enum JellyfinEndpoint: APIEndpoint {
     /// Sodalite#81: read and write one item's UserData, so offline progress can be handed back.
     case userItemData(itemID: String, userID: String)
     case updateUserItemData(itemID: String, userID: String, payload: JSONValue)
+    /// Sets the user's 0 to 10 rating to nil. The UserData POST cannot: it only writes fields that
+    /// arrive with a value.
+    case clearUserRating(itemID: String, userID: String)
     case unmarkPlayed(userID: String, itemID: String)
 
     // Search
@@ -168,6 +171,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/PlayedItems/\(itemID)"
         case .userItemData(let itemID, _), .updateUserItemData(let itemID, _, _):
             "/UserItems/\(itemID)/UserData"
+        case .clearUserRating(let itemID, _):
+            "/UserItems/\(itemID)/Rating"
         case .unmarkPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
         case .searchHints:
@@ -233,7 +238,7 @@ enum JellyfinEndpoint: APIEndpoint {
              .createLiveTvTimer, .createLiveTvSeriesTimer,
              .downloadRemoteSubtitle:
             .post
-        case .unmarkFavorite, .unmarkPlayed, .deleteItem, .stopActiveEncodings,
+        case .unmarkFavorite, .unmarkPlayed, .clearUserRating, .deleteItem, .stopActiveEncodings,
              .deleteLiveTvTimer, .deleteLiveTvSeriesTimer, .deleteSubtitle:
             .delete
         default:
@@ -258,7 +263,7 @@ enum JellyfinEndpoint: APIEndpoint {
 
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .userItemData(_, let userID), .updateUserItemData(_, let userID, _):
+        case .userItemData(_, let userID), .updateUserItemData(_, let userID, _), .clearUserRating(_, let userID):
             return [URLQueryItem(name: "userId", value: userID)]
 
         case .quickConnectCheck(let secret):

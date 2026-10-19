@@ -150,6 +150,20 @@ struct ProfileSyncPayloadsTests {
         #expect(!store.showNextEpisodeCard)
     }
 
+    @Test func theRatingPromptSwitchTravelsAndAnOlderRecordKeepsIt() {
+        let source = PlaybackPreferences(store: scratch("ratingPromptSource"))
+        source.askForRatingAfterMovie = false
+        let target = PlaybackPreferences(store: scratch("ratingPromptTarget"))
+        ProfilePlaybackPayload(collecting: source, stamp: .now).apply(to: target)
+        #expect(!target.askForRatingAfterMovie)
+
+        var older = ProfilePlaybackPayload(collecting: source, stamp: .now)
+        older.askForRatingAfterMovie = nil
+        target.askForRatingAfterMovie = true
+        older.apply(to: target)
+        #expect(target.askForRatingAfterMovie)
+    }
+
     @Test func aDecodeFailureNamesTheKeyAndNoValue() {
         let data = Data(#"{"schemaVersion":1,"secret":"hunter2"}"#.utf8)
         do {
