@@ -1085,9 +1085,16 @@ final class PlayerViewModel {
                 }
                 return await engine.scrubThumbnail(atSeconds: seconds, maxWidth: maxWidth)
             }
+            // Dolby Vision Profile 5 / 10.0: no still of it can be coloured here, so the engine shows
+            // the keyframe through the system compositor in a view instead. Same axis as above.
+            let viewPreview: (Double, AetherScrubPreviewView) async -> Bool = { [weak engine] seconds, view in
+                guard let engine, engine.scrubPreviewDrawsInView, engine.discTitles.isEmpty else { return false }
+                return await engine.showScrubPreview(atSeconds: seconds, in: view) != nil
+            }
             scrubPreview.configure(
                 extractor: frameExtractor,
                 cacheThumbnail: cacheThumbnail,
+                viewPreview: viewPreview,
                 enabled: preferences.showScrubPreview
             )
         }

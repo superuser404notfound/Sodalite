@@ -224,6 +224,12 @@ enum Changelog {
                     "changelog.1_1_0.userRating.body",
                     icon: "star"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.dvScrubPreview.title",
+                    "changelog.1_1_0.dvScrubPreview.body",
+                    icon: "film"
+                ),
             ]
         ),
         // MARK: 1.0.0
