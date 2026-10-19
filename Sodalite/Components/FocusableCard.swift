@@ -10,6 +10,7 @@ struct FocusableCard<Content: View>: View {
     var exposesButtonSemantics = false
     @ViewBuilder let content: (_ isFocused: Bool) -> Content
 
+    @Environment(\.cardMenuWillOpen) private var cardMenuWillOpen
     @FocusState private var isFocused: Bool
     @GestureState private var isPressed = false
 
@@ -28,7 +29,7 @@ struct FocusableCard<Content: View>: View {
         content(isHighlighted)
             .focusableSurface()
             .focused($isFocused)
-            .stableTap(isFocused: isFocused, longPressOpensMenu: opensMenuOnHold) { action() }
+            .stableTap(isFocused: isFocused, longPressOpensMenu: opensMenuOnHold, onHold: opensMenuOnHold ? cardMenuWillOpen : nil) { action() }
             .focusResponse(.card, isFocused: isHighlighted)
     }
 

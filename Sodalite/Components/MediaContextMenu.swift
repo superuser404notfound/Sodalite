@@ -7,6 +7,9 @@ extension EnvironmentValues {
     /// Takes a card's show out of Continue Watching and Next Up. Set only on those rows, where the
     /// entry means something.
     @Entry var dropSeries: DropSeriesAction?
+    /// Told when a card's hold is about to open its menu, which takes focus off the row. Home needs
+    /// to tell that apart from the move to the tab bar, which looks the same to its focus state.
+    @Entry var cardMenuWillOpen: (() -> Void)?
 }
 
 /// Always equal: its one publisher (Home) routes into state storage that outlives every render, so

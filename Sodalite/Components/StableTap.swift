@@ -8,6 +8,8 @@ struct StableTapModifier: ViewModifier {
     /// on the way into its own menu (Sodalite#75). Off elsewhere: a row with nothing to disambiguate
     /// from keeps firing on the press itself, which is what makes the shell feel immediate.
     var longPressOpensMenu: Bool = false
+    /// Called when a hold reaches the limit, just before the menu takes focus.
+    var onHold: (() -> Void)? = nil
     let action: () -> Void
 
     /// Minimum steady-focus time (s) before a press fires; drop to 0.06 if 80 ms feels sluggish.
@@ -41,6 +43,7 @@ struct StableTapModifier: ViewModifier {
             if longPressOpensMenu {
                 tracked.onLongPressGesture(minimumDuration: Self.clickHoldLimit) {
                     holdReachedLimit = true
+                    onHold?()
                 } onPressingChanged: { pressing in
                     if pressing {
                         pressStartedAt = Date()
@@ -103,11 +106,13 @@ extension View {
     func stableTap(
         isFocused: Bool,
         longPressOpensMenu: Bool = false,
+        onHold: (() -> Void)? = nil,
         perform action: @escaping () -> Void
     ) -> some View {
         modifier(StableTapModifier(
             isFocused: isFocused,
             longPressOpensMenu: longPressOpensMenu,
+            onHold: onHold,
             action: action
         ))
     }

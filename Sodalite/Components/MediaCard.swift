@@ -69,11 +69,6 @@ struct MediaCard: View {
             itemInfo
         }
         .frame(width: cardWidth)
-        #if !os(macOS)
-        // tvOS lifts a copy of the card next to its context menu, and the title lines rode along
-        // across the row heading. Only the artwork is the preview; a `preview:` view is ignored there.
-        .contentShape(.contextMenuPreview, ArtworkPreviewShape(size: cardSize, cornerRadius: ArtworkCorner.radius))
-        #endif
         .accessibilityElement(children: .combine)
         .accessibilityValue(accessibilityProgress)
     }
@@ -208,15 +203,5 @@ struct MediaCard: View {
         case .folder: "folder"
         default: "photo"
         }
-    }
-}
-
-/// The artwork's rounded rectangle at the top of a card, whatever the card's full height.
-private nonisolated struct ArtworkPreviewShape: Shape {
-    let size: CGSize
-    let cornerRadius: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        RoundedRectangle(cornerRadius: cornerRadius).path(in: CGRect(origin: .zero, size: size))
     }
 }
