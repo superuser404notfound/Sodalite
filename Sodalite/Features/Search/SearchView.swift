@@ -182,21 +182,6 @@ struct SearchView: View {
     /// Focusable clear, mirroring ValuePickerRow's focus chrome (tinted fill + ring, never a white
     /// system pill). Activated through stableTap so focus drift in the last frames of a click can't
     /// wipe the query from a neighbour's press.
-    private func libraryCard(_ item: JellyfinItem, isFocused: Bool, showsInfo: Bool = true) -> MediaCard {
-        MediaCard(
-            item: item,
-            imageURL: dependencies.jellyfinImageService.imageURL(
-                itemID: item.id,
-                imageType: .primary,
-                tag: item.imageTags?.primary,
-                maxWidth: ImageWidth.card
-            ),
-            style: .poster,
-            isFocused: isFocused,
-            showsInfo: showsInfo
-        )
-    }
-
     private func clearButton(vm: SearchViewModel) -> some View {
         Image(systemName: "xmark.circle.fill")
             .font(.title3)
@@ -216,6 +201,21 @@ struct SearchView: View {
             .accessibilityLabel(Text("search.clear"))
     }
     #endif
+
+    private func libraryCard(_ item: JellyfinItem, isFocused: Bool, showsInfo: Bool = true) -> MediaCard {
+        MediaCard(
+            item: item,
+            imageURL: dependencies.jellyfinImageService.imageURL(
+                itemID: item.id,
+                imageType: .primary,
+                tag: item.imageTags?.primary,
+                maxWidth: ImageWidth.card
+            ),
+            style: .poster,
+            isFocused: isFocused,
+            showsInfo: showsInfo
+        )
+    }
 
     @ViewBuilder
     private func resultsView(vm: SearchViewModel) -> some View {
