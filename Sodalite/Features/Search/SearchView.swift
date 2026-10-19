@@ -246,6 +246,7 @@ struct SearchView: View {
                                 item: item,
                                 imageURL: dependencies.jellyfinImageService.imageURL(
                                     itemID: item.id,
+                                    serverID: item.serverID,
                                     imageType: .primary,
                                     tag: item.imageTags?.primary,
                                     maxWidth: ImageWidth.card
