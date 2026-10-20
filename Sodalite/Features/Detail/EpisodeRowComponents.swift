@@ -261,11 +261,10 @@ struct EpisodeLandscapeCard: View {
                 }
 
                 if let runtime = episode.runTimeTicks {
-                    // A started episode carries its remaining time on the artwork, so the total
-                    // would be a second number on one card saying something else (Sodalite#99).
-                    // Blank, not absent: the strip keeps even card heights that way, the same
-                    // reason MediaCard always renders its subtitle slot.
-                    Text(remainingLabel == nil ? runtime.ticksToDurationDisplay : " ")
+                    // The total stays on a started episode too (Sodalite#193): the badge on the
+                    // artwork is the time left, this line is the episode's length, and the badge
+                    // drops out where the locale's label does not fit beside the track.
+                    Text(runtime.ticksToDurationDisplay)
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
