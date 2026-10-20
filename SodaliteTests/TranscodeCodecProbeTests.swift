@@ -55,4 +55,33 @@ struct TranscodeCodecProbeTests {
             resolve: { URL(string: "https://jf.local\($0)") }, fetch: { _ in self.hevcMaster })
         #expect(service.playbackInfoRequests.isEmpty)
     }
+
+    @Test func onlyAnHLSPathCountsAsAPlaylist() {
+        #expect(TranscodeCodecProbe.isPlaylist(transcodingPath: "/videos/ep-1/master.m3u8?VideoCodec=hevc,h264"))
+        #expect(TranscodeCodecProbe.isPlaylist(transcodingPath: "/videos/ep-1/MASTER.M3U8"))
+        #expect(!TranscodeCodecProbe.isPlaylist(transcodingPath: "/videos/ep-1/stream.mkv?VideoCodec=copy&AudioCodec=aac"))
+        #expect(!TranscodeCodecProbe.isPlaylist(transcodingPath: "/videos/ep-1/stream.mkv?Foo=master.m3u8"))
+    }
+
+    /// Sodalite#191: a user who may not transcode video gets a progressive remux URL. Fetching it starts
+    /// ffmpeg and streams the whole film into memory, so the probe never fetches it, and stops asking.
+    @Test func aProgressiveAnswerIsNeverFetchedAndNotAskedAgain() async throws {
+        let service = RecordingPlaybackService()
+        service.transcodingURLWhenUnpinned = "/videos/ep-1/stream.mkv?VideoCodec=copy&AudioCodec=aac"
+        let memory = TranscodeCodecMemory(defaults: UserDefaults(suiteName: "probe.\(UUID().uuidString)")!)
+        var fetched: [URL] = []
+        let codec = await TranscodeCodecProbe.run(
+            itemID: "ep-1", userID: "user", server: "jf.local", service: service, memory: memory,
+            resolve: { URL(string: "https://jf.local\($0)") },
+            fetch: { fetched.append($0); return nil })
+        #expect(codec == nil)
+        #expect(fetched.isEmpty)
+        #expect(memory.isUnanswerable(server: "jf.local", userID: "user"))
+        #expect(!memory.isUnanswerable(server: "jf.local", userID: "other"))
+
+        _ = await TranscodeCodecProbe.run(
+            itemID: "ep-2", userID: "user", server: "jf.local", service: service, memory: memory,
+            resolve: { URL(string: "https://jf.local\($0)") }, fetch: { _ in self.hevcMaster })
+        #expect(service.playbackInfoRequests.count == 1)
+    }
 }

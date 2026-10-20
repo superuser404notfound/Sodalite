@@ -1366,7 +1366,8 @@ final class PlayerViewModel {
                 Task { [weak self] in await self?.loadEpisodeSegments() }
             }
             // Sodalite#87: learn once per server which codec it transcodes in, so the quality picker's
-            // estimate is right before the first real transcode. Costs no ffmpeg on the server.
+            // estimate is right before the first real transcode. Fetches only an HLS master, which
+            // costs no ffmpeg on the server (#191).
             if !isLocalSession {
                 Task { [weak self] in await self?.probeTranscodeCodecIfNeeded() }
                 // Powers the transport-bar episode picker; stays empty (picker hidden) for movies / single-episode.
@@ -2607,13 +2608,7 @@ final class PlayerViewModel {
             itemID: item.id, userID: userID, server: service.baseURL?.host(), mediaSourceID: mediaSourceID,
             service: service, memory: transcodeCodecMemory,
             resolve: { service.buildTranscodeURL(relativePath: $0) },
-            fetch: { url in
-                var request = URLRequest(url: url)
-                request.timeoutInterval = 10
-                guard let (data, response) = try? await URLSession.shared.data(for: request),
-                      (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-                return String(data: data, encoding: .utf8)
-            })
+            fetch: TranscodeCodecProbe.fetchPlaylist)
     }
 
     func qualityPickerHint(_ quality: StreamingQuality) -> String? {

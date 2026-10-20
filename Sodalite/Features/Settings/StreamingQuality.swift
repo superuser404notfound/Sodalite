@@ -31,6 +31,21 @@ struct TranscodeCodecMemory {
         guard codec == "hevc" || codec == "h264" else { return }
         defaults.set(codec, forKey: key(server))
     }
+
+    private func unanswerableKey(_ server: String, _ userID: String) -> String {
+        "playback.transcodeProbeUnanswerable.\(server).\(userID)"
+    }
+
+    /// The server answered this user's probe with no playlist (Sodalite#191: a user who may not transcode
+    /// video gets a progressive remux URL). That holds for every item, so the probe stops asking; a real
+    /// transcode, should the policy change, still records the codec.
+    func isUnanswerable(server: String, userID: String) -> Bool {
+        defaults.bool(forKey: unanswerableKey(server, userID))
+    }
+
+    func markUnanswerable(server: String, userID: String) {
+        defaults.set(true, forKey: unanswerableKey(server, userID))
+    }
 }
 
 /// Asks a server once which codec it transcodes in, before any transcode has run (Sodalite#87). The
@@ -39,6 +54,33 @@ struct TranscodeCodecMemory {
 enum TranscodeCodecProbe {
     /// Low enough that practically every source is transcoded, so the answer carries a transcode URL.
     static let probeCap = 1_000_000
+
+    /// More than any master playlist; the fetch stops here whatever the server sends.
+    static let fetchLimit = 64 * 1024
+
+    /// Only an HLS playlist is cheap to fetch. Under a policy without video transcoding Jellyfin answers
+    /// with a progressive stream (`stream.mkv`), whose fetch starts ffmpeg and never ends (Sodalite#191).
+    static func isPlaylist(transcodingPath: String) -> Bool {
+        let path = URLComponents(string: transcodingPath)?.path ?? transcodingPath
+        return path.lowercased().hasSuffix(".m3u8")
+    }
+
+    /// Reads at most `fetchLimit` bytes, and nothing at all from a response that is not a playlist.
+    static func fetchPlaylist(_ url: URL) async -> String? {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+        guard let (bytes, response) = try? await URLSession.shared.bytes(for: request),
+              let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+        if let type = http.mimeType?.lowercased(), !type.contains("mpegurl") { return nil }
+        var data = Data()
+        do {
+            for try await byte in bytes {
+                data.append(byte)
+                if data.count >= fetchLimit { return nil }
+            }
+        } catch { return nil }
+        return String(data: data, encoding: .utf8)
+    }
 
     static func videoCodec(fromMaster master: String) -> String? {
         guard let start = master.range(of: "CODECS=\""),
@@ -58,15 +100,21 @@ enum TranscodeCodecProbe {
     static func run(itemID: String, userID: String, server: String?, mediaSourceID: String? = nil,
                     service: JellyfinPlaybackServiceProtocol, memory: TranscodeCodecMemory,
                     resolve: (String) -> URL?, fetch: (URL) async -> String?) async -> String? {
-        guard let server, memory.knownCodec(server: server) == nil else { return nil }
+        guard let server, memory.knownCodec(server: server) == nil,
+              !memory.isUnanswerable(server: server, userID: userID) else { return nil }
         // Pinned to the source being played so the server picks no subtitle to burn in (see
         // `vodPlaybackInfoBody`).
         guard let info = try? await service.getPlaybackInfo(
                 itemID: itemID, userID: userID,
                 profile: DirectPlayProfile.current(maxStreamingBitrate: probeCap),
                 mediaSourceID: mediaSourceID, audioStreamIndex: nil),
-              let path = info.mediaSources.first?.transcodingUrl,
-              let url = resolve(path),
+              let path = info.mediaSources.first?.transcodingUrl else { return nil }
+        guard isPlaylist(transcodingPath: path) else {
+            memory.markUnanswerable(server: server, userID: userID)
+            LogTap.shared.note("[Quality] \(server) offers this user no transcode playlist, probe off")
+            return nil
+        }
+        guard let url = resolve(path),
               let master = await fetch(url),
               let codec = videoCodec(fromMaster: master) else { return nil }
         memory.record(server: server, deliveredCodec: codec)
