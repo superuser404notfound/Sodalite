@@ -6,7 +6,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/AetherEngine",
       "state" : {
-        "revision" : "e9b379ee08c437e5d119f2fc450e73f28f582d89"
+        "revision" : "e5ea8dac56a6962d7f6793fc80b7c84caa61b7af"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/FFmpegBuild",
       "state" : {
-        "revision" : "be000b9e3275981a001d28d4ad135531d9fae913",
-        "version" : "3.8.0"
+        "revision" : "3b398c8f6340fe5fb4a7cb9a2a211a16677171e0",
+        "version" : "3.9.0"
       }
     },
     {
@@ -34,15 +34,6 @@
       "state" : {
         "revision" : "0d7cce1d6836a30d13a3a2326e50a153af53f014",
         "version" : "2.1.0"
-      }
-    },
-    {
-      "identity" : "libdtsx",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/superuser404notfound/LibDTSX",
-      "state" : {
-        "revision" : "7d68c8bbda348a10e169b9bb9619c8b2b7a0c642",
-        "version" : "3.0.0"
       }
     },
     {
