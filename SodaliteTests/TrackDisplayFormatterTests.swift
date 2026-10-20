@@ -90,7 +90,7 @@ struct TrackDisplayFormatterTests {
         #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-HD HRA")) == "DTS-HD HRA 7.1")
         #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-ES")) == "DTS 7.1")
         #expect(TrackDisplayFormatter.audioDisplayName(for: dts(nil)) == "DTS 7.1")
-        // A track LibDTSX confirmed under a plain "DTS-HD MA" label is named by the engine's flag.
+        // A track the engine confirmed as DTS:X under a plain "DTS-HD MA" label is named by the engine's flag.
         let confirmed = TrackInfo(id: 4, name: "Track 4 (dca)", codec: "dca", language: nil, channels: 8,
                                   isDefault: false, profile: "DTS-HD MA", isDTSX: true)
         #expect(TrackDisplayFormatter.audioDisplayName(for: confirmed) == "DTS:X")

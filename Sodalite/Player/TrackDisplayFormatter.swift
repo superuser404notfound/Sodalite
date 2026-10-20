@@ -90,7 +90,7 @@ enum TrackDisplayFormatter {
     }
 
     /// AetherEngine#744: DTS:X keeps its heights the same way. The engine's flag covers the profile
-    /// FFmpeg reads and a track LibDTSX confirmed while it played, which FFmpeg labels plain DTS-HD MA.
+    /// FFmpeg reads and a track the engine's DTS:X decoder confirmed while it played, which FFmpeg labels plain DTS-HD MA.
     static func isDTSX(_ track: TrackInfo) -> Bool {
         track.isDTSX
     }

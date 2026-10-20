@@ -67,13 +67,6 @@ enum OpenSourceLicenses {
             textResource: "LicenseText-LibTrueHD"
         ),
         OpenSourceComponent(
-            name: "LibDTSX (dca)",
-            licenseName: "LGPL-3.0-or-later",
-            url: "https://github.com/superuser404notfound/LibDTSX",
-            notice: "Copyright 2026 kristofferR (Apache-2.0). Includes the dca crate from harletty-bridge, a port of FFmpeg's LGPL-2.1-or-later DTS decoder, so the library as a whole is LGPL-3.0-or-later. Dynamically linked as an embedded framework; its source is the LibDTSX release tag (see URL above).",
-            textResource: "LicenseText-LibDTSX"
-        ),
-        OpenSourceComponent(
             name: "SwiftAssRenderer",
             licenseName: "MIT",
             url: "https://github.com/mihai8804858/swift-ass-renderer",

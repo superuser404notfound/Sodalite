@@ -252,7 +252,6 @@
 		1DAF2936EC2F37D049F7F075 /* TopShelfTitleVeil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E01BDFD248355FD167C2D3 /* TopShelfTitleVeil.swift */; };
 		1DD9EBCAB06E334496CE11C8 /* CatalogProviderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58ABF4558D8BC04D3D114DBB /* CatalogProviderRow.swift */; };
 		1E294628EF88DCBB0D1A300E /* LiveTunerGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC26AA8655AB4CC74F3C0793 /* LiveTunerGate.swift */; };
-		1E2B373B6DBCFAE15A9B61C1 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		1E57BADCCFE70704CCBEAAE3 /* AppActivityNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6FF875EAE37B6450F32055 /* AppActivityNotifications.swift */; };
 		1E9B7ACBE23E7A30980882AF /* ExternalSoftwareVideoDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D57213E75303B0AFC84A8D /* ExternalSoftwareVideoDecision.swift */; };
 		1EA942ED1C82BB847BCD7866 /* CloudSyncProfileRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13EAF84BDC15DE641CED31FE /* CloudSyncProfileRecordTests.swift */; };
@@ -834,7 +833,6 @@
 		6155CE6952F1F51D5F7CBC54 /* LogExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378EC7F381338358EE8D8737 /* LogExportPanel.swift */; };
 		61684D095067EF7AAC450970 /* LiveTVSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 639865ECEC5C0110DA86B090 /* LiveTVSource.swift */; };
 		61C0F0CA36D78611EA6BBE54 /* ParticipantPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1866253FFA373B3CD3E2C1BE /* ParticipantPlanner.swift */; };
-		61D9B884AD01EFE60410D9E6 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		61F0D1FC2AAFDB1C15C59421 /* TopShelfCachePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D955E208D3CD0779141D95 /* TopShelfCachePolicy.swift */; };
 		61FAA923450C58737A33862F /* LiveAudioSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0680E5F6755B5EDFEA1F37C0 /* LiveAudioSwitch.swift */; };
 		62233FB36CBA95FD70E7A7E0 /* LogExportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F7442383C534C1B4B4A45D /* LogExportSession.swift */; };
@@ -1579,7 +1577,6 @@
 		BC3363C9D225960A56F6A542 /* MainQueueDefer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2009D3A6B35520280B2E8329 /* MainQueueDefer.swift */; };
 		BC394DC2F7FD3FADB5F542A3 /* SerialRequestQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88656BC295B74B8BCA7950E5 /* SerialRequestQueue.swift */; };
 		BC59CA7F196489AC9FD28ADC /* AlphabetIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E168730BECFF639441E313F3 /* AlphabetIndexTests.swift */; };
-		BC8C55399AACEBF219FA42B9 /* LicenseText-LibDTSX.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */; };
 		BC9958FB9C48FDC846075BE2 /* VersionDistinguishingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C873364734DF9D2D7E3465B /* VersionDistinguishingLabel.swift */; };
 		BCCA98F65EB9930E16778303 /* SubtitleSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40ACBA3D2A39D41E0D6463FB /* SubtitleSearchView.swift */; };
 		BCDD8F5406D81BBBC6BABE3E /* DownloadActivitySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5591D34A72BB99474F72BB /* DownloadActivitySummary.swift */; };
@@ -2693,7 +2690,6 @@
 		7F01E69FDD2E8F31796ACA3B /* CombinedServersReviewFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedServersReviewFixTests.swift; sourceTree = "<group>"; };
 		7F32B40C7469D099A08AE6FD /* ServerSwitchResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSwitchResumeTests.swift; sourceTree = "<group>"; };
 		7FD145192044D97F650B4405 /* CollectionPlaybackQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionPlaybackQueue.swift; sourceTree = "<group>"; };
-		8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LicenseText-LibDTSX.txt"; sourceTree = "<group>"; };
 		8045FAEEA02DFFFAF1D2E465 /* ChangelogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangelogEntry.swift; sourceTree = "<group>"; };
 		805C6914767AC1469126A3BD /* PlayerReachabilityFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerReachabilityFace.swift; sourceTree = "<group>"; };
 		813BABB8AB0ED10E6E5CAAA5 /* HomeRowIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRowIdentityTests.swift; sourceTree = "<group>"; };
@@ -3888,7 +3884,6 @@
 				7E6FC57C0434B0E5A844A312 /* LicenseText-dav1d.txt */,
 				01C12B24850C327CD8373DB8 /* LicenseText-ISC-libass.txt */,
 				F49AA15F4541B18B03730DEF /* LicenseText-LGPL-2.1.txt */,
-				8006F297CB048656B3DB347E /* LicenseText-LibDTSX.txt */,
 				CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */,
 				E16CB1DBF0F096E8267D8D08 /* LicenseText-MIT.txt */,
 				51C8ACDBF478C0267CFAE44C /* LicenseText-WTFPL.txt */,
@@ -4866,7 +4861,6 @@
 				6CD4329A2FF702EFF3A5ECD4 /* LicenseText-AetherEngine.txt in Resources */,
 				88EE6900705FF3EB24532855 /* LicenseText-ISC-libass.txt in Resources */,
 				6540637AAEF6D363C5EC219F /* LicenseText-LGPL-2.1.txt in Resources */,
-				BC8C55399AACEBF219FA42B9 /* LicenseText-LibDTSX.txt in Resources */,
 				D7E7187229B233A5F347AB0E /* LicenseText-LibTrueHD.txt in Resources */,
 				6C0ADA6EE072933263ED5510 /* LicenseText-MIT.txt in Resources */,
 				82718D52B0B18494B92B9219 /* LicenseText-WTFPL.txt in Resources */,
@@ -4890,7 +4884,6 @@
 				FEC7094E718910B6D04487EA /* LicenseText-AetherEngine.txt in Resources */,
 				E50C8E9A2BF14F89FA2478B8 /* LicenseText-ISC-libass.txt in Resources */,
 				AAFA6FD004F90C1D56D8BAF6 /* LicenseText-LGPL-2.1.txt in Resources */,
-				61D9B884AD01EFE60410D9E6 /* LicenseText-LibDTSX.txt in Resources */,
 				15D1DA1FC18AFFBC76A9D860 /* LicenseText-LibTrueHD.txt in Resources */,
 				A4BFA36B843326A7EC932BFF /* LicenseText-MIT.txt in Resources */,
 				86DAC04B4D70E624E775C452 /* LicenseText-WTFPL.txt in Resources */,
@@ -4915,7 +4908,6 @@
 				7DD3E4C2939E4A83C7581697 /* LicenseText-AetherEngine.txt in Resources */,
 				F14ABC8BA2EC86EF899D26A4 /* LicenseText-ISC-libass.txt in Resources */,
 				00541D39AB9C7F73B2031840 /* LicenseText-LGPL-2.1.txt in Resources */,
-				1E2B373B6DBCFAE15A9B61C1 /* LicenseText-LibDTSX.txt in Resources */,
 				A24FD4694A445920199FBE79 /* LicenseText-LibTrueHD.txt in Resources */,
 				0D5A0CE3CEDD4B602E517610 /* LicenseText-MIT.txt in Resources */,
 				F7DDD121DD8A20E436AC0C70 /* LicenseText-WTFPL.txt in Resources */,
