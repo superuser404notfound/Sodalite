@@ -41,6 +41,10 @@ struct SidebarShell<Content: View>: View {
 
     private var isFullBleed: Bool { Self.fullBleedTabs.contains(selectedTab) }
 
+    private var exitOutcome: SidebarExitPolicy.Outcome {
+        SidebarExitPolicy.next(focusIsInRail: focusIsInRail, selectedTab: selectedTab)
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             // Layout placeholder only. The rail itself is an overlay, so it can move freely while
@@ -92,18 +96,19 @@ struct SidebarShell<Content: View>: View {
         .onChange(of: focus) { _, newValue in
             focusIsInRail = newValue != nil
         }
-        // Menu is ours only while the rail is on screen. On a pushed screen the navigation stack
-        // owns it, and an installed handler would swallow the press that should pop the screen,
-        // hence the nil rather than an empty closure.
-        .onExitCommandIfEnabled(!chromeHidden) {
-            switch SidebarExitPolicy.next(focusIsInRail: focusIsInRail, selectedTab: selectedTab) {
+        // Menu is ours only while the rail is on screen and there is a step left in the chain. On a
+        // pushed screen the navigation stack owns it, and on the last step the system does: any
+        // installed handler swallows the press, even one that does nothing, so Menu on Home in the
+        // rail never left the app. Hence the nil rather than an empty closure.
+        .onExitCommandIfEnabled(!chromeHidden && exitOutcome != .leaveApp) {
+            switch exitOutcome {
             case .focusRail:
                 focus = .item(selectedTab)
             case .selectHome:
                 selectedTab = .home
                 focus = .item(.home)
             case .leaveApp:
-                // Nothing: letting the press fall through is what leaves the app.
+                // Unreachable: the handler is not installed for this step.
                 break
             }
         }

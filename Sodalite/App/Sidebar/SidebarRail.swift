@@ -22,7 +22,6 @@ struct SidebarRail: View {
                    : SidebarMetrics.iconColumn
     }
 
-
     var body: some View {
         VStack(alignment: isExpanded ? .leading : .center, spacing: SidebarMetrics.itemSpacing) {
             SidebarProfileHeader(isExpanded: isExpanded)
@@ -41,6 +40,9 @@ struct SidebarRail: View {
                 Rectangle()
                     .fill(Color.Theme.hairline)
                     .frame(width: dividerWidth, height: SidebarMetrics.dividerHeight)
+                    // Centred in both states. The expanded rail aligns its rows leading, and the
+                    // divider, shorter than the rail by the padding, followed them to the left.
+                    .frame(maxWidth: .infinity)
 
                 SidebarItemRow(
                     tab: .settings,
