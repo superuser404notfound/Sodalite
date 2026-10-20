@@ -112,6 +112,9 @@ struct ContentLogoTitle<Fallback: View>: View {
         AsyncCachedImage(
             url: logoURL,
             onLoadFailed: { loadFailed = $0 },
+            // The margin baked into the PNG differs from logo to logo; trimmed, the budget and the
+            // bottom-leading slot both apply to the ink (Sodalite#192).
+            trimsTransparentMargin: true,
             // sizedContent, not onImageLoaded: the mark's own size arrives WITH the mark, out of one
             // state, so there is no pass where an image is on screen and its aspect is not known yet.
             // Through the callback there was, and every first open drew the mark square (Sodalite#97).

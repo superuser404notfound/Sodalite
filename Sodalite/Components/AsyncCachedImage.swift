@@ -21,6 +21,10 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     /// detail-page logo reserving its slot, Sodalite#97) can only tell "still coming" from "never
     /// coming" here, and put its own fallback back.
     var onLoadFailed: ((Bool) -> Void)? = nil
+    /// Crop the decoded image to its non-transparent pixels before it is cached, so the content
+    /// closure and its size see the visible mark and not the canvas around it. The title logo only
+    /// (Sodalite#192).
+    var trimsTransparentMargin = false
     /// Built with the decoded image AND that image's own size, so a caller that has to size its
     /// frame from the source's aspect ratio reads both out of the same state. Handing the size back
     /// through `onImageLoaded` instead puts it in the CALLER's state, one view up, where the image
@@ -52,6 +56,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         fallbackURL: URL? = nil,
         onImageLoaded: ((PlatformImage) -> Void)? = nil,
         onLoadFailed: ((Bool) -> Void)? = nil,
+        trimsTransparentMargin: Bool = false,
         @ViewBuilder sizedContent: @escaping (Image, CGSize) -> Content,
         @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
@@ -59,6 +64,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         self.fallbackURL = fallbackURL
         self.onImageLoaded = onImageLoaded
         self.onLoadFailed = onLoadFailed
+        self.trimsTransparentMargin = trimsTransparentMargin
         self.content = sizedContent
         self.placeholder = placeholder
     }
@@ -191,8 +197,9 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     @MainActor
     private func loadImage(from url: URL?, attempt: Int) async -> ImageLoadOutcome {
         guard let url else { return .noImage }
+        let cacheKey = trimsTransparentMargin ? ImageCache.trimmedKey(for: url) : url
 
-        if let cached = ImageCache.shared.image(for: url) {
+        if let cached = ImageCache.shared.image(for: cacheKey) {
             return .image(cached)
         }
 
@@ -204,10 +211,11 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
 
-        let outcome = await Self.fetchAndDecode(request: request, attempt: attempt)
+        let outcome = await Self.fetchAndDecode(
+            request: request, attempt: attempt, trimsTransparentMargin: trimsTransparentMargin)
         guard case .image(let prepared) = outcome else { return outcome }
         // Cache before the cancellation check: a `.task(id:)` invalidation may cancel between decode and @State write, but the bytes are already in memory, so skipping the store would re-pay bandwidth+decode on next mount. Only a WHOLE image ever gets here, so a payload that stopped in the middle cannot latch itself into the session (Sodalite#123).
-        ImageCache.shared.store(prepared, for: url)
+        ImageCache.shared.store(prepared, for: cacheKey)
         guard !Task.isCancelled else { return .noImage }
         return .image(prepared)
     }
@@ -217,10 +225,27 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     /// `attempt` reaches `ImageFetch` rather than staying here: a 200 is not the same as a whole
     /// image, and the retry that follows one has to ask the SERVER, not the HTTP cache that just
     /// stored the half file (Sodalite#123).
-    nonisolated private static func fetchAndDecode(request: URLRequest, attempt: Int) async -> ImageLoadOutcome {
+    ///
+    /// The trim runs here, after `ImageFetch` has refused a payload that stopped short, so a
+    /// half-written logo is never measured (Sodalite#123), and before the cache, so a hit costs
+    /// nothing (Sodalite#192).
+    nonisolated private static func fetchAndDecode(
+        request: URLRequest, attempt: Int, trimsTransparentMargin: Bool
+    ) async -> ImageLoadOutcome {
         switch await ImageFetch.load(request, attempt: attempt) {
         case .whole(let data):
-            guard let image = PlatformImage(data: data) else { return .noImage }
+            guard var image = PlatformImage(data: data) else { return .noImage }
+            if trimsTransparentMargin {
+                let trimmed = image.trimmingTransparentMargin()
+                if trimmed !== image {
+                    LogTap.shared.note(
+                        "[Image] trimmed \(imageKind(request.url)) \(itemTail(request.url))"
+                            + " \(Int(image.size.width))x\(Int(image.size.height))"
+                            + " -> \(Int(trimmed.size.width))x\(Int(trimmed.size.height))"
+                    )
+                    image = trimmed
+                }
+            }
             return .image(image.preparedForDisplay() ?? image)
         case .incomplete:
             return .incompletePayload
@@ -262,6 +287,15 @@ final class ImageCache: @unchecked Sendable {
 
     nonisolated func store(_ image: PlatformImage, for url: URL) {
         cache.setObject(image, forKey: url as NSURL, cost: estimatedBytes(for: image))
+    }
+
+    /// A trimmed image is a different image from the one at its URL, so it is cached under its own
+    /// key: a surface that asks for the same URL untrimmed must not read the crop, nor the logo the
+    /// canvas. A fragment never reaches the server, so the request itself is unchanged.
+    nonisolated static func trimmedKey(for url: URL) -> URL {
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.fragment = "trimmed"
+        return components?.url ?? url
     }
 
     /// Wipe on profile switches: a poster cached with user A's token may be unfetchable under user B's permissions.

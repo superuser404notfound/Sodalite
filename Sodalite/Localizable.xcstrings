@@ -72423,6 +72423,330 @@
         }
       }
     },
+    "changelog.1_1_0.logoMargin.body" : {
+      "comment" : "What's New 1.1.0: body for title logos trimmed to their visible mark (Sodalite#192).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loga titulů na stránkách s detaily se ořezávají na viditelný znak, takže prázdný okraj, který mají některé obrázky log, je už nezmenšuje ani je neodsouvá od okraje."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titellogoer på detaljesider beskæres til det synlige mærke, så den tomme kant, som nogle logobilleder har, ikke længere gør dem mindre eller skubber dem væk fra kanten."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titellogos auf den Detailseiten werden auf das sichtbare Zeichen zugeschnitten. Der leere Rand, den manche Logobilder mitbringen, macht sie nicht mehr kleiner und rückt sie nicht mehr von der Kante ab."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα λογότυπα τίτλων στις σελίδες λεπτομερειών περικόπτονται στο ορατό σήμα, ώστε το κενό περιθώριο που έχουν ορισμένες εικόνες λογοτύπων να μην τα μικραίνει ούτε να τα απομακρύνει από την άκρη."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title logos on detail pages are trimmed to the visible mark, so the empty border some logo images carry no longer makes them smaller or pushes them away from the edge."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los logotipos de título de las páginas de detalle se recortan a la marca visible, así que el borde vacío que traen algunas imágenes de logotipo ya no los hace más pequeños ni los separa del borde."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tietosivujen nimilogot rajataan näkyvään merkkiin, joten joidenkin logokuvien tyhjä reunus ei enää pienennä niitä eikä siirrä niitä irti reunasta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les logos de titre des pages de détail sont recadrés sur la partie visible, si bien que la marge vide de certaines images de logo ne les rapetisse plus et ne les éloigne plus du bord."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logotipovi naslova na stranicama s detaljima obrezuju se na vidljivi znak, pa ih prazan rub koji imaju neke slike logotipa više ne smanjuje niti odmiče od ruba."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A részletes oldalak címlogói a látható jelre vágódnak, így egyes logóképek üres szegélye már nem teszi őket kisebbé, és nem tolja el őket a széltől."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I loghi dei titoli nelle pagine di dettaglio vengono ritagliati sul marchio visibile, così il bordo vuoto di alcune immagini del logo non li rimpicciolisce più né li allontana dal margine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細ページのタイトルロゴは見える部分に合わせて切り取られるようになりました。一部のロゴ画像にある空白の余白のせいで、ロゴが小さくなったり端から離れたりすることはもうありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상세 페이지의 타이틀 로고가 보이는 부분에 맞게 잘립니다. 일부 로고 이미지에 있는 빈 여백 때문에 로고가 작아지거나 가장자리에서 밀려나는 일이 더 이상 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tittellogoer på detaljsider beskjæres til det synlige merket, så den tomme kanten noen logobilder har, ikke lenger gjør dem mindre eller skyver dem bort fra kanten."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titellogo's op detailpagina's worden bijgesneden tot het zichtbare beeldmerk, zodat de lege rand die sommige logo-afbeeldingen hebben ze niet meer kleiner maakt of van de rand af duwt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loga tytułów na stronach szczegółów są przycinane do widocznego znaku, więc pusty margines, który mają niektóre obrazy logo, nie zmniejsza ich już ani nie odsuwa od krawędzi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os logos de título nas páginas de detalhes são recortados na marca visível, então a borda vazia que algumas imagens de logo trazem não os deixa mais menores nem os afasta da margem."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os logótipos de título nas páginas de detalhe são recortados à marca visível, pelo que a margem vazia de algumas imagens de logótipo já não os torna mais pequenos nem os afasta da margem."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logourile de titlu de pe paginile de detalii sunt decupate la semnul vizibil, așa că marginea goală pe care o au unele imagini de logo nu le mai micșorează și nu le mai depărtează de margine."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логотипы на страницах с подробностями обрезаются по видимому знаку, поэтому пустые поля, которые есть у некоторых изображений логотипов, больше не уменьшают их и не отодвигают от края."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logá titulov na stránkach s detailmi sa orezávajú na viditeľný znak, takže prázdny okraj, ktorý majú niektoré obrázky lôg, ich už nezmenšuje ani neodsúva od okraja."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titellogotyper på detaljsidor beskärs till det synliga märket, så den tomma kanten som vissa logobilder har gör dem inte längre mindre och skjuter inte bort dem från kanten."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntı sayfalarındaki başlık logoları görünen işarete göre kırpılır; böylece bazı logo görsellerindeki boş kenar artık onları küçültmez ve kenardan uzaklaştırmaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логотипи на сторінках із подробицями обрізаються за видимим знаком, тож порожні поля, які мають деякі зображення логотипів, більше не зменшують їх і не відсувають від краю."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详情页上的标题标志会裁剪到可见部分，部分标志图片自带的空白边距不再让标志变小，也不再把它推离边缘。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細頁面上的標題標誌會裁切到可見部分，部分標誌圖片自帶的空白邊距不再讓標誌變小，也不再把它推離邊緣。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.logoMargin.title" : {
+      "comment" : "What's New 1.1.0: title for title logos trimmed to their visible mark (Sodalite#192).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loga bez prázdného okraje"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logoer uden tom kant"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logos ohne leeren Rand"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λογότυπα χωρίς κενό περιθώριο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logos without the empty border"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logotipos sin borde vacío"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logot ilman tyhjää reunaa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des logos sans marge vide"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logotipovi bez praznog ruba"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logók üres szegély nélkül"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loghi senza bordo vuoto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "余白のないロゴ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빈 여백 없는 로고"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logoer uten tom kant"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logo's zonder lege rand"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loga bez pustego marginesu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logos sem borda vazia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logótipos sem margem vazia"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logouri fără margine goală"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логотипы без пустых полей"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logá bez prázdneho okraja"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logotyper utan tom kant"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boş kenarı olmayan logolar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Логотипи без порожніх полів"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去掉空白边距的标志"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去除空白邊距的標誌"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.mac.body" : {
       "comment" : "What's New 1.1.0: body of the highlight introducing the native Mac app",
       "extractionState" : "manual",

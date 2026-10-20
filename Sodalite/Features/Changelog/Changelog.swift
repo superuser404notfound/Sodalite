@@ -242,6 +242,12 @@ enum Changelog {
                     "changelog.1_1_0.cardMenu.body",
                     icon: "contextualmenu.and.cursorarrow"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.logoMargin.title",
+                    "changelog.1_1_0.logoMargin.body",
+                    icon: "crop"
+                ),
             ]
         ),
         // MARK: 1.0.0
