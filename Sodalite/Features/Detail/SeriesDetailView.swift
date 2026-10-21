@@ -768,7 +768,8 @@ struct SeriesDetailView: View {
             DetailHeroSynopsis(
                 text: displayOverview,
                 isPending: overviewMayStillLand,
-                spoilerItem: displayItem
+                spoilerItem: displayItem,
+                onTap: openMoreDetails
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -835,6 +836,15 @@ struct SeriesDetailView: View {
 
     /// displayItem, so the episode state asks about the episode: the policy ignores a series, which
     /// is what keeps a show's own synopsis visible while its episodes are veiled.
+    /// The More Details button's action, shared with a tap on the panel's synopsis teaser.
+    private func openMoreDetails() {
+        if isSynopsisVeiled {
+            SpoilerReveal.reveal(displayItem, dependencies: dependencies, appState: appState)
+        } else {
+            isPresentingMoreDetails = true
+        }
+    }
+
     private var isSynopsisVeiled: Bool {
         SpoilerReveal.isHidden(displayItem, dependencies: dependencies, appState: appState)
     }
@@ -1154,11 +1164,7 @@ struct SeriesDetailView: View {
                     // per-SERIES rule, and two identical glyphs in one row would be a one-off reveal
                     // and a standing setting wearing the same face. Circular, so it reads as this
                     // button in another state rather than as a different control.
-                    if isSynopsisVeiled {
-                        SpoilerReveal.reveal(displayItem, dependencies: dependencies, appState: appState)
-                    } else {
-                        isPresentingMoreDetails = true
-                    }
+                    openMoreDetails()
                 }
             )
             .focused($focusedAction, equals: .moreDetails)
@@ -1280,9 +1286,12 @@ struct SeriesDetailView: View {
     // MARK: - Season Section
 
     /// The selected season's synopsis, when the library has one. The box and the focus routing read the same accessor, so an up-move can never be aimed at a box that is not on screen.
+    /// Metadata providers often copy the series plot onto a single season, and the panel above
+    /// already carries that text, so a season overview equal to the series one counts as none.
     private func seasonOverview(vm: DetailViewModel) -> String? {
         guard let overview = vm.selectedSeason?.overview?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !overview.isEmpty else { return nil }
+              !overview.isEmpty,
+              overview != vm.item.overview?.trimmingCharacters(in: .whitespacesAndNewlines) else { return nil }
         return overview
     }
 

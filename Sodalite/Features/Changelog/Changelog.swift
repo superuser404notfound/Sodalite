@@ -183,6 +183,12 @@ enum Changelog {
                     icon: "person.badge.key"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.synopsisTap.title",
+                    "changelog.1_1_0.synopsisTap.body",
+                    icon: "text.alignleft"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.multiview.title",
                     "changelog.1_1_0.multiview.body",
