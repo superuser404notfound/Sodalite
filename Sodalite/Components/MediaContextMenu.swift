@@ -36,8 +36,44 @@ extension View {
     /// per-user marks the detail page offers. `open` takes the item to show, which for Go to Show is
     /// the card's series rather than the card. A card whose tap goes through `stableTap` must set
     /// `longPressOpensMenu`, or the press opens the card on its way into the menu (Sodalite#75).
+    ///
+    /// On tvOS the remote's Play button on the focused card starts the same playback as the menu's
+    /// Play (Sodalite#196), the way the TV app, Netflix and Hulu answer it.
     func mediaContextMenu(for item: JellyfinItem, open: @escaping (JellyfinItem) -> Void) -> some View {
         contextMenu { MediaContextMenu(item: item, open: open) }
+            .modifier(PlayButtonStartsPlayback(item: item))
+    }
+}
+
+extension PlayMediaItemAction {
+    /// The card types whose Play goes straight to the player: a series plays its next episode.
+    static func plays(_ item: JellyfinItem) -> Bool {
+        item.type == .movie || item.type == .episode || item.type == .series
+    }
+}
+
+/// Attached only where the screen publishes `playMediaItem` and the card can play, because a
+/// handler here takes the press from the tab root's music toggle above it.
+private struct PlayButtonStartsPlayback: ViewModifier {
+    let item: JellyfinItem
+
+    @Environment(\.dependencies) private var dependencies
+    @Environment(\.playMediaItem) private var playMediaItem
+
+    func body(content: Content) -> some View {
+        if let playMediaItem, PlayMediaItemAction.plays(item) {
+            content.onPlayPauseCommandCompat {
+                // Background music keeps the button it already had.
+                let music = dependencies.musicPlaybackCoordinator
+                if music.currentItem != nil {
+                    music.togglePlayPause()
+                } else {
+                    playMediaItem(item)
+                }
+            }
+        } else {
+            content
+        }
     }
 }
 
@@ -68,7 +104,7 @@ private struct MediaContextMenu: View {
             }
         }
 
-        if let playMediaItem, item.type == .movie || item.type == .episode || item.type == .series {
+        if let playMediaItem, PlayMediaItemAction.plays(item) {
             Button(hasPosition ? "detail.resume" : "detail.play", systemImage: "play.fill") {
                 playMediaItem(item)
             }

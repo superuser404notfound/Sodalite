@@ -25,12 +25,15 @@ struct SearchView: View {
     /// where only the last one attached ever presents, and the older path dies without a warning.
     private enum Destination: Identifiable {
         case library(JellyfinItem)
+        /// A result's Play: its detail page, straight into the player.
+        case play(JellyfinItem, fromBeginning: Bool)
         case catalog(SeerrMedia)
         case person(PersonRoute)
 
         var id: String {
             switch self {
             case .library(let item): "library-\(item.id)"
+            case .play(let item, let fromBeginning): "play-\(item.id)-\(fromBeginning)"
             case .catalog(let media): "catalog-\(media.stableKey)"
             case .person(let route): "person-\(route.id)"
             }
@@ -54,11 +57,17 @@ struct SearchView: View {
                 }
             }
             .reservesShellChrome()
+            // Below the cover, so a detail page's own rows do not ask this host for a second one.
+            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+                destination = .play(item, fromBeginning: fromBeginning)
+            })
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $destination) { destination in
                 switch destination {
                 case .library(let item):
                     DetailRouterView(item: item)
+                case .play(let item, let fromBeginning):
+                    DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: fromBeginning)
                 case .catalog(let media):
                     CatalogDetailView(media: media)
                 case .person(let route):

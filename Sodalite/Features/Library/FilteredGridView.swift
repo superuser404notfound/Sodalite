@@ -34,6 +34,9 @@ struct FilteredGridView: View {
     @State private var items: [JellyfinItem]
     @State private var isLoading: Bool
     @State private var selectedItem: JellyfinItem?
+    /// How `selectedItem` opens: a card's Play opens its detail page straight into the player.
+    @State private var selectedPlays = false
+    @State private var selectedPlaysFromBeginning = false
     /// A folder tapped in a folder-browsed library; opens its own grid one level down (Sodalite#180).
     @State private var selectedFolder: JellyfinItem?
     @State private var showPlayer = false
@@ -320,6 +323,12 @@ struct FilteredGridView: View {
                 if showsRail { rail }
             }
         }
+        // On the grid only, so a detail page pushed from here does not inherit it.
+        .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+            selectedPlays = true
+            selectedPlaysFromBeginning = fromBeginning
+            selectedItem = item
+        })
         .overlay {
             if let userID = sessionUserID {
                 PlayerLauncher(
@@ -346,7 +355,7 @@ struct FilteredGridView: View {
         .hidesNavigationBarChrome()
         .hidesShellTabBar()
         .navigationDestination(item: $selectedItem) { item in
-            DetailRouterView(item: item)
+            DetailRouterView(item: item, autoPlay: selectedPlays, autoPlayFromBeginning: selectedPlaysFromBeginning)
                 .detailCoverPush()
         }
         .navigationDestination(item: $selectedFolder) { folder in
@@ -526,7 +535,12 @@ struct FilteredGridView: View {
     }
 
     private func open(_ item: JellyfinItem) {
-        if item.type == .folder { selectedFolder = item } else { selectedItem = item }
+        if item.type == .folder {
+            selectedFolder = item
+        } else {
+            selectedPlays = false
+            selectedItem = item
+        }
     }
 
     /// A slot's card, or its placeholder until the page lands. Both focusable under the slot index,
