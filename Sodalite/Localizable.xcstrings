@@ -79863,6 +79863,330 @@
         }
       }
     },
+    "changelog.1_1_0.synopsisTap.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu a iPadu otevře klepnutí na popis v horní části stránky filmu nebo seriálu Další informace. Sezóna, jejíž popis jen opakuje popis seriálu, se už nezobrazuje dvakrát."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad åbner et tryk på beskrivelsen øverst på en film- eller serieside Flere detaljer. En sæson, hvis beskrivelse blot gentager seriens, vises ikke længere to gange."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf iPhone und iPad öffnet ein Tippen auf die Beschreibung oben auf einer Film- oder Serienseite Mehr Details. Eine Staffel, deren Beschreibung nur die der Serie wiederholt, steht nicht mehr doppelt da."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone και iPad, ένα άγγιγμα στην περίληψη στο πάνω μέρος μιας σελίδας ταινίας ή σειράς ανοίγει τις Περισσότερες λεπτομέρειες. Μια σεζόν της οποίας η περιγραφή απλώς επαναλαμβάνει εκείνη της σειράς δεν εμφανίζεται πια δύο φορές."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone and iPad, tapping the synopsis at the top of a film or series page opens More Details. A season whose description only repeats the series one no longer shows up twice."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iPhone y iPad, al tocar la sinopsis en la parte superior de una página de película o serie se abre Más detalles. Una temporada cuya descripción solo repite la de la serie ya no aparece dos veces."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhonessa ja iPadissa elokuvan tai sarjan sivun yläosan juoniselostuksen napauttaminen avaa Lisätiedot. Kautta, jonka kuvaus vain toistaa sarjan kuvauksen, ei enää näytetä kahdesti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone et iPad, toucher le synopsis en haut d'une page de film ou de série ouvre Plus de détails. Une saison dont la description ne fait que répéter celle de la série n'apparaît plus en double."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhoneu i iPadu dodir sažetka na vrhu stranice filma ili serije otvara Više detalja. Sezona čiji opis samo ponavlja opis serije više se ne prikazuje dvaput."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-on és iPaden a film- vagy sorozatoldal tetején lévő leírásra koppintva megnyílnak a További részletek. Az az évad, amelynek leírása csak a sorozatét ismétli, már nem jelenik meg kétszer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su iPhone e iPad, toccando la trama in cima alla pagina di un film o di una serie si apre Altri dettagli. Una stagione la cui descrizione ripete solo quella della serie non compare più due volte."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone と iPad では、映画やシリーズのページ上部にあるあらすじをタップすると詳細情報が開きます。シリーズと同じ説明しか持たないシーズンは、二重に表示されなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone과 iPad에서 영화나 시리즈 페이지 상단의 줄거리를 탭하면 상세 정보가 열립니다. 시리즈 설명을 그대로 반복하는 시즌 설명은 더 이상 두 번 표시되지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad åpner et trykk på handlingen øverst på en film- eller serieside Flere detaljer. En sesong der beskrivelsen bare gjentar seriens, vises ikke lenger to ganger."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op iPhone en iPad opent een tik op de samenvatting bovenaan een film- of seriepagina Meer details. Een seizoen waarvan de beschrijving alleen die van de serie herhaalt, staat er niet meer dubbel."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie i iPadzie stuknięcie opisu u góry strony filmu lub serialu otwiera Więcej szczegółów. Sezon, którego opis tylko powtarza opis serialu, nie jest już pokazywany dwa razy."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e no iPad, tocar na sinopse no topo da página de um filme ou série abre Mais detalhes. Uma temporada cuja descrição só repete a da série não aparece mais duas vezes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e no iPad, tocar na sinopse no topo da página de um filme ou série abre Mais detalhes. Uma temporada cuja descrição apenas repete a da série já não aparece duas vezes."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe iPhone și iPad, o atingere pe rezumatul din partea de sus a paginii unui film sau serial deschide Mai multe detalii. Un sezon a cărui descriere doar o repetă pe cea a serialului nu mai apare de două ori."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone и iPad нажатие на описание вверху страницы фильма или сериала открывает «Подробнее». Сезон, описание которого лишь повторяет описание сериала, больше не показывается дважды."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone a iPade otvorí ťuknutie na popis v hornej časti stránky filmu alebo seriálu Ďalšie podrobnosti. Séria, ktorej popis len opakuje popis seriálu, sa už nezobrazuje dvakrát."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone och iPad öppnar ett tryck på handlingen överst på en film- eller seriesida Fler detaljer. En säsong vars beskrivning bara upprepar seriens visas inte längre två gånger."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone ve iPad'de bir film ya da dizi sayfasının üstündeki özete dokunmak Daha Fazla Ayrıntı'yı açar. Açıklaması yalnızca dizininkini tekrarlayan bir sezon artık iki kez gösterilmiyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone та iPad натискання на опис угорі сторінки фільму чи серіалу відкриває «Докладніше». Сезон, опис якого лише повторює опис серіалу, більше не показується двічі."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上，轻点电影或剧集页面顶部的简介即可打开更多详情。描述只是重复剧集简介的季不再重复显示。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上，點一下電影或影集頁面頂端的簡介即可開啟更多詳細資訊。描述只是重複影集簡介的季不再重複顯示。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.synopsisTap.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popis otevře Další informace"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beskrivelsen åbner Flere detaljer"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Beschreibung öffnet Mehr Details"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η περίληψη ανοίγει τις Περισσότερες λεπτομέρειες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The synopsis opens More Details"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La sinopsis abre Más detalles"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juoniselostus avaa Lisätiedot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le synopsis ouvre Plus de détails"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sažetak otvara Više detalja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A leírás megnyitja a További részleteket"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La trama apre Altri dettagli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あらすじから詳細情報へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "줄거리를 눌러 상세 정보 열기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handlingen åpner Flere detaljer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De samenvatting opent Meer details"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opis otwiera Więcej szczegółów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sinopse abre Mais detalhes"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sinopse abre Mais detalhes"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezumatul deschide Mai multe detalii"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Описание открывает «Подробнее»"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popis otvorí Ďalšie podrobnosti"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handlingen öppnar Fler detaljer"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özet, Daha Fazla Ayrıntı'yı açar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Опис відкриває «Докладніше»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻点简介查看更多详情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點一下簡介查看更多詳細資訊"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.tvLogin.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

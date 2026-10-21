@@ -20,6 +20,9 @@ struct DetailHeroSynopsis: View {
     /// Sodalite#50. The teaser is veiled by exactly the same rule as the box below the fold, or a
     /// hidden episode synopsis would simply be printed one screen higher.
     var spoilerItem: JellyfinItem?
+    /// What a tap on the teaser does on touch: the page's More Details action, so the truncated
+    /// text is not a dead end. tvOS leaves the panel outside the focus engine and ignores it.
+    var onTap: (() -> Void)?
 
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -48,6 +51,10 @@ struct DetailHeroSynopsis: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .spoilerVeil(isHidden: isSpoilerHidden, style: .text)
+                #if !os(tvOS)
+                .contentShape(Rectangle())
+                .onTapGesture { onTap?() }
+                #endif
         } else if isPending {
             // Reserved, not a skeleton. The panel already carries a material, and three grey bars
             // inside it read as more chrome than the fetch they stand in for is worth.

@@ -500,7 +500,8 @@ struct MovieDetailView: View {
             DetailHeroSynopsis(
                 text: vm.item.overview,
                 isPending: !vm.hasFullDetail,
-                spoilerItem: vm.item
+                spoilerItem: vm.item,
+                onTap: { openMoreDetails(vm: vm) }
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -549,6 +550,15 @@ struct MovieDetailView: View {
         dependencies.hdr10PlusProbeStore.carriesHDR10Plus(
             item: vm.item,
             sourceID: versionSelection.preferredSourceID(for: vm.item))
+    }
+
+    /// The More Details button's action, shared with a tap on the panel's synopsis teaser.
+    private func openMoreDetails(vm: DetailViewModel) {
+        if isSynopsisVeiled(vm: vm) {
+            SpoilerReveal.reveal(vm.item, dependencies: dependencies, appState: appState)
+        } else {
+            isPresentingMoreDetails = true
+        }
     }
 
     private func isSynopsisVeiled(vm: DetailViewModel) -> Bool {
@@ -753,11 +763,7 @@ struct MovieDetailView: View {
                     // per-SERIES rule, and two identical glyphs in one row would be a one-off reveal
                     // and a standing setting wearing the same face. Circular, so it reads as this
                     // button in another state rather than as a different control.
-                    if isSynopsisVeiled(vm: vm) {
-                        SpoilerReveal.reveal(vm.item, dependencies: dependencies, appState: appState)
-                    } else {
-                        isPresentingMoreDetails = true
-                    }
+                    openMoreDetails(vm: vm)
                 }
             )
             .focused($focusedAction, equals: .moreDetails)
