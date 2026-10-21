@@ -29,6 +29,10 @@ final class LiveProgramsViewModel {
 
     private let service: JellyfinLiveTvServiceProtocol
     private let userID: String
+    /// The fetch under way, owned by the model rather than by whichever view asked for it. A tab page
+    /// rebuilt by a profile switch cancels the task that started the load, and a cancelled request
+    /// came back as "every category failed": the error page stood until the next tab change.
+    private var inFlight: Task<Void, Never>?
 
     init(service: JellyfinLiveTvServiceProtocol, userID: String) {
         self.service = service
@@ -74,9 +78,18 @@ final class LiveProgramsViewModel {
         return max(target, loadedAt.addingTimeInterval(minimumLifetime))
     }
 
-    /// Fan out one recommended-programs call per category.
+    /// One fetch at a time, shared: a second caller waits for the one under way instead of returning
+    /// at once and sleeping a whole lifetime on a snapshot that may never arrive.
     private func fetch() async {
-        guard !isLoading else { return }
+        if let inFlight { return await inFlight.value }
+        let task = Task { await performFetch() }
+        inFlight = task
+        await task.value
+        inFlight = nil
+    }
+
+    /// Fan out one recommended-programs call per category.
+    private func performFetch() async {
         isLoading = true
         defer { isLoading = false }
         let startedAt = Date()
