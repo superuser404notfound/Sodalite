@@ -266,6 +266,12 @@ enum Changelog {
                     "changelog.1_1_0.logoMargin.body",
                     icon: "crop"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.liveDelay.title",
+                    "changelog.1_1_0.liveDelay.body",
+                    icon: "clock.arrow.circlepath"
+                ),
             ]
         ),
         // MARK: 1.0.0

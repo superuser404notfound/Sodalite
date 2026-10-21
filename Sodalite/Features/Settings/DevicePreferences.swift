@@ -18,6 +18,7 @@ final class DevicePreferences {
         static let playerRotationLocked = "playback.playerRotationLocked"
         static let networkBufferDepth = "playback.networkBufferDepth"
         static let liveBufferDepth = "playback.liveBufferDepth"
+        static let liveDelay = "playback.liveDelay"
         static let liveTeletextPage = "playback.liveTeletextPage"
         static let streamingQualityWifi = "playback.streamingQualityWifi"
         static let streamingQualityCellular = "playback.streamingQualityCellular"
@@ -63,6 +64,11 @@ final class DevicePreferences {
 
     var liveBufferDepth: PlaybackPreferences.LiveBufferDepth {
         didSet { store.set(liveBufferDepth.rawValue, forKey: Keys.liveBufferDepth) }
+    }
+
+    /// The link this box is on decides it, not the profile.
+    var liveDelay: PlaybackPreferences.LiveDelay {
+        didSet { store.set(liveDelay.rawValue, forKey: Keys.liveDelay) }
     }
 
     var liveTeletextPage: PlaybackPreferences.LiveTeletextPage {
@@ -117,6 +123,8 @@ final class DevicePreferences {
             .flatMap(PlaybackPreferences.NetworkBufferDepth.init(rawValue:)) ?? .system
         self.liveBufferDepth = store.string(forKey: Keys.liveBufferDepth)
             .flatMap(PlaybackPreferences.LiveBufferDepth.init(rawValue:)) ?? .ninetyMinutes
+        self.liveDelay = store.string(forKey: Keys.liveDelay)
+            .flatMap(PlaybackPreferences.LiveDelay.init(rawValue:)) ?? .off
         self.liveTeletextPage = store.string(forKey: Keys.liveTeletextPage)
             .flatMap(PlaybackPreferences.LiveTeletextPage.init(rawValue:)) ?? .auto
         self.streamingQualityWifi = store.string(forKey: Keys.streamingQualityWifi)
@@ -144,6 +152,7 @@ final class DevicePreferences {
         update(\.playerRotationLocked)
         update(\.networkBufferDepth)
         update(\.liveBufferDepth)
+        update(\.liveDelay)
         update(\.liveTeletextPage)
         update(\.streamingQualityWifi)
         update(\.streamingQualityCellular)
