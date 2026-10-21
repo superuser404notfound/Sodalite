@@ -39,6 +39,8 @@ struct SubtitleOverlayView: View {
     /// Lowercased active subtitle codec ("ass"/"ssa"/"subrip"/...); drives the raw-event-line
     /// stripper for the fallback where an ASS track is active but the styled renderer bailed.
     let activeSubtitleCodec: String?
+    /// Same gate for the secondary track: under `preserveASSMarkup` its ASS cues are raw event lines too.
+    var secondarySubtitleCodec: String? = nil
 
     /// While a secondary track is selected, the primary renders through the plain-text overlay
     /// (not libass) so both lines stack without overlap; libass positions ASS primaries opaquely
@@ -168,8 +170,9 @@ struct SubtitleOverlayView: View {
                     cue.placement == nil ? renderLine(for: cue) : nil
                 }
                 let secondaryLines: [String] = activeCues(in: secondaryCues, maxDuration: secondaryMaxCueDuration).compactMap { cue in
-                    guard case .text(let raw) = cue.body, !raw.isEmpty else { return nil }
-                    return raw
+                    guard case .text(let raw) = cue.body else { return nil }
+                    let display = isASSSecondaryActive ? strippedASSText(raw) : raw
+                    return display.isEmpty ? nil : display
                 }
                 if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
                     stackedText(
@@ -189,6 +192,10 @@ struct SubtitleOverlayView: View {
     /// cue text bodies are still RAW event lines (`ReadOrder,Layer,...,Text`), stripped before display.
     private var isASSTrackActive: Bool {
         activeSubtitleCodec == "ass" || activeSubtitleCodec == "ssa"
+    }
+
+    private var isASSSecondaryActive: Bool {
+        secondarySubtitleCodec == "ass" || secondarySubtitleCodec == "ssa"
     }
 
     /// Fallback when the styled renderer is unavailable: raw event lines

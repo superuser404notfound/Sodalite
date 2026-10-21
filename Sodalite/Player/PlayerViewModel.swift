@@ -262,6 +262,11 @@ final class PlayerViewModel {
     }
     var secondarySubtitleMaxCueDuration: Double = 60
     var activeSecondarySubtitleIndex: Int?
+    /// Lowercased Jellyfin codec of the secondary track; gates the same raw-ASS stripper as the primary.
+    var activeSecondarySubtitleCodec: String? {
+        guard let index = activeSecondarySubtitleIndex else { return nil }
+        return subtitleStreams.first(where: { $0.index == index })?.codec?.lowercased()
+    }
 
     /// Audio tracks in picker order (container-default first); picker UI indexes here, not `player.audioTracks`.
     var displayAudioTracks: [TrackInfo] {

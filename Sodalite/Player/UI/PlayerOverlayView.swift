@@ -841,6 +841,7 @@ private struct SubtitleLayer: View {
                 assRenderer: viewModel.assRenderer,
                 assReloadSignal: viewModel.assReloadSignal,
                 activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                 hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                 videoSize: viewModel.videoSize,
                 pictureMode: viewModel.pictureMode

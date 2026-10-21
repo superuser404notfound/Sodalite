@@ -27,6 +27,7 @@ struct ExternalSubtitleView: View {
                     assRenderer: nil,
                     assReloadSignal: viewModel.assReloadSignal,
                     activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                    secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                     hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                     videoSize: viewModel.videoSize
                     // No pictureMode: the external window pins its layer to .resizeAspect
