@@ -136,76 +136,10 @@ struct LiveTransportBar: View {
 
                 Spacer()
 
-                if !viewModel.isAtLiveEdge {
-                    TransportTrackLabel(
-                        label: String(localized: "livetv.returnToLive", defaultValue: "Return to Live"),
-                        icon: "forward.end.alt.fill",
-                        showsLabel: true,
-                        isFocused: returnToLiveFocused
-                    )
-                }
-
-                if !viewModel.displayAudioTracks.isEmpty {
-                    // Same gap and the same label rule as the VOD bar (#124): no off-state, so the
-                    // chip stays a glyph until focus (or its open menu, which holds focus) asks.
-                    VStack(spacing: 12) {
-                        if isAudioDropdownOpen {
-                            PlayerTrackDropdownList(items: audioDropdownItems)
-                        }
-                        TransportTrackLabel(
-                            label: activeAudioLabel,
-                            icon: "speaker.wave.2",
-                            showsLabel: audioFocused,
-                            isFocused: audioFocused
-                        )
-                    }
-                }
-
-                if !viewModel.displaySubtitleStreams.isEmpty {
-                    VStack(spacing: 12) {
-                        if isSubtitleDropdownOpen {
-                            PlayerTrackDropdownList(items: subtitleDropdownItems)
-                        }
-                        TransportTrackLabel(
-                            label: activeSubtitleLabel,
-                            icon: "captions.bubble",
-                            showsLabel: hasActiveSubtitle || subtitleFocused,
-                            isFocused: subtitleFocused
-                        )
-                    }
-                }
-
-                if viewModel.isPiPAvailable {
-                    TransportTrackLabel(
-                        label: String(localized: "player.pip", defaultValue: "Picture in Picture"),
-                        icon: "pip.enter",
-                        showsLabel: false,
-                        isFocused: pipFocused
-                    )
-                    .opacity(viewModel.isPiPPossible ? 1.0 : 0.4)
-                }
-
-                #if os(tvOS)
-                if viewModel.offersMultiview {
-                    TransportTrackLabel(
-                        label: String(localized: "multiview.button", defaultValue: "Multiview"),
-                        icon: "rectangle.split.2x2",
-                        showsLabel: viewModel.controlsFocus == .multiviewButton,
-                        isFocused: viewModel.controlsFocus == .multiviewButton
-                    )
-                }
-                #endif
-
-                // The chip the VOD bar has always had. Without it the stats panel existed on a live channel
-                // and had no way to be opened on tvOS, which is where a live route or a tuner id is worth
-                // reading; the touch bar on iOS never gated it, so the two players disagreed.
-                if viewModel.preferences.showStatsForNerds {
-                    TransportTrackLabel(
-                        label: String(localized: "player.stats", defaultValue: "Stats"),
-                        icon: "info.circle",
-                        showsLabel: false,
-                        isFocused: infoFocused || viewModel.showStatsOverlay
-                    )
+                // Drawn from the focus order, as the VOD bar is: the viewer's arrangement (Sodalite#194)
+                // and every data gate live in one place, so a chip on screen is always a focus stop.
+                ForEach(viewModel.liveTransportFocusOrder, id: \.self) { control in
+                    controlChip(control)
                 }
 
                 LiveBadge(isAtLiveEdge: viewModel.isAtLiveEdge)
@@ -236,6 +170,71 @@ struct LiveTransportBar: View {
         .animation(.smooth(duration: 0.25), value: viewModel.isPlaying)
         .animation(.smooth(duration: 0.32), value: viewModel.controlsFocus)
         .animation(.smooth(duration: 0.32), value: viewModel.trackDropdown)
+    }
+
+    @ViewBuilder
+    private func controlChip(_ control: PlayerViewModel.ControlsFocus) -> some View {
+        switch control {
+        case .returnToLiveButton:
+            TransportTrackLabel(
+                label: String(localized: "livetv.returnToLive", defaultValue: "Return to Live"),
+                icon: "forward.end.alt.fill",
+                showsLabel: true,
+                isFocused: returnToLiveFocused
+            )
+        case .audioButton:
+            // Same gap and the same label rule as the VOD bar (#124): no off-state, so the
+            // chip stays a glyph until focus (or its open menu, which holds focus) asks.
+            VStack(spacing: 12) {
+                if isAudioDropdownOpen {
+                    PlayerTrackDropdownList(items: audioDropdownItems)
+                }
+                TransportTrackLabel(
+                    label: activeAudioLabel,
+                    icon: "speaker.wave.2",
+                    showsLabel: audioFocused,
+                    isFocused: audioFocused
+                )
+            }
+        case .subtitleButton:
+            VStack(spacing: 12) {
+                if isSubtitleDropdownOpen {
+                    PlayerTrackDropdownList(items: subtitleDropdownItems)
+                }
+                TransportTrackLabel(
+                    label: activeSubtitleLabel,
+                    icon: "captions.bubble",
+                    showsLabel: hasActiveSubtitle || subtitleFocused,
+                    isFocused: subtitleFocused
+                )
+            }
+        case .pipButton:
+            TransportTrackLabel(
+                label: String(localized: "player.pip", defaultValue: "Picture in Picture"),
+                icon: "pip.enter",
+                showsLabel: false,
+                isFocused: pipFocused
+            )
+            .opacity(viewModel.isPiPPossible ? 1.0 : 0.4)
+        case .multiviewButton:
+            TransportTrackLabel(
+                label: String(localized: "multiview.button", defaultValue: "Multiview"),
+                icon: "rectangle.split.2x2",
+                showsLabel: viewModel.controlsFocus == .multiviewButton,
+                isFocused: viewModel.controlsFocus == .multiviewButton
+            )
+        case .infoButton:
+            // Without this chip the stats panel existed on a live channel and had no way to be
+            // opened on tvOS, which is where a live route or a tuner id is worth reading.
+            TransportTrackLabel(
+                label: String(localized: "player.stats", defaultValue: "Stats"),
+                icon: "info.circle",
+                showsLabel: false,
+                isFocused: infoFocused || viewModel.showStatsOverlay
+            )
+        default:
+            EmptyView()
+        }
     }
 
     // MARK: - Scrub Preview

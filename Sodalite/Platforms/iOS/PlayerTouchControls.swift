@@ -113,20 +113,35 @@ struct PlayerTouchControls: View {
             // won its row and crushed whatever shared it).
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 12) {
-                    if PlayerOrientation.isPhone {
-                        rotationLockButton
+                    // The viewer's arrangement (Sodalite#194); the iPad has no rotation lock to show.
+                    ForEach(controls.visibleControls(in: .topBar), id: \.self) { control in
+                        topBarButton(control)
                     }
-                    childLockButton
-                    // Auto-PiP (swipe-Home) is AVKit's own; no manual button (a custom AVPictureInPictureController
-                    // breaks AVKit's auto-PiP and can't survive backgrounding). AirPlay button for discoverability.
-                    AirPlayRouteButton(tint: .white)
-                        .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
                 }
                 if viewModel.videoFormat != .sdr {
                     VideoFormatBadge(format: viewModel.videoFormat, compact: true)
                 }
             }
+        }
+    }
+
+    private var controls: PlayerControlsLayout { viewModel.preferences.playerControls }
+
+    @ViewBuilder
+    private func topBarButton(_ control: PlayerControl) -> some View {
+        switch control {
+        case .rotationLock where PlayerOrientation.isPhone:
+            rotationLockButton
+        case .childLock:
+            childLockButton
+        case .airPlay:
+            // Auto-PiP (swipe-Home) is AVKit's own; no manual button (a custom AVPictureInPictureController
+            // breaks AVKit's auto-PiP and can't survive backgrounding). AirPlay button for discoverability.
+            AirPlayRouteButton(tint: .white)
+                .frame(width: 44, height: 44)
+                .background(.ultraThinMaterial, in: Circle())
+        default:
+            EmptyView()
         }
     }
 
@@ -239,46 +254,51 @@ struct PlayerTouchControls: View {
     // icon under a full row. Landscape and iPad still measure to a single row.
     private var iconRow: some View {
         FlowLayout(alignment: .center, spacing: isPad ? 28 : 20, balanced: true) {
-            if viewModel.isLiveSession {
-                if !viewModel.isAtLiveEdge {
-                    returnToLiveButton
-                }
-            } else {
-                iconButton("arrow.counterclockwise") { viewModel.restartFromBeginning() }
-                    .accessibilityLabel(Text("player.restart"))
+            // The prompts lead, outside the viewer's arrangement, as on tvOS (Sodalite#194).
+            if viewModel.isLiveSession && !viewModel.isAtLiveEdge {
+                returnToLiveButton
             }
             if viewModel.activeSkipSegment != nil {
                 iconButton("forward.end.fill") { viewModel.skipActiveSegment() }
             }
-            if viewModel.seasonEpisodes.count > 1 {
-                iconButton("list.bullet") { activePicker = .episodes }
+            // One list for both session kinds: the touch bar has never had a live row of its own.
+            ForEach(controls.visibleControls(in: .transport), id: \.self) { control in
+                iconRowButton(control)
             }
-            // Gated on chapter data alone (it used to vanish on any series episode), and on a split-bar
-            // glyph so it never reads as the episode list it can now stand next to.
-            if viewModel.chapters.count > 1 {
-                iconButton("rectangle.split.3x1") { activePicker = .chapters }
-            }
-            if !viewModel.displayAudioTracks.isEmpty {
-                iconButton("speaker.wave.2") { activePicker = .audio }
-            }
-            if !viewModel.displaySubtitleStreams.isEmpty || viewModel.supportsSubtitleSearch {
-                iconButton("captions.bubble") { activePicker = .subtitle }
-            }
-            if viewModel.supportsQualityChoice {
-                iconButton("dial.medium") { activePicker = .quality }
-            }
+        }
+    }
+
+    @ViewBuilder
+    private func iconRowButton(_ control: PlayerControl) -> some View {
+        switch control {
+        case .restart where !viewModel.isLiveSession:
+            iconButton("arrow.counterclockwise") { viewModel.restartFromBeginning() }
+                .accessibilityLabel(Text("player.restart"))
+        case .episodes where viewModel.seasonEpisodes.count > 1:
+            iconButton("list.bullet") { activePicker = .episodes }
+        // Gated on chapter data alone (it used to vanish on any series episode), and on a split-bar
+        // glyph so it never reads as the episode list it can now stand next to.
+        case .chapters where viewModel.chapters.count > 1:
+            iconButton("rectangle.split.3x1") { activePicker = .chapters }
+        case .audio where !viewModel.displayAudioTracks.isEmpty:
+            iconButton("speaker.wave.2") { activePicker = .audio }
+        case .subtitles where !viewModel.displaySubtitleStreams.isEmpty || viewModel.supportsSubtitleSearch:
+            iconButton("captions.bubble") { activePicker = .subtitle }
+        case .quality where viewModel.supportsQualityChoice:
+            iconButton("dial.medium") { activePicker = .quality }
+        case .speed:
             iconButton("gauge.with.needle") { activePicker = .speed }
-            // Sodalite#156: picture mode sets videoGravity on this device's layer, which nobody is
-            // looking at while the picture plays on a receiver or an external display.
-            if ExternalPlaybackPresentation.localPictureControlsApply(
-                destination: viewModel.externalPlaybackDestination) {
-                iconButton(pictureIcon) { activePicker = .picture }
+        // Sodalite#156: picture mode sets videoGravity on this device's layer, which nobody is
+        // looking at while the picture plays on a receiver or an external display.
+        case .picture where ExternalPlaybackPresentation.localPictureControlsApply(
+            destination: viewModel.externalPlaybackDestination):
+            iconButton(pictureIcon) { activePicker = .picture }
+        case .stats:
+            iconButton("info.circle", active: viewModel.showStatsOverlay) {
+                viewModel.showStatsOverlay.toggle()
             }
-            if viewModel.preferences.showStatsForNerds {
-                iconButton("info.circle", active: viewModel.showStatsOverlay) {
-                    viewModel.showStatsOverlay.toggle()
-                }
-            }
+        default:
+            EmptyView()
         }
     }
 

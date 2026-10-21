@@ -52,6 +52,11 @@ struct PlayerGestureCatcher: View {
                         destination: viewModel.externalPlaybackDestination) {
                         zone = .none
                     }
+                    // A swipe the viewer switched off is a dead strip, like the center (Sodalite#194).
+                    if let control = Self.control(for: zone),
+                       !viewModel.preferences.playerControls.isVisible(control, in: .gestures) {
+                        zone = .none
+                    }
                     if isVertical, zone != .none {
                         panAxis = .vertical
                         panZone = zone
@@ -67,6 +72,14 @@ struct PlayerGestureCatcher: View {
                 else if panZone == .volume { viewModel.setVolume(Float(level)) }
             }
             .onEnded { _ in panAxis = .undecided; panZone = .none }
+    }
+
+    private static func control(for zone: PanZone) -> PlayerControl? {
+        switch zone {
+        case .brightness: .brightnessSwipe
+        case .volume: .volumeSwipe
+        case .none: nil
+        }
     }
 
     /// Classify a drag's start X into the left brightness strip, the right volume strip, or the dead center.

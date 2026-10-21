@@ -123,6 +123,12 @@ enum Changelog {
                     icon: "rectangle.on.rectangle"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.playerControls.title",
+                    "changelog.1_1_0.playerControls.body",
+                    icon: "slider.horizontal.below.rectangle"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.sleepClose.title",
                     "changelog.1_1_0.sleepClose.body",

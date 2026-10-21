@@ -3152,9 +3152,8 @@ final class PlayerViewModel {
     private func setActiveSkipSegment(_ newValue: ActiveSkipSegment?) {
         activeSkipSegment = newValue
         if newValue == nil && controlsFocus == .skipSegmentButton {
-            if !player.audioTracks.isEmpty { controlsFocus = .audioButton }
-            else if !subtitleStreams.isEmpty { controlsFocus = .subtitleButton }
-            else { controlsFocus = .speedButton }
+            // Read off the rendered order: the viewer may have hidden any fixed fallback (Sodalite#194).
+            controlsFocus = Self.upLanding(in: transportFocusOrder) ?? .progressBar
         }
     }
 

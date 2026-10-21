@@ -65,6 +65,9 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     var showNextEpisodeCard: Bool?
     /// Optional for the same reason. nil keeps the local value.
     var askForRatingAfterMovie: Bool?
+    /// Sodalite#194, the encoded `PlayerControlsLayout`. Optional for the same reason; nil keeps the
+    /// local layout.
+    var playerControls: String?
 }
 
 extension ProfilePlaybackPayload {
@@ -100,7 +103,8 @@ extension ProfilePlaybackPayload {
             subtitlesOnSkipBack: p.subtitlesOnSkipBack,
             touchpadScrubbing: p.touchpadScrubbing,
             showNextEpisodeCard: p.showNextEpisodeCard,
-            askForRatingAfterMovie: p.askForRatingAfterMovie
+            askForRatingAfterMovie: p.askForRatingAfterMovie,
+            playerControls: p.playerControls.encoded()
         )
     }
 
@@ -136,6 +140,9 @@ extension ProfilePlaybackPayload {
         if let touchpadScrubbing { p.touchpadScrubbing = touchpadScrubbing }
         if let showNextEpisodeCard { p.showNextEpisodeCard = showNextEpisodeCard }
         if let askForRatingAfterMovie { p.askForRatingAfterMovie = askForRatingAfterMovie }
+        if let playerControls {
+            p.playerControls = PlayerControlsLayout.decoded(playerControls, showsStats: p.showStatsForNerds)
+        }
     }
 }
 

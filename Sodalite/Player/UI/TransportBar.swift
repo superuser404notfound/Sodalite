@@ -69,10 +69,10 @@ struct TransportBar: View {
     /// unaware of the engine/extractor.
     let chapterThumbnail: @Sendable (Int) async -> CGImage?
     let pictureMode: PlaybackPreferences.PictureMode
-    /// "Stats for Nerds" info chip (off by default); toggles a side-panel overlay, no dropdown.
-    let showsInfoButton: Bool
-    /// PiP chip (tvOS, native path only); dimmed while AVKit reports PiP not possible.
-    let showsPiPButton: Bool
+    /// The chips left to right, prompts first: `PlayerViewModel.transportFocusOrder`, which already
+    /// holds every gate (track data, PiP, the viewer's arrangement from Sodalite#194).
+    let controlsOrder: [PlayerViewModel.ControlsFocus]
+    /// PiP chip dimmed while AVKit reports PiP not possible.
     let isPiPEnabled: Bool
     /// Whether the stats panel is open; gives the chip a "pressed" look so the state reads visually.
     let isStatsOverlayOpen: Bool
@@ -96,154 +96,10 @@ struct TransportBar: View {
             HStack(alignment: .bottom, spacing: 16) {
                 Spacer()
 
-                trackButton(
-                    label: String(localized: "player.restart", defaultValue: "Restart"),
-                    icon: "arrow.counterclockwise",
-                    isFocused: controlsFocus == .restartButton,
-                    persistsLabel: false,
-                    dropdown: [],
-                    isOpen: false
-                )
-
-                if let skipSegmentLabel {
-                    trackButton(
-                        label: skipSegmentLabel,
-                        icon: "forward.end.fill",
-                        isFocused: controlsFocus == .skipSegmentButton,
-                        persistsLabel: false,
-                        dropdown: [],
-                        isOpen: false
-                    )
-                }
-
-                if let nextEpisodeLabel {
-                    trackButton(
-                        label: nextEpisodeLabel,
-                        icon: "play.fill",
-                        isFocused: controlsFocus == .nextEpisodeButton,
-                        persistsLabel: true,
-                        dropdown: [],
-                        isOpen: false,
-                        countdownProgress: nextEpisodeCountdownProgress
-                    )
-                }
-
-                if seasonEpisodes.count > 1 {
-                    trackButton(
-                        label: episodeButtonLabel,
-                        icon: "list.bullet",
-                        isFocused: controlsFocus == .episodeButton,
-                        // No off-state to report, so nothing to pin: focus (and an open menu, which
-                        // holds focus) still reveals "S1, E5". Same rule as Speed at 1x (#124).
-                        persistsLabel: false,
-                        dropdown: episodeDropdownItems,
-                        isOpen: isEpisodeDropdownOpen
-                    )
-                }
-
-                // Gated on chapter data alone. It used to be suppressed on any series episode, which
-                // took chapter navigation away from every remux that carries real ones. The split-bar
-                // glyph is what keeps it apart from the episode list next to it.
-                if chapters.count > 1 {
-                    trackButton(
-                        label: chapterButtonLabel,
-                        icon: "rectangle.split.3x1",
-                        isFocused: controlsFocus == .chapterButton,
-                        persistsLabel: false,
-                        dropdown: chapterDropdownItems,
-                        isOpen: isChapterDropdownOpen
-                    )
-                }
-
-                if !audioTracks.isEmpty {
-                    let activeTrack = audioTracks.first(where: { $0.id == activeAudioIndex })
-                    trackButton(
-                        label: activeTrack.map { TrackDisplayFormatter.shortName(for: $0) }
-                            ?? String(localized: "player.audio", defaultValue: "Audio"),
-                        icon: "speaker.wave.2",
-                        isFocused: controlsFocus == .audioButton,
-                        persistsLabel: false,
-                        dropdown: audioDropdownItems,
-                        isOpen: isAudioDropdownOpen
-                    )
-                }
-
-                if !subtitleStreams.isEmpty || supportsSubtitleSearch {
-                    let activeStream = activeSubtitleIndex.flatMap { idx in
-                        subtitleStreams.first(where: { $0.index == idx })
-                    }
-                    trackButton(
-                        label: activeStream.map { TrackDisplayFormatter.subtitleShortName(for: $0) }
-                            ?? String(localized: "player.subtitles.off", defaultValue: "Off"),
-                        icon: "captions.bubble",
-                        isFocused: controlsFocus == .subtitleButton,
-                        // Subtitles are the one picker here with an off-state, so this is the chip
-                        // that follows Speed literally: "Off" is the default and needs no words.
-                        // Keyed on the resolved stream, not the index: an index with no stream
-                        // behind it renders "Off", and pinning that would be a lie.
-                        persistsLabel: activeStream != nil,
-                        dropdown: {
-                            if case .secondarySubtitle = trackDropdown { return secondarySubtitleDropdownItems }
-                            return subtitleDropdownItems
-                        }(),
-                        isOpen: isSubtitleDropdownOpen || isSecondarySubtitleDropdownOpen
-                    )
-                }
-
-                if viewModel.supportsQualityChoice {
-                    trackButton(
-                        label: viewModel.displayedStreamingQuality.shortLabel,
-                        icon: "dial.medium",
-                        isFocused: controlsFocus == .qualityButton,
-                        // Pinned off Original, like Speed off 1x: a capped session should say so.
-                        persistsLabel: viewModel.displayedStreamingQuality != .original,
-                        dropdown: qualityDropdownItems,
-                        isOpen: isQualityDropdownOpen
-                    )
-                }
-
-                trackButton(
-                    label: TransportBar.speedLabel(for: activeSpeedIndex),
-                    icon: "gauge.with.needle",
-                    isFocused: controlsFocus == .speedButton,
-                    // Label persists only off 1x; at normal speed it collapses to the gauge icon.
-                    persistsLabel: !TransportBar.isDefaultSpeed(activeSpeedIndex),
-                    dropdown: speedDropdownItems,
-                    isOpen: isSpeedDropdownOpen
-                )
-
-                trackButton(
-                    label: pictureButtonLabel,
-                    icon: pictureButtonIcon,
-                    isFocused: controlsFocus == .pictureButton,
-                    // Icon already swaps 16:9 vs fill glyph, so the mode reads without a pinned label.
-                    persistsLabel: false,
-                    dropdown: pictureDropdownItems,
-                    isOpen: isPictureDropdownOpen
-                )
-
-                if showsPiPButton {
-                    trackButton(
-                        label: String(localized: "player.pip", defaultValue: "Picture in Picture"),
-                        icon: "pip.enter",
-                        isFocused: controlsFocus == .pipButton,
-                        persistsLabel: false,
-                        dropdown: [],
-                        isOpen: false
-                    )
-                    .opacity(isPiPEnabled ? 1.0 : 0.4)
-                }
-
-                if showsInfoButton {
-                    // Info chip toggles the stats side panel (no dropdown); looks pressed while open.
-                    trackButton(
-                        label: String(localized: "player.stats", defaultValue: "Stats"),
-                        icon: "info.circle",
-                        isFocused: controlsFocus == .infoButton || isStatsOverlayOpen,
-                        persistsLabel: false,
-                        dropdown: [],
-                        isOpen: false
-                    )
+                // The bar draws exactly the focus order, so a button the viewer hid (Sodalite#194) or
+                // the content cannot fill is neither drawn nor a stop under left/right.
+                ForEach(controlsOrder, id: \.self) { control in
+                    controlButton(control)
                 }
             }
             .padding(.bottom, 4)
@@ -728,6 +584,146 @@ struct TransportBar: View {
     }
 
     // MARK: - Track Button + Dropdown
+
+    /// One chip of the row. The gates live in `PlayerViewModel.transportFocusOrder`; a control
+    /// reaches here only when it is in the order, so nothing below checks its own data again.
+    @ViewBuilder
+    private func controlButton(_ control: PlayerViewModel.ControlsFocus) -> some View {
+        switch control {
+        case .restartButton:
+            trackButton(
+                label: String(localized: "player.restart", defaultValue: "Restart"),
+                icon: "arrow.counterclockwise",
+                isFocused: controlsFocus == .restartButton,
+                persistsLabel: false,
+                dropdown: [],
+                isOpen: false
+            )
+        case .skipSegmentButton:
+            trackButton(
+                label: skipSegmentLabel ?? "",
+                icon: "forward.end.fill",
+                isFocused: controlsFocus == .skipSegmentButton,
+                persistsLabel: false,
+                dropdown: [],
+                isOpen: false
+            )
+        case .nextEpisodeButton:
+            trackButton(
+                label: nextEpisodeLabel ?? "",
+                icon: "play.fill",
+                isFocused: controlsFocus == .nextEpisodeButton,
+                persistsLabel: true,
+                dropdown: [],
+                isOpen: false,
+                countdownProgress: nextEpisodeCountdownProgress
+            )
+        case .episodeButton:
+            trackButton(
+                label: episodeButtonLabel,
+                icon: "list.bullet",
+                isFocused: controlsFocus == .episodeButton,
+                // No off-state to report, so nothing to pin: focus (and an open menu, which
+                // holds focus) still reveals "S1, E5". Same rule as Speed at 1x (#124).
+                persistsLabel: false,
+                dropdown: episodeDropdownItems,
+                isOpen: isEpisodeDropdownOpen
+            )
+        case .chapterButton:
+            // The split-bar glyph is what keeps it apart from the episode list next to it.
+            trackButton(
+                label: chapterButtonLabel,
+                icon: "rectangle.split.3x1",
+                isFocused: controlsFocus == .chapterButton,
+                persistsLabel: false,
+                dropdown: chapterDropdownItems,
+                isOpen: isChapterDropdownOpen
+            )
+        case .audioButton:
+            let activeTrack = audioTracks.first(where: { $0.id == activeAudioIndex })
+            trackButton(
+                label: activeTrack.map { TrackDisplayFormatter.shortName(for: $0) }
+                    ?? String(localized: "player.audio", defaultValue: "Audio"),
+                icon: "speaker.wave.2",
+                isFocused: controlsFocus == .audioButton,
+                persistsLabel: false,
+                dropdown: audioDropdownItems,
+                isOpen: isAudioDropdownOpen
+            )
+        case .subtitleButton:
+            let activeStream = activeSubtitleIndex.flatMap { idx in
+                subtitleStreams.first(where: { $0.index == idx })
+            }
+            trackButton(
+                label: activeStream.map { TrackDisplayFormatter.subtitleShortName(for: $0) }
+                    ?? String(localized: "player.subtitles.off", defaultValue: "Off"),
+                icon: "captions.bubble",
+                isFocused: controlsFocus == .subtitleButton,
+                // Subtitles are the one picker here with an off-state, so this is the chip
+                // that follows Speed literally: "Off" is the default and needs no words.
+                // Keyed on the resolved stream, not the index: an index with no stream
+                // behind it renders "Off", and pinning that would be a lie.
+                persistsLabel: activeStream != nil,
+                dropdown: {
+                    if case .secondarySubtitle = trackDropdown { return secondarySubtitleDropdownItems }
+                    return subtitleDropdownItems
+                }(),
+                isOpen: isSubtitleDropdownOpen || isSecondarySubtitleDropdownOpen
+            )
+        case .qualityButton:
+            trackButton(
+                label: viewModel.displayedStreamingQuality.shortLabel,
+                icon: "dial.medium",
+                isFocused: controlsFocus == .qualityButton,
+                // Pinned off Original, like Speed off 1x: a capped session should say so.
+                persistsLabel: viewModel.displayedStreamingQuality != .original,
+                dropdown: qualityDropdownItems,
+                isOpen: isQualityDropdownOpen
+            )
+        case .speedButton:
+            trackButton(
+                label: TransportBar.speedLabel(for: activeSpeedIndex),
+                icon: "gauge.with.needle",
+                isFocused: controlsFocus == .speedButton,
+                // Label persists only off 1x; at normal speed it collapses to the gauge icon.
+                persistsLabel: !TransportBar.isDefaultSpeed(activeSpeedIndex),
+                dropdown: speedDropdownItems,
+                isOpen: isSpeedDropdownOpen
+            )
+        case .pictureButton:
+            trackButton(
+                label: pictureButtonLabel,
+                icon: pictureButtonIcon,
+                isFocused: controlsFocus == .pictureButton,
+                // Icon already swaps 16:9 vs fill glyph, so the mode reads without a pinned label.
+                persistsLabel: false,
+                dropdown: pictureDropdownItems,
+                isOpen: isPictureDropdownOpen
+            )
+        case .pipButton:
+            trackButton(
+                label: String(localized: "player.pip", defaultValue: "Picture in Picture"),
+                icon: "pip.enter",
+                isFocused: controlsFocus == .pipButton,
+                persistsLabel: false,
+                dropdown: [],
+                isOpen: false
+            )
+            .opacity(isPiPEnabled ? 1.0 : 0.4)
+        case .infoButton:
+            // Info chip toggles the stats side panel (no dropdown); looks pressed while open.
+            trackButton(
+                label: String(localized: "player.stats", defaultValue: "Stats"),
+                icon: "info.circle",
+                isFocused: controlsFocus == .infoButton || isStatsOverlayOpen,
+                persistsLabel: false,
+                dropdown: [],
+                isOpen: false
+            )
+        case .progressBar, .multiviewButton, .returnToLiveButton:
+            EmptyView()
+        }
+    }
 
     private func trackButton(label: String, icon: String, isFocused: Bool, persistsLabel: Bool, dropdown: [DropdownItem], isOpen: Bool, countdownProgress: Double? = nil) -> some View {
         // 12, not 6: the menu was crammed onto its own chip (#124). The column grows upward from a

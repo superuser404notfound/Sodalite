@@ -104,7 +104,7 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                 // Engage the orientation mode BEFORE presenting: the system validates the player VC's
                 // supportedInterfaceOrientations against the app's allowed set at present time, so in
                 // locked mode the delegate must already permit landscape or it throws "no common orientation".
-                PlayerOrientation.engage(locked: preferences.playerRotationLocked, session: playerVC.orientationSession)
+                PlayerOrientation.engage(locked: preferences.appliesRotationLock, session: playerVC.orientationSession)
                 #endif
                 return playerVC
             }
