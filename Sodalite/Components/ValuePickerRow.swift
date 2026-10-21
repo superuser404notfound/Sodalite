@@ -51,34 +51,26 @@ struct ValuePickerRow<Value: Hashable>: View {
     /// the narrow width, which collapses the label column and blows up the row height).
     private var isCompact: Bool { hSizeClass == .compact }
 
+    #if os(tvOS)
+    @State private var focusAcquiredAt: Date?
+    #endif
+
     var body: some View {
-        layout
-            .padding(.horizontal, isCompact ? 16 : 28)
-            .padding(.vertical, isCompact ? 16 : 22)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(focused ? Color.Theme.focusFill : Color.Theme.restFillFaint)
-            )
-            .focusStroke(cornerRadius: 16, isFocused: focused)
-            .focusResponse(.row, isFocused: focused)
-            .focusableSurface(true)
+        #if os(tvOS)
+        // A Button, not `stableTap`: the system routes Select to the focused button's action, while
+        // SwiftUI's long-press gesture only saw about one press in five on this row (measured on
+        // Wohnzimmer, 2026-10-21: 11 of 11 presses reached the window, a handful the gesture).
+        Button(action: selectPressed) { surface }
+            .buttonStyle(ValuePickerRowButtonStyle())
             .focused($focused)
-            .animation(.easeInOut(duration: 0.15), value: selection)
-            #if os(tvOS)
+            .onChange(of: focused) { _, isFocused in
+                focusAcquiredAt = isFocused ? Date() : nil
+            }
             .onMoveCommand { direction in
                 switch direction {
                 case .left:  advance(by: -1)
                 case .right: advance(by: 1)
                 default: break
-                }
-            }
-            // tvOS: Select flips a two-option row and opens the list of a longer one (focus-gated).
-            // iOS uses the tappable chevrons, both directions.
-            .stableTap(isFocused: focused) {
-                if ValuePickerAdvance.selectOpensList(count: options.count) {
-                    isListPresented = true
-                } else {
-                    advance(by: 1)
                 }
             }
             .menuPresentation(isPresented: $isListPresented) {
@@ -95,8 +87,41 @@ struct ValuePickerRow<Value: Hashable>: View {
                     onCancel: { isListPresented = false }
                 )
             }
-            #endif
+        #else
+        // iOS uses the tappable chevrons, both directions.
+        surface
+            .focusableSurface(true)
+            .focused($focused)
+        #endif
     }
+
+    private var surface: some View {
+        layout
+            .padding(.horizontal, isCompact ? 16 : 28)
+            .padding(.vertical, isCompact ? 16 : 22)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(focused ? Color.Theme.focusFill : Color.Theme.restFillFaint)
+            )
+            .focusStroke(cornerRadius: 16, isFocused: focused)
+            .focusResponse(.row, isFocused: focused)
+            .animation(.easeInOut(duration: 0.15), value: selection)
+    }
+
+    #if os(tvOS)
+    /// Select flips a two-option row and opens the list of a longer one. Dropped while focus is
+    /// younger than `StableTapModifier.stableFocusWindow`, the same drift guard every other row has.
+    private func selectPressed() {
+        guard let acquired = focusAcquiredAt,
+              Date().timeIntervalSince(acquired) >= StableTapModifier.stableFocusWindow
+        else { return }
+        if ValuePickerAdvance.selectOpensList(count: options.count) {
+            isListPresented = true
+        } else {
+            advance(by: 1)
+        }
+    }
+    #endif
 
     @ViewBuilder
     private var layout: some View {
@@ -192,3 +217,13 @@ struct ValuePickerRow<Value: Hashable>: View {
         }
     }
 }
+
+#if os(tvOS)
+/// Draws the row as it is: the row carries its own fill, stroke and lift, and a custom style keeps
+/// tvOS from adding its own focus effect on top.
+private struct ValuePickerRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+    }
+}
+#endif
