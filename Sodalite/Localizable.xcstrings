@@ -75659,6 +75659,330 @@
         }
       }
     },
+    "changelog.1_1_0.settingsList.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutí na nastavení s více než dvěma hodnotami nyní otevře seznam všech hodnot, takže každou z nich vybere jakýkoli ovladač, i Siri Remote první generace. Doleva a doprava hodnoty dál přepíná."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et klik på en indstilling med mere end to værdier åbner nu en liste over dem alle, så alle fjernbetjeninger kan nå hver værdi, også første generation af Siri Remote. Venstre og højre skifter stadig mellem dem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Klick auf eine Einstellung mit mehr als zwei Werten öffnet jetzt die Liste aller Werte, damit jede Fernbedienung jeden Wert erreicht, auch die Siri Remote der ersten Generation. Links und rechts schalten weiterhin durch."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα κλικ σε ρύθμιση με περισσότερες από δύο τιμές ανοίγει πλέον τη λίστα με όλες, ώστε κάθε τηλεχειριστήριο να φτάνει σε κάθε τιμή, ακόμη και το Siri Remote πρώτης γενιάς. Αριστερά και δεξιά εξακολουθούν να τις αλλάζουν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicking a setting with more than two values now opens a list of all of them, so every remote reaches every value, the first-generation Siri Remote included. Left and right still step through them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al pulsar un ajuste con más de dos valores ahora se abre la lista completa, así cualquier mando llega a cualquier valor, incluido el Siri Remote de primera generación. Izquierda y derecha siguen recorriéndolos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asetuksen, jolla on enemmän kuin kaksi arvoa, painaminen avaa nyt luettelon kaikista arvoista, joten jokainen kaukosäädin yltää jokaiseen arvoon, myös ensimmäisen sukupolven Siri Remote. Vasen ja oikea selaavat niitä edelleen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un clic sur un réglage à plus de deux valeurs ouvre désormais la liste complète, pour que chaque télécommande atteigne chaque valeur, y compris la Siri Remote de première génération. Gauche et droite les font toujours défiler."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik na postavku s više od dvije vrijednosti sada otvara popis svih vrijednosti, pa svaki daljinski upravljač dolazi do svake, uključujući Siri Remote prve generacije. Lijevo i desno i dalje ih mijenjaju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kettőnél több értékű beállításra kattintva most megnyílik az összes érték listája, így minden távirányító elér minden értéket, az első generációs Siri Remote is. Balra és jobbra továbbra is léptet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un clic su un'impostazione con più di due valori ora apre l'elenco completo, così ogni telecomando raggiunge ogni valore, compreso il Siri Remote di prima generazione. Sinistra e destra continuano a scorrerli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "値が3つ以上ある設定をクリックすると、すべての値のリストが開くようになりました。第1世代のSiri Remoteを含め、どのリモコンでもすべての値を選べます。左右での切り替えも引き続き使えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "값이 세 개 이상인 설정을 클릭하면 이제 모든 값의 목록이 열려, 1세대 Siri Remote를 포함한 모든 리모컨으로 모든 값을 선택할 수 있습니다. 왼쪽과 오른쪽으로도 계속 바꿀 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et klikk på en innstilling med mer enn to verdier åpner nå en liste over alle, slik at alle fjernkontroller når hver verdi, også førstegenerasjons Siri Remote. Venstre og høyre blar fortsatt gjennom dem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een klik op een instelling met meer dan twee waarden opent nu een lijst met alle waarden, zodat elke afstandsbediening elke waarde bereikt, ook de Siri Remote van de eerste generatie. Links en rechts bladeren er nog steeds doorheen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknięcie ustawienia z więcej niż dwiema wartościami otwiera teraz listę wszystkich wartości, więc każdy pilot dotrze do każdej z nich, także Siri Remote pierwszej generacji. W lewo i w prawo nadal je przełącza."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicar em um ajuste com mais de dois valores agora abre a lista completa, para que qualquer controle alcance qualquer valor, incluindo o Siri Remote de primeira geração. Esquerda e direita continuam alternando entre eles."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicar numa definição com mais de dois valores abre agora a lista completa, para que qualquer comando chegue a qualquer valor, incluindo o Siri Remote de primeira geração. Esquerda e direita continuam a percorrê-los."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un clic pe o setare cu mai mult de două valori deschide acum lista tuturor valorilor, astfel încât orice telecomandă ajunge la orice valoare, inclusiv Siri Remote de primă generație. Stânga și dreapta le parcurg în continuare."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажатие на настройку с более чем двумя значениями теперь открывает список всех значений, чтобы любой пульт мог выбрать любое из них, включая Siri Remote первого поколения. Влево и вправо по-прежнему переключают их."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutie na nastavenie s viac ako dvoma hodnotami teraz otvorí zoznam všetkých hodnôt, takže každý ovládač dosiahne každú z nich, aj Siri Remote prvej generácie. Doľava a doprava ich naďalej prepína."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ett klick på en inställning med fler än två värden öppnar nu en lista över alla, så att varje fjärrkontroll når varje värde, även första generationens Siri Remote. Vänster och höger bläddrar fortfarande igenom dem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İkiden fazla değeri olan bir ayara tıklamak artık tüm değerlerin listesini açıyor; böylece birinci nesil Siri Remote dahil her kumanda her değere ulaşabiliyor. Sol ve sağ ile geçiş de sürüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натискання на налаштування з більш ніж двома значеннями тепер відкриває список усіх значень, тож будь-який пульт може вибрати будь-яке з них, зокрема Siri Remote першого покоління. Ліворуч і праворуч і далі перемикають їх."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按具有两个以上值的设置时，现在会打开包含所有值的列表，任何遥控器都能选到每个值，包括第一代 Siri Remote。左右键仍可逐项切换。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按下具有兩個以上數值的設定時，現在會開啟包含所有數值的列表，任何遙控器都能選到每個數值，包括第一代 Siri Remote。左右鍵仍可逐項切換。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.settingsList.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nastavení ze seznamu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg indstillinger fra en liste"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen aus der Liste wählen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιλογή ρυθμίσεων από λίστα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick settings from a list"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige ajustes de una lista"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitse asetukset luettelosta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir les réglages dans une liste"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabir postavki s popisa"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beállítások kiválasztása listából"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli le impostazioni da un elenco"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定をリストから選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목록에서 설정 선택"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velg innstillinger fra en liste"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instellingen kiezen uit een lijst"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybór ustawień z listy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha ajustes em uma lista"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha definições numa lista"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alege setările dintr-o listă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбор настроек из списка"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výber nastavení zo zoznamu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj inställningar från en lista"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları listeden seçin"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибір налаштувань зі списку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从列表中选择设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從列表中選擇設定"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.showAll.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

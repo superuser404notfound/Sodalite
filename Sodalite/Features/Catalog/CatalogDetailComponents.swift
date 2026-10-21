@@ -82,7 +82,7 @@ struct CatalogPickerButtonStyle: ButtonStyle {
 /// 2026-09-09). Done stays on both, because a multi-select has something to confirm that Menu, now
 /// a cancel, no longer does.
 private struct CatalogOptionPanel<Rows: View>: View {
-    let title: String
+    let title: Text
     let onCancel: () -> Void
     /// Multi-select only. A single-select panel commits on the row press and has nothing to confirm.
     let onCommit: (() -> Void)?
@@ -99,7 +99,7 @@ private struct CatalogOptionPanel<Rows: View>: View {
         VStack(spacing: isCompact ? 18 : 28) {
             exits
                 .padding(.horizontal, gutter)
-            Text(title)
+            title
                 .font(isCompact ? .title3 : .title2)
                 .fontWeight(.semibold)
                 .padding(.horizontal, gutter)
@@ -198,13 +198,48 @@ struct CatalogPickerSheet: View {
         let label: String
     }
 
-    let title: String
+    let title: Text
     let options: [Option]
     let selectedID: String?
     let onSelect: (String) -> Void
     let onCancel: () -> Void
 
     @FocusState private var focusedID: String?
+
+    init(
+        title: String,
+        options: [Option],
+        selectedID: String?,
+        onSelect: @escaping (String) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        self.init(title: Text(title), options: options, selectedID: selectedID, onSelect: onSelect, onCancel: onCancel)
+    }
+
+    /// For a caller that holds its title as a catalog key (the settings rows).
+    init(
+        title: LocalizedStringKey,
+        options: [Option],
+        selectedID: String?,
+        onSelect: @escaping (String) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        self.init(title: Text(title), options: options, selectedID: selectedID, onSelect: onSelect, onCancel: onCancel)
+    }
+
+    private init(
+        title: Text,
+        options: [Option],
+        selectedID: String?,
+        onSelect: @escaping (String) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        self.title = title
+        self.options = options
+        self.selectedID = selectedID
+        self.onSelect = onSelect
+        self.onCancel = onCancel
+    }
 
     var body: some View {
         CatalogOptionPanel(title: title, onCancel: onCancel, onCommit: nil) {
@@ -248,7 +283,7 @@ struct CatalogMultiSelectSheet: View {
 
     var body: some View {
         CatalogOptionPanel(
-            title: title,
+            title: Text(title),
             onCancel: onCancel,
             onCommit: { onCommit(selection) }
         ) {

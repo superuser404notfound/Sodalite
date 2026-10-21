@@ -6,10 +6,10 @@ import SwiftUI
 /// testable. A two-option row is a TOGGLE and wraps in both directions; three or more are an ordered
 /// list and clamp at their ends.
 ///
-/// Sodalite#115: the select click is the only gesture that reaches every remote, and it only ever steps
-/// forward. With a clamped step that gave any toggle already sitting on its last option a click that did
-/// nothing, which is how "Stats for Nerds" could be switched on and never off again. Two states are peers,
-/// so there is no end for them to clamp against. For a longer list there is, and the greyed chevron says so.
+/// Sodalite#115: the select click is the only gesture that reaches every remote. On a toggle it steps,
+/// and a clamped step gave any toggle already sitting on its last option a click that did nothing, which
+/// is how "Stats for Nerds" could be switched on and never off again. Two states are peers, so there is
+/// no end for them to clamp against. For a longer list there is, and the greyed chevron says so.
 enum ValuePickerAdvance {
 
     /// The index a step lands on. `count` is the number of options.
@@ -24,9 +24,16 @@ enum ValuePickerAdvance {
     static func canMove(from current: Int, by step: Int, count: Int) -> Bool {
         index(from: current, by: step, count: count) != current
     }
+
+    /// Whether the select click opens the full list instead of stepping. A forward-only click on a
+    /// clamped list stops dead at its end and can only get back with left, which the first-generation
+    /// Siri Remote and a CEC TV remote do not reliably have; the list reaches every value in one pick.
+    static func selectOpensList(count: Int) -> Bool {
+        count > 2
+    }
 }
 
-/// Full-width settings row: left/right cycles options directly (no dropdown), Select also advances forward, chevrons are cues not focus targets.
+/// Full-width settings row: left/right steps through the options directly, Select flips a toggle or opens the list of a longer row, chevrons are cues not focus targets.
 struct ValuePickerRow<Value: Hashable>: View {
     let icon: String
     let title: LocalizedStringKey
@@ -38,6 +45,7 @@ struct ValuePickerRow<Value: Hashable>: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.settingsValueScope) private var valueScope
     @FocusState private var focused: Bool
+    @State private var isListPresented = false
 
     /// iPhone compact stacks the picker control under the label (the one-line tvOS row overflows
     /// the narrow width, which collapses the label column and blows up the row height).
@@ -64,11 +72,28 @@ struct ValuePickerRow<Value: Hashable>: View {
                 default: break
                 }
             }
-            // tvOS: Select also advances forward (focus-gated). iOS uses the tappable chevrons (both
-            // directions); on a list of three or more a forward-only tap still cannot reach a lower option,
-            // which is what the chevrons are for. On a two-option row it wraps, so a click is a full toggle.
+            // tvOS: Select flips a two-option row and opens the list of a longer one (focus-gated).
+            // iOS uses the tappable chevrons, both directions.
             .stableTap(isFocused: focused) {
-                advance(by: 1)
+                if ValuePickerAdvance.selectOpensList(count: options.count) {
+                    isListPresented = true
+                } else {
+                    advance(by: 1)
+                }
+            }
+            .menuPresentation(isPresented: $isListPresented) {
+                CatalogPickerSheet(
+                    title: title,
+                    options: options.indices.map { .init(id: String($0), label: label(options[$0])) },
+                    selectedID: String(currentIndex),
+                    onSelect: { id in
+                        if let index = Int(id), options.indices.contains(index) {
+                            selection = options[index]
+                        }
+                        isListPresented = false
+                    },
+                    onCancel: { isListPresented = false }
+                )
             }
             #endif
     }
