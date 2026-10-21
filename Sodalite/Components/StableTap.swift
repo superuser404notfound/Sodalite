@@ -1,6 +1,10 @@
 import SwiftUI
 
 /// Focusable-row activation gated on focus stability. Siri Remote finger drift in the last frames of a click can shift focus to a neighbour and activate the wrong tile; this drops presses until focus has been steady for `stableFocusWindow`. 80 ms is below human reaction to a focus shift (~200 ms) so it filters drift without latency on deliberate clicks. Caller still owns `.focusable`/`.focused` and styling.
+///
+/// Never on a view that also carries `.onMoveCommand`: there the long press saw about one Select press in
+/// five on tvOS 26 (measured on `ValuePickerRow`, 2026-10-21), while the same gesture on rows without it
+/// caught every press. Such a view is a `Button` with its own focus-age check, as `ValuePickerRow` is.
 struct StableTapModifier: ViewModifier {
     let isFocused: Bool
     /// Set on a row that also answers a hold (a `.contextMenu`). The press then decides on RELEASE and
