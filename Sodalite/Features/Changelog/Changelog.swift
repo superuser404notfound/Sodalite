@@ -177,6 +177,12 @@ enum Changelog {
                     icon: "list.number"
                 ),
                 ChangelogHighlight(
+                    .fix,
+                    "changelog.1_1_0.sparsePolicy.title",
+                    "changelog.1_1_0.sparsePolicy.body",
+                    icon: "person.badge.key"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.multiview.title",
                     "changelog.1_1_0.multiview.body",
