@@ -162,8 +162,7 @@ struct PlayerControlsSettingsView: View {
                 }
             )
             .settingsValueScope(.device)
-            .padding(.leading, hInset + 44)
-            .padding(.trailing, hInset)
+            .padding(.horizontal, hInset)
         }
     }
 
