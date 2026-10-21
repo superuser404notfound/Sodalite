@@ -72,6 +72,12 @@ struct HomeView: View {
             // and as scroll content margins, it changed nothing).
             .padding(.leading, shellLeadingSlot)
             .ignoresSafeArea(.container, edges: shellLeadingSlot > 0 ? .leading : [])
+            // The cards' Play (menu and remote button) takes the same autoplay route as the hero's.
+            // Below the covers, so a detail page's own rows do not ask this host for a second one.
+            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+                heroPlayFromBeginning = fromBeginning
+                heroPlayItem = item
+            })
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $selectedItem) { item in
                 DetailRouterView(item: item)
@@ -79,11 +85,6 @@ struct HomeView: View {
             .detailCover(item: $heroPlayItem) { item in
                 DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: heroPlayFromBeginning)
             }
-            // The cards' context-menu Play takes the same autoplay route as the hero's.
-            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
-                heroPlayFromBeginning = fromBeginning
-                heroPlayItem = item
-            })
             .environment(\.cardMenuWillOpen) { focusLeavesForMenu = true }
             .detailCover(item: $selectedFilter) { filter in
                 FilteredGridView(

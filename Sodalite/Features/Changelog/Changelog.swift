@@ -255,6 +255,12 @@ enum Changelog {
                     icon: "contextualmenu.and.cursorarrow"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.playButton.title",
+                    "changelog.1_1_0.playButton.body",
+                    icon: "playpause.fill"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.logoMargin.title",
                     "changelog.1_1_0.logoMargin.body",

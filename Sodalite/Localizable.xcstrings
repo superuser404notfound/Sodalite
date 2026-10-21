@@ -74363,6 +74363,328 @@
         }
       }
     },
+    "changelog.1_1_0.playButton.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na úvodní stránce, v knihovně a ve vyhledávání spustí tlačítko Přehrát na ovladači film, epizodu nebo seriál okamžitě. Seriál přehraje další epizodu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Hjem, i et bibliotek og i søgning starter fjernbetjeningens Afspil-knap en film, et afsnit eller en serie med det samme. En serie afspiller sit næste afsnit."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Startseite, in einer Mediathek und in der Suche startet die Play-Taste der Fernbedienung einen Film, eine Folge oder eine Serie sofort. Eine Serie spielt ihre nächste Folge."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Αρχική, σε μια βιβλιοθήκη και στην αναζήτηση, το κουμπί Αναπαραγωγής του τηλεχειριστηρίου ξεκινά αμέσως μια ταινία, ένα επεισόδιο ή μια σειρά. Μια σειρά παίζει το επόμενο επεισόδιό της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Home, in a library and in search, the remote's Play button starts a movie, episode or show right away. A show plays its next episode."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Inicio, en una biblioteca y en la búsqueda, el botón Reproducir del mando inicia al instante una película, un episodio o una serie. Una serie reproduce su siguiente episodio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kotinäkymässä, kirjastossa ja haussa kaukosäätimen toistopainike käynnistää elokuvan, jakson tai sarjan heti. Sarja toistaa seuraavan jaksonsa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur l'accueil, dans une bibliothèque et dans la recherche, le bouton Lecture de la télécommande lance aussitôt un film, un épisode ou une série. Une série lit son prochain épisode."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na početnoj stranici, u biblioteci i u pretraživanju tipka za reprodukciju na daljinskom upravljaču odmah pokreće film, epizodu ili seriju. Serija reproducira svoju sljedeću epizodu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kezdőlapon, egy könyvtárban és a keresésben a távirányító Lejátszás gombja azonnal elindítja a filmet, epizódot vagy sorozatot. Egy sorozat a következő epizódját játssza le."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nella Home, in una libreria e nella ricerca, il tasto Play del telecomando avvia subito un film, un episodio o una serie. Una serie riproduce il suo episodio successivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム、ライブラリ、検索で、映画・エピソード・番組を選んでリモコンの再生ボタンを押すとすぐに再生が始まります。番組の場合は次のエピソードが再生されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈, 보관함, 검색에서 영화, 에피소드 또는 시리즈에 초점을 두고 리모컨의 재생 버튼을 누르면 바로 재생됩니다. 시리즈는 다음 에피소드를 재생합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Hjem, i et bibliotek og i søk starter fjernkontrollens Spill av-knapp en film, en episode eller en serie med en gang. En serie spiller av neste episode."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Home, in een bibliotheek en in zoeken start de afspeelknop van de afstandsbediening een film, aflevering of serie meteen. Een serie speelt de volgende aflevering af."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na stronie głównej, w bibliotece i w wyszukiwaniu przycisk odtwarzania na pilocie od razu uruchamia film, odcinek lub serial. Serial odtwarza swój następny odcinek."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Tela Inicial, em uma biblioteca e na busca, o botão Reproduzir do controle remoto inicia na hora um filme, episódio ou série. Uma série reproduz o próximo episódio."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Início, numa biblioteca e na pesquisa, o botão Reproduzir do comando inicia de imediato um filme, episódio ou série. Uma série reproduz o episódio seguinte."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe pagina principală, într-o bibliotecă și în căutare, butonul Redare al telecomenzii pornește imediat un film, un episod sau un serial. Un serial redă episodul următor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На главной, в медиатеке и в поиске кнопка воспроизведения на пульте сразу запускает фильм, эпизод или сериал. Сериал воспроизводит следующий эпизод."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na úvodnej stránke, v knižnici a vo vyhľadávaní spustí tlačidlo Prehrať na ovládači film, epizódu alebo seriál okamžite. Seriál prehrá ďalšiu epizódu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Hem, i ett bibliotek och i sökningen startar fjärrkontrollens uppspelningsknapp en film, ett avsnitt eller en serie direkt. En serie spelar upp sitt nästa avsnitt."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana sayfada, bir kitaplıkta ve aramada kumandanın Oynat düğmesi bir filmi, bölümü veya diziyi hemen başlatır. Bir dizi sıradaki bölümünü oynatır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На головній, у медіатеці та в пошуку кнопка відтворення на пульті одразу запускає фільм, епізод або серіал. Серіал відтворює наступний епізод."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在主页、资料库和搜索中，按遥控器上的播放键即可立即播放电影、单集或剧集。剧集会播放下一集。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在主頁、資料庫和搜尋中，按遙控器上的播放鍵即可立即播放電影、單集或劇集。劇集會播放下一集。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.playButton.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrávání ovladačem Apple TV"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspil fra Apple TV-fjernbetjeningen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abspielen mit der Apple TV-Fernbedienung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναπαραγωγή από το τηλεχειριστήριο Apple TV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play from the Apple TV remote"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir desde el mando del Apple TV"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toisto Apple TV:n kaukosäätimestä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture depuis la télécommande Apple TV"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprodukcija s daljinskog upravljača Apple TV-a"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátszás az Apple TV távirányítójáról"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci dal telecomando di Apple TV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVリモコンから再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 리모컨으로 재생"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spill av fra Apple TV-fjernkontrollen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspelen met de Apple TV-afstandsbediening"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarzanie pilotem Apple TV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir pelo controle remoto da Apple TV"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir a partir do comando da Apple TV"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redare de pe telecomanda Apple TV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизведение с пульта Apple TV"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehrávanie ovládačom Apple TV"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela upp från Apple TV-fjärrkontrollen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV kumandasından oynat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворення з пульта Apple TV"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 Apple TV 遥控器直接播放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 Apple TV 遙控器直接播放"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.playerControls.body" : {
       "extractionState" : "manual",
       "localizations" : {
