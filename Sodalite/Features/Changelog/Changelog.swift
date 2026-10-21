@@ -195,6 +195,12 @@ enum Changelog {
                     icon: "person.2"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.topBar.title",
+                    "changelog.1_1_0.topBar.body",
+                    icon: "menubar.rectangle"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.multiview.title",
                     "changelog.1_1_0.multiview.body",

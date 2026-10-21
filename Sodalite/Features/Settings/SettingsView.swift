@@ -30,6 +30,7 @@ struct SettingsView: View {
                 }
                 .screenContentInset()
             }
+            .drivesShellBar()
             #if os(iOS)
             // The sheet has a swipe-down grabber, but an explicit close matches the gear that
             // opened it (and the detail cover). Pinned outside the ScrollView so it never scrolls;

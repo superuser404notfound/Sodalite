@@ -84,6 +84,7 @@ struct LiveProgramsView: View {
                     }
                     .padding(.vertical, hSizeClass == .compact ? 16 : 40)
                 }
+                .drivesShellBar()
                 #if os(iOS)
                 .refreshable { await model.refresh() }
                 #endif

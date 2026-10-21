@@ -453,6 +453,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical, 40)
             }
+            .drivesShellBar()
             .scrollsUnderShellChrome()
             #if os(tvOS)
             // The banner's art reaches past the scroll view's left edge, under the sidebar rail. The

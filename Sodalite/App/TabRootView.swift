@@ -49,23 +49,15 @@ struct TabRootView: View {
     @State private var pushStacks = TabPushStacks()
     #endif
 
-    private var iconColor: Color {
-        appearanceTheme.palette.navigation.color
-    }
-
     private var appearance: AppearancePreferences {
         dependencies.appearancePreferences
     }
 
+    #if !os(tvOS)
     @ViewBuilder
     private func tabLabel(_ tab: AppTab) -> some View {
         Label {
-            // The profile tab carries the name the corner badge used to show.
-            if tab == .profiles, let user = appState.activeUser {
-                Text(verbatim: user.name)
-            } else {
-                Text(tab.labelKey)
-            }
+            Text(tab.labelKey)
         } icon: {
             // .monochrome strips the baked white that "tv" renders hierarchically, which would override the tint and leave that icon gray.
             Image(systemName: tab.systemImage)
@@ -73,17 +65,14 @@ struct TabRootView: View {
         }
     }
 
-    /// Pending-approval count for the Catalog tab badge; nil for other tabs, tvOS, or a zero count
-    /// (a `.badge(0)` renders nothing).
+    /// Pending-approval count for the Catalog tab badge; nil for other tabs or a zero count (a
+    /// `.badge(0)` renders nothing).
     private func catalogBadgeCount(_ tab: AppTab) -> Int? {
-        #if !os(tvOS)
         guard tab == .catalog else { return nil }
         let count = dependencies.pendingRequestsMonitor.pendingApprovalCount ?? 0
         return count > 0 ? count : nil
-        #else
-        return nil
-        #endif
     }
+    #endif
 
     /// The probed tab set minus the ones the user switched off in settings (Sodalite#62).
     ///
@@ -117,10 +106,10 @@ struct TabRootView: View {
         ProfileShellLayout(profile: appState.profileKey, tabs: displayedTabs, style: appearance.navigationStyle)
     }
 
+    #if !os(tvOS)
     private var tabShell: some View {
         TabView(selection: $selectedTab) {
             ForEach(tabsOnScreen, id: \.self) { tab in
-                #if !os(tvOS)
                 if tab == .search {
                     Tab(value: tab, role: .search) {
                         tabContent(for: tab)
@@ -135,24 +124,20 @@ struct TabRootView: View {
                     }
                     .badge(catalogBadgeCount(tab) ?? 0)
                 }
-                #else
-                Tab(value: tab) {
-                    ShellChromeHost {
-                        tabContent(for: tab)
-                    }
-                } label: {
-                    tabLabel(tab)
-                }
-                #endif
             }
         }
     }
+    #endif
 
     /// Sodalite#140. iOS and iPadOS are on the adaptive sidebar unconditionally. tvOS asks the
     /// viewer, because the two styles are a different shell rather than a different skin: the
     /// sidebar hands its screens the full height the top bar reserves for itself. Flipping the
-    /// choice changes this view's type, so the whole TabView is rebuilt and every tab page starts
+    /// choice changes this view's type, so the whole shell is rebuilt and every tab page starts
     /// fresh. That is why the settings screen commits the change on the way out, not under focus.
+    ///
+    /// Both tvOS shells are Sodalite's own. The system sidebar cannot be tinted (Apple DTS:
+    /// "navigation controls are monochromatic", developer.apple.com/forums/thread/795226), and the
+    /// system top bar caps its pill at 1252pt, which cut off the last of six German tabs.
     @ViewBuilder
     private var styledTabShell: some View {
         #if !os(tvOS)
@@ -164,13 +149,13 @@ struct TabRootView: View {
         #else
         Group {
             if appearance.navigationStyle == .sidebar {
-                // Ours, not the system's. The system sidebar cannot be tinted at all (see the note
-                // on configureTabBarItemAppearance) and it covers the content instead of pushing it.
                 SidebarShell(tabs: tabsOnScreen, selectedTab: $selectedTab) { tab in
                     tabContent(for: tab)
                 }
             } else {
-                tabShell
+                TopBarShell(tabs: tabsOnScreen, selectedTab: $selectedTab) { tab in
+                    tabContent(for: tab)
+                }
             }
         }
         .background {
@@ -321,9 +306,6 @@ struct TabRootView: View {
             }
             await recoverOptionalTabs()
         }
-        .onAppear {
-            configureTabBarItemAppearance()
-        }
         // Combining turned on, a server excluded, or a secondary moved to an address that answers (Sodalite#85).
         .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
             loginProbeTask?.cancel()
@@ -332,10 +314,6 @@ struct TabRootView: View {
         .onChange(of: dependencies.sessionRegistry.routesRevision) { _, _ in
             loginProbeTask?.cancel()
             loginProbeTask = Task { await recoverOptionalTabs() }
-        }
-        .onChange(of: iconColor) { _, _ in
-            // Re-apply on accent change; UITabBarItem.appearance() reads at configure time, not live.
-            configureTabBarItemAppearance()
         }
         // One handler for the tab set and the selection, so both reach the bar in the same update
         // (see presentedTabs). Keyed on the DISPLAYED set, not the probed one: a tab the user switched
@@ -371,12 +349,6 @@ struct TabRootView: View {
             if result.landsOnHome {
                 DispatchQueue.main.async {
                     settingsEpoch &+= 1
-                }
-            }
-            if old.tabs != new.tabs {
-                // Async Live TV / Music insertion rebuilds the UITabBar; re-apply the tint next tick once the new bar exists.
-                DispatchQueue.main.async {
-                    configureTabBarItemAppearance()
                 }
             }
             if let before = old.profile, let after = new.profile, old.profile != new.profile {
@@ -500,72 +472,6 @@ struct TabRootView: View {
         }
     }
 
-    /// TOP BAR ONLY, and that is not a gap to close (Sodalite#140). A sidebar cannot be tinted:
-    /// measured on tvOS 26.5, `.tint`, `.foregroundStyle` on the label, `window.tintColor`,
-    /// `tintColor` on every view in the hierarchy and a baked `.alwaysOriginal` image all leave the
-    /// icons alone, the baked one even forces them black. There is no `UITabBar` under a sidebar to
-    /// begin with: the hierarchy is `_UIHostingView` plus `_UIInheritedView` and layers, so this
-    /// appearance proxy has nothing to reach. Apple DTS states it outright, "that's currently not
-    /// supported, navigation controls are monochromatic" (developer.apple.com/forums/thread/795226).
-    /// The viewer who wants the accent over the height keeps the top bar, which is what the switch
-    /// in Settings > Tabs is for.
-    ///
-    /// Tints tab-bar icons + titles via UITabBarAppearance.iconColor at bar creation. NOT per-item .alwaysOriginal images: tvOS re-templates mid-session-inserted items (Live TV / Music) gray and discards baked images, but iconColor tells it which color to template TO. (The gray-on-detail-RETURN is a separate tvOS 26 issue, addressed by presenting details as a full-screen cover so the bar is never hidden/removed.)
-    private func configureTabBarItemAppearance() {
-        #if os(tvOS)
-        let tintUIColor = UIColor(iconColor)
-
-        let itemAppearance = UITabBarItemAppearance()
-        itemAppearance.normal.iconColor = tintUIColor
-        itemAppearance.selected.iconColor = tintUIColor
-        itemAppearance.focused.iconColor = tintUIColor
-        // Titles: white at rest, accent when selected or focused.
-        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white]
-        itemAppearance.selected.titleTextAttributes = [.foregroundColor: tintUIColor]
-        itemAppearance.focused.titleTextAttributes = [.foregroundColor: tintUIColor]
-
-        let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        // tvOS may lay items stacked or inline by width; set all three so the tint holds.
-        appearance.stackedLayoutAppearance = itemAppearance
-        appearance.inlineLayoutAppearance = itemAppearance
-        appearance.compactInlineLayoutAppearance = itemAppearance
-
-        // Future tab bars (a rebuild allocates a new one) inherit this.
-        UITabBar.appearance().standardAppearance = appearance
-
-        // Repaint the tab bar that's already on screen.
-        for scene in UIApplication.shared.connectedScenes {
-            guard let windowScene = scene as? UIWindowScene else { continue }
-            for window in windowScene.windows {
-                Self.applyTabBarAppearance(appearance, tint: tintUIColor, in: window)
-            }
-        }
-        #endif
-    }
-
-    #if os(tvOS)
-    private static func applyTabBarAppearance(_ appearance: UITabBarAppearance, tint: UIColor, in view: UIView) {
-        if let tabBar = view as? UITabBar {
-            tabBar.standardAppearance = appearance
-            // The appearance proxy only governs items at CREATION; recolor the live instance directly so an accent change repaints the on-screen bar.
-            tabBar.tintColor = tint
-            tabBar.unselectedItemTintColor = tint
-            // A live bar keeps drawing the previous colour until its next layout pass, which a tab
-            // change triggers and a new appearance does not: a profile switch to another accent left
-            // the old one on screen. Measured in a bare TabView on the tvOS 26 simulator, 2026-09-17:
-            // without this the bar stayed blue after a switch to pink, with it the bar is pink at once;
-            // per-item appearance stayed blue, and re-setting items or the selection crashes a bar a
-            // tab bar controller owns.
-            tabBar.setNeedsLayout()
-            tabBar.layoutIfNeeded()
-        }
-        for subview in view.subviews {
-            applyTabBarAppearance(appearance, tint: tint, in: subview)
-        }
-    }
-    #endif
-
     #if os(iOS)
     /// Identifies the Settings sheet as the Guardian-PIN presenter while it is up.
     private static let settingsGateHost = "settings.sheet"
@@ -589,6 +495,7 @@ struct TabRootView: View {
                 }
                 #else
                 LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
+                    .reservesShellBar()
                 #endif
             case .catalog:
                 CatalogView()
@@ -634,7 +541,7 @@ struct TabRootView: View {
                      hSizeClass == .compact && !Self.scrollsUnderChrome.contains(tab) ? Self.gearChromeHeight : 0)
         .environment(\.detailCoverStack, pushStacks.stack(for: tab))
         // The iPhone's tab bar belongs to the tab pages; a pushed detail takes the whole screen, as
-        // the cover it replaced did. Owned here at the tab root, like tvOS's ShellChromeHost, rather
+        // the cover it replaced did. Owned here at the tab root, like the tvOS shells own theirs, rather
         // than by the pushed page: a hide a page applies to itself outlives the page (Sodalite#141),
         // and this one is recomputed from the stack that exists. .visible rather than .automatic,
         // which is what a stranded hide survives in.
