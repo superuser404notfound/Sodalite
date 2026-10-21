@@ -396,6 +396,7 @@ extension PlayerViewModel {
                 // short-GOP channels show a picture in ~3-6s instead of 18s+; long-GOP channels
                 // quantize back to standard behavior automatically.
                 liveJoinProfile: .fastZap,
+                liveEdgeCushionSeconds: preferences.liveDelay.seconds,
                 preserveASSMarkup: true,
                 // Engine picks the preferred-language audio on the first frame (#72), replacing the
                 // post-load selectAudioTrack reload that misfired on single-track channels.
@@ -531,6 +532,7 @@ extension PlayerViewModel {
             // bursty Jellyfin transcode fills the startup cushion at I/O speed either way; the
             // observed-cadence floor keeps bursty ingest patient.
             liveJoinProfile: .fastZap,
+            liveEdgeCushionSeconds: preferences.liveDelay.seconds,
             // Raw ASS event lines for the styled-subtitle path (ASSRenderCoordinator); only affects ASS/SSA content.
             preserveASSMarkup: true,
             // Engine picks the preferred-language audio on the first frame (#72), replacing the

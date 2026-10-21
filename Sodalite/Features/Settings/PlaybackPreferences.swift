@@ -252,6 +252,25 @@ final class PlaybackPreferences {
         }
     }
 
+    /// How far behind the broadcast live TV plays, passed to the engine as
+    /// `LoadOptions.liveEdgeCushionSeconds`: the buffer a slow or unsteady connection has against
+    /// the channel. The join waits until that much has arrived, so a channel takes up to that much
+    /// longer to start. Off keeps the engine's own distance.
+    enum LiveDelay: String, CaseIterable, Sendable, Identifiable {
+        case off, tenSeconds, twentySeconds, thirtySeconds, fortyFiveSeconds
+        var id: String { rawValue }
+        var titleKey: String { "settings.playback.liveDelay.\(rawValue)" }
+        var seconds: Double? {
+            switch self {
+            case .off:              return nil
+            case .tenSeconds:       return 10
+            case .twentySeconds:    return 20
+            case .thirtySeconds:    return 30
+            case .fortyFiveSeconds: return 45
+            }
+        }
+    }
+
     // MARK: - Properties
 
     var autoplayNextEpisode: Bool {
@@ -472,6 +491,11 @@ final class PlaybackPreferences {
     var liveBufferDepth: LiveBufferDepth {
         get { device.liveBufferDepth }
         set { device.liveBufferDepth = newValue }
+    }
+
+    var liveDelay: LiveDelay {
+        get { device.liveDelay }
+        set { device.liveDelay = newValue }
     }
 
     var streamingQualityWifi: StreamingQuality {

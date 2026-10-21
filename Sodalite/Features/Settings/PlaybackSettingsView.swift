@@ -262,6 +262,19 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
+                ValuePickerRow(
+                    icon: "clock.arrow.circlepath",
+                    title: "settings.playback.liveDelay",
+                    subtitle: "settings.playback.liveDelay.subtitle",
+                    options: PlaybackPreferences.LiveDelay.allCases,
+                    selection: Binding(
+                        get: { prefs.liveDelay },
+                        set: { prefs.liveDelay = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
                 sectionHeader("settings.playback.section.languages")
 
                 languageRow(
