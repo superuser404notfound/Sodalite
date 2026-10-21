@@ -47,6 +47,7 @@ final class PlaybackPreferences {
         static let rememberTrackSelections = "playback.rememberTrackSelections"
         static let subtitlesOnSkipBack = "playback.subtitlesOnSkipBack"
         static let touchpadScrubbing = "playback.touchpadScrubbing"
+        static let playerControls = "playback.playerControls"
     }
 
     // MARK: - Allowed Values
@@ -422,14 +423,26 @@ final class PlaybackPreferences {
         didSet { store.set(subtitlesOnSkipBack, forKey: Keys.subtitlesOnSkipBack) }
     }
 
+    /// Sodalite#194: which player controls show, and in what order. Stats lives in here too; it was
+    /// a device switch before, which seeds a profile that has no layout of its own yet.
+    var playerControls: PlayerControlsLayout {
+        didSet { store.set(playerControls.encoded(), forKey: Keys.playerControls) }
+    }
+
+    /// What the legacy cloud record still carries for older builds, which know Stats only as one
+    /// switch: on while any row still shows the chip.
+    var showStatsForNerds: Bool {
+        PlayerControlGroup.allCases.contains { playerControls.isVisible(.stats, in: $0) }
+    }
+
+    /// A lock whose button is hidden could never be released from the player, so it stops applying.
+    var appliesRotationLock: Bool {
+        playerRotationLocked && playerControls.isVisible(.rotationLock, in: .topBar)
+    }
+
     // MARK: - Device values
 
     // Pass-throughs to the one `DevicePreferences` every profile shares; see there.
-
-    var showStatsForNerds: Bool {
-        get { device.showStatsForNerds }
-        set { device.showStatsForNerds = newValue }
-    }
 
     var showEngineDiagnostics: Bool {
         get { device.showEngineDiagnostics }
@@ -566,6 +579,9 @@ final class PlaybackPreferences {
         self.rememberTrackSelections = store.object(forKey: Keys.rememberTrackSelections) as? Bool ?? true
         self.subtitlesOnSkipBack = store.object(forKey: Keys.subtitlesOnSkipBack) as? Bool ?? true
         self.touchpadScrubbing = store.object(forKey: Keys.touchpadScrubbing) as? Bool ?? true
+        self.playerControls = store.string(forKey: Keys.playerControls)
+            .map { PlayerControlsLayout.decoded($0, showsStats: device.showStatsForNerds) }
+            ?? .defaults(showsStats: device.showStatsForNerds)
     }
 
     /// `scope` nil is the unprefixed legacy space. Without a `device`, one is built over the same

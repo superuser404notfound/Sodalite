@@ -8,13 +8,15 @@ struct TransportFocusOrderTests {
                        episodeCount: Int = 1, chapterCount: Int = 0,
                        hasAudioTracks: Bool = true, hasSubtitles: Bool = true,
                        hasQualityChoice: Bool = false,
-                       isPiPAvailable: Bool = false, showsStats: Bool = false) -> [PlayerViewModel.ControlsFocus] {
+                       isPiPAvailable: Bool = false, showsStats: Bool = false,
+                       controls: [PlayerControl]? = nil) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.transportFocusOrder(
+            controls: controls ?? PlayerControlsLayout.defaults(showsStats: showsStats).visibleControls(in: .transport),
             hasSkippableSegment: hasSkippableSegment, hasNextEpisodePrompt: hasNextEpisodePrompt,
             episodeCount: episodeCount, chapterCount: chapterCount,
             hasAudioTracks: hasAudioTracks, hasSubtitles: hasSubtitles,
             hasQualityChoice: hasQualityChoice,
-            isPiPAvailable: isPiPAvailable, showsStats: showsStats)
+            isPiPAvailable: isPiPAvailable)
     }
 
     /// Sodalite#87: the rung sits with the stream choices, after subtitles and before speed.
@@ -24,16 +26,17 @@ struct TransportFocusOrderTests {
                 == [.restartButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton])
     }
 
-    @Test("restart leads the order and is always present")
-    func restartAlwaysFirst() {
+    @Test("by default restart leads the arranged part and needs no data")
+    func restartLeadsByDefault() {
         #expect(order().first == .restartButton)
-        #expect(order(hasSkippableSegment: true, episodeCount: 12, isPiPAvailable: true, showsStats: true).first == .restartButton)
+        #expect(order(episodeCount: 12, isPiPAvailable: true, showsStats: true).first == .restartButton)
         #expect(order(hasAudioTracks: false, hasSubtitles: false).first == .restartButton)
     }
 
-    @Test("the skip button sits between restart and the track buttons")
+    /// Sodalite#194: the prompts are not in the viewer's list and lead the row, ahead of it.
+    @Test("the skip button leads, ahead of restart")
     func skipSegmentPosition() {
-        #expect(order(hasSkippableSegment: true) == [.restartButton, .skipSegmentButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
+        #expect(order(hasSkippableSegment: true) == [.skipSegmentButton, .restartButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
     }
 
     /// Sodalite#103: with the transport open the floating prompt is suppressed and this button is
@@ -41,9 +44,9 @@ struct TransportFocusOrderTests {
     @Test("the next-episode button sits beside the skip button, and only while the prompt is up")
     func nextEpisodePosition() {
         #expect(order(hasNextEpisodePrompt: true)
-                == [.restartButton, .nextEpisodeButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
+                == [.nextEpisodeButton, .restartButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
         #expect(order(hasSkippableSegment: true, hasNextEpisodePrompt: true)
-                == [.restartButton, .skipSegmentButton, .nextEpisodeButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
+                == [.skipSegmentButton, .nextEpisodeButton, .restartButton, .audioButton, .subtitleButton, .speedButton, .pictureButton])
         #expect(!order().contains(.nextEpisodeButton))
     }
 
@@ -72,12 +75,33 @@ struct TransportFocusOrderTests {
 
     /// Up from the scrub bar lands on the leftmost control that is not "From Start"; reading it off
     /// the same order the bar renders from is what keeps that landing on a button that exists.
-    @Test("the up-from-scrub-bar landing is the leftmost control after restart")
+    @Test("the up-from-scrub-bar landing is the leftmost control that is not restart")
     func upFromProgressBarLanding() {
-        #expect(order(episodeCount: 12, chapterCount: 40).first(where: { $0 != .restartButton }) == .episodeButton)
-        #expect(order(episodeCount: 1, chapterCount: 40).first(where: { $0 != .restartButton }) == .chapterButton)
-        #expect(order(hasSkippableSegment: true, episodeCount: 12, chapterCount: 40).first(where: { $0 != .restartButton }) == .skipSegmentButton)
-        #expect(order(hasAudioTracks: false, hasSubtitles: false).first(where: { $0 != .restartButton }) == .speedButton)
+        #expect(PlayerViewModel.upLanding(in: order(episodeCount: 12, chapterCount: 40)) == .episodeButton)
+        #expect(PlayerViewModel.upLanding(in: order(episodeCount: 1, chapterCount: 40)) == .chapterButton)
+        #expect(PlayerViewModel.upLanding(in: order(hasSkippableSegment: true, episodeCount: 12, chapterCount: 40)) == .skipSegmentButton)
+        #expect(PlayerViewModel.upLanding(in: order(hasAudioTracks: false, hasSubtitles: false)) == .speedButton)
+    }
+
+    /// Sodalite#194: Up used to fall back to Speed, which the viewer can now hide.
+    @Test("with only restart left Up lands on it, with nothing left it stays on the bar")
+    func upLandingEdges() {
+        #expect(PlayerViewModel.upLanding(in: order(controls: [.restart])) == .restartButton)
+        #expect(PlayerViewModel.upLanding(in: order(controls: [])) == nil)
+        #expect(PlayerViewModel.upLanding(in: order(hasSkippableSegment: true, controls: [])) == .skipSegmentButton)
+    }
+
+    @Test("the viewer's arrangement sets the order and hides what it leaves out")
+    func arrangement() {
+        #expect(order(chapterCount: 40, showsStats: true, controls: [.stats, .chapters, .subtitles, .audio])
+                == [.infoButton, .chapterButton, .subtitleButton, .audioButton])
+        #expect(order(hasNextEpisodePrompt: true, controls: [.speed])
+                == [.nextEpisodeButton, .speedButton])
+    }
+
+    @Test("an arranged control still needs its data")
+    func arrangedControlKeepsItsGate() {
+        #expect(order(chapterCount: 0, controls: [.chapters, .pip, .quality]).isEmpty)
     }
 
     @Test("optional trailing buttons appear only when enabled")
@@ -94,11 +118,21 @@ struct LiveTransportFocusOrderTests {
     private func order(isAtLiveEdge: Bool = true, hasAudioTracks: Bool = false,
                        hasSubtitles: Bool = false, isPiPAvailable: Bool = false,
                        offersMultiview: Bool = false,
-                       showsStats: Bool = false) -> [PlayerViewModel.ControlsFocus] {
+                       showsStats: Bool = false,
+                       controls: [PlayerControl]? = nil) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.liveTransportFocusOrder(
+            controls: controls ?? PlayerControlsLayout.defaults(showsStats: showsStats).visibleControls(in: .live),
             isAtLiveEdge: isAtLiveEdge, hasAudioTracks: hasAudioTracks,
             hasSubtitles: hasSubtitles, isPiPAvailable: isPiPAvailable,
-            offersMultiview: offersMultiview, showsStats: showsStats)
+            offersMultiview: offersMultiview)
+    }
+
+    /// Sodalite#194: Return to Live is the live prompt and stays ahead of any arrangement.
+    @Test("the viewer's arrangement orders the live row behind Return to Live")
+    func liveArrangement() {
+        #expect(order(isAtLiveEdge: false, hasAudioTracks: true, hasSubtitles: true, showsStats: true,
+                      controls: [.stats, .subtitles])
+                == [.returnToLiveButton, .infoButton, .subtitleButton])
     }
 
     @Test("the multiview button sits after PiP and before stats, and only when offered")

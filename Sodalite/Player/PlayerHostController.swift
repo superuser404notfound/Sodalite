@@ -798,7 +798,7 @@ final class PlayerHostController: AVPlayerViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         #if os(iOS)
-        PlayerOrientation.engage(locked: viewModel.preferences.playerRotationLocked, session: orientationSession)
+        PlayerOrientation.engage(locked: viewModel.preferences.appliesRotationLock, session: orientationSession)
         viewModel.startVolumeObservation()
         #endif
         // Kick off playback as the modal starts appearing so network/demuxer work overlaps the present-then-layout sequence.
@@ -1679,10 +1679,11 @@ final class PlayerHostController: AVPlayerViewController {
                 }
                 // Read the rendered order rather than restate its gates: this used to be a hand-written
                 // chain that had to be kept in step with two other copies, and drifting from them is
-                // how Up lands on a button that is not on screen. "From Start" is skipped because it
-                // discards the resume position, an unwanted first stop for a single press of Up.
-                viewModel.controlsFocus = viewModel.transportFocusOrder
-                    .first(where: { $0 != .restartButton }) ?? .speedButton
+                // how Up lands on a button that is not on screen. With every control hidden
+                // (Sodalite#194) there is nothing above the bar, so focus stays on it.
+                if let landing = PlayerViewModel.upLanding(in: viewModel.transportFocusOrder) {
+                    viewModel.controlsFocus = landing
+                }
                 viewModel.scheduleControlsHide()
             case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()

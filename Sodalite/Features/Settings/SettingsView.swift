@@ -242,6 +242,17 @@ struct SettingsView: View {
                 PlaybackSettingsView()
             }
 
+            // The Mac player has its own transport, which this screen does not arrange.
+            #if !os(macOS)
+            SettingsTile(
+                icon: "slider.horizontal.below.rectangle",
+                title: "settings.playerControls.title",
+                subtitle: "settings.playerControls.subtitle"
+            ) {
+                PlayerControlsSettingsView()
+            }
+            #endif
+
             #if os(iOS)
             SettingsTile(
                 icon: "arrow.down.circle",

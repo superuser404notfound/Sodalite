@@ -296,16 +296,22 @@ struct PlayerOverlayView: View {
             .transition(.opacity)
     }
 
+    private var gestures: PlayerControlsLayout { viewModel.preferences.playerControls }
+
     private var swipeHintsRow: some View {
         HStack {
             // Sodalite#156: the brightness swipe stands down while the picture is elsewhere, so its
             // affordance goes with it. The volume one stays, it still reaches an AirPlay 2 receiver.
-            if ExternalPlaybackPresentation.localPictureControlsApply(
+            if gestures.isVisible(.brightnessSwipe, in: .gestures),
+               ExternalPlaybackPresentation.localPictureControlsApply(
                 destination: viewModel.externalPlaybackDestination) {
                 swipeHint(icon: "sun.max.fill")
             }
             Spacer()
-            swipeHint(icon: "speaker.wave.2.fill")
+            // A swipe switched off in Player Controls (Sodalite#194) takes its hint with it.
+            if gestures.isVisible(.volumeSwipe, in: .gestures) {
+                swipeHint(icon: "speaker.wave.2.fill")
+            }
         }
     }
 
@@ -683,8 +689,7 @@ struct PlayerOverlayView: View {
                     durationSeconds: viewModel.player.duration,
                     chapterThumbnail: { await viewModel.chapterThumbnail(forIndex: $0) },
                     pictureMode: viewModel.pictureMode,
-                    showsInfoButton: viewModel.preferences.showStatsForNerds,
-                    showsPiPButton: viewModel.isPiPAvailable,
+                    controlsOrder: viewModel.transportFocusOrder,
                     isPiPEnabled: viewModel.isPiPPossible,
                     isStatsOverlayOpen: viewModel.showStatsOverlay,
                     previewImage: viewModel.scrubPreview.previewImage,

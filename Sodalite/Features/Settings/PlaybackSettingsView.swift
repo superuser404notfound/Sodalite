@@ -493,32 +493,6 @@ struct PlaybackSettingsView: View {
                     )
                 )
                 .settingsValueScope(.device)
-
-                sectionHeader("settings.playback.section.advanced")
-
-                boolRow(
-                    icon: "info.circle",
-                    title: "settings.playback.statsForNerds",
-                    subtitle: "settings.playback.statsForNerds.subtitle",
-                    value: Binding(
-                        get: { prefs.showStatsForNerds },
-                        set: { prefs.showStatsForNerds = $0 }
-                    )
-                )
-                .settingsValueScope(.device)
-
-                if prefs.showStatsForNerds {
-                    boolRow(
-                        icon: "waveform.path.ecg",
-                        title: "settings.playback.engineDiagnostics.title",
-                        subtitle: "settings.playback.engineDiagnostics.subtitle",
-                        value: Binding(
-                            get: { prefs.showEngineDiagnostics },
-                            set: { prefs.showEngineDiagnostics = $0 }
-                        )
-                    )
-                    .settingsValueScope(.device)
-                }
             }
             .screenContentInset()
             .task { displayHasDolbyVision = AetherEngine.displayCapabilities.supportsDolbyVision }
