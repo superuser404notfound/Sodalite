@@ -429,8 +429,11 @@ final class PlaybackPreferences {
         didSet { store.set(playerControls.encoded(), forKey: Keys.playerControls) }
     }
 
-    /// What the legacy cloud record still carries for older builds, which know Stats only as a switch.
-    var showStatsForNerds: Bool { playerControls.isVisible(.stats, in: .transport) }
+    /// What the legacy cloud record still carries for older builds, which know Stats only as one
+    /// switch: on while any row still shows the chip.
+    var showStatsForNerds: Bool {
+        PlayerControlGroup.allCases.contains { playerControls.isVisible(.stats, in: $0) }
+    }
 
     /// A lock whose button is hidden could never be released from the player, so it stops applying.
     var appliesRotationLock: Bool {

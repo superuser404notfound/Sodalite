@@ -50,6 +50,16 @@ struct PlayerControlsLayout: Equatable, Sendable {
         return PlayerControlsLayout(groups: groups)
     }
 
+    /// The shipped order and set, with each row's Stats left as it is: the chip was never part of
+    /// that set, so restoring it must not switch it on or off in a row the viewer did not touch.
+    func restoringDefaults() -> PlayerControlsLayout {
+        var result = PlayerControlsLayout.defaults()
+        for group in PlayerControlGroup.allCases where isVisible(.stats, in: group) {
+            result.setVisible(true, .stats, in: group)
+        }
+        return result
+    }
+
     /// Visible entries in order, then hidden ones.
     func entries(in group: PlayerControlGroup) -> [Entry] {
         let all = groups[group] ?? []

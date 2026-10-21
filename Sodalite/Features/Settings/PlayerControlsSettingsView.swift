@@ -93,10 +93,7 @@ struct PlayerControlsSettingsView: View {
             FocusableTile(action: {
                 moving = nil
                 withAnimation(.easeInOut(duration: 0.25)) {
-                    // Stats starts from where it is now: Restore Defaults is about order and the
-                    // shipped set, and the chip was never in that set.
-                    let stats = prefs.showStatsForNerds
-                    prefs.playerControls = .defaults(showsStats: stats)
+                    prefs.playerControls = prefs.playerControls.restoringDefaults()
                 }
             }) { isFocused in
                 Label("home.customize.resetDefaults", systemImage: "arrow.counterclockwise")

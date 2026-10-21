@@ -69,6 +69,18 @@ struct PlayerControlsLayoutTests {
         #expect(layout.visibleControls(in: .live) == PlayerControlsLayout.defaults().visibleControls(in: .live))
     }
 
+    @Test("restoring the defaults keeps each row's Stats as it was")
+    func restoreKeepsStatsPerGroup() {
+        var layout = PlayerControlsLayout.defaults()
+        layout.setVisible(true, .stats, in: .live)
+        layout.setVisible(false, .restart, in: .transport)
+        layout.move(.audio, toVisibleIndex: 0, in: .live)
+        let restored = layout.restoringDefaults()
+        #expect(restored.isVisible(.restart, in: .transport))
+        #expect(!restored.isVisible(.stats, in: .transport))
+        #expect(restored.visibleControls(in: .live) == [.audio, .subtitles, .pip, .multiview, .stats])
+    }
+
     @Test("garbage falls back to the defaults")
     func garbage() {
         #expect(PlayerControlsLayout.decoded("nope", showsStats: true) == .defaults(showsStats: true))
