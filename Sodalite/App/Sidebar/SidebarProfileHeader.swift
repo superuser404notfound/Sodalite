@@ -11,14 +11,13 @@ struct SidebarProfileHeader: View {
     let isExpanded: Bool
 
     @Environment(\.appState) private var appState
-    @Environment(\.dependencies) private var dependencies
 
     private var user: JellyfinUser? { appState.activeUser }
 
     var body: some View {
         if let user {
             HStack(spacing: SidebarMetrics.labelSpacing) {
-                avatar(for: user)
+                SidebarProfileAvatar(user: user)
                     .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
                 if isExpanded {
                     Text(user.name)
@@ -36,8 +35,16 @@ struct SidebarProfileHeader: View {
             .allowsHitTesting(false)
         }
     }
+}
 
-    private func avatar(for user: JellyfinUser) -> some View {
+/// The header's avatar, shared with the profile row that takes its place when there is more than
+/// one profile to switch between.
+struct SidebarProfileAvatar: View {
+    let user: JellyfinUser
+
+    @Environment(\.dependencies) private var dependencies
+
+    var body: some View {
         ZStack {
             if let url = dependencies.jellyfinImageService.userProfileImageURL(
                 userID: user.id,

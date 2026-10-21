@@ -2013,6 +2013,7 @@
 		EFBC999805A2C4BAADBF155B /* CatalogMyRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F38638757BED26968F0D0E /* CatalogMyRequestsView.swift */; };
 		EFC1D23FE1D7398075A1E24E /* MusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E55900F993728FBE6C15FF /* MusicSource.swift */; };
 		F01B3523DA803BCF532A6C48 /* SubtitleMenuLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B60AEAEA1E24DBE622AA94F /* SubtitleMenuLayout.swift */; };
+		F036233E8E7903C560B6BAB0 /* AppTabProfilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4435C9740DE4153BDC0A2B33 /* AppTabProfilesTests.swift */; };
 		F037CDE82E611B4FA4E1BBB8 /* JellyfinLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C70AF39F350B8FBC30EDFF0 /* JellyfinLibrary.swift */; };
 		F05C42287A7C3CA6A4848696 /* ProviderMatchMerging.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA06E6A3F31863E5F2E74C1 /* ProviderMatchMerging.swift */; };
 		F08453BCCCF955F7CDA0CDF8 /* MergedPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EA4A7C68D00D08DB75239D /* MergedPager.swift */; };
@@ -2467,6 +2468,7 @@
 		43908DAD44D0E11A0C1AE772 /* ServerSwitchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSwitchSheet.swift; sourceTree = "<group>"; };
 		442B310F29B45D8FE16B9A9C /* SourceOutageWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceOutageWatchdog.swift; sourceTree = "<group>"; };
 		442CBBBE7A989D32C02969FB /* ServerURLEditPrecedenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerURLEditPrecedenceTests.swift; sourceTree = "<group>"; };
+		4435C9740DE4153BDC0A2B33 /* AppTabProfilesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabProfilesTests.swift; sourceTree = "<group>"; };
 		44AD184DF6BCAAD832065C41 /* PlayerOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerOverlayView.swift; sourceTree = "<group>"; };
 		44E41F893E1451BCE8BF9FF8 /* DependencyContainer+Profiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DependencyContainer+Profiles.swift"; sourceTree = "<group>"; };
 		453749D3E8ADA040F6D60D56 /* SeerrDiscoverService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrDiscoverService.swift; sourceTree = "<group>"; };
@@ -3489,6 +3491,7 @@
 				78AB704604ABDC7957C436C7 /* AppearanceThemeTests.swift */,
 				3CF33A19D775EC74C37D044E /* AppIconBadgeTests.swift */,
 				95C972EA4C9CDCA93F0675DE /* AppTabDownloadsTests.swift */,
+				4435C9740DE4153BDC0A2B33 /* AppTabProfilesTests.swift */,
 				B68B185438E9063FAD04C4DE /* AppTransportSecurityTests.swift */,
 				2871D3EBD7927D0CD8562D0B /* ArtworkTintTests.swift */,
 				160817A76C557D7AED59C0BB /* ASSFontCacheTests.swift */,
@@ -6118,6 +6121,7 @@
 				241E448AD61955DF56D158F5 /* AlphabetJumpResolverTests.swift in Sources */,
 				C05778725A25E7B47B054B17 /* AppIconBadgeTests.swift in Sources */,
 				FDC28FAB05F7AC899C846F38 /* AppTabDownloadsTests.swift in Sources */,
+				F036233E8E7903C560B6BAB0 /* AppTabProfilesTests.swift in Sources */,
 				3A77AE4E13FAB10643F9D522 /* AppTransportSecurityTests.swift in Sources */,
 				003B0BEE0184D0E9BD87B6FD /* AppearanceSurfaceStructureTests.swift in Sources */,
 				88B98E450A198AE8825E7D8F /* AppearanceThemeTests.swift in Sources */,

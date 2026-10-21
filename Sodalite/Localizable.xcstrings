@@ -75977,6 +75977,330 @@
         }
       }
     },
+    "changelog.1_1_0.profileTab.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV ukazuje karta za Nastavením, kdo je přihlášen, a nabízí ostatní profily na tomto serveru, takže přepínání už nevede přes Nastavení. V postranním panelu je pod Nastavením. Zobrazí se, když je uloženo více profilů."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV viser en fane efter Indstillinger, hvem der er logget ind, og de andre profiler på denne server, så et skift ikke længere går gennem Indstillinger. I sidepanelet ligger den under Indstillinger. Den vises, når mere end én profil er gemt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV zeigt ein Tab nach den Einstellungen, wer angemeldet ist, und bietet die anderen Profile dieses Servers an, ein Wechsel führt also nicht mehr durch die Einstellungen. In der Seitenleiste steht er unter den Einstellungen. Er erscheint, sobald mehr als ein Profil gespeichert ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Apple TV, μια καρτέλα μετά τις Ρυθμίσεις δείχνει ποιος είναι συνδεδεμένος και τα άλλα προφίλ αυτού του διακομιστή, έτσι η εναλλαγή δεν περνά πλέον από τις Ρυθμίσεις. Στην πλαϊνή στήλη βρίσκεται κάτω από τις Ρυθμίσεις. Εμφανίζεται όταν είναι αποθηκευμένα περισσότερα από ένα προφίλ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV, a tab after Settings shows who is signed in and offers the other profiles on this server, so switching no longer goes through Settings. In the sidebar it sits under Settings. It appears once more than one profile is saved."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Apple TV, una pestaña después de Ajustes muestra quién ha iniciado sesión y ofrece los demás perfiles de este servidor, así que cambiar ya no pasa por Ajustes. En la barra lateral está debajo de Ajustes. Aparece cuando hay más de un perfil guardado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä Asetusten jälkeinen välilehti näyttää, kuka on kirjautunut, ja tarjoaa tämän palvelimen muut profiilit, joten vaihto ei enää kulje Asetusten kautta. Sivupalkissa se on Asetusten alla. Se näkyy, kun tallennettuja profiileja on useampi kuin yksi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur Apple TV, un onglet après Réglages indique qui est connecté et propose les autres profils de ce serveur, le changement ne passe donc plus par Réglages. Dans la barre latérale, il se trouve sous Réglages. Il apparaît dès que plus d’un profil est enregistré."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u kartica nakon Postavki pokazuje tko je prijavljen i nudi ostale profile na ovom poslužitelju, pa promjena više ne ide kroz Postavke. U bočnoj traci nalazi se ispod Postavki. Pojavljuje se kad je spremljeno više od jednog profila."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n a Beállítások utáni lap mutatja, ki van bejelentkezve, és felkínálja a szerver többi profilját, így a váltás már nem a Beállításokon át vezet. Az oldalsávban a Beállítások alatt található. Akkor jelenik meg, ha egynél több profil van mentve."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV, una scheda dopo Impostazioni mostra chi ha effettuato l’accesso e propone gli altri profili di questo server, così il cambio non passa più da Impostazioni. Nella barra laterale si trova sotto Impostazioni. Appare quando è salvato più di un profilo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV では、設定の後ろのタブにサインイン中のユーザーが表示され、このサーバーのほかのプロフィールを選べるので、切り替えに設定を開く必要がなくなりました。サイドバーでは設定の下にあります。保存されたプロフィールが 2 つ以上あると表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 설정 다음 탭에 로그인한 사용자가 표시되고 이 서버의 다른 프로필을 고를 수 있어, 더 이상 설정을 거치지 않고 전환할 수 있습니다. 사이드바에서는 설정 아래에 있습니다. 저장된 프로필이 둘 이상일 때 나타납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV viser en fane etter Innstillinger hvem som er logget på, og tilbyr de andre profilene på denne serveren, så bytte går ikke lenger gjennom Innstillinger. I sidefeltet ligger den under Innstillinger. Den vises når mer enn én profil er lagret."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Apple TV toont een tab na Instellingen wie er is ingelogd en biedt de andere profielen op deze server aan, dus wisselen gaat niet meer via Instellingen. In de zijbalk staat hij onder Instellingen. Hij verschijnt zodra er meer dan één profiel is opgeslagen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV karta za Ustawieniami pokazuje, kto jest zalogowany, i proponuje pozostałe profile na tym serwerze, więc zmiana nie wymaga już wchodzenia w Ustawienia. Na pasku bocznym znajduje się pod Ustawieniami. Pojawia się, gdy zapisano więcej niż jeden profil."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, uma aba depois de Configurações mostra quem está conectado e oferece os outros perfis deste servidor, então trocar não passa mais por Configurações. Na barra lateral, ela fica abaixo de Configurações. Aparece quando há mais de um perfil salvo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, um separador a seguir a Definições mostra quem tem sessão iniciada e oferece os outros perfis deste servidor, pelo que mudar já não passa pelas Definições. Na barra lateral fica por baixo de Definições. Aparece quando há mais de um perfil guardado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, o filă după Setări arată cine este conectat și oferă celelalte profiluri de pe acest server, astfel că schimbarea nu mai trece prin Setări. În bara laterală se află sub Setări. Apare când sunt salvate mai multe profiluri."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка после «Настроек» показывает, кто вошёл, и предлагает другие профили этого сервера, так что для смены больше не нужно заходить в «Настройки». В боковой панели она находится под «Настройками». Появляется, когда сохранено больше одного профиля."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV ukazuje karta za Nastaveniami, kto je prihlásený, a ponúka ostatné profily na tomto serveri, takže prepínanie už nevedie cez Nastavenia. V bočnom paneli je pod Nastaveniami. Zobrazí sa, keď je uložených viac profilov."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV visar en flik efter Inställningar vem som är inloggad och erbjuder de andra profilerna på den här servern, så byte går inte längre via Inställningar. I sidofältet ligger den under Inställningar. Den visas när mer än en profil är sparad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV’de Ayarlar’dan sonraki bir sekme kimin oturum açtığını gösterir ve bu sunucudaki diğer profilleri sunar, böylece geçiş artık Ayarlar üzerinden yapılmaz. Kenar çubuğunda Ayarlar’ın altında yer alır. Birden fazla profil kayıtlı olduğunda görünür."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка після «Налаштувань» показує, хто ввійшов, і пропонує інші профілі цього сервера, тож для зміни більше не потрібно заходити в «Налаштування». На бічній панелі вона розташована під «Налаштуваннями». З’являється, коли збережено більше одного профілю."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，“设置”后面的标签会显示当前登录的用户，并列出此服务器上的其他个人资料，切换不必再进入“设置”。在侧边栏中，它位于“设置”下方。保存了多个个人资料时才会出现。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，「設定」後面的標籤會顯示目前登入的使用者，並列出此伺服器上的其他個人檔案，切換不必再進入「設定」。在側邊欄中，它位於「設定」下方。儲存了多個個人檔案時才會出現。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.profileTab.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přepínání profilů z panelu karet"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skift profil fra fanelinjen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil wechseln über die Tab-Leiste"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εναλλαγή προφίλ από τη γραμμή καρτελών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch profiles from the tab bar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia de perfil desde la barra de pestañas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaihda profiilia välilehtipalkista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer de profil depuis la barre d’onglets"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promjena profila iz trake kartica"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilváltás a lapsávról"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia profilo dalla barra delle schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブバーからプロフィールを切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭 막대에서 프로필 전환"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bytt profil fra fanelinjen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wissel van profiel via de tabbalk"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmiana profilu z paska kart"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troque de perfil pela barra de abas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mude de perfil a partir da barra de separadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schimbă profilul din bara de file"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смена профиля из панели вкладок"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepínanie profilov z panela kariet"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Byt profil från flikfältet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme çubuğundan profil değiştirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зміна профілю з панелі вкладок"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从标签栏切换个人资料"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從標籤列切換個人檔案"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.restingTouch.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

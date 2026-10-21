@@ -60,7 +60,12 @@ struct TabRootView: View {
     @ViewBuilder
     private func tabLabel(_ tab: AppTab) -> some View {
         Label {
-            Text(tab.labelKey)
+            // The profile tab carries the name the corner badge used to show.
+            if tab == .profiles, let user = appState.activeUser {
+                Text(verbatim: user.name)
+            } else {
+                Text(tab.labelKey)
+            }
         } icon: {
             // .monochrome strips the baked white that "tv" renders hierarchically, which would override the tint and leave that icon gray.
             Image(systemName: tab.systemImage)
@@ -91,6 +96,8 @@ struct TabRootView: View {
             .filter { !appearance.isTabHidden($0) }
         #if os(iOS)
         if hSizeClass == .compact { tabs = tabs.filter { $0 != .settings } }
+        #elseif os(tvOS)
+        tabs = AppTab.withProfiles(tabs, hasProfiles: rememberedProfileCount > 1)
         #elseif os(macOS)
         // The Mac keeps Settings in its own window (Cmd-,), see MacSettingsWindowContent.
         tabs = tabs.filter { $0 != .settings }
@@ -208,14 +215,9 @@ struct TabRootView: View {
             #elseif os(macOS)
             ActiveUserBadge(rememberedCount: rememberedProfileCount,
                             onTap: { appState.requestProfilePicker = true })
-            #else
-            // Not in sidebar mode: the rail carries the profile as its header, so a second badge in
-            // the corner is both a duplicate and, without a top bar under it, a thing that lands on
-            // top of whatever the screen puts up there (the Live TV and Catalog pickers do).
-            if appearance.navigationStyle == .topBar {
-                ActiveUserBadge(rememberedCount: rememberedProfileCount)
-            }
             #endif
+            // tvOS has no badge: whenever it would show, the profile tab after Settings carries the
+            // name and, unlike the badge, can be focused.
         }
         #if os(iOS)
         .sheet(isPresented: $showDownloads) {
@@ -248,9 +250,7 @@ struct TabRootView: View {
         // Keyed on identity changes, not read per body, to keep the keychain read cheap. serverDidSwitch
         // is folded in so a same-user server change still re-reads.
         .task(id: profileCountIdentity) {
-            rememberedProfileCount = appState.activeServer.map {
-                dependencies.listRememberedUsers(serverID: $0.id).count
-            } ?? 0
+            refreshRememberedProfileCount()
         }
         .task(id: appState.serverDidSwitch) {
             // TabRootView stays mounted across a switch, so recompute the optional Live TV / Music tabs per server, else the old server's Live TV lingers (wrong backend) and a new server's Music never appears until relaunch.
@@ -391,6 +391,9 @@ struct TabRootView: View {
         .onChange(of: selectedTab) { _, _ in
             // The viewer moved, so the switch is over: a later tab change is theirs, not its.
             switchOrigin = nil
+            // A profile forgotten on the profile tab changes no identity, so the count is re-read
+            // on the way out, and the tab goes once only one profile is left.
+            refreshRememberedProfileCount()
         }
         .onChange(of: appState.profileKey) { old, new in
             if ProfileShellLayout.switchResetsSettings(
@@ -406,6 +409,23 @@ struct TabRootView: View {
                 loginProbeTask = Task { await recoverOptionalTabs() }
             }
         }
+    }
+
+    /// The profile tab keeps one identity: a pick there switches the profile and leaves the tab in
+    /// the same update, and re-identifying the page the bar is leaving in that update strands the
+    /// bar's selection on the old index (Sodalite#169). It re-reads its cards on appear anyway.
+    private func contentIdentity(for tab: AppTab) -> AnyHashable {
+        switch tab {
+        case .settings: AnyHashable(settingsEpoch)
+        case .profiles: AnyHashable(appState.activeServer?.id)
+        default: AnyHashable(appState.profileKey)
+        }
+    }
+
+    private func refreshRememberedProfileCount() {
+        rememberedProfileCount = appState.activeServer.map {
+            dependencies.listRememberedUsers(serverID: $0.id).count
+        } ?? 0
     }
 
     /// Re-evaluates the optional Live TV / Music tabs for the now-active server after a login completion, then publishes only a real change.
@@ -584,12 +604,22 @@ struct TabRootView: View {
                 #endif
             case .settings:
                 SettingsView()
+            case .profiles:
+                #if os(tvOS)
+                if let server = appState.activeServer {
+                    // Picking a profile, or the active one, is done with this tab: back to Home.
+                    LaunchProfilePickerView(server: server, context: .chooser,
+                                            onFinished: { selectedTab = .home })
+                }
+                #else
+                EmptyView()
+                #endif
             }
         }
         // Every tab's screens hold the profile they were built for (Live TV captures its user id
         // once, Search its results), so a switch rebuilds them. Settings keeps its stack unless the
         // switch has to take away what the previous profile unlocked, see switchResetsSettings.
-        .id(tab == .settings ? AnyHashable(settingsEpoch) : AnyHashable(appState.profileKey))
+        .id(contentIdentity(for: tab))
         // The verdict is measured once for the whole app, so it is consumed once for the whole app
         // (Sodalite#126). Inside the tab content, never over the tab bar: the fix for the case that
         // has one is in Settings, and the bar is the way there.

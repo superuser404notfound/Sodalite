@@ -17,8 +17,8 @@ struct LaunchProfilePickerView: View {
     /// when the target holds no session this device may resume unasked (Sodalite#74). In reprompt
     /// context, picking the active profile must not switch or clear caches, just dismiss; in
     /// switchServer context every card belongs to another server, so every card is a real switch.
-    /// `chooser`: opened on purpose from the iOS profile badge; dismissible, and the active card
-    /// just closes it.
+    /// `chooser`: opened on purpose, from the iOS profile badge or as the tvOS profile tab;
+    /// dismissible, and the active card just closes it.
     enum Context { case launch, reprompt, switchServer, chooser }
     var context: Context = .launch
     /// Cover dismissal (reprompt + switchServer); nil in launch context.
