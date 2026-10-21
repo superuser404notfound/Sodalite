@@ -49,3 +49,17 @@ extension JellyfinUserPolicyTests {
         #expect(try user(policy: nil).canManageLiveTv == false)
     }
 }
+
+extension JellyfinUserPolicyTests {
+
+    // MARK: - Sparse Policy blocks (TestFlight feedback 2026-10-21)
+
+    /// A server that leaves a grant out of Policy must still let the user log in; the grant reads as withheld.
+    @Test func aPolicyMissingItsGrantsStillDecodes() throws {
+        let json = #"{"Id": "u", "Name": "N", "ServerId": "s", "Policy": {"EnableAllFolders": true}}"#
+        let u = try JSONDecoder().decode(JellyfinUser.self, from: Data(json.utf8))
+        #expect(u.policy?.isAdministrator == false)
+        #expect(u.canDeleteContent == false)
+        #expect(u.policy?.enableAllFolders == true)
+    }
+}

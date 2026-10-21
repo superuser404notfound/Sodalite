@@ -40,6 +40,20 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             case allowedTags = "AllowedTags"
             case blockUnratedItems = "BlockUnratedItems"
         }
+
+        /// Every field is optional on the wire: a server that omits one (seen in TestFlight feedback for
+        /// `EnableContentDeletion`) must not fail the whole login decode. A missing grant reads as not granted.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            isAdministrator = try c.decodeIfPresent(Bool.self, forKey: .isAdministrator) ?? false
+            enableContentDeletion = try c.decodeIfPresent(Bool.self, forKey: .enableContentDeletion) ?? false
+            enableLiveTvManagement = try c.decodeIfPresent(Bool.self, forKey: .enableLiveTvManagement)
+            enableAllFolders = try c.decodeIfPresent(Bool.self, forKey: .enableAllFolders)
+            maxParentalRating = try c.decodeIfPresent(Int.self, forKey: .maxParentalRating)
+            blockedTags = try c.decodeIfPresent([String].self, forKey: .blockedTags)
+            allowedTags = try c.decodeIfPresent([String].self, forKey: .allowedTags)
+            blockUnratedItems = try c.decodeIfPresent([String].self, forKey: .blockUnratedItems)
+        }
     }
 
     /// Admin (implicit all-rights) or EnableContentDeletion. False when `policy` is unloaded (conservative default pre first getCurrentUser()).
