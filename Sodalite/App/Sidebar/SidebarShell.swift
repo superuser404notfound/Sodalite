@@ -75,6 +75,16 @@ struct SidebarShell<Content: View>: View {
                     focus = nil
                 }
             )
+            // Right always leaves for the page, as it does from the system sidebar. A move only
+            // goes where something focusable lies in its path, and beside a row there is often
+            // nothing: Home's banner runs under the rail, so Right from Home went nowhere (seen on
+            // device, and the same before pages were kept). On the rail, never on a row: beside a
+            // row's `stableTap` it costs Select presses (see `StableTapModifier`).
+            .onMoveCommand { direction in
+                if direction == .right {
+                    focus = nil
+                }
+            }
             .padding(.leading, SidebarMetrics.railLeadingInset)
             // The only thing that moves for a pushed screen.
             .offset(x: selectedHidesChrome ? -SidebarMetrics.railSlot : 0)
