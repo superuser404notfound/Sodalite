@@ -72,6 +72,10 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Our recognizers, so suppressAVKitGestures can disable AVKit's own (arrow→10s skip, select→toggle, pan→scrub) which otherwise fire silently and eat presses before our handlers.
     private var ourGestureRecognizers: [UIGestureRecognizer] = []
+    #if os(tvOS)
+    /// Remote silence before the press being handled; see `LiveZapInput.wakeIdle`.
+    private var remoteIdleBeforePress: TimeInterval = 0
+    #endif
 
     #if os(tvOS)
     /// Sodalite#115: where on the 1st-generation remote's glass surface the click landed. UIKit reports
@@ -475,6 +479,10 @@ final class PlayerHostController: AVPlayerViewController {
         let rest = RestingTouchGestureRecognizer { [weak self] in self?.surfaceRested() }
         view.addGestureRecognizer(rest)
         ourGestureRecognizers.append(rest)
+
+        let activity = RemoteActivityGestureRecognizer { [weak self] idle in self?.remoteIdleBeforePress = idle }
+        view.addGestureRecognizer(activity)
+        ourGestureRecognizers.append(activity)
         #else
         // iOS touch transport: screen gestures live in the SwiftUI overlay (PlayerGestureCatcher),
         // below the controls, so they coexist with the tappable widgets. Nothing to attach here.
@@ -1635,9 +1643,11 @@ final class PlayerHostController: AVPlayerViewController {
             for: key, isLive: viewModel.isLiveSession, showControls: viewModel.showControls,
             errorVisible: viewModel.errorMessage != nil,
             overlayCapturesInput: viewModel.isSubtitleDeletePromptVisible || viewModel.subtitleSearchVisible
-                || statsOverlayCapturesPresses || viewModel.isDropdownOpen)
+                || statsOverlayCapturesPresses || viewModel.isDropdownOpen,
+            remoteIdle: remoteIdleBeforePress)
         switch action {
         case .zap(let delta): viewModel.requestZap(by: delta); return true
+        case .wake: viewModel.showZapWakeBanner(); return true
         case .ignore: return true
         case .passThrough: return false
         }
