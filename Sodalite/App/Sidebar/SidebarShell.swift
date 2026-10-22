@@ -7,6 +7,13 @@ import SwiftUI
 ///
 /// Walking the rail moves focus only. The content changes on Select, so running through seven tabs
 /// costs no loads, and Live TV in particular is not woken up in passing.
+///
+/// A tab's page is built the first time it is selected and kept from then on, as the top bar keeps
+/// it, so coming back to a tab reloads nothing and finds its stack as it was left. Its scroll does
+/// not survive Select: focus released into a kept page goes to the top-leading card still partly on
+/// screen and the page scrolls to it. Handing focus back to the card the viewer left needs
+/// `UIFocusSystem.requestFocusUpdate(to:)`, which ignores an item outside the focused environment
+/// (all measured in the tvOS 26 simulator).
 struct SidebarShell<Content: View>: View {
     let tabs: [AppTab]
     @Binding var selectedTab: AppTab
@@ -21,7 +28,13 @@ struct SidebarShell<Content: View>: View {
     /// Raised by a pushed screen that wants the navigation out of the way (Settings sub-screens,
     /// the licence reader, Home's customiser). The rail then has to go, but NOT by taking a
     /// different branch: that rebuilds the content and the pushed screen's own stack goes with it.
-    @State private var chromeHidden = false
+    /// Per tab, because pages are kept: a detail left open in one tab must not hide the rail over
+    /// another.
+    @State private var chromeHidden: [AppTab: Bool] = [:]
+    /// Tabs whose page exists. A page is built on its first visit.
+    @State private var builtTabs: Set<AppTab> = []
+
+    private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
     /// What the rail occupies in the layout. Note what it does NOT depend on: `chromeHidden`.
     ///
@@ -39,32 +52,15 @@ struct SidebarShell<Content: View>: View {
     /// the art was cut at the slot, by the tab's NavigationStack, which on tvOS is UIKit and clips.
     static var fullBleedTabs: Set<AppTab> { [.home] }
 
-    private var isFullBleed: Bool { Self.fullBleedTabs.contains(selectedTab) }
-
     private var exitOutcome: SidebarExitPolicy.Outcome {
         SidebarExitPolicy.next(focusIsInRail: focusIsInRail, selectedTab: selectedTab)
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Layout placeholder only. The rail itself is an overlay, so it can move freely while
-            // this width changes in one step underneath it.
-            Color.clear
-                .frame(width: isFullBleed ? 0 : slotWidth)
-                .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInRail)
-
-            content(selectedTab)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // Unconditional: the margins stay put when the rail leaves, so a pushed screen
-                // does not re-lay-out itself on the way in or out.
-                .environment(\.shellPaysLeadingInset, true)
-                .environment(\.shellLeadingSlot, isFullBleed ? slotWidth : 0)
-                .focusSectionCompat()
-                // The shell opens on the content, not on the rail, which is what the top bar does.
-                .prefersDefaultFocus(true, in: shellFocus)
-                .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
-                    chromeHidden = hidden
-                }
+        ZStack {
+            ForEach(tabs.filter { builtTabs.contains($0) || $0 == selectedTab }, id: \.self) { tab in
+                page(for: tab)
+            }
         }
         .overlay(alignment: .leading) {
             SidebarRail(
@@ -81,10 +77,10 @@ struct SidebarShell<Content: View>: View {
             )
             .padding(.leading, SidebarMetrics.railLeadingInset)
             // The only thing that moves for a pushed screen.
-            .offset(x: chromeHidden ? -SidebarMetrics.railSlot : 0)
-            .opacity(chromeHidden ? 0 : 1)
-            .disabled(chromeHidden)
-            .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: chromeHidden)
+            .offset(x: selectedHidesChrome ? -SidebarMetrics.railSlot : 0)
+            .opacity(selectedHidesChrome ? 0 : 1)
+            .disabled(selectedHidesChrome)
+            .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: selectedHidesChrome)
         }
         // ONE opt-out, for the whole shell. On a child alone it does not work: the HStack still
         // starts inside the 60pt title-safe margin, so the rail reaches the edge while the content
@@ -93,6 +89,13 @@ struct SidebarShell<Content: View>: View {
         .ignoresSafeArea(edges: .leading)
         .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInRail)
 
+        .onAppear { builtTabs.insert(selectedTab) }
+        .onChange(of: selectedTab) { _, tab in
+            builtTabs.insert(tab)
+        }
+        .onChange(of: tabs) { _, now in
+            builtTabs.formIntersection(now)
+        }
         .onChange(of: focus) { _, newValue in
             focusIsInRail = newValue != nil
         }
@@ -100,7 +103,7 @@ struct SidebarShell<Content: View>: View {
         // pushed screen the navigation stack owns it, and on the last step the system does: any
         // installed handler swallows the press, even one that does nothing, so Menu on Home in the
         // rail never left the app. Hence the nil rather than an empty closure.
-        .onExitCommandIfEnabled(!chromeHidden && exitOutcome != .leaveApp) {
+        .onExitCommandIfEnabled(!selectedHidesChrome && exitOutcome != .leaveApp) {
             switch exitOutcome {
             case .focusRail:
                 focus = .item(selectedTab)
@@ -113,6 +116,35 @@ struct SidebarShell<Content: View>: View {
             }
         }
         .focusScope(shellFocus)
+    }
+
+    private func page(for tab: AppTab) -> some View {
+        let isSelected = tab == selectedTab
+        let isFullBleed = Self.fullBleedTabs.contains(tab)
+        return HStack(spacing: 0) {
+            // Layout placeholder only. The rail itself is an overlay, so it can move freely while
+            // this width changes in one step underneath it.
+            Color.clear
+                .frame(width: isFullBleed ? 0 : slotWidth)
+                .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInRail)
+
+            content(tab)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Unconditional: the margins stay put when the rail leaves, so a pushed screen
+                // does not re-lay-out itself on the way in or out.
+                .environment(\.shellPaysLeadingInset, true)
+                .environment(\.shellLeadingSlot, isFullBleed ? slotWidth : 0)
+                .focusSectionCompat()
+                .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
+                    chromeHidden[tab] = hidden
+                }
+        }
+        // A kept page stays mounted but leaves the screen and the focus engine.
+        .opacity(isSelected ? 1 : 0)
+        .allowsHitTesting(isSelected)
+        .accessibilityHidden(!isSelected)
+        // The shell opens on the content, not on the rail, which is what the top bar does.
+        .prefersDefaultFocus(isSelected, in: shellFocus)
     }
 }
 #endif
