@@ -44,7 +44,7 @@ struct SidebarShell<Content: View>: View {
     /// how the width was animated (a stack is UIKit-backed on tvOS and will not interpolate one
     /// anyway). One element moving beats two moving out of step.
     private var slotWidth: CGFloat {
-        SidebarMetrics.railLeadingInset + SidebarMetrics.width(isExpanded: focusIsInRail)
+        SidebarMetrics.railLeadingInset + SidebarMetrics.panelWidth(isExpanded: focusIsInRail)
     }
 
     /// Tabs whose page runs full width under the rail and insets its own content by the slot

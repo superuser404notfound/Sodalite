@@ -70,6 +70,7 @@ struct SidebarRail: View {
             }
         }
         .frame(width: SidebarMetrics.width(isExpanded: isExpanded))
+        .padding(.horizontal, SidebarMetrics.panelHorizontalPadding)
         // A glass panel behind the rail, the same frosted dark the top bar sits on. It was dropped
         // once, when the rail only ever lay over the app background and the icons were legible there
         // on their own; Home's banner now runs under the rail, and over bright artwork they were not.
