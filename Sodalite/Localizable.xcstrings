@@ -67248,157 +67248,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržte kartu na Domů nebo v knihovně: přejít na seriál, přehrát od začátku, označit jako zhlédnuté, odebrat z Pokračovat ve sledování nebo skrýt celý seriál z Pokračovat ve sledování a Další. Skryté seriály najdete v Přizpůsobit domov."
+            "value" : "Podržte kartu na Domů nebo v knihovně: přejít na seriál, přehrát od začátku, označit jako zhlédnuté, odebrat z Pokračovat ve sledování nebo skrýt celý seriál z Pokračovat ve sledování a Další. Skryté seriály najdete v Přizpůsobit domov. Smazat celou historii označí po potvrzení všechny díly seriálu jako nezhlédnuté."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold et kort på Hjem eller i biblioteket: gå til serien, afspil fra begyndelsen, markér som set, fjern fra Fortsæt med at se, eller skjul hele serien fra Fortsæt med at se og Næste. Skjulte serier ligger under Tilpas hjem."
+            "value" : "Hold et kort på Hjem eller i biblioteket: gå til serien, afspil fra begyndelsen, markér som set, fjern fra Fortsæt med at se, eller skjul hele serien fra Fortsæt med at se og Næste. Skjulte serier ligger under Tilpas hjem. Fjern al historik markerer efter en bekræftelse alle afsnit af serien som ikke set."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine Karte auf der Startseite oder in der Bibliothek gedrückt halten: zur Serie, von vorne abspielen, als gesehen markieren, aus Weiterschauen entfernen oder die ganze Serie aus Weiterschauen und Als Nächstes ausblenden. Ausgeblendete Serien stehen unter Startseite anpassen."
+            "value" : "Eine Karte auf der Startseite oder in der Bibliothek gedrückt halten: zur Serie, von vorne abspielen, als gesehen markieren, aus Weiterschauen entfernen oder die ganze Serie aus Weiterschauen und Als Nächstes ausblenden. Ausgeblendete Serien stehen unter Startseite anpassen. Gesamten Verlauf entfernen markiert nach einer Rückfrage alle Folgen der Serie als nicht gesehen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κρατήστε πατημένη μια κάρτα στην Αρχική ή στη βιβλιοθήκη: μετάβαση στη σειρά, αναπαραγωγή από την αρχή, σήμανση ως προβεβλημένο, αφαίρεση από τη Συνέχιση παρακολούθησης ή απόκρυψη ολόκληρης της σειράς από τη Συνέχιση παρακολούθησης και το Επόμενο. Οι κρυμμένες σειρές βρίσκονται στην Προσαρμογή αρχικής."
+            "value" : "Κρατήστε πατημένη μια κάρτα στην Αρχική ή στη βιβλιοθήκη: μετάβαση στη σειρά, αναπαραγωγή από την αρχή, σήμανση ως προβεβλημένο, αφαίρεση από τη Συνέχιση παρακολούθησης ή απόκρυψη ολόκληρης της σειράς από τη Συνέχιση παρακολούθησης και το Επόμενο. Οι κρυμμένες σειρές βρίσκονται στην Προσαρμογή αρχικής. Η Διαγραφή όλου του ιστορικού σημειώνει, μετά από επιβεβαίωση, όλα τα επεισόδια της σειράς ως μη προβεβλημένα."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold a card on Home or in the library: go to the show, play from the beginning, mark it watched, remove it from Continue Watching, or hide the whole show from Continue Watching and Next Up. Hidden shows live under Customize Home."
+            "value" : "Hold a card on Home or in the library: go to the show, play from the beginning, mark it watched, remove it from Continue Watching, or hide the whole show from Continue Watching and Next Up. Hidden shows live under Customize Home. Remove All History marks every episode of the show unwatched, after a confirmation."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantén pulsada una tarjeta en Inicio o en la biblioteca: ir a la serie, reproducir desde el principio, marcar como visto, quitar de Seguir viendo u ocultar toda la serie de Seguir viendo y Siguiente. Las series ocultas están en Personalizar inicio."
+            "value" : "Mantén pulsada una tarjeta en Inicio o en la biblioteca: ir a la serie, reproducir desde el principio, marcar como visto, quitar de Seguir viendo u ocultar toda la serie de Seguir viendo y Siguiente. Las series ocultas están en Personalizar inicio. Borrar todo el historial marca, tras una confirmación, todos los episodios de la serie como no vistos."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pidä korttia painettuna Koti-näkymässä tai kirjastossa: siirry sarjaan, toista alusta, merkitse katsotuksi, poista Jatka katselua -riviltä tai piilota koko sarja Jatka katselua- ja Seuraavaksi-riveiltä. Piilotetut sarjat löytyvät kohdasta Mukauta aloitusnäyttö."
+            "value" : "Pidä korttia painettuna Koti-näkymässä tai kirjastossa: siirry sarjaan, toista alusta, merkitse katsotuksi, poista Jatka katselua -riviltä tai piilota koko sarja Jatka katselua- ja Seuraavaksi-riveiltä. Piilotetut sarjat löytyvät kohdasta Mukauta aloitusnäyttö. Poista koko historia merkitsee vahvistuksen jälkeen sarjan kaikki jaksot katsomattomiksi."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintenez une vignette sur l'accueil ou dans la bibliothèque : aller à la série, lire depuis le début, marquer comme vu, retirer de Continuer à regarder ou masquer toute la série de Continuer à regarder et À suivre. Les séries masquées se trouvent dans Personnaliser l'accueil."
+            "value" : "Maintenez une vignette sur l'accueil ou dans la bibliothèque : aller à la série, lire depuis le début, marquer comme vu, retirer de Continuer à regarder ou masquer toute la série de Continuer à regarder et À suivre. Les séries masquées se trouvent dans Personnaliser l'accueil. Effacer tout l’historique marque, après confirmation, tous les épisodes de la série comme non vus."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Držite karticu na Početnoj ili u knjižnici: idi na seriju, reproduciraj od početka, označi kao pogledano, ukloni iz Nastavi gledanje ili sakrij cijelu seriju iz Nastavi gledanje i Sljedeće. Skrivene serije nalaze se pod Prilagodi početnu."
+            "value" : "Držite karticu na Početnoj ili u knjižnici: idi na seriju, reproduciraj od početka, označi kao pogledano, ukloni iz Nastavi gledanje ili sakrij cijelu seriju iz Nastavi gledanje i Sljedeće. Skrivene serije nalaze se pod Prilagodi početnu. Ukloni svu povijest nakon potvrde označava sve epizode serije kao neodgledane."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tartson lenyomva egy kártyát a Kezdőlapon vagy a könyvtárban: ugrás a sorozatra, lejátszás az elejéről, megjelölés megnézettként, eltávolítás a Folytatás sorból, vagy az egész sorozat elrejtése a Folytatás és a Következő sorból. Az elrejtett sorozatok a Kezdőképernyő testreszabása alatt találhatók."
+            "value" : "Tartson lenyomva egy kártyát a Kezdőlapon vagy a könyvtárban: ugrás a sorozatra, lejátszás az elejéről, megjelölés megnézettként, eltávolítás a Folytatás sorból, vagy az egész sorozat elrejtése a Folytatás és a Következő sorból. Az elrejtett sorozatok a Kezdőképernyő testreszabása alatt találhatók. A Teljes előzmény törlése megerősítés után a sorozat összes epizódját megnézetlennek jelöli."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tieni premuta una scheda nella Home o nella libreria: vai alla serie, riproduci dall'inizio, segna come visto, rimuovi da Continua a guardare o nascondi l'intera serie da Continua a guardare e Prossimo. Le serie nascoste si trovano in Personalizza home."
+            "value" : "Tieni premuta una scheda nella Home o nella libreria: vai alla serie, riproduci dall'inizio, segna come visto, rimuovi da Continua a guardare o nascondi l'intera serie da Continua a guardare e Prossimo. Le serie nascoste si trovano in Personalizza home. Rimuovi tutta la cronologia, dopo una conferma, segna tutti gli episodi della serie come non visti."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ホームやライブラリでカードを長押しすると、番組へ移動、最初から再生、視聴済みにする、視聴を続けるから削除、または番組全体を視聴を続けると次の再生から非表示にできます。非表示の番組はホームをカスタマイズにあります。"
+            "value" : "ホームやライブラリでカードを長押しすると、番組へ移動、最初から再生、視聴済みにする、視聴を続けるから削除、または番組全体を視聴を続けると次の再生から非表示にできます。非表示の番組はホームをカスタマイズにあります。すべての履歴を削除は、確認のうえ番組の全エピソードを未視聴にします。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "홈이나 라이브러리에서 카드를 길게 누르면 시리즈로 이동, 처음부터 재생, 시청함으로 표시, 계속 시청에서 제거, 또는 시리즈 전체를 계속 시청과 다음에서 숨길 수 있습니다. 숨긴 시리즈는 홈 사용자 지정에 있습니다."
+            "value" : "홈이나 라이브러리에서 카드를 길게 누르면 시리즈로 이동, 처음부터 재생, 시청함으로 표시, 계속 시청에서 제거, 또는 시리즈 전체를 계속 시청과 다음에서 숨길 수 있습니다. 숨긴 시리즈는 홈 사용자 지정에 있습니다. 모든 기록 삭제는 확인 후 시리즈의 모든 에피소드를 시청 안 함으로 표시합니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold inne et kort på Hjem eller i biblioteket: gå til serien, spill av fra starten, merk som sett, fjern fra Fortsett å se, eller skjul hele serien fra Fortsett å se og Neste. Skjulte serier finner du under Tilpass hjem."
+            "value" : "Hold inne et kort på Hjem eller i biblioteket: gå til serien, spill av fra starten, merk som sett, fjern fra Fortsett å se, eller skjul hele serien fra Fortsett å se og Neste. Skjulte serier finner du under Tilpass hjem. Fjern all historikk merker etter en bekreftelse alle episodene i serien som ikke sett."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd een kaart ingedrukt op Home of in de bibliotheek: naar de serie, afspelen vanaf begin, markeren als bekeken, verwijderen uit Verder kijken of de hele serie verbergen uit Verder kijken en Volgende. Verborgen series staan onder Home aanpassen."
+            "value" : "Houd een kaart ingedrukt op Home of in de bibliotheek: naar de serie, afspelen vanaf begin, markeren als bekeken, verwijderen uit Verder kijken of de hele serie verbergen uit Verder kijken en Volgende. Verborgen series staan onder Home aanpassen. Alle geschiedenis verwijderen markeert na een bevestiging alle afleveringen van de serie als niet bekeken."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przytrzymaj kartę na ekranie głównym lub w bibliotece: przejdź do serialu, odtwórz od początku, oznacz jako obejrzane, usuń z Kontynuuj oglądanie lub ukryj cały serial w Kontynuuj oglądanie i Następne. Ukryte seriale znajdziesz w Dostosuj stronę główną."
+            "value" : "Przytrzymaj kartę na ekranie głównym lub w bibliotece: przejdź do serialu, odtwórz od początku, oznacz jako obejrzane, usuń z Kontynuuj oglądanie lub ukryj cały serial w Kontynuuj oglądanie i Następne. Ukryte seriale znajdziesz w Dostosuj stronę główną. Usuń całą historię po potwierdzeniu oznacza wszystkie odcinki serialu jako nieobejrzane."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantenha pressionado um cartão no Início ou na biblioteca: ir para a série, reproduzir do início, marcar como assistido, remover de Continuar assistindo ou ocultar a série inteira de Continuar assistindo e Próximo. As séries ocultas ficam em Personalizar início."
+            "value" : "Mantenha pressionado um cartão no Início ou na biblioteca: ir para a série, reproduzir do início, marcar como assistido, remover de Continuar assistindo ou ocultar a série inteira de Continuar assistindo e Próximo. As séries ocultas ficam em Personalizar início. Remover todo o histórico marca, após uma confirmação, todos os episódios da série como não assistidos."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantenha premido um cartão no Início ou na biblioteca: ir para a série, reproduzir desde o início, marcar como visto, remover de Continuar a ver ou ocultar a série inteira de Continuar a ver e A seguir. As séries ocultas ficam em Personalizar início."
+            "value" : "Mantenha premido um cartão no Início ou na biblioteca: ir para a série, reproduzir desde o início, marcar como visto, remover de Continuar a ver ou ocultar a série inteira de Continuar a ver e A seguir. As séries ocultas ficam em Personalizar início. Remover todo o histórico marca, após uma confirmação, todos os episódios da série como não vistos."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ține apăsat pe un card în Acasă sau în bibliotecă: mergi la serial, redă de la început, marchează ca vizionat, elimină din Continuă vizionarea sau ascunde tot serialul din Continuă vizionarea și Următorul. Serialele ascunse se află în Personalizează ecranul principal."
+            "value" : "Ține apăsat pe un card în Acasă sau în bibliotecă: mergi la serial, redă de la început, marchează ca vizionat, elimină din Continuă vizionarea sau ascunde tot serialul din Continuă vizionarea și Următorul. Serialele ascunse se află în Personalizează ecranul principal. Șterge tot istoricul marchează, după o confirmare, toate episoadele serialului ca nevizionate."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Удерживайте карточку на главной или в медиатеке: перейти к сериалу, воспроизвести сначала, отметить как просмотренное, убрать из «Продолжить просмотр» или скрыть весь сериал из «Продолжить просмотр» и «Далее». Скрытые сериалы находятся в разделе «Настроить главную»."
+            "value" : "Удерживайте карточку на главной или в медиатеке: перейти к сериалу, воспроизвести сначала, отметить как просмотренное, убрать из «Продолжить просмотр» или скрыть весь сериал из «Продолжить просмотр» и «Далее». Скрытые сериалы находятся в разделе «Настроить главную». «Удалить всю историю» после подтверждения отмечает все эпизоды сериала как непросмотренные."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržte kartu na Domov alebo v knižnici: prejsť na seriál, prehrať od začiatku, označiť ako pozreté, odstrániť z Pokračovať v sledovaní alebo skryť celý seriál z Pokračovať v sledovaní a Ďalšie. Skryté seriály nájdete v Prispôsobiť domov."
+            "value" : "Podržte kartu na Domov alebo v knižnici: prejsť na seriál, prehrať od začiatku, označiť ako pozreté, odstrániť z Pokračovať v sledovaní alebo skryť celý seriál z Pokračovať v sledovaní a Ďalšie. Skryté seriály nájdete v Prispôsobiť domov. Odstrániť celú históriu po potvrdení označí všetky diely seriálu ako nepozreté."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Håll in ett kort på Hem eller i biblioteket: gå till serien, spela upp från början, markera som sedd, ta bort från Fortsätt titta eller dölj hela serien från Fortsätt titta och Nästa. Dolda serier finns under Anpassa hem."
+            "value" : "Håll in ett kort på Hem eller i biblioteket: gå till serien, spela upp från början, markera som sedd, ta bort från Fortsätt titta eller dölj hela serien från Fortsätt titta och Nästa. Dolda serier finns under Anpassa hem. Ta bort all historik markerar efter en bekräftelse alla avsnitt i serien som osedda."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ana sayfada veya kitaplıkta bir karta basılı tutun: diziye git, baştan oynat, izlendi olarak işaretle, İzlemeye Devam Et'ten kaldır veya tüm diziyi İzlemeye Devam Et ve Sırada satırlarından gizle. Gizlenen diziler Ana Ekranı Özelleştir altında."
+            "value" : "Ana sayfada veya kitaplıkta bir karta basılı tutun: diziye git, baştan oynat, izlendi olarak işaretle, İzlemeye Devam Et'ten kaldır veya tüm diziyi İzlemeye Devam Et ve Sırada satırlarından gizle. Gizlenen diziler Ana Ekranı Özelleştir altında. Tüm geçmişi kaldır, onaydan sonra dizinin tüm bölümlerini izlenmedi olarak işaretler."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Утримуйте картку на головній або в медіатеці: перейти до серіалу, відтворити спочатку, позначити як переглянуте, прибрати з «Продовжити перегляд» або приховати весь серіал із «Продовжити перегляд» і «Наступне». Приховані серіали знаходяться в розділі «Налаштувати головну»."
+            "value" : "Утримуйте картку на головній або в медіатеці: перейти до серіалу, відтворити спочатку, позначити як переглянуте, прибрати з «Продовжити перегляд» або приховати весь серіал із «Продовжити перегляд» і «Наступне». Приховані серіали знаходяться в розділі «Налаштувати головну». «Видалити всю історію» після підтвердження позначає всі епізоди серіалу як непереглянуті."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在首页或媒体库中按住卡片：前往剧集、从头播放、标记为已观看、从继续观看中移除，或将整部剧集从继续观看和接下来中隐藏。已隐藏的剧集位于自定义首页中。"
+            "value" : "在首页或媒体库中按住卡片：前往剧集、从头播放、标记为已观看、从继续观看中移除，或将整部剧集从继续观看和接下来中隐藏。已隐藏的剧集位于自定义首页中。移除全部历史记录会在确认后将整部剧集的所有集标记为未观看。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在首頁或媒體庫中按住卡片：前往影集、從頭播放、標示為已觀看、從繼續觀看中移除，或將整部影集從繼續觀看和接下來中隱藏。已隱藏的影集位於自訂主畫面中。"
+            "value" : "在首頁或媒體庫中按住卡片：前往影集、從頭播放、標示為已觀看、從繼續觀看中移除，或將整部影集從繼續觀看和接下來中隱藏。已隱藏的影集位於自訂主畫面中。移除所有觀看紀錄會在確認後將整部影集的所有集數標示為未觀看。"
           }
         }
       }
@@ -86325,6 +86325,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "從繼續觀看中移除"
+          }
+        }
+      }
+    },
+    "contextMenu.removeShowHistory" : {
+      "comment" : "Menu on a Continue Watching or Next Up card: marks every episode of the show unwatched, after a confirmation",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smazat celou historii"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern al historik"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamten Verlauf entfernen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή όλου του ιστορικού"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove All History"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar todo el historial"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poista koko historia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer tout l’historique"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukloni svu povijest"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teljes előzmény törlése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi tutta la cronologia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての履歴を削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 기록 삭제"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern all historikk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle geschiedenis verwijderen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuń całą historię"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover todo o histórico"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover todo o histórico"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Șterge tot istoricul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить всю историю"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odstrániť celú históriu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta bort all historik"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm geçmişi kaldır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити всю історію"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除全部历史记录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除所有觀看紀錄"
           }
         }
       }
@@ -114162,6 +114324,654 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最近播出的影集"
+          }
+        }
+      }
+    },
+    "home.removeShowHistory.confirm.action" : {
+      "comment" : "Destructive button of the Remove All History alert",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smazat historii"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern historik"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf entfernen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή ιστορικού"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove History"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar historial"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poista historia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer l’historique"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukloni povijest"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzmény törlése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi cronologia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴を削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 삭제"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern historikk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschiedenis verwijderen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuń historię"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover histórico"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover histórico"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Șterge istoricul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить историю"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odstrániť históriu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta bort historik"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçmişi kaldır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити історію"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除历史记录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除觀看紀錄"
+          }
+        }
+      }
+    },
+    "home.removeShowHistory.confirm.message %@" : {
+      "comment" : "Message of the Remove All History alert; the argument is the show's name",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Všechny díly seriálu %@ budou označeny jako nezhlédnuté a ztratí pozici pro pokračování. Tuto akci nelze vrátit."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle afsnit af %@ markeres som ikke set og mister deres genoptagelsesposition. Det kan ikke fortrydes."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Folgen von %@ werden als nicht gesehen markiert und verlieren ihre Fortsetzen-Position. Das lässt sich nicht rückgängig machen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλα τα επεισόδια του %@ θα σημειωθούν ως μη προβεβλημένα και θα χάσουν το σημείο συνέχισης. Η ενέργεια δεν αναιρείται."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every episode of %@ is marked unwatched and loses its resume position. This can't be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos los episodios de %@ se marcarán como no vistos y perderán su posición de reanudación. No se puede deshacer."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaikki sarjan %@ jaksot merkitään katsomattomiksi ja niiden jatkokohta poistetaan. Tätä ei voi perua."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les épisodes de %@ seront marqués comme non vus et perdront leur position de reprise. Cette action est irréversible."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sve epizode serije %@ bit će označene kao neodgledane i izgubit će mjesto nastavka. To se ne može poništiti."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A(z) %@ összes epizódja megnézetlennek lesz jelölve, és elveszíti a folytatási pozícióját. Ez nem vonható vissza."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutti gli episodi di %@ verranno segnati come non visti e perderanno la posizione di ripresa. L’operazione non è annullabile."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@のすべてのエピソードが未視聴になり、再開位置も消去されます。この操作は取り消せません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@의 모든 에피소드가 시청 안 함으로 표시되고 이어보기 위치가 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle episoder av %@ merkes som ikke sett og mister fortsettelsesposisjonen. Dette kan ikke angres."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle afleveringen van %@ worden als niet bekeken gemarkeerd en verliezen hun hervatpositie. Dit kan niet ongedaan worden gemaakt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wszystkie odcinki serialu %@ zostaną oznaczone jako nieobejrzane i stracą miejsce wznowienia. Tej operacji nie można cofnąć."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os episódios de %@ serão marcados como não assistidos e perderão a posição de retomada. Não é possível desfazer."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os episódios de %@ serão marcados como não vistos e perderão a posição de retoma. Não é possível anular."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toate episoadele din %@ vor fi marcate ca nevizionate și își vor pierde poziția de reluare. Acțiunea nu poate fi anulată."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все эпизоды %@ будут отмечены как непросмотренные, а позиция продолжения будет сброшена. Это действие нельзя отменить."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Všetky diely seriálu %@ budú označené ako nepozreté a stratia pozíciu na pokračovanie. Túto akciu nemožno vrátiť."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla avsnitt av %@ markeras som osedda och förlorar sin återupptagningsposition. Det går inte att ångra."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dizisinin tüm bölümleri izlenmedi olarak işaretlenecek ve devam etme konumları silinecek. Bu işlem geri alınamaz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усі епізоди %@ буде позначено як непереглянуті, а позицію продовження скинуто. Цю дію неможливо скасувати."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 的所有剧集都将标记为未观看，并清除继续播放位置。此操作无法撤销。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 的所有集數都會標示為未觀看，並清除續播位置。此動作無法復原。"
+          }
+        }
+      }
+    },
+    "home.removeShowHistory.confirm.title" : {
+      "comment" : "Title of the alert that confirms Remove All History on a show",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smazat celou historii?"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern al historik?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamten Verlauf entfernen?"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή όλου του ιστορικού;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove All History?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Borrar todo el historial?"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poistetaanko koko historia?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer tout l’historique ?"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukloniti svu povijest?"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlöd a teljes előzményt?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovere tutta la cronologia?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての履歴を削除しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 기록을 삭제할까요?"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjerne all historikk?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle geschiedenis verwijderen?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usunąć całą historię?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover todo o histórico?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover todo o histórico?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ștergi tot istoricul?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить всю историю?"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odstrániť celú históriu?"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta bort all historik?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm geçmiş kaldırılsın mı?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити всю історію?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除全部历史记录？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要移除所有觀看紀錄嗎？"
+          }
+        }
+      }
+    },
+    "home.removeShowHistory.failed.title" : {
+      "comment" : "Title of the alert when the server refused Remove All History",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historii se nepodařilo smazat"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historikken kunne ikke fjernes"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf konnte nicht entfernt werden"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν ήταν δυνατή η διαγραφή του ιστορικού"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't Remove the History"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo borrar el historial"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historiaa ei voitu poistaa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’effacer l’historique"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povijest nije moguće ukloniti"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem sikerült törölni az előzményt"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile rimuovere la cronologia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "履歴を削除できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록을 삭제할 수 없음"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunne ikke fjerne historikken"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan geschiedenis niet verwijderen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie udało się usunąć historii"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível remover o histórico"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível remover o histórico"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Istoricul nu a putut fi șters"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось удалить историю"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Históriu sa nepodarilo odstrániť"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att ta bort historiken"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçmiş kaldırılamadı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося видалити історію"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法移除历史记录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法移除觀看紀錄"
           }
         }
       }

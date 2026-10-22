@@ -36,6 +36,12 @@ struct HomeView: View {
     /// no URL editor).
     @State private var showAddURLSheet = false
 
+    /// The card whose show a menu asked to wipe; the alert below confirms before anything is sent.
+    @State private var historyRemovalItem: JellyfinItem?
+    /// Set when the server refused the removal: the viewer confirmed a destructive step, so a silent
+    /// failure would read as done.
+    @State private var historyRemovalError: String?
+
     /// True while something is presented over Home: a detail page or a filtered grid. Home is not
     /// the screen then, which is what the two refresh observers below ask about.
     private var isCovered: Bool { selectedItem != nil || selectedFilter != nil }
@@ -262,6 +268,47 @@ struct HomeView: View {
         }
         // The fix for an off-network server, offered where the failure is (Sodalite#122).
         .addExternalAddressSheet(isPresented: $showAddURLSheet)
+        .alert(
+            "home.removeShowHistory.confirm.title",
+            isPresented: Binding(
+                get: { historyRemovalItem != nil },
+                set: { if !$0 { historyRemovalItem = nil } }
+            ),
+            presenting: historyRemovalItem
+        ) { item in
+            Button("home.removeShowHistory.confirm.action", role: .destructive) { removeSeriesHistory(of: item) }
+            Button("common.cancel", role: .cancel) {}
+        } message: { item in
+            Text("home.removeShowHistory.confirm.message \(item.seriesName ?? item.name)")
+        }
+        .alert(
+            "home.removeShowHistory.failed.title",
+            isPresented: Binding(
+                get: { historyRemovalError != nil },
+                set: { if !$0 { historyRemovalError = nil } }
+            ),
+            presenting: historyRemovalError
+        ) { _ in
+            Button("common.ok", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
+    }
+
+    /// Unplayed on the series is the server's own cascade: every episode loses its played mark,
+    /// play count, last-played date and resume position, which is all the history Jellyfin keeps.
+    private func removeSeriesHistory(of item: JellyfinItem) {
+        guard let seriesID = item.seriesId else { return }
+        let session = dependencies.sessionRegistry.session(for: item)
+        Task {
+            do {
+                try await session.itemService.setPlayed(userID: session.userID, itemID: seriesID, isPlayed: false)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                TopShelfRefresher.invalidate()
+            } catch {
+                historyRemovalError = ErrorText.user(for: error)
+            }
+        }
     }
 
     /// What Home shows instead of content, or nil to keep loading or keep showing rows.
@@ -405,6 +452,9 @@ struct HomeView: View {
                                 DroppedSeriesStore.drop(item, fallbackServerID: vm.serverID, scope: vm.homeScope)
                                 withAnimation(.easeInOut(duration: 0.25)) { vm.removeDroppedSeries() }
                             }
+                            : nil)
+                        .environment(\.removeSeriesHistory, row.type == .continueWatching || row.type == .nextUp
+                            ? DropSeriesAction { historyRemovalItem = $0 }
                             : nil)
                         .focused($focusedRowIndex, equals: idx)
 

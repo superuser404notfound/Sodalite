@@ -7,6 +7,9 @@ extension EnvironmentValues {
     /// Takes a card's show out of Continue Watching and Next Up. Set only on those rows, where the
     /// entry means something.
     @Entry var dropSeries: DropSeriesAction?
+    /// Asks to mark every episode of a card's show unwatched. The screen confirms first, a menu has
+    /// nowhere to ask. Set on the same rows as `dropSeries`.
+    @Entry var removeSeriesHistory: DropSeriesAction?
     /// Told when a card's hold is about to open its menu, which takes focus off the row. Home needs
     /// to tell that apart from the move to the tab bar, which looks the same to its focus state.
     @Entry var cardMenuWillOpen: (() -> Void)?
@@ -22,7 +25,8 @@ struct PlayMediaItemAction: Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool { true }
 }
 
-/// Always equal, for the same reason as `PlayMediaItemAction`.
+/// Always equal, for the same reason as `PlayMediaItemAction`. Also carries Remove All History,
+/// which takes the same card and is published by the same rows.
 struct DropSeriesAction: Equatable {
     let perform: (JellyfinItem) -> Void
 
@@ -84,6 +88,7 @@ private struct MediaContextMenu: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.playMediaItem) private var playMediaItem
     @Environment(\.dropSeries) private var dropSeries
+    @Environment(\.removeSeriesHistory) private var removeSeriesHistory
 
     private var isPlayed: Bool { item.userData?.played ?? false }
     private var isFavorite: Bool { item.userData?.isFavorite ?? false }
@@ -141,6 +146,12 @@ private struct MediaContextMenu: View {
 
         if let dropSeries, item.seriesId != nil {
             Button("contextMenu.hideShow", systemImage: "minus.circle") { dropSeries(item) }
+        }
+
+        if let removeSeriesHistory, item.seriesId != nil {
+            Button("contextMenu.removeShowHistory", systemImage: "trash", role: .destructive) {
+                removeSeriesHistory(item)
+            }
         }
     }
 
