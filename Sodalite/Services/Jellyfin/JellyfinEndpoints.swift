@@ -615,6 +615,9 @@ struct ItemQuery: Sendable {
     /// `IsMissing=false` does not cover them (see above), so the clamp and the `isVirtual` filter
     /// are separate nets rather than alternatives.
     var maxPremiereDate: Date?
+    /// `MinPremiereDate=`: lower bound on the air date. The Upcoming row asks for episodes from
+    /// yesterday on, which is the query `/Shows/Upcoming` runs on the server, minus its fixed sort.
+    var minPremiereDate: Date?
     /// Jellyfin `Fields=`, deliberately without a default. It used to be optional with a
     /// `fields ?? defaultFields` fallback, so a caller that simply did not think about it silently
     /// asked for the detail-screen set; four grid queries did exactly that (Sodalite#68). Pick one:
@@ -673,6 +676,11 @@ struct ItemQuery: Sendable {
             items.append(URLQueryItem(name: "PersonIds", value: personIDs.joined(separator: ",")))
         }
         if let isMissing { items.append(URLQueryItem(name: "IsMissing", value: String(isMissing))) }
+        if let minPremiereDate {
+            items.append(
+                URLQueryItem(name: "MinPremiereDate", value: Self.premiereDateFormatter.string(from: minPremiereDate))
+            )
+        }
         if let maxPremiereDate {
             items.append(
                 URLQueryItem(name: "MaxPremiereDate", value: Self.premiereDateFormatter.string(from: maxPremiereDate))

@@ -4,6 +4,9 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     // Declaration order = default display order for fresh installs / Reset (defaultConfig uses allCases.enumerated()); existing users keep their saved order.
     case continueWatching
     case nextUp
+    /// Announced episodes of the shows the profile is caught up on (Sodalite#198). Off by default:
+    /// it needs a metadata plugin that lists unaired episodes, or Seerr.
+    case upcoming
     case myMedia
     case favorites
     case favoriteEpisodes
@@ -41,7 +44,7 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var cardStyle: MediaCardStyle {
         switch self {
-        case .continueWatching, .nextUp, .favoriteEpisodes:
+        case .continueWatching, .nextUp, .upcoming, .favoriteEpisodes:
             .landscape
         default:
             .poster
@@ -74,6 +77,7 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         switch self {
         case .continueWatching: "home.continueWatching"
         case .nextUp: "home.nextUp"
+        case .upcoming: "home.upcoming"
         case .latestMovies: "home.latestMovies"
         case .latestShows: "home.latestShows"
         case .recentlyReleasedMovies: "home.recentlyReleasedMovies"
@@ -98,6 +102,7 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         switch self {
         case .continueWatching: "play.circle"
         case .nextUp: "forward"
+        case .upcoming: "calendar.badge.plus"
         case .latestMovies: "film"
         case .latestShows: "tv"
         case .recentlyReleasedMovies: "calendar"

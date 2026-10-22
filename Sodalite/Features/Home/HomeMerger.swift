@@ -5,7 +5,7 @@ import Foundation
 nonisolated enum HomeMerger {
     enum Order: Equatable {
         case lastPlayedDescending, roundRobin, resumeThenRoundRobin, dateCreatedDescending
-        case premiereDescending, ratingDescending, sortNameAscending, episodeOrder
+        case premiereDescending, premiereAscending, ratingDescending, sortNameAscending, episodeOrder
     }
 
     static func order(for type: HomeRowType, mergedContinueWatching: Bool) -> Order {
@@ -13,6 +13,7 @@ nonisolated enum HomeMerger {
         case .continueWatching: mergedContinueWatching ? .resumeThenRoundRobin : .lastPlayedDescending
         case .latestMovies, .recentlyAdded: .dateCreatedDescending
         case .recentlyReleasedMovies: .premiereDescending
+        case .upcoming: .premiereAscending
         case .topRatedMovies, .topRatedShows: .ratingDescending
         case .allMovies, .allSeries, .favorites, .collections, .playlists: .sortNameAscending
         case .favoriteEpisodes: .episodeOrder
@@ -26,7 +27,7 @@ nonisolated enum HomeMerger {
     static func limit(for type: HomeRowType, mergedContinueWatching: Bool) -> Int {
         switch type {
         case .continueWatching: mergedContinueWatching ? 32 : 16
-        case .nextUp, .latestMovies, .latestShows, .recentlyReleasedShows, .libraryLatest: 16
+        case .nextUp, .upcoming, .latestMovies, .latestShows, .recentlyReleasedShows, .libraryLatest: 16
         case .recentlyReleasedMovies, .recentlyAdded, .topRatedMovies, .topRatedShows: 20
         case .allMovies, .allSeries, .favorites, .favoriteEpisodes, .collections, .playlists: 30
         case .myMedia, .genres, .discoverProviders: 30
@@ -82,6 +83,8 @@ nonisolated enum HomeMerger {
             return stableSort(entries) { descending($0.item.dateCreated, $1.item.dateCreated) }
         case .premiereDescending:
             return stableSort(entries) { descending($0.item.premiereDate, $1.item.premiereDate) }
+        case .premiereAscending:
+            return stableSort(entries) { ascending($0.item.premiereDate, $1.item.premiereDate) }
         case .ratingDescending:
             return stableSort(entries) {
                 switch ($0.item.communityRating, $1.item.communityRating) {
@@ -126,6 +129,16 @@ nonisolated enum HomeMerger {
     private static func descending(_ lhs: String?, _ rhs: String?) -> Bool? {
         switch (lhs, rhs) {
         case let (l?, r?): l == r ? nil : l > r
+        case (.some, .none): true
+        case (.none, .some): false
+        case (.none, .none): nil
+        }
+    }
+
+    /// Same as `descending`, soonest first, nil still last.
+    private static func ascending(_ lhs: String?, _ rhs: String?) -> Bool? {
+        switch (lhs, rhs) {
+        case let (l?, r?): l == r ? nil : l < r
         case (.some, .none): true
         case (.none, .some): false
         case (.none, .none): nil

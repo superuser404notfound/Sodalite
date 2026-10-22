@@ -118,7 +118,7 @@ struct HomeView: View {
                     serverID: appState.activeServer?.id ?? userID,
                     sources: dependencies.homeSources(activeUserID: userID)
                 )
-                viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
+                attachCallbacks(to: viewModel)
                 Task { await viewModel?.loadContent() }
             } else {
                 // Pick up new server-side content on the way back to the tab; the view model owns
@@ -231,7 +231,7 @@ struct HomeView: View {
                 serverID: appState.activeServer?.id ?? userID,
                 sources: dependencies.homeSources(activeUserID: userID)
             )
-            viewModel?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
+            attachCallbacks(to: viewModel)
             Task { await viewModel?.loadContent() }
         }
         // The participating servers changed (Combine servers switched, a server added or muted):
@@ -339,6 +339,14 @@ struct HomeView: View {
         )
     }
 
+    private func attachCallbacks(to vm: HomeViewModel?) {
+        vm?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
+        vm?.nextAiringLookup = { @MainActor [appState, dependencies] tmdbID in
+            guard appState.isSeerrConnected else { return nil }
+            return try await dependencies.seerrMediaService.tvDetail(tmdbID: tmdbID).nextEpisodeToAir
+        }
+    }
+
     /// Retry re-probes before it re-fetches, else the reload would run against the same stale
     /// verdict and paint this screen straight back.
     ///
@@ -408,6 +416,21 @@ struct HomeView: View {
                     }
                     ForEach(Array(vm.orderedSections().enumerated()), id: \.element.id) { idx, section in
                     switch section {
+                    case .media(let row) where row.type == .upcoming:
+                        UpcomingRow(
+                            items: row.items,
+                            imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
+                            onItemSelected: { item in
+                                // The episode has no page of its own yet, so the card opens its show.
+                                guard let seriesID = item.seriesId else { return }
+                                var series = JellyfinItem(seriesStub: seriesID, name: item.seriesName ?? "")
+                                series.serverID = item.serverID
+                                selectedItem = series
+                            },
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) }
+                        )
+                        .focused($focusedRowIndex, equals: idx)
+
                     case .media(let row):
                         let cwImage = row.type.usesBackdrop
                             ? dependencies.appearancePreferences.continueWatchingImage

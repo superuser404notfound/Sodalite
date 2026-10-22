@@ -46,6 +46,9 @@ struct SeerrTVDetail: Codable, Sendable {
     let watchProviders: [SeerrWatchProviderRegion]?
     let contentRatings: SeerrContentRatings?
     let externalIds: SeerrExternalIds?
+    /// TMDB's next scheduled episode, nil once a show has nothing announced. Feeds the Upcoming row
+    /// for series whose Jellyfin library lists no future episode (Sodalite#198).
+    let nextEpisodeToAir: SeerrEpisode?
 
     var displayYear: String? {
         guard let firstAirDate, firstAirDate.count >= 4 else { return nil }
