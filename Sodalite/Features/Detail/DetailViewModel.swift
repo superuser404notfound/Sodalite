@@ -27,6 +27,8 @@ final class DetailViewModel {
     var similarItems: [JellyfinItem] = []
     /// Extras from the item's clips/extras folders (Sodalite#179). Fetched only when the detail reports a SpecialFeatureCount.
     var specialFeatures: [JellyfinItem] = []
+    /// Every local trailer, for the Trailers & Extras row (Sodalite#195). Fetched only when the detail reports a LocalTrailerCount.
+    var localTrailers: [JellyfinItem] = []
     /// Similar titles the server does NOT have, from Jellyseerr. Empty unless the catalog is connected and visible, the item carries a TMDB id, and something survives the dedupe.
     var catalogSimilar: [SeerrMedia] = []
     var selectedSeasonID: String?
@@ -42,17 +44,26 @@ final class DetailViewModel {
         (item.localTrailerCount ?? 0) > 0
     }
 
-    /// The YouTube trailer the Trailer button embeds when the server has no local one (Sodalite#195).
-    /// Always nil on tvOS: it has no WebKit, and a deep link into the YouTube app did not work there.
-    var remoteTrailer: YouTubeTrailer? {
+    /// The YouTube trailers the page embeds when the server has no local one (Sodalite#195). A local
+    /// trailer is usually the same film's trailer, so it wins rather than sitting beside its double.
+    /// Always empty on tvOS: it has no WebKit, and a deep link into the YouTube app did not work there.
+    var remoteTrailers: [YouTubeTrailer] {
         #if os(tvOS)
-        nil
+        []
         #else
-        hasLocalTrailer ? nil : item.youTubeTrailer
+        hasLocalTrailer ? [] : item.youTubeTrailers
         #endif
     }
 
+    /// The one the Trailer button plays.
+    var remoteTrailer: YouTubeTrailer? { remoteTrailers.first }
+
     var hasTrailer: Bool { hasLocalTrailer || remoteTrailer != nil }
+
+    /// Whether the Trailers & Extras row has anything to show.
+    var hasTrailersOrExtras: Bool {
+        !localTrailers.isEmpty || !remoteTrailers.isEmpty || !specialFeatures.isEmpty
+    }
 
     /// Season the tab bar currently has selected; the season synopsis box reads its overview.
     var selectedSeason: JellyfinItem? {
@@ -114,6 +125,7 @@ final class DetailViewModel {
 
     /// First local trailer to play, or nil; fetched on Trailer-button tap so the endpoint is hit on demand.
     func loadTrailer() async -> JellyfinItem? {
+        if let loaded = localTrailers.first { return loaded }
         let trailers = try? await itemService.getLocalTrailers(userID: userID, itemID: item.id)
         return trailers?.first
     }
@@ -171,6 +183,9 @@ final class DetailViewModel {
             isFavorite = detail.userData?.isFavorite ?? false
             isPlayed = detail.userData?.played ?? false
             if !isWritingRating { rating = detail.userData?.rating }
+            if (detail.localTrailerCount ?? 0) > 0 {
+                loadLocalTrailers(for: itemID)
+            }
             if (detail.specialFeatureCount ?? 0) > 0 {
                 loadSpecialFeatures(for: itemID)
             }
@@ -188,6 +203,15 @@ final class DetailViewModel {
         await playlistContentTask?.value
 
         isLoading = false
+    }
+
+    /// Same shape as the extras, which the trailers share a row with.
+    private func loadLocalTrailers(for itemID: String) {
+        Task { [weak self] in
+            guard let self else { return }
+            let trailers = (try? await itemService.getLocalTrailers(userID: userID, itemID: itemID)) ?? []
+            await MainActor.run { self.localTrailers = trailers }
+        }
     }
 
     /// Below the fold like the similar row, so it lands progressively instead of gating isLoading.

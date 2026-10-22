@@ -663,13 +663,14 @@ struct SeriesDetailView: View {
                         }
                     }
 
-                    // Sodalite#179. The show's extras, not an episode's, so they leave with the
-                    // Trailer button when an episode takes the page.
-                    let showsExtras = !isShowingEpisode && !vm.specialFeatures.isEmpty
+                    // Sodalite#179 and #195. The show's trailers and extras, not an episode's, so
+                    // they leave with the Trailer button when an episode takes the page.
+                    let showsExtras = !isShowingEpisode && vm.hasTrailersOrExtras
                     if showsExtras {
-                        HorizontalMediaRow(
-                            title: "detail.extras",
-                            items: vm.specialFeatures,
+                        TrailersAndExtrasRow(
+                            localTrailers: vm.localTrailers,
+                            youTubeTrailers: vm.remoteTrailers,
+                            extras: vm.specialFeatures,
                             imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
                             fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
                             onItemSelected: { extra in
@@ -678,7 +679,11 @@ struct SeriesDetailView: View {
                                 playOriginatedFromPlayButton = false
                                 showPlayer = true
                             },
-                            cardStyle: .landscape
+                            onYouTubeSelected: { trailer in
+                                #if !os(tvOS)
+                                youTubeTrailer = trailer
+                                #endif
+                            }
                         )
                         .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast) { playButtonFocused = true }
                     }
@@ -865,7 +870,7 @@ struct SeriesDetailView: View {
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
         !vm.seasons.isEmpty || vm.isLoadingSeasons
             || !(vm.item.people?.isEmpty ?? true)
-            || (!isShowingEpisode && !vm.specialFeatures.isEmpty)
+            || (!isShowingEpisode && vm.hasTrailersOrExtras)
             || !vm.similarItems.isEmpty
             || !vm.catalogSimilar.isEmpty
     }

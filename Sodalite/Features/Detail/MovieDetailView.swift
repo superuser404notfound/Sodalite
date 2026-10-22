@@ -427,7 +427,7 @@ struct MovieDetailView: View {
                     }
                 }
 
-                if !vm.specialFeatures.isEmpty {
+                if vm.hasTrailersOrExtras {
                     extrasRow(vm: vm)
                         .onFocusMoveUp(active: !hasCast) { playButtonFocused = true }
                 }
@@ -440,7 +440,7 @@ struct MovieDetailView: View {
                         onItemSelected: { navigateToItem = $0 },
                         cardStyle: .poster
                     )
-                    .onFocusMoveUp(active: !hasCast && vm.specialFeatures.isEmpty) { playButtonFocused = true }
+                    .onFocusMoveUp(active: !hasCast && !vm.hasTrailersOrExtras) { playButtonFocused = true }
                 }
 
                 // Same split the search screen teaches: what the server has on top, what it would have
@@ -451,7 +451,7 @@ struct MovieDetailView: View {
                         items: vm.catalogSimilar,
                         onItemSelected: { navigateToSeerrRequest = $0 }
                     )
-                    .onFocusMoveUp(active: !hasCast && vm.specialFeatures.isEmpty && vm.similarItems.isEmpty) {
+                    .onFocusMoveUp(active: !hasCast && !vm.hasTrailersOrExtras && vm.similarItems.isEmpty) {
                         playButtonFocused = true
                     }
                 }
@@ -577,22 +577,27 @@ struct MovieDetailView: View {
     /// Whether anything below the fold is a section rather than the closing caption line. It decides
     /// where that line is drawn, and through it whether the page is scrollable at all.
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
-        !(vm.item.people?.isEmpty ?? true) || !vm.specialFeatures.isEmpty
+        !(vm.item.people?.isEmpty ?? true) || vm.hasTrailersOrExtras
             || !vm.similarItems.isEmpty || !vm.catalogSimilar.isEmpty
     }
 
-    /// Sodalite#179. Frame grabs are 16:9; an extra without one borrows the page's own backdrop.
+    /// Sodalite#179 and #195. Frame grabs are 16:9; an extra without one borrows the page's own backdrop.
     private func extrasRow(vm: DetailViewModel) -> some View {
-        HorizontalMediaRow(
-            title: "detail.extras",
-            items: vm.specialFeatures,
+        TrailersAndExtrasRow(
+            localTrailers: vm.localTrailers,
+            youTubeTrailers: vm.remoteTrailers,
+            extras: vm.specialFeatures,
             imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
             fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
             onItemSelected: { extra in
                 extraItem = extra
                 showExtra = true
             },
-            cardStyle: .landscape
+            onYouTubeSelected: { trailer in
+                #if !os(tvOS)
+                youTubeTrailer = trailer
+                #endif
+            }
         )
     }
 

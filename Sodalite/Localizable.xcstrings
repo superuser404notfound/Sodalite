@@ -69514,157 +69514,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, featurety, vystřižené scény a další bonusy ze složek s bonusy filmu nebo seriálu mají teď na stránce s detaily vlastní řadu a přehrají se přímo odtud."
+            "value" : "Klipy, featurety, vystřižené scény a další bonusy ze složek s bonusy filmu nebo seriálu mají teď na stránce s detaily vlastní řadu a přehrají se přímo odtud. Upoutávky titulu jsou na začátku téže řady."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klip, featurettes, slettede scener og andet ekstramateriale fra en films eller series ekstramapper har nu deres egen række på detaljesiden og afspilles direkte derfra."
+            "value" : "Klip, featurettes, slettede scener og andet ekstramateriale fra en films eller series ekstramapper har nu deres egen række på detaljesiden og afspilles direkte derfra. En titels trailere står forrest i samme række."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, Featurettes, entfallene Szenen und andere Extras aus den Extras-Ordnern eines Films oder einer Serie haben jetzt eine eigene Reihe auf der Detailseite und spielen direkt von dort."
+            "value" : "Clips, Featurettes, entfallene Szenen und andere Extras aus den Extras-Ordnern eines Films oder einer Serie haben jetzt eine eigene Reihe auf der Detailseite und spielen direkt von dort. Die Trailer eines Titels stehen vorne in derselben Reihe."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κλιπ, featurettes, κομμένες σκηνές και άλλο επιπλέον υλικό από τους φακέλους extras μιας ταινίας ή σειράς έχουν πλέον τη δική τους σειρά στη σελίδα λεπτομερειών και παίζουν απευθείας από εκεί."
+            "value" : "Κλιπ, featurettes, κομμένες σκηνές και άλλο επιπλέον υλικό από τους φακέλους extras μιας ταινίας ή σειράς έχουν πλέον τη δική τους σειρά στη σελίδα λεπτομερειών και παίζουν απευθείας από εκεί. Τα τρέιλερ ενός τίτλου βρίσκονται στην αρχή της ίδιας σειράς."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, featurettes, deleted scenes and other extras from a movie's or show's extras folders now get their own row on the detail page and play right from there."
+            "value" : "Clips, featurettes, deleted scenes and other extras from a movie's or show's extras folders now get their own row on the detail page and play right from there. A title's trailers sit at the front of the same row."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los clips, featurettes, escenas eliminadas y otros extras de las carpetas de extras de una película o serie tienen ahora su propia fila en la página de detalles y se reproducen desde ahí."
+            "value" : "Los clips, featurettes, escenas eliminadas y otros extras de las carpetas de extras de una película o serie tienen ahora su propia fila en la página de detalles y se reproducen desde ahí. Los tráileres de un título aparecen al principio de la misma fila."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elokuvan tai sarjan lisämateriaalikansioiden klipit, featuretit, poistetut kohtaukset ja muu lisämateriaali saavat nyt oman rivinsä tietosivulle, ja ne toistetaan suoraan sieltä."
+            "value" : "Elokuvan tai sarjan lisämateriaalikansioiden klipit, featuretit, poistetut kohtaukset ja muu lisämateriaali saavat nyt oman rivinsä tietosivulle, ja ne toistetaan suoraan sieltä. Nimikkeen trailerit ovat saman rivin alussa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les extraits, making-of, scènes coupées et autres bonus des dossiers d'extras d'un film ou d'une série ont désormais leur propre rangée sur la page de détails et se lisent directement depuis celle-ci."
+            "value" : "Les extraits, making-of, scènes coupées et autres bonus des dossiers d'extras d'un film ou d'une série ont désormais leur propre rangée sur la page de détails et se lisent directement depuis celle-ci. Les bandes-annonces d'un titre figurent en tête de cette même rangée."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Isječci, featurette, izbačene scene i ostali dodaci iz mapa s dodacima filma ili serije sada imaju vlastiti red na stranici s detaljima i reproduciraju se izravno odande."
+            "value" : "Isječci, featurette, izbačene scene i ostali dodaci iz mapa s dodacima filma ili serije sada imaju vlastiti red na stranici s detaljima i reproduciraju se izravno odande. Najave naslova nalaze se na početku istog reda."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A film vagy sorozat extramappáiban lévő klipek, werkfilmek, kivágott jelenetek és egyéb extrák mostantól saját sort kapnak a részletek oldalon, és közvetlenül onnan játszhatók le."
+            "value" : "A film vagy sorozat extramappáiban lévő klipek, werkfilmek, kivágott jelenetek és egyéb extrák mostantól saját sort kapnak a részletek oldalon, és közvetlenül onnan játszhatók le. A cím előzetesei ugyanennek a sornak az elején állnak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clip, featurette, scene eliminate e altri contenuti extra dalle cartelle extra di un film o di una serie hanno ora una propria fila nella pagina dei dettagli e si riproducono direttamente da lì."
+            "value" : "Clip, featurette, scene eliminate e altri contenuti extra dalle cartelle extra di un film o di una serie hanno ora una propria fila nella pagina dei dettagli e si riproducono direttamente da lì. I trailer di un titolo si trovano all'inizio della stessa fila."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "映画やシリーズの特典フォルダにあるクリップ、メイキング、未公開シーンなどの特典映像が詳細ページに専用の列で表示され、そこから直接再生できるようになりました。"
+            "value" : "映画やシリーズの特典フォルダにあるクリップ、メイキング、未公開シーンなどの特典映像が詳細ページに専用の列で表示され、そこから直接再生できるようになりました。作品の予告編は同じ列の先頭に表示されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "영화나 시리즈의 부가 영상 폴더에 있는 클립, 메이킹 영상, 삭제된 장면 등이 이제 상세 페이지에 별도의 줄로 표시되며 바로 재생할 수 있습니다."
+            "value" : "영화나 시리즈의 부가 영상 폴더에 있는 클립, 메이킹 영상, 삭제된 장면 등이 이제 상세 페이지에 별도의 줄로 표시되며 바로 재생할 수 있습니다. 작품의 예고편은 같은 줄의 맨 앞에 표시됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipp, featurettes, slettede scener og annet ekstramateriale fra en films eller series ekstramapper har nå sin egen rad på detaljsiden og spilles av rett derfra."
+            "value" : "Klipp, featurettes, slettede scener og annet ekstramateriale fra en films eller series ekstramapper har nå sin egen rad på detaljsiden og spilles av rett derfra. En tittels trailere står først i samme rad."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, featurettes, verwijderde scènes en andere extra's uit de extra-mappen van een film of serie hebben nu een eigen rij op de detailpagina en spelen daar direct af."
+            "value" : "Clips, featurettes, verwijderde scènes en andere extra's uit de extra-mappen van een film of serie hebben nu een eigen rij op de detailpagina en spelen daar direct af. De trailers van een titel staan vooraan in dezelfde rij."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, materiały zza kulis, usunięte sceny i inne dodatki z folderów z dodatkami filmu lub serialu mają teraz własny rząd na stronie szczegółów i odtwarzają się bezpośrednio stamtąd."
+            "value" : "Klipy, materiały zza kulis, usunięte sceny i inne dodatki z folderów z dodatkami filmu lub serialu mają teraz własny rząd na stronie szczegółów i odtwarzają się bezpośrednio stamtąd. Zwiastuny tytułu znajdują się na początku tego samego rzędu."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipes, featurettes, cenas excluídas e outros extras das pastas de extras de um filme ou série agora têm sua própria fileira na página de detalhes e são reproduzidos direto de lá."
+            "value" : "Clipes, featurettes, cenas excluídas e outros extras das pastas de extras de um filme ou série agora têm sua própria fileira na página de detalhes e são reproduzidos direto de lá. Os trailers de um título ficam no início da mesma fileira."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipes, featurettes, cenas eliminadas e outros extras das pastas de extras de um filme ou série têm agora a sua própria fila na página de detalhes e são reproduzidos diretamente a partir daí."
+            "value" : "Clipes, featurettes, cenas eliminadas e outros extras das pastas de extras de um filme ou série têm agora a sua própria fila na página de detalhes e são reproduzidos diretamente a partir daí. Os trailers de um título ficam no início da mesma fila."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipurile, featurette-urile, scenele eliminate și alte materiale bonus din folderele de extras ale unui film sau serial au acum propriul rând pe pagina de detalii și se redau direct de acolo."
+            "value" : "Clipurile, featurette-urile, scenele eliminate și alte materiale bonus din folderele de extras ale unui film sau serial au acum propriul rând pe pagina de detalii și se redau direct de acolo. Trailerele unui titlu apar la începutul aceluiași rând."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Клипы, фильмы о съёмках, удалённые сцены и другие доп. материалы из папок extras фильма или сериала теперь показываются отдельным рядом на странице с подробностями и воспроизводятся прямо оттуда."
+            "value" : "Клипы, фильмы о съёмках, удалённые сцены и другие доп. материалы из папок extras фильма или сериала теперь показываются отдельным рядом на странице с подробностями и воспроизводятся прямо оттуда. Трейлеры стоят в начале того же ряда."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, featurety, vystrihnuté scény a ďalšie bonusy z priečinkov s bonusmi filmu alebo seriálu majú teraz na stránke s detailmi vlastný rad a prehrajú sa priamo odtiaľ."
+            "value" : "Klipy, featurety, vystrihnuté scény a ďalšie bonusy z priečinkov s bonusmi filmu alebo seriálu majú teraz na stránke s detailmi vlastný rad a prehrajú sa priamo odtiaľ. Ukážky titulu sú na začiatku toho istého radu."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipp, featurettes, borttagna scener och annat extramaterial från en films eller series extramappar har nu en egen rad på detaljsidan och spelas upp direkt därifrån."
+            "value" : "Klipp, featurettes, borttagna scener och annat extramaterial från en films eller series extramappar har nu en egen rad på detaljsidan och spelas upp direkt därifrån. En titels trailers står först i samma rad."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir filmin veya dizinin ekstra klasörlerindeki klipler, kamera arkası videoları, silinmiş sahneler ve diğer ekstralar artık ayrıntı sayfasında kendi satırında yer alıyor ve doğrudan oradan oynatılıyor."
+            "value" : "Bir filmin veya dizinin ekstra klasörlerindeki klipler, kamera arkası videoları, silinmiş sahneler ve diğer ekstralar artık ayrıntı sayfasında kendi satırında yer alıyor ve doğrudan oradan oynatılıyor. Bir yapımın fragmanları aynı satırın başında yer alıyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Кліпи, фільми про зйомки, видалені сцени та інші додаткові матеріали з папок extras фільму чи серіалу тепер мають власний ряд на сторінці з подробицями й відтворюються просто звідти."
+            "value" : "Кліпи, фільми про зйомки, видалені сцени та інші додаткові матеріали з папок extras фільму чи серіалу тепер мають власний ряд на сторінці з подробицями й відтворюються просто звідти. Трейлери стоять на початку того самого ряду."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "电影或剧集花絮文件夹中的片段、幕后特辑、删减片段等花絮现在会在详情页单独成行显示，并可直接从那里播放。"
+            "value" : "电影或剧集花絮文件夹中的片段、幕后特辑、删减片段等花絮现在会在详情页单独成行显示，并可直接从那里播放。作品的预告片位于同一行的最前面。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電影或影集花絮資料夾中的片段、幕後特輯、刪減片段等花絮現在會在詳細資料頁單獨成列顯示，並可直接從那裡播放。"
+            "value" : "電影或影集花絮資料夾中的片段、幕後特輯、刪減片段等花絮現在會在詳細資料頁單獨成列顯示，並可直接從那裡播放。作品的預告片位於同一列的最前面。"
           }
         }
       }
@@ -82782,7 +82782,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na iPhonu, iPadu a Macu tlačítko Trailer nově přehraje i trailer filmu nebo seriálu z YouTube, pokud váš server žádný vlastní nemá. Přehrává se v přehrávači YouTube a video, které nelze vložit, se místo toho otevře v YouTube."
+            "value" : "Na iPhonu, iPadu a Macu tlačítko Upoutávka nově přehraje i upoutávku filmu nebo seriálu z YouTube, pokud váš server žádnou vlastní nemá. Přehrává se v přehrávači YouTube a video, které nelze vložit, se místo toho otevře v YouTube."
           }
         },
         "da" : {
@@ -82830,7 +82830,7 @@
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na iPhoneu, iPadu i Macu gumb Trailer sada reproducira i trailer filma ili serije s YouTubea kada vaš poslužitelj nema vlastiti. Reproducira se u YouTubeovu playeru, a videozapis koji se ne može ugraditi umjesto toga se otvara u YouTubeu."
+            "value" : "Na iPhoneu, iPadu i Macu gumb Najava sada reproducira i najavu filma ili serije s YouTubea kada vaš poslužitelj nema vlastitu. Reproducira se u YouTubeovu playeru, a videozapis koji se ne može ugraditi umjesto toga se otvara u YouTubeu."
           }
         },
         "hu" : {
@@ -82902,7 +82902,7 @@
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na iPhone, iPade a Macu tlačidlo Trailer teraz prehrá aj trailer filmu alebo seriálu z YouTube, ak váš server nemá vlastný. Prehráva sa v prehrávači YouTube a video, ktoré sa nedá vložiť, sa namiesto toho otvorí v YouTube."
+            "value" : "Na iPhone, iPade a Macu tlačidlo Ukážka teraz prehrá aj ukážku filmu alebo seriálu z YouTube, ak váš server nemá vlastnú. Prehráva sa v prehrávači YouTube a video, ktoré sa nedá vložiť, sa namiesto toho otvorí v YouTube."
           }
         },
         "sv" : {
@@ -82944,7 +82944,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trailery z YouTube"
+            "value" : "Upoutávky z YouTube"
           }
         },
         "da" : {
@@ -82992,7 +82992,7 @@
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Traileri s YouTubea"
+            "value" : "Najave s YouTubea"
           }
         },
         "hu" : {
@@ -83064,7 +83064,7 @@
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trailery z YouTube"
+            "value" : "Ukážky z YouTube"
           }
         },
         "sv" : {
@@ -99271,7 +99271,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trailer zde nelze přehrát"
+            "value" : "Upoutávku zde nelze přehrát"
           }
         },
         "da" : {
@@ -99319,7 +99319,7 @@
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trailer se ovdje ne može reproducirati"
+            "value" : "Najava se ovdje ne može reproducirati"
           }
         },
         "hu" : {
@@ -99391,7 +99391,7 @@
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trailer tu nemožno prehrať"
+            "value" : "Ukážku tu nemožno prehrať"
           }
         },
         "sv" : {
@@ -99584,6 +99584,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此影片無法在 Sodalite 中播放。請在 YouTube 中開啟觀看。"
+          }
+        }
+      }
+    },
+    "detail.trailers" : {
+      "comment" : "Heading of the detail row when it holds only trailers",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávky"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέιλερ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráileres"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailerit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandes-annonces"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najave"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzetesek"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予告編"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예고편"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwiastuny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлеры"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážky"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fragmanlar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлери"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预告片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預告片"
+          }
+        }
+      }
+    },
+    "detail.trailersAndExtras" : {
+      "comment" : "Heading of the detail row when it holds trailers and extras",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávky a bonusy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere og ekstramateriale"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer & Extras"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέιλερ και επιπλέον υλικό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers & Extras"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráileres y extras"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailerit ja lisämateriaali"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandes-annonces et bonus"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najave i dodaci"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzetesek és extrák"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer e contenuti extra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予告編と特典映像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예고편 및 부가 영상"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere og ekstramateriale"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers en extra's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwiastuny i dodatki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers e extras"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers e extras"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere și materiale bonus"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлеры и доп. материалы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážky a bonusy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers och extramaterial"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fragmanlar ve ekstralar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлери та додаткові матеріали"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预告片和花絮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預告片和花絮"
           }
         }
       }

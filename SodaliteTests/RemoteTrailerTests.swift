@@ -41,8 +41,8 @@ struct RemoteTrailerTests {
         #expect(id(nil) == nil)
     }
 
-    @Test("the item decodes RemoteTrailers and takes the first entry that resolves")
-    func itemPicksFirstYouTubeTrailer() throws {
+    @Test("the item decodes RemoteTrailers and keeps the YouTube entries in order")
+    func itemKeepsYouTubeTrailersInOrder() throws {
         let json = """
         {"Id":"m1","Name":"M1","Type":"Movie",
          "RemoteTrailers":[{"Url":"https://vimeo.com/1"},
@@ -50,15 +50,29 @@ struct RemoteTrailerTests {
                            {"Url":"https://www.youtube.com/watch?v=bbbbbbbbbbb"}]}
         """
         let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(json.utf8))
-        #expect(item.youTubeTrailer == YouTubeTrailer(videoID: "aaaaaaaaaaa", title: "Official Trailer"))
-        #expect(item.youTubeTrailer?.watchURL.absoluteString == "https://www.youtube.com/watch?v=aaaaaaaaaaa")
+        #expect(item.youTubeTrailers == [
+            YouTubeTrailer(videoID: "aaaaaaaaaaa", title: "Official Trailer"),
+            YouTubeTrailer(videoID: "bbbbbbbbbbb", title: nil),
+        ])
+        #expect(item.youTubeTrailers.first?.watchURL.absoluteString == "https://www.youtube.com/watch?v=aaaaaaaaaaa")
     }
 
     @Test("an item without the field has no remote trailer")
     func itemWithoutField() throws {
         let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"m1","Name":"M1","Type":"Movie"}"#.utf8))
         #expect(item.remoteTrailers == nil)
-        #expect(item.youTubeTrailer == nil)
+        #expect(item.youTubeTrailers.isEmpty)
+    }
+
+    @Test("the same video listed twice becomes one card")
+    func duplicatesCollapse() throws {
+        let json = """
+        {"Id":"m1","Name":"M1","Type":"Movie",
+         "RemoteTrailers":[{"Url":"https://www.youtube.com/watch?v=aaaaaaaaaaa","Name":"Trailer"},
+                           {"Url":"https://youtu.be/aaaaaaaaaaa","Name":"Trailer (DE)"}]}
+        """
+        let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(json.utf8))
+        #expect(item.youTubeTrailers.map(\.videoID) == ["aaaaaaaaaaa"])
     }
 
     @Test("the detail field set asks the server for RemoteTrailers")

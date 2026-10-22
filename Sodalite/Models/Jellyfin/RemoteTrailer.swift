@@ -60,14 +60,26 @@ struct YouTubeTrailer: Identifiable, Hashable {
     var watchURL: URL {
         URL(string: "https://www.youtube.com/watch?v=\(videoID)")!
     }
+
+    /// The 1280x720 still, which older or low-resolution uploads lack.
+    var thumbnailURL: URL {
+        URL(string: "https://i.ytimg.com/vi/\(videoID)/maxresdefault.jpg")!
+    }
+
+    /// 320x180, generated for every video, and 16:9 like the card (the larger `hqdefault` is 4:3 with bars).
+    var fallbackThumbnailURL: URL {
+        URL(string: "https://i.ytimg.com/vi/\(videoID)/mqdefault.jpg")!
+    }
 }
 
 extension JellyfinItem {
-    /// First remote trailer that resolves to a YouTube video, the only kind the embed can play.
-    var youTubeTrailer: YouTubeTrailer? {
-        for trailer in remoteTrailers ?? [] {
-            if let id = trailer.youTubeVideoID { return YouTubeTrailer(videoID: id, title: trailer.name) }
+    /// The remote trailers that resolve to a YouTube video, the only kind the embed can play, in the
+    /// server's order and without repeats (TMDB lists the same video under several languages).
+    var youTubeTrailers: [YouTubeTrailer] {
+        var seen = Set<String>()
+        return (remoteTrailers ?? []).compactMap { trailer in
+            guard let id = trailer.youTubeVideoID, seen.insert(id).inserted else { return nil }
+            return YouTubeTrailer(videoID: id, title: trailer.name)
         }
-        return nil
     }
 }
