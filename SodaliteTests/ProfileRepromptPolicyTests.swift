@@ -48,4 +48,15 @@ struct ProfileRepromptPolicyTests {
         #expect(!decide(elapsed: .seconds(299), interval: .after5min, wasBackgrounded: false))
         #expect(decide(elapsed: .seconds(300), interval: .after5min, wasBackgrounded: false))
     }
+
+    @Test func shieldEligibilityIgnoresTime() {
+        #expect(ProfileRepromptPolicy.canReprompt(
+            interval: .after60min, launchBehavior: .showPicker, isAuthenticated: true, rememberedCount: 2))
+        #expect(!ProfileRepromptPolicy.canReprompt(
+            interval: .off, launchBehavior: .showPicker, isAuthenticated: true, rememberedCount: 2))
+        #expect(!ProfileRepromptPolicy.canReprompt(
+            interval: .immediately, launchBehavior: .useDefault, isAuthenticated: true, rememberedCount: 2))
+        #expect(!ProfileRepromptPolicy.canReprompt(
+            interval: .immediately, launchBehavior: .showPicker, isAuthenticated: true, rememberedCount: 1))
+    }
 }

@@ -21,10 +21,23 @@ enum ProfileRepromptPolicy {
         tvUserChanged: Bool,
         wasBackgrounded: Bool = true
     ) -> Bool {
-        guard let threshold = interval.threshold else { return false }
-        guard launchBehavior == .showPicker else { return false }
-        guard isAuthenticated, rememberedCount > 1 else { return false }
+        guard let threshold = interval.threshold,
+              canReprompt(interval: interval, launchBehavior: launchBehavior,
+                          isAuthenticated: isAuthenticated, rememberedCount: rememberedCount)
+        else { return false }
         guard !isPlaybackRunning, !tvUserChanged else { return false }
         return elapsed >= (wasBackgrounded ? threshold : max(threshold, inactiveOnlyFloor))
+    }
+
+    /// The time-independent half of `shouldReprompt`: whether any return to the app could bring the
+    /// picker up. Decides on the way out, before anyone knows how long the trip lasts, whether the
+    /// privacy shield goes over the app (Sodalite#184).
+    static func canReprompt(
+        interval: AuthPreferences.ProfileRepromptInterval,
+        launchBehavior: AuthPreferences.LaunchBehavior,
+        isAuthenticated: Bool,
+        rememberedCount: Int
+    ) -> Bool {
+        interval.threshold != nil && launchBehavior == .showPicker && isAuthenticated && rememberedCount > 1
     }
 }
