@@ -220,6 +220,12 @@ struct HomeHeroCarousel: View {
                 .contentShape(Rectangle())
                 .onTapGesture { onOpen(current) }
                 .mediaContextMenu(for: current) { onOpen($0) }
+                // The buttons are gone on touch, so the two actions they carried stay reachable here.
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction { onOpen(current) }
+                .accessibilityAction(named: Text("detail.play")) { onPlay(current) }
+                .accessibilityAdjustableAction { step($0 == .increment ? 1 : -1) }
                 #endif
                 #if os(iOS)
                 .simultaneousGesture(
@@ -416,8 +422,8 @@ struct HomeHeroCarousel: View {
         #endif
     }
 
-    /// The upright iPhone's text: logo, facts and the two buttons, centred. No overview, the poster
-    /// already says what the title is and two lines of it would push Play off the art.
+    /// The upright iPhone's text: logo, facts and two lines of the overview, centred. No buttons on
+    /// touch (Blexbi): the banner itself opens the title, and its hold menu carries Play.
     private func portraitDetails(for item: JellyfinItem) -> some View {
         VStack(spacing: 12) {
             ContentLogoTitle(
@@ -442,8 +448,13 @@ struct HomeHeroCarousel: View {
                     .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
             }
 
-            heroButtons(for: item)
-                .padding(.top, 4)
+            if let overview = item.overview, !overview.isEmpty {
+                Text(verbatim: overview)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
         }
         .frame(maxWidth: .infinity)
         .foregroundStyle(.white)
@@ -463,12 +474,9 @@ struct HomeHeroCarousel: View {
             tvButtons(for: item)
                 .padding(.top, 8)
             #else
-            VStack(alignment: .leading, spacing: 20) {
-                heroButtons(for: item)
-                pager
-                    .padding(.leading, 8)
-            }
-            .padding(.top, 4)
+            pager
+                .padding(.leading, 8)
+                .padding(.top, 4)
             #endif
         }
         .foregroundStyle(.white)
@@ -555,37 +563,6 @@ struct HomeHeroCarousel: View {
     }
     #endif
 
-    #if !os(tvOS)
-    private func heroButtons(for item: JellyfinItem) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                onPlay(item)
-            } label: {
-                Label("detail.play", systemImage: "play.fill")
-                    .font(.headline)
-                    .padding(.horizontal, 22)
-                    .padding(.vertical, 10)
-                    .foregroundStyle(.black)
-                    .background(.white, in: Capsule())
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                onOpen(item)
-            } label: {
-                Image(systemName: "info")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .glassEffect(.regular.interactive(), in: .circle)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text(verbatim: item.name))
-        }
-    }
-    #else
-    private func heroButtons(for item: JellyfinItem) -> some View { EmptyView() }
-    #endif
 
     @ViewBuilder
     private var pager: some View {

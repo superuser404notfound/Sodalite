@@ -4128,6 +4128,168 @@
         }
       }
     },
+    "appearance.accent.silver" : {
+      "comment" : "Accent color option name",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stříbrná"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sølv"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silber"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ασημί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silver"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plata"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopea"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argent"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Srebrna"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ezüst"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シルバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실버"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sølv"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zilver"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Srebrny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prata"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prateado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argintiu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серебристый"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strieborná"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silver"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gümüş"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сріблястий"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "银色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "銀色"
+          }
+        }
+      }
+    },
     "appearance.accent.sky" : {
       "comment" : "Accent color option name",
       "extractionState" : "manual",
@@ -71449,6 +71611,328 @@
         }
       }
     },
+    "changelog.1_1_0.iphoneCleanup.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banner na úvodní stránce je bez tlačítek (klepnutím otevřete, podržením přehrajete), sezónu seriálu vyberete z jedné nabídky a děj je pod tlačítkem Přehrát, klepnutím se rozbalí celý."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banneret på Hjem har ingen knapper (tryk for at åbne, hold for at afspille), en serie vælger sæson i én menu, og handlingen står under Afspil og foldes helt ud med et tryk."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Banner auf der Startseite kommt ohne Buttons aus (Tippen öffnet, Halten spielt ab), eine Serie wählt ihre Staffel aus einem Menü, und die Handlung steht unter Abspielen und klappt per Tipp ganz auf."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το banner της Αρχικής δεν έχει πλέον κουμπιά (πατήστε για άνοιγμα, κρατήστε για αναπαραγωγή), η σειρά επιλέγει σεζόν από ένα μενού και η υπόθεση βρίσκεται κάτω από την Αναπαραγωγή και ανοίγει ολόκληρη με ένα πάτημα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Home banner drops its buttons (tap to open, hold to play), a series picks its season from one menu, and the plot sits under Play and opens in full with a tap."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El banner de Inicio ya no tiene botones (toca para abrir, mantén pulsado para reproducir), una serie elige la temporada en un solo menú y la sinopsis va bajo Reproducir y se despliega entera con un toque."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kotinäkymän bannerissa ei ole enää painikkeita (avaa napauttamalla, toista painamalla pitkään), sarjan kausi valitaan yhdestä valikosta ja juoni on Toista-painikkeen alla ja aukeaa kokonaan napautuksella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La bannière de l’accueil perd ses boutons (touchez pour ouvrir, maintenez pour lire), une série choisit sa saison dans un seul menu et le synopsis passe sous Lire et s’ouvre en entier d’un toucher."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banner na početnoj nema više gumbe (dodirnite za otvaranje, zadržite za reprodukciju), serija bira sezonu iz jednog izbornika, a radnja stoji ispod Reproduciraj i dodirom se otvara cijela."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kezdőlap bannere gombok nélkül jelenik meg (koppintás megnyitja, nyomva tartás lejátssza), a sorozat évadát egy menüből választhatod, a cselekmény pedig a Lejátszás alatt van, és koppintásra teljesen kinyílik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il banner della Home perde i pulsanti (tocca per aprire, tieni premuto per riprodurre), una serie sceglie la stagione da un solo menu e la trama sta sotto Riproduci e si apre per intero con un tocco."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームのバナーからボタンをなくしました（タップで開き、長押しで再生）。シリーズのシーズンは1つのメニューから選べ、あらすじは再生ボタンの下に表示され、タップで全文が開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 배너에서 버튼이 빠졌습니다(탭하면 열기, 길게 누르면 재생). 시리즈는 메뉴 하나에서 시즌을 고르고, 줄거리는 재생 아래에 있으며 탭하면 전체가 펼쳐집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banneret på Hjem har ingen knapper lenger (trykk for å åpne, hold for å spille av), en serie velger sesong fra én meny, og handlingen står under Spill av og åpnes helt med et trykk."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De banner op Home heeft geen knoppen meer (tik om te openen, houd vast om af te spelen), een serie kiest het seizoen uit één menu en de inhoud staat onder Afspelen en klapt met een tik helemaal open."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baner na stronie głównej nie ma już przycisków (dotknij, aby otworzyć, przytrzymaj, aby odtworzyć), serial wybiera sezon z jednego menu, a opis fabuły jest pod Odtwórz i rozwija się w całości po dotknięciu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O banner do Início perde os botões (toque para abrir, segure para reproduzir), uma série escolhe a temporada em um único menu e a sinopse fica abaixo de Reproduzir e abre inteira com um toque."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O banner do Início perde os botões (toque para abrir, mantenha premido para reproduzir), uma série escolhe a temporada num único menu e a sinopse fica por baixo de Reproduzir e abre por inteiro com um toque."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannerul de pe Acasă nu mai are butoane (atinge pentru a deschide, ține apăsat pentru redare), un serial își alege sezonul dintr-un singur meniu, iar rezumatul stă sub Redă și se deschide complet la o atingere."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Баннер на главной больше без кнопок (нажатие открывает, удержание запускает), сезон сериала выбирается из одного меню, а описание стоит под кнопкой «Смотреть» и раскрывается целиком по нажатию."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banner na úvodnej stránke je bez tlačidiel (ťuknutím otvoríte, podržaním prehráte), sériu prepnete na inú sériu z jednej ponuky a dej je pod tlačidlom Prehrať, ťuknutím sa rozbalí celý."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannern på Hem har inga knappar längre (tryck för att öppna, håll för att spela), en serie väljer säsong från en meny och handlingen står under Spela och öppnas helt med ett tryck."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana sayfa afişi artık düğmesiz (açmak için dokunun, oynatmak için basılı tutun), dizinin sezonu tek bir menüden seçilir ve konu Oynat’ın altında durur, bir dokunuşla tamamı açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Банер на головній тепер без кнопок (дотик відкриває, утримання запускає), сезон серіалу обирається з одного меню, а опис стоїть під кнопкою «Відтворити» й розгортається повністю дотиком."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页横幅不再显示按钮（轻点打开，长按播放），剧集在一个菜单中选择季，剧情简介位于播放按钮下方，轻点即可展开全文。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主畫面橫幅不再顯示按鈕（輕點打開，長按播放），影集在一個選單中選擇季，劇情簡介位於播放按鈕下方，輕點即可展開全文。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.iphoneCleanup.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klidnější iPhone"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En roligere iPhone"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgeräumteres iPhone"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πιο καθαρό iPhone"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A calmer iPhone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un iPhone más despejado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selkeämpi iPhone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un iPhone plus épuré"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uredniji iPhone"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letisztultabb iPhone"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un iPhone più ordinato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すっきりした iPhone 表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 깔끔해진 iPhone"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En roligere iPhone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een rustigere iPhone"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spokojniejszy iPhone"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um iPhone mais limpo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um iPhone mais limpo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un iPhone mai aerisit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более аккуратный iPhone"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokojnejší iPhone"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En lugnare iPhone"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha sade bir iPhone"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Охайніший iPhone"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更清爽的 iPhone 界面"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更清爽的 iPhone 介面"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.latestPerLibrary.body" : {
       "comment" : "What's New 1.1.0: body for the per-library Latest rows a multi-library Home now starts with.",
       "extractionState" : "manual",
@@ -78887,6 +79371,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記得每個分頁的側邊欄"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.silverAccent.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bílý a šedý akcent jako u běžného přehrávače, zdarma v nastavení vzhledu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En hvid og grå accent som i en almindelig afspiller, gratis under udseende."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiß und Grau wie in einem gewohnten Player, kostenlos in den Darstellungseinstellungen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λευκό και γκρι χρώμα έμφασης όπως σε ένα συνηθισμένο πρόγραμμα αναπαραγωγής, δωρεάν στις ρυθμίσεις εμφάνισης."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A white and grey accent like a regular player, free in the appearance settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un acento blanco y gris como el de un reproductor habitual, gratis en los ajustes de apariencia."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valkoinen ja harmaa korostusväri kuin tavallisessa soittimessa, ilmaiseksi ulkoasun asetuksissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un accent blanc et gris comme dans un lecteur classique, gratuit dans les réglages d’apparence."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijeli i sivi naglasak kao u uobičajenom playeru, besplatno u postavkama izgleda."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehér és szürke kiemelőszín, mint egy megszokott lejátszóban, ingyen a megjelenési beállításokban."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un accento bianco e grigio come in un normale player, gratis nelle impostazioni di aspetto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般的なプレーヤーのような白とグレーのアクセント。外観設定で無料で選べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반 플레이어처럼 흰색과 회색의 강조 색상, 화면 설정에서 무료로 선택할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En hvit og grå aksent som i en vanlig avspiller, gratis under utseende."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een wit en grijs accent zoals in een gewone speler, gratis in de weergave-instellingen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biało-szary akcent jak w zwykłym odtwarzaczu, za darmo w ustawieniach wyglądu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um destaque branco e cinza como o de um player comum, grátis nos ajustes de aparência."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um destaque branco e cinzento como o de um leitor comum, gratuito nas definições de aspeto."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un accent alb și gri ca într-un player obișnuit, gratuit în setările de aspect."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бело-серый акцент, как в привычном плеере, бесплатно в настройках оформления."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biely a sivý akcent ako v bežnom prehrávači, zadarmo v nastaveniach vzhľadu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En vit och grå accent som i en vanlig spelare, gratis under utseende."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıradan bir oynatıcıdaki gibi beyaz ve gri vurgu rengi, görünüm ayarlarında ücretsiz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Біло-сірий акцент, як у звичному плеєрі, безкоштовно в налаштуваннях вигляду."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "像常见播放器一样的白色和灰色强调色，可在外观设置中免费选择。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "像常見播放器一樣的白色與灰色強調色，可在外觀設定中免費選擇。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.silverAccent.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stříbrný akcent"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sølv-accent"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akzentfarbe Silber"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ασημί χρώμα έμφασης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silver accent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acento plateado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopea korostusväri"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accent argent"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Srebrni naglasak"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ezüst kiemelőszín"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accento argento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シルバーのアクセント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실버 강조 색상"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sølv-aksent"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zilveren accent"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Srebrny akcent"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destaque prata"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destaque prateado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accent argintiu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серебристый акцент"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strieborný akcent"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silveraccent"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gümüş vurgu rengi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сріблястий акцент"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "银色强调色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "銀色強調色"
           }
         }
       }

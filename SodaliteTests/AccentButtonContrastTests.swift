@@ -60,7 +60,7 @@ struct AccentButtonContrastTests {
             )
             return RGBColor.white.contrastRatio(with: fill) < 3.0
         }
-        #expect(failing.count == 8, "expected the eight lightest presets, got \(failing.map(\.rawValue))")
+        #expect(failing.count == 9, "expected the nine lightest presets, got \(failing.map(\.rawValue))")
         #expect(failing.allSatisfy { $0.palette.foreground == .black })
     }
 }

@@ -382,6 +382,7 @@ struct MovieDetailView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     glassPanel(vm: vm)
                     actionButtonRow(vm: vm)
+                    if isPhonePortrait { heroSynopsis(vm: vm) }
                 // Sodalite#146 round 2. A page whose ONLY content below the fold is this one
                 // non-focusable line has no business having a fold at all, and the difference is not
                 // cosmetic. With the line down there the block measures ~30 pt, the trailing chrome
@@ -503,19 +504,28 @@ struct MovieDetailView: View {
 
             // Sodalite#146: the plot belongs in the viewport the viewer actually meets. The box
             // below the fold keeps the full text; this is the teaser that decides whether they
-            // scroll to it.
-            DetailHeroSynopsis(
-                text: vm.item.overview,
-                isPending: !vm.hasFullDetail,
-                spoilerItem: vm.item,
-                onTap: { openMoreDetails(vm: vm) }
-            )
+            // scroll to it. The upright iPhone has it under the buttons instead.
+            if !isPhonePortrait { heroSynopsis(vm: vm) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(isPhonePortrait ? 16 : 30)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
+        // The upright iPhone draws no panel (Blexbi): its column sits on the page's own ground
+        // under the poster, not over the backdrop, so the glass only boxed the text in.
+        .padding(isPhonePortrait ? 0 : 30)
+        .background {
+            if !isPhonePortrait {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+            }
+        }
+    }
+
+    private func heroSynopsis(vm: DetailViewModel) -> some View {
+        DetailHeroSynopsis(
+            text: vm.item.overview,
+            isPending: !vm.hasFullDetail,
+            spoilerItem: vm.item,
+            onTap: { openMoreDetails(vm: vm) },
+            expandsInPlace: isPhonePortrait
         )
     }
 
