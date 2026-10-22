@@ -238,7 +238,6 @@ struct SodaliteApp: App {
         #endif
     }
 
-    /// Handles `sodalite://item/{id}` and `sodalite://play/{id}` (TopShelf's display and play actions): stashes the id in AppState for AppRouter to resolve. Synchronously tears down any active player modal first, else a TopShelf tap waking the app from a paused player loses ~10s to the player's own appDidBecomeActive reload before AppRouter's .task(id:) cycles in.
     /// Writes only on a change: the home-config signal fires for every row edit too, and each
     /// write would otherwise ask the shelf to reload.
     private func mirrorHiddenShowsToShelf() {
@@ -249,6 +248,7 @@ struct SodaliteApp: App {
         TopShelfRefresher.invalidate()
     }
 
+    /// Handles `sodalite://item/{id}` and `sodalite://play/{id}` (TopShelf's display and play actions): stashes the id in AppState for AppRouter to resolve. Synchronously tears down any active player modal first, else a TopShelf tap waking the app from a paused player loses ~10s to the player's own appDidBecomeActive reload before AppRouter's .task(id:) cycles in.
     private func handleDeepLink(_ url: URL) {
         guard let route = DeepLinkRoute.parse(url) else { return }
         PlayerModalDismisser.dismissActive(logPrefix: "[SodaliteApp]")
