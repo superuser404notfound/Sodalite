@@ -70803,6 +70803,328 @@
         }
       }
     },
+    "changelog.1_1_0.inlineSearch.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hledání na Apple TV už nezakrývá obrazovku klávesnicí přes celou obrazovku. Klávesnice je v jednom řádku nahoře a výsledky se pod ní doplňují s každým písmenem, takže šipkou dolů se k nim dostanete hned."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Søgning på Apple TV dækker ikke længere skærmen med et fuldskærmstastatur. Tastaturet ligger på én linje øverst, og resultaterne dukker op nedenunder for hvert bogstav, så Ned fører dig direkte til dem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Suche auf dem Apple TV verdeckt den Bildschirm nicht mehr mit einer Vollbild-Tastatur. Die Tastatur sitzt als eine Zeile oben, die Ergebnisse erscheinen darunter mit jedem Buchstaben, und nach unten geht es direkt hinein."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η αναζήτηση στο Apple TV δεν καλύπτει πλέον την οθόνη με πληκτρολόγιο πλήρους οθόνης. Το πληκτρολόγιο βρίσκεται σε μία γραμμή στο πάνω μέρος και τα αποτελέσματα εμφανίζονται από κάτω με κάθε γράμμα, οπότε με το Κάτω πηγαίνετε κατευθείαν σε αυτά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search on Apple TV no longer covers the screen with a full-screen keyboard. The keyboard sits in one row at the top and the results fill in below with every letter, so Down takes you straight to them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La búsqueda en Apple TV ya no tapa la pantalla con un teclado a pantalla completa. El teclado ocupa una sola fila arriba y los resultados aparecen debajo con cada letra, así que con Abajo llegas directamente a ellos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:n haku ei enää peitä näyttöä koko näytön näppäimistöllä. Näppäimistö on yhtenä rivinä ylhäällä, ja tulokset päivittyvät sen alle jokaisella kirjaimella, joten alas pääset suoraan niihin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche sur Apple TV ne recouvre plus l’écran d’un clavier plein écran. Le clavier tient sur une ligne en haut et les résultats s’affichent en dessous à chaque lettre : Bas vous y emmène directement."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pretraživanje na Apple TV-u više ne prekriva zaslon tipkovnicom preko cijelog zaslona. Tipkovnica je u jednom retku na vrhu, a rezultati se pojavljuju ispod nje sa svakim slovom, pa vas tipka dolje vodi ravno do njih."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Apple TV-n a keresés már nem takarja el a képernyőt teljes képernyős billentyűzettel. A billentyűzet egyetlen sorban fent helyezkedik el, a találatok pedig minden betűvel frissülnek alatta, így lefelé lépve azonnal hozzájuk jutsz."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ricerca su Apple TV non copre più lo schermo con una tastiera a schermo intero. La tastiera occupa una sola riga in alto e i risultati compaiono sotto a ogni lettera, così con Giù ci arrivi direttamente."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVの検索で、全画面キーボードが画面を覆わなくなりました。キーボードは上部の1行に収まり、1文字入力するごとにその下に結果が表示されるので、下を押せばすぐに結果へ移動できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV의 검색이 더 이상 전체 화면 키보드로 화면을 가리지 않습니다. 키보드는 상단 한 줄에 표시되고 글자를 입력할 때마다 그 아래에 결과가 나타나므로, 아래로 이동하면 바로 결과로 갈 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Søk på Apple TV dekker ikke lenger skjermen med et fullskjermstastatur. Tastaturet ligger på én linje øverst, og resultatene dukker opp under for hver bokstav, så Ned tar deg rett til dem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoeken op Apple TV bedekt het scherm niet meer met een schermvullend toetsenbord. Het toetsenbord staat op één regel bovenaan en de resultaten verschijnen eronder bij elke letter, zodat je met Omlaag er meteen bij bent."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyszukiwanie na Apple TV nie zasłania już ekranu klawiaturą pełnoekranową. Klawiatura zajmuje jeden wiersz u góry, a wyniki pojawiają się pod nią z każdą literą, więc strzałką w dół od razu do nich przejdziesz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A busca na Apple TV não cobre mais a tela com um teclado em tela cheia. O teclado fica em uma única linha no topo e os resultados aparecem logo abaixo a cada letra, então é só descer para chegar a eles."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pesquisa na Apple TV já não cobre o ecrã com um teclado em ecrã inteiro. O teclado ocupa uma única linha no topo e os resultados surgem por baixo a cada letra, por isso basta descer para chegar a eles."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Căutarea pe Apple TV nu mai acoperă ecranul cu o tastatură pe tot ecranul. Tastatura stă pe un singur rând sus, iar rezultatele apar dedesubt la fiecare literă, așa că apăsând în jos ajungi direct la ele."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск на Apple TV больше не закрывает экран полноэкранной клавиатурой. Клавиатура занимает одну строку вверху, а результаты появляются под ней с каждой буквой, так что кнопкой вниз вы сразу переходите к ним."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyhľadávanie na Apple TV už nezakrýva obrazovku klávesnicou na celú obrazovku. Klávesnica je v jednom riadku hore a výsledky sa pod ňou zobrazujú s každým písmenom, takže šípkou nadol sa k nim dostanete hneď."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sökningen på Apple TV täcker inte längre skärmen med ett helskärmstangentbord. Tangentbordet ligger på en rad överst och resultaten dyker upp nedanför för varje bokstav, så Ned tar dig direkt till dem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV’deki arama artık ekranı tam ekran bir klavyeyle kapatmıyor. Klavye üstte tek bir satırda duruyor ve sonuçlar her harfle birlikte altında beliriyor, böylece aşağı tuşuyla doğrudan onlara geçebilirsiniz."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук на Apple TV більше не закриває екран повноекранною клавіатурою. Клавіатура займає один рядок угорі, а результати з’являються під нею з кожною літерою, тож кнопкою вниз ви одразу переходите до них."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上的搜索不再用全屏键盘遮住屏幕。键盘位于顶部的一行，每输入一个字母，结果就会显示在下方，按向下即可直接进入结果。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 上的搜尋不再以全螢幕鍵盤遮住畫面。鍵盤位於頂端的一列，每輸入一個字母，結果就會顯示在下方，按向下即可直接進入結果。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.inlineSearch.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výsledky už při psaní na Apple TV"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultater mens du skriver på Apple TV"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergebnisse beim Tippen auf dem Apple TV"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αποτελέσματα ενώ πληκτρολογείτε στο Apple TV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Results while you type on Apple TV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultados mientras escribes en Apple TV"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulokset jo kirjoittaessa Apple TV:ssä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des résultats pendant la saisie sur Apple TV"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezultati dok tipkate na Apple TV-u"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Találatok már gépelés közben az Apple TV-n"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Risultati mentre scrivi su Apple TV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVで入力中に結果を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 입력하는 동안 결과 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultater mens du skriver på Apple TV"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultaten tijdens het typen op Apple TV"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyniki już podczas pisania na Apple TV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultados enquanto você digita na Apple TV"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultados enquanto escreve na Apple TV"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezultate în timp ce tastezi pe Apple TV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Результаты прямо во время ввода на Apple TV"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výsledky už počas písania na Apple TV"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultat medan du skriver på Apple TV"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV’de yazarken sonuçlar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Результати просто під час введення на Apple TV"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上边输入边看结果"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上邊輸入邊看結果"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.iosLogin.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -170708,168 +171030,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 Sodalite 上繼續觀看最近的劇集或電影。"
-          }
-        }
-      }
-    },
-    "search.clear" : {
-      "comment" : "Accessibility label of the tvOS button that empties the search field",
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vymazat hledání"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ryd søgning"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suche löschen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Εκκαθάριση αναζήτησης"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear search"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Borrar búsqueda"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tyhjennä haku"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effacer la recherche"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Očisti pretragu"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keresés törlése"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancella ricerca"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "検索をクリア"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "검색 지우기"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tøm søk"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zoekopdracht wissen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wyczyść wyszukiwanie"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limpar busca"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limpar pesquisa"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Șterge căutarea"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Очистить поиск"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vymazať hľadanie"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rensa sökning"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aramayı temizle"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Очистити пошук"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清除搜索"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清除搜尋"
           }
         }
       }
