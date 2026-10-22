@@ -19,8 +19,13 @@ struct AppRouter: View {
     @State private var launchPickerServer: JellyfinServer?
 
     /// ContinuousClock (keeps counting through device sleep) instant of the last .background
-    /// entry; consumed on return to .active by consumeBackgroundInstant (issue #41).
+    /// entry; consumed on return to .active by consumeBackgroundInstant (issue #41). On tvOS the
+    /// .inactive entry stamps it too: the screensaver never reaches .background.
     @State private var lastBackgroundedAt: ContinuousClock.Instant?
+    /// Whether the trip stamped above reached .background, or only the screensaver's .inactive.
+    @State private var tripReachedBackground = false
+    /// Set while a due reprompt waits for the paused player it closed to leave the screen.
+    @State private var repromptAwaitsPlayerDismissal = false
     /// Non-nil while the who's-watching cover is up: which server's profiles it offers and why it was
     /// raised (the periodic reprompt for the active server, or a switch to a server this device holds
     /// no resumable session for, Sodalite#74).
@@ -76,7 +81,7 @@ struct AppRouter: View {
     /// True while the who's-watching reprompt is up. A deep link or Continue Watching request waits
     /// behind it and resolves for whoever it lets in: it used to drop the cover, and the link that
     /// opened the app became a way past an entry-locked profile's only gate.
-    private var repromptHolds: Bool { profileCover?.context == .reprompt }
+    private var repromptHolds: Bool { profileCover?.context == .reprompt || repromptAwaitsPlayerDismissal }
 
     private struct PendingLink: Equatable {
         let itemID: String?
@@ -255,11 +260,20 @@ struct AppRouter: View {
         }
         .task(id: scenePhase) {
             if scenePhase == .background {
-                lastBackgroundedAt = ContinuousClock().now
                 #if os(tvOS)
+                if lastBackgroundedAt == nil { lastBackgroundedAt = ContinuousClock().now }
                 TopShelfRefresher.refreshBeforeSuspension()
+                #else
+                lastBackgroundedAt = ContinuousClock().now
                 #endif
+                tripReachedBackground = true
             }
+            #if os(tvOS)
+            if scenePhase == .inactive, lastBackgroundedAt == nil {
+                lastBackgroundedAt = ContinuousClock().now
+                tripReachedBackground = false
+            }
+            #endif
             guard scenePhase == .active else { return }
             consumeBackgroundInstant()
         }
@@ -517,10 +531,12 @@ struct AppRouter: View {
     /// the same return to the app is due.
     private func consumeBackgroundInstant() {
         let backgroundedAt = lastBackgroundedAt
+        let reachedBackground = tripReachedBackground
         lastBackgroundedAt = nil
+        tripReachedBackground = false
         // Skip until the initial restore has run, so a cold launch does not re-prompt on top of it.
         guard hasRestored else { return }
-        maybeRequestProfileReprompt(backgroundedAt: backgroundedAt)
+        maybeRequestProfileReprompt(backgroundedAt: backgroundedAt, reachedBackground: reachedBackground)
     }
 
     /// Whether a deep link or Continue Watching request has to wait for the reprompt.
@@ -530,12 +546,12 @@ struct AppRouter: View {
     }
 
     /// Only decides whether to arm the cover; `consumeBackgroundInstant` owns the instant.
-    private func maybeRequestProfileReprompt(backgroundedAt: ContinuousClock.Instant?) {
+    private func maybeRequestProfileReprompt(backgroundedAt: ContinuousClock.Instant?, reachedBackground: Bool) {
         guard let backgroundedAt else { return }
         // Never arm over a sibling cover (one fullScreenCover per host view). A deep link in flight
         // does not stop it, it waits behind it.
         guard deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew, profileCover == nil,
-              !appState.isMyRequestsPanelPresented
+              !appState.isMyRequestsPanelPresented, !repromptAwaitsPlayerDismissal
         else { return }
         guard let server = appState.activeServer else { return }
         let should = ProfileRepromptPolicy.shouldReprompt(
@@ -544,10 +560,29 @@ struct AppRouter: View {
             launchBehavior: dependencies.authPreferences.launchBehavior,
             isAuthenticated: appState.isAuthenticated,
             rememberedCount: dependencies.listRememberedUsers(serverID: server.id).count,
-            isPlayerActive: PlayerModalPresence.isPlayerActive,
-            tvUserChanged: false
+            isPlaybackRunning: PlayerModalPresence.isPlaybackRunning,
+            tvUserChanged: false,
+            wasBackgrounded: reachedBackground
         )
-        if should { profileCover = ProfileCoverRequest(server: server, context: .reprompt) }
+        guard should else { return }
+        guard PlayerModalPresence.isPlayerActive else {
+            profileCover = ProfileCoverRequest(server: server, context: .reprompt)
+            return
+        }
+        // A paused player left open would hand the next viewer this profile's title and library.
+        // Closed the way a deep link closes it, so the stop report saves the position.
+        repromptAwaitsPlayerDismissal = true
+        appState.requestPlayerDismissal &+= 1
+        PlayerModalDismisser.dismissActive(logPrefix: "[Reprompt]")
+        Task { @MainActor in
+            // Same settle as the deep-link path: a cover presented mid-dismiss never lands.
+            try? await Task.sleep(for: .milliseconds(250))
+            repromptAwaitsPlayerDismissal = false
+            guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented,
+                  let server = appState.activeServer
+            else { return }
+            profileCover = ProfileCoverRequest(server: server, context: .reprompt)
+        }
     }
 
     private func restoreSession() async {

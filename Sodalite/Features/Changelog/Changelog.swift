@@ -183,6 +183,12 @@ enum Changelog {
                     icon: "person.badge.key"
                 ),
                 ChangelogHighlight(
+                    .fix,
+                    "changelog.1_1_0.repromptPaused.title",
+                    "changelog.1_1_0.repromptPaused.body",
+                    icon: "person.crop.circle.badge.questionmark"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.synopsisTap.title",
                     "changelog.1_1_0.synopsisTap.body",

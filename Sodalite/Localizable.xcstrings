@@ -76301,6 +76301,330 @@
         }
       }
     },
+    "changelog.1_1_0.repromptPaused.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pozastavený přehrávač už nebrání opětovnému zobrazení výběru profilu. Je-li výběr po návratu na řadě, přehrávač se zavře, pozice se uloží a zobrazí se výběr. Na Apple TV se nyní jako nepřítomnost počítá i spořič obrazovky."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En afspiller på pause holder ikke længere profilvælgeren væk. Når vælgeren skal vises ved din tilbagevenden, lukker afspilleren, positionen gemmes, og vælgeren vises. På Apple TV tæller pauseskærmen nu også som fravær."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein pausierter Player hält die Profilauswahl nicht mehr fern. Ist die Auswahl bei der Rückkehr fällig, schließt sich der Player, die Position wird gespeichert und die Auswahl erscheint. Auf dem Apple TV zählt jetzt auch der Bildschirmschoner als Abwesenheit."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα πρόγραμμα αναπαραγωγής σε παύση δεν εμποδίζει πλέον την επιλογή προφίλ. Όταν η επιλογή οφείλεται κατά την επιστροφή, η αναπαραγωγή κλείνει, η θέση αποθηκεύεται και εμφανίζεται η επιλογή. Στο Apple TV η προφύλαξη οθόνης μετράει πλέον κι αυτή ως απουσία."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A paused player no longer keeps the profile picker away. When the picker is due on your return, the player closes, the position is saved, and the picker appears. On Apple TV the screensaver now counts as time away too."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un reproductor en pausa ya no impide que vuelva el selector de perfil. Si al volver toca mostrarlo, el reproductor se cierra, se guarda la posición y aparece el selector. En el Apple TV, el salvapantallas ahora también cuenta como tiempo fuera."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tauotettu soitin ei enää estä profiilin valintaa. Kun valinta on palatessa vuorossa, soitin sulkeutuu, kohta tallennetaan ja valinta tulee näkyviin. Apple TV:ssä myös näytönsäästäjä lasketaan nyt poissaoloksi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un lecteur en pause n’empêche plus le choix du profil de revenir. Si ce choix est dû à votre retour, le lecteur se ferme, la position est enregistrée et le choix s’affiche. Sur Apple TV, l’économiseur d’écran compte désormais aussi comme une absence."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauzirani reproduktor više ne sprječava odabir profila. Kad je odabir pri povratku na redu, reproduktor se zatvara, položaj se sprema i pojavljuje se odabir. Na Apple TV-u se sada i čuvar zaslona računa kao odsutnost."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A szüneteltetett lejátszó már nem tartja vissza a profilválasztót. Ha visszatéréskor esedékes a választó, a lejátszó bezárul, a pozíció mentésre kerül, és megjelenik a választó. Apple TV-n mostantól a képernyővédő is távollétnek számít."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un player in pausa non tiene più lontana la scelta del profilo. Se al ritorno la scelta è dovuta, il player si chiude, la posizione viene salvata e compare la scelta. Su Apple TV anche il salvaschermo conta ora come assenza."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時停止したプレーヤーがプロフィール選択を妨げなくなりました。戻ったときに選択画面を表示する条件を満たしていれば、プレーヤーが閉じて再生位置が保存され、選択画面が表示されます。Apple TVではスクリーンセーバーも離席時間として数えるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일시 정지된 플레이어가 더 이상 프로필 선택을 막지 않습니다. 돌아왔을 때 선택 화면을 표시해야 하면 플레이어가 닫히고 위치가 저장된 뒤 선택 화면이 나타납니다. Apple TV에서는 이제 화면 보호기도 자리 비움 시간으로 계산됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En spiller på pause holder ikke lenger profilvelgeren unna. Når velgeren skal vises når du kommer tilbake, lukkes spilleren, posisjonen lagres og velgeren vises. På Apple TV teller nå også skjermspareren som fravær."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een gepauzeerde speler houdt de profielkiezer niet langer tegen. Is de kiezer bij terugkeer aan de beurt, dan sluit de speler, wordt de positie bewaard en verschijnt de kiezer. Op Apple TV telt de schermbeveiliging nu ook als afwezigheid."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wstrzymany odtwarzacz nie blokuje już wyboru profilu. Jeśli po powrocie wybór jest wymagany, odtwarzacz się zamyka, pozycja zostaje zapisana i pojawia się wybór. Na Apple TV wygaszacz ekranu również liczy się teraz jako nieobecność."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um player pausado não impede mais o seletor de perfil. Quando o seletor deve aparecer na volta, o player fecha, a posição é salva e o seletor aparece. No Apple TV, o protetor de tela agora também conta como tempo fora."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um leitor em pausa já não impede o seletor de perfil. Quando o seletor é devido no regresso, o leitor fecha, a posição é guardada e o seletor aparece. Na Apple TV, a proteção de ecrã conta agora também como tempo ausente."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un player pus pe pauză nu mai împiedică alegerea profilului. Când alegerea este datorată la revenire, playerul se închide, poziția se salvează și apare alegerea. Pe Apple TV, economizorul de ecran contează acum și el ca absență."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плеер на паузе больше не мешает выбору профиля. Если при возвращении пора показать выбор, плеер закрывается, позиция сохраняется и появляется выбор профиля. На Apple TV заставка теперь тоже считается отсутствием."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pozastavený prehrávač už nebráni výberu profilu. Ak je výber po návrate na rade, prehrávač sa zavrie, pozícia sa uloží a zobrazí sa výber. Na Apple TV sa teraz ako neprítomnosť počíta aj šetrič obrazovky."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pausad spelare håller inte längre profilväljaren borta. När väljaren ska visas vid återkomsten stängs spelaren, positionen sparas och väljaren visas. På Apple TV räknas nu även skärmsläckaren som frånvaro."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklatılmış oynatıcı artık profil seçimini engellemiyor. Dönüşte seçim zamanı geldiyse oynatıcı kapanır, konum kaydedilir ve seçim ekranı görünür. Apple TV’de ekran koruyucu da artık uzakta geçen süre sayılıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плеєр на паузі більше не заважає вибору профілю. Якщо після повернення час показати вибір, плеєр закривається, позиція зберігається і з’являється вибір профілю. На Apple TV заставка тепер теж вважається відсутністю."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂停的播放器不再阻止个人资料选择。如果返回时应显示选择界面，播放器会关闭并保存位置，然后显示选择界面。在 Apple TV 上，屏幕保护程序现在也算作离开时间。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫停的播放器不再阻擋個人檔案選擇。若返回時應顯示選擇畫面，播放器會關閉並儲存位置，然後顯示選擇畫面。在 Apple TV 上，螢幕保護程式現在也算作離開時間。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.repromptPaused.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výběr profilu i po pozastaveném videu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilvælger også efter en video på pause"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilauswahl auch nach pausiertem Video"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιλογή προφίλ και μετά από βίντεο σε παύση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile picker after a paused video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selector de perfil tras un vídeo en pausa"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profiilin valinta myös tauotetun videon jälkeen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choix du profil après une vidéo en pause"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabir profila i nakon pauziranog videa"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilválasztó szüneteltetett videó után is"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scelta del profilo dopo un video in pausa"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時停止中の動画からもプロフィール選択へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일시 정지된 동영상 후에도 프로필 선택"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilvelger også etter en video på pause"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profielkiezer ook na een gepauzeerde video"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybór profilu także po wstrzymanym filmie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seletor de perfil após um vídeo pausado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seletor de perfil após um vídeo em pausa"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alegerea profilului și după un videoclip pus pe pauză"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбор профиля и после видео на паузе"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výber profilu aj po pozastavenom videu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilväljaren även efter en pausad video"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklatılmış videodan sonra da profil seçimi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибір профілю й після відео на паузі"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂停视频后也会显示个人资料选择"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫停影片後也會顯示個人檔案選擇"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.restingTouch.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
