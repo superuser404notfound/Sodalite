@@ -16,6 +16,7 @@ struct SidebarItemRow: View {
     let onSelect: () -> Void
 
     @Environment(\.appearanceTheme) private var appearanceTheme
+    @Environment(\.appState) private var appState
 
     private var isFocused: Bool { focus == .item(tab) }
 
@@ -29,15 +30,20 @@ struct SidebarItemRow: View {
 
     var body: some View {
         HStack(spacing: SidebarMetrics.labelSpacing) {
-            // .monochrome for the same reason the tab bar needs it: "tv" renders hierarchically and
-            // would otherwise ignore the colour it is given.
-            Image(systemName: tab.systemImage)
-                .symbolRenderingMode(.monochrome)
-                .font(.system(size: SidebarMetrics.iconSize))
-                .foregroundStyle(iconColor)
-                .frame(width: SidebarMetrics.iconColumn)
+            if tab == .profiles, let user = appState.activeUser {
+                SidebarProfileAvatar(user: user)
+                    .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
+            } else {
+                // .monochrome for the same reason the tab bar needs it: "tv" renders hierarchically
+                // and would otherwise ignore the colour it is given.
+                Image(systemName: tab.systemImage)
+                    .symbolRenderingMode(.monochrome)
+                    .font(.system(size: SidebarMetrics.iconSize))
+                    .foregroundStyle(iconColor)
+                    .frame(width: SidebarMetrics.iconColumn)
+            }
             if isExpanded {
-                Text(tab.labelKey)
+                label
                     // .headline (38pt on tvOS 26), not .title3: title3 is 48pt there, and the
                     // longest label at that size ("Einstellungen") does not fit the rail.
                     .font(.headline)
@@ -65,6 +71,14 @@ struct SidebarItemRow: View {
             onSelect()
         }
         .animation(.easeInOut(duration: 0.2), value: state)
+    }
+
+    private var label: Text {
+        if tab == .profiles, let user = appState.activeUser {
+            Text(verbatim: user.name)
+        } else {
+            Text(tab.labelKey)
+        }
     }
 }
 #endif

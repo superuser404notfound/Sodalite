@@ -53,6 +53,7 @@ struct RecordingsView: View {
             .padding(.horizontal, hSizeClass == .compact ? metrics.gridInset : 80)
             .padding(.vertical, hSizeClass == .compact ? 24 : 40)
         }
+        .drivesShellBar()
         .task { await model.load() }
         .overlay {
             if let userID = sessionUserID {

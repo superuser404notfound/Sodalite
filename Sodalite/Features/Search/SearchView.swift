@@ -237,6 +237,7 @@ struct SearchView: View {
             }
             .padding(.vertical, 20)
         }
+        .drivesShellBar()
     }
 
     private func librarySection(items: [JellyfinItem]) -> some View {

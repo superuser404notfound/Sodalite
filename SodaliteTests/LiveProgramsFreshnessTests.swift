@@ -145,6 +145,22 @@ struct LiveProgramsFreshnessTests {
         #expect(model.rows.isEmpty == false)
         #expect(model.loadError == nil)
     }
+
+    @Test("a load whose caller goes away still fills the rows instead of painting an error")
+    func cancelledCallerDoesNotFailTheLoad() async {
+        let service = StubLiveTvService(airingFor: 3600)
+        service.delay = .milliseconds(100)
+        let model = LiveProgramsViewModel(service: service, userID: "u")
+
+        // What a tab page rebuilt under a profile switch does to the load it started.
+        let caller = Task { await model.load() }
+        try? await Task.sleep(for: .milliseconds(20))
+        caller.cancel()
+        await caller.value
+
+        #expect(model.loadError == nil)
+        #expect(model.rows.isEmpty == false)
+    }
 }
 
 /// Counts recommended-programs calls and can be made to fail; every other endpoint is unused here.
@@ -152,6 +168,8 @@ private final class StubLiveTvService: JellyfinLiveTvServiceProtocol, @unchecked
     /// Seconds the returned program still has to run, measured from the moment it is asked for.
     let airingFor: TimeInterval
     var failing = false
+    /// Answer time, slept with the caller's cancellation the way URLSession honours it.
+    var delay: Duration?
 
     private let lock = NSLock()
     private var count = 0
@@ -162,6 +180,7 @@ private final class StubLiveTvService: JellyfinLiveTvServiceProtocol, @unchecked
     func getRecommendedPrograms(userID: String, category: LiveProgramCategory,
                                 limit: Int) async throws -> [JellyfinProgram] {
         lock.withLock { count += 1 }
+        if let delay { try await Task.sleep(for: delay) }
         if failing { throw URLError(.notConnectedToInternet) }
         let now = Date()
         return [JellyfinProgram(

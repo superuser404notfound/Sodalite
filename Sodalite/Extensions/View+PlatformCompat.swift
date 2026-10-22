@@ -8,22 +8,27 @@ enum VerbatimTextEntryKind {
 
 struct ThemeNavigationStack<Content: View>: View {
     @ViewBuilder let content: () -> Content
+    @Environment(\.shellBarInset) private var shellBarInset
 
     var body: some View {
         NavigationStack {
-            content().themedNavigationDestination()
+            // Inside, on the root only: the tvOS top bar's room (see `reservesShellBar`).
+            content().shellBarInset(shellBarInset).themedNavigationDestination()
         }
+        .environment(\.shellBarInset, 0)
     }
 }
 
 struct ThemeNavigationPathStack<Content: View>: View {
     @Binding var path: NavigationPath
     @ViewBuilder let content: () -> Content
+    @Environment(\.shellBarInset) private var shellBarInset
 
     var body: some View {
         NavigationStack(path: $path) {
-            content().themedNavigationDestination()
+            content().shellBarInset(shellBarInset).themedNavigationDestination()
         }
+        .environment(\.shellBarInset, 0)
     }
 }
 

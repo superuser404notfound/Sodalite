@@ -75977,6 +75977,330 @@
         }
       }
     },
+    "changelog.1_1_0.profileTab.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV ukazuje karta za Nastavením, kdo je přihlášen, a nabízí ostatní profily na tomto serveru, takže přepínání už nevede přes Nastavení. V postranním panelu je pod Nastavením. Zobrazí se, když je uloženo více profilů."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV viser en fane efter Indstillinger, hvem der er logget ind, og de andre profiler på denne server, så et skift ikke længere går gennem Indstillinger. I sidepanelet ligger den under Indstillinger. Den vises, når mere end én profil er gemt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV zeigt ein Tab nach den Einstellungen, wer angemeldet ist, und bietet die anderen Profile dieses Servers an, ein Wechsel führt also nicht mehr durch die Einstellungen. In der Seitenleiste steht er unter den Einstellungen. Er erscheint, sobald mehr als ein Profil gespeichert ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Apple TV, μια καρτέλα μετά τις Ρυθμίσεις δείχνει ποιος είναι συνδεδεμένος και τα άλλα προφίλ αυτού του διακομιστή, έτσι η εναλλαγή δεν περνά πλέον από τις Ρυθμίσεις. Στην πλαϊνή στήλη βρίσκεται κάτω από τις Ρυθμίσεις. Εμφανίζεται όταν είναι αποθηκευμένα περισσότερα από ένα προφίλ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV, a tab after Settings shows who is signed in and offers the other profiles on this server, so switching no longer goes through Settings. In the sidebar it sits under Settings. It appears once more than one profile is saved."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Apple TV, una pestaña después de Ajustes muestra quién ha iniciado sesión y ofrece los demás perfiles de este servidor, así que cambiar ya no pasa por Ajustes. En la barra lateral está debajo de Ajustes. Aparece cuando hay más de un perfil guardado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä Asetusten jälkeinen välilehti näyttää, kuka on kirjautunut, ja tarjoaa tämän palvelimen muut profiilit, joten vaihto ei enää kulje Asetusten kautta. Sivupalkissa se on Asetusten alla. Se näkyy, kun tallennettuja profiileja on useampi kuin yksi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur Apple TV, un onglet après Réglages indique qui est connecté et propose les autres profils de ce serveur, le changement ne passe donc plus par Réglages. Dans la barre latérale, il se trouve sous Réglages. Il apparaît dès que plus d’un profil est enregistré."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u kartica nakon Postavki pokazuje tko je prijavljen i nudi ostale profile na ovom poslužitelju, pa promjena više ne ide kroz Postavke. U bočnoj traci nalazi se ispod Postavki. Pojavljuje se kad je spremljeno više od jednog profila."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n a Beállítások utáni lap mutatja, ki van bejelentkezve, és felkínálja a szerver többi profilját, így a váltás már nem a Beállításokon át vezet. Az oldalsávban a Beállítások alatt található. Akkor jelenik meg, ha egynél több profil van mentve."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV, una scheda dopo Impostazioni mostra chi ha effettuato l’accesso e propone gli altri profili di questo server, così il cambio non passa più da Impostazioni. Nella barra laterale si trova sotto Impostazioni. Appare quando è salvato più di un profilo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV では、設定の後ろのタブにサインイン中のユーザーが表示され、このサーバーのほかのプロフィールを選べるので、切り替えに設定を開く必要がなくなりました。サイドバーでは設定の下にあります。保存されたプロフィールが 2 つ以上あると表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 설정 다음 탭에 로그인한 사용자가 표시되고 이 서버의 다른 프로필을 고를 수 있어, 더 이상 설정을 거치지 않고 전환할 수 있습니다. 사이드바에서는 설정 아래에 있습니다. 저장된 프로필이 둘 이상일 때 나타납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV viser en fane etter Innstillinger hvem som er logget på, og tilbyr de andre profilene på denne serveren, så bytte går ikke lenger gjennom Innstillinger. I sidefeltet ligger den under Innstillinger. Den vises når mer enn én profil er lagret."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Apple TV toont een tab na Instellingen wie er is ingelogd en biedt de andere profielen op deze server aan, dus wisselen gaat niet meer via Instellingen. In de zijbalk staat hij onder Instellingen. Hij verschijnt zodra er meer dan één profiel is opgeslagen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV karta za Ustawieniami pokazuje, kto jest zalogowany, i proponuje pozostałe profile na tym serwerze, więc zmiana nie wymaga już wchodzenia w Ustawienia. Na pasku bocznym znajduje się pod Ustawieniami. Pojawia się, gdy zapisano więcej niż jeden profil."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, uma aba depois de Configurações mostra quem está conectado e oferece os outros perfis deste servidor, então trocar não passa mais por Configurações. Na barra lateral, ela fica abaixo de Configurações. Aparece quando há mais de um perfil salvo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, um separador a seguir a Definições mostra quem tem sessão iniciada e oferece os outros perfis deste servidor, pelo que mudar já não passa pelas Definições. Na barra lateral fica por baixo de Definições. Aparece quando há mais de um perfil guardado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, o filă după Setări arată cine este conectat și oferă celelalte profiluri de pe acest server, astfel că schimbarea nu mai trece prin Setări. În bara laterală se află sub Setări. Apare când sunt salvate mai multe profiluri."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка после «Настроек» показывает, кто вошёл, и предлагает другие профили этого сервера, так что для смены больше не нужно заходить в «Настройки». В боковой панели она находится под «Настройками». Появляется, когда сохранено больше одного профиля."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV ukazuje karta za Nastaveniami, kto je prihlásený, a ponúka ostatné profily na tomto serveri, takže prepínanie už nevedie cez Nastavenia. V bočnom paneli je pod Nastaveniami. Zobrazí sa, keď je uložených viac profilov."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV visar en flik efter Inställningar vem som är inloggad och erbjuder de andra profilerna på den här servern, så byte går inte längre via Inställningar. I sidofältet ligger den under Inställningar. Den visas när mer än en profil är sparad."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV’de Ayarlar’dan sonraki bir sekme kimin oturum açtığını gösterir ve bu sunucudaki diğer profilleri sunar, böylece geçiş artık Ayarlar üzerinden yapılmaz. Kenar çubuğunda Ayarlar’ın altında yer alır. Birden fazla profil kayıtlı olduğunda görünür."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка після «Налаштувань» показує, хто ввійшов, і пропонує інші профілі цього сервера, тож для зміни більше не потрібно заходити в «Налаштування». На бічній панелі вона розташована під «Налаштуваннями». З’являється, коли збережено більше одного профілю."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，“设置”后面的标签会显示当前登录的用户，并列出此服务器上的其他个人资料，切换不必再进入“设置”。在侧边栏中，它位于“设置”下方。保存了多个个人资料时才会出现。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，「設定」後面的標籤會顯示目前登入的使用者，並列出此伺服器上的其他個人檔案，切換不必再進入「設定」。在側邊欄中，它位於「設定」下方。儲存了多個個人檔案時才會出現。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.profileTab.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přepínání profilů z panelu karet"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skift profil fra fanelinjen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil wechseln über die Tab-Leiste"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εναλλαγή προφίλ από τη γραμμή καρτελών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch profiles from the tab bar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia de perfil desde la barra de pestañas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaihda profiilia välilehtipalkista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer de profil depuis la barre d’onglets"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promjena profila iz trake kartica"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilváltás a lapsávról"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambia profilo dalla barra delle schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブバーからプロフィールを切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭 막대에서 프로필 전환"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bytt profil fra fanelinjen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wissel van profiel via de tabbalk"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmiana profilu z paska kart"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troque de perfil pela barra de abas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mude de perfil a partir da barra de separadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schimbă profilul din bara de file"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смена профиля из панели вкладок"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepínanie profilov z panela kariet"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Byt profil från flikfältet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme çubuğundan profil değiştirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зміна профілю з панелі вкладок"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从标签栏切换个人资料"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從標籤列切換個人檔案"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.restingTouch.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -80183,6 +80507,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "點一下簡介查看更多詳細資訊"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.topBar.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV kreslí horní lištu nyní Sodalite sám: název ukazuje jen vybraná karta, ostatní svou ikonu, takže se vejdou všechny karty a nic se už neořízne na okraji. Při pohybu fokusu se plynule animuje a při posouvání stránky odjíždí nahoru jako dřív."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV tegner Sodalite nu selv topbjælken: kun den valgte fane viser sin titel, de andre deres ikon, så alle faner er plads, og intet bliver længere skåret af i kanten. Den bevæger sig blødt, når fokus flytter sig, og glider op med siden som før."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV zeichnet Sodalite die Top Bar jetzt selbst: Nur der gewählte Tab zeigt seinen Titel, die anderen ihr Symbol, so passt jeder Tab hinein und am Rand wird nichts mehr abgeschnitten. Sie bewegt sich weich mit dem Fokus und fährt wie bisher mit der Seite nach oben."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στην Apple TV η επάνω γραμμή σχεδιάζεται πλέον από το ίδιο το Sodalite: μόνο η επιλεγμένη καρτέλα δείχνει τον τίτλο της, οι άλλες το εικονίδιό τους, έτσι χωρούν όλες και τίποτα δεν κόβεται πια στην άκρη. Κινείται ομαλά με την εστίαση και ανεβαίνει με τη σελίδα όπως πριν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV the top bar is now Sodalite's own: only the selected tab shows its title and the others their icon, so every tab fits and nothing is cut off at the edge any more. It moves smoothly as focus walks across it and rides up with the page as before."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Apple TV la barra superior la dibuja ahora el propio Sodalite: solo la pestaña seleccionada muestra su título y las demás su icono, así caben todas y ya no se corta nada en el borde. Se mueve con suavidad al pasar el foco y sube con la página como antes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä Sodalite piirtää yläpalkin nyt itse: vain valittu välilehti näyttää otsikkonsa, muut kuvakkeensa, joten kaikki välilehdet mahtuvat eikä reunasta katkea enää mitään. Se liikkuu pehmeästi fokuksen mukana ja nousee sivun mukana ylös kuten ennenkin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur Apple TV, la barre supérieure est désormais dessinée par Sodalite : seul l’onglet sélectionné affiche son titre, les autres leur icône, si bien que tous les onglets tiennent et que plus rien n’est coupé au bord. Elle suit le focus en douceur et remonte avec la page comme avant."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u Sodalite sada sam crta gornju traku: naslov prikazuje samo odabrana kartica, ostale svoju ikonu, pa stanu sve kartice i na rubu se više ništa ne odrezuje. Glatko se pomiče s fokusom i odlazi gore sa stranicom kao i prije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n a felső sávot most maga a Sodalite rajzolja: csak a kiválasztott lap mutatja a címét, a többi az ikonját, így minden lap elfér, és a szélén semmi sem vágódik le. Simán követi a fókuszt, és az oldallal együtt csúszik fel, mint eddig."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV la barra superiore ora la disegna Sodalite: solo la scheda selezionata mostra il titolo e le altre la loro icona, così ci stanno tutte e sul bordo non viene più tagliato nulla. Si muove in modo fluido seguendo il focus e sale con la pagina come prima."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV のトップバーを Sodalite 自身が描くようになりました。選択中のタブだけがタイトルを表示し、ほかのタブはアイコンを表示するので、すべてのタブが収まり、端で切れることもなくなりました。フォーカスの移動に合わせて滑らかに動き、これまでどおりページと一緒に上へスクロールします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 이제 Sodalite가 상단 막대를 직접 그립니다. 선택한 탭만 제목을 보여 주고 나머지는 아이콘만 보여 주므로 모든 탭이 들어가고 가장자리에서 잘리는 일도 없습니다. 포커스를 따라 부드럽게 움직이고 이전처럼 페이지와 함께 위로 올라갑니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV tegner Sodalite nå toppfeltet selv: bare den valgte fanen viser tittelen sin, de andre ikonet sitt, så alle faner får plass og ingenting blir lenger kuttet i kanten. Den beveger seg mykt med fokus og glir opp med siden som før."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Apple TV tekent Sodalite de bovenbalk nu zelf: alleen de gekozen tab toont zijn titel, de andere hun symbool, zodat elke tab past en er aan de rand niets meer wordt afgesneden. Hij beweegt soepel mee met de focus en schuift zoals voorheen met de pagina omhoog."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV Sodalite rysuje teraz górny pasek samodzielnie: tytuł pokazuje tylko wybrana karta, pozostałe swoją ikonę, więc mieszczą się wszystkie karty i nic nie jest już ucinane przy krawędzi. Płynnie podąża za fokusem i jak dotąd przesuwa się w górę razem ze stroną."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, a barra superior agora é desenhada pelo próprio Sodalite: só a aba selecionada mostra o título e as outras o ícone, então todas as abas cabem e nada é mais cortado na borda. Ela se move suavemente com o foco e sobe com a página como antes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, a barra superior é agora desenhada pelo próprio Sodalite: só o separador selecionado mostra o título e os outros o ícone, por isso cabem todos e já nada é cortado na margem. Move-se suavemente com o foco e sobe com a página como antes."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, bara de sus este acum desenată de Sodalite: doar fila selectată își arată titlul, celelalte pictograma, așa că încap toate filele și nimic nu mai este tăiat la margine. Se mișcă lin odată cu focalizarea și urcă împreună cu pagina, ca până acum."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV верхнюю панель теперь рисует сам Sodalite: название показывает только выбранная вкладка, остальные — свой значок, поэтому помещаются все вкладки и у края больше ничего не обрезается. Она плавно следует за фокусом и, как и раньше, уезжает вверх вместе со страницей."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV kreslí hornú lištu teraz sám Sodalite: názov ukazuje len vybraná karta, ostatné svoju ikonu, takže sa zmestia všetky karty a na okraji sa už nič neoreže. Pri pohybe fokusu sa plynulo animuje a pri posúvaní stránky odchádza hore ako doteraz."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV ritar Sodalite nu toppfältet själv: bara den valda fliken visar sin titel, de andra sin symbol, så alla flikar får plats och inget klipps längre av vid kanten. Det rör sig mjukt med fokus och glider upp med sidan som förut."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV’de üst çubuğu artık Sodalite kendisi çiziyor: yalnızca seçili sekme başlığını, diğerleri simgesini gösteriyor; böylece tüm sekmeler sığıyor ve kenarda artık hiçbir şey kesilmiyor. Odakla birlikte akıcı şekilde hareket ediyor ve önceden olduğu gibi sayfayla birlikte yukarı kayıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV верхню панель тепер малює сам Sodalite: назву показує лише вибрана вкладка, решта — свій значок, тож уміщаються всі вкладки й біля краю більше нічого не обрізається. Вона плавно рухається за фокусом і, як і раніше, їде вгору разом зі сторінкою."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，顶部栏现在由 Sodalite 自己绘制：只有选中的标签显示标题，其他标签只显示图标，因此所有标签都放得下，边缘也不会再被截断。它随焦点平滑移动，并像以前一样随页面向上滚动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，頂部列現在由 Sodalite 自己繪製：只有選取的標籤顯示標題，其他標籤只顯示圖示，因此所有標籤都放得下，邊緣也不會再被截斷。它隨焦點平滑移動，並像以前一樣隨頁面向上捲動。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.topBar.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horní lišta, do které se vejdou všechny karty"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En topbjælke med plads til alle faner"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Top Bar, in die jeder Tab passt"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια επάνω γραμμή που χωρά όλες τις καρτέλες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A top bar that fits every tab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una barra superior en la que caben todas las pestañas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yläpalkki, johon mahtuvat kaikki välilehdet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une barre supérieure où tous les onglets tiennent"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gornja traka u koju stanu sve kartice"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felső sáv, amelyben minden lap elfér"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una barra superiore in cui entrano tutte le schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのタブが収まるトップバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 탭이 들어가는 상단 막대"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En toppfelt med plass til alle faner"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een bovenbalk waarin elke tab past"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Górny pasek, w którym mieszczą się wszystkie karty"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma barra superior em que cabem todas as abas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma barra superior onde cabem todos os separadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bară de sus în care încap toate filele"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верхняя панель, в которую помещаются все вкладки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horná lišta, do ktorej sa zmestia všetky karty"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ett toppfält som rymmer alla flikar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm sekmelerin sığdığı bir üst çubuk"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Верхня панель, у яку вміщаються всі вкладки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "容得下所有标签的顶部栏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "容得下所有標籤的頂部列"
           }
         }
       }

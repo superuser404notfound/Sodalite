@@ -147,7 +147,7 @@ struct TabVisibilitySettingsView: View {
         case .search: "settings.tabs.search.subtitle"
         case .music: "settings.tabs.music.subtitle"
         case .downloads: "settings.tabs.downloads.subtitle"
-        case .home, .settings: ""
+        case .home, .settings, .profiles: ""
         }
     }
 }

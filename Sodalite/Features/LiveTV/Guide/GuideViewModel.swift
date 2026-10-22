@@ -90,6 +90,12 @@ final class GuideViewModel {
     func load() async {
         guard !didLoad else { return }
         didLoad = true
+        // Owned by the model, not by the caller: a page rebuilt under a profile switch cancels the
+        // task that asked, and a cancelled first page landed as a load error that only Retry undid.
+        await Task { await performLoad() }.value
+    }
+
+    private func performLoad() async {
         // The two probes run concurrently: they are independent, and serialising them would put two
         // round trips in front of the first channel page instead of one.
         async let infoTask = try? service.getGuideInfo()
