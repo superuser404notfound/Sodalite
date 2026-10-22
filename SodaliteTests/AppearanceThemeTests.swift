@@ -6,9 +6,9 @@ import Testing
 struct AppearanceThemeTests {
     @Test("catalog has three free and twenty supporter accents")
     func catalogMembership() {
-        #expect(AccentPreset.allCases.filter { $0.tier == .free }.count == 3)
+        #expect(AccentPreset.allCases.filter { $0.tier == .free }.count == 4)
         #expect(AccentPreset.allCases.filter { $0.tier == .supporter }.count == 20)
-        #expect(Set(AccentPreset.allCases.map(\.rawValue)).count == 23)
+        #expect(Set(AccentPreset.allCases.map(\.rawValue)).count == 24)
         for preset in AccentPreset.allCases {
             #expect(preset.category.presets.contains(preset))
         }
@@ -53,7 +53,7 @@ struct AppearanceThemeTests {
         }
     }
 
-    /// The catalog assertion above only proves the rule on 23 hand-picked hexes. The rule itself is
+    /// The catalog assertion above only proves the rule on 24 hand-picked hexes. The rule itself is
     /// a claim about every colour, and the 0.30 threshold is the whole of it: nudge it up and the
     /// fills just under the new value keep a white label that no longer clears 3:1.
     @Test("the derived foreground clears 3:1 on any fill, not just the catalog")
@@ -81,7 +81,7 @@ struct AppearanceThemeTests {
             let ratio = preset.palette.foreground.contrastRatio(with: preset.palette.restingControl)
             #expect(ratio >= 3.0, "\(preset.rawValue) draws its glyph at \(ratio):1 while unfocused")
         }
-        // Same argument as the rule above: the claim is about every colour, not the 23 in the
+        // Same argument as the rule above: the claim is about every colour, not the 24 in the
         // catalog. Measured floor is 3.72:1, at a magenta just over the foreground threshold.
         for step in 0...255 {
             let value = UInt32(step)
@@ -183,6 +183,7 @@ struct AppearanceThemeTests {
             String(localized: "appearance.accent.system", defaultValue: "System Blue"),
             String(localized: "appearance.accent.orange", defaultValue: "Orange"),
             String(localized: "appearance.accent.violet", defaultValue: "Violet"),
+            String(localized: "appearance.accent.silver", defaultValue: "Silver"),
             String(localized: "appearance.accent.sky", defaultValue: "Sky"),
             String(localized: "appearance.accent.mint", defaultValue: "Mint"),
             String(localized: "appearance.accent.blush", defaultValue: "Blush"),

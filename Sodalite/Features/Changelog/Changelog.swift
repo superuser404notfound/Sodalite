@@ -326,6 +326,18 @@ enum Changelog {
                     "changelog.1_1_0.liveDelay.body",
                     icon: "clock.arrow.circlepath"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.iphoneCleanup.title",
+                    "changelog.1_1_0.iphoneCleanup.body",
+                    icon: "iphone"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.silverAccent.title",
+                    "changelog.1_1_0.silverAccent.body",
+                    icon: "paintpalette.fill"
+                ),
             ]
         ),
         // MARK: 1.0.0

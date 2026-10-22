@@ -121,6 +121,7 @@ enum AccentPreset: String, CaseIterable, Identifiable, Sendable {
     case systemBlue = "system"
     case orange
     case violet
+    case silver
     case sky = "ocean"
     case mint
     case blush = "rose"
@@ -154,7 +155,7 @@ enum AccentPreset: String, CaseIterable, Identifiable, Sendable {
 
     var category: AccentCategory {
         switch self {
-        case .systemBlue, .orange, .violet: .basic
+        case .systemBlue, .orange, .violet, .silver: .basic
         case .sky, .mint, .blush, .apricot, .lavender: .pastel
         case .cobalt, .emerald, .ruby, .amber, .royalViolet: .bold
         case .cyan, .magenta, .lime, .ultraviolet, .solarOrange: .electric
@@ -171,6 +172,9 @@ enum AccentPreset: String, CaseIterable, Identifiable, Sendable {
         case .systemBlue: .init(control: .init(hex: 0x007AFF), navigation: .init(hex: 0x006ADE), focus: .init(hex: 0x007AFF))
         case .orange: .init(control: .init(hex: 0xFF9500), navigation: .init(hex: 0xA15E00), focus: .init(hex: 0xFF9500))
         case .violet: .init(control: .init(hex: 0xAF52DE), navigation: .init(hex: 0x9C49C6), focus: .init(hex: 0xAF52DE))
+        // The player's own white and grey rather than a colour (Blexbi): a light control fill wears
+        // a dark label through `foreground`, and the darker grey carries navigation on light glass.
+        case .silver: .init(control: .init(hex: 0xE5E5EA), navigation: .init(hex: 0x636366), focus: .init(hex: 0xE5E5EA))
         case .sky: .init(control: .init(hex: 0x72C7ED), navigation: .init(hex: 0x43758C), focus: .init(hex: 0x72C7ED))
         case .mint: .init(control: .init(hex: 0x78D9B8), navigation: .init(hex: 0x427765), focus: .init(hex: 0x78D9B8))
         case .blush: .init(control: .init(hex: 0xEE91AD), navigation: .init(hex: 0x985D6F), focus: .init(hex: 0xEE91AD))
@@ -203,6 +207,7 @@ extension AccentPreset {
         case .systemBlue: String(localized: "appearance.accent.system", defaultValue: "System Blue")
         case .orange: String(localized: "appearance.accent.orange", defaultValue: "Orange")
         case .violet: String(localized: "appearance.accent.violet", defaultValue: "Violet")
+        case .silver: String(localized: "appearance.accent.silver", defaultValue: "Silver")
         case .sky: String(localized: "appearance.accent.sky", defaultValue: "Sky")
         case .mint: String(localized: "appearance.accent.mint", defaultValue: "Mint")
         case .blush: String(localized: "appearance.accent.blush", defaultValue: "Blush")

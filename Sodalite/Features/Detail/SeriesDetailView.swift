@@ -604,6 +604,7 @@ struct SeriesDetailView: View {
                 glassPanel(vm: vm)
                     .id(Self.pageTopAnchor)
                 actionButtonRow(vm: vm)
+                if isPhonePortrait { heroSynopsis }
                 // See MovieDetailView: with this line below the fold the page measures ~30 pt of
                 // content down there, the trailing chrome adds 200, and tvOS scrolls 116 pt to park
                 // the focused Play button. Up here the block measures zero, the chrome goes with it,
@@ -733,7 +734,8 @@ struct SeriesDetailView: View {
     // MARK: - Glass Panel
 
     private func glassPanel(vm: DetailViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        // Centred on the upright iPhone, like the logo above it and the buttons below.
+        VStack(alignment: isPhonePortrait ? .center : .leading, spacing: 16) {
             // Panel title is the episode name in episode mode; the series root has none (logo lives in the hero slot, see DetailContentOverlay).
             if isShowingEpisode {
                 Text(selectedEpisode.map { dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: $0) } ?? "")
@@ -760,7 +762,7 @@ struct SeriesDetailView: View {
                     // column there and the pills pushed it past the screen edge (Sodalite#145,
                     // measured on the iPhone 2026-09-14).
                     if isPhonePortrait {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(spacing: 8) {
                             episodeLine(vm: vm)
                             episodeBadges()
                         }
@@ -777,21 +779,27 @@ struct SeriesDetailView: View {
 
             // Sodalite#146: series synopsis in the series state, the episode's own in episode state,
             // which is what displayItem/displayOverview already resolve for the box below the fold.
-            DetailHeroSynopsis(
-                text: displayOverview,
-                isPending: overviewMayStillLand,
-                spoilerItem: displayItem,
-                onTap: openMoreDetails
-            )
+            // The upright iPhone has it under the buttons instead.
+            if !isPhonePortrait { heroSynopsis }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        // The movie page's number, and the phone-portrait branch with it: the series panel was a
-        // flat 30 on every tier, so on a phone the two pages inset their text differently by 14 pt
-        // (Sodalite#146 round 3).
-        .padding(isPhonePortrait ? 16 : 30)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
+        .frame(maxWidth: .infinity, alignment: isPhonePortrait ? .center : .leading)
+        // The movie page's numbers: no panel on the upright iPhone (Blexbi), 30 everywhere else.
+        .padding(isPhonePortrait ? 0 : 30)
+        .background {
+            if !isPhonePortrait {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+            }
+        }
+    }
+
+    private var heroSynopsis: some View {
+        DetailHeroSynopsis(
+            text: displayOverview,
+            isPending: overviewMayStillLand,
+            spoilerItem: displayItem,
+            onTap: openMoreDetails,
+            expandsInPlace: isPhonePortrait
         )
     }
 
@@ -1447,96 +1455,75 @@ struct SeriesDetailView: View {
     private func seasonSection(vm: DetailViewModel) -> some View {
         // .focusSection (at the bottom) keeps up/down inside the season+episode block, else a far-right episode's up-swipe bypasses the season bar and lands on the overview textbox; the onMoveCommand redirect then snaps to the selected tab.
         VStack(alignment: .leading, spacing: 20) {
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(vm.seasons) { season in
-                            SeasonTab(
-                                id: season.id,
-                                name: season.name,
-                                isSelected: vm.selectedSeasonID == season.id,
-                                focusedID: $focusedSeasonID,
-                                action: {
-                                    // Don't reset the hero to series root here: flipping the short episode panel to the taller series panel while focus is on the season bar makes tvOS follow the tab and scroll the page down. "Serie anzeigen" resets the hero explicitly.
-                                    Task { await vm.loadEpisodes(seasonID: season.id) }
-                                }
-                            )
-                            .id(season.id)
-                            // Up out of the first section below the fold has to be REDIRECTED, not
-                            // merely resolved, exactly as on the movie page. The secondaries are out
-                            // of the focus engine while focus is not in the action row, so Play is
-                            // the only candidate left, and from a tab past the row's width it is too
-                            // far sideways for the engine to reach at all: the move simply does not
-                            // happen, and the page is a dead end until the viewer walks back to the
-                            // leftmost tab (Sodalite#146 round 2, reported on a device). On the tab
-                            // and not on the block around it: an `onMoveCommand` out there would
-                            // also catch the up-moves out of the episode row and the season
-                            // synopsis, which have their own, nearer destinations.
-                            .onFocusMoveUp(active: true) { playButtonFocused = true }
-                            .contextMenu {
-                                Button {
-                                    let target = !vm.isPlayed(season)
-                                    Task { await vm.setSeasonPlayed(seasonID: season.id, isPlayed: target) }
-                                } label: {
-                                    Label(
-                                        vm.isPlayed(season) ? "detail.season.markUnwatched" : "detail.season.markWatched",
-                                        systemImage: vm.isPlayed(season) ? "checkmark.circle.fill" : "checkmark.circle"
-                                    )
-                                }
-                                #if os(iOS)
-                                if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
-                                    Button {
-                                        downloadTarget = .season(
-                                            seriesID: vm.item.id, seasonID: season.id,
-                                            episodes: vm.selectedSeasonID == season.id ? vm.episodes : [])
-                                    } label: {
-                                        Label("downloads.action.downloadSeason", systemImage: "arrow.down.circle")
+            if usesSeasonMenu {
+                seasonMenu(vm: vm)
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(vm.seasons) { season in
+                                SeasonTab(
+                                    id: season.id,
+                                    name: season.name,
+                                    isSelected: vm.selectedSeasonID == season.id,
+                                    focusedID: $focusedSeasonID,
+                                    action: {
+                                        // Don't reset the hero to series root here: flipping the short episode panel to the taller series panel while focus is on the season bar makes tvOS follow the tab and scroll the page down. "Serie anzeigen" resets the hero explicitly.
+                                        Task { await vm.loadEpisodes(seasonID: season.id) }
                                     }
-                                }
-                                #endif
-                                Divider()
-                                // Reachable from the lower half of the page too. These set the
-                                // SERIES rule, which is what their titles say.
-                                spoilerRuleMenu(seriesID: vm.item.id)
+                                )
+                                .id(season.id)
+                                // Up out of the first section below the fold has to be REDIRECTED, not
+                                // merely resolved, exactly as on the movie page. The secondaries are out
+                                // of the focus engine while focus is not in the action row, so Play is
+                                // the only candidate left, and from a tab past the row's width it is too
+                                // far sideways for the engine to reach at all: the move simply does not
+                                // happen, and the page is a dead end until the viewer walks back to the
+                                // leftmost tab (Sodalite#146 round 2, reported on a device). On the tab
+                                // and not on the block around it: an `onMoveCommand` out there would
+                                // also catch the up-moves out of the episode row and the season
+                                // synopsis, which have their own, nearer destinations.
+                                .onFocusMoveUp(active: true) { playButtonFocused = true }
+                                .contextMenu { seasonActions(season, vm: vm) }
                             }
                         }
+                        // Focus scale 1.05 needs vertical slack or the halo clips against the scroll-view edges.
+                        .padding(.horizontal, metrics.rowInset)
+                        .padding(.vertical, 12)
                     }
-                    // Focus scale 1.05 needs vertical slack or the halo clips against the scroll-view edges.
-                    .padding(.horizontal, metrics.rowInset)
-                    .padding(.vertical, 12)
-                }
-                .onChange(of: focusedSeasonID) { oldID, newID in
-                    // Force focus back to the current season on entry from above (oldID nil), return from the episode row (episodesHadFocus), or fall-through.
-                    let cameFromOutside = oldID == nil || episodesHadFocus
-                    if cameFromOutside, let newID, newID != vm.selectedSeasonID {
-                        let target = vm.selectedSeasonID
-                        // Defer one runloop tick: a synchronous @FocusState write inside its own onChange is dropped on tvOS; DispatchQueue.main is honored, Task/Task.sleep hops are swallowed.
-                        DispatchQueue.main.async {
-                            focusedSeasonID = target
+                    .onChange(of: focusedSeasonID) { oldID, newID in
+                        // Force focus back to the current season on entry from above (oldID nil), return from the episode row (episodesHadFocus), or fall-through.
+                        let cameFromOutside = oldID == nil || episodesHadFocus
+                        if cameFromOutside, let newID, newID != vm.selectedSeasonID {
+                            let target = vm.selectedSeasonID
+                            // Defer one runloop tick: a synchronous @FocusState write inside its own onChange is dropped on tvOS; DispatchQueue.main is honored, Task/Task.sleep hops are swallowed.
+                            DispatchQueue.main.async {
+                                focusedSeasonID = target
+                            }
+                        }
+                        episodesHadFocus = false
+                        if newID != nil {
+                            lastFocusedArea = .season
+                        }
+                        if let focusedID = focusedSeasonID {
+                            withAnimation { proxy.scrollTo(focusedID, anchor: .center) }
+                        }
+                        if newID != nil {
+                            episodeRedirectDone = false
                         }
                     }
-                    episodesHadFocus = false
-                    if newID != nil {
-                        lastFocusedArea = .season
+                    .onChange(of: focusedEpisodeID) { oldEpisode, newEpisode in
+                        if newEpisode != nil {
+                            episodesHadFocus = true
+                            lastFocusedArea = .episode
+                        } else if let oldEpisode {
+                            episodeAim.focusLeft(oldEpisode)
+                        }
                     }
-                    if let focusedID = focusedSeasonID {
-                        withAnimation { proxy.scrollTo(focusedID, anchor: .center) }
-                    }
-                    if newID != nil {
+                    .onChange(of: vm.selectedSeasonID) { _, newID in
                         episodeRedirectDone = false
+                        withAnimation { proxy.scrollTo(newID, anchor: .center) }
                     }
-                }
-                .onChange(of: focusedEpisodeID) { oldEpisode, newEpisode in
-                    if newEpisode != nil {
-                        episodesHadFocus = true
-                        lastFocusedArea = .episode
-                    } else if let oldEpisode {
-                        episodeAim.focusLeft(oldEpisode)
-                    }
-                }
-                .onChange(of: vm.selectedSeasonID) { _, newID in
-                    episodeRedirectDone = false
-                    withAnimation { proxy.scrollTo(newID, anchor: .center) }
                 }
             }
 
@@ -1697,6 +1684,84 @@ struct SeriesDetailView: View {
             }
         }
         .focusSectionCompat()
+    }
+
+    /// An upright iPhone's season bar showed three tabs that filled the width exactly, so nothing said
+    /// there were 27 more (Blexbi). There the bar becomes one menu naming the season on screen, with the
+    /// per-season actions the tabs' hold menu carries under the list.
+    private var usesSeasonMenu: Bool {
+        #if os(iOS)
+        hSizeClass == .compact
+        #else
+        false
+        #endif
+    }
+
+    private func seasonMenu(vm: DetailViewModel) -> some View {
+        Menu {
+            Picker(
+                selection: Binding(
+                    get: { vm.selectedSeasonID },
+                    set: { id in
+                        guard let id, id != vm.selectedSeasonID else { return }
+                        Task { await vm.loadEpisodes(seasonID: id) }
+                    }
+                )
+            ) {
+                ForEach(vm.seasons) { season in
+                    Text(season.name).tag(Optional(season.id))
+                }
+            } label: {
+                EmptyView()
+            }
+            .pickerStyle(.inline)
+            if let season = vm.selectedSeason {
+                Section(season.name) { seasonActions(season, vm: vm) }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(vm.selectedSeason?.name ?? "")
+                    .font(.title3.weight(.semibold))
+                Image(systemName: "chevron.down")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .foregroundStyle(.primary)
+            // The tab bar's height, so the skeleton above it swaps in without a jump.
+            .frame(minHeight: 52)
+            .contentShape(Rectangle())
+        }
+        .menuOrder(.fixed)
+        .padding(.horizontal, metrics.rowInset)
+        .padding(.vertical, 12)
+    }
+
+    @ViewBuilder
+    private func seasonActions(_ season: JellyfinItem, vm: DetailViewModel) -> some View {
+        Button {
+            let target = !vm.isPlayed(season)
+            Task { await vm.setSeasonPlayed(seasonID: season.id, isPlayed: target) }
+        } label: {
+            Label(
+                vm.isPlayed(season) ? "detail.season.markUnwatched" : "detail.season.markWatched",
+                systemImage: vm.isPlayed(season) ? "checkmark.circle.fill" : "checkmark.circle"
+            )
+        }
+        #if os(iOS)
+        if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
+            Button {
+                downloadTarget = .season(
+                    seriesID: vm.item.id, seasonID: season.id,
+                    episodes: vm.selectedSeasonID == season.id ? vm.episodes : [])
+            } label: {
+                Label("downloads.action.downloadSeason", systemImage: "arrow.down.circle")
+            }
+        }
+        #endif
+        Divider()
+        // Reachable from the lower half of the page too. These set the
+        // SERIES rule, which is what their titles say.
+        spoilerRuleMenu(seriesID: vm.item.id)
     }
 
     @ViewBuilder

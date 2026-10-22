@@ -23,6 +23,12 @@ struct DetailHeroSynopsis: View {
     /// What a tap on the teaser does on touch: the page's More Details action, so the truncated
     /// text is not a dead end. tvOS leaves the panel outside the focus engine and ignores it.
     var onTap: (() -> Void)?
+    /// The upright iPhone's placement under the action row (Blexbi): the page scrolls freely there,
+    /// so a tap opens the whole text in place instead of leaving for More Details. The reserved
+    /// lines still hold while it is closed, which is what keeps the buttons above it still.
+    var expandsInPlace = false
+
+    @State private var isExpanded = false
 
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -47,14 +53,22 @@ struct DetailHeroSynopsis: View {
             Text(text)
                 .font(.body)
                 .foregroundStyle(.secondary)
-                .lineLimit(lineCount, reservesSpace: true)
+                .lineLimit(isExpanded ? .max : lineCount, reservesSpace: !isExpanded)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .spoilerVeil(isHidden: isSpoilerHidden, style: .text)
                 #if !os(tvOS)
                 .contentShape(Rectangle())
-                .onTapGesture { onTap?() }
+                .onTapGesture {
+                    if expandsInPlace, !isSpoilerHidden {
+                        withAnimation(.easeInOut(duration: 0.25)) { isExpanded.toggle() }
+                    } else {
+                        onTap?()
+                    }
+                }
                 #endif
+                .onChange(of: text) { isExpanded = false }
+                .onChange(of: isSpoilerHidden) { if $1 { isExpanded = false } }
         } else if isPending {
             // Reserved, not a skeleton. The panel already carries a material, and three grey bars
             // inside it read as more chrome than the fetch they stand in for is worth.
