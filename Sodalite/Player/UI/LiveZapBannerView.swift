@@ -11,8 +11,10 @@ struct LiveZapBannerView: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: banner.direction >= 0 ? "chevron.up" : "chevron.down")
-                .font(.system(size: 22, weight: .bold))
+            if banner.direction != 0 {
+                Image(systemName: banner.direction > 0 ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 22, weight: .bold))
+            }
             if let channel = banner.channel {
                 if let number = channel.channelNumber {
                     Text(number)

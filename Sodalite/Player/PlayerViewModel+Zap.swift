@@ -7,7 +7,9 @@ struct LiveZapBanner: Equatable {
 }
 
 extension PlayerViewModel {
-    static let zapSettle: Duration = .milliseconds(600)
+    /// Long enough to read the banner between presses: a slow source spends seconds on every channel
+    /// a commit lands on, and a started tune cannot be called back (Sodalite#173).
+    static let zapSettle: Duration = .milliseconds(1200)
 
     var zapTarget: JellyfinChannel? {
         neighbourChannel(offset: zapPendingOffset)
@@ -76,6 +78,14 @@ extension PlayerViewModel {
             guard !Task.isCancelled else { return }
             await self?.commitZap()
         }
+    }
+
+    /// The press that woke the remote: shows where the viewer is instead of moving.
+    func showZapWakeBanner() {
+        guard isLiveSession, !isTearingDown, zapPendingOffset == 0 else { return }
+        loadZapLineupIfNeeded()
+        zapBanner = LiveZapBanner(channel: liveChannel, direction: 0)
+        armZapBannerHide()
     }
 
     func refreshZapBanner(direction: Int? = nil) {
