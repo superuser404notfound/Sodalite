@@ -20,6 +20,16 @@ struct SidebarShell<Content: View>: View {
     @ViewBuilder let content: (AppTab) -> Content
 
     @FocusState private var focus: SidebarFocus?
+    @Environment(\.resetFocus) private var resetFocus
+    /// True while focus is anywhere inside the selected page (a container reports its descendants).
+    @FocusState private var pageHoldsFocus: Bool
+    /// The system places the opening focus without asking `prefersDefaultFocus`, top-leading first,
+    /// and that is the rail's selected row (measured in the tvOS simulator: the rail took focus under
+    /// the splash while the banner's Play was already on screen; the top bar escapes only because
+    /// Play lies left of it). Until the page has held focus once, focus arriving in the rail is that
+    /// placement and not the viewer, so it is handed back once.
+    @State private var pageHasHeldFocus = false
+    @State private var openingFocusHandedBack = false
     /// Mirrors the focus so the animation has something to compare, and so the Menu policy can ask
     /// where focus is without reading `@FocusState` mid-update.
     /// Starts false: the app opens on the content, the way it does with the top bar.
@@ -62,6 +72,7 @@ struct SidebarShell<Content: View>: View {
                 page(for: tab)
             }
         }
+        .focused($pageHoldsFocus)
         .overlay(alignment: .leading) {
             SidebarRail(
                 tabs: tabs,
@@ -108,6 +119,14 @@ struct SidebarShell<Content: View>: View {
         }
         .onChange(of: focus) { _, newValue in
             focusIsInRail = newValue != nil
+            // A page with nothing focusable keeps the rail: the reset finds no other place.
+            if newValue != nil, !pageHasHeldFocus, !openingFocusHandedBack {
+                openingFocusHandedBack = true
+                resetFocus(in: shellFocus)
+            }
+        }
+        .onChange(of: pageHoldsFocus) { _, holds in
+            if holds { pageHasHeldFocus = true }
         }
         // Menu is ours only while the rail is on screen and there is a step left in the chain. On a
         // pushed screen the navigation stack owns it, and on the last step the system does: any
