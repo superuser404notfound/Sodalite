@@ -88,6 +88,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.youTubeTrailers.title",
+                    "changelog.1_1_0.youTubeTrailers.body",
+                    icon: "play.rectangle"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.homeVideos.title",
                     "changelog.1_1_0.homeVideos.body",
                     icon: "folder.fill"

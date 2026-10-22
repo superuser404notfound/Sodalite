@@ -31,6 +31,10 @@ struct MovieDetailView: View {
     @State private var showExtra = false
     /// The local trailer or an Extras card (Sodalite#179); both are distinct server items played from the start.
     @State private var extraItem: JellyfinItem?
+    #if !os(tvOS)
+    /// Sodalite#195: the remote trailer playing in YouTube's embedded player.
+    @State private var youTubeTrailer: YouTubeTrailer?
+    #endif
     @State private var isPresentingDeleteSheet: Bool = false
     @State private var isPresentingMoreDetails = false
     @FocusState private var playButtonFocused: Bool
@@ -170,6 +174,9 @@ struct MovieDetailView: View {
                 item: item,
                 sourceID: versionSelection.preferredSourceID(for: item))
         }
+        #if !os(tvOS)
+        .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
+        #endif
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
@@ -686,11 +693,17 @@ struct MovieDetailView: View {
                 .focused($focusedAction, equals: .replay)
             }
 
-            if vm.hasLocalTrailer {
+            if vm.hasTrailer {
                 GlassActionButton(
                     title: "detail.trailer",
                     systemImage: "play.rectangle",
                     action: {
+                        #if !os(tvOS)
+                        if let remote = vm.remoteTrailer {
+                            youTubeTrailer = remote
+                            return
+                        }
+                        #endif
                         Task {
                             if let trailer = await vm.loadTrailer() {
                                 extraItem = trailer

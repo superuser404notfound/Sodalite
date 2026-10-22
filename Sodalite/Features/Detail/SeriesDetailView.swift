@@ -21,6 +21,10 @@ struct SeriesDetailView: View {
     @State private var showPlayer = false
     @State private var playQueue: [JellyfinItem] = []
     @State private var playItem: JellyfinItem?
+    #if !os(tvOS)
+    /// Sodalite#195: the remote trailer playing in YouTube's embedded player.
+    @State private var youTubeTrailer: YouTubeTrailer?
+    #endif
     @State private var playFromBeginning = false
     /// Sodalite#81: the episode or season whose download rung is being asked for.
     @State private var downloadTarget: DownloadTarget?
@@ -284,6 +288,9 @@ struct SeriesDetailView: View {
                 item: episode,
                 sourceID: versionSelection.preferredSourceID(for: episode))
         }
+        #if !os(tvOS)
+        .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
+        #endif
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
@@ -1041,11 +1048,17 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .replay)
             }
 
-            if !isShowingEpisode && vm.hasLocalTrailer {
+            if !isShowingEpisode && vm.hasTrailer {
                 GlassActionButton(
                     title: "detail.trailer",
                     systemImage: "play.rectangle",
                     action: {
+                        #if !os(tvOS)
+                        if let remote = vm.remoteTrailer {
+                            youTubeTrailer = remote
+                            return
+                        }
+                        #endif
                         Task {
                             if let trailer = await vm.loadTrailer() {
                                 playItem = trailer

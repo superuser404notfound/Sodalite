@@ -42,6 +42,18 @@ final class DetailViewModel {
         (item.localTrailerCount ?? 0) > 0
     }
 
+    /// The YouTube trailer the Trailer button embeds when the server has no local one (Sodalite#195).
+    /// Always nil on tvOS: it has no WebKit, and a deep link into the YouTube app did not work there.
+    var remoteTrailer: YouTubeTrailer? {
+        #if os(tvOS)
+        nil
+        #else
+        hasLocalTrailer ? nil : item.youTubeTrailer
+        #endif
+    }
+
+    var hasTrailer: Bool { hasLocalTrailer || remoteTrailer != nil }
+
     /// Season the tab bar currently has selected; the season synopsis box reads its overview.
     var selectedSeason: JellyfinItem? {
         selectedSeasonID.flatMap { id in seasons.first(where: { $0.id == id }) }
