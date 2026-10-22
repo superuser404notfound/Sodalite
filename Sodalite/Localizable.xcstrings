@@ -69514,157 +69514,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, featurety, vystřižené scény a další bonusy ze složek s bonusy filmu nebo seriálu mají teď na stránce s detaily vlastní řadu a přehrají se přímo odtud."
+            "value" : "Klipy, featurety, vystřižené scény a další bonusy ze složek s bonusy filmu nebo seriálu mají teď na stránce s detaily vlastní řadu a přehrají se přímo odtud. Upoutávky titulu jsou na začátku téže řady."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klip, featurettes, slettede scener og andet ekstramateriale fra en films eller series ekstramapper har nu deres egen række på detaljesiden og afspilles direkte derfra."
+            "value" : "Klip, featurettes, slettede scener og andet ekstramateriale fra en films eller series ekstramapper har nu deres egen række på detaljesiden og afspilles direkte derfra. En titels trailere står forrest i samme række."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, Featurettes, entfallene Szenen und andere Extras aus den Extras-Ordnern eines Films oder einer Serie haben jetzt eine eigene Reihe auf der Detailseite und spielen direkt von dort."
+            "value" : "Clips, Featurettes, entfallene Szenen und andere Extras aus den Extras-Ordnern eines Films oder einer Serie haben jetzt eine eigene Reihe auf der Detailseite und spielen direkt von dort. Die Trailer eines Titels stehen vorne in derselben Reihe."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κλιπ, featurettes, κομμένες σκηνές και άλλο επιπλέον υλικό από τους φακέλους extras μιας ταινίας ή σειράς έχουν πλέον τη δική τους σειρά στη σελίδα λεπτομερειών και παίζουν απευθείας από εκεί."
+            "value" : "Κλιπ, featurettes, κομμένες σκηνές και άλλο επιπλέον υλικό από τους φακέλους extras μιας ταινίας ή σειράς έχουν πλέον τη δική τους σειρά στη σελίδα λεπτομερειών και παίζουν απευθείας από εκεί. Τα τρέιλερ ενός τίτλου βρίσκονται στην αρχή της ίδιας σειράς."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, featurettes, deleted scenes and other extras from a movie's or show's extras folders now get their own row on the detail page and play right from there."
+            "value" : "Clips, featurettes, deleted scenes and other extras from a movie's or show's extras folders now get their own row on the detail page and play right from there. A title's trailers sit at the front of the same row."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los clips, featurettes, escenas eliminadas y otros extras de las carpetas de extras de una película o serie tienen ahora su propia fila en la página de detalles y se reproducen desde ahí."
+            "value" : "Los clips, featurettes, escenas eliminadas y otros extras de las carpetas de extras de una película o serie tienen ahora su propia fila en la página de detalles y se reproducen desde ahí. Los tráileres de un título aparecen al principio de la misma fila."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elokuvan tai sarjan lisämateriaalikansioiden klipit, featuretit, poistetut kohtaukset ja muu lisämateriaali saavat nyt oman rivinsä tietosivulle, ja ne toistetaan suoraan sieltä."
+            "value" : "Elokuvan tai sarjan lisämateriaalikansioiden klipit, featuretit, poistetut kohtaukset ja muu lisämateriaali saavat nyt oman rivinsä tietosivulle, ja ne toistetaan suoraan sieltä. Nimikkeen trailerit ovat saman rivin alussa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les extraits, making-of, scènes coupées et autres bonus des dossiers d'extras d'un film ou d'une série ont désormais leur propre rangée sur la page de détails et se lisent directement depuis celle-ci."
+            "value" : "Les extraits, making-of, scènes coupées et autres bonus des dossiers d'extras d'un film ou d'une série ont désormais leur propre rangée sur la page de détails et se lisent directement depuis celle-ci. Les bandes-annonces d'un titre figurent en tête de cette même rangée."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Isječci, featurette, izbačene scene i ostali dodaci iz mapa s dodacima filma ili serije sada imaju vlastiti red na stranici s detaljima i reproduciraju se izravno odande."
+            "value" : "Isječci, featurette, izbačene scene i ostali dodaci iz mapa s dodacima filma ili serije sada imaju vlastiti red na stranici s detaljima i reproduciraju se izravno odande. Najave naslova nalaze se na početku istog reda."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A film vagy sorozat extramappáiban lévő klipek, werkfilmek, kivágott jelenetek és egyéb extrák mostantól saját sort kapnak a részletek oldalon, és közvetlenül onnan játszhatók le."
+            "value" : "A film vagy sorozat extramappáiban lévő klipek, werkfilmek, kivágott jelenetek és egyéb extrák mostantól saját sort kapnak a részletek oldalon, és közvetlenül onnan játszhatók le. A cím előzetesei ugyanennek a sornak az elején állnak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clip, featurette, scene eliminate e altri contenuti extra dalle cartelle extra di un film o di una serie hanno ora una propria fila nella pagina dei dettagli e si riproducono direttamente da lì."
+            "value" : "Clip, featurette, scene eliminate e altri contenuti extra dalle cartelle extra di un film o di una serie hanno ora una propria fila nella pagina dei dettagli e si riproducono direttamente da lì. I trailer di un titolo si trovano all'inizio della stessa fila."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "映画やシリーズの特典フォルダにあるクリップ、メイキング、未公開シーンなどの特典映像が詳細ページに専用の列で表示され、そこから直接再生できるようになりました。"
+            "value" : "映画やシリーズの特典フォルダにあるクリップ、メイキング、未公開シーンなどの特典映像が詳細ページに専用の列で表示され、そこから直接再生できるようになりました。作品の予告編は同じ列の先頭に表示されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "영화나 시리즈의 부가 영상 폴더에 있는 클립, 메이킹 영상, 삭제된 장면 등이 이제 상세 페이지에 별도의 줄로 표시되며 바로 재생할 수 있습니다."
+            "value" : "영화나 시리즈의 부가 영상 폴더에 있는 클립, 메이킹 영상, 삭제된 장면 등이 이제 상세 페이지에 별도의 줄로 표시되며 바로 재생할 수 있습니다. 작품의 예고편은 같은 줄의 맨 앞에 표시됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipp, featurettes, slettede scener og annet ekstramateriale fra en films eller series ekstramapper har nå sin egen rad på detaljsiden og spilles av rett derfra."
+            "value" : "Klipp, featurettes, slettede scener og annet ekstramateriale fra en films eller series ekstramapper har nå sin egen rad på detaljsiden og spilles av rett derfra. En tittels trailere står først i samme rad."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clips, featurettes, verwijderde scènes en andere extra's uit de extra-mappen van een film of serie hebben nu een eigen rij op de detailpagina en spelen daar direct af."
+            "value" : "Clips, featurettes, verwijderde scènes en andere extra's uit de extra-mappen van een film of serie hebben nu een eigen rij op de detailpagina en spelen daar direct af. De trailers van een titel staan vooraan in dezelfde rij."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, materiały zza kulis, usunięte sceny i inne dodatki z folderów z dodatkami filmu lub serialu mają teraz własny rząd na stronie szczegółów i odtwarzają się bezpośrednio stamtąd."
+            "value" : "Klipy, materiały zza kulis, usunięte sceny i inne dodatki z folderów z dodatkami filmu lub serialu mają teraz własny rząd na stronie szczegółów i odtwarzają się bezpośrednio stamtąd. Zwiastuny tytułu znajdują się na początku tego samego rzędu."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipes, featurettes, cenas excluídas e outros extras das pastas de extras de um filme ou série agora têm sua própria fileira na página de detalhes e são reproduzidos direto de lá."
+            "value" : "Clipes, featurettes, cenas excluídas e outros extras das pastas de extras de um filme ou série agora têm sua própria fileira na página de detalhes e são reproduzidos direto de lá. Os trailers de um título ficam no início da mesma fileira."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipes, featurettes, cenas eliminadas e outros extras das pastas de extras de um filme ou série têm agora a sua própria fila na página de detalhes e são reproduzidos diretamente a partir daí."
+            "value" : "Clipes, featurettes, cenas eliminadas e outros extras das pastas de extras de um filme ou série têm agora a sua própria fila na página de detalhes e são reproduzidos diretamente a partir daí. Os trailers de um título ficam no início da mesma fila."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clipurile, featurette-urile, scenele eliminate și alte materiale bonus din folderele de extras ale unui film sau serial au acum propriul rând pe pagina de detalii și se redau direct de acolo."
+            "value" : "Clipurile, featurette-urile, scenele eliminate și alte materiale bonus din folderele de extras ale unui film sau serial au acum propriul rând pe pagina de detalii și se redau direct de acolo. Trailerele unui titlu apar la începutul aceluiași rând."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Клипы, фильмы о съёмках, удалённые сцены и другие доп. материалы из папок extras фильма или сериала теперь показываются отдельным рядом на странице с подробностями и воспроизводятся прямо оттуда."
+            "value" : "Клипы, фильмы о съёмках, удалённые сцены и другие доп. материалы из папок extras фильма или сериала теперь показываются отдельным рядом на странице с подробностями и воспроизводятся прямо оттуда. Трейлеры стоят в начале того же ряда."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipy, featurety, vystrihnuté scény a ďalšie bonusy z priečinkov s bonusmi filmu alebo seriálu majú teraz na stránke s detailmi vlastný rad a prehrajú sa priamo odtiaľ."
+            "value" : "Klipy, featurety, vystrihnuté scény a ďalšie bonusy z priečinkov s bonusmi filmu alebo seriálu majú teraz na stránke s detailmi vlastný rad a prehrajú sa priamo odtiaľ. Ukážky titulu sú na začiatku toho istého radu."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klipp, featurettes, borttagna scener och annat extramaterial från en films eller series extramappar har nu en egen rad på detaljsidan och spelas upp direkt därifrån."
+            "value" : "Klipp, featurettes, borttagna scener och annat extramaterial från en films eller series extramappar har nu en egen rad på detaljsidan och spelas upp direkt därifrån. En titels trailers står först i samma rad."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir filmin veya dizinin ekstra klasörlerindeki klipler, kamera arkası videoları, silinmiş sahneler ve diğer ekstralar artık ayrıntı sayfasında kendi satırında yer alıyor ve doğrudan oradan oynatılıyor."
+            "value" : "Bir filmin veya dizinin ekstra klasörlerindeki klipler, kamera arkası videoları, silinmiş sahneler ve diğer ekstralar artık ayrıntı sayfasında kendi satırında yer alıyor ve doğrudan oradan oynatılıyor. Bir yapımın fragmanları aynı satırın başında yer alıyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Кліпи, фільми про зйомки, видалені сцени та інші додаткові матеріали з папок extras фільму чи серіалу тепер мають власний ряд на сторінці з подробицями й відтворюються просто звідти."
+            "value" : "Кліпи, фільми про зйомки, видалені сцени та інші додаткові матеріали з папок extras фільму чи серіалу тепер мають власний ряд на сторінці з подробицями й відтворюються просто звідти. Трейлери стоять на початку того самого ряду."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "电影或剧集花絮文件夹中的片段、幕后特辑、删减片段等花絮现在会在详情页单独成行显示，并可直接从那里播放。"
+            "value" : "电影或剧集花絮文件夹中的片段、幕后特辑、删减片段等花絮现在会在详情页单独成行显示，并可直接从那里播放。作品的预告片位于同一行的最前面。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電影或影集花絮資料夾中的片段、幕後特輯、刪減片段等花絮現在會在詳細資料頁單獨成列顯示，並可直接從那裡播放。"
+            "value" : "電影或影集花絮資料夾中的片段、幕後特輯、刪減片段等花絮現在會在詳細資料頁單獨成列顯示，並可直接從那裡播放。作品的預告片位於同一列的最前面。"
           }
         }
       }
@@ -82771,6 +82771,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "版本按鈕只顯示差異"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.youTubeTrailers.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu, iPadu a Macu tlačítko Upoutávka nově přehraje i upoutávku filmu nebo seriálu z YouTube, pokud váš server žádnou vlastní nemá. Přehrává se v přehrávači YouTube a video, které nelze vložit, se místo toho otevře v YouTube."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone, iPad og Mac afspiller Trailer-knappen nu også en films eller series trailer fra YouTube, når din server ikke har sin egen. Den afspilles i YouTubes egen afspiller, og en video, der ikke kan indlejres, åbnes i YouTube i stedet."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf iPhone, iPad und Mac spielt der Trailer-Button jetzt auch den Trailer eines Films oder einer Serie von YouTube ab, wenn dein Server keinen eigenen hat. Er läuft im Player von YouTube, und ein Video, das sich nicht einbetten lässt, öffnet sich stattdessen in YouTube."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone, iPad και Mac, το κουμπί Τρέιλερ αναπαράγει πλέον και το τρέιλερ μιας ταινίας ή σειράς από το YouTube, όταν ο διακομιστής σας δεν έχει δικό του. Παίζει στο πρόγραμμα αναπαραγωγής του YouTube, και ένα βίντεο που δεν μπορεί να ενσωματωθεί ανοίγει αντί γι' αυτό στο YouTube."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone, iPad and Mac, the Trailer button now also plays a movie's or show's trailer from YouTube when your server has none of its own. It plays in YouTube's own player, and a video that can't be embedded opens in YouTube instead."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iPhone, iPad y Mac, el botón Tráiler ahora también reproduce el tráiler de una película o serie desde YouTube cuando tu servidor no tiene uno propio. Se reproduce en el reproductor de YouTube, y un vídeo que no se puede insertar se abre en YouTube."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhonessa, iPadissa ja Macissa Traileri-painike toistaa nyt myös elokuvan tai sarjan trailerin YouTubesta, kun palvelimellasi ei ole omaa. Se toistuu YouTuben omassa soittimessa, ja video, jota ei voi upottaa, avautuu sen sijaan YouTubessa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone, iPad et Mac, le bouton Bande-annonce lit désormais aussi la bande-annonce d'un film ou d'une série depuis YouTube lorsque votre serveur n'en a pas. Elle est lue dans le lecteur de YouTube, et une vidéo qui ne peut pas être intégrée s'ouvre plutôt dans YouTube."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhoneu, iPadu i Macu gumb Najava sada reproducira i najavu filma ili serije s YouTubea kada vaš poslužitelj nema vlastitu. Reproducira se u YouTubeovu playeru, a videozapis koji se ne može ugraditi umjesto toga se otvara u YouTubeu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-on, iPaden és Macen az Előzetes gomb mostantól a film vagy sorozat YouTube-os előzetesét is lejátssza, ha a szervereden nincs saját. A YouTube saját lejátszójában fut, a nem beágyazható videó pedig helyette a YouTube-ban nyílik meg."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su iPhone, iPad e Mac, il pulsante Trailer ora riproduce anche il trailer di un film o di una serie da YouTube quando il tuo server non ne ha uno proprio. Viene riprodotto nel player di YouTube, e un video che non può essere incorporato si apre invece in YouTube."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone、iPad、Mac では、サーバーに予告編がない場合、予告編ボタンで映画や番組の予告編を YouTube から再生できるようになりました。YouTube のプレーヤーで再生され、埋め込めない動画は代わりに YouTube で開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone, iPad 및 Mac에서 서버에 자체 예고편이 없으면 예고편 버튼이 이제 YouTube에서 영화나 프로그램의 예고편을 재생합니다. YouTube 자체 플레이어에서 재생되며, 퍼가기가 허용되지 않는 동영상은 대신 YouTube에서 열립니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone, iPad og Mac spiller Trailer-knappen nå også av en films eller series trailer fra YouTube når serveren din ikke har en egen. Den spilles i YouTubes egen avspiller, og en video som ikke kan bygges inn, åpnes i YouTube i stedet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op iPhone, iPad en Mac speelt de Trailer-knop nu ook de trailer van een film of serie af vanaf YouTube als je server er zelf geen heeft. Hij speelt in de eigen speler van YouTube, en een video die niet kan worden ingesloten, opent in plaats daarvan in YouTube."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie, iPadzie i Macu przycisk Zwiastun odtwarza teraz także zwiastun filmu lub serialu z YouTube, gdy serwer nie ma własnego. Jest odtwarzany w odtwarzaczu YouTube, a wideo, którego nie można osadzić, otwiera się w YouTube."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone, iPad e Mac, o botão Trailer agora também reproduz o trailer de um filme ou série do YouTube quando seu servidor não tem um próprio. Ele toca no player do próprio YouTube, e um vídeo que não pode ser incorporado abre no YouTube."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone, iPad e Mac, o botão Trailer passa também a reproduzir o trailer de um filme ou série a partir do YouTube quando o seu servidor não tem um próprio. É reproduzido no leitor do próprio YouTube, e um vídeo que não pode ser incorporado abre antes no YouTube."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe iPhone, iPad și Mac, butonul Trailer redă acum și trailerul unui film sau al unui serial de pe YouTube atunci când serverul tău nu are unul propriu. Rulează în playerul YouTube, iar un videoclip care nu poate fi încorporat se deschide în schimb în YouTube."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone, iPad и Mac кнопка «Трейлер» теперь воспроизводит и трейлер фильма или сериала с YouTube, если на вашем сервере нет собственного. Он идёт в плеере YouTube, а видео, которое нельзя встроить, вместо этого открывается в YouTube."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone, iPade a Macu tlačidlo Ukážka teraz prehrá aj ukážku filmu alebo seriálu z YouTube, ak váš server nemá vlastnú. Prehráva sa v prehrávači YouTube a video, ktoré sa nedá vložiť, sa namiesto toho otvorí v YouTube."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone, iPad och Mac spelar Trailer-knappen nu även upp en films eller series trailer från YouTube när din server inte har någon egen. Den spelas i YouTubes egen spelare, och en video som inte kan bäddas in öppnas i YouTube i stället."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone, iPad ve Mac'te Fragman düğmesi artık sunucunuzda kendi fragmanı olmadığında bir filmin veya dizinin fragmanını YouTube'dan da oynatıyor. YouTube'un kendi oynatıcısında çalar, yerleştirilemeyen bir video ise bunun yerine YouTube'da açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone, iPad і Mac кнопка «Трейлер» тепер відтворює й трейлер фільму чи серіалу з YouTube, якщо на вашому сервері немає власного. Він іде в плеєрі YouTube, а відео, яке не можна вбудувати, натомість відкривається в YouTube."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone、iPad 和 Mac 上，如果服务器没有自己的预告片，预告片按钮现在也会播放来自 YouTube 的电影或剧集预告片。它在 YouTube 自己的播放器中播放，无法嵌入的视频会改为在 YouTube 中打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone、iPad 和 Mac 上，若伺服器沒有自己的預告片，預告片按鈕現在也會播放來自 YouTube 的電影或影集預告片。它在 YouTube 自己的播放器中播放，無法嵌入的影片則會改在 YouTube 中開啟。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.youTubeTrailers.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávky z YouTube"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere fra YouTube"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube-Trailer"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέιλερ από το YouTube"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube trailers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráileres de YouTube"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube-trailerit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandes-annonces YouTube"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najave s YouTubea"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube-előzetesek"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer da YouTube"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube の予告編"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube 예고편"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere fra YouTube"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube-trailers"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwiastuny z YouTube"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers do YouTube"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers do YouTube"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere de pe YouTube"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлеры с YouTube"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážky z YouTube"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers från YouTube"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube fragmanları"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлери з YouTube"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube 预告片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube 預告片"
           }
         }
       }
@@ -98774,6 +99098,816 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "預告片"
+          }
+        }
+      }
+    },
+    "detail.trailer.openInYouTube" : {
+      "comment" : "Button in the remote trailer sheet that opens the video in the YouTube app or browser",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otevřít v YouTube"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åbn i YouTube"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In YouTube öffnen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Άνοιγμα στο YouTube"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in YouTube"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en YouTube"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaa YouTubessa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir dans YouTube"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvori u YouTubeu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megnyitás a YouTube-ban"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri in YouTube"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube で開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube에서 열기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åpne i YouTube"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in YouTube"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otwórz w YouTube"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no YouTube"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no YouTube"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deschide în YouTube"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть в YouTube"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvoriť v YouTube"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna i YouTube"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube'da aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити в YouTube"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 YouTube 中打开"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 YouTube 中開啟"
+          }
+        }
+      }
+    },
+    "detail.trailer.unavailable" : {
+      "comment" : "Title shown when a YouTube trailer refuses to play embedded",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávku zde nelze přehrát"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traileren kan ikke afspilles her"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer kann hier nicht abgespielt werden"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το τρέιλερ δεν μπορεί να αναπαραχθεί εδώ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer can't play here"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tráiler no se puede reproducir aquí"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traileria ei voi toistaa tässä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de lire la bande-annonce ici"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najava se ovdje ne može reproducirati"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az előzetes itt nem játszható le"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile riprodurre il trailer qui"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここでは予告編を再生できません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여기에서는 예고편을 재생할 수 없음"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traileren kan ikke spilles av her"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer kan hier niet worden afgespeeld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie można tu odtworzyć zwiastuna"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não é possível reproduzir o trailer aqui"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não é possível reproduzir o trailer aqui"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailerul nu poate fi redat aici"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлер нельзя воспроизвести здесь"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážku tu nemožno prehrať"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailern kan inte spelas upp här"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fragman burada oynatılamıyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлер не можна відтворити тут"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法在此播放预告片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法在此播放預告片"
+          }
+        }
+      }
+    },
+    "detail.trailer.unavailable.message" : {
+      "comment" : "Explanation shown when a YouTube trailer refuses to play embedded",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto video nelze přehrát v Sodalite. Otevřete ho v YouTube a podívejte se na něj tam."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne video kan ikke afspilles i Sodalite. Åbn den i YouTube for at se den."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Video lässt sich nicht in Sodalite abspielen. Öffne es in YouTube, um es anzusehen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτό το βίντεο δεν μπορεί να αναπαραχθεί μέσα στο Sodalite. Ανοίξτε το στο YouTube για να το δείτε."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This video can't be played inside Sodalite. Open it in YouTube to watch it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo no se puede reproducir dentro de Sodalite. Ábrelo en YouTube para verlo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tätä videota ei voi toistaa Sodalitessa. Avaa se YouTubessa katsoaksesi sen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette vidéo ne peut pas être lue dans Sodalite. Ouvrez-la dans YouTube pour la regarder."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovaj se videozapis ne može reproducirati u Sodaliteu. Otvorite ga u YouTubeu da biste ga pogledali."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez a videó nem játszható le a Sodalite-ban. Nyisd meg a YouTube-ban a megtekintéshez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo video non può essere riprodotto in Sodalite. Aprilo in YouTube per guardarlo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この動画は Sodalite 内では再生できません。YouTube で開いてご覧ください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 동영상은 Sodalite 안에서 재생할 수 없습니다. 보려면 YouTube에서 여세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne videoen kan ikke spilles av i Sodalite. Åpne den i YouTube for å se den."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze video kan niet in Sodalite worden afgespeeld. Open hem in YouTube om hem te bekijken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tego wideo nie można odtworzyć w Sodalite. Otwórz je w YouTube, aby je obejrzeć."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo não pode ser reproduzido no Sodalite. Abra-o no YouTube para assistir."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo não pode ser reproduzido no Sodalite. Abra-o no YouTube para o ver."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acest videoclip nu poate fi redat în Sodalite. Deschide-l în YouTube pentru a-l viziona."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это видео нельзя воспроизвести в Sodalite. Откройте его в YouTube, чтобы посмотреть."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto video nemožno prehrať v Sodalite. Otvorte ho v YouTube a pozrite si ho tam."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den här videon kan inte spelas upp i Sodalite. Öppna den i YouTube för att se den."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu video Sodalite içinde oynatılamıyor. İzlemek için YouTube'da açın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Це відео не можна відтворити в Sodalite. Відкрийте його в YouTube, щоб переглянути."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此视频无法在 Sodalite 中播放。请在 YouTube 中打开观看。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此影片無法在 Sodalite 中播放。請在 YouTube 中開啟觀看。"
+          }
+        }
+      }
+    },
+    "detail.trailers" : {
+      "comment" : "Heading of the detail row when it holds only trailers",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávky"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέιλερ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráileres"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailerit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandes-annonces"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najave"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzetesek"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予告編"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예고편"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwiastuny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлеры"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážky"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fragmanlar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлери"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预告片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預告片"
+          }
+        }
+      }
+    },
+    "detail.trailersAndExtras" : {
+      "comment" : "Heading of the detail row when it holds trailers and extras",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upoutávky a bonusy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere og ekstramateriale"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer & Extras"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέιλερ και επιπλέον υλικό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers & Extras"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tráileres y extras"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailerit ja lisämateriaali"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bandes-annonces et bonus"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najave i dodaci"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzetesek és extrák"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer e contenuti extra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予告編と特典映像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예고편 및 부가 영상"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere og ekstramateriale"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers en extra's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwiastuny i dodatki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers e extras"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers e extras"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailere și materiale bonus"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлеры и доп. материалы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukážky a bonusy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailers och extramaterial"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fragmanlar ve ekstralar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трейлери та додаткові матеріали"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预告片和花絮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "預告片和花絮"
           }
         }
       }

@@ -68,6 +68,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     let localTrailerCount: Int?
     /// Extras from the item's extras/clips/featurettes folders (requires SpecialFeatureCount in Fields); gates the detail Extras row. nil if unrequested.
     let specialFeatureCount: Int?
+    /// Trailer links from the metadata provider (requires RemoteTrailers in Fields), Sodalite#195. `var`
+    /// with a default so the hand-written inits below stay untouched.
+    var remoteTrailers: [RemoteTrailer]?
     let seriesPrimaryImageTag: String?
     let providerIds: [String: String]?
     /// nil unless the fetch requested `Fields=Chapters`; `[]` is the server answering "none". `var`
@@ -188,6 +191,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
         case specialFeatureCount = "SpecialFeatureCount"
+        case remoteTrailers = "RemoteTrailers"
         case seriesPrimaryImageTag = "SeriesPrimaryImageTag"
         case providerIds = "ProviderIds"
         case chapters = "Chapters"

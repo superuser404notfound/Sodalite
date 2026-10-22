@@ -557,7 +557,7 @@ enum JellyfinEndpoint: APIEndpoint {
     /// `ItemQuery` fell back to for any caller that left `fields` nil, which is how four grid queries
     /// ended up asking a large library for cast lists and chapter arrays no cell renders. There is no
     /// fallback any more: `ItemQuery.fields` has no default and every call site picks its set.
-    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,Trickplay"
+    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,RemoteTrailers,Trickplay"
 
     /// Season bar: ChildCount (episode count per season) without defaultFields' heavy arrays. Name/index/watched are base/UserData fields.
     /// It must be `ChildCount`, NOT `ItemCounts`: Jellyfin's DtoService fills a Season's ChildCount only under `ItemFields.ChildCount`; `ItemCounts` sets it on the ItemsByName path (people/genres/studios) and leaves a Season's nil. With the wrong field every season read as zero episodes, which the catalog's Jellyfin ground-truth reconcile scores as "deleted".

@@ -21,6 +21,10 @@ struct SeriesDetailView: View {
     @State private var showPlayer = false
     @State private var playQueue: [JellyfinItem] = []
     @State private var playItem: JellyfinItem?
+    #if !os(tvOS)
+    /// Sodalite#195: the remote trailer playing in YouTube's embedded player.
+    @State private var youTubeTrailer: YouTubeTrailer?
+    #endif
     @State private var playFromBeginning = false
     /// Sodalite#81: the episode or season whose download rung is being asked for.
     @State private var downloadTarget: DownloadTarget?
@@ -284,6 +288,9 @@ struct SeriesDetailView: View {
                 item: episode,
                 sourceID: versionSelection.preferredSourceID(for: episode))
         }
+        #if !os(tvOS)
+        .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
+        #endif
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
@@ -656,13 +663,14 @@ struct SeriesDetailView: View {
                         }
                     }
 
-                    // Sodalite#179. The show's extras, not an episode's, so they leave with the
-                    // Trailer button when an episode takes the page.
-                    let showsExtras = !isShowingEpisode && !vm.specialFeatures.isEmpty
+                    // Sodalite#179 and #195. The show's trailers and extras, not an episode's, so
+                    // they leave with the Trailer button when an episode takes the page.
+                    let showsExtras = !isShowingEpisode && vm.hasTrailersOrExtras
                     if showsExtras {
-                        HorizontalMediaRow(
-                            title: "detail.extras",
-                            items: vm.specialFeatures,
+                        TrailersAndExtrasRow(
+                            localTrailers: vm.localTrailers,
+                            youTubeTrailers: vm.remoteTrailers,
+                            extras: vm.specialFeatures,
                             imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
                             fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
                             onItemSelected: { extra in
@@ -671,7 +679,11 @@ struct SeriesDetailView: View {
                                 playOriginatedFromPlayButton = false
                                 showPlayer = true
                             },
-                            cardStyle: .landscape
+                            onYouTubeSelected: { trailer in
+                                #if !os(tvOS)
+                                youTubeTrailer = trailer
+                                #endif
+                            }
                         )
                         .onFocusMoveUp(active: !seasonBlockIsFirst && !hasCast) { playButtonFocused = true }
                     }
@@ -858,7 +870,7 @@ struct SeriesDetailView: View {
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
         !vm.seasons.isEmpty || vm.isLoadingSeasons
             || !(vm.item.people?.isEmpty ?? true)
-            || (!isShowingEpisode && !vm.specialFeatures.isEmpty)
+            || (!isShowingEpisode && vm.hasTrailersOrExtras)
             || !vm.similarItems.isEmpty
             || !vm.catalogSimilar.isEmpty
     }
@@ -1041,11 +1053,17 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .replay)
             }
 
-            if !isShowingEpisode && vm.hasLocalTrailer {
+            if !isShowingEpisode && vm.hasTrailer {
                 GlassActionButton(
                     title: "detail.trailer",
                     systemImage: "play.rectangle",
                     action: {
+                        #if !os(tvOS)
+                        if let remote = vm.remoteTrailer {
+                            youTubeTrailer = remote
+                            return
+                        }
+                        #endif
                         Task {
                             if let trailer = await vm.loadTrailer() {
                                 playItem = trailer
