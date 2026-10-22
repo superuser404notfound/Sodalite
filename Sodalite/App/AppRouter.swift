@@ -198,6 +198,12 @@ struct AppRouter: View {
             }
             Task { await restoreSession() }
         }
+        #if !os(macOS)
+        // Synchronous on the way out, so the shield is in the snapshot the system takes next.
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            raisePrivacyShieldIfRepromptPossible()
+        }
+        #endif
         #if os(iOS)
         .onChange(of: scenePhase) { _, phase in
             // Queue the next background poll when leaving the foreground, only while opted in.
@@ -276,6 +282,11 @@ struct AppRouter: View {
             #endif
             guard scenePhase == .active else { return }
             consumeBackgroundInstant()
+            #if !os(macOS)
+            // A due reprompt lowers it once the picker is up, see the profile cover. The late lower
+            // is the backstop for a cover that never lands, which would leave the app unseeable.
+            if !repromptHolds { PrivacyShield.lower() } else { PrivacyShield.lower(after: .seconds(3)) }
+            #endif
         }
         .task(id: appState.serverDidSwitch) {
             guard appState.serverDidSwitch > 0 else { return }
@@ -388,6 +399,10 @@ struct AppRouter: View {
             // Menu would close the reprompt as "continue as current" without the entry lock's PIN.
             // The picker routes that press through its gated select instead.
             .interactiveDismissDisabled(cover.context == .reprompt)
+            #if !os(macOS)
+            // Held past the cover's slide-in, so the page it closed never shows.
+            .onAppear { PrivacyShield.lower(after: .milliseconds(400)) }
+            #endif
             // The AppRouter-level PIN cover can't stack on this cover (one cover per host view),
             // so the gate presents from inside while this one is up.
             .fullScreenCoverCompat(item: Binding(
@@ -539,6 +554,20 @@ struct AppRouter: View {
         maybeRequestProfileReprompt(backgroundedAt: backgroundedAt, reachedBackground: reachedBackground)
     }
 
+    #if !os(macOS)
+    private func raisePrivacyShieldIfRepromptPossible() {
+        guard hasRestored, let server = appState.activeServer else { return }
+        let possible = ProfileRepromptPolicy.canReprompt(
+            interval: dependencies.authPreferences.profileReprompt,
+            launchBehavior: dependencies.authPreferences.launchBehavior,
+            isAuthenticated: appState.isAuthenticated,
+            rememberedCount: dependencies.listRememberedUsers(serverID: server.id).count
+        )
+        guard possible else { return }
+        PrivacyShield.raise(isSupporter: dependencies.storeKitService.isSupporter)
+    }
+    #endif
+
     /// Whether a deep link or Continue Watching request has to wait for the reprompt.
     private func holdForReprompt() -> Bool {
         if lastBackgroundedAt != nil { consumeBackgroundInstant() }
@@ -580,7 +609,12 @@ struct AppRouter: View {
             repromptAwaitsPlayerDismissal = false
             guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented,
                   let server = appState.activeServer
-            else { return }
+            else {
+                #if !os(macOS)
+                PrivacyShield.lower()
+                #endif
+                return
+            }
             profileCover = ProfileCoverRequest(server: server, context: .reprompt)
         }
     }

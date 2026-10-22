@@ -202,6 +202,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
+                    "changelog.1_1_0.privacyShield.title",
+                    "changelog.1_1_0.privacyShield.body",
+                    icon: "eye.slash"
+                ),
+                ChangelogHighlight(
+                    .improve,
                     "changelog.1_1_0.synopsisTap.title",
                     "changelog.1_1_0.synopsisTap.body",
                     icon: "text.alignleft"

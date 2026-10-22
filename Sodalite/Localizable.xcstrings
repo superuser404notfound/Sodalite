@@ -76299,6 +76299,330 @@
         }
       }
     },
+    "changelog.1_1_0.privacyShield.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je-li výběr profilu zapnutý, Sodalite nyní při odchodu překryje obrazovku tmavým sklem. Po návratu se místo titulů posledního profilu zobrazí logo a výběr se objeví, aniž by se za ním nejdřív zavírala stránka."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når profilvalget er slået til, lægger Sodalite nu mørkt glas over skærmen, når du forlader appen. Når du vender tilbage, vises logoet i stedet for den sidste profils titler, og valget vises, uden at en side først lukker bagved."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist die Profilauswahl eingeschaltet, legt Sodalite beim Verlassen jetzt dunkles Glas über den Bildschirm. Bei der Rückkehr erscheint das Logo statt der Titel des letzten Profils, und die Auswahl kommt, ohne dass sich vorher eine Seite dahinter schließt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Με ενεργή την επιλογή προφίλ, το Sodalite καλύπτει πλέον την οθόνη με σκούρο γυαλί όταν φεύγετε. Στην επιστροφή εμφανίζεται το λογότυπο αντί για τους τίτλους του τελευταίου προφίλ, και η επιλογή εμφανίζεται χωρίς να κλείνει πρώτα μια σελίδα από πίσω."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With the profile picker on, Sodalite now lays dark glass over its screen when you leave. Coming back shows the logo instead of the last profile's titles, and the picker appears without a page closing behind it first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con el selector de perfil activado, Sodalite ahora cubre la pantalla con cristal oscuro al salir. Al volver se ve el logotipo en lugar de los títulos del último perfil, y el selector aparece sin que antes se cierre una página detrás."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun profiilin valinta on käytössä, Sodalite peittää nyt näytön tummalla lasilla, kun poistut. Palatessa näkyy logo viimeisen profiilin nimikkeiden sijaan, ja valinta tulee esiin ilman, että sivu sulkeutuu ensin sen takana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec le choix du profil activé, Sodalite recouvre désormais l’écran d’un verre sombre quand vous quittez l’app. Au retour, le logo s’affiche au lieu des titres du dernier profil, et le choix apparaît sans qu’une page se ferme d’abord derrière."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kad je odabir profila uključen, Sodalite sada pri izlasku prekriva zaslon tamnim staklom. Pri povratku se umjesto naslova zadnjeg profila prikazuje logo, a odabir se pojavljuje bez da se iza njega prvo zatvara stranica."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekapcsolt profilválasztó esetén a Sodalite mostantól kilépéskor sötét üveggel takarja el a képernyőt. Visszatéréskor a logó jelenik meg az utolsó profil címei helyett, és a választó úgy jelenik meg, hogy előtte nem zárul be mögötte egy oldal."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con la scelta del profilo attiva, Sodalite ora copre lo schermo con un vetro scuro quando esci. Al ritorno compare il logo invece dei titoli dell’ultimo profilo, e la scelta appare senza che prima si chiuda una pagina dietro."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィール選択がオンのとき、Sodalite はアプリを離れる際に画面を暗いガラスで覆うようになりました。戻ると前のプロフィールのタイトルではなくロゴが表示され、背後でページが閉じることなく選択画面が表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로필 선택이 켜져 있으면 Sodalite가 이제 앱을 떠날 때 화면을 어두운 유리로 덮습니다. 돌아오면 마지막 프로필의 타이틀 대신 로고가 보이고, 뒤에서 페이지가 먼저 닫히는 일 없이 선택 화면이 나타납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når profilvalget er slått på, legger Sodalite nå mørkt glass over skjermen når du forlater appen. Når du kommer tilbake, vises logoen i stedet for titlene til den siste profilen, og valget vises uten at en side først lukkes bak det."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met de profielkeuze aan legt Sodalite nu donker glas over het scherm wanneer je de app verlaat. Bij terugkeer zie je het logo in plaats van de titels van het laatste profiel, en de keuze verschijnt zonder dat er eerst een pagina achter sluit."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gdy wybór profilu jest włączony, Sodalite przy wyjściu przykrywa teraz ekran ciemnym szkłem. Po powrocie widać logo zamiast tytułów ostatniego profilu, a wybór pojawia się bez zamykania się najpierw strony w tle."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com a escolha de perfil ativada, o Sodalite agora cobre a tela com vidro escuro ao sair. Ao voltar, aparece o logotipo em vez dos títulos do último perfil, e a escolha surge sem que uma página se feche antes por trás."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com a escolha de perfil ativada, o Sodalite cobre agora o ecrã com vidro escuro ao sair. Ao regressar, surge o logótipo em vez dos títulos do último perfil, e a escolha aparece sem que uma página se feche antes por trás."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cu alegerea profilului activată, Sodalite acoperă acum ecranul cu sticlă întunecată când ieși. La revenire apare logoul în locul titlurilor ultimului profil, iar alegerea apare fără ca mai întâi să se închidă o pagină în spate."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если выбор профиля включён, Sodalite теперь закрывает экран тёмным стеклом при выходе. При возвращении виден логотип, а не названия последнего профиля, и выбор появляется без того, чтобы сначала за ним закрывалась страница."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ak je výber profilu zapnutý, Sodalite teraz pri odchode prekryje obrazovku tmavým sklom. Po návrate sa namiesto titulov posledného profilu zobrazí logo a výber sa objaví bez toho, aby sa za ním najprv zatvárala stránka."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När profilvalet är på lägger Sodalite nu mörkt glas över skärmen när du lämnar appen. När du kommer tillbaka visas logotypen i stället för den senaste profilens titlar, och valet visas utan att en sida först stängs bakom det."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil seçimi açıkken Sodalite artık uygulamadan çıkarken ekranı koyu camla örtüyor. Geri dönüldüğünde son profilin başlıkları yerine logo görünür ve seçim, arkasında önce bir sayfa kapanmadan açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо вибір профілю ввімкнено, Sodalite тепер під час виходу закриває екран темним склом. Після повернення видно логотип, а не назви останнього профілю, і вибір з’являється без того, щоб спершу за ним закривалася сторінка."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启配置文件选择后，Sodalite 现在会在离开时用深色玻璃遮住屏幕。返回时显示的是标志，而不是上一个配置文件的影片，选择界面出现前也不会先在后面关闭页面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟設定檔選擇後，Sodalite 現在會在離開時用深色玻璃遮住螢幕。返回時顯示的是標誌，而不是上一個設定檔的影片，選擇畫面出現前也不會先在後面關閉頁面。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.privacyShield.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Při návratu nic neprozradí"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intet at se, når du vender tilbage"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Einblick bei der Rückkehr"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα ορατό κατά την επιστροφή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to see on the way back"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada a la vista al volver"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ei mitään nähtävää palatessa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à voir au retour"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ništa za vidjeti pri povratku"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visszatéréskor semmi sem látszik"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niente da vedere al ritorno"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻ったときに何も見えません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "돌아올 때 아무것도 보이지 않음"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingenting å se når du kommer tilbake"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niets te zien bij terugkeer"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nic nie widać po powrocie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada à vista ao voltar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada à vista ao regressar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimic de văzut la revenire"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При возвращении ничего не видно"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri návrate nič neprezradí"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget att se när du kommer tillbaka"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dönüşte hiçbir şey görünmüyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Після повернення нічого не видно"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回时不再露出内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回時不再露出內容"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.profileTab.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
