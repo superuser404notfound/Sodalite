@@ -68,6 +68,7 @@ struct DetailHeroSynopsis: View {
                 }
                 #endif
                 .onChange(of: text) { isExpanded = false }
+                .onChange(of: isSpoilerHidden) { if $1 { isExpanded = false } }
         } else if isPending {
             // Reserved, not a skeleton. The panel already carries a material, and three grey bars
             // inside it read as more chrome than the fetch they stand in for is worth.

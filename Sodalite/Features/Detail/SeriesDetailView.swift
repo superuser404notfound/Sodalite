@@ -1686,7 +1686,6 @@ struct SeriesDetailView: View {
         .focusSectionCompat()
     }
 
-    @ViewBuilder
     /// An upright iPhone's season bar showed three tabs that filled the width exactly, so nothing said
     /// there were 27 more (Blexbi). There the bar becomes one menu naming the season on screen, with the
     /// per-season actions the tabs' hold menu carries under the list.
@@ -1765,6 +1764,7 @@ struct SeriesDetailView: View {
         spoilerRuleMenu(seriesID: vm.item.id)
     }
 
+    @ViewBuilder
     /// Whole-section placeholder while getSeasons is in flight: skeleton season tabs above the episode skeleton row. Mirrors seasonSection's ScrollView/spacing/padding so the swap doesn't shift layout.
     private func seasonSectionSkeleton(vm: DetailViewModel) -> some View {
         VStack(alignment: .leading, spacing: 20) {
