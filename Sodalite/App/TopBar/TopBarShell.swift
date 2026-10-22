@@ -28,6 +28,9 @@ struct TopBarShell<Content: View>: View {
     /// bar over another.
     @State private var chromeHidden: [AppTab: Bool] = [:]
     @State private var scrollOffsets: [AppTab: CGFloat] = [:]
+    /// Bumped per tab when Menu brings the viewer up to the bar, which the page answers by
+    /// scrolling to its top (see `drivesShellBar`).
+    @State private var scrollToTopRequests: [AppTab: Int] = [:]
 
     private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
@@ -78,6 +81,9 @@ struct TopBarShell<Content: View>: View {
         .onExitCommandIfEnabled(!selectedHidesChrome && exitOutcome != .leaveApp) {
             switch exitOutcome {
             case .focusRail:
+                // The system bar scrolled the page back to its top here. Left where it was, the bar
+                // came down over a page still scrolled deep into its rows.
+                scrollToTopRequests[selectedTab, default: 0] += 1
                 focus = .item(selectedTab)
             case .selectHome:
                 selectedTab = .home
@@ -98,6 +104,7 @@ struct TopBarShell<Content: View>: View {
             .environment(\.shellBarScroll, ShellBarScroll { offset in
                 scrollOffsets[tab] = offset
             })
+            .environment(\.shellBarScrollToTop, scrollToTopRequests[tab] ?? 0)
             .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                 chromeHidden[tab] = hidden
             }
@@ -149,6 +156,8 @@ struct ShellBarScroll {
 
 extension EnvironmentValues {
     @Entry var shellBarScroll: ShellBarScroll?
+    /// Changes when the top bar asks the page under it to scroll back to its top.
+    @Entry var shellBarScrollToTop = 0
     /// The room the top bar takes above a tab's root page, zero everywhere else. Claimed once, by
     /// the page's root, and zeroed for everything inside it, so a pushed screen, a sheet or a cover
     /// never inherits it.
@@ -178,7 +187,8 @@ extension View {
 
     /// Marks the scroll view the top bar rides with: a tab's ROOT page, the one under the bar. The
     /// system bar picked that scroll view by itself; a hand-drawn bar has to be told. A page that does
-    /// not say keeps the bar in place, which costs nothing but the ride.
+    /// not say keeps the bar in place, which costs nothing but the ride. It is also the scroll view
+    /// Menu sends back to the top.
     func drivesShellBar() -> some View {
         modifier(DrivesShellBar())
     }
@@ -196,14 +206,23 @@ private struct ReservesShellBar: ViewModifier {
 
 private struct DrivesShellBar: ViewModifier {
     @Environment(\.shellBarScroll) private var shellBarScroll
+    @Environment(\.shellBarScrollToTop) private var scrollToTop
+    @State private var position = ScrollPosition(edge: .top)
 
     func body(content: Content) -> some View {
         #if os(tvOS)
-        content.onScrollGeometryChange(for: CGFloat.self) { geometry in
-            geometry.contentOffset.y + geometry.contentInsets.top
-        } action: { _, offset in
-            shellBarScroll?.report(offset)
-        }
+        content
+            .scrollPosition($position)
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentOffset.y + geometry.contentInsets.top
+            } action: { _, offset in
+                shellBarScroll?.report(offset)
+            }
+            .onChange(of: scrollToTop) {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    position.scrollTo(edge: .top)
+                }
+            }
         #else
         content
         #endif
