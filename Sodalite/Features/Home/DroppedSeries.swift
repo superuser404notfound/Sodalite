@@ -56,6 +56,17 @@ enum DroppedSeriesStore {
         }
     }
 
+    /// What the Top Shelf extension gets: the profile's hidden shows on its own server, which is
+    /// the one the shelf's session talks to.
+    static func shelfMirror(for profile: ProfileKey) -> TopShelfHiddenShows {
+        TopShelfHiddenShows(
+            userID: profile.userID,
+            seriesIDs: load(scope: profile.storageScope)
+                .filter { $0.serverID == profile.serverID }
+                .map(\.seriesID)
+        )
+    }
+
     static func entry(for item: JellyfinItem, fallbackServerID: String) -> DroppedSeries? {
         guard let seriesID = item.seriesId else { return nil }
         return DroppedSeries(

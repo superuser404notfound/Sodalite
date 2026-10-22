@@ -191,6 +191,14 @@ struct SodaliteApp: App {
                     TopShelfArtwork.write(rawValue: dependencies.appearancePreferences.topShelfImage.rawValue)
                     TopShelfRefresher.invalidate()
                 }
+                // Fifth crossing: a show hidden from Home's rows stays off the shelf as well.
+                .task(id: appState.profileKey) { mirrorHiddenShowsToShelf() }
+                .onReceive(NotificationCenter.default.publisher(for: .homeConfigDidChange)) { _ in
+                    mirrorHiddenShowsToShelf()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .cloudSyncDidApplyChanges)) { _ in
+                    mirrorHiddenShowsToShelf()
+                }
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }
@@ -231,6 +239,16 @@ struct SodaliteApp: App {
     }
 
     /// Handles `sodalite://item/{id}` and `sodalite://play/{id}` (TopShelf's display and play actions): stashes the id in AppState for AppRouter to resolve. Synchronously tears down any active player modal first, else a TopShelf tap waking the app from a paused player loses ~10s to the player's own appDidBecomeActive reload before AppRouter's .task(id:) cycles in.
+    /// Writes only on a change: the home-config signal fires for every row edit too, and each
+    /// write would otherwise ask the shelf to reload.
+    private func mirrorHiddenShowsToShelf() {
+        guard let profile = appState.profileKey else { return }
+        let mirror = DroppedSeriesStore.shelfMirror(for: profile)
+        guard mirror != TopShelfHiddenShows.read() else { return }
+        TopShelfHiddenShows.write(mirror)
+        TopShelfRefresher.invalidate()
+    }
+
     private func handleDeepLink(_ url: URL) {
         guard let route = DeepLinkRoute.parse(url) else { return }
         PlayerModalDismisser.dismissActive(logPrefix: "[SodaliteApp]")
