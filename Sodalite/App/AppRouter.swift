@@ -283,8 +283,9 @@ struct AppRouter: View {
             guard scenePhase == .active else { return }
             consumeBackgroundInstant()
             #if !os(macOS)
-            // A due reprompt lowers it once the picker is up, see the profile cover.
-            if !repromptHolds { PrivacyShield.lower() }
+            // A due reprompt lowers it once the picker is up, see the profile cover. The late lower
+            // is the backstop for a cover that never lands, which would leave the app unseeable.
+            if !repromptHolds { PrivacyShield.lower() } else { PrivacyShield.lower(after: .seconds(3)) }
             #endif
         }
         .task(id: appState.serverDidSwitch) {
