@@ -30,7 +30,9 @@ struct TopBarItem: View {
     }
 
     private var foreground: Color {
-        state.usesAccentIcon ? appearanceTheme.palette.navigation.color : state.iconFallbackColor
+        // `control`, the sidebar's colour: `navigation` is tuned for the system bar's LIGHT glass,
+        // and this bar sits on the same dark frosted panel as the rail.
+        state.usesAccentIcon ? appearanceTheme.palette.control.color : state.iconFallbackColor
     }
 
     var body: some View {
