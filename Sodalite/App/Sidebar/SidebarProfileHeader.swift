@@ -16,15 +16,12 @@ struct SidebarProfileHeader: View {
 
     var body: some View {
         if let user {
-            HStack(spacing: SidebarMetrics.labelSpacing) {
+            HStack(spacing: 0) {
                 SidebarProfileAvatar(user: user)
                     .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
-                if isExpanded {
+                SidebarRevealedLabel(isExpanded: isExpanded) {
                     Text(user.name)
-                        .font(.headline)
                         .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
                 }
             }
             .padding(.horizontal, SidebarMetrics.itemHorizontalPadding(isExpanded: isExpanded))

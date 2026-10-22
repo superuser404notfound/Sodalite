@@ -77597,6 +77597,330 @@
         }
       }
     },
+    "changelog.1_1_0.sidebarKeep.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV se karta, na kterou se v postranním panelu vrátíte, už znovu nenačítá a otevřená stránka s detaily tam stále je. Názvy se nyní otevírají spolu s panelem, místo aby se na okamžik objevily přes stránku vedle něj."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV genindlæses en fane, du vender tilbage til i sidebaren, ikke længere, og en åben detaljeside er der stadig. Titlerne åbner nu sammen med panelet i stedet for kort at dukke op over siden ved siden af."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV lädt ein Tab, zu dem man in der Sidebar zurückkehrt, nicht mehr neu, und eine geöffnete Detailseite ist noch da. Die Titel öffnen sich jetzt zusammen mit der Leiste, statt kurz über der Seite daneben zu erscheinen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο Apple TV μια καρτέλα στην οποία επιστρέφετε από την πλαϊνή μπάρα δεν φορτώνει πια ξανά, και μια ανοιχτή σελίδα λεπτομερειών είναι ακόμη εκεί. Οι τίτλοι ανοίγουν τώρα μαζί με τη μπάρα, αντί να εμφανίζονται για λίγο πάνω από τη σελίδα δίπλα της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV a tab you return to in the sidebar no longer reloads, and an open detail page is still there. The titles now open together with the rail instead of briefly appearing over the page beside it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Apple TV, una pestaña a la que vuelves desde la barra lateral ya no se recarga, y una página de detalles abierta sigue ahí. Los títulos ahora se abren junto con la barra en lugar de aparecer un instante sobre la página de al lado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä välilehti, jolle palaat sivupalkista, ei enää lataudu uudelleen, ja avoin tietosivu on yhä paikallaan. Otsikot avautuvat nyt yhdessä palkin kanssa sen sijaan, että ne näkyisivät hetken viereisen sivun päällä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur Apple TV, un onglet que vous rouvrez depuis la barre latérale ne se recharge plus, et une page de détails ouverte est toujours là. Les titres s'ouvrent désormais avec la barre au lieu d'apparaître un instant par-dessus la page voisine."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u kartica na koju se vratite u bočnoj traci više se ne učitava ponovno, a otvorena stranica s detaljima i dalje je tu. Naslovi se sada otvaraju zajedno s trakom umjesto da se na trenutak pojave preko stranice pokraj nje."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n az oldalsávban újra megnyitott lap már nem töltődik be újra, és a megnyitott részletes oldal is megmarad. A címek most a sávval együtt nyílnak ki, ahelyett hogy egy pillanatra a mellette lévő oldal fölött jelennének meg."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV una scheda a cui torni dalla barra laterale non si ricarica più, e una pagina di dettagli aperta è ancora lì. I titoli ora si aprono insieme alla barra invece di comparire per un attimo sopra la pagina accanto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVで、サイドバーから戻ったタブが再読み込みされなくなり、開いていた詳細ページもそのまま残ります。タイトルはバーと一緒に開くようになり、隣のページの上に一瞬表示されることはなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 사이드바로 돌아온 탭이 더 이상 다시 로드되지 않으며, 열어 둔 상세 페이지도 그대로 남아 있습니다. 제목은 이제 옆 페이지 위에 잠깐 나타나는 대신 막대와 함께 열립니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV lastes ikke en fane du går tilbake til i sidefeltet inn på nytt lenger, og en åpen detaljside er der fortsatt. Titlene åpner seg nå sammen med feltet i stedet for å dukke opp et øyeblikk over siden ved siden av."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Apple TV wordt een tabblad waarnaar je in de zijbalk terugkeert niet meer opnieuw geladen, en een geopende detailpagina is er nog. De titels openen nu samen met de balk in plaats van even over de pagina ernaast te verschijnen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV karta, do której wracasz z paska bocznego, nie ładuje się już ponownie, a otwarta strona szczegółów nadal tam jest. Tytuły otwierają się teraz razem z paskiem, zamiast pojawiać się na chwilę nad stroną obok."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, uma aba à qual você volta pela barra lateral não é mais recarregada, e uma página de detalhes aberta continua lá. Os títulos agora abrem junto com a barra em vez de aparecerem por um instante sobre a página ao lado."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, um separador ao qual regressa pela barra lateral já não é recarregado, e uma página de detalhes aberta continua lá. Os títulos abrem agora com a barra em vez de aparecerem por instantes sobre a página ao lado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, o filă la care revii din bara laterală nu se mai reîncarcă, iar o pagină de detalii deschisă este încă acolo. Titlurile se deschid acum odată cu bara, în loc să apară pentru o clipă peste pagina de alături."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка, к которой вы возвращаетесь через боковую панель, больше не загружается заново, а открытая страница с подробностями остаётся на месте. Названия теперь раскрываются вместе с панелью, а не появляются на миг поверх соседней страницы."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV sa karta, na ktorú sa vrátite v bočnom paneli, už znova nenačítava a otvorená stránka s podrobnosťami tam stále je. Názvy sa teraz otvárajú spolu s panelom namiesto toho, aby sa na okamih zobrazili cez stránku vedľa neho."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV laddas en flik som du återvänder till i sidofältet inte längre om, och en öppen detaljsida finns kvar. Titlarna öppnas nu tillsammans med fältet i stället för att en kort stund visas över sidan bredvid."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'de kenar çubuğundan geri döndüğünüz bir sekme artık yeniden yüklenmiyor ve açık bir ayrıntı sayfası yerinde kalıyor. Başlıklar artık yanındaki sayfanın üzerinde kısa süre belirmek yerine çubukla birlikte açılıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вкладка, до якої ви повертаєтеся через бічну панель, більше не завантажується знову, а відкрита сторінка з подробицями залишається на місці. Назви тепер розгортаються разом із панеллю, а не з’являються на мить поверх сусідньої сторінки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，通过侧边栏返回的标签页不再重新加载，已打开的详情页也仍然保留。标题现在会随侧边栏一起展开，而不会在旁边的页面上短暂出现。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，透過側邊欄返回的分頁不再重新載入，已開啟的詳細資訊頁面也仍然保留。標題現在會隨側邊欄一起展開，而不會在旁邊的頁面上短暫出現。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.sidebarKeep.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postranní panel si pamatuje každou kartu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sidebaren husker hver fane"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Sidebar merkt sich jeden Tab"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η πλαϊνή μπάρα θυμάται κάθε καρτέλα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sidebar that remembers every tab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una barra lateral que recuerda cada pestaña"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sivupalkki muistaa jokaisen välilehden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une barre latérale qui se souvient de chaque onglet"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bočna traka pamti svaku karticu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az oldalsáv minden lapot megjegyez"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una barra laterale che ricorda ogni scheda"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイドバーが各タブを覚えるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 탭을 기억하는 사이드바"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sidefeltet husker hver fane"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een zijbalk die elk tabblad onthoudt"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasek boczny pamięta każdą kartę"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma barra lateral que lembra cada aba"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma barra lateral que se lembra de cada separador"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bară laterală care ține minte fiecare filă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Боковая панель помнит каждую вкладку"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bočný panel si pamätá každú kartu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sidofältet minns varje flik"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her sekmeyi hatırlayan kenar çubuğu"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бічна панель пам’ятає кожну вкладку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记住每个标签页的侧边栏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記得每個分頁的側邊欄"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.sleepClose.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

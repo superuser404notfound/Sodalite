@@ -48,7 +48,7 @@ struct SidebarMetricsTests {
     @Test("the leading margin swallows the focus lift of a screen-wide tile")
     func marginCoversTheWidestFocusLift() {
         let tileScale: CGFloat = 1.03
-        let contentWidth: CGFloat = 1920 - SidebarMetrics.railLeadingInset - SidebarMetrics.collapsedWidth
+        let contentWidth: CGFloat = 1920 - SidebarMetrics.railSlot
         let growthPerSide = contentWidth * (tileScale - 1) / 2
         #expect(SidebarMetrics.contentLeading >= growthPerSide)
     }
@@ -80,6 +80,13 @@ struct SidebarMetricsTests {
     func widthFollowsExpansion() {
         #expect(SidebarMetrics.width(isExpanded: false) == SidebarMetrics.collapsedWidth)
         #expect(SidebarMetrics.width(isExpanded: true) == SidebarMetrics.expandedWidth)
+    }
+
+    @Test("the panel is wider than its rows, so a focused pill never meets the glass edge")
+    func panelInsetsTheRows() {
+        #expect(SidebarMetrics.panelHorizontalPadding > 0)
+        #expect(SidebarMetrics.panelWidth(isExpanded: true) == SidebarMetrics.expandedWidth + SidebarMetrics.panelHorizontalPadding * 2)
+        #expect(SidebarMetrics.railSlot == SidebarMetrics.railLeadingInset + SidebarMetrics.panelWidth(isExpanded: false))
     }
 
     @Test("the whole block fits the tvOS title-safe band, profile header included")

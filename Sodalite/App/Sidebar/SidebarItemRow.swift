@@ -29,7 +29,7 @@ struct SidebarItemRow: View {
     }
 
     var body: some View {
-        HStack(spacing: SidebarMetrics.labelSpacing) {
+        HStack(spacing: 0) {
             if tab == .profiles, let user = appState.activeUser {
                 SidebarProfileAvatar(user: user)
                     .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
@@ -42,16 +42,17 @@ struct SidebarItemRow: View {
                     .foregroundStyle(iconColor)
                     .frame(width: SidebarMetrics.iconColumn)
             }
-            if isExpanded {
-                label
-                    // .headline (38pt on tvOS 26), not .title3: title3 is 48pt there, and the
-                    // longest label at that size ("Einstellungen") does not fit the rail.
-                    .font(.headline)
-                    .foregroundStyle(state.labelColor)
-                    .lineLimit(1)
-                    // NOT fixedSize: that makes a long label (German "Einstellungen") wider than
-                    // the rail and it then draws straight over the content beside it.
-                    .truncationMode(.tail)
+            SidebarRevealedLabel(isExpanded: isExpanded) {
+                // Both colours stand in place and only cross-fade. Recoloured as focus arrives, the
+                // label went white on the brightening pill and vanished for the length of the fade.
+                ZStack(alignment: .leading) {
+                    label
+                        .foregroundStyle(SidebarItemState.selected.labelColor)
+                        .opacity(state == .focused ? 0 : 1)
+                    label
+                        .foregroundStyle(SidebarItemState.focused.labelColor)
+                        .opacity(state == .focused ? 1 : 0)
+                }
             }
         }
         .padding(.horizontal, SidebarMetrics.itemHorizontalPadding(isExpanded: isExpanded))
@@ -79,6 +80,33 @@ struct SidebarItemRow: View {
         } else {
             Text(tab.labelKey)
         }
+    }
+}
+/// A rail label that opens by width with the rail instead of appearing at its final place. Inserted
+/// whole, the labels stood at full width while the glass panel was still narrow, so for the length
+/// of the expand they lay over the content beside the rail (measured with a slowed animation).
+///
+/// The text is laid out once at the full budget and only the window onto it moves, so it never
+/// re-truncates mid-animation. The gap to the icon lives inside the window, or the collapsed row
+/// would keep it.
+struct SidebarRevealedLabel<Label: View>: View {
+    let isExpanded: Bool
+    @ViewBuilder let label: () -> Label
+
+    var body: some View {
+        label()
+            // .headline (38pt on tvOS 26), not .title3: title3 is 48pt there, and the longest label
+            // at that size ("Einstellungen") does not fit the rail.
+            .font(.headline)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .frame(width: SidebarMetrics.labelWidthBudget, alignment: .leading)
+            .padding(.leading, SidebarMetrics.labelSpacing)
+            .frame(width: isExpanded ? SidebarMetrics.labelWidthBudget + SidebarMetrics.labelSpacing : 0,
+                   alignment: .leading)
+            .clipped()
+            .opacity(isExpanded ? 1 : 0)
+            .accessibilityHidden(!isExpanded)
     }
 }
 #endif
