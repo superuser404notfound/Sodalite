@@ -13,7 +13,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
     SWIFT_VERSION: "6.0"
     # Xcode's project template sets this, XcodeGen does not, so without it the build-setting
     # default (NO) applies and Xcode keeps offering to "fix" it in the UI, which would only
