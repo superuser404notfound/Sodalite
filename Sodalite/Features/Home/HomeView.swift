@@ -38,6 +38,9 @@ struct HomeView: View {
 
     /// The card whose show a menu asked to wipe; the alert below confirms before anything is sent.
     @State private var historyRemovalItem: JellyfinItem?
+    /// Set when the server refused the removal: the viewer confirmed a destructive step, so a silent
+    /// failure would read as done.
+    @State private var historyRemovalError: String?
 
     /// True while something is presented over Home: a detail page or a filtered grid. Home is not
     /// the screen then, which is what the two refresh observers below ask about.
@@ -278,6 +281,18 @@ struct HomeView: View {
         } message: { item in
             Text("home.removeShowHistory.confirm.message \(item.seriesName ?? item.name)")
         }
+        .alert(
+            "home.removeShowHistory.failed.title",
+            isPresented: Binding(
+                get: { historyRemovalError != nil },
+                set: { if !$0 { historyRemovalError = nil } }
+            ),
+            presenting: historyRemovalError
+        ) { _ in
+            Button("common.ok", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
     }
 
     /// Unplayed on the series is the server's own cascade: every episode loses its played mark,
@@ -286,8 +301,13 @@ struct HomeView: View {
         guard let seriesID = item.seriesId else { return }
         let session = dependencies.sessionRegistry.session(for: item)
         Task {
-            try? await session.itemService.setPlayed(userID: session.userID, itemID: seriesID, isPlayed: false)
-            NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+            do {
+                try await session.itemService.setPlayed(userID: session.userID, itemID: seriesID, isPlayed: false)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                TopShelfRefresher.invalidate()
+            } catch {
+                historyRemovalError = ErrorText.user(for: error)
+            }
         }
     }
 
