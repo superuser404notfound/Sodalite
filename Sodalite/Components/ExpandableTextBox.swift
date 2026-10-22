@@ -81,6 +81,8 @@ struct TextOverlay: View {
     let text: String
     @Binding var isPresented: Bool
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+
     var body: some View {
         ZStack {
             Color.Theme.scrimHeavy.ignoresSafeArea()
@@ -99,12 +101,18 @@ struct TextOverlay: View {
                 .frame(maxWidth: 1200)
             }
             #else
+            // A tap anywhere closes the reader: the text is not selectable, and the bare glyph
+            // that used to be the only way out had to be hit to the point (reported on the iPhone).
             ScrollView {
                 Text(text)
                     .font(.body)
                     .foregroundStyle(.primary)
-                    .padding(60)
+                    .padding(.horizontal, hSizeClass == .compact ? 24 : 60)
+                    .padding(.vertical, 60)
                     .frame(maxWidth: 1200)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture { isPresented = false }
             }
 
             VStack {
@@ -113,12 +121,16 @@ struct TextOverlay: View {
                     Button {
                         isPresented = false
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .frame(width: 44, height: 44)
+                            .glassEffect(.regular.interactive(), in: .circle)
                     }
                     .buttonStyle(.plain)
-                    .padding(40)
+                    .accessibilityLabel(Text("common.done"))
+                    .padding(.trailing, 16)
+                    .padding(.top, 8)
                 }
                 Spacer()
             }

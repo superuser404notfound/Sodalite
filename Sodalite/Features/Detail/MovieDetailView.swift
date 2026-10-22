@@ -472,7 +472,8 @@ struct MovieDetailView: View {
     // MARK: - Glass Panel
 
     private func glassPanel(vm: DetailViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        // Centred on the upright iPhone, like the logo above it and the buttons below.
+        VStack(alignment: isPhonePortrait ? .center : .leading, spacing: 16) {
             // Title/logo lives in the hero slot (see DetailContentOverlay); panel opens into the metadata row.
             if vm.item.type == .episode, let series = vm.item.seriesName {
                 Text(episodeSubtitle(vm: vm, seriesName: series))
@@ -490,7 +491,7 @@ struct MovieDetailView: View {
                 // there, and four of them on the metadata line pushed it past the screen edge and
                 // dragged the studios line out with it (measured on the iPhone, 2026-09-14).
                 if isPhonePortrait {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(spacing: 8) {
                         ItemMetadataRow(item: vm.item)
                         let pills = formatBadgePills(vm: vm)
                         if !pills.isEmpty {
@@ -507,7 +508,7 @@ struct MovieDetailView: View {
             // scroll to it. The upright iPhone has it under the buttons instead.
             if !isPhonePortrait { heroSynopsis(vm: vm) }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: isPhonePortrait ? .center : .leading)
         // The upright iPhone draws no panel (Blexbi): its column sits on the page's own ground
         // under the poster, not over the backdrop, so the glass only boxed the text in.
         .padding(isPhonePortrait ? 0 : 30)

@@ -734,7 +734,8 @@ struct SeriesDetailView: View {
     // MARK: - Glass Panel
 
     private func glassPanel(vm: DetailViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        // Centred on the upright iPhone, like the logo above it and the buttons below.
+        VStack(alignment: isPhonePortrait ? .center : .leading, spacing: 16) {
             // Panel title is the episode name in episode mode; the series root has none (logo lives in the hero slot, see DetailContentOverlay).
             if isShowingEpisode {
                 Text(selectedEpisode.map { dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: $0) } ?? "")
@@ -761,7 +762,7 @@ struct SeriesDetailView: View {
                     // column there and the pills pushed it past the screen edge (Sodalite#145,
                     // measured on the iPhone 2026-09-14).
                     if isPhonePortrait {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(spacing: 8) {
                             episodeLine(vm: vm)
                             episodeBadges()
                         }
@@ -781,7 +782,7 @@ struct SeriesDetailView: View {
             // The upright iPhone has it under the buttons instead.
             if !isPhonePortrait { heroSynopsis }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: isPhonePortrait ? .center : .leading)
         // The movie page's numbers: no panel on the upright iPhone (Blexbi), 30 everywhere else.
         .padding(isPhonePortrait ? 0 : 30)
         .background {
