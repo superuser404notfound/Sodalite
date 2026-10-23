@@ -15,4 +15,27 @@ struct DownloadRungOptionsTests {
         let options = DownloadRungOption.options(sourceBitrate: 3_000_000, sourceSize: 10, runtimeTicks: nil)
         #expect(options.map(\.quality) == [.original, .mbps2])
     }
+
+    private func source(_ id: String, name: String, height: Int, bitrate: Int, size: Int64) throws -> MediaSource {
+        try JSONDecoder().decode(MediaSource.self, from: Data(#"""
+            {"Id":"\#(id)","Name":"\#(name)","Size":\#(size),"Bitrate":\#(bitrate),
+             "MediaStreams":[{"Index":0,"Type":"Video","Codec":"h264","Width":\#(height * 16 / 9),"Height":\#(height)}]}
+            """#.utf8))
+    }
+
+    @Test func everyVersionIsAnOriginalAndTheRungsFollowTheSelectedOne() throws {
+        let remux = try source("remux", name: "Remux", height: 1080, bitrate: 30_000_000, size: 30_000)
+        let uhd = try source("uhd", name: "UHD", height: 2160, bitrate: 3_000_000, size: 9_000)
+        let options = DownloadRungOption.options(versions: [remux, uhd], selected: uhd, runtimeTicks: 36_000_000_000)
+        #expect(options.map(\.quality) == [.original, .original, .mbps2])
+        #expect(options.map(\.source?.id) == ["uhd", "remux", nil])
+        #expect(options.map(\.estimatedBytes).prefix(2) == [9_000, 30_000])
+        #expect(Set(options.map(\.id)).count == options.count)
+    }
+
+    @Test func versionLabelWithoutSizeDropsOnlyTheSize() throws {
+        let uhd = try source("uhd", name: "UHD", height: 2160, bitrate: 3_000_000, size: 9_000_000_000)
+        #expect(uhd.versionLabel(includingSize: false) == "UHD · 4K · H264")
+        #expect(uhd.versionLabel.hasPrefix("UHD · 4K · H264 · "))
+    }
 }

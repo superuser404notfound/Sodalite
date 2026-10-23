@@ -46,7 +46,9 @@ enum DownloadButtonState: Equatable {
 struct DownloadRungOption: Identifiable, Equatable {
     let quality: StreamingQuality
     let estimatedBytes: Int64?
-    var id: String { quality.rawValue }
+    /// The version an original downloads, set only where the item has more than one (Sodalite#200).
+    var source: MediaSource? = nil
+    var id: String { [quality.rawValue, source?.id].compactMap { $0 }.joined(separator: "-") }
 
     /// The same filter as the player picker (#87): a rung that would not transcode this file is the
     /// original under another name. Always best first, so the list reads the same every time.
@@ -55,5 +57,16 @@ struct DownloadRungOption: Identifiable, Equatable {
             DownloadRungOption(quality: $0, estimatedBytes: DownloadPlanner.estimatedBytes(
                 quality: $0, sourceBitrate: sourceBitrate, sourceSize: sourceSize, runtimeTicks: runtimeTicks))
         }
+    }
+
+    /// Several versions: each one is an original of its own, best first like the version picker, and
+    /// the rungs below them transcode the version the page has selected (Sodalite#200).
+    static func options(versions: [MediaSource], selected: MediaSource, runtimeTicks: Int64?) -> [DownloadRungOption] {
+        let originals = versions.rankedByQuality().map {
+            DownloadRungOption(quality: .original, estimatedBytes: $0.size, source: $0)
+        }
+        let rungs = options(sourceBitrate: selected.bitrate, sourceSize: selected.size, runtimeTicks: runtimeTicks)
+            .filter { $0.quality != .original }
+        return originals + rungs
     }
 }

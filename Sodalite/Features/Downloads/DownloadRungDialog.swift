@@ -6,15 +6,15 @@ struct DownloadFacts: Equatable {
     let size: Int64?
     let runtimeTicks: Int64?
 
-    static func of(_ item: JellyfinItem) -> DownloadFacts {
-        let source = item.mediaSources?.first
+    static func of(_ item: JellyfinItem, sourceID: String?) -> DownloadFacts {
+        let source = item.effectiveMediaSource(id: sourceID ?? VersionSelection().preferredSourceID(for: item))
         return DownloadFacts(bitrate: source?.bitrate, size: source?.size, runtimeTicks: item.runTimeTicks)
     }
 
     /// A season is an estimate over its episodes: the highest bitrate decides which rungs bite, sizes
     /// and runtimes add up, and one unknown size makes the original's total unknown.
     static func of(season episodes: [JellyfinItem]) -> DownloadFacts {
-        let sources = episodes.map { $0.mediaSources?.first }
+        let sources = episodes.map { $0.effectiveMediaSource(id: VersionSelection().preferredSourceID(for: $0)) }
         let sizes = sources.map { $0?.size }
         return DownloadFacts(
             bitrate: sources.compactMap { $0?.bitrate }.max(),
@@ -23,21 +23,22 @@ struct DownloadFacts: Equatable {
     }
 }
 
-/// One movie or episode, or a whole season (Sodalite#81).
+/// One movie or episode, or a whole season (Sodalite#81). `sourceID` is the version the page has
+/// selected, nil where there is no choice (Sodalite#200).
 enum DownloadTarget: Identifiable {
-    case item(JellyfinItem)
+    case item(JellyfinItem, sourceID: String?)
     case season(seriesID: String, seasonID: String, episodes: [JellyfinItem])
 
     var id: String {
         switch self {
-        case .item(let item): item.id
+        case .item(let item, _): item.id
         case .season(_, let seasonID, _): "season-\(seasonID)"
         }
     }
 
     var facts: DownloadFacts {
         switch self {
-        case .item(let item): .of(item)
+        case .item(let item, let sourceID): .of(item, sourceID: sourceID)
         case .season(_, _, let episodes): .of(season: episodes)
         }
     }
@@ -61,7 +62,7 @@ extension DownloadFailure {
 }
 
 #if !os(tvOS)
-/// Asks which rung to download at, every time, with the last one used on top (Sodalite#81).
+/// Asks which rung to download at, every time, best first (Sodalite#81).
 private struct DownloadRungDialog: ViewModifier {
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
@@ -76,7 +77,7 @@ private struct DownloadRungDialog: ViewModifier {
                 presenting: target
             ) { target in
                 ForEach(options(for: target)) { option in
-                    Button(label(for: option)) { start(target, quality: option.quality) }
+                    Button(label(for: option)) { start(target, option: option) }
                 }
                 Button("common.cancel", role: .cancel) {}
             } message: { target in
@@ -90,27 +91,35 @@ private struct DownloadRungDialog: ViewModifier {
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
+        if case .item(let item, let sourceID) = target, item.selectableMediaSources.count > 1,
+           let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection().preferredSourceID(for: item)) {
+            return DownloadRungOption.options(versions: item.selectableMediaSources, selected: selected,
+                                              runtimeTicks: item.runTimeTicks)
+        }
         let facts = target.facts
         return DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size,
                                           runtimeTicks: facts.runtimeTicks)
     }
 
     private func label(for option: DownloadRungOption) -> String {
-        let title = String(localized: String.LocalizationValue(option.quality.titleKey))
+        var title = String(localized: String.LocalizationValue(option.quality.titleKey))
+        if let version = option.source?.versionLabel(includingSize: false), !version.isEmpty {
+            title += " · \(version)"
+        }
         let size = option.estimatedBytes.map { $0.formatted(.byteCount(style: .file)) }
             ?? String(localized: "downloads.dialog.sizeUnknown", defaultValue: "size unknown")
         return "\(title) · \(size)"
     }
 
-    private func start(_ target: DownloadTarget, quality: StreamingQuality) {
+    private func start(_ target: DownloadTarget, option: DownloadRungOption) {
         guard let manager = dependencies.downloadManager else { return }
         Task {
             do {
                 switch target {
-                case .item(let item):
-                    try await manager.enqueue(item: item, quality: quality)
+                case .item(let item, let sourceID):
+                    try await manager.enqueue(item: item, quality: option.quality, mediaSourceID: option.source?.id ?? sourceID)
                 case .season(let seriesID, let seasonID, _):
-                    try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, quality: quality)
+                    try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, quality: option.quality)
                 }
                 dependencies.beginDownloadActivity()
             } catch {
@@ -139,6 +148,8 @@ extension View {
 /// The download control of a detail page: starts, shows progress, and offers pause, retry and removal.
 struct DownloadActionButton: View {
     let item: JellyfinItem
+    /// The version the page has selected, carried into the dialog (Sodalite#200).
+    var sourceID: String? = nil
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
     @State private var showsMenu = false
@@ -153,7 +164,7 @@ struct DownloadActionButton: View {
                 progressFraction: state.progressFraction
             ) {
                 switch state {
-                case .available: target = .item(item)
+                case .available: target = .item(item, sourceID: sourceID)
                 case .paused:
                     manager.resume(itemID: item.id)
                     dependencies.beginDownloadActivity()

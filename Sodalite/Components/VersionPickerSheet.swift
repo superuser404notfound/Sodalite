@@ -32,12 +32,15 @@ extension MediaSource {
     }
 
     /// Version-row label: prefers the server's version name (Jellyfin's `MediaSource.Name`, e.g. "Directors Cut"), appends derived specs the name doesn't convey, falls back to container so a row is never blank.
-    var versionLabel: String {
+    var versionLabel: String { versionLabel(includingSize: true) }
+
+    /// The same label without the size, for a row that states the size itself (the download dialog).
+    func versionLabel(includingSize: Bool) -> String {
         var parts: [String] = []
         if let name, !name.trimmingCharacters(in: .whitespaces).isEmpty {
             parts.append(name)
         }
-        for spec in [resolutionLabel, codecLabel, sizeLabel].compactMap({ $0 }) {
+        for spec in [resolutionLabel, codecLabel, includingSize ? sizeLabel : nil].compactMap({ $0 }) {
             if !parts.contains(where: { $0.caseInsensitiveCompare(spec) == .orderedSame }) {
                 parts.append(spec)
             }

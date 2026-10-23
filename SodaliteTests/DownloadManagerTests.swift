@@ -135,6 +135,36 @@ struct DownloadManagerTests {
         #expect(transport.started.count == before)
     }
 
+    @Test func enqueueDownloadsTheChosenVersionByItsOwnID() async throws {
+        let backend = FakeDownloadBackend()
+        let (manager, store, transport) = makeManager(backend: backend)
+        try await manager.enqueue(item: movie("a"), quality: .original, mediaSourceID: "v2")
+        #expect(backend.requestedSourceIDs.first == "v2")
+        #expect(store.item("a")?.manifest.mediaSourceID == "v2")
+        #expect(transport.started.first?.request.url?.path == "/Items/v2/Download")
+    }
+
+    @Test func enqueueWithoutAChoiceTakesTheBestVersion() async throws {
+        let backend = FakeDownloadBackend()
+        let (manager, store, transport) = makeManager(backend: backend)
+        let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(#"""
+            {"Id":"a","Name":"M","Type":"Movie","RunTimeTicks":36000000000,"MediaSources":[
+            {"Id":"a","MediaStreams":[{"Index":0,"Type":"Video","Width":1920,"Height":1080}]},
+            {"Id":"uhd","MediaStreams":[{"Index":0,"Type":"Video","Width":3840,"Height":2160}]}]}
+            """#.utf8))
+        try await manager.enqueue(item: item, quality: .original)
+        #expect(store.item("a")?.manifest.mediaSourceID == "uhd")
+        #expect(transport.started.first?.request.url?.path == "/Items/uhd/Download")
+    }
+
+    @Test func enqueueOfASingleVersionKeepsTheItemPath() async throws {
+        let backend = FakeDownloadBackend()
+        let (manager, _, transport) = makeManager(backend: backend)
+        try await manager.enqueue(item: movie("a"), quality: .original)
+        #expect(backend.requestedSourceIDs.first == .some(nil))
+        #expect(transport.started.first?.request.url?.path == "/Items/a/Download")
+    }
+
     @Test func enqueueSeasonAddsEveryEpisodeOnce() async throws {
         let backend = FakeDownloadBackend()
         backend.seasonEpisodes = ["e1", "e2", "e3"]
@@ -161,7 +191,8 @@ final class FakeDownloadBackend: DownloadBackend {
         if yieldsInPlaybackInfo { try await Task.sleep(for: .milliseconds(20)) }
         if failingItemIDs.contains(itemID) { throw Refused() }
         let tc = transcodingUrl.map { #","TranscodingUrl":"\#($0)""# } ?? ""
-        let json = #"{"PlaySessionId":"ps-\#(itemID)","MediaSources":[{"Id":"src-\#(itemID)","Container":"mkv","Size":1000,"Bitrate":\#(sourceBitrate)\#(tc),"MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc"},{"Index":1,"Type":"Audio","Codec":"aac"}]}]}"#
+        requestedSourceIDs.append(mediaSourceID)
+        let json = #"{"PlaySessionId":"ps-\#(itemID)","MediaSources":[{"Id":"\#(mediaSourceID ?? "src-\(itemID)")","Container":"mkv","Size":1000,"Bitrate":\#(sourceBitrate)\#(tc),"MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc"},{"Index":1,"Type":"Audio","Codec":"aac"}]}]}"#
         return try JSONDecoder().decode(PlaybackInfoResponse.self, from: Data(json.utf8))
     }
     func itemDetail(itemID: String) async throws -> JellyfinItem {
@@ -181,6 +212,7 @@ final class FakeDownloadBackend: DownloadBackend {
     var probedDuration: Double?
     var yieldsInPlaybackInfo = false
     var failingItemIDs: Set<String> = []
+    var requestedSourceIDs: [String?] = []
     struct Refused: Error {}
     func mediaDuration(of url: URL) async -> Double? { probedDuration }
 }

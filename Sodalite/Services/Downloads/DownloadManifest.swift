@@ -41,6 +41,9 @@ struct DownloadManifest: Codable, Sendable, Equatable {
     var playSessionID: String?
     /// A transcode's token-free URL, kept so a restart after a relaunch needs no new PlaybackInfo.
     var transcodeURL: String?
+    /// A picked version's own item id, which an original downloads from in place of `itemID`
+    /// (Sodalite#200). Nil for a single-version item and for every manifest written before.
+    var versionID: String?
     var mediaFileName: String?
     /// Stream index to sidecar file name inside the item directory.
     var subtitleFiles: [Int: String] = [:]

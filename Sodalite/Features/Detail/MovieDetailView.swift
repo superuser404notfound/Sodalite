@@ -774,7 +774,7 @@ struct MovieDetailView: View {
 
             #if os(iOS)
             if session.allowsDeleteAndDownload {
-                DownloadActionButton(item: vm.item, target: $downloadTarget)
+                DownloadActionButton(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item), target: $downloadTarget)
             }
             #endif
 

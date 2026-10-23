@@ -38,11 +38,16 @@ enum DownloadPlanner {
                         mediaFileExtension: "mp4")
         }
 
-        let url = baseURL.appendingPathComponent("Items").appendingPathComponent(itemID).appendingPathComponent("Download")
-        return Plan(route: .original, url: url, expectedBytes: source.size,
+        return Plan(route: .original, url: originalURL(itemID: itemID, baseURL: baseURL), expectedBytes: source.size,
                     sidecarStreams: streams.filter { isText($0) && $0.isExternal == true },
                     localSource: source,
                     mediaFileExtension: fileExtension(forContainer: source.container))
+    }
+
+    /// A second version is an item of its own, and `Items/{id}/Download` serves only that item's own
+    /// file, so a picked version is asked for by its id (Sodalite#200).
+    static func originalURL(itemID: String, baseURL: URL) -> URL {
+        baseURL.appendingPathComponent("Items").appendingPathComponent(itemID).appendingPathComponent("Download")
     }
 
     static func estimatedBytes(quality: StreamingQuality, sourceBitrate: Int?, sourceSize: Int64?,
