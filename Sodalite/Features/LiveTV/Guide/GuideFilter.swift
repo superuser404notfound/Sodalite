@@ -1,16 +1,18 @@
 import Foundation
 
-/// Server-side channel filters for the guide. Channel search is deliberately not part of this:
-/// Jellyfin cannot filter channels by name, so search stays client-side in `GuideViewModel`.
+/// The guide's channel filters. Only favourites go to the server: Jellyfin drops `Type` on
+/// `/LiveTv/Channels` and answers the category flags from channel tags no channel carries (#201),
+/// so kind is narrowed on the client and a category through the programs airing now.
 struct GuideFilter: Equatable, Sendable {
 
-    /// Category chips. Jellyfin applies these to the channel's CURRENT program, not to a channel
-    /// genre, which is why activating one snaps the axis back to "now" (see `GuideViewModel`).
+    /// Category chips: channels whose CURRENT program carries the flag, which is why activating one
+    /// snaps the axis back to "now" (see `GuideViewModel`). Resolved by `GuideCategoryController`.
     enum Category: String, CaseIterable, Identifiable, Sendable {
         case sports, kids, news, movies
 
         var id: String { rawValue }
 
+        /// The program flag. Jellyfin applies these correctly to `/LiveTv/Programs` only.
         var queryName: String {
             switch self {
             case .sports: "IsSports"
@@ -29,8 +31,8 @@ struct GuideFilter: Equatable, Sendable {
 
     var favoritesOnly = false
     var category: Category?
-    /// nil means no `Type` parameter at all. The guide always sends one; the Live TV tab gate does
-    /// not, because a radio-only server still has Live TV and must not be gated out of the tab.
+    /// nil admits every kind. The guide always narrows to one; the Live TV tab gate does not,
+    /// because a radio-only server still has Live TV and must not be gated out of the tab.
     var kind: ChannelKind? = .tv
 
     static let `default` = GuideFilter()
@@ -39,12 +41,13 @@ struct GuideFilter: Equatable, Sendable {
 
     var isDefault: Bool { self == .default }
 
+    /// What the server is asked for. Two filters with equal items share one fetched channel list.
     var queryItems: [URLQueryItem] {
-        var items: [URLQueryItem] = []
-        if let kind { items.append(URLQueryItem(name: "Type", value: kind.rawValue)) }
-        if favoritesOnly { items.append(URLQueryItem(name: "IsFavorite", value: "true")) }
-        if let category { items.append(URLQueryItem(name: category.queryName, value: "true")) }
-        return items
+        favoritesOnly ? [URLQueryItem(name: "IsFavorite", value: "true")] : []
+    }
+
+    func admits(kindOf channel: JellyfinChannel) -> Bool {
+        kind.map { channel.kind == $0 } ?? true
     }
 }
 

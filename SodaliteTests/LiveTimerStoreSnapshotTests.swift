@@ -51,7 +51,7 @@ private final class EmptyTimerService: JellyfinLiveTvServiceProtocol, @unchecked
     func getPrograms(channelIDs: [String], userID: String, start: Date, end: Date) async throws -> [JellyfinProgram] { [] }
     func getGuideInfo() async throws -> JellyfinGuideInfo { JellyfinGuideInfo(startDate: nil, endDate: nil) }
     func getRecommendedPrograms(userID: String, category: LiveProgramCategory, limit: Int) async throws -> [JellyfinProgram] { [] }
-    func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?, cap: Int) async throws -> [JellyfinProgram] { [] }
+    func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?, category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram] { [] }
     func setFavorite(userID: String, channelID: String, isFavorite: Bool) async throws {}
     func getRecordings(userID: String, isInProgress: Bool?) async throws -> [JellyfinItem] { [] }
     func getTimers() async throws -> [LiveTvTimer] { [] }

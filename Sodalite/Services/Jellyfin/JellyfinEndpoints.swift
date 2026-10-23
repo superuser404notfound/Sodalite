@@ -85,8 +85,9 @@ enum JellyfinEndpoint: APIEndpoint {
     // Live TV
     case liveTvChannels(userID: String, startIndex: Int, limit: Int, filter: GuideFilter)
     case liveTvPrograms(channelIDs: [String], userID: String, minEndDate: Date, maxStartDate: Date)
-    /// Programs across the whole line-up, slim (no images): the guide's genre list and genre matches (#182).
-    case liveTvProgramIndex(userID: String, window: GuideProgramWindow, genres: String?, startIndex: Int, limit: Int)
+    /// Programs across the whole line-up, slim (no images): the guide's genre list, genre matches (#182) and category matches (#201).
+    case liveTvProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
+                            category: GuideFilter.Category?, startIndex: Int, limit: Int)
     case liveTvRecommendedPrograms(userID: String, category: LiveProgramCategory, limit: Int)
     case liveTvGuideInfo
     case closeLiveStream(liveStreamID: String)
@@ -435,7 +436,7 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "Fields", value: "Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle,Genres"),
             ]
 
-        case .liveTvProgramIndex(let userID, let window, let genres, let startIndex, let limit):
+        case .liveTvProgramIndex(let userID, let window, let genres, let category, let startIndex, let limit):
             var items = [
                 URLQueryItem(name: "UserId", value: userID),
                 URLQueryItem(name: "StartIndex", value: String(startIndex)),
@@ -456,6 +457,7 @@ enum JellyfinEndpoint: APIEndpoint {
                 items.append(URLQueryItem(name: "MaxStartDate", value: iso.string(from: end)))
             }
             if let genres { items.append(URLQueryItem(name: "Genres", value: genres)) }
+            if let category { items.append(URLQueryItem(name: category.queryName, value: "true")) }
             return items
 
         case .liveTvRecommendedPrograms(let userID, let category, let limit):

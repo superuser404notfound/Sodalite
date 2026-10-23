@@ -79,7 +79,7 @@ struct ChannelListView: View {
                         .listRowBackground(Color.clear)
                 }
                 if model.channels.isEmpty {
-                    if model.genres.isResolving {
+                    if model.genres.isResolving || model.categories.isResolving {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color.clear)

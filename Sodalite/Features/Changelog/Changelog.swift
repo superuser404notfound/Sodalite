@@ -202,6 +202,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.guideChips.title",
+                    "changelog.1_1_0.guideChips.body",
+                    icon: "line.3.horizontal.decrease.circle"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.sparsePolicy.title",
                     "changelog.1_1_0.sparsePolicy.body",
                     icon: "person.badge.key"

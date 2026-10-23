@@ -5,9 +5,9 @@ protocol JellyfinLiveTvServiceProtocol: Sendable {
                      filter: GuideFilter) async throws -> LiveTvChannelsResponse
     func getPrograms(channelIDs: [String], userID: String, start: Date, end: Date) async throws -> [JellyfinProgram]
     /// Programs across the whole line-up in `window`, narrowed to `genres` (Jellyfin's pipe-delimited
-    /// OR) when given. Paged internally up to `cap`.
+    /// OR) and to `category`'s program flag when given. Paged internally up to `cap`.
     func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
-                         cap: Int) async throws -> [JellyfinProgram]
+                         category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram]
     func getGuideInfo() async throws -> JellyfinGuideInfo
     /// Channels are BaseItemDto, so favorite reuses the generic FavoriteItems endpoint.
     func setFavorite(userID: String, channelID: String, isFavorite: Bool) async throws
@@ -51,13 +51,13 @@ final class JellyfinLiveTvService: JellyfinLiveTvServiceProtocol {
     }
 
     func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
-                         cap: Int) async throws -> [JellyfinProgram] {
+                         category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram] {
         let pageSize = 500
         var collected: [JellyfinProgram] = []
         while collected.count < cap {
             let response: LiveTvProgramsResponse = try await client.request(
                 endpoint: JellyfinEndpoint.liveTvProgramIndex(
-                    userID: userID, window: window, genres: genres,
+                    userID: userID, window: window, genres: genres, category: category,
                     startIndex: collected.count, limit: pageSize),
                 responseType: LiveTvProgramsResponse.self,
                 decoder: .jellyfinLiveTv

@@ -11,6 +11,7 @@ final class ChannelListViewModel {
     private(set) var programsByChannel: [String: [JellyfinProgram]] = [:]
     var isLoading: Bool { fetchingGeneration != nil }
     private(set) var loadError: String?
+    /// Latched, see GuideViewModel.hasRadioChannels.
     private(set) var hasRadioChannels = false
     private(set) var filter: GuideFilter = .default
     private(set) var searchText = ""
@@ -18,6 +19,8 @@ final class ChannelListViewModel {
     let timers: LiveTimerStore
     /// Genre narrowing (#182), shared with the guide grid.
     let genres: GuideGenreController
+    /// Category narrowing (#201), shared with the guide grid.
+    let categories: GuideCategoryController
 
     private let service: JellyfinLiveTvServiceProtocol
     private let userID: String
@@ -36,8 +39,10 @@ final class ChannelListViewModel {
         self.userID = userID
         self.timers = timers
         self.genres = GuideGenreController(service: service, userID: userID)
+        self.categories = GuideCategoryController(service: service, userID: userID)
         genres.guideWindow = { [unowned self] in (windowStart, windowEnd) }
         genres.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
+        categories.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
     }
 
     /// The two days the schedule sheet offers, matching the grid's axis.
@@ -50,7 +55,6 @@ final class ChannelListViewModel {
     func load() async {
         guard !didLoad else { return }
         didLoad = true
-        await probeRadio()
         await fetchChannels()
     }
 
@@ -61,8 +65,9 @@ final class ChannelListViewModel {
     func refresh() async {
         loadGeneration += 1
         fetchedChannels = []
-        // A "now" genre match is as old as the moment it was made.
+        // A "now" genre or category match is as old as the moment it was made.
         genres.invalidate()
+        categories.invalidate()
         await fetchChannels()
     }
 
@@ -78,23 +83,24 @@ final class ChannelListViewModel {
         }
     }
 
-    private func probeRadio() async {
-        var probe = GuideFilter.default
-        probe.kind = .radio
-        let response = try? await service.getChannels(
-            userID: userID, startIndex: 0, limit: 1, filter: probe)
-        hasRadioChannels = !(response?.items.isEmpty ?? true)
-    }
-
+    /// See GuideViewModel.apply(filter:).
     func apply(filter newFilter: GuideFilter) async {
         guard newFilter != filter else { return }
+        let refetch = newFilter.queryItems != filter.queryItems
         filter = newFilter
+        guard refetch else {
+            recomputeVisibleChannels()
+            await categories.apply(newFilter.category)
+            return
+        }
         loadGeneration += 1
         fetchedChannels = []
         channels = []
         programsByChannel = [:]
         requestedProgramChannelIDs = []
+        async let resolved: Void = categories.apply(newFilter.category)
         await fetchChannels()
+        await resolved
     }
 
     func apply(searchText newValue: String) {
@@ -117,6 +123,7 @@ final class ChannelListViewModel {
                 guard generation == loadGeneration else { return }
                 fetchedChannels.append(contentsOf: response.items)
                 timers.seedFavorites(from: response.items)
+                if response.items.contains(where: { $0.kind == .radio }) { hasRadioChannels = true }
                 startIndex += response.items.count
                 if response.items.count < GuideViewModel.pageSize { complete = true }
                 loadError = nil
@@ -132,7 +139,7 @@ final class ChannelListViewModel {
     private func recomputeVisibleChannels() {
         let query = searchText
         channels = fetchedChannels.filter { channel in
-            genres.admits(channel)
+            filter.admits(kindOf: channel) && categories.admits(channel) && genres.admits(channel)
                 && (query.isEmpty || GuideViewModel.matches(channel: channel, query: query))
         }
     }
