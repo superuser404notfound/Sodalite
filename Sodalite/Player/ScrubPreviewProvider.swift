@@ -37,10 +37,6 @@ final class ScrubPreviewProvider {
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var generation = 0
 
-    // Last warmed source seconds, throttles re-extraction to ~keyframe spacing.
-    @ObservationIgnored private var lastWarmedSeconds = -Double.infinity
-    @ObservationIgnored private let warmThresholdSeconds: Double = 2
-
     init() {}
 
     /// Set up for a new session. `enabled` = Settings toggle (false = no-op);
@@ -143,27 +139,8 @@ final class ScrubPreviewProvider {
         }
     }
 
-    /// Keep one frame warm at the current playback position so the first scrub
-    /// frame is on screen instantly (card is gated on isScrubbing, so invisible
-    /// during playback). Driven from currentTime while not scrubbing; throttled
-    /// to ~keyframe spacing; shares the `generation` guard with update(fraction:).
-    func warm(toSeconds seconds: Double) {
-        guard enabled, seconds >= 0,
-              (extractor != nil || cacheThumbnail != nil || serverThumbnail != nil || viewPreview != nil) else { return }
-        guard abs(seconds - lastWarmedSeconds) >= warmThresholdSeconds else { return }
-        lastWarmedSeconds = seconds
-
-        generation += 1
-        let gen = generation
-        loadTask?.cancel()
-        loadTask = Task { [weak self] in
-            guard let self else { return }
-            await self.resolveAndPublish(seconds: seconds, gen: gen)
-        }
-    }
-
     /// Cancel any pending scrub load (commit/cancel/idle-hide). Intentionally
-    /// KEEPS `previewImage` so the warm seed survives for the next scrub;
+    /// KEEPS `previewImage` so the next scrub opens on a picture;
     /// reset() drops it at session teardown.
     func clear() {
         loadTask?.cancel()
@@ -187,6 +164,5 @@ final class ScrubPreviewProvider {
         liveThumbnail = nil
         serverThumbnail = nil
         enabled = false
-        lastWarmedSeconds = -Double.infinity
     }
 }

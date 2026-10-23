@@ -297,6 +297,12 @@ enum Changelog {
                     icon: "star"
                 ),
                 ChangelogHighlight(
+                    .fix,
+                    "changelog.1_1_0.scrubPreviewPlayback.title",
+                    "changelog.1_1_0.scrubPreviewPlayback.body",
+                    icon: "appletv"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.dvScrubPreview.title",
                     "changelog.1_1_0.dvScrubPreview.body",
