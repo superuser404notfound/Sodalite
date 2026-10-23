@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Picks the live URL for a server, and says whether it answered.
 ///
@@ -131,12 +132,46 @@ enum ServerProbe {
     /// A server stored without an id (discovery tolerates one) has nothing to compare against.
     static func jellyfin(_ base: URL, expectedServerID: String) async -> Bool {
         guard !expectedServerID.isEmpty else { return await jellyfin(base) }
-        async let ready = jellyfin(base)
-        guard let (data, response) = await fetch(base.appending(path: "System/Info/Public")),
-              (200...299).contains(response.statusCode),
-              identifies(data, as: expectedServerID)
-        else { return false }
-        return await ready
+        async let ready = outcome(at: base.appending(path: jellyfinReadinessPath))
+        let failure: String?
+        switch await outcome(at: base.appending(path: "System/Info/Public")) {
+        case .failed(let reason):
+            failure = "System/Info/Public \(reason)"
+        case .answered(_, let response) where !(200...299).contains(response.statusCode):
+            failure = "System/Info/Public HTTP \(response.statusCode)"
+        case .answered(let data, _) where !identifies(data, as: expectedServerID):
+            failure = "answers as server \(answeredID(data)), session expects \(expectedServerID.prefix(8))"
+        case .answered:
+            switch await ready {
+            case .failed(let reason): failure = "\(jellyfinReadinessPath) \(reason)"
+            case .answered(_, let response) where !answers(statusCode: response.statusCode):
+                failure = "\(jellyfinReadinessPath) HTTP \(response.statusCode)"
+            case .answered: failure = nil
+            }
+        }
+        noteProbeFailure(failure, host: base.host() ?? "?")
+        return failure == nil
+    }
+
+    /// Why the last identity probe of each host failed, so a failure that keeps repeating is logged
+    /// once (Sodalite#199). The verdict line names only the host, and a working server that the
+    /// strip calls unreachable leaves three suspects that look the same from outside: an identity
+    /// that does not match, a readiness endpoint answering 5xx, and the two second cap.
+    private static let lastFailures = OSAllocatedUnfairLock(initialState: [String: String]())
+
+    private static func noteProbeFailure(_ failure: String?, host: String) {
+        let isNew = lastFailures.withLock { failures in
+            defer { failures[host] = failure }
+            return failure != nil && failures[host] != failure
+        }
+        if isNew, let failure {
+            LogTap.shared.note("[network] probe of \(host) failed: \(failure)")
+        }
+    }
+
+    private static func answeredID(_ body: Data) -> String {
+        let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
+        return (object?["Id"] as? String).map { String($0.prefix(8)) } ?? "(no Id)"
     }
 
     /// Whether a `System/Info/Public` body names this server. Jellyfin writes the id as 32 hex
@@ -162,6 +197,17 @@ enum ServerProbe {
     }
 
     private static func fetch(_ url: URL) async -> (Data, HTTPURLResponse)? {
+        guard case .answered(let data, let response) = await outcome(at: url) else { return nil }
+        return (data, response)
+    }
+
+    /// Not an `Error`: the reason is a log line, never a viewer's.
+    private enum ProbeOutcome {
+        case answered(Data, HTTPURLResponse)
+        case failed(String)
+    }
+
+    private static func outcome(at url: URL) async -> ProbeOutcome {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
         config.timeoutIntervalForResource = timeout
@@ -169,10 +215,17 @@ enum ServerProbe {
         let session = URLSession(
             configuration: config, delegate: ServerTrustDelegate.shared, delegateQueue: nil)
         defer { session.invalidateAndCancel() }
-        guard let (data, response) = try? await session.data(from: url),
-              let http = response as? HTTPURLResponse
-        else { return nil }
-        return (data, http)
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard let http = response as? HTTPURLResponse else {
+                return .failed("no HTTP response")
+            }
+            return .answered(data, http)
+        } catch let error as URLError {
+            return .failed("no answer (URLError \(error.code.rawValue))")
+        } catch {
+            return .failed("no answer (\(type(of: error)))")
+        }
     }
 }
 
