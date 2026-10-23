@@ -1157,7 +1157,7 @@ struct SeriesDetailView: View {
 
                 #if os(iOS)
                 if session.allowsDeleteAndDownload {
-                    DownloadActionButton(item: ep, target: $downloadTarget)
+                    DownloadActionButton(item: ep, sourceID: versionSelection.preferredSourceID(for: ep), target: $downloadTarget)
                 }
                 #endif
             }
@@ -1377,7 +1377,7 @@ struct SeriesDetailView: View {
             }
             if dependencies.downloadStore.item(episode.id) == nil {
                 Button {
-                    downloadTarget = .item(episode)
+                    downloadTarget = .item(episode, sourceID: versionSelection.preferredSourceID(for: episode))
                 } label: {
                     Label("downloads.action.download", systemImage: "arrow.down.circle")
                 }

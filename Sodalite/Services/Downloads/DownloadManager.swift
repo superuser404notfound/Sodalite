@@ -73,12 +73,15 @@ final class DownloadManager {
 
     // MARK: Enqueue
 
-    func enqueue(item: JellyfinItem, quality: StreamingQuality) async throws {
+    /// `mediaSourceID` is the version to download; nil takes the one the detail page shows by
+    /// default, not whichever the server lists first (Sodalite#200).
+    func enqueue(item: JellyfinItem, quality: StreamingQuality, mediaSourceID: String? = nil) async throws {
         guard store.item(item.id) == nil else { return }
         guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
 
-        let probe = try await backend.playbackInfo(itemID: item.id, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: quality.maxStreamingBitrate), mediaSourceID: nil, audioStreamIndex: nil)
-        guard let first = probe.mediaSources.first else { throw DownloadEnqueueError.noSource }
+        let versionID = mediaSourceID ?? VersionSelection().preferredSourceID(for: item)
+        let probe = try await backend.playbackInfo(itemID: item.id, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: quality.maxStreamingBitrate), mediaSourceID: versionID, audioStreamIndex: nil)
+        guard let first = probe.mediaSources.first(where: { $0.id == versionID }) ?? probe.mediaSources.first else { throw DownloadEnqueueError.noSource }
         let audio = DownloadPlanner.audioStreamIndex(preferredLanguage: backend.preferredAudioLanguage, streams: first.mediaStreams ?? [])
         // Ask again pinned to the audio track when a transcode is going to happen: Jellyfin only
         // applies AudioStreamIndex when the request names the source (MediaInfoHelper), and the
@@ -86,7 +89,7 @@ final class DownloadManager {
         let info = quality.bites(sourceBitrate: first.bitrate)
             ? try await backend.playbackInfo(itemID: item.id, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: quality.maxStreamingBitrate), mediaSourceID: first.id, audioStreamIndex: audio)
             : probe
-        guard let source = info.mediaSources.first else { throw DownloadEnqueueError.noSource }
+        guard let source = info.mediaSources.first(where: { $0.id == first.id }) ?? info.mediaSources.first else { throw DownloadEnqueueError.noSource }
 
         let detail = (try? await backend.itemDetail(itemID: item.id)) ?? item
         let plan = DownloadPlanner.plan(itemID: item.id, source: source, quality: quality, runtimeTicks: detail.runTimeTicks,
@@ -111,6 +114,7 @@ final class DownloadManager {
                                         playSessionID: info.playSessionId, state: .queued, createdAt: Date())
         manifest.expectedBytes = plan.expectedBytes
         manifest.transcodeURL = plan.route == .transcode ? plan.url.absoluteString : nil
+        manifest.versionID = versionID == nil ? nil : source.id
         manifest.progress.positionTicks = detail.userData?.playbackPositionTicks ?? 0
         manifest.progress.played = detail.userData?.played ?? false
         manifest.progress.lastPlayed = JellyfinDate.parse(detail.userData?.lastPlayedDate)
@@ -302,7 +306,7 @@ final class DownloadManager {
         let url: URL
         switch item.manifest.route {
         case .original:
-            url = baseURL.appendingPathComponent("Items").appendingPathComponent(itemID).appendingPathComponent("Download")
+            url = DownloadPlanner.originalURL(itemID: item.manifest.versionID ?? itemID, baseURL: baseURL)
         case .transcode:
             // Rebuilt from the stored PlaySession: a running encode serves no ranges, so an
             // interrupted transcode always starts over. PlaybackInfo is asked again lazily only if
