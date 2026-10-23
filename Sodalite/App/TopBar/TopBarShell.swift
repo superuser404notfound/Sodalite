@@ -27,7 +27,8 @@ struct TopBarShell<Content: View>: View {
     /// Per tab, because each page asks for itself: a detail left open in one tab must not hide the
     /// bar over another.
     @State private var chromeHidden: [ShellTab: Bool] = [:]
-    @State private var scrollOffsets: [ShellTab: CGFloat] = [:]
+    /// Not `@State` values: a scroll writes here every frame, and only the bar may redraw for it.
+    @State private var ride = ShellBarRide()
     /// Bumped per tab when Menu brings the viewer up to the bar, which the page answers by
     /// scrolling to its top (see `drivesShellBar`).
     @State private var scrollToTopRequests: [ShellTab: Int] = [:]
@@ -38,13 +39,6 @@ struct TopBarShell<Content: View>: View {
         SidebarExitPolicy.next(focusIsInRail: focusIsInBar, selectedTab: selectedTab)
     }
 
-    /// How far the scroll has carried the bar up. A focused bar is always fully down: Menu from a
-    /// scrolled page brings the viewer to it, and it has to be there to be seen.
-    private var barLift: CGFloat {
-        guard !focusIsInBar else { return 0 }
-        return min(max(scrollOffsets[selectedTab] ?? 0, 0), TopBarMetrics.travel)
-    }
-
     var body: some View {
         ZStack(alignment: .top) {
             ForEach(tabs.filter { builtTabs.contains($0) || $0 == selectedTab }, id: \.self) { tab in
@@ -53,9 +47,10 @@ struct TopBarShell<Content: View>: View {
         }
         .focusSectionCompat()
         .overlay(alignment: .top) {
-            bar
+            RidingBar(ride: ride, tab: selectedTab, isDown: focusIsInBar, isHidden: selectedHidesChrome) {
+                bar
+            }
                 .padding(.top, TopBarMetrics.barTop)
-                .offset(y: selectedHidesChrome ? -TopBarMetrics.travel : -barLift)
                 .opacity(selectedHidesChrome ? 0 : 1)
                 .disabled(selectedHidesChrome)
                 .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: selectedHidesChrome)
@@ -101,9 +96,7 @@ struct TopBarShell<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // The room the bar takes, which the page's ROOT claims (see `reservesShellBar`).
             .environment(\.shellBarInset, TopBarMetrics.contentInset)
-            .environment(\.shellBarScroll, ShellBarScroll { offset in
-                scrollOffsets[tab] = offset
-            })
+            .environment(\.shellBarScroll, ShellBarScroll(ride: ride, tab: tab))
             .environment(\.shellBarScrollToTop, scrollToTopRequests[tab] ?? 0)
             .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                 chromeHidden[tab] = hidden
@@ -147,11 +140,56 @@ struct TopBarShell<Content: View>: View {
         .focusSectionCompat()
     }
 }
+
+/// The bar's ride, split from the shell so the page's scroll redraws the bar and nothing else. Read
+/// in the shell's body, every scroll frame rebuilt the shell and with it every kept page.
+private struct RidingBar<Bar: View>: View {
+    let ride: ShellBarRide
+    let tab: ShellTab
+    /// A focused bar is always fully down: Menu from a scrolled page brings the viewer to it, and it
+    /// has to be there to be seen.
+    let isDown: Bool
+    let isHidden: Bool
+    @ViewBuilder let bar: Bar
+
+    var body: some View {
+        bar.offset(y: isHidden ? -TopBarMetrics.travel : (isDown ? 0 : -ride.lift(for: tab)))
+    }
+}
 #endif
 
-/// Hands a tab's root scroll offset to the top bar, which rides up with it.
-struct ShellBarScroll {
-    let report: (CGFloat) -> Void
+/// How far each tab's root scroll has carried the top bar up, clamped to the bar's travel. Only a
+/// change inside that range is stored, so scrolling deeper than the bar can go costs nothing.
+@MainActor @Observable
+final class ShellBarRide {
+    private var lifts: [ShellTab: CGFloat] = [:]
+
+    func lift(for tab: ShellTab) -> CGFloat {
+        lifts[tab] ?? 0
+    }
+
+    func report(_ offset: CGFloat, for tab: ShellTab) {
+        let lift = min(max(offset, 0), TopBarMetrics.travel)
+        if lifts[tab] != lift {
+            lifts[tab] = lift
+        }
+    }
+}
+
+/// Hands a tab's root scroll offset to the top bar, which rides up with it. Equatable by identity,
+/// so the environment value stays the same across the shell's updates and no page redraws for it.
+struct ShellBarScroll: Equatable {
+    let ride: ShellBarRide
+    let tab: ShellTab
+
+    @MainActor
+    func report(_ offset: CGFloat) {
+        ride.report(offset, for: tab)
+    }
+
+    static func == (lhs: ShellBarScroll, rhs: ShellBarScroll) -> Bool {
+        lhs.ride === rhs.ride && lhs.tab == rhs.tab
+    }
 }
 
 extension EnvironmentValues {
@@ -213,8 +251,9 @@ private struct DrivesShellBar: ViewModifier {
         #if os(tvOS)
         content
             .scrollPosition($position)
+            // Clamped here as well, so the action stops firing once the bar is fully up.
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.contentOffset.y + geometry.contentInsets.top
+                min(max(geometry.contentOffset.y + geometry.contentInsets.top, 0), TopBarMetrics.travel)
             } action: { _, offset in
                 shellBarScroll?.report(offset)
             }
