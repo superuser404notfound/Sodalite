@@ -645,28 +645,8 @@ struct HomeView: View {
     }
 
     private func makeLibraryFilter(for library: JellyfinLibrary) -> FilterDestination {
-        // My Media tile browses one library in the shared grid; parentID scopes it, types match the library.
-        let types = MyMediaLibraries.itemTypes(for: library.libraryType)
-        // Collapsing box sets inside the box-set view is meaningless, and a virtual view takes no parentID.
-        let isVirtualView = MyMediaLibraries.isVirtualView(library.libraryType)
-        // The only grids that defer to the server's "Group movies into collections" (Sodalite#44). Note the server itself skips collapsing once the grid's watch-status filter adds IsPlayed, so Watched/Unwatched stay flat.
         let grouping = HomeRowConfig.collectionGrouping(scope: appState.profileKey?.storageScope ?? "")
-        var query = ItemQuery(
-            parentID: isVirtualView ? nil : library.id,
-            includeItemTypes: types,
-            sortBy: "SortName",
-            sortOrder: "Ascending",
-            limit: 200,
-            // A grid cell renders name/year/index/series/watched plus the poster; People,
-            // MediaStreams, MediaSources, Chapters and Trickplay were fetched, decoded and cached
-            // for every tile and never read (Sodalite#68).
-            fields: JellyfinEndpoint.homeRowFields
-        )
-        if MyMediaLibraries.browsesFolders(library.libraryType) {
-            query = MyMediaLibraries.folderQuery(parentID: library.id)
-        } else if !isVirtualView {
-            query.collapseBoxSetItems = grouping.queryValue
-        }
+        let query = MyMediaLibraries.gridQuery(for: library, grouping: grouping)
         return FilterDestination(
             title: library.name,
             query: query,

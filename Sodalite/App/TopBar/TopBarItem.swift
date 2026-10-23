@@ -3,14 +3,14 @@ import SwiftUI
 
 /// Where focus can sit inside the top bar. The content's own focus stays the content's business.
 enum TopBarFocus: Hashable {
-    case item(AppTab)
+    case item(ShellTab)
 }
 
 /// One tab in the top bar: its icon always, its title only while it is the selected tab. The title
 /// opens and closes by width, the way the player's transport pills reveal theirs, so the bar breathes
 /// instead of jumping. Each item carries its own pill and fades it, the way the transport pills do.
 struct TopBarItem: View {
-    let tab: AppTab
+    let tab: ShellTab
     let isSelected: Bool
     /// The bar holds focus, so the active item is the white focus pill rather than the resting one.
     let barIsFocused: Bool
@@ -103,7 +103,7 @@ struct TopBarItem: View {
         if tab == .profiles, let user = appState.activeUser {
             Text(verbatim: user.name)
         } else {
-            Text(tab.labelKey)
+            tab.title
         }
     }
 

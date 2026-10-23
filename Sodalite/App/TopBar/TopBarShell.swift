@@ -12,9 +12,9 @@ import SwiftUI
 ///   does not rebuild what it passes, and a page keeps its scroll and its stack;
 /// - Menu leaves the content for the bar, then the bar for Home, then the app (`SidebarExitPolicy`).
 struct TopBarShell<Content: View>: View {
-    let tabs: [AppTab]
-    @Binding var selectedTab: AppTab
-    @ViewBuilder let content: (AppTab) -> Content
+    let tabs: [ShellTab]
+    @Binding var selectedTab: ShellTab
+    @ViewBuilder let content: (ShellTab) -> Content
 
     @FocusState private var focus: TopBarFocus?
     @Environment(\.resetFocus) private var resetFocus
@@ -23,14 +23,14 @@ struct TopBarShell<Content: View>: View {
     @State private var focusIsInBar = false
     @Namespace private var shellFocus
     /// Tabs whose page exists. A page is built on its first visit, the way `TabView` built it.
-    @State private var builtTabs: Set<AppTab> = []
+    @State private var builtTabs: Set<ShellTab> = []
     /// Per tab, because each page asks for itself: a detail left open in one tab must not hide the
     /// bar over another.
-    @State private var chromeHidden: [AppTab: Bool] = [:]
-    @State private var scrollOffsets: [AppTab: CGFloat] = [:]
+    @State private var chromeHidden: [ShellTab: Bool] = [:]
+    @State private var scrollOffsets: [ShellTab: CGFloat] = [:]
     /// Bumped per tab when Menu brings the viewer up to the bar, which the page answers by
     /// scrolling to its top (see `drivesShellBar`).
-    @State private var scrollToTopRequests: [AppTab: Int] = [:]
+    @State private var scrollToTopRequests: [ShellTab: Int] = [:]
 
     private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
@@ -95,7 +95,7 @@ struct TopBarShell<Content: View>: View {
         .focusScope(shellFocus)
     }
 
-    private func page(for tab: AppTab) -> some View {
+    private func page(for tab: ShellTab) -> some View {
         let isSelected = tab == selectedTab
         return content(tab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -3,13 +3,13 @@ import SwiftUI
 
 /// Where focus can sit inside the shell. The content's own focus stays the content's business.
 enum SidebarFocus: Hashable {
-    case item(AppTab)
+    case item(ShellTab)
 }
 
 /// Sodalite#140. One rail row. Deliberately thin: every decision it could get wrong lives in
 /// `SidebarItemState` and `SidebarMetrics`, which are pinned by tests.
 struct SidebarItemRow: View {
-    let tab: AppTab
+    let tab: ShellTab
     let isSelected: Bool
     let isExpanded: Bool
     @FocusState.Binding var focus: SidebarFocus?
@@ -78,7 +78,7 @@ struct SidebarItemRow: View {
         if tab == .profiles, let user = appState.activeUser {
             Text(verbatim: user.name)
         } else {
-            Text(tab.labelKey)
+            tab.title
         }
     }
 }

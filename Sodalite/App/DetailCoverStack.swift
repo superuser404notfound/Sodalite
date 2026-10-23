@@ -77,7 +77,8 @@ final class TabPushStacks {
     private let stacks: [AppTab: DetailCoverStack] = Dictionary(
         uniqueKeysWithValues: AppTab.allCases.map { ($0, DetailCoverStack()) })
 
-    func stack(for tab: AppTab) -> DetailCoverStack { stacks[tab] ?? DetailCoverStack() }
+    /// A library tab exists only in the tvOS shell, which has no push stacks.
+    func stack(for tab: ShellTab) -> DetailCoverStack { tab.appTab.flatMap { stacks[$0] } ?? DetailCoverStack() }
 }
 
 private struct ShellChromeTopInsetKey: EnvironmentKey {

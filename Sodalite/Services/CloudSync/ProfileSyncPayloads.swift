@@ -173,6 +173,8 @@ struct ProfileAppearancePayload: Codable, Equatable {
     var showTagline: Bool?
     /// nil from a build without the episode-title veil, unapplied for the same reason.
     var spoilerHideEpisodeTitles: Bool? = nil
+    /// nil from a build without library tabs, unapplied for the same reason.
+    var pinnedLibraryTabs: [PinnedLibraryTab]? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -200,7 +202,8 @@ extension ProfileAppearancePayload {
             showCommunityRating: a.showCommunityRating,
             showCriticRating: a.showCriticRating,
             showTagline: a.showTagline,
-            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles
+            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
+            pinnedLibraryTabs: a.pinnedLibraryTabs
         )
     }
 
@@ -225,6 +228,7 @@ extension ProfileAppearancePayload {
         a.showCriticRating = showCriticRating
         if let showTagline { a.showTagline = showTagline }
         if let spoilerHideEpisodeTitles { a.spoilerHideEpisodeTitles = spoilerHideEpisodeTitles }
+        if let pinnedLibraryTabs { a.setPinnedLibraryTabs(pinnedLibraryTabs) }
     }
 }
 

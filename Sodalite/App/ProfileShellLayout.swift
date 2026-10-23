@@ -6,7 +6,7 @@ import Foundation
 /// defined destination. A switch between two profiles with the same shell rebuilds nothing and stays.
 struct ProfileShellLayout: Equatable {
     let profile: ProfileKey?
-    let tabs: [AppTab]
+    let tabs: [ShellTab]
     let style: AppearancePreferences.NavigationStyle
 
     /// Whether a profile switch pops the Settings stack. A gated screen (Parental Controls, Servers,
@@ -33,7 +33,7 @@ struct ProfileShellLayout: Equatable {
 
     /// The tab to select once a shell change is published. A switch that changed the shell lands on
     /// Home, and hiding the tab the viewer is standing on has to land somewhere that still exists.
-    static func landingTab(current: AppTab, tabs: [AppTab], landsOnHome: Bool) -> AppTab {
+    static func landingTab(current: ShellTab, tabs: [ShellTab], landsOnHome: Bool) -> ShellTab {
         landsOnHome || !tabs.contains(current) ? .home : current
     }
 

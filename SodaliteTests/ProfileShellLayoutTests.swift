@@ -6,7 +6,7 @@ struct ProfileShellLayoutTests {
     private let alice = ProfileKey(serverID: "s", userID: "alice")
     private let bob = ProfileKey(serverID: "s", userID: "bob")
 
-    private func layout(_ profile: ProfileKey?, _ tabs: [AppTab], _ style: AppearancePreferences.NavigationStyle = .topBar) -> ProfileShellLayout {
+    private func layout(_ profile: ProfileKey?, _ tabs: [ShellTab], _ style: AppearancePreferences.NavigationStyle = .topBar) -> ProfileShellLayout {
         ProfileShellLayout(profile: profile, tabs: tabs, style: style)
     }
 

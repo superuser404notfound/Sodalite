@@ -41,4 +41,13 @@ extension View {
         return self
         #endif
     }
+
+    /// `hidesShellTabBar()` where only some callers of a screen want the bar gone.
+    func hidesShellTabBar(_ hides: Bool) -> some View {
+        #if os(tvOS)
+        preference(key: ShellChromeHiddenKey.self, value: hides)
+        #else
+        self
+        #endif
+    }
 }

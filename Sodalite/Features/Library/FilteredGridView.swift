@@ -98,6 +98,9 @@ struct FilteredGridView: View {
     /// A combined Home's servers, active first; with more than one the grid pages through all of
     /// them (Sodalite#85). nil or one entry keeps the single-server path.
     let sources: [HomeSource]?
+    /// The root of a pinned library's tab (tvOS) rather than a screen opened from Home: the shell
+    /// bar stays, and there is nothing to go back to.
+    let isTabRoot: Bool
     @State private var mergedGrid = MergedGridState()
     /// A combined provider grid whose secondary dropped out this round: shown, never cached.
     @State private var combinedIncomplete = false
@@ -120,8 +123,10 @@ struct FilteredGridView: View {
         cacheScope: FilterCacheScope? = nil,
         sortScope: LibrarySortScope? = nil,
         hidesAudioPlaylists: Bool = false,
-        sources: [HomeSource]? = nil
+        sources: [HomeSource]? = nil,
+        isTabRoot: Bool = false
     ) {
+        self.isTabRoot = isTabRoot
         self.title = title
         self.query = query
         self.smartProviderID = smartProviderID
@@ -245,13 +250,15 @@ struct FilteredGridView: View {
                                 .foregroundStyle(.tertiary)
                             Text("library.empty.message")
                                 .foregroundStyle(.secondary)
-                            Button { dismiss() } label: {
-                                Text("common.back")
-                                    .font(.body)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 12)
+                            if !isTabRoot {
+                                Button { dismiss() } label: {
+                                    Text("common.back")
+                                        .font(.body)
+                                        .padding(.horizontal, 32)
+                                        .padding(.vertical, 12)
+                                }
+                                .buttonStyle(SettingsTileButtonStyle())
                             }
-                            .buttonStyle(SettingsTileButtonStyle())
                         }
                         .frame(maxWidth: .infinity, minHeight: 400)
                     } else {
@@ -355,10 +362,12 @@ struct FilteredGridView: View {
         }
         // iOS keeps the bar: the grid is pushed there, and the bar carries its way back.
         .hidesNavigationBarChrome()
-        .hidesShellTabBar()
+        .hidesShellTabBar(!isTabRoot)
+        // A tab root's pushes take the screen the way a pushed settings page does.
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item, autoPlay: selectedPlays, autoPlayFromBeginning: selectedPlaysFromBeginning)
                 .detailCoverPush()
+                .hidesShellTabBar(isTabRoot)
         }
         .navigationDestination(item: $selectedFolder) { folder in
             // The library's sort scope carries down, so one choice orders the whole tree.
@@ -371,6 +380,7 @@ struct FilteredGridView: View {
                 sortScope: sortScope
             )
             .detailCoverPush()
+            .hidesShellTabBar(isTabRoot)
         }
         .menuPresentation(isPresented: $showSortSheet) {
             LibrarySortSheet(

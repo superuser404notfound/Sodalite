@@ -71,6 +71,7 @@ final class AppearancePreferences {
         static let hiddenTabs = "appearance.hiddenTabs"
         static let hiddenTabsFromNewerBuilds = "appearance.hiddenTabs.newerBuilds"
         static let navigationStyle = "appearance.navigationStyle"
+        static let pinnedLibraryTabs = "appearance.pinnedLibraryTabs"
         static let showPosterBadges = "appearance.showPosterBadges"
         static let showDetailBadges = "appearance.showDetailBadges"
         static let showLibraryNames = "appearance.showLibraryNames"
@@ -205,6 +206,18 @@ final class AppearancePreferences {
         didSet { store.set(navigationStyle.rawValue, forKey: Keys.navigationStyle) }
     }
 
+    /// Libraries pinned as tabs of their own, in bar order. Read only by the tvOS shell, and
+    /// committed by the settings screen on the way out for the same reason as `navigationStyle`.
+    var pinnedLibraryTabs: [PinnedLibraryTab] {
+        didSet { store.set(try? JSONEncoder().encode(pinnedLibraryTabs), forKey: Keys.pinnedLibraryTabs) }
+    }
+
+    /// One assignment, and none for an unchanged list, so a commit rebuilds the bar at most once.
+    func setPinnedLibraryTabs(_ tabs: [PinnedLibraryTab]) {
+        guard tabs != pinnedLibraryTabs else { return }
+        pinnedLibraryTabs = tabs
+    }
+
     var cardScale: CGFloat {
         largeCards ? Self.largeCardScale : 1.0
     }
@@ -292,6 +305,8 @@ final class AppearancePreferences {
         self.showTagline = store.object(forKey: Keys.showTagline) as? Bool ?? true
         self.navigationStyle = store.string(forKey: Keys.navigationStyle)
             .flatMap(NavigationStyle.init(rawValue:)) ?? .topBar
+        self.pinnedLibraryTabs = (store.object(forKey: Keys.pinnedLibraryTabs) as? Data)
+            .flatMap { try? JSONDecoder().decode([PinnedLibraryTab].self, from: $0) } ?? []
         let storedTabs = store.array(forKey: Keys.hiddenTabs) as? [String] ?? []
         // A tab a newer build hid that this build has since learned: it joins the known ones, or it
         // would show here while still being published as hidden. Written straight to the defaults,

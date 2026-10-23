@@ -15,9 +15,9 @@ import SwiftUI
 /// `UIFocusSystem.requestFocusUpdate(to:)`, which ignores an item outside the focused environment
 /// (all measured in the tvOS 26 simulator).
 struct SidebarShell<Content: View>: View {
-    let tabs: [AppTab]
-    @Binding var selectedTab: AppTab
-    @ViewBuilder let content: (AppTab) -> Content
+    let tabs: [ShellTab]
+    @Binding var selectedTab: ShellTab
+    @ViewBuilder let content: (ShellTab) -> Content
 
     @FocusState private var focus: SidebarFocus?
     @Environment(\.resetFocus) private var resetFocus
@@ -40,9 +40,9 @@ struct SidebarShell<Content: View>: View {
     /// different branch: that rebuilds the content and the pushed screen's own stack goes with it.
     /// Per tab, because pages are kept: a detail left open in one tab must not hide the rail over
     /// another.
-    @State private var chromeHidden: [AppTab: Bool] = [:]
+    @State private var chromeHidden: [ShellTab: Bool] = [:]
     /// Tabs whose page exists. A page is built on its first visit.
-    @State private var builtTabs: Set<AppTab> = []
+    @State private var builtTabs: Set<ShellTab> = []
 
     private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
@@ -60,7 +60,7 @@ struct SidebarShell<Content: View>: View {
     /// Tabs whose page runs full width under the rail and insets its own content by the slot
     /// (`shellLeadingSlot`): Home, whose banner art fills the screen. Placed beside the rail instead,
     /// the art was cut at the slot, by the tab's NavigationStack, which on tvOS is UIKit and clips.
-    static var fullBleedTabs: Set<AppTab> { [.home] }
+    static var fullBleedTabs: Set<ShellTab> { [.home] }
 
     private var exitOutcome: SidebarExitPolicy.Outcome {
         SidebarExitPolicy.next(focusIsInRail: focusIsInRail, selectedTab: selectedTab)
@@ -147,7 +147,7 @@ struct SidebarShell<Content: View>: View {
         .focusScope(shellFocus)
     }
 
-    private func page(for tab: AppTab) -> some View {
+    private func page(for tab: ShellTab) -> some View {
         let isSelected = tab == selectedTab
         let isFullBleed = Self.fullBleedTabs.contains(tab)
         return HStack(spacing: 0) {
