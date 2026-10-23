@@ -95,6 +95,9 @@ extension HomeViewModel {
                 let response = try await source.libraryService.getNextUp(userID: source.userID, seriesID: nil, limit: 16, rewatching: rewatching)
                 items = DroppedSeriesStore.filter(response.items, serverID: source.serverID, scope: homeScope)
 
+            case .upcoming:
+                items = try await loadUpcoming(source: source)
+
             case .latestMovies:
                 // Native /Items/Latest for web-UI parity. ParentId omitted so multiple movie libraries all surface, which makes IncludeItemTypes=Movie mandatory (else Jellyfin jumbles movies/series/music into one row).
                 items = try await source.libraryService.getLatestMedia(

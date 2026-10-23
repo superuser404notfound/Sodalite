@@ -92,7 +92,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     }
 
     /// TMDB id (correlates with Seerr). Key is case-sensitive ("Tmdb"); older scanners wrote "tmdb", so check both.
-    var tmdbID: Int? {
+    nonisolated var tmdbID: Int? {
         guard let ids = providerIds else { return nil }
         let raw = ids["Tmdb"] ?? ids["tmdb"] ?? ids["TMDB"]
         return raw.flatMap(Int.init)
@@ -244,6 +244,56 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         self.artists = nil
         self.albumId = nil
         self.albumPrimaryImageTag = nil
+    }
+
+    /// An announced episode the library does not list, built from Seerr's `nextEpisodeToAir` for the
+    /// Upcoming row (Sodalite#198). Virtual like the server's own unaired entries, so nothing tries
+    /// to play it, and it carries the series' artwork tags because it has none of its own. The id is
+    /// namespaced under the series so it can never collide with a real item.
+    nonisolated init(upcomingEpisodeOf series: JellyfinItem, seasonNumber: Int?, episodeNumber: Int, name: String?, airDate: String) {
+        self.id = "upcoming:\(series.id):\(seasonNumber ?? 0):\(episodeNumber)"
+        self.name = name ?? ""
+        self.sortName = nil
+        self.originalTitle = nil
+        self.overview = nil
+        self.type = .episode
+        self.seriesName = series.name
+        self.seriesId = series.id
+        self.seasonId = nil
+        self.parentIndexNumber = seasonNumber
+        self.indexNumber = episodeNumber
+        self.productionYear = nil
+        self.communityRating = nil
+        self.criticRating = nil
+        self.officialRating = nil
+        self.runTimeTicks = nil
+        self.premiereDate = airDate
+        self.endDate = nil
+        self.status = nil
+        self.genres = nil
+        self.taglines = nil
+        self.imageTags = nil
+        self.backdropImageTags = nil
+        self.parentBackdropImageTags = series.backdropImageTags
+        self.userData = nil
+        self.mediaStreams = nil
+        self.mediaSources = nil
+        self.people = nil
+        self.studios = nil
+        self.collectionType = nil
+        self.childCount = nil
+        self.localTrailerCount = nil
+        self.specialFeatureCount = nil
+        self.seriesPrimaryImageTag = series.imageTags?.primary
+        self.providerIds = nil
+        self.chapters = nil
+        self.trickplay = nil
+        self.albumArtist = nil
+        self.artists = nil
+        self.albumId = nil
+        self.albumPrimaryImageTag = nil
+        self.locationType = "Virtual"
+        self.serverID = series.serverID
     }
 
     /// Live-channel item so PlayerViewModel works unchanged for live playback; display name prefers the current program's title.

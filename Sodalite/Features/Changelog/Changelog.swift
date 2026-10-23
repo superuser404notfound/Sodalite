@@ -338,6 +338,12 @@ enum Changelog {
                     "changelog.1_1_0.silverAccent.body",
                     icon: "paintpalette.fill"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.upcomingRow.title",
+                    "changelog.1_1_0.upcomingRow.body",
+                    icon: "calendar.badge.plus"
+                ),
             ]
         ),
         // MARK: 1.0.0

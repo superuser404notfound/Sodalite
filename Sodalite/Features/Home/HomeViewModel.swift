@@ -62,6 +62,11 @@ final class HomeViewModel {
     var pendingUnreachable: [String] = []
     /// Called with the server id of a secondary that refused its token.
     var onUnauthorized: ((String) -> Void)?
+    /// Seerr's next announced episode for a TMDB id, nil without a Seerr session. The Upcoming row's
+    /// fallback for shows the library lists nothing ahead for (Sodalite#198).
+    var nextAiringLookup: (@Sendable (Int) async throws -> SeerrEpisode?)?
+    /// Answers from `nextAiringLookup`, so a refetch of Home does not ask Seerr about every show again.
+    var nextAiringCache: [Int: HomeUpcoming.CachedAiring] = [:]
     /// The home feed's cache slot: the profile's own with one source, a combined one otherwise.
     var feedIdentity: CacheIdentity {
         sources.count > 1 ? Self.combinedIdentity(for: sources, userID: userID) : cacheIdentity
@@ -578,6 +583,11 @@ final class HomeViewModel {
         cwImage: AppearancePreferences.ContinueWatchingImage = .still,
         spoilerSafe: Bool = false
     ) -> URL? {
+        if rowType == .upcoming {
+            // Show art only: a Seerr entry has no image of its own, and a library one's still would
+            // be the one picture of an unseen episode on the page.
+            return imageService.seriesArtworkURL(for: item)
+        }
         guard rowType.usesBackdrop else {
             return imageService.posterURL(for: item)
         }

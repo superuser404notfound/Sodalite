@@ -83259,6 +83259,328 @@
         }
       }
     },
+    "changelog.1_1_0.upcomingRow.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nový řádek na domovské obrazovce ukazuje, kdy vyjde další díl seriálu, který máte dokoukaný, ze serveru nebo ze Seerru. Zapněte ho v Úpravách domovské obrazovky."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny række på Hjem viser, hvornår næste afsnit af en serie, du er ajour med, sendes, fra din server eller fra Seerr. Slå den til under Tilpas Hjem."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine neue Home-Reihe zeigt, wann die nächste Folge einer Serie erscheint, bei der du auf dem aktuellen Stand bist, vom Server oder aus Seerr. Einschalten unter Home anpassen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια νέα σειρά στην Αρχική δείχνει πότε προβάλλεται το επόμενο επεισόδιο μιας σειράς που έχετε προλάβει, από τον διακομιστή σας ή από το Seerr. Ενεργοποιήστε την στην Προσαρμογή Αρχικής."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new Home row shows when the next episode of a show you are caught up on airs, from your server or from Seerr. Turn it on in Customize Home."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una nueva fila de Inicio muestra cuándo se emite el próximo episodio de una serie que llevas al día, desde tu servidor o desde Seerr. Actívala en Personalizar Inicio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uusi Koti-rivi näyttää, milloin ajan tasalla olevan sarjan seuraava jakso julkaistaan, palvelimelta tai Seerristä. Ota se käyttöön kohdassa Muokkaa Kotia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une nouvelle rangée de l’accueil indique quand sort le prochain épisode d’une série à laquelle vous êtes à jour, depuis votre serveur ou Seerr. À activer dans Personnaliser l’accueil."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novi red na početnoj prikazuje kada izlazi sljedeća epizoda serije koju ste sustigli, s vašeg poslužitelja ili iz Seerra. Uključite ga u Prilagodbi početne."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy új kezdőlapsor mutatja, mikor jelenik meg egy naprakészen követett sorozat következő epizódja, a szerverről vagy a Seerrből. A Kezdőlap testreszabásában kapcsolható be."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una nuova riga della Home mostra quando esce il prossimo episodio di una serie che sei in pari, dal tuo server o da Seerr. Attivala in Personalizza Home."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視聴が追いついている番組の次のエピソードがいつ放送されるかを、サーバーまたはSeerrから取得してホームの新しい列に表示します。ホームのカスタマイズでオンにできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다 따라잡은 시리즈의 다음 에피소드 방영일을 서버 또는 Seerr에서 가져와 홈의 새 줄에 보여줍니다. 홈 사용자화에서 켤 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny rad på Hjem viser når neste episode av en serie du er à jour med sendes, fra serveren din eller fra Seerr. Slå den på under Tilpass Hjem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een nieuwe rij op Home toont wanneer de volgende aflevering verschijnt van een serie die je bij hebt, van je server of uit Seerr. Zet hem aan bij Home aanpassen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowy wiersz na ekranie głównym pokazuje, kiedy wyjdzie kolejny odcinek serialu, z którym jesteś na bieżąco, z serwera lub z Seerra. Włącz go w Dostosuj ekran główny."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma nova fileira no Início mostra quando sai o próximo episódio de uma série que você está em dia, do seu servidor ou do Seerr. Ative em Personalizar Início."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma nova fila no Início mostra quando sai o próximo episódio de uma série que tem em dia, do seu servidor ou do Seerr. Ative em Personalizar Início."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un rând nou pe ecranul principal arată când apare următorul episod al unui serial la care ești la zi, de pe server sau din Seerr. Activează-l în Personalizează ecranul principal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый ряд на главной показывает, когда выйдет следующая серия сериала, который вы досмотрели, по данным сервера или Seerr. Включается в настройке главной."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nový riadok na domovskej obrazovke ukazuje, kedy vyjde ďalší diel seriálu, ktorý máte dopozeraný, zo servera alebo zo Seerru. Zapnite ho v Úpravách domovskej obrazovky."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny rad på Hem visar när nästa avsnitt av en serie du är ikapp med sänds, från din server eller från Seerr. Slå på den under Anpassa Hem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni bir Ana Sayfa satırı, güncel olduğunuz bir dizinin sonraki bölümünün ne zaman yayınlanacağını sunucunuzdan veya Seerr’den gösterir. Ana Sayfayı Özelleştir’den açın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новий ряд на головній показує, коли вийде наступна серія серіалу, який ви наздогнали, за даними сервера або Seerr. Увімкніть його в налаштуванні головної."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页新增一行，显示你已追平的剧集下一集何时播出，数据来自你的服务器或 Seerr。可在自定义主页中开启。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主頁新增一列，顯示你已追上的劇集下一集何時播出，資料來自你的伺服器或 Seerr。可在自訂主頁中開啟。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.upcomingRow.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Připravované díly"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommende afsnit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommende Folgen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επερχόμενα επεισόδια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming episodes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos episodios"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulevat jaksot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisodes à venir"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nadolazeće epizode"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Közelgő epizódok"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodi in arrivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放送予定のエピソード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방영 예정 에피소드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommende episoder"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komende afleveringen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nadchodzące odcinki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos episódios"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximos episódios"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episoade viitoare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предстоящие серии"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pripravované diely"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommande avsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaklaşan bölümler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Майбутні серії"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即将播出的剧集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即將播出的劇集"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.userRating.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -118044,6 +118366,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最高評分影集"
+          }
+        }
+      }
+    },
+    "home.upcoming" : {
+      "comment" : "Section title for the row of announced episodes of shows the user is caught up on",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Připravované"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommende"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demnächst"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσεχώς"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximamente"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulossa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À venir"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uskoro"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hamarosan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In arrivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "近日公開"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방영 예정"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommende"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Binnenkort"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nadchodzące"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em breve"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brevemente"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În curând"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скоро"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pripravované"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kommande"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Незабаром"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即将播出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即將播出"
           }
         }
       }
