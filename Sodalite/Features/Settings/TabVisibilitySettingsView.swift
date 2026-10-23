@@ -23,6 +23,16 @@ struct TabVisibilitySettingsView: View {
     /// written, so a commit after a profile switch would hand these drafts to the next profile.
     @State private var draftProfile: ProfileKey?
 
+    #if os(tvOS)
+    @Environment(\.appState) private var appState
+    /// The profile's browsable libraries in its My Media order, nil until they arrive.
+    @State private var libraries: [JellyfinLibrary]?
+    /// False when a combined secondary did not answer, so its pins are kept rather than dropped.
+    @State private var librariesComplete = false
+    /// Held back like the tab set: a pin changes the bar, which rebuilds the Settings stack.
+    @State private var draftPins: Set<String>?
+    #endif
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 8) {
@@ -71,6 +81,33 @@ struct TabVisibilitySettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.top, 24)
+
+                #if os(tvOS)
+                // Last, because the list arrives from the server: rows appearing under the focused
+                // one would move it.
+                if let libraries, !libraries.isEmpty {
+                    sectionHeader("settings.tabs.section.libraries")
+                    Text("settings.tabs.libraries.caption")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .padding(.bottom, 16)
+                    ForEach(libraries, id: \.originKey) { library in
+                        ValuePickerRow(
+                            icon: PinnedLibraryTab(library: library).systemImage,
+                            title: "",
+                            subtitle: "settings.tabs.library.subtitle",
+                            verbatimTitle: library.name,
+                            options: [false, true],
+                            selection: pinBinding(for: library),
+                            label: { pinned in
+                                pinned
+                                    ? String(localized: "settings.playback.on", defaultValue: "On")
+                                    : String(localized: "settings.playback.off", defaultValue: "Off")
+                            }
+                        )
+                    }
+                }
+                #endif
             }
             .screenContentInset()
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,11 +121,18 @@ struct TabVisibilitySettingsView: View {
                 draftProfile = dependencies.activeProfileKey
                 draft = nil
                 draftNavigationStyle = nil
+                #if os(tvOS)
+                draftPins = nil
+                libraries = nil
+                #endif
             }
             if draft == nil { draft = appearance.hiddenTabs }
             if draftNavigationStyle == nil { draftNavigationStyle = appearance.navigationStyle }
         }
         .onDisappear(perform: commit)
+        #if os(tvOS)
+        .task(id: draftProfile) { await loadLibraries() }
+        #endif
     }
 
     private var editedTabs: Set<AppTab> { draft ?? appearance.hiddenTabs }
@@ -129,9 +173,58 @@ struct TabVisibilitySettingsView: View {
         if let draftNavigationStyle, draftNavigationStyle != appearance.navigationStyle {
             appearance.navigationStyle = draftNavigationStyle
         }
+        #if os(tvOS)
+        commitPins()
+        #endif
         guard let draft else { return }
         appearance.setHiddenTabs(draft)
     }
+
+    #if os(tvOS)
+    private var editedPins: Set<String> {
+        draftPins ?? Set(appearance.pinnedLibraryTabs.map(\.originKey))
+    }
+
+    private func pinBinding(for library: JellyfinLibrary) -> Binding<Bool> {
+        Binding(
+            get: { editedPins.contains(library.originKey) },
+            set: { pinned in
+                var next = editedPins
+                if pinned {
+                    next.insert(library.originKey)
+                } else {
+                    next.remove(library.originKey)
+                }
+                draftPins = next
+            }
+        )
+    }
+
+    private func loadLibraries() async {
+        guard let userID = appState.activeUser?.id, let scope = draftProfile else { return }
+        let sources = dependencies.homeSources(activeUserID: userID)
+        guard let result = await CustomizeLibraryList.fetch(sources, secondaryDeadline: .seconds(4)),
+              scope == draftProfile
+        else { return }
+        let activeServerID = appState.activeServer?.id ?? ""
+        libraries = LibraryLayout.load(scope: scope.storageScope)
+            .ordered(MyMediaLibraries.browsable(result.libraries), fallbackServerID: activeServerID)
+        librariesComplete = result.complete
+    }
+
+    /// Pins in My Media order, with the names the server has now. A pin whose library is not in
+    /// the list is kept only while the list is incomplete: a secondary may just not have answered.
+    private func commitPins() {
+        guard let libraries else { return }
+        let pinned = editedPins
+        let listed = Set(libraries.map(\.originKey))
+        var pins = libraries.filter { pinned.contains($0.originKey) }.map(PinnedLibraryTab.init(library:))
+        if !librariesComplete {
+            pins += appearance.pinnedLibraryTabs.filter { pinned.contains($0.originKey) && !listed.contains($0.originKey) }
+        }
+        appearance.setPinnedLibraryTabs(pins)
+    }
+    #endif
 
     private var header: some View {
         Text("settings.tabs.title")

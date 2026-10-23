@@ -72905,6 +72905,328 @@
         }
       }
     },
+    "changelog.1_1_0.libraryTabs.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV lze knihovny jako Filmy nebo Seriály připnout jako vlastní kartu hned za kartou Domů: Nastavení > Karty."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV kan biblioteker som Film eller Serier fastgøres som deres egen fane lige efter Hjem: Indstillinger > Faner."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV lassen sich Bibliotheken wie Filme oder Serien als eigener Tab direkt nach der Startseite anheften: Einstellungen > Tabs."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο Apple TV, βιβλιοθήκες όπως Ταινίες ή Σειρές μπορούν να καρφιτσωθούν ως δική τους καρτέλα αμέσως μετά την Αρχική: Ρυθμίσεις > Καρτέλες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV, libraries such as Movies or Shows can be pinned as their own tab right after Home: Settings > Tabs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el Apple TV, bibliotecas como Películas o Series pueden fijarse como pestaña propia justo después de Inicio: Ajustes > Pestañas."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä kirjastot, kuten Elokuvat tai Sarjat, voi kiinnittää omaksi välilehdekseen heti Kodin jälkeen: Asetukset > Välilehdet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur l'Apple TV, des bibliothèques comme Films ou Séries peuvent être épinglées en onglet juste après Accueil : Réglages > Onglets."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV biblioteke poput Filmova ili Serija mogu se prikvačiti kao vlastita kartica odmah nakon Početne: Postavke > Kartice."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n az olyan könyvtárak, mint a Filmek vagy a Sorozatok, saját lapként rögzíthetők közvetlenül a Kezdőlap után: Beállítások > Lapok."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV, librerie come Film o Serie possono essere fissate come scheda propria subito dopo Home: Impostazioni > Schede."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVでは、映画やシリーズなどのライブラリをホームのすぐ後ろに専用タブとして固定できます（設定 > タブ）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 영화나 시리즈 같은 라이브러리를 홈 바로 뒤에 자체 탭으로 고정할 수 있습니다(설정 > 탭)."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV kan biblioteker som Filmer eller Serier festes som egen fane rett etter Hjem: Innstillinger > Faner."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op de Apple TV kunnen bibliotheken als Films of Series als eigen tabblad direct na Home worden vastgezet: Instellingen > Tabbladen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV biblioteki takie jak Filmy czy Seriale można przypiąć jako osobną kartę zaraz po karcie Główna: Ustawienia > Karty."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, bibliotecas como Filmes ou Séries podem ser fixadas como aba própria logo depois do Início: Configurações > Abas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, bibliotecas como Filmes ou Séries podem ser afixadas como separador próprio logo a seguir ao Início: Definições > Separadores."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, biblioteci precum Filme sau Seriale pot fi fixate ca filă proprie imediat după Acasă: Setări > File."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV медиатеки вроде «Фильмов» или «Сериалов» можно закрепить отдельной вкладкой сразу после «Главной»: Настройки > Вкладки."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV možno knižnice ako Filmy alebo Seriály pripnúť ako vlastnú kartu hneď za Domovom: Nastavenia > Karty."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV kan bibliotek som Filmer eller Serier fästas som en egen flik direkt efter Hem: Inställningar > Flikar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'de Filmler veya Diziler gibi kütüphaneler, Ana Sayfa'nın hemen ardından kendi sekmesi olarak sabitlenebilir: Ayarlar > Sekmeler."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV медіатеки на кшталт «Фільмів» чи «Серіалів» можна закріпити окремою вкладкою одразу після «Головної»: Налаштування > Вкладки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，可将电影或剧集等媒体库固定为主页之后的独立标签：设置 > 标签页。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，可將電影或影集等媒體庫釘選為首頁之後的獨立標籤：設定 > 標籤頁。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.libraryTabs.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knihovny jako karty"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker som faner"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheken als Tab"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βιβλιοθήκες ως καρτέλες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libraries as tabs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como pestañas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kirjastot välilehtinä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèques en onglets"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteke kao kartice"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Könyvtárak lapként"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Librerie come schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリをタブに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리를 탭으로"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker som faner"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheken als tabblad"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteki jako karty"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como abas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como separadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteci ca file"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медиатеки как вкладки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knižnice ako karty"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotek som flikar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme olarak kütüphaneler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медіатеки як вкладки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将媒体库设为标签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將媒體庫設為標籤"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.liveDelay.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -234157,6 +234479,328 @@
         }
       }
     },
+    "settings.tabs.libraries.caption" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Připnutá knihovna dostane vlastní kartu hned za kartou Domů a otevírá se rovnou do své mřížky."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et fastgjort bibliotek får sin egen fane lige efter Hjem og åbner direkte i sit gitter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine angeheftete Bibliothek bekommt einen eigenen Tab direkt nach der Startseite und öffnet sich gleich mit ihrem Raster."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια καρφιτσωμένη βιβλιοθήκη αποκτά δική της καρτέλα αμέσως μετά την Αρχική και ανοίγει κατευθείαν στο πλέγμα της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pinned library gets its own tab right after Home and opens straight into its grid."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una biblioteca fijada tiene su propia pestaña justo después de Inicio y se abre directamente en su cuadrícula."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiinnitetty kirjasto saa oman välilehden heti Kodin jälkeen ja avautuu suoraan ruudukkoonsa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une bibliothèque épinglée obtient son propre onglet juste après Accueil et s'ouvre directement sur sa grille."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikvačena biblioteka dobiva vlastitu karticu odmah nakon Početne i otvara se izravno u svojoj mreži."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rögzített könyvtár saját lapot kap közvetlenül a Kezdőlap után, és egyenesen a rácsában nyílik meg."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una libreria fissata ha una scheda tutta sua subito dopo Home e si apre direttamente sulla sua griglia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "固定したライブラリはホームのすぐ後ろに専用のタブを持ち、そのままグリッドで開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고정한 라이브러리는 홈 바로 뒤에 자체 탭이 생기고 바로 그리드로 열립니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Et festet bibliotek får sin egen fane rett etter Hjem og åpner rett i rutenettet sitt."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een vastgezette bibliotheek krijgt een eigen tabblad direct na Home en opent meteen in haar raster."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przypięta biblioteka dostaje własną kartę zaraz po karcie Główna i otwiera się od razu w swojej siatce."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma biblioteca fixada ganha uma aba própria logo depois do Início e abre direto na sua grade."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma biblioteca afixada ganha um separador próprio logo a seguir ao Início e abre diretamente na sua grelha."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O bibliotecă fixată primește o filă proprie imediat după Acasă și se deschide direct în grila sa."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закреплённая медиатека получает свою вкладку сразу после «Главной» и открывается прямо в виде сетки."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pripnutá knižnica dostane vlastnú kartu hneď za Domovom a otvára sa rovno do svojej mriežky."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ett fäst bibliotek får en egen flik direkt efter Hem och öppnas direkt i sitt rutnät."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sabitlenen bir kütüphane, Ana Sayfa'nın hemen ardından kendi sekmesini alır ve doğrudan ızgarasıyla açılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закріплена медіатека отримує власну вкладку одразу після «Головної» і відкривається просто в сітці."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "固定的媒体库会在主页之后获得自己的标签，并直接以网格打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "釘選的媒體庫會在首頁之後擁有自己的標籤，並直接以網格開啟。"
+          }
+        }
+      }
+    },
+    "settings.tabs.library.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vlastní karta za kartou Domů"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egen fane efter Hjem"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigener Tab nach der Startseite"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δική της καρτέλα μετά την Αρχική"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its own tab after Home"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pestaña propia después de Inicio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma välilehti Kodin jälkeen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son propre onglet après Accueil"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vlastita kartica nakon Početne"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saját lap a Kezdőlap után"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheda propria dopo Home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームの後ろに専用タブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 뒤에 자체 탭"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egen fane etter Hjem"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigen tabblad na Home"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Własna karta po karcie Główna"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aba própria depois do Início"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separador próprio depois do Início"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filă proprie după Acasă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Своя вкладка после «Главной»"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vlastná karta za Domovom"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egen flik efter Hem"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana Sayfa'dan sonra kendi sekmesi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Власна вкладка після «Головної»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页之后的独立标签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首頁之後的獨立標籤"
+          }
+        }
+      }
+    },
     "settings.tabs.liveTV.subtitle" : {
       "comment" : "Row subtitle for the Live TV tab toggle",
       "extractionState" : "manual",
@@ -235287,6 +235931,167 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜尋你的媒體庫；目錄開啟時也搜尋 Jellyseerr。"
+          }
+        }
+      }
+    },
+    "settings.tabs.section.libraries" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knihovny jako karty"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker som faner"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheken als Tab"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βιβλιοθήκες ως καρτέλες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libraries as tabs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como pestañas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kirjastot välilehtinä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèques en onglets"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteke kao kartice"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Könyvtárak lapként"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Librerie come schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリをタブに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리를 탭으로"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteker som faner"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheken als tabblad"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteki jako karty"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como abas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotecas como separadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteci ca file"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медиатеки как вкладки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knižnice ako karty"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotek som flikar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sekme olarak kütüphaneler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медіатеки як вкладки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将媒体库设为标签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將媒體庫設為標籤"
           }
         }
       }

@@ -8,7 +8,7 @@ enum SidebarExitPolicy {
         case leaveApp
     }
 
-    static func next(focusIsInRail: Bool, selectedTab: AppTab) -> Outcome {
+    static func next(focusIsInRail: Bool, selectedTab: ShellTab) -> Outcome {
         guard focusIsInRail else { return .focusRail }
         return selectedTab == .home ? .leaveApp : .selectHome
     }

@@ -8,14 +8,14 @@ import SwiftUI
 /// under it for the same reason. In the collapsed rail that divider shrinks to the icon column,
 /// otherwise it draws a line across empty space.
 struct SidebarRail: View {
-    let tabs: [AppTab]
-    let selectedTab: AppTab
+    let tabs: [ShellTab]
+    let selectedTab: ShellTab
     let isExpanded: Bool
     @FocusState.Binding var focus: SidebarFocus?
-    let onSelect: (AppTab) -> Void
+    let onSelect: (ShellTab) -> Void
 
     /// Settings and the profiles are pulled out of the flow above and placed under the divider.
-    private var browsingTabs: [AppTab] { tabs.filter { $0 != .settings && $0 != .profiles } }
+    private var browsingTabs: [ShellTab] { tabs.filter { $0 != .settings && $0 != .profiles } }
     private var hasSettings: Bool { tabs.contains(.settings) }
     private var hasProfiles: Bool { tabs.contains(.profiles) }
 

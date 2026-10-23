@@ -4,7 +4,7 @@ import UIKit
 #endif
 
 struct TabRootView: View {
-    @State private var selectedTab: AppTab = .home
+    @State private var selectedTab: ShellTab = .home
     @State private var availableTabs: [AppTab] = AppTab.baseTabs
     /// Participants with Live TV, from the last tab probe (Sodalite#85).
     @State private var liveTVServerIDs: [String] = []
@@ -31,7 +31,7 @@ struct TabRootView: View {
     /// the newly selected page blank on tvOS: its content appears and disappears in the same pass and
     /// stays gone until the viewer leaves the tab and comes back (measured on the tvOS 27 simulator,
     /// the same switch published in one update lands intact). nil until the first change.
-    @State private var presentedTabs: [AppTab]?
+    @State private var presentedTabs: [ShellTab]?
     /// Identity of the Settings content, bumped by a profile switch that pops its stack or lands on Home.
     @State private var settingsEpoch = 0
     @Environment(\.dependencies) private var dependencies
@@ -55,9 +55,9 @@ struct TabRootView: View {
 
     #if !os(tvOS)
     @ViewBuilder
-    private func tabLabel(_ tab: AppTab) -> some View {
+    private func tabLabel(_ tab: ShellTab) -> some View {
         Label {
-            Text(tab.labelKey)
+            tab.title
         } icon: {
             // .monochrome strips the baked white that "tv" renders hierarchically, which would override the tint and leave that icon gray.
             Image(systemName: tab.systemImage)
@@ -67,7 +67,7 @@ struct TabRootView: View {
 
     /// Pending-approval count for the Catalog tab badge; nil for other tabs or a zero count (a
     /// `.badge(0)` renders nothing).
-    private func catalogBadgeCount(_ tab: AppTab) -> Int? {
+    private func catalogBadgeCount(_ tab: ShellTab) -> Int? {
         guard tab == .catalog else { return nil }
         let count = dependencies.pendingRequestsMonitor.pendingApprovalCount ?? 0
         return count > 0 ? count : nil
@@ -80,7 +80,7 @@ struct TabRootView: View {
     /// the iOS "More" tab, whose nested navigation controller skips the Settings root on back.
     /// Settings is reached via the gear overlay instead. tvOS + iPad keep it as a tab/sidebar item,
     /// and the Mac moves it to the Settings window.
-    private var displayedTabs: [AppTab] {
+    private var displayedTabs: [ShellTab] {
         var tabs = AppTab.withDownloads(availableTabs, hasDownloads: showsDownloadsTab)
             .filter { !appearance.isTabHidden($0) }
         #if os(iOS)
@@ -91,10 +91,16 @@ struct TabRootView: View {
         // The Mac keeps Settings in its own window (Cmd-,), see MacSettingsWindowContent.
         tabs = tabs.filter { $0 != .settings }
         #endif
-        return tabs
+        var shellTabs = tabs.map(ShellTab.app)
+        #if os(tvOS)
+        // Pinned libraries follow Home, where the viewer asked for them (Discord, 2026-10-23).
+        let libraries = appearance.pinnedLibraryTabs.filter(pinIsReachable).map(ShellTab.library)
+        shellTabs.insert(contentsOf: libraries, at: shellTabs.firstIndex(of: .home).map { $0 + 1 } ?? 0)
+        #endif
+        return shellTabs
     }
 
-    private var tabsOnScreen: [AppTab] {
+    private var tabsOnScreen: [ShellTab] {
         presentedTabs ?? displayedTabs
     }
 
@@ -255,7 +261,7 @@ struct TabRootView: View {
                 availableTabs = base
                 liveTVServerIDs = []
                 musicServerIDs = []
-                if !base.contains(selectedTab) {
+                if let tab = selectedTab.appTab, !base.contains(tab) {
                     selectedTab = .home
                 }
             }
@@ -322,8 +328,8 @@ struct TabRootView: View {
         .onChange(of: appState.requestedTab) { _, requested in
             guard let requested else { return }
             appState.requestedTab = nil
-            if tabsOnScreen.contains(requested) {
-                selectedTab = requested
+            if tabsOnScreen.contains(.app(requested)) {
+                selectedTab = .app(requested)
             } else if requested == .downloads {
                 #if os(iOS)
                 showDownloads = true
@@ -386,10 +392,10 @@ struct TabRootView: View {
     /// The profile tab keeps one identity: a pick there switches the profile and leaves the tab in
     /// the same update, and re-identifying the page the bar is leaving in that update strands the
     /// bar's selection on the old index (Sodalite#169). It re-reads its cards on appear anyway.
-    private func contentIdentity(for tab: AppTab) -> AnyHashable {
-        switch tab {
-        case .settings: AnyHashable(settingsEpoch)
-        case .profiles: AnyHashable(appState.activeServer?.id)
+    private func contentIdentity(for tab: ShellTab) -> AnyHashable {
+        switch tab.appTab {
+        case .settings?: AnyHashable(settingsEpoch)
+        case .profiles?: AnyHashable(appState.activeServer?.id)
         default: AnyHashable(appState.profileKey)
         }
     }
@@ -417,7 +423,7 @@ struct TabRootView: View {
             activeServerID: appState.activeServer?.id
         ) {
             availableTabs = base
-            if !base.contains(selectedTab) {
+            if let tab = selectedTab.appTab, !base.contains(tab) {
                 selectedTab = .home
             }
         }
@@ -478,49 +484,17 @@ struct TabRootView: View {
     #endif
 
     @ViewBuilder
-    private func tabContent(for tab: AppTab) -> some View {
+    private func tabContent(for tab: ShellTab) -> some View {
         Group {
             switch tab {
-            case .home:
-                HomeView()
-            case .liveTV:
-                // Selection is passed rather than inferred from onAppear: a tab that is not selected
-                // keeps its content in the hierarchy, so its clocks have to be told (#96).
-                #if os(macOS) || os(iOS)
-                // Every other tab roots its own stack; this one did not need one while its program
-                // pages were covers, and on the Mac and iOS they are pushes (see detailCover).
-                ThemeNavigationStack {
-                    LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
-                        .reservesShellChrome()
-                }
-                #else
-                LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
-                    .reservesShellBar()
-                #endif
-            case .catalog:
-                CatalogView()
-            case .search:
-                SearchView()
-            case .music:
-                MusicHomeView(capableServerIDs: musicServerIDs)
-            case .downloads:
-                #if !os(tvOS)
-                DownloadsView()
-                #else
-                EmptyView()
-                #endif
-            case .settings:
-                SettingsView()
-            case .profiles:
+            case .library(let pin):
                 #if os(tvOS)
-                if let server = appState.activeServer {
-                    // Picking a profile, or the active one, is done with this tab: back to Home.
-                    LaunchProfilePickerView(server: server, context: .chooser,
-                                            onFinished: { selectedTab = .home })
-                }
+                libraryTabContent(pin)
                 #else
                 EmptyView()
                 #endif
+            case .app(let appTab):
+                appTabContent(appTab)
             }
         }
         // Every tab's screens hold the profile they were built for (Live TV captures its user id
@@ -557,6 +531,86 @@ struct TabRootView: View {
         #endif
     }
 
+    @ViewBuilder
+    private func appTabContent(_ tab: AppTab) -> some View {
+        switch tab {
+        case .home:
+            HomeView()
+        case .liveTV:
+            // Selection is passed rather than inferred from onAppear: a tab that is not selected
+            // keeps its content in the hierarchy, so its clocks have to be told (#96).
+            #if os(macOS) || os(iOS)
+            // Every other tab roots its own stack; this one did not need one while its program
+            // pages were covers, and on the Mac and iOS they are pushes (see detailCover).
+            ThemeNavigationStack {
+                LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
+                    .reservesShellChrome()
+            }
+            #else
+            LiveTVTabView(isTabSelected: selectedTab == .liveTV, capableServerIDs: liveTVServerIDs)
+                .reservesShellBar()
+            #endif
+        case .catalog:
+            CatalogView()
+        case .search:
+            SearchView()
+        case .music:
+            MusicHomeView(capableServerIDs: musicServerIDs)
+        case .downloads:
+            #if !os(tvOS)
+            DownloadsView()
+            #else
+            EmptyView()
+            #endif
+        case .settings:
+            SettingsView()
+        case .profiles:
+            #if os(tvOS)
+            if let server = appState.activeServer {
+                // Picking a profile, or the active one, is done with this tab: back to Home.
+                LaunchProfilePickerView(server: server, context: .chooser,
+                                        onFinished: { selectedTab = .home })
+            }
+            #else
+            EmptyView()
+            #endif
+        }
+    }
+
+    #if os(tvOS)
+    /// A pinned library is reachable while its server is: the active one, or a combined participant.
+    private func pinIsReachable(_ pin: PinnedLibraryTab) -> Bool {
+        guard let serverID = pin.serverID, serverID != appState.activeServer?.id else { return true }
+        return dependencies.sessionRegistry.participants.contains { $0.server?.id == serverID }
+    }
+
+    /// The grid a My Media tile opens, as the root of its own tab.
+    private func libraryTabContent(_ pin: PinnedLibraryTab) -> some View {
+        let library = pin.library
+        let session = dependencies.sessionRegistry.session(forServerID: pin.serverID)
+        let grouping = HomeRowConfig.collectionGrouping(scope: appState.profileKey?.storageScope ?? "")
+        let identity = session.isActive
+            ? appState.cacheIdentity ?? CacheIdentity(serverID: "", userID: "")
+            : CacheIdentity(serverID: session.server?.id ?? "", userID: session.userID)
+        return ThemeNavigationStack {
+            FilteredGridView(
+                title: pin.name,
+                query: MyMediaLibraries.gridQuery(for: library, grouping: grouping),
+                cacheScope: FilterCacheScope(
+                    key: FilterCacheKey.Home.library(id: pin.libraryID, grouping: grouping),
+                    identity: identity
+                ),
+                sortScope: appState.profileKey.map {
+                    LibrarySortScope.library(id: pin.libraryID, scope: $0.storageScope)
+                },
+                hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType),
+                isTabRoot: true
+            )
+        }
+        .environment(\.serverSession, session.isActive ? nil : session)
+    }
+    #endif
+
     /// A tab only where the bar has room for it: the iPad sidebar. See `showDownloads`.
     private var showsDownloadsTab: Bool {
         #if os(iOS)
@@ -575,7 +629,7 @@ struct TabRootView: View {
     /// The tabs whose root scroll view sits directly under the chrome (`scrollsUnderShellChrome`).
     /// The others start with a fixed header (Live TV's and Catalog's pickers, the search field),
     /// under which their lists end the regular way.
-    static let scrollsUnderChrome: Set<AppTab> = [.home, .music]
+    static let scrollsUnderChrome: Set<ShellTab> = [.home, .music]
 
     private var downloadsButton: some View {
         chromeCircleButton(systemImage: "arrow.down.circle", label: "tab.downloads") { showDownloads = true }

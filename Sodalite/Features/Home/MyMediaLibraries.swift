@@ -45,6 +45,33 @@ enum MyMediaLibraries {
         return query
     }
 
+    /// The grid a library opens into, from a My Media tile or its own tab.
+    static func gridQuery(for library: JellyfinLibrary, grouping: CollectionGrouping) -> ItemQuery {
+        // parentID scopes the grid, the types match the library.
+        let types = itemTypes(for: library.libraryType)
+        // Collapsing box sets inside the box-set view is meaningless, and a virtual view takes no parentID.
+        let isVirtual = isVirtualView(library.libraryType)
+        var query = ItemQuery(
+            parentID: isVirtual ? nil : library.id,
+            includeItemTypes: types,
+            sortBy: "SortName",
+            sortOrder: "Ascending",
+            limit: 200,
+            // A grid cell renders name/year/index/series/watched plus the poster; People,
+            // MediaStreams, MediaSources, Chapters and Trickplay were fetched, decoded and cached
+            // for every tile and never read (Sodalite#68).
+            fields: JellyfinEndpoint.homeRowFields
+        )
+        if browsesFolders(library.libraryType) {
+            query = folderQuery(parentID: library.id)
+        } else if !isVirtual {
+            // The only grids that defer to the server's "Group movies into collections" (Sodalite#44).
+            // The server itself skips collapsing once the watch-status filter adds IsPlayed.
+            query.collapseBoxSetItems = grouping.queryValue
+        }
+        return query
+    }
+
     static func itemTypes(for type: LibraryType) -> [ItemType] {
         switch type {
         case .movies: [.movie]
