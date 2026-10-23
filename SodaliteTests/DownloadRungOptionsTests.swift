@@ -16,6 +16,20 @@ struct DownloadRungOptionsTests {
         #expect(options.map(\.quality) == [.original, .mbps2])
     }
 
+    /// Sodalite#202: the server would copy the video under every rung, so their sizes would be fiction.
+    @Test func aUserWithoutVideoTranscodingIsOfferedOnlyTheOriginal() throws {
+        let options = DownloadRungOption.options(sourceBitrate: 29_000_000, sourceSize: 5_570_000_000,
+                                                 runtimeTicks: 15_600_000_000, canTranscodeVideo: false)
+        #expect(options.map(\.quality) == [.original])
+        #expect(options.first?.estimatedBytes == 5_570_000_000)
+
+        let remux = try source("remux", name: "Remux", height: 1080, bitrate: 30_000_000, size: 30_000)
+        let uhd = try source("uhd", name: "UHD", height: 2160, bitrate: 20_000_000, size: 9_000)
+        let versions = DownloadRungOption.options(versions: [remux, uhd], selected: uhd,
+                                                  runtimeTicks: 36_000_000_000, canTranscodeVideo: false)
+        #expect(versions.map(\.quality) == [.original, .original])
+    }
+
     private func source(_ id: String, name: String, height: Int, bitrate: Int, size: Int64) throws -> MediaSource {
         try JSONDecoder().decode(MediaSource.self, from: Data(#"""
             {"Id":"\#(id)","Name":"\#(name)","Size":\#(size),"Bitrate":\#(bitrate),

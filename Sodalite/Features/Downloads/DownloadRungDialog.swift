@@ -66,6 +66,7 @@ extension DownloadFailure {
 private struct DownloadRungDialog: ViewModifier {
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @State private var errorMessage: String?
 
     func body(content: Content) -> some View {
@@ -91,14 +92,15 @@ private struct DownloadRungDialog: ViewModifier {
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
+        let canTranscodeVideo = appState.activeUser?.canTranscodeVideo ?? true
         if case .item(let item, let sourceID) = target, item.selectableMediaSources.count > 1,
            let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection().preferredSourceID(for: item)) {
             return DownloadRungOption.options(versions: item.selectableMediaSources, selected: selected,
-                                              runtimeTicks: item.runTimeTicks)
+                                              runtimeTicks: item.runTimeTicks, canTranscodeVideo: canTranscodeVideo)
         }
         let facts = target.facts
         return DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size,
-                                          runtimeTicks: facts.runtimeTicks)
+                                          runtimeTicks: facts.runtimeTicks, canTranscodeVideo: canTranscodeVideo)
     }
 
     private func label(for option: DownloadRungOption) -> String {

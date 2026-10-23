@@ -115,6 +115,12 @@ final class AppState {
         )
     }
 
+    /// Whether a session on `session` may transcode video (Sodalite#202). Only the active server's
+    /// policy is loaded; a combined-Home server keeps the server default.
+    func canTranscodeVideo(on session: ServerSession?) -> Bool {
+        session?.isActive == false || activeUser?.canTranscodeVideo ?? true
+    }
+
     /// Replaces activeServer with a fresh copy (applies an updated version after a server upgrade). id guard so a racing switch doesn't apply another server's data.
     func updateActiveServer(_ server: JellyfinServer) {
         guard activeServer?.id == server.id else { return }

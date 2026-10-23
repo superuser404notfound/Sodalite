@@ -555,6 +555,9 @@ final class PlayerViewModel {
     /// Sodalite#50. A snapshot taken at construction: neither player surface offers a reveal, so it
     /// never needs to change mid-session. Nothing under Player/ reads the SwiftUI environment.
     let spoilerPolicy: SpoilerPolicy
+    /// False for a user whose policy forbids video transcoding: the server would copy the video under
+    /// every rung, so the session stays on Original and the picker offers nothing else (Sodalite#202).
+    let canTranscodeVideo: Bool
 
     /// When set, `startPlayback()` selects the matching PlaybackInfo source instead of first.
     /// Nil keeps default-first. Set by the detail-view version picker.
@@ -931,6 +934,7 @@ final class PlayerViewModel {
         itemService: JellyfinItemServiceProtocol? = nil,
         trackMemory: TrackSelectionMemory? = nil,
         spoilerPolicy: SpoilerPolicy = .disabled,
+        canTranscodeVideo: Bool = true,
         cachedPlaybackInfo: PrefetchedPlaybackInfo? = nil,
         preferredMediaSourceID: String? = nil,
         playQueue: [JellyfinItem] = [],
@@ -957,6 +961,7 @@ final class PlayerViewModel {
         self.itemService = itemService
         self.trackMemory = trackMemory
         self.spoilerPolicy = spoilerPolicy
+        self.canTranscodeVideo = canTranscodeVideo
         self.scrubPreview = ScrubPreviewProvider()
         self.cachedPlaybackInfo = cachedPlaybackInfo
         self.preferredMediaSourceID = preferredMediaSourceID
@@ -1119,7 +1124,7 @@ final class PlayerViewModel {
         stopProgressReporting()
         hasReportedStart = false
         if streamingQuality == nil, !isLiveSession {
-            streamingQuality = preferences.defaultStreamingQuality()
+            streamingQuality = canTranscodeVideo ? preferences.defaultStreamingQuality() : .original
         }
         hostLoadActive = true
         clearError()
@@ -2534,11 +2539,13 @@ final class PlayerViewModel {
     /// actually transcode it. A rung the file fits under plays the original, so choosing it changes
     /// nothing (Sodalite#87).
     var pickerQualities: [StreamingQuality] {
-        Self.pickerQualities(sourceBitrate: activePlaybackSource?.bitrate)
+        Self.pickerQualities(sourceBitrate: activePlaybackSource?.bitrate, canTranscodeVideo: canTranscodeVideo)
     }
 
-    static func pickerQualities(sourceBitrate: Int?) -> [StreamingQuality] {
-        StreamingQuality.allCases.filter { $0 == .original || $0.bites(sourceBitrate: sourceBitrate) }
+    static func pickerQualities(sourceBitrate: Int?, canTranscodeVideo: Bool = true) -> [StreamingQuality] {
+        StreamingQuality.allCases.filter {
+            $0 == .original || (canTranscodeVideo && $0.bites(sourceBitrate: sourceBitrate))
+        }
     }
 
     /// The row the picker marks: a rung that does not bite plays the original, so Original is what runs.

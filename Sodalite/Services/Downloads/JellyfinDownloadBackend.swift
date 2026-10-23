@@ -17,6 +17,7 @@ final class JellyfinDownloadBackend: DownloadBackend {
     var userID: String { container?.activeUserID ?? "" }
     var preferredAudioLanguage: String? { container?.playbackPreferences.preferredAudioLanguage }
     var allowsCellular: Bool { !(container?.downloadPreferences.wifiOnly ?? true) }
+    var canTranscodeVideo: Bool { container?.appState?.activeUser?.canTranscodeVideo ?? true }
 
     struct Unavailable: LocalizedError {
         var errorDescription: String? {

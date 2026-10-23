@@ -51,9 +51,13 @@ struct DownloadRungOption: Identifiable, Equatable {
     var id: String { [quality.rawValue, source?.id].compactMap { $0 }.joined(separator: "-") }
 
     /// The same filter as the player picker (#87): a rung that would not transcode this file is the
-    /// original under another name. Always best first, so the list reads the same every time.
-    static func options(sourceBitrate: Int?, sourceSize: Int64?, runtimeTicks: Int64?) -> [DownloadRungOption] {
-        StreamingQuality.allCases.filter { $0 == .original || $0.bites(sourceBitrate: sourceBitrate) }.map {
+    /// original under another name. Always best first, so the list reads the same every time. A user
+    /// without video transcoding gets the original under every rung, so only Original is offered (Sodalite#202).
+    static func options(sourceBitrate: Int?, sourceSize: Int64?, runtimeTicks: Int64?,
+                        canTranscodeVideo: Bool = true) -> [DownloadRungOption] {
+        StreamingQuality.allCases.filter {
+            $0 == .original || (canTranscodeVideo && $0.bites(sourceBitrate: sourceBitrate))
+        }.map {
             DownloadRungOption(quality: $0, estimatedBytes: DownloadPlanner.estimatedBytes(
                 quality: $0, sourceBitrate: sourceBitrate, sourceSize: sourceSize, runtimeTicks: runtimeTicks))
         }
@@ -61,11 +65,13 @@ struct DownloadRungOption: Identifiable, Equatable {
 
     /// Several versions: each one is an original of its own, best first like the version picker, and
     /// the rungs below them transcode the version the page has selected (Sodalite#200).
-    static func options(versions: [MediaSource], selected: MediaSource, runtimeTicks: Int64?) -> [DownloadRungOption] {
+    static func options(versions: [MediaSource], selected: MediaSource, runtimeTicks: Int64?,
+                        canTranscodeVideo: Bool = true) -> [DownloadRungOption] {
         let originals = versions.rankedByQuality().map {
             DownloadRungOption(quality: .original, estimatedBytes: $0.size, source: $0)
         }
-        let rungs = options(sourceBitrate: selected.bitrate, sourceSize: selected.size, runtimeTicks: runtimeTicks)
+        let rungs = options(sourceBitrate: selected.bitrate, sourceSize: selected.size, runtimeTicks: runtimeTicks,
+                            canTranscodeVideo: canTranscodeVideo)
             .filter { $0.quality != .original }
         return originals + rungs
     }
