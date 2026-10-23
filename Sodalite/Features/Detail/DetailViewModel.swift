@@ -155,8 +155,10 @@ final class DetailViewModel {
         let snapshotTmdbID = item.tmdbID
         Task { [weak self] in
             guard let self else { return }
-            let similar = try? await itemService.getSimilarItems(itemID: itemID, userID: userID, limit: 12)
-            let libraryItems = similar?.items ?? []
+            // With "external content in suggestions" on, the server mixes guide programs and channel trailers
+            // into this list; neither is a library item, so the tap lands on a page whose Play fails with 400.
+            let similar = try? await itemService.getSimilarItems(itemID: itemID, userID: userID, limit: 20)
+            let libraryItems = Array((similar?.items ?? []).filter { $0.type != .unknown }.prefix(12))
             if similar != nil {
                 await MainActor.run { self.similarItems = libraryItems }
             }

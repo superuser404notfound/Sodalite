@@ -80341,6 +80341,330 @@
         }
       }
     },
+    "changelog.1_1_0.similarRow.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Řada Podobné tituly už nezobrazuje pořady z TV programu ani trailery, které v knihovně nejsou a nedaly se přehrát."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rækken Lignende titler viser ikke længere tv-udsendelser fra programguiden eller trailere, der ikke findes i biblioteket og ikke kunne afspilles."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Reihe Ähnliche Titel zeigt keine Sendungen aus dem TV-Guide und keine Trailer mehr, die nicht in der Mediathek liegen und sich nicht abspielen ließen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η σειρά Παρόμοιοι τίτλοι δεν εμφανίζει πλέον εκπομπές από τον οδηγό προγράμματος ή τρέιλερ που δεν υπάρχουν στη βιβλιοθήκη και δεν μπορούσαν να αναπαραχθούν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Similar row no longer lists TV guide broadcasts or trailers that are not in the library and could not be played."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fila Títulos similares ya no muestra emisiones de la guía de TV ni tráileres que no están en la biblioteca y no se podían reproducir."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samankaltaiset-rivi ei enää näytä ohjelmaoppaan lähetyksiä tai trailereita, joita ei ole kirjastossa ja joita ei voinut toistaa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La rangée Titres similaires n’affiche plus les émissions du guide TV ni les bandes-annonces absentes de la bibliothèque, qui ne pouvaient pas être lues."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Red Slični naslovi više ne prikazuje emisije iz TV vodiča ni trailere koji nisu u biblioteci i nisu se mogli reproducirati."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Hasonló címek sor már nem mutat a műsorújságból származó adásokat vagy előzeteseket, amelyek nincsenek a könyvtárban és nem voltak lejátszhatók."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La riga Titoli simili non mostra più trasmissioni della guida TV né trailer che non sono nella libreria e non si potevano riprodurre."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「類似作品」の列に、ライブラリにない再生できない番組表の放送や予告編が表示されなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비슷한 콘텐츠 줄에 라이브러리에 없어 재생할 수 없던 TV 편성표 방송이나 예고편이 더 이상 표시되지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raden Lignende titler viser ikke lenger sendinger fra programguiden eller trailere som ikke finnes i biblioteket og ikke kunne spilles av."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De rij Vergelijkbare titels toont geen uitzendingen uit de tv-gids of trailers meer die niet in de bibliotheek staan en niet af te spelen waren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rząd Podobne tytuły nie pokazuje już audycji z przewodnika TV ani zwiastunów, których nie ma w bibliotece i nie dało się ich odtworzyć."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fileira Títulos semelhantes não mostra mais programas do guia de TV nem trailers que não estão na biblioteca e não podiam ser reproduzidos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fila Títulos semelhantes já não mostra emissões do guia de TV nem trailers que não estão na biblioteca e não podiam ser reproduzidos."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rândul Titluri similare nu mai afișează emisiuni din ghidul TV sau trailere care nu sunt în bibliotecă și nu puteau fi redate."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ряд «Похожие» больше не показывает передачи из телегида и трейлеры, которых нет в медиатеке и которые нельзя было воспроизвести."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rad Podobné tituly už nezobrazuje relácie z TV programu ani trailery, ktoré v knižnici nie sú a nedali sa prehrať."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raden Liknande titlar visar inte längre sändningar från tv-guiden eller trailers som inte finns i biblioteket och inte gick att spela upp."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benzer içerikler satırı artık kitaplıkta olmayan ve oynatılamayan TV rehberi yayınlarını veya fragmanları göstermiyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ряд «Схожі» більше не показує передачі з телегіду й трейлери, яких немає в медіатеці і які не можна було відтворити."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“相似内容”一栏不再显示媒体库中没有、无法播放的电视节目指南节目或预告片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「相似內容」一欄不再顯示媒體庫中沒有、無法播放的電視節目表節目或預告片。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.similarRow.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podobné tituly jen z knihovny"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lignende titler kun fra biblioteket"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ähnliche Titel nur aus der Mediathek"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παρόμοιοι τίτλοι μόνο από τη βιβλιοθήκη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Similar titles only from the library"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos similares solo de la biblioteca"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samankaltaiset nimikkeet vain kirjastosta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titres similaires uniquement de la bibliothèque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slični naslovi samo iz biblioteke"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hasonló címek csak a könyvtárból"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titoli simili solo dalla libreria"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類似作品はライブラリ内のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비슷한 콘텐츠는 라이브러리에서만"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lignende titler bare fra biblioteket"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergelijkbare titels alleen uit de bibliotheek"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podobne tytuły tylko z biblioteki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos semelhantes só da biblioteca"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Títulos semelhantes só da biblioteca"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titluri similare doar din bibliotecă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Похожие только из медиатеки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podobné tituly len z knižnice"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liknande titlar bara från biblioteket"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benzer içerikler yalnızca kitaplıktan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Схожі лише з медіатеки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相似内容仅来自媒体库"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相似內容僅來自媒體庫"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.sleepClose.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

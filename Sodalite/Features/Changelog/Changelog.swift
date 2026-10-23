@@ -196,6 +196,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.similarRow.title",
+                    "changelog.1_1_0.similarRow.body",
+                    icon: "square.stack"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.sparsePolicy.title",
                     "changelog.1_1_0.sparsePolicy.body",
                     icon: "person.badge.key"
