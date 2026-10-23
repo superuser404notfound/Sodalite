@@ -11,6 +11,8 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
     /// Present when the channel list is fetched with `EnableUserData=true`.
     let userData: ChannelUserData?
     var serverID: String? = nil
+    /// Jellyfin's `ChannelType` ("TV" / "Radio"), filled on every channel without a `Fields` entry.
+    var channelType: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -20,6 +22,7 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
         case currentProgram = "CurrentProgram"
         case userData = "UserData"
         case serverID = "ServerId"
+        case channelType = "ChannelType"
     }
 
     /// Primary image tag, used to build the channel-logo URL.
@@ -27,6 +30,11 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
 
     /// Server-side favorite flag (nil when UserData wasn't requested).
     var isFavorite: Bool { userData?.isFavorite ?? false }
+
+    /// A channel without a type is TV: the M3U tuner never sets one, and Jellyfin defaults it so.
+    var kind: GuideFilter.ChannelKind {
+        channelType.flatMap(GuideFilter.ChannelKind.init(rawValue:)) ?? .tv
+    }
 }
 
 extension JellyfinChannel {
@@ -41,7 +49,8 @@ extension JellyfinChannel {
             imageTags: try c.decodeIfPresent([String: String].self, forKey: .imageTags),
             currentProgram: try c.decodeIfPresent(JellyfinProgram.self, forKey: .currentProgram),
             userData: try c.decodeIfPresent(ChannelUserData.self, forKey: .userData),
-            serverID: try c.decodeIfPresent(String.self, forKey: .serverID))
+            serverID: try c.decodeIfPresent(String.self, forKey: .serverID),
+            channelType: try c.decodeIfPresent(String.self, forKey: .channelType))
     }
 }
 

@@ -71,7 +71,7 @@ struct GuideGenreFilterTests {
 
     @Test func theAiringIndexAsksForWhatIsOnNow() {
         let endpoint = JellyfinEndpoint.liveTvProgramIndex(
-            userID: "u", window: .airing, genres: "NBA|NFL", startIndex: 500, limit: 500)
+            userID: "u", window: .airing, genres: "NBA|NFL", category: nil, startIndex: 500, limit: 500)
         let items = endpoint.queryItems
         #expect(endpoint.path == "/LiveTv/Programs")
         #expect(value(items, "IsAiring") == "true")
@@ -86,7 +86,7 @@ struct GuideGenreFilterTests {
         let items = JellyfinEndpoint.liveTvProgramIndex(
             userID: "u",
             window: .range(start: Date(timeIntervalSince1970: 0), end: Date(timeIntervalSince1970: 3600)),
-            genres: nil, startIndex: 0, limit: 500).queryItems
+            genres: nil, category: nil, startIndex: 0, limit: 500).queryItems
         #expect(value(items, "IsAiring") == nil)
         #expect(value(items, "MinEndDate") != nil)
         #expect(value(items, "MaxStartDate") != nil)
@@ -202,7 +202,7 @@ private final class GenreStub: JellyfinLiveTvServiceProtocol, @unchecked Sendabl
     }
 
     func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
-                         cap: Int) async throws -> [JellyfinProgram] {
+                         category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram] {
         lock.withLock {
             self.genres = genres
             airing = window == .airing

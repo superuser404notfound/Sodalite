@@ -59,7 +59,7 @@ final class GuideGenreController {
         defer { if loadingScope == scope { loadingScope = nil } }
         do {
             let programs = try await service.getProgramIndex(
-                userID: userID, window: window(for: scope), genres: nil, cap: Self.programCap)
+                userID: userID, window: window(for: scope), genres: nil, category: nil, cap: Self.programCap)
             names[scope] = GuideGenreFilter.genreNames(in: programs)
         } catch {
             self.error = ErrorText.user(for: error)
@@ -98,7 +98,7 @@ final class GuideGenreController {
         do {
             let programs = try await service.getProgramIndex(
                 userID: userID, window: window(for: filter.scope),
-                genres: filter.queryValue, cap: Self.programCap)
+                genres: filter.queryValue, category: nil, cap: Self.programCap)
             guard current == generation else { return }
             channelIDs = Set(programs.compactMap(\.channelId))
             error = nil

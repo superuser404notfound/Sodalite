@@ -570,6 +570,7 @@
 		404A48AFC5B493A7DBF076C9 /* MultiviewOverlayVisibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA7F304886C8D76515853E9 /* MultiviewOverlayVisibility.swift */; };
 		40592A3AA9EB12064DCF3CA1 /* CloudSyncMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0ADC46D81A9CF7F465A5A05 /* CloudSyncMerge.swift */; };
 		405B51CBA803D69D14D52F54 /* GuideAxisAdvanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F92E6CE312FC6CB38861FA /* GuideAxisAdvanceTests.swift */; };
+		405F17DC271BFF557C2CC4DD /* GuideCategoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1B3EE3110433FAF9ACBDF9 /* GuideCategoryController.swift */; };
 		4115318BCC4798788C59F3C7 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4F6464C543DFF6027F96CB /* JSONValue.swift */; };
 		412CFFB034FED12383ACA2A7 /* DetailHeroSynopsis.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F13EE37C87736E5AE9B58F /* DetailHeroSynopsis.swift */; };
 		4157DC03D082FD8FCAC8D2BB /* FilteredGridPhase2CacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5243285B47EE4164BDDC61 /* FilteredGridPhase2CacheTests.swift */; };
@@ -700,6 +701,7 @@
 		4FDFCB8C600C83653DAC0EE2 /* MacSidebarToggleRepair.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F228D93F5A4018CF17BD35E /* MacSidebarToggleRepair.swift */; };
 		4FF01EE9C4D2C7BE2EFD2790 /* CertificateTrustFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 614E28A7002618314BCD6123 /* CertificateTrustFailure.swift */; };
 		5001F7B2935C54870C7CE7C5 /* WatchStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AC25744AF04149582645C9 /* WatchStats.swift */; };
+		500988026F24626016F42E6E /* GuideCategoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1B3EE3110433FAF9ACBDF9 /* GuideCategoryController.swift */; };
 		5014D2B5FDC274AE79600BDF /* SeerrAuthResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B88E8CE251D5B15713F56E /* SeerrAuthResponse.swift */; };
 		505A63B23F5DC6F5960ACD98 /* NowPlayingWakeSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653E7EF00474F38C86221991 /* NowPlayingWakeSink.swift */; };
 		50AC05242DDAD481A91E524E /* LiveRailGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD54A37321E5D6A5380099 /* LiveRailGeometryTests.swift */; };
@@ -1082,6 +1084,7 @@
 		7AD956D6F2E4C417289EA15A /* SiriRemoteRestingTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDD7F1F3457B7F3D63A1419 /* SiriRemoteRestingTouch.swift */; };
 		7B13679E148F325101FF3DE9 /* MenuPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C52ED4FBFB462A125DC24C /* MenuPresentation.swift */; };
 		7B1A72F3C645295073FE9522 /* MyRequestsDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631A28F4D1D9012314F4A7BC /* MyRequestsDiff.swift */; };
+		7B1DD5D6D753406392B6B30E /* GuideCategoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1B3EE3110433FAF9ACBDF9 /* GuideCategoryController.swift */; };
 		7B86B607AEE42CBA1F7A6EEF /* PlaybackSourceFacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3D4D98D7BD962D3F7A25B0 /* PlaybackSourceFacts.swift */; };
 		7C2CF8DDC011A7E87FACF115 /* EpisodeStateOrigin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8543AE708CF079C505AC6FD /* EpisodeStateOrigin.swift */; };
 		7C79FF6C0C9AAFCB77EED2C6 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEBCF0AA238DAB1924A48D3 /* AppRouter.swift */; };
@@ -2126,6 +2129,7 @@
 		F6E937B6EFEC128B5D844AF4 /* ResumeBarFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95598449270B79CB528DC564 /* ResumeBarFile.swift */; };
 		F6FF181CEC42C2FF177329F7 /* AccentAuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC7712AD9E8B29E84A7C624 /* AccentAuroraBackground.swift */; };
 		F703C5A648FED4D809CA485C /* Issue72LimiterSaturationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594FF4CD36B27FEFDD9B7F98 /* Issue72LimiterSaturationTests.swift */; };
+		F708C1E60EB4293493795E6F /* GuideCategoryChipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D73BE51A7F8A6211EA4C60 /* GuideCategoryChipTests.swift */; };
 		F72D8C450A9DB19783E5FA5E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB64AA91C881200F98F790D /* SettingsView.swift */; };
 		F73E9DEAEA5201E870029FAE /* SeerrSeasonRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4D3E849B07F0E0FBB4599F /* SeerrSeasonRow.swift */; };
 		F74FDF2DD75F0066DA3F366D /* CloudSyncForwardCompatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEF15F18D201FFB609B9CE8 /* CloudSyncForwardCompatTests.swift */; };
@@ -2403,6 +2407,7 @@
 		256CE5DE2B1273662AB9F398 /* StatsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsOverlayView.swift; sourceTree = "<group>"; };
 		2571665C0F9D8B80C4BC47E0 /* MacAboutWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAboutWindow.swift; sourceTree = "<group>"; };
 		25BD387802323A463E872181 /* ForeignNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForeignNetworkTests.swift; sourceTree = "<group>"; };
+		25D73BE51A7F8A6211EA4C60 /* GuideCategoryChipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideCategoryChipTests.swift; sourceTree = "<group>"; };
 		25E0D841BD4BA1B55994E038 /* LiveRailLabels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveRailLabels.swift; sourceTree = "<group>"; };
 		25E45C5B4B6301A984B2A308 /* ActiveProfileRemovalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveProfileRemovalTests.swift; sourceTree = "<group>"; };
 		25FF2C59F162B68CC0D9F82B /* RecordingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingsView.swift; sourceTree = "<group>"; };
@@ -2425,6 +2430,7 @@
 		295FDAA87BA1F88D38652E78 /* FolderBrowseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderBrowseTests.swift; sourceTree = "<group>"; };
 		29809C29A9F5414708B210F6 /* NowPlayingPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingPresentation.swift; sourceTree = "<group>"; };
 		29F7CC53B87E7E5AE63C0EF1 /* PlaylistDetailViewRowIDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailViewRowIDTests.swift; sourceTree = "<group>"; };
+		2A1B3EE3110433FAF9ACBDF9 /* GuideCategoryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideCategoryController.swift; sourceTree = "<group>"; };
 		2A1FEC49C220A8CA94AFC056 /* HomeContinueWatchingConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContinueWatchingConcurrencyTests.swift; sourceTree = "<group>"; };
 		2A923B05E2F215F901C75218 /* PiPSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPSessionCoordinator.swift; sourceTree = "<group>"; };
 		2AEDF4FA4D7ED09E1704C0B8 /* LiveTimerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTimerStore.swift; sourceTree = "<group>"; };
@@ -3679,6 +3685,7 @@
 				EA60D8A55CE7A835EEAB00EF /* GuardianPINRecoveryCandidatesTests.swift */,
 				62F92E6CE312FC6CB38861FA /* GuideAxisAdvanceTests.swift */,
 				E14D3464C7E129B3F2C36E08 /* GuideAxisTests.swift */,
+				25D73BE51A7F8A6211EA4C60 /* GuideCategoryChipTests.swift */,
 				C7C6E7157A4A15687C7DC119 /* GuideCellTextStepTests.swift */,
 				939138CECC6FB0BF0B9E2B05 /* GuideChannelSearchTests.swift */,
 				6E1CBDC8FD675B2A490D1A34 /* GuideEdgeFadeTests.swift */,
@@ -4157,6 +4164,7 @@
 			isa = PBXGroup;
 			children = (
 				5E3E9F1FC8C17D4465BA1132 /* GuideAxis.swift */,
+				2A1B3EE3110433FAF9ACBDF9 /* GuideCategoryController.swift */,
 				6733091F24DDFD26F129BDD6 /* GuideCells.swift */,
 				3D5633624A3EA3F64C0B47CD /* GuideControlsView.swift */,
 				56D8EEF3C03148CFDABEFD32 /* GuideFilter.swift */,
@@ -5190,6 +5198,7 @@
 				309E12574539E98A196489D0 /* GuardianPINCrypto.swift in Sources */,
 				18F7695A40F39E7C4AA02E3D /* GuardianPINRecoveryCandidates.swift in Sources */,
 				853C5FB7CBBECB1E2EECAFC0 /* GuideAxis.swift in Sources */,
+				405F17DC271BFF557C2CC4DD /* GuideCategoryController.swift in Sources */,
 				2040F4CF1D2637C356C12326 /* GuideCells.swift in Sources */,
 				24319C53ED75B6AAAA312675 /* GuideControlsView.swift in Sources */,
 				D171F86A59BE0D23D49E7A35 /* GuideFilter.swift in Sources */,
@@ -5771,6 +5780,7 @@
 				5135BB5FABAEAD27031166C6 /* GuardianPINCrypto.swift in Sources */,
 				24A23FB39A9EB29464FDD985 /* GuardianPINRecoveryCandidates.swift in Sources */,
 				57A99162E968F403D66F8F9D /* GuideAxis.swift in Sources */,
+				500988026F24626016F42E6E /* GuideCategoryController.swift in Sources */,
 				8F0EF61BD4A156B9CB07F8D1 /* GuideCells.swift in Sources */,
 				44AFB5042A23F110A12FF926 /* GuideControlsView.swift in Sources */,
 				259B79B451528C5FF81A56F9 /* GuideFilter.swift in Sources */,
@@ -6361,6 +6371,7 @@
 				2567386EADBABB28A6BEBD7B /* GuardianPINRecoveryCandidatesTests.swift in Sources */,
 				405B51CBA803D69D14D52F54 /* GuideAxisAdvanceTests.swift in Sources */,
 				01A9AC45054B22178B172FE3 /* GuideAxisTests.swift in Sources */,
+				F708C1E60EB4293493795E6F /* GuideCategoryChipTests.swift in Sources */,
 				866B09FAD6F1D85CBEAA0222 /* GuideCellTextStepTests.swift in Sources */,
 				81037655426C4431ED7C3341 /* GuideChannelSearchTests.swift in Sources */,
 				30FA53AE69FCCD0C55CEDF2F /* GuideEdgeFadeTests.swift in Sources */,
@@ -6793,6 +6804,7 @@
 				D36F4A87CC36115958693DD5 /* GuardianPINCrypto.swift in Sources */,
 				F3FAB17E58CBC268E7603C64 /* GuardianPINRecoveryCandidates.swift in Sources */,
 				955FE9E5B37AAE0E81E1C594 /* GuideAxis.swift in Sources */,
+				7B1DD5D6D753406392B6B30E /* GuideCategoryController.swift in Sources */,
 				77BDB66D7B8BB9E41E00773A /* GuideCells.swift in Sources */,
 				03376AF52AD5EC8D5688232A /* GuideControlsView.swift in Sources */,
 				FB3C19CD53327511C67690C0 /* GuideFilter.swift in Sources */,

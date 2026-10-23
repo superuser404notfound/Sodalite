@@ -69993,6 +69993,330 @@
         }
       }
     },
+    "changelog.1_1_0.guideChips.body" : {
+      "comment" : "What's New 1.1.0: guide category chips airing now, Radio chip only with radio channels (#201)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čipy Sport, Zprávy, Filmy a Děti v průvodci živou TV nyní ukazují stanice, které takový pořad právě vysílají. Sport a Zprávy dříve zůstávaly prázdné. Čip Rádio se zobrazí jen tehdy, když má server rozhlasové stanice."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chippene Sport, Nyheder, Film og Børn i Live TV-guiden viser nu de kanaler, der sender sådan et program lige nu. Sport og Nyheder forblev tidligere tomme. Radio-chippen vises kun, når serveren har radiokanaler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Chips Sport, Nachrichten, Filme und Kinder im Live-TV-Guide zeigen jetzt die Sender, auf denen gerade so eine Sendung läuft. Sport und Nachrichten blieben bisher leer. Der Radio-Chip erscheint nur noch, wenn der Server Radiosender hat."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα κουμπιά Αθλητικά, Ειδήσεις, Ταινίες και Παιδικά στον οδηγό Live TV δείχνουν πλέον τα κανάλια που μεταδίδουν τέτοιο πρόγραμμα αυτή τη στιγμή. Τα Αθλητικά και οι Ειδήσεις έμεναν μέχρι τώρα κενά. Το κουμπί Ραδιόφωνο εμφανίζεται μόνο όταν ο διακομιστής έχει ραδιοφωνικά κανάλια."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Sports, News, Movies and Kids chips in the Live TV guide now show the channels airing such a program right now. Sports and News used to stay empty. The Radio chip only appears when the server has radio channels."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los chips Deportes, Noticias, Películas e Infantil de la guía de TV en directo ahora muestran los canales que emiten un programa así en este momento. Deportes y Noticias antes se quedaban vacíos. El chip Radio solo aparece si el servidor tiene canales de radio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live TV -oppaan Urheilu-, Uutiset-, Elokuvat- ja Lapset-valinnat näyttävät nyt kanavat, joilla on juuri nyt menossa sellainen ohjelma. Urheilu ja Uutiset jäivät aiemmin tyhjiksi. Radio-valinta näkyy vain, jos palvelimella on radiokanavia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les puces Sport, Infos, Films et Enfants du guide TV en direct affichent désormais les chaînes qui diffusent un tel programme en ce moment. Sport et Infos restaient vides jusqu'ici. La puce Radio n'apparaît que si le serveur a des chaînes de radio."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oznake Sport, Vijesti, Filmovi i Djeca u vodiču TV uživo sada prikazuju kanale koji upravo emitiraju takav program. Sport i Vijesti dosad su ostajali prazni. Oznaka Radio pojavljuje se samo ako poslužitelj ima radijske kanale."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az élő TV műsorújság Sport, Hírek, Filmek és Gyerek gombjai mostantól azokat a csatornákat mutatják, amelyeken éppen ilyen műsor megy. A Sport és a Hírek eddig üresek maradtak. A Rádió gomb csak akkor jelenik meg, ha a szerveren vannak rádiócsatornák."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I chip Sport, Notizie, Film e Bambini nella guida della TV in diretta ora mostrano i canali che trasmettono un programma del genere in questo momento. Sport e Notizie prima restavano vuoti. Il chip Radio compare solo se il server ha canali radio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブTVガイドのスポーツ、ニュース、映画、キッズのチップは、今まさにその種類の番組を放送しているチャンネルを表示するようになりました。これまでスポーツとニュースは空のままでした。ラジオのチップはサーバーにラジオチャンネルがある場合にのみ表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실시간 TV 가이드의 스포츠, 뉴스, 영화, 키즈 칩이 이제 지금 그런 프로그램을 방송 중인 채널을 보여 줍니다. 이전에는 스포츠와 뉴스가 비어 있었습니다. 라디오 칩은 서버에 라디오 채널이 있을 때만 나타납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brikkene Sport, Nyheter, Filmer og Barn i Live TV-guiden viser nå kanalene som sender et slikt program akkurat nå. Sport og Nyheter forble tidligere tomme. Radio-brikken vises bare når serveren har radiokanaler."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De chips Sport, Nieuws, Films en Kinderen in de Live TV-gids tonen nu de zenders die op dit moment zo'n programma uitzenden. Sport en Nieuws bleven voorheen leeg. De Radio-chip verschijnt alleen als de server radiozenders heeft."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przyciski Sport, Wiadomości, Filmy i Dzieci w przewodniku telewizji na żywo pokazują teraz kanały, które właśnie nadają taki program. Sport i Wiadomości wcześniej pozostawały puste. Przycisk Radio pojawia się tylko wtedy, gdy serwer ma kanały radiowe."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os chips Esportes, Notícias, Filmes e Infantil no guia de TV ao vivo agora mostram os canais que estão exibindo esse tipo de programa neste momento. Esportes e Notícias antes ficavam vazios. O chip Rádio só aparece quando o servidor tem canais de rádio."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os chips Desporto, Notícias, Filmes e Infantil no guia de TV em direto mostram agora os canais que estão a emitir um programa desse tipo neste momento. Desporto e Notícias ficavam vazios até aqui. O chip Rádio só aparece quando o servidor tem canais de rádio."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butoanele Sport, Știri, Filme și Copii din ghidul TV live arată acum canalele care difuzează chiar acum un astfel de program. Sport și Știri rămâneau goale până acum. Butonul Radio apare doar dacă serverul are canale radio."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки «Спорт», «Новости», «Фильмы» и «Детям» в гиде прямого эфира теперь показывают каналы, на которых прямо сейчас идёт такая передача. «Спорт» и «Новости» раньше оставались пустыми. Кнопка «Радио» появляется, только если на сервере есть радиоканалы."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čipy Šport, Správy, Filmy a Deti v sprievodcovi živou TV teraz ukazujú stanice, ktoré takýto program práve vysielajú. Šport a Správy predtým zostávali prázdne. Čip Rádio sa zobrazí len vtedy, keď má server rozhlasové stanice."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knapparna Sport, Nyheter, Filmer och Barn i Live TV-guiden visar nu de kanaler som sänder ett sådant program just nu. Sport och Nyheter förblev tidigare tomma. Radio-knappen visas bara när servern har radiokanaler."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı TV rehberindeki Spor, Haberler, Filmler ve Çocuk çipleri artık şu anda böyle bir program yayınlayan kanalları gösteriyor. Spor ve Haberler daha önce boş kalıyordu. Radyo çipi yalnızca sunucuda radyo kanalları olduğunda görünür."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки «Спорт», «Новини», «Фільми» та «Дітям» у гіді прямого ефіру тепер показують канали, на яких просто зараз іде така передача. «Спорт» і «Новини» раніше залишалися порожніми. Кнопка «Радіо» з'являється, лише якщо на сервері є радіоканали."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直播电视节目指南中的体育、新闻、电影和儿童标签现在显示此刻正在播出此类节目的频道。体育和新闻以前总是空的。只有服务器有广播频道时才会显示广播标签。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直播電視節目指南中的體育、新聞、電影和兒童標籤現在顯示此刻正在播出此類節目的頻道。體育和新聞以前總是空的。只有伺服器有廣播頻道時才會顯示廣播標籤。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.guideChips.title" : {
+      "comment" : "What's New 1.1.0: guide category chips airing now, Radio chip only with radio channels (#201)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategorie v průvodci ukazují, co právě běží"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidens kategorier viser, hvad der kører nu"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guide-Kategorien zeigen, was gerade läuft"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι κατηγορίες του οδηγού δείχνουν τι παίζει τώρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guide categories show what's on now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las categorías de la guía muestran lo que se emite ahora"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppaan kategoriat näyttävät, mitä on nyt menossa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les catégories du guide montrent ce qui passe maintenant"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategorije u vodiču prikazuju što se sada emitira"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A műsorújság kategóriái azt mutatják, ami most megy"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le categorie della guida mostrano cosa va in onda ora"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ガイドのカテゴリが今放送中の番組を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가이드 카테고리가 지금 방송 중인 프로그램을 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidens kategorier viser hva som går nå"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gidscategorieën tonen wat er nu op is"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategorie w przewodniku pokazują, co leci teraz"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As categorias do guia mostram o que está passando agora"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As categorias do guia mostram o que está a dar agora"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoriile ghidului arată ce rulează acum"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категории гида показывают то, что идёт сейчас"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategórie v sprievodcovi ukazujú, čo práve beží"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidens kategorier visar vad som sänds nu"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rehber kategorileri şu an yayında olanı gösteriyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категорії гіда показують те, що йде зараз"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "节目指南分类显示正在播出的内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "節目指南分類顯示正在播出的內容"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.guideGenres.body" : {
       "comment" : "What's New 1.1.0: genre filter in the Live TV guide (#182)",
       "extractionState" : "manual",

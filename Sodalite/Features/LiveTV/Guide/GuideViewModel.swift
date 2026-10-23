@@ -26,7 +26,8 @@ final class GuideViewModel {
     var isLoadingChannels: Bool { fetchingGeneration != nil }
     private(set) var channelsComplete = false
     private(set) var loadError: String?
-    /// Drives whether the Radio chip is offered at all.
+    /// Drives whether the Radio chip is offered at all. Latched: a favourites-only list without a
+    /// radio channel must not take the chip away again.
     private(set) var hasRadioChannels = false
 
     /// Hero content: the last program focused IN THE GRID, held while focus sits on the ruler or
@@ -49,6 +50,8 @@ final class GuideViewModel {
 
     /// Genre narrowing (#182), applied client-side on top of `filter` and the search.
     let genres: GuideGenreController
+    /// Category narrowing (#201), applied client-side like the genres.
+    let categories: GuideCategoryController
 
     private let service: JellyfinLiveTvServiceProtocol
     private let userID: String
@@ -76,17 +79,18 @@ final class GuideViewModel {
         self.axis = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute)
         self.anchorTime = now
         self.genres = GuideGenreController(service: service, userID: userID)
+        self.categories = GuideCategoryController(service: service, userID: userID)
         genres.guideWindow = { [unowned self] in (axis.start, axis.end) }
         genres.onSnapToNow = { [unowned self] in jumpToNow() }
         genres.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
+        categories.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
     }
 
     var allLoadedPrograms: [JellyfinProgram] { programsByChannel.values.flatMap { $0 } }
 
     // MARK: - Loading
 
-    /// Guide bounds, the Radio probe and the channel list. Safe to call repeatedly; only the first
-    /// call does work.
+    /// Guide bounds and the channel list. Safe to call repeatedly; only the first call does work.
     func load() async {
         guard !didLoad else { return }
         didLoad = true
@@ -96,19 +100,12 @@ final class GuideViewModel {
     }
 
     private func performLoad() async {
-        // The two probes run concurrently: they are independent, and serialising them would put two
-        // round trips in front of the first channel page instead of one.
-        async let infoTask = try? service.getGuideInfo()
-        async let radioTask = try? service.getChannels(
-            userID: userID, startIndex: 0, limit: 1, filter: Self.radioProbe)
-
         // The axis is rebuilt once the server's horizon is known, BEFORE any program fetch: a 12h
         // guide should not render 36h of empty canvas, and the ruler's chip count comes off the axis.
-        if let end = (await infoTask)?.endDate {
+        if let end = (try? await service.getGuideInfo())?.endDate {
             guideEnd = end
             refreshAxis()
         }
-        hasRadioChannels = !((await radioTask)?.items.isEmpty ?? true)
         await fetchChannels()
     }
 
@@ -152,25 +149,28 @@ final class GuideViewModel {
         requestedProgramChannelIDs = []
         anchorTime = min(max(anchorTime, rebuilt.start), rebuilt.end)
         genres.invalidate()
+        categories.invalidate()
         return true
     }
-
-    /// One-item Radio query. Without it the Radio chip would be offered on the majority of servers
-    /// that have no radio tuner at all.
-    private static let radioProbe: GuideFilter = {
-        var probe = GuideFilter.default
-        probe.kind = .radio
-        return probe
-    }()
 
     func apply(filter newFilter: GuideFilter) async {
         guard newFilter != filter else { return }
         let categoryChanged = newFilter.category != nil && newFilter.category != filter.category
+        let refetch = newFilter.queryItems != filter.queryItems
         filter = newFilter
-        // Jellyfin's category filters look at what is airing RIGHT NOW. Leaving the axis parked at
-        // 23:00 would show channels selected for their 20:15 program, which reads as a broken filter.
+        // A category matches what is airing RIGHT NOW. Leaving the axis parked at 23:00 would show
+        // channels selected for their 20:15 program, which reads as a broken filter.
         if categoryChanged { jumpToNow() }
-        await reloadChannels()
+        if refetch {
+            async let resolved: Void = categories.apply(newFilter.category)
+            await reloadChannels()
+            await resolved
+        } else {
+            // Kind and category narrow what is already fetched. The category's resolve empties the
+            // set in the same turn, so the grid never shows the unnarrowed list in between.
+            recomputeVisibleChannels()
+            await categories.apply(newFilter.category)
+        }
     }
 
     func apply(searchText newValue: String) {
@@ -204,6 +204,9 @@ final class GuideViewModel {
                 guard generation == loadGeneration else { return }
                 fetchedChannels.append(contentsOf: response.items)
                 timers.seedFavorites(from: response.items)
+                // Read off the channels themselves: Jellyfin drops a Type=Radio filter, so a probe
+                // for one answered yes on every server with Live TV (#201).
+                if response.items.contains(where: { $0.kind == .radio }) { hasRadioChannels = true }
                 startIndex += response.items.count
                 // A page that came back empty also ends the loop, or a server that ignores
                 // StartIndex would spin here forever.
@@ -222,7 +225,8 @@ final class GuideViewModel {
     private func recomputeVisibleChannels() {
         let query = searchText
         channels = fetchedChannels.filter { channel in
-            genres.admits(channel) && (query.isEmpty || Self.matches(channel: channel, query: query))
+            filter.admits(kindOf: channel) && categories.admits(channel) && genres.admits(channel)
+                && (query.isEmpty || Self.matches(channel: channel, query: query))
         }
     }
 
