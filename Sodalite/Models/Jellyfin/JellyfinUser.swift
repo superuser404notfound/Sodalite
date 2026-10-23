@@ -29,6 +29,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
         var blockedTags: [String]? = nil
         var allowedTags: [String]? = nil
         var blockUnratedItems: [String]? = nil
+        var enableVideoPlaybackTranscoding: Bool? = nil
 
         enum CodingKeys: String, CodingKey {
             case isAdministrator = "IsAdministrator"
@@ -39,6 +40,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             case blockedTags = "BlockedTags"
             case allowedTags = "AllowedTags"
             case blockUnratedItems = "BlockUnratedItems"
+            case enableVideoPlaybackTranscoding = "EnableVideoPlaybackTranscoding"
         }
 
         /// Every field is optional on the wire: a server that omits one (seen in TestFlight feedback for
@@ -53,6 +55,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             blockedTags = try c.decodeIfPresent([String].self, forKey: .blockedTags)
             allowedTags = try c.decodeIfPresent([String].self, forKey: .allowedTags)
             blockUnratedItems = try c.decodeIfPresent([String].self, forKey: .blockUnratedItems)
+            enableVideoPlaybackTranscoding = try c.decodeIfPresent(Bool.self, forKey: .enableVideoPlaybackTranscoding)
         }
     }
 
@@ -66,6 +69,13 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
     /// administrator shortcut. False while the policy is unloaded, like `canDeleteContent`.
     var canManageLiveTv: Bool {
         policy?.enableLiveTvManagement == true
+    }
+
+    /// Jellyfin's `EnableVideoPlaybackTranscoding`. Without it the server still hands out a transcode
+    /// URL for a capped request, but copies the video, so no bitrate cap is ever applied (Sodalite#202).
+    /// True while the policy is unloaded: that is the server default, and the rungs were offered before.
+    var canTranscodeVideo: Bool {
+        policy?.enableVideoPlaybackTranscoding != false
     }
 
     /// Nothing in the policy keeps library items from this user: every folder, no rating ceiling, no tag

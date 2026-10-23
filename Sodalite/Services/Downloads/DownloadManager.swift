@@ -33,6 +33,8 @@ protocol DownloadBackend: AnyObject {
     var userID: String { get }
     var preferredAudioLanguage: String? { get }
     var allowsCellular: Bool { get }
+    /// False for a user whose policy forbids video transcoding: every rung downloads the original (Sodalite#202).
+    var canTranscodeVideo: Bool { get }
     func playbackInfo(itemID: String, profile: [String: Any], mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse
     func itemDetail(itemID: String) async throws -> JellyfinItem
     func seasonEpisodes(seriesID: String, seasonID: String) async throws -> [JellyfinItem]
@@ -75,8 +77,9 @@ final class DownloadManager {
 
     /// `mediaSourceID` is the version to download; nil takes the one the detail page shows by
     /// default, not whichever the server lists first (Sodalite#200).
-    func enqueue(item: JellyfinItem, quality: StreamingQuality, mediaSourceID: String? = nil) async throws {
+    func enqueue(item: JellyfinItem, quality requested: StreamingQuality, mediaSourceID: String? = nil) async throws {
         guard store.item(item.id) == nil else { return }
+        let quality = backend.canTranscodeVideo ? requested : .original
         guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
 
         let versionID = mediaSourceID ?? VersionSelection().preferredSourceID(for: item)

@@ -15,6 +15,12 @@ struct QualityPickerRungsTests {
         #expect(PlayerViewModel.pickerQualities(sourceBitrate: 1_500_000) == [.original])
     }
 
+    /// Sodalite#202: without video transcoding every rung plays the original.
+    @Test func aUserWithoutVideoTranscodingIsOfferedOnlyTheOriginal() {
+        #expect(PlayerViewModel.pickerQualities(sourceBitrate: 29_000_000, canTranscodeVideo: false) == [.original])
+        #expect(PlayerViewModel.pickerQualities(sourceBitrate: nil, canTranscodeVideo: false) == [.original])
+    }
+
     /// Without a bitrate nothing can be ruled out.
     @Test func anUnknownBitrateOffersEveryRung() {
         #expect(PlayerViewModel.pickerQualities(sourceBitrate: nil) == StreamingQuality.allCases)

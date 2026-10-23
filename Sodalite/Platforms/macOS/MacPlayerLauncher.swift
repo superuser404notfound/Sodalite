@@ -65,6 +65,7 @@ struct PlayerLauncher: View {
             itemService: itemService,
             trackMemory: trackMemory,
             spoilerPolicy: spoilerPolicy,
+            canTranscodeVideo: state.canTranscodeVideo(on: serverSession),
             cachedPlaybackInfo: cachedPlaybackInfo,
             preferredMediaSourceID: preferredMediaSourceID,
             playQueue: playQueue,

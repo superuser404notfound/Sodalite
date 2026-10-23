@@ -35,6 +35,20 @@ struct JellyfinUserPolicyTests {
         #expect(try user(policy: nil).seesWholeLibrary == false)
         #expect(try user(policy: "").seesWholeLibrary == false)
     }
+
+    // MARK: - canTranscodeVideo (Sodalite#202)
+
+    /// Without the grant Jellyfin copies the video under every rung, so no cap is ever applied.
+    @Test func videoTranscodingFollowsThePolicy() throws {
+        #expect(try user(policy: #", "EnableVideoPlaybackTranscoding": false"#).canTranscodeVideo == false)
+        #expect(try user(policy: #", "EnableVideoPlaybackTranscoding": true"#).canTranscodeVideo)
+    }
+
+    /// Unknown is the server default, so the rungs stay offered until the policy says otherwise.
+    @Test func anUnknownPolicyMayTranscodeVideo() throws {
+        #expect(try user(policy: nil).canTranscodeVideo)
+        #expect(try user(policy: "").canTranscodeVideo)
+    }
 }
 
 extension JellyfinUserPolicyTests {

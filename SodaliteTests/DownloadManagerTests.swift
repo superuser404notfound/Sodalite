@@ -105,6 +105,20 @@ struct DownloadManagerTests {
         #expect(store.item("a") == nil)
     }
 
+    /// Sodalite#202: Jellyfin hands such a user a transcode URL but copies the video, so a rung
+    /// would download the original under a size it never had.
+    @Test func aUserWithoutVideoTranscodingDownloadsTheOriginalForAnyRung() async throws {
+        let backend = FakeDownloadBackend()
+        backend.sourceBitrate = 30_000_000
+        backend.transcodingUrl = "/videos/a/stream.mp4?MediaSourceId=src&api_key=T"
+        backend.canTranscodeVideo = false
+        let (manager, store, _) = makeManager(backend: backend)
+        try await manager.enqueue(item: movie("a"), quality: .mbps2)
+        #expect(store.item("a")?.manifest.route == .original)
+        #expect(store.item("a")?.manifest.quality == .original)
+        #expect(store.item("a")?.manifest.expectedBytes == 1000)
+    }
+
     @Test func unauthorizedRetryRebuildsTheRequest() async throws {
         let backend = FakeDownloadBackend()
         let (manager, store, transport) = makeManager(backend: backend)
@@ -186,6 +200,7 @@ final class FakeDownloadBackend: DownloadBackend {
     let baseURL: URL? = URL(string: "https://jf.example")
     let userID = "usr"
     let preferredAudioLanguage: String? = nil
+    var canTranscodeVideo = true
 
     func playbackInfo(itemID: String, profile: [String: Any], mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         if yieldsInPlaybackInfo { try await Task.sleep(for: .milliseconds(20)) }

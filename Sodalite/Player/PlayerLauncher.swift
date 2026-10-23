@@ -78,6 +78,7 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                     itemService: itemService,
                     trackMemory: trackMemory,
                     spoilerPolicy: spoilerPolicy,
+                    canTranscodeVideo: appState.canTranscodeVideo(on: serverSession),
                     cachedPlaybackInfo: cachedPlaybackInfo,
                     preferredMediaSourceID: preferredMediaSourceID,
                     playQueue: playQueue,
