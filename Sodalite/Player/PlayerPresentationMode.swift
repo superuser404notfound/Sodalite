@@ -15,4 +15,6 @@ enum PlayerPresentationMode: Sendable, Equatable {
     var observesAppLifecycle: Bool { self != .multiviewTile }
     var offersPictureInPicture: Bool { self != .multiviewTile }
     var offersMultiview: Bool { self != .multiviewTile }
+    /// The Multiview chip stays in a tile's full screen and goes back to the grid, like Back.
+    var returnsToMultiview: Bool { self == .multiviewTile }
 }

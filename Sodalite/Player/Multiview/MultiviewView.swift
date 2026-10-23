@@ -121,7 +121,7 @@ struct MultiviewView: View {
             if let failure {
                 failureOverlay(failure)
             }
-            channelLabel(tile.currentChannel)
+            channelLabel(tile.currentChannel, program: vm.liveProgram?.name ?? tile.currentChannel.currentProgram?.name)
                 .opacity(showInfo ? 1 : 0)
                 .animation(.easeInOut(duration: 0.3), value: showInfo)
                 .allowsHitTesting(false)
@@ -172,20 +172,19 @@ struct MultiviewView: View {
         }
     }
 
-    private func channelLabel(_ channel: JellyfinChannel) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 12) {
-                if let number = channel.channelNumber, !number.isEmpty {
-                    Text(number)
-                        .font(.headline.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-                Text(channel.name)
-                    .font(.headline)
-                    .lineLimit(1)
-            }
-            if let program = channel.currentProgram?.name, !program.isEmpty {
-                Text(program)
+    /// classicjazz on #175: the programme reads before the channel, so it leads and the channel sits under it.
+    private func channelLabel(_ channel: JellyfinChannel, program: String?) -> some View {
+        let program = program.flatMap { $0.isEmpty ? nil : $0 }
+        let number = channel.channelNumber.flatMap { $0.isEmpty ? nil : $0 }
+        let subtitle = program == nil
+            ? number
+            : [number, channel.name].compactMap { $0 }.joined(separator: " \u{00B7} ")
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(program ?? channel.name)
+                .font(.headline)
+                .lineLimit(1)
+            if let subtitle {
+                Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)

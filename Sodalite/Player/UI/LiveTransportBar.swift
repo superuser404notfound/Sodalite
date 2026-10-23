@@ -218,7 +218,9 @@ struct LiveTransportBar: View {
             .opacity(viewModel.isPiPPossible ? 1.0 : 0.4)
         case .multiviewButton:
             TransportTrackLabel(
-                label: String(localized: "multiview.button", defaultValue: "Multiview"),
+                label: viewModel.multiviewReturnsToGrid
+                    ? String(localized: "multiview.backToGrid", defaultValue: "Back to Multiview")
+                    : String(localized: "multiview.button", defaultValue: "Multiview"),
                 icon: "rectangle.split.2x2",
                 showsLabel: viewModel.controlsFocus == .multiviewButton,
                 isFocused: viewModel.controlsFocus == .multiviewButton

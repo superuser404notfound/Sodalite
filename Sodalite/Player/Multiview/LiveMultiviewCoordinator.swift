@@ -41,6 +41,9 @@ final class LiveMultiviewCoordinator {
 
     typealias TileFactory = (JellyfinChannel, AetherEngine) -> PlayerViewModel
 
+    /// How long a tile's full screen may hide the others before they hand their tuners back.
+    static let hiddenTileParkDelay: Duration = .seconds(300)
+
     let session: MultiviewSession
     let theme: ResolvedAppearanceTheme
     var pickerRequest: MultiviewPickerRequest?
@@ -58,6 +61,10 @@ final class LiveMultiviewCoordinator {
     @ObservationIgnored private var wasBackgrounded = false
     @ObservationIgnored private var suspendTask: Task<Void, Never>?
     @ObservationIgnored private var resumeTask: Task<Void, Never>?
+    @ObservationIgnored private var parkTask: Task<Void, Never>?
+    @ObservationIgnored private var unparkTask: Task<Void, Never>?
+    /// The tile whose full screen is up, nil while the grid shows.
+    @ObservationIgnored private var fullScreenTileID: UUID?
     @ObservationIgnored private var suspensionAssertion: UIBackgroundTaskIdentifier = .invalid
     @ObservationIgnored private var finished = false
     /// Each tile's frame in window coordinates, as the grid last laid it out.
@@ -214,6 +221,8 @@ final class LiveMultiviewCoordinator {
             }
         )
         fullScreen = controller
+        fullScreenTileID = id
+        armParking()
         controller.modalPresentationStyle = .fullScreen
         grid.present(controller, animated: armZoom(on: controller, tile: id))
     }
@@ -231,13 +240,45 @@ final class LiveMultiviewCoordinator {
         return true
     }
 
+    /// classicjazz on #175: the other tiles keep a tuner each while nobody sees them, which another client
+    /// on the same tuner may want.
+    private func armParking() {
+        parkTask?.cancel()
+        guard let visible = fullScreenTileID else { return }
+        let session = session
+        parkTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: Self.hiddenTileParkDelay)
+            guard !Task.isCancelled, self?.fullScreenTileID == visible else { return }
+            LogTap.shared.note("[Multiview] full screen for \(Self.hiddenTileParkDelay), parking hidden tiles")
+            // Unstructured, so a return to the grid mid-way waits for the releases instead of cutting one short.
+            await Task { @MainActor in await session.parkHidden(except: visible) }.value
+        }
+    }
+
     /// The grid is on screen again: every tile's end handler is ours, whatever a full screen wrote meanwhile.
     func gridDidAppear() {
+        fullScreenTileID = nil
+        unparkHiddenTiles()
         for tile in session.tiles {
             tile.viewModel.zapSkipsChannelIDs = nil
             Self.armTileEnd(tile.viewModel)
             // Ended while its full screen was up: that player closed itself, the tile is still dead.
             if tile.viewModel.player.state == .ended { tile.viewModel.onPlaybackReachedEnd?() }
+        }
+    }
+
+    private func unparkHiddenTiles() {
+        let pending = parkTask
+        parkTask = nil
+        pending?.cancel()
+        let session = session
+        let prior = unparkTask
+        unparkTask = Task { @MainActor in
+            await prior?.value
+            await pending?.value
+            guard !Task.isCancelled, !session.parkedTileIDs.isEmpty else { return }
+            LogTap.shared.note("[Multiview] grid back, retuning parked tiles=\(session.parkedTileIDs.count)")
+            await session.unparkAll()
         }
     }
 
@@ -369,6 +410,10 @@ final class LiveMultiviewCoordinator {
         LogTap.shared.note("[Multiview] background, suspending tiles=\(session.tiles.count)")
         wasBackgrounded = true
         resumeTask?.cancel()
+        parkTask?.cancel()
+        parkTask = nil
+        unparkTask?.cancel()
+        unparkTask = nil
         for tile in session.tiles { tile.viewModel.setAppActive(false) }
         suspendTask?.cancel()
         endSuspensionAssertion()
@@ -399,6 +444,7 @@ final class LiveMultiviewCoordinator {
         resumeTask = Task { @MainActor in
             await session.resumeAll()
         }
+        armParking()
     }
 
     private func endSuspensionAssertion() {
@@ -415,6 +461,10 @@ final class LiveMultiviewCoordinator {
         suspendTask = nil
         resumeTask?.cancel()
         resumeTask = nil
+        parkTask?.cancel()
+        parkTask = nil
+        unparkTask?.cancel()
+        unparkTask = nil
         endSuspensionAssertion()
         lineupTask?.cancel()
         lineupTask = nil

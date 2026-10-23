@@ -28,22 +28,24 @@ struct MultiviewSessionTests {
     private func makeSession(
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
-        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
+        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) },
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
     ) throws -> MultiviewSession {
-        try makeSessionAndPool(audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend).session
+        try makeSessionAndPool(audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend, park: park).session
     }
 
     private func makeSessionAndPool(
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
-        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) }
+        suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) },
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
     ) throws -> (session: MultiviewSession, pool: MultiviewEnginePool) {
         let pool = MultiviewEnginePool(primary: try AetherEngine(), make: { try AetherEngine() })
         let first = makeVM(channel("c1"), engine: pool.primary, role: .primary)
         let session = MultiviewSession(
             first: first, channel: channel("c1"), pool: pool,
             makeTileVM: { [self] channel, engine in makeVM(channel, engine: engine, role: .primary) },
-            audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend)
+            audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend, park: park)
         return (session, pool)
     }
 
@@ -282,6 +284,40 @@ struct MultiviewSessionTests {
         #expect(Set(journal.entries) == ["start:c1", "end:c1", "start:c2", "end:c2", "start:c3", "end:c3"])
         // Concurrent: every suspension starts before the first one finishes.
         #expect(journal.entries.prefix(3).allSatisfy { $0.hasPrefix("start:") })
+    }
+
+    @Test("a long full screen parks every other tile once, and the grid retunes exactly those")
+    func parkHiddenThenUnpark() async throws {
+        let journal = Journal()
+        let session = try makeSession(
+            retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
+            park: { vm in journal.entries.append("park:\(vm.liveChannel?.id ?? "?")") })
+        try session.add(channel("c2"))
+        try session.add(channel("c3"))
+        let visible = session.tiles[1].id
+        await session.parkHidden(except: visible)
+        await session.parkHidden(except: visible)
+        #expect(journal.entries == ["park:c1", "park:c3"])
+        #expect(session.parkedTileIDs == [session.tiles[0].id, session.tiles[2].id])
+        journal.entries = []
+        await session.unparkAll()
+        #expect(journal.entries == ["retune:c1", "retune:c3"])
+        #expect(session.parkedTileIDs.isEmpty)
+    }
+
+    @Test("a parked tile that is removed or replaced is not retuned later")
+    func removedParkedTileIsForgotten() async throws {
+        let journal = Journal()
+        let session = try makeSession(
+            retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
+            park: { _ in })
+        try session.add(channel("c2"))
+        try session.add(channel("c3"))
+        await session.parkHidden(except: session.tiles[0].id)
+        session.remove(session.tiles[1].id)
+        try session.replace(session.tiles[1].id, with: channel("c4"))
+        await session.unparkAll()
+        #expect(journal.entries.isEmpty)
     }
 
     @Test("a survivor on a pool engine keeps its slot when multiview is entered again")

@@ -28,12 +28,15 @@ final class MultiviewSession {
 
     private(set) var tiles: [MultiviewTile]
     private(set) var audibleTileID: UUID
+    /// Tiles whose tuner went back while another tile was full screen; retuned when the grid shows again.
+    private(set) var parkedTileIDs: Set<UUID> = []
 
     @ObservationIgnored private let pool: MultiviewEnginePool
     @ObservationIgnored private let makeTileVM: (JellyfinChannel, AetherEngine) -> PlayerViewModel
     @ObservationIgnored private let audioFollowDelay: Duration
     @ObservationIgnored private let retune: (PlayerViewModel) async -> Void
     @ObservationIgnored private let suspend: @MainActor @Sendable (PlayerViewModel) async -> Void
+    @ObservationIgnored private let park: @MainActor @Sendable (PlayerViewModel) async -> Void
     @ObservationIgnored private var pendingAudio: Task<Void, Never>?
 
     init(
@@ -45,7 +48,8 @@ final class MultiviewSession {
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
         suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = {
             await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18)
-        }
+        },
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
     ) {
         // The first tile is the channel already on screen: it keeps playing on whatever engine it has, and
         // a survivor of an earlier grid keeps that engine's slot so no later tile is handed it again.
@@ -58,6 +62,7 @@ final class MultiviewSession {
         self.audioFollowDelay = audioFollowDelay
         self.retune = retune
         self.suspend = suspend
+        self.park = park
         applyVolumes()
     }
 
@@ -91,6 +96,7 @@ final class MultiviewSession {
         vm.sharedOutputRole = old.sharedOutputRole
         tiles[index].channel = channel
         tiles[index].viewModel = vm
+        parkedTileIDs.remove(id)
         applyVolumes()
         vm.beginPlayback()
     }
@@ -99,6 +105,7 @@ final class MultiviewSession {
         guard let index = tiles.firstIndex(where: { $0.id == id }) else { return }
         release(tiles[index].viewModel)
         tiles.remove(at: index)
+        parkedTileIDs.remove(id)
         if id == audibleTileID, let first = tiles.first {
             audibleTileID = first.id
         }
@@ -161,8 +168,27 @@ final class MultiviewSession {
         }
     }
 
+    /// Every tile but `visible` gives its tuner back, for other clients while nobody sees those tiles.
+    func parkHidden(except visible: UUID) async {
+        let hidden = tiles.filter { $0.id != visible && !parkedTileIDs.contains($0.id) }
+        parkedTileIDs.formUnion(hidden.map(\.id))
+        for tile in hidden {
+            await park(tile.viewModel)
+        }
+    }
+
+    /// One tune at a time, in grid order, for the tiles `parkHidden` let go.
+    func unparkAll() async {
+        let ids = parkedTileIDs
+        parkedTileIDs = []
+        for tile in tiles where ids.contains(tile.id) {
+            await retune(tile.viewModel)
+        }
+    }
+
     /// One tune at a time, the audible one first, so the tile with sound is the one that comes back first.
     func resumeAll() async {
+        parkedTileIDs = []
         let ordered = tiles.filter { $0.id == audibleTileID } + tiles.filter { $0.id != audibleTileID }
         for tile in ordered {
             await retune(tile.viewModel)

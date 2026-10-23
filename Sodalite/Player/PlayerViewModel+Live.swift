@@ -1190,6 +1190,14 @@ extension PlayerViewModel {
     /// return value: this runs in a task that is long finished by the time the foreground return asks,
     /// and a released tuner is what makes that return a tune rather than a resume, because there is
     /// nothing left to resume onto.
+    /// Sodalite#175: a multiview tile hidden behind another tile's full screen hands its tuner back the
+    /// way a suspension does; `retuneLiveStream()` brings it back when the grid shows again.
+    func parkHiddenLiveTile() async {
+        guard isLiveSession, activeLiveStreamID != nil, errorMessage == nil, tileRefusal == nil else { return }
+        player.stop()
+        await releaseLiveSessionForSuspension(waitingForTeardownUpTo: 5)
+    }
+
     func releaseLiveSessionForSuspension(waitingForTeardownUpTo timeout: TimeInterval) async {
         guard isLiveSession, activeLiveStreamID != nil else { return }
         let deadline = Date().addingTimeInterval(timeout)
