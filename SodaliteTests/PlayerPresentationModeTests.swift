@@ -6,6 +6,7 @@ struct PlayerPresentationModeTests {
     func standalone() {
         let m = PlayerPresentationMode.standalone
         #expect(m.launchesPlayback && m.stopsOnDismiss && m.observesAppLifecycle && m.offersPictureInPicture && m.offersMultiview)
+        #expect(!m.returnsToMultiview)
     }
 
     @Test("the survivor after multiview does not reload but is otherwise a normal player")
@@ -20,5 +21,6 @@ struct PlayerPresentationModeTests {
         let m = PlayerPresentationMode.multiviewTile
         #expect(!m.launchesPlayback && !m.stopsOnDismiss && !m.observesAppLifecycle)
         #expect(!m.offersPictureInPicture && !m.offersMultiview)
+        #expect(m.returnsToMultiview)
     }
 }

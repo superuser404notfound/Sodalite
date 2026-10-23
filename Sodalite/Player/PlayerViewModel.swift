@@ -405,6 +405,8 @@ final class PlayerViewModel {
     var isPiPAvailable = false
     /// Sodalite#175: the live bar shows the Multiview chip; the host writes it, iOS never does.
     var offersMultiview = false
+    /// The chip is in a tile's full screen, where it returns to the grid instead of opening one.
+    var multiviewReturnsToGrid = false
     @ObservationIgnored var onMultiviewRequested: (() -> Void)?
     /// AVKit's isPictureInPicturePossible; drives the transport button's enabled/dimmed state.
     var isPiPPossible = false

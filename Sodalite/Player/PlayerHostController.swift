@@ -157,7 +157,11 @@ final class PlayerHostController: AVPlayerViewController {
         view.backgroundColor = .black
         #if os(tvOS)
         viewModel.offersMultiview = offersMultiview
-        viewModel.onMultiviewRequested = { [weak self] in self?.handOffToMultiview() }
+        viewModel.multiviewReturnsToGrid = mode.returnsToMultiview
+        viewModel.onMultiviewRequested = { [weak self] in
+            guard let self else { return }
+            if self.mode.returnsToMultiview { self.dismissPlayer() } else { self.handOffToMultiview() }
+        }
         #endif
 
         // REQUIRED on tvOS for AVKit's Now Playing session + AirPods + Atmos sync; visible chrome is suppressed separately.
@@ -1042,7 +1046,7 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.player.state == .paused { viewModel.player.play() }
     }
 
-    var offersMultiview: Bool { mode.offersMultiview && viewModel.isLiveSession }
+    var offersMultiview: Bool { (mode.offersMultiview || mode.returnsToMultiview) && viewModel.isLiveSession }
 
     /// Sodalite#149: the one word that says which kind of trip this was, short enough to read next to a
     /// playhead in a log line.
