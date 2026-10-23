@@ -19,7 +19,11 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     /// with undecodable audio takes (#100). Jellyfin answers a DirectPlay verdict with neither a
     /// TranscodingUrl nor a reason, so taking that verdict off the table is the only way to see what
     /// else the server would have offered.
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse
+    ///
+    /// `autoOpenLiveStream` false asks without opening anything: no tuner, no probe, no handle to close.
+    /// The answer carries the channel's lineup source as is, which for an M3U channel is the provider
+    /// URL in `Path`, and that is all the direct route needs (#204).
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws
     func reportPlaybackStopped(_ report: PlaybackStopReport) async throws
@@ -94,7 +98,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         return body
     }
 
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil, maxStreamingBitrate: Int, enableDirectPlay: Bool = true) async throws -> PlaybackInfoResponse {
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil, maxStreamingBitrate: Int, enableDirectPlay: Bool = true, autoOpenLiveStream: Bool = true) async throws -> PlaybackInfoResponse {
         let body = Self.playbackInfoBody(profile: profile ?? [:], maxStreamingBitrate: nil,
                                          enableDirectPlay: enableDirectPlay)
         return try await postPlaybackInfo(profile: profile, body: body) { payload in
@@ -102,7 +106,8 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
                 itemID: itemID,
                 userID: userID,
                 maxStreamingBitrate: maxStreamingBitrate,
-                payload: payload
+                payload: payload,
+                autoOpen: autoOpenLiveStream
             )
         }
     }

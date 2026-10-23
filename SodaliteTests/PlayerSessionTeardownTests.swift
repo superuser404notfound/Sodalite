@@ -104,6 +104,7 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private var _events: [String] = []
     private var _playbackInfoRequests: [String] = []
     private var _livePlaybackInfoRequests: [String] = []
+    private var _unopenedLivePlaybackInfoRequests: [String] = []
     private var _requestedCaps: [Int?] = []
     private var _requestedAudioIndexes: [Int?] = []
     private var _requestedMediaSourceIDs: [String?] = []
@@ -133,6 +134,10 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
     /// Every live tuner open (live PlaybackInfo), by item id.
     var livePlaybackInfoRequests: [String] { lock.withLock { _livePlaybackInfoRequests } }
+    /// Every unopened live PlaybackInfo (#204), by item id. Opens nothing, so it is not a tuner open.
+    var unopenedLivePlaybackInfoRequests: [String] { lock.withLock { _unopenedLivePlaybackInfoRequests } }
+    /// The Path an unopened live PlaybackInfo answers with, by item id; none answers without one.
+    var unopenedPaths: [String: String] = [:]
     /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
     var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
     var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
@@ -186,7 +191,15 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     }
 
     private struct NotUsed: Error {}
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse {
+        guard autoOpenLiveStream else {
+            lock.withLock { _unopenedLivePlaybackInfoRequests.append(itemID) }
+            let path = unopenedPaths[itemID].map { #","Path":"\#($0)""# } ?? ""
+            return try JSONDecoder().decode(
+                PlaybackInfoResponse.self,
+                from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)"\#(path)}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+            )
+        }
         lock.withLock { _livePlaybackInfoRequests.append(itemID) }
         guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
         // Ignores cancellation, like a request Jellyfin is already probing the tuner for.

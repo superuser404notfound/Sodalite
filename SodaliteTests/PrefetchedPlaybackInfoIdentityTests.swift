@@ -53,7 +53,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
             )
         }
 
-        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
+        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse {
             throw NotUsed()
         }
         func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}

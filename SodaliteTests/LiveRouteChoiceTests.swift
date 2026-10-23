@@ -56,6 +56,26 @@ struct LiveRouteChoiceTests {
         #expect(Set(reasons).count == reasons.count)
     }
 
+    // MARK: - Unopened answer (#204)
+
+    @Test("an unopened answer naming a provider playlist goes direct, query and case aside")
+    func unopenedProviderPlaylist() {
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: providerPath)
+            == URL(string: providerPath)!)
+        let pluto = "https://service-stitcher.example/stitch/hls/channel/5f1/master.M3U8?deviceId=x&sid=y"
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: pluto) == URL(string: pluto)!)
+    }
+
+    @Test("HDHomeRun, a raw-TS entry, a tuner file or a local path keep the open")
+    func unopenedNonPlaylistOpens() {
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: "http://192.168.1.60:5004/auto/v5.1") == nil)
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: "http://iptv.example/live/u/p/42.ts") == nil)
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: "http://iptv.example/play?ch=42.m3u8") == nil)
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: tunerPath) == nil)
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: "/media/tv/channel.m3u8") == nil)
+        #expect(PlayerViewModel.liveUnopenedDirectUpstream(sourcePath: nil) == nil)
+    }
+
     // MARK: - Server route ranking
 
     @Test("a copy-remux TranscodingUrl loses to the tuner file it would have copied")

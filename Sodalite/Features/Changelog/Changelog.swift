@@ -87,6 +87,12 @@ enum Changelog {
                     icon: "tv"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.firstTune.title",
+                    "changelog.1_1_0.firstTune.body",
+                    icon: "bolt.horizontal"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.extras.title",
                     "changelog.1_1_0.extras.body",

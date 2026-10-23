@@ -55,6 +55,36 @@ extension PlayerViewModel {
             }
         }
 
+        // A first tune needs the same thing a remembered one does, the provider URL, and Jellyfin names it
+        // for an M3U channel without opening anything. The open is what costs on a channel's first tune:
+        // the server connects to the provider itself, waits at least 3 s and ffprobes (#204).
+        if !didAttemptLiveFallback, let unopened = try await unopenedDirectUpstream() {
+            let reader = HLSLiveIngestReader(playlistURL: unopened.upstream)
+            do {
+                liveRoute = .direct
+                LogTap.shared.note("[LiveDirect] route=direct source=unopened upstream=\(LogSecrets.upstreamDescription(unopened.upstream))")
+                try await startDirectIngest(
+                    reader: reader,
+                    playSessionID: unopened.playSessionID,
+                    mediaSourceID: unopened.mediaSourceID
+                )
+                directStreamMemory?.remember(unopened.upstream, userID: userID, channelID: item.id)
+                return
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                // The opened answer would name the same URL, so it has nothing to retry: this is the
+                // negotiated direct attempt failing, and it takes the once-per-session fallback.
+                didAttemptLiveFallback = true
+                usedDirectLivePath = false
+                lastIngestError = reader.terminalError
+                let detail = reader.terminalError.map { " ingest=\($0)" } ?? ""
+                LogTap.shared.note("[LiveDirect] route=fallback reason=\(error)\(detail)")
+                try await loadLiveStreamViaServer()
+                return
+            }
+        }
+
         // Stage-1 PlaybackInfo: copy ceiling + the tuner upstream URL (MediaSource.Path) for the direct attempt.
         var info = try await openLiveTuner(maxStreamingBitrate: DirectPlayProfile.liveCopyCeilingBitrate)
         guard var source = info.mediaSources.first else { throw PlayerEngineError.noSource }
@@ -146,6 +176,41 @@ extension PlayerViewModel {
         }
     }
 
+    /// Channels whose unopened answer named no provider playlist, so later tunes in this process skip
+    /// the extra round trip and open straight away (HDHomeRun, raw-TS M3U entries).
+    static var channelsWithoutUnopenedUpstream: Set<String> = []
+
+    /// The provider playlist an unopened live PlaybackInfo names, or nil when the tune needs the opened
+    /// answer. Opens nothing, so there is no tuner to close and nothing for the gate or the ledger.
+    /// The audio check is skipped with the probe: the lineup streams carry no codec to check, the same
+    /// position the remembered route is in. Any failure but cancellation falls back to the open.
+    private func unopenedDirectUpstream() async throws -> (upstream: URL, playSessionID: String?, mediaSourceID: String)? {
+        let itemID = item.id
+        guard !Self.channelsWithoutUnopenedUpstream.contains(itemID) else { return nil }
+        let info: PlaybackInfoResponse
+        do {
+            info = try await playbackService.getLivePlaybackInfo(
+                itemID: itemID, userID: userID,
+                profile: DirectPlayProfile.liveProfile(),
+                maxStreamingBitrate: DirectPlayProfile.liveCopyCeilingBitrate,
+                enableDirectPlay: true,
+                autoOpenLiveStream: false)
+        } catch {
+            if error is CancellationError || Task.isCancelled { throw CancellationError() }
+            LogTap.shared.note("[LiveDirect] unopened PlaybackInfo failed, opening: \(error)")
+            return nil
+        }
+        try Task.checkCancellation()
+        guard let source = info.mediaSources.first,
+              let upstream = Self.liveUnopenedDirectUpstream(sourcePath: source.path) else {
+            Self.channelsWithoutUnopenedUpstream.insert(itemID)
+            return nil
+        }
+        // Same reason as on the opened route: the path can carry the account password (audit DIAG-2).
+        LogSecrets.registerUpstreamCredentials(in: upstream)
+        return (upstream, info.playSessionId, source.id)
+    }
+
     /// The audio verdict plus the one line that carries it into a report, in that order, because a
     /// decision taken without the line is one no retest can confirm (#100).
     private func noteLiveAudioDecision(
@@ -195,7 +260,8 @@ extension PlayerViewModel {
                 itemID: itemID, userID: user,
                 profile: DirectPlayProfile.liveProfile(),
                 maxStreamingBitrate: maxStreamingBitrate,
-                enableDirectPlay: enableDirectPlay)
+                enableDirectPlay: enableDirectPlay,
+                autoOpenLiveStream: true)
         }
         guard case .answered(let outcome) = await Self.outcome(of: request) else {
             LogTap.shared.note("[Live] tune superseded while PlaybackInfo was out, its tuner closes on arrival")
@@ -1340,6 +1406,20 @@ extension PlayerViewModel {
               let scheme = upstream.scheme?.lowercased(),
               scheme == "http" || scheme == "https" else { return .pathNotAnUpstreamURL }
         return .eligible(upstream)
+    }
+
+    /// Whether an UNOPENED answer's Path is a provider playlist the engine can ingest (#204). Stricter
+    /// than the opened check because the answer is: no probed container, and on servers that predate
+    /// Jellyfin's manifest check no TranscodingUrl either, so nothing in it tells a playlist from a byte
+    /// stream but the extension. HDHomeRun's `/auto/v5.1` and a raw-TS entry fail it and open as before.
+    static func liveUnopenedDirectUpstream(sourcePath: String?) -> URL? {
+        guard let sourcePath,
+              JellyfinPlaybackService.liveStreamFileRelativePath(fromSourcePath: sourcePath) == nil,
+              let upstream = URL(string: sourcePath),
+              let scheme = upstream.scheme?.lowercased(),
+              scheme == "http" || scheme == "https",
+              ["m3u8", "m3u"].contains(upstream.pathExtension.lowercased()) else { return nil }
+        return upstream
     }
 
     /// Which server route a live tune takes. Pure, because the decision was previously observable only
