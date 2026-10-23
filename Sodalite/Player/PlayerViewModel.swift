@@ -1992,22 +1992,16 @@ final class PlayerViewModel {
                     let rem = dur - time
                     self.remainingTime = rem > 0 ? "-\(self.formatSeconds(rem))" : "-00:00"
                 }
-                // Progress bar + warmed frame must NOT follow the live clock during a scrub (would fight scrubProgress).
+                // The progress bar must NOT follow the live clock during a scrub (would fight scrubProgress).
                 guard !self.isScrubbing else { return }
                 // Live owns `progress` via the DVR baseline in observeLiveEdge (live duration is 0). Leave VOD untouched.
                 if !self.isLiveSession {
                     self.progress = dur > 0 ? Float(time / dur) : 0
                 }
-                // Keep one frame warm at the playhead so the first scrub frame is instant.
-                // Skip while the spinner is up (startup / rebuffer / stall): for DV/4K sources
-                // with no server trickplay, warm() spins up a second demuxer + a full software
-                // HEVC decode that needlessly competes with the pipeline for CPU and I/O during
-                // the exact window playback is trying to become ready. (The DV "loads forever"
-                // hang itself was an engine backpressure wedge, fixed separately; this only
-                // removes the contention.) Scrub-start prewarm() still covers cold-start latency.
-                if !self.isLoading {
-                    self.scrubPreview.warm(toSeconds: time)
-                }
+                // No preview frame is warmed at the playhead during playback: without server trickplay
+                // every warm is a second decode beside the player, and on an A10X that decoder failed
+                // the player's own frames (VT -12909, frozen picture, a 4K title ending early). The
+                // first scrub frame comes from scrub-start prewarm() and update(fraction:).
             }
             .store(in: &cancellables)
 

@@ -78403,6 +78403,328 @@
         }
       }
     },
+    "changelog.1_1_0.scrubPreviewPlayback.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Náhled při posouvání už během přehrávání nedekóduje snímky na pozadí. Na Apple TV 4K (1. generace) mohla tato práce navíc zmrazit obraz nebo předčasně ukončit titul ve 4K."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forhåndsvisningen ved spoling afkoder ikke længere billeder i baggrunden under afspilning. På et Apple TV 4K (1. generation) kunne det ekstra arbejde fryse billedet eller afslutte en 4K-titel for tidligt."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Vorschau beim Spulen dekodiert während der Wiedergabe keine Bilder mehr im Hintergrund. Auf einem Apple TV 4K (1. Generation) konnte diese Zusatzarbeit das Bild einfrieren oder einen 4K-Titel vorzeitig beenden."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η προεπισκόπηση κατά την κύλιση δεν αποκωδικοποιεί πλέον εικόνες στο παρασκήνιο κατά την αναπαραγωγή. Σε Apple TV 4K (1ης γενιάς) αυτή η επιπλέον εργασία μπορούσε να παγώσει την εικόνα ή να τερματίσει πρόωρα έναν τίτλο 4K."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrub previews no longer decode pictures in the background during playback. On an Apple TV 4K (1st generation) that extra work could freeze the picture or end a 4K title early."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La vista previa al desplazarse ya no decodifica imágenes en segundo plano durante la reproducción. En un Apple TV 4K (1.ª generación) ese trabajo extra podía congelar la imagen o terminar antes de tiempo un título 4K."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelauksen esikatselu ei enää pura kuvia taustalla toiston aikana. Apple TV 4K:lla (1. sukupolvi) tämä lisätyö saattoi jäädyttää kuvan tai lopettaa 4K-nimikkeen ennenaikaisesti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'aperçu pendant le défilement ne décode plus d'images en arrière-plan pendant la lecture. Sur une Apple TV 4K (1re génération), ce travail supplémentaire pouvait figer l'image ou arrêter prématurément un titre 4K."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregled pri premotavanju više ne dekodira slike u pozadini tijekom reprodukcije. Na Apple TV 4K (1. generacija) taj dodatni posao mogao je zamrznuti sliku ili prerano završiti 4K naslov."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tekerési előnézet lejátszás közben már nem dekódol képeket a háttérben. Egy Apple TV 4K-n (1. generáció) ez a többletmunka kimerevíthette a képet, vagy idő előtt leállíthatott egy 4K-s címet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'anteprima durante lo scorrimento non decodifica più immagini in background durante la riproduzione. Su una Apple TV 4K (1ª generazione) questo lavoro extra poteva bloccare l'immagine o interrompere in anticipo un titolo 4K."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シーク時のプレビューが再生中にバックグラウンドで映像をデコードしなくなりました。Apple TV 4K（第1世代）では、この余分な処理により映像が止まったり、4Kタイトルが途中で終了したりすることがありました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탐색 미리보기가 재생 중에 더 이상 백그라운드에서 영상을 디코딩하지 않습니다. Apple TV 4K(1세대)에서는 이 추가 작업으로 화면이 멈추거나 4K 타이틀이 일찍 종료될 수 있었습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forhåndsvisningen ved spoling dekoder ikke lenger bilder i bakgrunnen under avspilling. På en Apple TV 4K (1. generasjon) kunne dette ekstraarbeidet fryse bildet eller avslutte en 4K-tittel for tidlig."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De voorvertoning bij het spoelen decodeert tijdens het afspelen geen beelden meer op de achtergrond. Op een Apple TV 4K (1e generatie) kon dat extra werk het beeld laten bevriezen of een 4K-titel voortijdig beëindigen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podgląd przy przewijaniu nie dekoduje już obrazów w tle podczas odtwarzania. Na Apple TV 4K (1. generacji) ta dodatkowa praca mogła zamrozić obraz lub przedwcześnie zakończyć tytuł 4K."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A prévia ao avançar não decodifica mais imagens em segundo plano durante a reprodução. Em uma Apple TV 4K (1ª geração), esse trabalho extra podia congelar a imagem ou encerrar um título 4K antes da hora."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pré-visualização ao avançar já não descodifica imagens em segundo plano durante a reprodução. Numa Apple TV 4K (1.ª geração), esse trabalho extra podia congelar a imagem ou terminar um título 4K antes do tempo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previzualizarea la derulare nu mai decodează imagini în fundal în timpul redării. Pe un Apple TV 4K (prima generație), această muncă suplimentară putea îngheța imaginea sau putea opri prematur un titlu 4K."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предпросмотр при перемотке больше не декодирует кадры в фоне во время воспроизведения. На Apple TV 4K (1-го поколения) эта дополнительная работа могла заморозить изображение или преждевременно завершить 4K-фильм."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Náhľad pri posúvaní už počas prehrávania nedekóduje snímky na pozadí. Na Apple TV 4K (1. generácia) mohla táto práca navyše zmraziť obraz alebo predčasne ukončiť titul vo 4K."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förhandsvisningen vid spolning avkodar inte längre bilder i bakgrunden under uppspelning. På en Apple TV 4K (1:a generationen) kunde det extra arbetet frysa bilden eller avsluta en 4K-titel i förtid."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sarma önizlemesi artık oynatma sırasında arka planda görüntü çözmüyor. Apple TV 4K (1. nesil) cihazında bu ek iş görüntüyü dondurabiliyor veya bir 4K içeriği erken sonlandırabiliyordu."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попередній перегляд під час перемотування більше не декодує кадри у фоні під час відтворення. На Apple TV 4K (1-го покоління) ця додаткова робота могла заморозити зображення або передчасно завершити 4K-фільм."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖动预览在播放期间不再于后台解码画面。在 Apple TV 4K（第一代）上，这项额外工作可能导致画面冻结或 4K 影片提前结束。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖動預覽在播放期間不再於背景解碼畫面。在 Apple TV 4K（第一代）上，這項額外工作可能導致畫面凍結或 4K 影片提早結束。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.scrubPreviewPlayback.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plynulejší přehrávání na starších Apple TV"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mere jævn afspilning på ældre Apple TV"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flüssigere Wiedergabe auf älteren Apple TV"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πιο ομαλή αναπαραγωγή σε παλαιότερα Apple TV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smoother playback on older Apple TVs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducción más fluida en Apple TV antiguos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sujuvampi toisto vanhemmilla Apple TV -laitteilla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture plus fluide sur les Apple TV plus anciennes"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glađa reprodukcija na starijim Apple TV uređajima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gördülékenyebb lejátszás régebbi Apple TV-ken"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduzione più fluida sulle Apple TV meno recenti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旧型Apple TVでの再生がよりスムーズに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구형 Apple TV에서 더 부드러운 재생"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jevnere avspilling på eldre Apple TV"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soepeler afspelen op oudere Apple TV's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Płynniejsze odtwarzanie na starszych Apple TV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprodução mais fluida em Apple TVs mais antigas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprodução mais fluida em Apple TV mais antigas"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redare mai fluentă pe Apple TV mai vechi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более плавное воспроизведение на старых Apple TV"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plynulejšie prehrávanie na starších Apple TV"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jämnare uppspelning på äldre Apple TV"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eski Apple TV'lerde daha akıcı oynatma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плавніше відтворення на старших Apple TV"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旧款 Apple TV 播放更流畅"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "舊款 Apple TV 播放更流暢"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.settingsList.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
