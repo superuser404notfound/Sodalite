@@ -38,6 +38,8 @@ struct ValuePickerRow<Value: Hashable>: View {
     let icon: String
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
+    /// Shown instead of `title`: a name from the server, which must not go through a catalog lookup.
+    var verbatimTitle: String? = nil
     let options: [Value]
     @Binding var selection: Value
     let label: (Value) -> String
@@ -154,7 +156,7 @@ struct ValuePickerRow<Value: Hashable>: View {
 
     private var labelView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            (verbatimTitle.map(Text.init(verbatim:)) ?? Text(title))
                 .font(.body)
                 .fontWeight(.medium)
             Text(subtitle)

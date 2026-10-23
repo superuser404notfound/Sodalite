@@ -94,8 +94,9 @@ struct TabVisibilitySettingsView: View {
                     ForEach(libraries, id: \.originKey) { library in
                         ValuePickerRow(
                             icon: PinnedLibraryTab(library: library).systemImage,
-                            title: LocalizedStringKey(library.name),
+                            title: "",
                             subtitle: "settings.tabs.library.subtitle",
+                            verbatimTitle: library.name,
                             options: [false, true],
                             selection: pinBinding(for: library),
                             label: { pinned in
