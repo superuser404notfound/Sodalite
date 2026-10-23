@@ -12,6 +12,9 @@ nonisolated enum HomeUpcoming {
     static let limit = 16
     /// How many recently watched shows are considered. Also the ceiling on Seerr lookups per load.
     static let seriesCap = 20
+    /// The schedule is the whole library's, read before it is matched to the caught-up shows, so it
+    /// is fetched wide and slim; the few episodes that make the row are fetched again with artwork.
+    static let scheduleLimit = 1000
     /// How long a Seerr answer is reused. Air dates move rarely, and a Home refetch should not cost a
     /// round of lookups.
     static let lookupLifetime: TimeInterval = 6 * 60 * 60
@@ -41,7 +44,7 @@ nonisolated enum HomeUpcoming {
             sortOrder: "Ascending",
             limit: limit,
             minPremiereDate: now.addingTimeInterval(-24 * 60 * 60),
-            fields: JellyfinEndpoint.homeRowFields
+            fields: ""
         )
     }
 

@@ -16,7 +16,7 @@ extension HomeViewModel {
             userID: source.userID, seriesID: nil, limit: 100, rewatching: false
         )
         async let scheduleResponse = source.libraryService.getItems(
-            userID: source.userID, query: HomeUpcoming.scheduleQuery(now: now, limit: 200)
+            userID: source.userID, query: HomeUpcoming.scheduleQuery(now: now, limit: HomeUpcoming.scheduleLimit)
         )
         // Next Up must answer: without it every watched show would read as caught up.
         let caughtUp = HomeUpcoming.caughtUpSeries(
@@ -25,12 +25,19 @@ extension HomeViewModel {
         )
         let schedule = (try? await scheduleResponse)?.items ?? []
         var found = HomeUpcoming.fromLibrary(schedule, caughtUp: caughtUp, now: now, calendar: calendar)
+        if !found.isEmpty {
+            let query = ItemQuery(ids: found.map(\.id), fields: JellyfinEndpoint.homeRowFields)
+            if let detailed = try? await source.libraryService.getItems(userID: source.userID, query: query).items {
+                let byID = Dictionary(detailed.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+                found = found.map { byID[$0.id] ?? $0 }
+            }
+        }
 
         let missing = HomeUpcoming.needingLookup(caughtUp: caughtUp, found: found)
         if source.isActive, let lookup = nextAiringLookup, !missing.isEmpty {
             found += await seerrUpcoming(for: missing, source: source, lookup: lookup, now: now, calendar: calendar)
         }
-        return DroppedSeriesStore.filter(HomeUpcoming.ordered(found), serverID: source.serverID, scope: homeScope)
+        return HomeUpcoming.ordered(DroppedSeriesStore.filter(found, serverID: source.serverID, scope: homeScope))
     }
 
     private func seerrUpcoming(

@@ -54,6 +54,7 @@ struct UpcomingRowTests {
         #expect(value("MinPremiereDate") == "2026-10-21T12:00:00Z")
         #expect(value("MaxPremiereDate") == nil)
         #expect(value("IsMissing") == nil)
+        #expect(value("Fields") == "")
     }
 
     @Test func recentlyPlayedQueryReadsWatchedEpisodesNewestFirst() {
