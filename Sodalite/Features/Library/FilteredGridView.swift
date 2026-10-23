@@ -65,6 +65,8 @@ struct FilteredGridView: View {
     /// A committed jump's slot. Leaving the rail to the left also moves focus geometrically, and
     /// that move lands after ours, so for half a second any other arrival is sent back here.
     @State private var pendingFocusSlot: Int?
+    /// A letter resolved before the server total, landed once it arrives (Sodalite#203).
+    @State private var heldLanding: (raw: Int, letter: String, commit: Bool)?
     @State private var scrollPosition = ScrollPosition()
     @State private var gridGeometry = GridScrollGeometry(gridTop: 0, gridWidth: 0, cellHeight: 0, columnMinimum: 0, spacing: 0)
     @Environment(\.dismiss) private var dismiss
@@ -402,6 +404,12 @@ struct FilteredGridView: View {
             gridLetter = nil
             rejectedLetter = nil
             pendingFocusSlot = nil
+            heldLanding = nil
+        }
+        .onChange(of: store.knowsTotal) { _, knows in
+            guard knows, let held = heldLanding else { return }
+            heldLanding = nil
+            land(on: held.raw, letter: held.letter, commit: held.commit)
         }
         .onChange(of: focusedSlot) { _, slot in
             if let target = pendingFocusSlot, let slot {
@@ -453,9 +461,10 @@ struct FilteredGridView: View {
         )
     }
 
+    /// Decided from the cached seed too, so a revisit draws the rail and its clearance from the
+    /// first frame (Sodalite#203); `land` is what waits for the server total.
     private var showsRail: Bool {
-        store.knowsTotal
-            && AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
+        AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
     }
 
     nonisolated private static let gridSpace = "FilteredGridView.content"
@@ -487,6 +496,7 @@ struct FilteredGridView: View {
     /// slot's page is pushed to the front, so only the destination is fetched.
     private func jump(to letter: String, commit: Bool) {
         jumpTask?.cancel()
+        heldLanding = nil
         // A commit on a letter already resolved lands now, ahead of the focus engine's own move
         // off the rail; anything else waits for the count.
         if commit, let raw = resolver?.cachedSlot(for: letter, descending: sort.descending) {
@@ -511,6 +521,11 @@ struct FilteredGridView: View {
     }
 
     private func land(on raw: Int, letter: String, commit: Bool) {
+        // A cached seed is only the first page, so a slot past it would clamp to its end.
+        guard store.knowsTotal else {
+            heldLanding = (raw, letter, commit)
+            return
+        }
         guard let slot = store.visibleIndex(atOrAfter: raw) else { return }
         store.prioritize(slot: slot)
         gridLetter = letter
