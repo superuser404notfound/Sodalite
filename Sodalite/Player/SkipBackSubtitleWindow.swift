@@ -109,6 +109,19 @@ enum SkipBackSubtitleWindow {
         return min(lineEnd, nextStart, lookup + maximumLinger) + delay
     }
 
+    /// Sodalite#178: the window shows a few seconds of dialogue, so the full-versus-SDH axis the
+    /// automatic pick leads with stops mattering (SDH is the dialogue plus sound cues) and the codec
+    /// takes its place: a text cue carries its real end time, which `lingerEnd` needs, and takes the
+    /// user's styling. Coverage still dominates, a forced or signs track reads back almost nothing.
+    /// Built on `subtitleAutoPickRank` so both share one classification.
+    static func readBackRank(_ stream: MediaStream) -> Int {
+        let rank = PlayerViewModel.subtitleAutoPickRank(stream)
+        let descriptor = rank / 2
+        let isBitmap = rank % 2
+        let coverage = max(descriptor - 1, 0)
+        return coverage * 4 + isBitmap * 2 + (descriptor == 1 ? 1 : 0)
+    }
+
     /// Preferred subtitle language first, then the language being heard. A preferred language with no
     /// matching track falls through rather than giving up: the point of the window is reading back the
     /// dialogue that just played. Nothing matching resolves to nil, never to an arbitrary first track.
@@ -117,14 +130,15 @@ enum SkipBackSubtitleWindow {
     static func resolveTrack(streams: [MediaStream], preferredSubtitleLanguage: String?,
                              audioLanguage: String?, unlabelledCountsAsHeard: Bool = false) -> Int? {
         if let preferred = preferredSubtitleLanguage,
-           let match = bestSubtitle(streams: streams, language: preferred) {
+           let match = bestSubtitle(streams: streams, language: preferred, rank: readBackRank) {
             return match
         }
-        if let audioLanguage, let match = bestSubtitle(streams: streams, language: audioLanguage) {
+        if let audioLanguage,
+           let match = bestSubtitle(streams: streams, language: audioLanguage, rank: readBackRank) {
             return match
         }
         guard unlabelledCountsAsHeard else { return nil }
-        return bestUnlabelledSubtitle(streams: streams)
+        return bestUnlabelledSubtitle(streams: streams, rank: readBackRank)
     }
 
     /// Live TV: broadcasters tag their subtitle stream `und`, or nothing at all, as a matter of
@@ -137,18 +151,20 @@ enum SkipBackSubtitleWindow {
     /// Shared with `SystemCaptionWindow` and with the live automatic pick in `applyPreferredSubtitle`,
     /// which reaches the same dead end from the other side: a configured subtitle language that no
     /// track on the channel states.
-    static func bestUnlabelledSubtitle(streams: [MediaStream]) -> Int? {
+    static func bestUnlabelledSubtitle(streams: [MediaStream],
+                                       rank: @MainActor (MediaStream) -> Int = PlayerViewModel.subtitleAutoPickRank) -> Int? {
         streams
             .filter { $0.type == .subtitle && PlayerViewModel.isLanguageUnknown($0.language) }
-            .min(by: { PlayerViewModel.subtitleAutoPickRank($0) < PlayerViewModel.subtitleAutoPickRank($1) })?
+            .min(by: { rank($0) < rank($1) })?
             .index
     }
 
     /// Shared with `SystemCaptionWindow`, which resolves the language the system picked the same way.
-    static func bestSubtitle(streams: [MediaStream], language: String) -> Int? {
+    static func bestSubtitle(streams: [MediaStream], language: String,
+                             rank: @MainActor (MediaStream) -> Int = PlayerViewModel.subtitleAutoPickRank) -> Int? {
         streams
             .filter { $0.type == .subtitle && PlayerViewModel.languagesMatch($0.language, language) }
-            .min(by: { PlayerViewModel.subtitleAutoPickRank($0) < PlayerViewModel.subtitleAutoPickRank($1) })?
+            .min(by: { rank($0) < rank($1) })?
             .index
     }
 }
