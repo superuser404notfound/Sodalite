@@ -4,13 +4,13 @@ import AetherEngine
 /// Sodalite#104: the two seek gestures, as the transport reports them.
 ///
 /// A press of the d-pad is a discrete step of a known length, and its destination is known before it
-/// lands; a hold is a scan doubling 2x to 128x that you stop when the picture looks right. Nothing
+/// lands; a hold is a scan of 8x and up that you stop when the picture looks right. Nothing
 /// about the second is countable, so a fixed-interval glyph over it would be a lie, and the bar used
 /// to draw both as the same knob sliding along the same track.
 enum SeekReadout: Equatable {
     /// A burst of presses: the interval each one moves, how many have landed, and which way.
     case press(seconds: Int, count: Int, direction: Int)
-    /// A continuous spool, at this multiple of real time.
+    /// A scan at this multiple of real time, held or latched.
     case hold(rate: Int, direction: Int)
 
     var direction: Int {
@@ -19,26 +19,26 @@ enum SeekReadout: Equatable {
         }
     }
 
-    /// Sodalite#186: the rates a hold steps through, and how long it has to be held to reach each.
+    /// Sodalite#186 round 3: the rates a scan steps through, one stage per press or per 1.5 s held.
     ///
-    /// A rate that climbed every 80 ms read as a counter running for as long as the button was down,
-    /// and a burst count printed as "4x" next to it read as one more speed. The ladder doubles from 2x
-    /// to 128x, the one other players on the box use, because 15x to 480x read as values that needed
-    /// explaining; 128x still crosses a two-hour film in under a minute.
-    static let holdStages: [(after: Double, rate: Int)] = [
-        (0, 2), (1.5, 4), (3, 8), (4.5, 16), (6, 32), (7.5, 64), (9, 128),
-    ]
+    /// The doubling ladder from 2x spent its first 9 s below 128x and crossed a 24-minute episode in
+    /// 19 s with the button down the whole way; the reporter measured Hulu at 13 s for a shorter one.
+    /// Three stages reach the top in two presses, and the fourth only joins on a film long enough to
+    /// want it.
+    static let scanRates = [8, 32, 128, 256]
+    static let fullScanLadderMinimumSeconds: Double = 90 * 60
+    static let scanStageHoldSeconds: Double = 1.5
 
-    /// The rate a hold runs at once it has been held `seconds` of real time.
-    static func holdRate(heldFor seconds: Double) -> Int {
-        holdStages.last(where: { seconds >= $0.after })?.rate ?? holdStages[0].rate
+    /// The ladder for a title this long. Live passes 0: its rail block is hours at most.
+    static func scanRates(durationSeconds: Double) -> [Int] {
+        durationSeconds >= fullScanLadderMinimumSeconds ? scanRates : Array(scanRates.dropLast())
     }
 
-    /// How far up the ladder `rate` stands, 0 to 1. By stage rather than by rate: on a doubling ladder
-    /// a linear share leaves every stage below the top two near zero.
+    /// How far up the full ladder `rate` stands, 0 to 1. By stage rather than by rate: on a ladder
+    /// that multiplies, a linear share leaves every stage below the top near zero.
     static func holdStageFraction(_ rate: Int) -> Double {
-        guard let index = holdStages.lastIndex(where: { $0.rate <= rate }) else { return 0 }
-        return Double(index) / Double(max(1, holdStages.count - 1))
+        guard let index = scanRates.lastIndex(where: { $0 <= rate }) else { return 0 }
+        return Double(index) / Double(max(1, scanRates.count - 1))
     }
 
     /// Sodalite#186: what a burst of presses has covered, signed, in place of how many presses it took.
@@ -62,6 +62,67 @@ enum SeekReadout: Equatable {
             }
         }
         return names
+    }
+}
+
+/// Sodalite#186 round 3: a scan the way the system player and Hulu run one.
+///
+/// Holding a direction starts it and climbs a stage every 1.5 s. Letting go no longer commits: the
+/// scan keeps running at the stage it reached, so a long seek does not have to be held all the way.
+/// A press the same way steps up, a press the other way steps down and, from the bottom stage, turns
+/// the scan around. Select or Play lands it, Menu throws it away.
+struct SeekScan: Equatable {
+    let rates: [Int]
+    private(set) var stage = 0
+    private(set) var direction: Int
+    private var holdBegan: ContinuousClock.Instant?
+    private var holdStartStage = 0
+
+    init(rates: [Int], direction: Int, heldAt: ContinuousClock.Instant) {
+        self.rates = rates
+        self.direction = direction < 0 ? -1 : 1
+        holdBegan = heldAt
+    }
+
+    var rate: Int { rates[stage] }
+    var isHeld: Bool { holdBegan != nil }
+
+    /// A hold while the scan runs: the same way climbs on from where it stands, the other way turns
+    /// it around from the bottom stage.
+    mutating func hold(direction: Int, at now: ContinuousClock.Instant) {
+        let direction = direction < 0 ? -1 : 1
+        if direction != self.direction {
+            self.direction = direction
+            stage = 0
+        }
+        holdBegan = now
+        holdStartStage = stage
+    }
+
+    mutating func release(at now: ContinuousClock.Instant) {
+        tick(at: now)
+        holdBegan = nil
+    }
+
+    mutating func press(direction: Int, at now: ContinuousClock.Instant) {
+        tick(at: now)
+        if (direction < 0 ? -1 : 1) == self.direction {
+            stage = min(stage + 1, rates.count - 1)
+        } else if stage > 0 {
+            stage -= 1
+        } else {
+            self.direction = -self.direction
+        }
+        if holdBegan != nil {
+            holdBegan = now
+            holdStartStage = stage
+        }
+    }
+
+    mutating func tick(at now: ContinuousClock.Instant) {
+        guard let holdBegan else { return }
+        let climbed = Int(holdBegan.duration(to: now) / .seconds(SeekReadout.scanStageHoldSeconds))
+        stage = min(rates.count - 1, holdStartStage + climbed)
     }
 }
 
@@ -107,6 +168,12 @@ extension PlayerViewModel {
         let dur = scrubReferenceDuration
         guard dur > 0 else { return }
 
+        // A swipe takes over a running scan from where it stands.
+        if continuousSeekTask != nil {
+            stopContinuousSeek()
+            seekReadout = nil
+            scrubStartProgress = scrubProgress
+        }
         if !isScrubbing {
             isScrubbing = true
             scrubStartProgress = progress
@@ -189,6 +256,7 @@ extension PlayerViewModel {
     /// picture still stands on (Sodalite#104 round 2).
     func commitScrub(thenPlay: Bool = false) {
         // Sodalite#104: whichever path ends the scrub, the pending idle and the readout are spent.
+        stopContinuousSeek()
         skipCommitTask?.cancel()
         skipCommitTask = nil
         seekReadout = nil
@@ -228,6 +296,7 @@ extension PlayerViewModel {
     }
 
     func cancelScrub() {
+        stopContinuousSeek()
         skipCommitTask?.cancel()
         skipCommitTask = nil
         seekReadout = nil
@@ -238,9 +307,8 @@ extension PlayerViewModel {
         scheduleControlsHide()
     }
 
-    /// Begin a continuous (hold-to-seek) scrub in `direction` (-1 left, +1
-    /// right), advancing `scrubProgress` with acceleration until
-    /// `endContinuousSeek`. Position is a preview committed only on release.
+    /// A held direction (-1 left, +1 right) starts a scan, or takes over a running one (`SeekScan`).
+    /// Position is a preview until Select, Play or, from a keyboard, the release lands it.
     func beginContinuousSeek(direction: Int) {
         let dur = scrubReferenceDuration
         guard dur > 0 else { return }
@@ -259,28 +327,33 @@ extension PlayerViewModel {
             }
         }
         controlsTimer?.cancel()
-        continuousSeekTask?.cancel()
 
-        let dir = Float(direction < 0 ? -1 : 1)
+        if seekScan != nil, continuousSeekTask != nil {
+            seekScan?.hold(direction: direction, at: .now)
+            return
+        }
+        seekScan = SeekScan(rates: SeekReadout.scanRates(durationSeconds: isLiveSession ? 0 : dur),
+                            direction: direction, heldAt: .now)
+        continuousSeekTask?.cancel()
         continuousSeekTask = Task { @MainActor [weak self] in
             // Sodalite#186: both the stage and the distance come off the clock, not off a tick count.
             // A tick that ran late used to move the knob one nominal tick and age the hold by one, so
             // under load the scan crawled below the rate the readout claimed.
             let clock = ContinuousClock()
-            let start = clock.now
-            var last = start
+            var last = clock.now
             while !Task.isCancelled {
-                guard let self else { return }
+                guard let self, var scan = self.seekScan else { return }
                 // Live re-reads the growing DVR window each tick; VOD is fixed.
                 let dur = self.scrubReferenceDuration
                 guard dur > 0 else { return }
                 let now = clock.now
-                let rate = SeekReadout.holdRate(heldFor: start.duration(to: now) / .seconds(1))
+                scan.tick(at: now)
+                self.seekScan = scan
                 let elapsed = last.duration(to: now) / .seconds(1)
                 last = now
-                let readout = SeekReadout.hold(rate: rate, direction: direction < 0 ? -1 : 1)
+                let readout = SeekReadout.hold(rate: scan.rate, direction: scan.direction)
                 if self.seekReadout != readout { self.seekReadout = readout }
-                let deltaProgress = dir * Float(Double(rate) * elapsed / dur)
+                let deltaProgress = Float(scan.direction) * Float(Double(scan.rate) * elapsed / dur)
                 self.scrubProgress = max(0, min(1, self.scrubProgress + deltaProgress))
                 if !self.isLiveSession {
                     self.scrubTime = self.formatSeconds(Double(self.scrubProgress) * dur)
@@ -291,13 +364,37 @@ extension PlayerViewModel {
         }
     }
 
-    /// End a continuous spool (release): the release IS the commit, so a held key lands the same way
-    /// the discrete presses next to it do (Sodalite#60, unconditional since #114). The touchpad pan
-    /// keeps its own preview-then-confirm ending in `scrubPanEnded`.
-    func endContinuousSeek() {
+    /// True while a scan runs with no direction held, so the remote's presses steer it instead of
+    /// skipping.
+    var isScanLatched: Bool {
+        continuousSeekTask != nil && seekScan?.isHeld == false
+    }
+
+    /// Sodalite#186 round 3: the remote lets go of a scan without landing it.
+    func latchContinuousSeek() {
         guard continuousSeekTask != nil else { return }
+        seekScan?.release(at: .now)
+    }
+
+    func stepLatchedScan(direction: Int) {
+        guard isScanLatched, var scan = seekScan else { return }
+        scan.press(direction: direction, at: .now)
+        seekScan = scan
+        seekReadout = .hold(rate: scan.rate, direction: scan.direction)
+    }
+
+    func stopContinuousSeek() {
         continuousSeekTask?.cancel()
         continuousSeekTask = nil
+        seekScan = nil
+    }
+
+    /// The keyboard's release, which has no Select to wait for: the release IS the commit (Sodalite#60,
+    /// unconditional since #114). The touchpad pan keeps its own preview-then-confirm ending in
+    /// `scrubPanEnded`.
+    func endContinuousSeek() {
+        guard continuousSeekTask != nil else { return }
+        stopContinuousSeek()
         commitScrub()
     }
 }

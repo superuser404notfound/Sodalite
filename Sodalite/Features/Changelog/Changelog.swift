@@ -141,6 +141,12 @@ enum Changelog {
                     icon: "rectangle.on.rectangle"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.fastForward.title",
+                    "changelog.1_1_0.fastForward.body",
+                    icon: "forward.fill"
+                ),
+                ChangelogHighlight(
                     .new,
                     "changelog.1_1_0.playerControls.title",
                     "changelog.1_1_0.playerControls.body",
