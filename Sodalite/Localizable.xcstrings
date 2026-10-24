@@ -69993,6 +69993,330 @@
         }
       }
     },
+    "changelog.1_1_0.fastForward.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržením vlevo nebo vpravo spustíte přetáčení rychlostí 8x a po puštění tlačítka pokračuje dál. Stiskem stejným směrem zrychlíte na 32x a 128x (u dlouhých filmů 256x), opačným směrem zpomalíte. Select přehraje od daného místa, Zpět akci zruší."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold venstre eller højre for at spole med 8x, og når du slipper, fortsætter det. Tryk samme vej for at øge til 32x og 128x (256x på lange film), den anden vej for at sætte farten ned. Select afspiller derfra, Tilbage annullerer."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links oder rechts halten startet den Suchlauf mit 8x, und nach dem Loslassen läuft er weiter. Ein Druck in dieselbe Richtung beschleunigt auf 32x und 128x (bei langen Filmen 256x), die Gegenrichtung bremst. Select spielt ab dort ab, Zurück bricht ab."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κρατήστε αριστερά ή δεξιά για σάρωση με 8x, και όταν αφήσετε το κουμπί συνεχίζει. Πατήστε προς την ίδια κατεύθυνση για 32x και 128x (256x σε μεγάλες ταινίες), προς την αντίθετη για να επιβραδύνετε. Το Select παίζει από εκεί, το Πίσω ακυρώνει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold left or right to scan at 8x, and it keeps going after you let go. Press the same way to speed up to 32x and 128x (256x on long films), the other way to slow down. Select plays from there, Back cancels."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsado izquierda o derecha para avanzar a 8x y, al soltar, sigue avanzando. Pulsa en la misma dirección para subir a 32x y 128x (256x en películas largas) y en la contraria para bajar. Select reproduce desde ahí, Atrás cancela."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pidä vasenta tai oikeaa painettuna, niin kelaus alkaa nopeudella 8x ja jatkuu, kun päästät irti. Paina samaan suuntaan nopeuttaaksesi 32x:ään ja 128x:ään (pitkissä elokuvissa 256x), vastakkaiseen hidastaaksesi. Select toistaa siitä kohdasta, Takaisin peruuttaa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenez gauche ou droite pour défiler à 8x, et le défilement continue une fois relâché. Appuyez dans le même sens pour passer à 32x puis 128x (256x sur les longs films), dans l'autre sens pour ralentir. Select lance la lecture à cet endroit, Retour annule."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Držite lijevo ili desno za premotavanje brzinom 8x, a kad pustite, nastavlja se. Pritisnite u istom smjeru za 32x i 128x (256x kod dugih filmova), u suprotnom za usporavanje. Select reproducira od tog mjesta, Natrag poništava."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tartsa nyomva a balra vagy jobbra gombot a 8x-os tekeréshez, elengedés után pedig folytatódik. Ugyanabba az irányba nyomva 32x-re és 128x-ra gyorsít (hosszú filmeknél 256x-ra), az ellenkező irányba lassít. A Select onnan indítja a lejátszást, a Vissza megszakítja."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni premuto sinistra o destra per scorrere a 8x, e quando rilasci continua. Premi nella stessa direzione per passare a 32x e 128x (256x nei film lunghi), in quella opposta per rallentare. Select riproduce da lì, Indietro annulla."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左右を長押しすると8xで早送りが始まり、離しても続きます。同じ方向に押すと32x、128x（長い映画では256x）に加速し、逆方向に押すと減速します。Selectでその位置から再生、戻るでキャンセルします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "왼쪽이나 오른쪽을 길게 누르면 8x로 탐색이 시작되고, 손을 떼도 계속됩니다. 같은 방향으로 누르면 32x, 128x(긴 영화는 256x)로 빨라지고, 반대 방향으로 누르면 느려집니다. Select를 누르면 그 위치부터 재생하고, 뒤로를 누르면 취소합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold venstre eller høyre for å spole med 8x, og når du slipper, fortsetter det. Trykk samme vei for å øke til 32x og 128x (256x på lange filmer), motsatt vei for å senke farten. Select spiller av derfra, Tilbake avbryter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd links of rechts ingedrukt om met 8x te spoelen, en als je loslaat gaat het door. Druk in dezelfde richting voor 32x en 128x (256x bij lange films), de andere kant op om te vertragen. Select speelt vanaf daar af, Terug annuleert."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przytrzymaj w lewo lub w prawo, aby przewijać z prędkością 8x, a po puszczeniu przewijanie trwa dalej. Naciśnij w tym samym kierunku, aby przyspieszyć do 32x i 128x (256x w długich filmach), w przeciwnym, aby zwolnić. Select odtwarza od tego miejsca, Wstecz anuluje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segure esquerda ou direita para avançar a 8x, e ao soltar o avanço continua. Pressione na mesma direção para subir para 32x e 128x (256x em filmes longos) e na direção oposta para diminuir. Select reproduz a partir dali, Voltar cancela."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha premido esquerda ou direita para avançar a 8x, e ao largar o avanço continua. Prima no mesmo sentido para subir para 32x e 128x (256x em filmes longos) e no sentido oposto para abrandar. Select reproduz a partir daí, Voltar cancela."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Țineți apăsat stânga sau dreapta pentru a derula cu 8x, iar după ce eliberați, derularea continuă. Apăsați în aceeași direcție pentru 32x și 128x (256x la filmele lungi), în direcția opusă pentru a încetini. Select redă de acolo, Înapoi anulează."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удерживайте влево или вправо, чтобы начать перемотку на 8x, и если отпустить, она продолжится. Нажатие в ту же сторону ускоряет до 32x и 128x (256x для длинных фильмов), в обратную — замедляет. Select запускает воспроизведение с этого места, Назад отменяет."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržaním doľava alebo doprava spustíte pretáčanie rýchlosťou 8x a po pustení pokračuje ďalej. Stlačením rovnakým smerom zrýchlite na 32x a 128x (pri dlhých filmoch 256x), opačným smerom spomalíte. Select prehrá od daného miesta, Späť zruší."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Håll vänster eller höger för att spola med 8x, och när du släpper fortsätter det. Tryck åt samma håll för att öka till 32x och 128x (256x på långa filmer), åt andra hållet för att sänka farten. Select spelar upp därifrån, Tillbaka avbryter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8x ile sarmak için sola veya sağa basılı tutun, bıraktığınızda sarma devam eder. Aynı yöne basarak 32x ve 128x'e (uzun filmlerde 256x) hızlanın, ters yöne basarak yavaşlayın. Select oradan oynatır, Geri iptal eder."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Утримуйте вліво або вправо, щоб почати перемотування на 8x, і якщо відпустити, воно триває далі. Натискання в той самий бік прискорює до 32x і 128x (256x для довгих фільмів), у протилежний — сповільнює. Select запускає відтворення з цього місця, Назад скасовує."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住左或右键以 8x 快进，松手后仍会继续。向同一方向按可加速到 32x 和 128x（长电影可达 256x），向反方向按则减速。按 Select 从该处播放，按返回取消。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住左或右鍵以 8x 快轉，放開後仍會繼續。往同一方向按可加速到 32x 和 128x（長片可達 256x），往反方向按則減速。按 Select 從該處播放，按返回取消。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.fastForward.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přetáčení, které běží dál"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoling der fortsætter"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorspulen, das weiterläuft"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γρήγορη κίνηση που συνεχίζει"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast forward that keeps going"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avance rápido que sigue solo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pikakelaus, joka jatkuu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avance rapide qui continue"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premotavanje koje ne staje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folyamatos gyorstekerés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanti veloce che continua"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "離しても続く早送り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "손을 떼도 계속되는 빨리 감기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoling som fortsetter"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snel vooruit dat doorgaat"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przewijanie, które trwa dalej"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanço rápido que continua"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanço rápido que continua"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Derulare rapidă care continuă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотка, которая не останавливается"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pretáčanie, ktoré pokračuje"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snabbspolning som fortsätter"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durmadan devam eden hızlı sarma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перемотування, яке не зупиняється"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "松手后继续的快进"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開後繼續的快轉"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.firstTune.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

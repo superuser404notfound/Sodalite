@@ -458,24 +458,68 @@ struct SeekReadoutTests {
         #expect(SeekReadout.hold(rate: 64, direction: 1) != SeekReadout.press(seconds: 64, count: 1, direction: 1))
     }
 
-    /// Sodalite#186: a rate redrawn every tick read as a counter running for as long as the button
-    /// was down. A hold doubles from 2x to 128x, the ladder other players use, and shows nothing between.
-    @Test("a hold doubles through seven rates, never between them")
-    func aHoldSteps() {
-        let stages = SeekReadout.holdStages.map(\.rate)
-        #expect(stages == [2, 4, 8, 16, 32, 64, 128])
-        #expect(SeekReadout.holdRate(heldFor: 0) == 2)
-        #expect(SeekReadout.holdRate(heldFor: 1.49) == 2)
-        #expect(SeekReadout.holdRate(heldFor: 1.5) == 4)
-        #expect(SeekReadout.holdRate(heldFor: 8.99) == 64)
-        #expect(SeekReadout.holdRate(heldFor: 9) == 128)
-        #expect(SeekReadout.holdRate(heldFor: 600) == 128)
-        #expect(SeekReadout.holdStageFraction(2) == 0)
-        #expect(SeekReadout.holdStageFraction(16) == 0.5)
-        #expect(SeekReadout.holdStageFraction(128) == 1)
-        for held in stride(from: 0.0, through: 10.0, by: 0.05) {
-            #expect(stages.contains(SeekReadout.holdRate(heldFor: held)))
-        }
+    /// Sodalite#186 round 3: the doubling ladder from 2x took 19 s over a 24-minute episode. Three
+    /// stages from 8x, a fourth only on a film long enough to want it.
+    @Test("a scan steps 8x, 32x, 128x, and 256x only on a long film")
+    func scanLadder() {
+        #expect(SeekReadout.scanRates(durationSeconds: 24 * 60) == [8, 32, 128])
+        #expect(SeekReadout.scanRates(durationSeconds: 0) == [8, 32, 128])
+        #expect(SeekReadout.scanRates(durationSeconds: 2 * 3600) == [8, 32, 128, 256])
+        #expect(SeekReadout.holdStageFraction(8) == 0)
+        #expect(SeekReadout.holdStageFraction(256) == 1)
+    }
+
+    @Test("a held scan climbs a stage every 1.5 s and stops at the top")
+    func heldScanClimbs() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.tick(at: t0.advanced(by: .seconds(1.49)))
+        #expect(scan.rate == 8)
+        scan.tick(at: t0.advanced(by: .seconds(1.5)))
+        #expect(scan.rate == 32)
+        scan.tick(at: t0.advanced(by: .seconds(600)))
+        #expect(scan.rate == 128)
+    }
+
+    @Test("letting go keeps the scan at the stage it reached")
+    func releaseLatches() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0.advanced(by: .seconds(2)))
+        #expect(!scan.isHeld)
+        scan.tick(at: t0.advanced(by: .seconds(60)))
+        #expect(scan.rate == 32)
+    }
+
+    @Test("presses step up, step down, and turn the scan around from the bottom")
+    func pressesSteer() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0)
+        scan.press(direction: 1, at: t0)
+        scan.press(direction: 1, at: t0)
+        scan.press(direction: 1, at: t0)
+        #expect(scan.rate == 128)
+        scan.press(direction: -1, at: t0)
+        scan.press(direction: -1, at: t0)
+        #expect(scan.rate == 8)
+        #expect(scan.direction == 1)
+        scan.press(direction: -1, at: t0)
+        #expect(scan.rate == 8)
+        #expect(scan.direction == -1)
+    }
+
+    @Test("a hold the other way turns a latched scan around from the bottom stage")
+    func holdReverses() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0.advanced(by: .seconds(4)))
+        #expect(scan.rate == 128)
+        scan.hold(direction: -1, at: t0.advanced(by: .seconds(5)))
+        #expect(scan.direction == -1)
+        #expect(scan.rate == 8)
+        scan.tick(at: t0.advanced(by: .seconds(6.5)))
+        #expect(scan.rate == 32)
     }
 
     /// Sodalite#186: a burst says how far it went, signed, so "4x" can no longer read as a fifth speed.

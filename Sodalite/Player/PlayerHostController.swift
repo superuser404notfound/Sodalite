@@ -1387,7 +1387,7 @@ final class PlayerHostController: AVPlayerViewController {
         // Segment skip over a transient scrub: the touchpad reports a tiny pan before its click, past the 40pt threshold, flipping isScrubbing/showControls; without this the tap-to-skip lands in commit-scrub. scrubMovedMeaningfully separates a deliberate drag (which must commit to its target) from the pre-click jitter, so only jitter skips here.
         if viewModel.activeSkipSegment != nil && !viewModel.isDropdownOpen
            && (!viewModel.showControls || viewModel.controlsFocus == .progressBar)
-           && !viewModel.scrubMovedMeaningfully {
+           && !viewModel.scrubMovedMeaningfully && !viewModel.isScanLatched {
             if viewModel.isScrubbing { viewModel.cancelScrub() }
             viewModel.skipActiveSegment()
             return
@@ -1409,7 +1409,11 @@ final class PlayerHostController: AVPlayerViewController {
         if !viewModel.isDropdownOpen,
            !viewModel.showControls || viewModel.controlsFocus == .progressBar,
            let direction = remoteSurface.consumeEdgeDirection() {
-            viewModel.seekJumpByConfiguredInterval(direction: direction)
+            if viewModel.isScanLatched {
+                viewModel.stepLatchedScan(direction: direction)
+            } else {
+                viewModel.seekJumpByConfiguredInterval(direction: direction)
+            }
             return
         }
         #endif
@@ -1418,7 +1422,8 @@ final class PlayerHostController: AVPlayerViewController {
         } else if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             viewModel.activateControl(viewModel.controlsFocus)
         } else if viewModel.isScrubbing {
-            viewModel.commitScrub()
+            // Sodalite#186 round 3: landing a scan plays from there, the way the system player does.
+            viewModel.commitScrub(thenPlay: viewModel.isScanLatched && !viewModel.isPlaying)
         } else {
             // Sodalite#58, unconditional since #114: a click on hidden controls pauses or resumes, the
             // way the system player behaves. togglePlayPause raises the transport itself, so the click
@@ -1515,6 +1520,7 @@ final class PlayerHostController: AVPlayerViewController {
         // Stats panel: horizontal nav is inert (no rows behind it to target).
         if statsOverlayCapturesPresses { return }
         if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: -1); return }
+        if viewModel.isScanLatched { viewModel.stepLatchedScan(direction: -1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: -1)
             viewModel.scheduleControlsHide()
@@ -1529,6 +1535,7 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.errorMessage != nil { viewModel.moveErrorFocus(by: 1); return }
         if statsOverlayCapturesPresses { return }
         if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: 1); return }
+        if viewModel.isScanLatched { viewModel.stepLatchedScan(direction: 1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: 1)
             viewModel.scheduleControlsHide()
@@ -1600,7 +1607,7 @@ final class PlayerHostController: AVPlayerViewController {
         }
     }
 
-    /// Continuous hold-to-seek spool from a directional long press; gated like the tap-skip path so a hold while navigating buttons or with stats/dropdown up is ignored.
+    /// A scan from a directional long press, which keeps running after the release (Sodalite#186); gated like the tap-skip path so a hold while navigating buttons or with stats/dropdown up is ignored.
     private func handleHold(_ gesture: UILongPressGestureRecognizer, direction: Int) {
         switch gesture.state {
         case .began:
@@ -1610,7 +1617,7 @@ final class PlayerHostController: AVPlayerViewController {
             if viewModel.showControls && viewModel.controlsFocus != .progressBar { return }
             viewModel.beginContinuousSeek(direction: direction)
         case .ended, .cancelled, .failed:
-            viewModel.endContinuousSeek()
+            viewModel.latchContinuousSeek()
         default:
             break
         }
@@ -1662,6 +1669,8 @@ final class PlayerHostController: AVPlayerViewController {
     #endif
 
     @objc private func upPressed() {
+        // A latched scan keeps the bar up and the focus on it until it lands or is thrown away.
+        if viewModel.isScanLatched { return }
         #if os(tvOS)
         if routeLiveZap(.up) { return }
         #endif
@@ -1721,6 +1730,7 @@ final class PlayerHostController: AVPlayerViewController {
     #endif
 
     @objc private func downPressed() {
+        if viewModel.isScanLatched { return }
         #if os(tvOS)
         if routeLiveZap(.down) { return }
         #endif

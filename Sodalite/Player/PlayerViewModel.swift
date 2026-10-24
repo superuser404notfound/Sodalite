@@ -709,9 +709,10 @@ final class PlayerViewModel {
     /// picture returned to live while the knob sat where the rewind had left it. A pending seek and
     /// an idle timer are two different things and cannot share one slot.
     var skipCommitTask: Task<Void, Never>?
-    /// In-flight continuous (hold-to-seek) scrub task; non-nil while left/right is held, advances
-    /// scrubProgress with acceleration until release (see PlayerViewModel+Scrubbing).
+    /// In-flight scan task; non-nil while a scan runs, held or latched, and advances scrubProgress
+    /// until the scrub lands or is thrown away (see PlayerViewModel+Scrubbing).
     var continuousSeekTask: Task<Void, Never>?
+    @ObservationIgnored var seekScan: SeekScan?
     /// In-flight initial-launch task (see `beginPlayback`), held so a back-press during the spinner
     /// can cancel it before `player.load()`; untracked it would resume after stopPlayback's
     /// player.stop() and restart playback behind a dismissed player (audio runs until app restart).
@@ -1581,8 +1582,7 @@ final class PlayerViewModel {
         zapBannerHideTask = nil
         controlsTimer?.cancel()
         controlsTimer = nil
-        continuousSeekTask?.cancel()
-        continuousSeekTask = nil
+        stopContinuousSeek()
         detailEnrichmentTask?.cancel()
         detailEnrichmentTask = nil
         scrubPreview.reset()
@@ -3864,7 +3864,7 @@ final class PlayerViewModel {
     /// The auto-hide's liveness check, asked at FIRE time (see `TransportAutoHide`). Explicit
     /// dismissals (Menu, PiP handoff, child lock) keep calling `hideControls()` directly.
     private func hideControlsIfPlaying() {
-        guard TransportAutoHide.hides(isPlaying: isPlaying) else { return }
+        guard TransportAutoHide.hides(isPlaying: isPlaying), continuousSeekTask == nil else { return }
         hideControls()
     }
 
