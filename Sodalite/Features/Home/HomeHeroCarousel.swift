@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The top of Home: the profile's HomeHeroMode titles as a full-width banner that pages by itself,
 /// the way the TV app opens. The art runs to the window's top edge under the toolbar; the title, a
-/// line of facts, the overview and Play sit over a scrim at the bottom leading corner. An upright
+/// line of facts, the overview (not on tvOS) and Play sit at the bottom leading corner. An upright
 /// iPhone gets its own shape: the poster standing up, the text centred under it.
 struct HomeHeroCarousel: View {
     let items: [JellyfinItem]
@@ -216,6 +216,17 @@ struct HomeHeroCarousel: View {
                 // nothing above a card to their right and Up did nothing until the row was scrolled
                 // back to its start.
                 .focusSection()
+                // The remote's Play starts the page on screen from anywhere in the banner, the way it
+                // does on a focused card (Sodalite#196); without it the press went to the music toggle
+                // at the tab root (Sodalite#205).
+                .onPlayPauseCommandCompat {
+                    let music = dependencies.musicPlaybackCoordinator
+                    if music.currentItem != nil {
+                        music.togglePlayPause()
+                    } else {
+                        onPlay(current)
+                    }
+                }
                 #else
                 .contentShape(Rectangle())
                 .onTapGesture { onOpen(current) }
@@ -500,6 +511,19 @@ struct HomeHeroCarousel: View {
             }
             .frame(maxWidth: Self.logoColumn.width, maxHeight: Self.logoColumn.height, alignment: .bottomLeading)
 
+            #if os(tvOS)
+            // The facts alone on tvOS (Sodalite#205): two lines of overview were cut off on almost
+            // every title, and the detail page is one click away.
+            if let facts = facts(for: item) {
+                Text(verbatim: facts)
+                    .font(.callout.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .lineLimit(1)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+            }
+            #else
             // The detail page's glass panel (MovieDetailView.glassPanel): the facts and the overview
             // carry their own material, so the art needs no shade of its own to keep them legible.
             VStack(alignment: .leading, spacing: 10) {
@@ -518,6 +542,7 @@ struct HomeHeroCarousel: View {
             }
             .padding(isCompact ? 16 : 30)
             .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+            #endif
         }
     }
 
@@ -545,6 +570,10 @@ struct HomeHeroCarousel: View {
             .collapsesActionButtonLabel(true)
             pager
                 .padding(.leading, 8)
+                // The one reachable dot moves right with every page, so Down from the info button
+                // found it only on the last page and fell into the rows on every other (Sodalite#205,
+                // measured 1 of 6 in the simulator). As a section the whole pill is the target.
+                .focusSection()
         }
     }
 
