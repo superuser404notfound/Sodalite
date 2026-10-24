@@ -6,6 +6,7 @@ import UIKit
 /// UIKit UITextField wrapper with UIKit's own clear button.
 struct SearchTextField: UIViewRepresentable {
     @Binding var text: String
+    @Binding var isEditing: Bool
     var placeholder: String
 
     func makeUIView(context: Context) -> UITextField {
@@ -35,6 +36,9 @@ struct SearchTextField: UIViewRepresentable {
         }
         uiView.placeholder = placeholder
         context.coordinator.parent = self
+        if !isEditing && uiView.isFirstResponder {
+            uiView.resignFirstResponder()
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -50,6 +54,14 @@ struct SearchTextField: UIViewRepresentable {
 
         @objc func editingChanged(_ sender: UITextField) {
             parent.text = sender.text ?? ""
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            if !parent.isEditing { parent.isEditing = true }
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            if parent.isEditing { parent.isEditing = false }
         }
 
         func textFieldShouldReturn(_ textField: UITextField) -> Bool {
