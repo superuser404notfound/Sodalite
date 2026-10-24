@@ -113,8 +113,23 @@ struct TabRootView: View {
     }
 
     #if !os(tvOS)
+    /// The bar writes the selection again when the open tab is tapped, which is the only sign of a
+    /// second tap SwiftUI gives. On Search that tap focuses the field (Sodalite#209).
+    private var tabSelection: Binding<ShellTab> {
+        Binding {
+            selectedTab
+        } set: { tab in
+            #if os(iOS)
+            if tab == .search && selectedTab == .search {
+                appState.requestSearchFieldFocus += 1
+            }
+            #endif
+            selectedTab = tab
+        }
+    }
+
     private var tabShell: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: tabSelection) {
             ForEach(tabsOnScreen, id: \.self) { tab in
                 if tab == .search {
                     Tab(value: tab, role: .search) {

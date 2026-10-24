@@ -93,6 +93,11 @@ struct SearchView: View {
             }
         }
         .onAppear(perform: bootstrap)
+        #if os(iOS)
+        .onChange(of: appState.requestSearchFieldFocus) { _, _ in
+            isSearchFieldEditing = true
+        }
+        #endif
         // Who takes part changed (Combine servers, a server muted or back): the next search uses it (Sodalite#85).
         .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
             guard let vm = viewModel, let userID = appState.activeUser?.id else { return }
