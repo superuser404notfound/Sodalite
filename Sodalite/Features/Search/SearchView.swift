@@ -10,6 +10,9 @@ struct SearchView: View {
     private var leadingInset: CGFloat { metrics.rowLeading(shellPaysLeading: shellPaysLeading) }
     @State private var viewModel: SearchViewModel?
     @State private var destination: Destination?
+    /// Drives the iOS bar's Cancel button: the keyboard covers the tab bar, so without it Return was
+    /// the only way out of the field (Sodalite#208).
+    @State private var isSearchFieldEditing = false
 
     private var seerrBrowsingEnabled: Bool {
         SeerrSurfacePolicy.browsingEnabled(
@@ -157,35 +160,55 @@ struct SearchView: View {
     private var searchBar: some View {
         if let vm = viewModel {
             HStack(spacing: 14) {
-                Image(systemName: "magnifyingglass")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 14) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                SearchTextField(
-                    text: Bindable(vm).query,
-                    placeholder: String(localized: "search.placeholder", defaultValue: "Search")
+                    searchField(vm: vm)
+                        .frame(maxWidth: .infinity, maxHeight: 42)
+                        .onChange(of: vm.query) { _, _ in
+                            vm.scheduleSearch()
+                        }
+
+                    if vm.isSearching {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+                .padding(.horizontal, 26)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.Theme.restFill)
                 )
-                .frame(maxWidth: .infinity, maxHeight: 42)
-                .onChange(of: vm.query) { _, _ in
-                    vm.scheduleSearch()
-                }
 
-                if vm.isSearching {
-                    ProgressView()
-                        .scaleEffect(0.8)
+                #if os(iOS)
+                if isSearchFieldEditing {
+                    // Only drops the keyboard: the field's own clear button already empties the query.
+                    Button("common.cancel") {
+                        isSearchFieldEditing = false
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
+                #endif
             }
-            .padding(.horizontal, 26)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.Theme.restFill)
-            )
+            .animation(.snappy, value: isSearchFieldEditing)
             .padding(.leading, metrics.screenLeading(shellPaysLeading: shellPaysLeading))
             .padding(.trailing, metrics.screenHInset)
             .padding(.top, 38)
             .padding(.bottom, 18)
         }
+    }
+
+    @ViewBuilder
+    private func searchField(vm: SearchViewModel) -> some View {
+        let placeholder = String(localized: "search.placeholder", defaultValue: "Search")
+        #if os(iOS)
+        SearchTextField(text: Bindable(vm).query, isEditing: $isSearchFieldEditing, placeholder: placeholder)
+        #else
+        SearchTextField(text: Bindable(vm).query, placeholder: placeholder)
+        #endif
     }
     #endif
 
@@ -224,6 +247,8 @@ struct SearchView: View {
             }
             .padding(.vertical, 20)
         }
+        // Scrolling the hits is the other way out of the keyboard, and it keeps the query.
+        .scrollDismissesKeyboard(.immediately)
         .drivesShellBar()
     }
 
