@@ -81,7 +81,7 @@ struct AlphabetRail: View {
     private func label(_ letter: String, isActive: Bool) -> some View {
         Text(verbatim: letter)
             .font(.caption2.weight(.semibold))
-            .foregroundStyle(isActive || highlighted == letter ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+            .foregroundStyle(isActive || highlighted == letter ? AnyShapeStyle(.tint) : AnyShapeStyle(Color.Theme.quietLabel))
             .frame(minWidth: 28, minHeight: 24)
             .background {
                 if isActive { Circle().fill(Color.Theme.focusFill) }
