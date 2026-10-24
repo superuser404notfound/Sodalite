@@ -185,9 +185,8 @@ struct SearchView: View {
 
                 #if os(iOS)
                 if isSearchFieldEditing {
-                    // UISearchController's Cancel: empties the query and drops the keyboard.
+                    // Only drops the keyboard: the field's own clear button already empties the query.
                     Button("common.cancel") {
-                        vm.query = ""
                         isSearchFieldEditing = false
                     }
                     .transition(.move(edge: .trailing).combined(with: .opacity))
