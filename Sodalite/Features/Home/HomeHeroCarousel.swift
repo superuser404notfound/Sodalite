@@ -563,16 +563,17 @@ struct HomeHeroCarousel: View {
                 }
                 .focused($focus, equals: .info)
                 // The detail page's trick (Sodalite#53): out of reach until focus is in the banner, so
-                // coming in from anywhere the engine can only land on Play, rather than landing on the
+                // coming in from outside the engine lands on Play (from below on the dots), rather than on the
                 // nearer info button and being corrected afterwards, which twitched.
                 .focusSuppressed(focus == nil)
             }
             .collapsesActionButtonLabel(true)
             pager
                 .padding(.leading, 8)
-                // The one reachable dot moves right with every page, so Down from the info button
-                // found it only on the last page and fell into the rows on every other (Sodalite#205,
-                // measured 1 of 6 in the simulator). As a section the whole pill is the target.
+                // The one reachable dot moves right with every page, and with few titles the pill
+                // ends left of the info button, so Down from it fell into the rows (Sodalite#205).
+                // A section the banner's width is under every button and over every card.
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .focusSection()
         }
     }
@@ -602,9 +603,9 @@ struct HomeHeroCarousel: View {
                     pagerMark(isCurrent: page == index)
                         .focusable()
                         .focused($focus, equals: .page(page))
-                        // Reachable from outside the banner never, and from the buttons only on the
-                        // page on screen; once focus is on the dots, every dot is.
-                        .focusSuppressed(!isOnDots && (focus == nil || page != index))
+                        // From outside the dots only the page on screen is reachable, so Up from the
+                        // rows and Down from the buttons land on it; once there, every dot is.
+                        .focusSuppressed(!isOnDots && page != index)
                     #else
                     pagerMark(isCurrent: page == index)
                         .contentShape(Rectangle().inset(by: -4))
