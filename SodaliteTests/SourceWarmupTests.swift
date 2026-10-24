@@ -27,7 +27,7 @@ struct PlaybackStreamSelectionTests {
         }
 
         func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse { throw NotUsed() }
-        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
+        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
         func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
         func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
         func reportPlaybackStopped(_ report: PlaybackStopReport) async throws {}

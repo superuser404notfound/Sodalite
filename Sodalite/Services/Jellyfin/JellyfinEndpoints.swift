@@ -51,7 +51,7 @@ enum JellyfinEndpoint: APIEndpoint {
 
     // PlaybackInfo body is the DeviceProfile dict (DirectPlayProfile [String: Any]) bridged through JSONValue for the Encodable body path.
     case playbackInfo(itemID: String, userID: String, payload: JSONValue)
-    case livePlaybackInfo(itemID: String, userID: String, maxStreamingBitrate: Int, payload: JSONValue)
+    case livePlaybackInfo(itemID: String, userID: String, maxStreamingBitrate: Int, payload: JSONValue, autoOpen: Bool)
     case sessionPlaying(report: PlaybackStartReport)
     case sessionProgress(report: PlaybackProgressReport)
     case sessionStopped(report: PlaybackStopReport)
@@ -156,7 +156,7 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Genres"
         case .studios:
             "/Studios"
-        case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _):
+        case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _, _):
             "/Items/\(itemID)/PlaybackInfo"
         case .sessionPlaying:
             "/Sessions/Playing"
@@ -273,11 +273,12 @@ enum JellyfinEndpoint: APIEndpoint {
         case .playbackInfo(_, let userID, _):
             return [URLQueryItem(name: "UserId", value: userID)]
 
-        case .livePlaybackInfo(_, let userID, let maxStreamingBitrate, _):
+        case .livePlaybackInfo(_, let userID, let maxStreamingBitrate, _, let autoOpen):
             // AutoOpenLiveStream probes the tuner (known codecs → DirectStream/copy, real LiveStreamId); IsPlayback marks a real play; MaxStreamingBitrate caps a transcode fallback.
+            // Without it nothing is opened or probed, and an M3U channel still answers with its provider URL in Path (#204).
             return [
                 URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "AutoOpenLiveStream", value: "true"),
+                URLQueryItem(name: "AutoOpenLiveStream", value: autoOpen ? "true" : "false"),
                 URLQueryItem(name: "IsPlayback", value: "true"),
                 URLQueryItem(name: "StartTimeTicks", value: "0"),
                 URLQueryItem(name: "MaxStreamingBitrate", value: String(maxStreamingBitrate)),
@@ -526,7 +527,7 @@ enum JellyfinEndpoint: APIEndpoint {
             AuthenticateBody(username: username, pw: password)
         case .quickConnectAuthenticate(let secret):
             QuickConnectAuthBody(secret: secret)
-        case .playbackInfo(_, _, let payload), .livePlaybackInfo(_, _, _, let payload):
+        case .playbackInfo(_, _, let payload), .livePlaybackInfo(_, _, _, let payload, _):
             payload
         case .updateUserItemData(_, _, let payload):
             payload

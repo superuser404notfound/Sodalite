@@ -69993,6 +69993,330 @@
         }
       }
     },
+    "changelog.1_1_0.firstTune.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV kanál z playlistu M3U už nečeká, až ho Jellyfin nejprve otevře a analyzuje. Sodalite se serveru zeptá jen na adresu streamu a přehrává přímo od poskytovatele, takže i první naladění kanálu začne zhruba za sekundu místo několika."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En IPTV-kanal fra en M3U-playliste venter ikke længere på, at Jellyfin først åbner og analyserer den. Sodalite beder kun serveren om streamadressen og afspiller direkte fra udbyderen, så selv den første start af en kanal tager omkring et sekund i stedet for flere."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein IPTV-Sender aus einer M3U-Playlist wartet nicht mehr darauf, dass Jellyfin ihn zuerst öffnet und analysiert. Sodalite fragt den Server nur nach der Streamadresse und spielt direkt vom Anbieter, daher startet auch der erste Aufruf eines Senders in etwa einer Sekunde statt in mehreren."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα κανάλι IPTV από λίστα M3U δεν περιμένει πλέον το Jellyfin να το ανοίξει και να το αναλύσει πρώτα. Το Sodalite ζητά από τον διακομιστή μόνο τη διεύθυνση της ροής και παίζει απευθείας από τον πάροχο, έτσι ακόμη και ο πρώτος συντονισμός ενός καναλιού ξεκινά σε περίπου ένα δευτερόλεπτο αντί για αρκετά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An IPTV channel from an M3U playlist no longer waits for Jellyfin to open and analyze it first. Sodalite asks the server only for the stream address and plays straight from the provider, so even the first tune of a channel starts in about a second instead of several."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canal IPTV de una lista M3U ya no espera a que Jellyfin lo abra y lo analice primero. Sodalite solo pide al servidor la dirección del stream y reproduce directamente desde el proveedor, así que incluso la primera sintonización de un canal empieza en un segundo aproximadamente en lugar de varios."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M3U-soittolistan IPTV-kanava ei enää odota, että Jellyfin ensin avaa ja analysoi sen. Sodalite kysyy palvelimelta vain striimin osoitteen ja toistaa suoraan palveluntarjoajalta, joten kanavan ensimmäinenkin viritys alkaa noin sekunnissa usean sijaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une chaîne IPTV d’une playlist M3U n’attend plus que Jellyfin l’ouvre et l’analyse d’abord. Sodalite demande seulement au serveur l’adresse du flux et lit directement depuis le fournisseur, si bien que même le premier accès à une chaîne démarre en une seconde environ au lieu de plusieurs."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV kanal s M3U popisa više ne čeka da ga Jellyfin najprije otvori i analizira. Sodalite od poslužitelja traži samo adresu streama i reproducira izravno od pružatelja, pa i prvo ugađanje kanala počinje za otprilike sekundu umjesto nekoliko."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az M3U-lejátszási lista IPTV-csatornája már nem várja meg, hogy a Jellyfin előbb megnyissa és elemezze. A Sodalite csak a stream címét kéri a szervertől, és közvetlenül a szolgáltatótól játszik le, így egy csatorna első hangolása is nagyjából egy másodperc alatt indul több helyett."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canale IPTV da una playlist M3U non aspetta più che Jellyfin lo apra e lo analizzi prima. Sodalite chiede al server solo l’indirizzo dello stream e riproduce direttamente dal provider, così anche la prima sintonizzazione di un canale parte in circa un secondo invece che in diversi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M3U プレイリストの IPTV チャンネルは、Jellyfin が先に開いて解析するのを待たなくなりました。Sodalite はサーバーにストリームのアドレスだけを問い合わせ、プロバイダーから直接再生するため、チャンネルの初回選局でも数秒ではなく約 1 秒で始まります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M3U 재생 목록의 IPTV 채널은 더 이상 Jellyfin이 먼저 열고 분석할 때까지 기다리지 않습니다. Sodalite는 서버에 스트림 주소만 요청하고 제공업체에서 바로 재생하므로, 채널을 처음 틀 때도 몇 초가 아니라 약 1초 만에 시작됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En IPTV-kanal fra en M3U-spilleliste venter ikke lenger på at Jellyfin først åpner og analyserer den. Sodalite ber bare serveren om strømadressen og spiller direkte fra leverandøren, så selv første oppstart av en kanal tar omtrent ett sekund i stedet for flere."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een IPTV-zender uit een M3U-playlist wacht niet meer tot Jellyfin hem eerst opent en analyseert. Sodalite vraagt de server alleen om het streamadres en speelt rechtstreeks van de aanbieder af, zodat zelfs de eerste keer afstemmen op een zender in ongeveer een seconde start in plaats van in enkele."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanał IPTV z playlisty M3U nie czeka już, aż Jellyfin najpierw go otworzy i przeanalizuje. Sodalite pyta serwer tylko o adres strumienia i odtwarza bezpośrednio od dostawcy, więc nawet pierwsze włączenie kanału trwa około sekundy zamiast kilku."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um canal IPTV de uma playlist M3U não espera mais o Jellyfin abri-lo e analisá-lo primeiro. O Sodalite pede ao servidor apenas o endereço do stream e reproduz direto do provedor, então até a primeira sintonia de um canal começa em cerca de um segundo em vez de vários."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um canal IPTV de uma playlist M3U já não espera que o Jellyfin o abra e analise primeiro. O Sodalite pede ao servidor apenas o endereço do stream e reproduz diretamente do fornecedor, pelo que até a primeira sintonização de um canal começa em cerca de um segundo em vez de vários."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canal IPTV dintr-un playlist M3U nu mai așteaptă ca Jellyfin să îl deschidă și să îl analizeze mai întâi. Sodalite cere serverului doar adresa streamului și redă direct de la furnizor, așa că și prima acordare a unui canal pornește în aproximativ o secundă în loc de câteva."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Канал IPTV из плейлиста M3U больше не ждёт, пока Jellyfin сначала откроет и проанализирует его. Sodalite запрашивает у сервера только адрес потока и воспроизводит напрямую от провайдера, поэтому даже первое включение канала занимает около секунды вместо нескольких."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV kanál z playlistu M3U už nečaká, kým ho Jellyfin najprv otvorí a analyzuje. Sodalite sa servera pýta len na adresu streamu a prehráva priamo od poskytovateľa, takže aj prvé naladenie kanála začne približne za sekundu namiesto niekoľkých."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En IPTV-kanal från en M3U-spellista väntar inte längre på att Jellyfin först öppnar och analyserar den. Sodalite frågar bara servern efter strömadressen och spelar direkt från leverantören, så även första starten av en kanal tar ungefär en sekund i stället för flera."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "M3U çalma listesindeki bir IPTV kanalı artık Jellyfin'in onu önce açıp analiz etmesini beklemiyor. Sodalite sunucudan yalnızca yayın adresini istiyor ve doğrudan sağlayıcıdan oynatıyor, böylece bir kanalın ilk açılışı bile birkaç saniye yerine yaklaşık bir saniyede başlıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Канал IPTV зі списку M3U більше не чекає, поки Jellyfin спершу відкриє й проаналізує його. Sodalite запитує в сервера лише адресу потоку й відтворює напряму від провайдера, тож навіть перше ввімкнення каналу триває близько секунди замість кількох."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "来自 M3U 播放列表的 IPTV 频道不再等待 Jellyfin 先打开并分析它。Sodalite 只向服务器请求流地址，并直接从提供商播放，因此即使是频道的首次调台也只需约 1 秒，而不是好几秒。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "來自 M3U 播放清單的 IPTV 頻道不再等待 Jellyfin 先開啟並分析它。Sodalite 只向伺服器要求串流位址，並直接從供應商播放，因此即使是頻道的首次轉台也只需約 1 秒，而不是好幾秒。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.firstTune.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rychlejší první naladění IPTV kanálů"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hurtigere første start på IPTV-kanaler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnellerer erster Start bei IPTV-Sendern"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ταχύτερος πρώτος συντονισμός σε κανάλια IPTV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faster first tune on IPTV channels"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primera sintonización más rápida en canales IPTV"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nopeampi ensimmäinen viritys IPTV-kanavilla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier zapping plus rapide sur les chaînes IPTV"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brže prvo ugađanje IPTV kanala"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gyorsabb első hangolás IPTV-csatornákon"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima sintonizzazione più rapida sui canali IPTV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV チャンネルの初回選局を高速化"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV 채널 첫 튜닝 속도 향상"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raskere første oppstart på IPTV-kanaler"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sneller eerste afstemming op IPTV-zenders"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szybsze pierwsze włączenie kanałów IPTV"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeira sintonia mais rápida em canais IPTV"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeira sintonização mais rápida em canais IPTV"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima acordare mai rapidă pe canalele IPTV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрее первое включение каналов IPTV"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rýchlejšie prvé naladenie IPTV kanálov"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snabbare första start på IPTV-kanaler"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV kanallarında daha hızlı ilk açılış"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Швидше перше ввімкнення каналів IPTV"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV 频道首次调台更快"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IPTV 頻道首次轉台更快"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.guideChips.body" : {
       "comment" : "What's New 1.1.0: guide category chips airing now, Radio chip only with radio channels (#201)",
       "extractionState" : "manual",
