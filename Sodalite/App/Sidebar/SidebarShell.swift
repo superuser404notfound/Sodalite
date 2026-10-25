@@ -168,9 +168,13 @@ struct SidebarShell<Content: View>: View {
                     chromeHidden[tab] = hidden
                 }
         }
-        // A kept page stays mounted but leaves the screen and the focus engine.
+        // A kept page stays mounted but leaves the screen and the focus engine. Opacity and hit
+        // testing alone leave its focus section in place, and a kept page stacked above the
+        // selected one caught the move and found nothing in it: Down from Live TV's segments went
+        // nowhere once Settings had been visited (Sodalite#140, reproduced in the tvOS simulator).
         .opacity(isSelected ? 1 : 0)
         .allowsHitTesting(isSelected)
+        .disabled(!isSelected)
         .accessibilityHidden(!isSelected)
         // The shell opens on the content, not on the rail, which is what the top bar does.
         .prefersDefaultFocus(isSelected, in: shellFocus)
