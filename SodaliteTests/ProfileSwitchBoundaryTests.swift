@@ -209,6 +209,14 @@ struct ProfileSwitchBoundaryTests {
             throw APIError.unauthorized(message: nil)
         }
 
+        func loginWithLocal(email: String, password: String) async throws -> SeerrUser {
+            throw APIError.unauthorized(message: nil)
+        }
+
+        func publicSettings() async throws -> SeerrPublicSettings {
+            throw APIError.unauthorized(message: nil)
+        }
+
         func logout() async throws {}
     }
 }

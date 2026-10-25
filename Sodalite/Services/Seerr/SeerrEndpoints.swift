@@ -3,6 +3,8 @@ import Foundation
 enum SeerrEndpoint: APIEndpoint {
     case status
     case authJellyfin(body: SeerrJellyfinAuthBody)
+    case authLocal(body: SeerrLocalAuthBody)
+    case publicSettings
     case authMe
     case authLogout
 
@@ -65,6 +67,8 @@ enum SeerrEndpoint: APIEndpoint {
         switch self {
         case .status: "/api/v1/status"
         case .authJellyfin: "/api/v1/auth/jellyfin"
+        case .authLocal: "/api/v1/auth/local"
+        case .publicSettings: "/api/v1/settings/public"
         case .authMe: "/api/v1/auth/me"
         case .authLogout: "/api/v1/auth/logout"
         case .discoverTrending: "/api/v1/discover/trending"
@@ -111,7 +115,7 @@ enum SeerrEndpoint: APIEndpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .authJellyfin, .createRequest: .post
+        case .authJellyfin, .authLocal, .createRequest: .post
         case .authLogout: .post
         case .mediaFileDelete, .deleteRequest: .delete
         case .approveRequest, .declineRequest, .retryRequest: .post
@@ -185,6 +189,7 @@ enum SeerrEndpoint: APIEndpoint {
     var body: (any Encodable & Sendable)? {
         switch self {
         case .authJellyfin(let body): body
+        case .authLocal(let body): body
         case .createRequest(let body): body
         case .updateRequest(_, let body): body
         default: nil
@@ -193,7 +198,7 @@ enum SeerrEndpoint: APIEndpoint {
 
     var requiresAuth: Bool {
         switch self {
-        case .status, .authJellyfin: false
+        case .status, .authJellyfin, .authLocal, .publicSettings: false
         default: true
         }
     }

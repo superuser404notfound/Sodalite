@@ -9,6 +9,7 @@ struct SeerrSettingsView: View {
     @State private var isDiscovering = false
     @State private var discoveredServer: SeerrServer?
     @State private var serverVersion: String?
+    @State private var serverSettings: SeerrPublicSettings?
     @State private var discoveryError: String?
 
     @State private var useJellyfinCredentials = true
@@ -152,6 +153,7 @@ struct SeerrSettingsView: View {
             Button {
                 discoveredServer = nil
                 serverVersion = nil
+                serverSettings = nil
                 loginError = nil
                 passwordText = ""
             } label: {
@@ -177,25 +179,27 @@ struct SeerrSettingsView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            if hasJellyfinUser {
+            if hasJellyfinUser && acceptsJellyfinLogin {
                 jellyfinToggle
             }
 
             VStack(spacing: 12) {
                 if !isUsernameHidden {
                     TextField(
-                        String(localized: "auth.login.username", defaultValue: "Username"),
+                        usesJellyfinProfile
+                            ? String(localized: "auth.login.username", defaultValue: "Username")
+                            : String(localized: "settings.seerr.usernameOrEmail", defaultValue: "Username or email"),
                         text: $usernameText
                     )
                     .verbatimTextEntry()
-                    .disabled(useJellyfinCredentials && hasJellyfinUser)
-                    .opacity(useJellyfinCredentials && hasJellyfinUser ? 0.6 : 1.0)
+                    .disabled(usesJellyfinProfile)
+                    .opacity(usesJellyfinProfile ? 0.6 : 1.0)
                 }
 
                 if isPasswordHidden {
                     passwordCachedNote
                 } else {
-                    if useJellyfinCredentials && hasJellyfinUser && cachedJellyfinPassword == nil {
+                    if usesJellyfinProfile && cachedJellyfinPassword == nil {
                         passwordNeededNote
                     }
                     SecureField(
@@ -525,12 +529,21 @@ struct SeerrSettingsView: View {
         appState.activeUser != nil
     }
 
+    /// A Plex-backed Seerr answers /auth/jellyfin with HTTP 500, so its sign-in takes typed credentials only (Sodalite#214).
+    private var acceptsJellyfinLogin: Bool {
+        serverSettings?.acceptsJellyfinLogin ?? true
+    }
+
+    private var usesJellyfinProfile: Bool {
+        useJellyfinCredentials && hasJellyfinUser && acceptsJellyfinLogin
+    }
+
     private var isUsernameHidden: Bool {
-        useJellyfinCredentials && hasJellyfinUser
+        usesJellyfinProfile
     }
 
     private var isPasswordHidden: Bool {
-        useJellyfinCredentials && hasJellyfinUser && cachedJellyfinPassword != nil
+        usesJellyfinProfile && cachedJellyfinPassword != nil
     }
 
     private var canSubmit: Bool {
@@ -563,6 +576,10 @@ struct SeerrSettingsView: View {
         case .success(let url, let info):
             let server = SeerrServer(url: url)
             dependencies.seerrClient.baseURL = url
+            serverSettings = try? await dependencies.seerrAuthService.publicSettings()
+            if serverSettings?.acceptsJellyfinLogin == false, usernameText == appState.activeUser?.name {
+                usernameText = ""
+            }
             discoveredServer = server
             serverVersion = info.version
         case .failure(let error):
@@ -586,10 +603,14 @@ struct SeerrSettingsView: View {
         }()
 
         do {
-            let user = try await dependencies.seerrAuthService.loginWithJellyfin(
-                username: username,
-                password: password
-            )
+            let auth = dependencies.seerrAuthService
+            let user = usesJellyfinProfile
+                ? try await auth.loginWithJellyfin(username: username, password: password)
+                : try await auth.loginWithTypedCredentials(
+                    identifier: username,
+                    password: password,
+                    settings: serverSettings
+                )
             // Tie the Seerr session to the active Jellyfin profile (per-profile cookie) so switchToUser can restore it.
             // What comes back may carry the URL slot this sign-in did not know (Sodalite#45).
             let connected = try dependencies.saveSeerrSession(
@@ -600,7 +621,7 @@ struct SeerrSettingsView: View {
 
             // The password just typed here is the Jellyfin one, so keep it: this screen is the only
             // one that asks for it again, and without this it would ask on every reconnect.
-            if useJellyfinCredentials, hasJellyfinUser, !passwordText.isEmpty,
+            if usesJellyfinProfile, !passwordText.isEmpty,
                await dependencies.adoptJellyfinPassword(username: username, password: password) {
                 cachedJellyfinPassword = password
             }
@@ -639,6 +660,7 @@ struct SeerrSettingsView: View {
         appState.disconnectSeerr()
         discoveredServer = nil
         serverVersion = nil
+        serverSettings = nil
         serverAddressText = ""
         passwordText = ""
     }
