@@ -1839,16 +1839,12 @@ final class PlayerHostController: AVPlayerViewController {
 
     // MARK: - Pan (Touchpad Scrubbing)
 
-    private enum PanAxis { case undetermined, horizontal, vertical }
-
     private var lastDropdownStep: CGFloat = 0
-    private var panAxis: PanAxis = .undetermined
+    private var panAxis: PlayerPanAxis = .undetermined
     private var verticalStepFired = false
     private var horizontalStepFired = false
     private var scrubCommitted = false
 
-    /// Travel (pt) to commit a pan to one axis; low enough to feel responsive, high enough a diagonal swipe doesn't trigger vertical nav.
-    private static let panAxisCommitThreshold: CGFloat = 40
     /// Vertical travel (pt) to fire up/down, one fire per gesture (single-shot like arrow keys).
     private static let verticalFireThreshold: CGFloat = 150
     /// Horizontal travel (pt) to fire left/right for transport-button nav (not scrubbing).
@@ -1871,11 +1867,7 @@ final class PlayerHostController: AVPlayerViewController {
             case .changed:
                 let t = gesture.translation(in: view)
                 if panAxis == .undetermined {
-                    let absX = abs(t.x)
-                    let absY = abs(t.y)
-                    if max(absX, absY) >= Self.panAxisCommitThreshold {
-                        panAxis = absX > absY ? .horizontal : .vertical
-                    }
+                    panAxis = PlayerPanAxis.resolve(translation: t)
                 }
                 guard panAxis != .undetermined else { break }
                 let delta = panAxis == .horizontal ? t.x : t.y
@@ -1910,11 +1902,7 @@ final class PlayerHostController: AVPlayerViewController {
             case .changed:
                 let t = gesture.translation(in: view)
                 if panAxis == .undetermined {
-                    let absX = abs(t.x)
-                    let absY = abs(t.y)
-                    if max(absX, absY) >= Self.panAxisCommitThreshold {
-                        panAxis = absX > absY ? .horizontal : .vertical
-                    }
+                    panAxis = PlayerPanAxis.resolve(translation: t)
                 }
                 if panAxis == .vertical, !verticalStepFired {
                     let v = gesture.velocity(in: view)
@@ -1976,11 +1964,7 @@ final class PlayerHostController: AVPlayerViewController {
             let t = gesture.translation(in: view)
 
             if panAxis == .undetermined {
-                let absX = abs(t.x)
-                let absY = abs(t.y)
-                if max(absX, absY) >= Self.panAxisCommitThreshold {
-                    panAxis = absX > absY ? .horizontal : .vertical
-                }
+                panAxis = PlayerPanAxis.resolve(translation: t)
             }
 
             switch panAxis {

@@ -86331,6 +86331,328 @@
         }
       }
     },
+    "changelog.1_1_0.transportFocus.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvýraznění na liště přehrávání se nyní přesune hned spolu s fokusem, takže předchozí tlačítko už nevypadá jako vybrané. Šikmé přejetí se už nepočítá jako vlevo nebo vpravo, takže přejetí dolů na ukazatel průběhu se nezmění v přetáčení."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I afspilningslinjen flytter markeringen sig nu i samme øjeblik som fokus, så den forrige knap ikke længere ser valgt ud. Et skråt swipe tæller ikke længere som venstre eller højre, så et swipe ned til statuslinjen ikke kan blive til en spoling."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In der Steuerleiste wandert die Hervorhebung jetzt im selben Moment wie der Fokus, die vorige Taste sieht also nicht mehr ausgewählt aus. Ein schräges Wischen zählt nicht mehr als links oder rechts, so wird ein Wischen nach unten in den Fortschrittsbalken nicht mehr zum Spulen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στη γραμμή αναπαραγωγής η επισήμανση μετακινείται πλέον τη στιγμή που μετακινείται η εστίαση, οπότε το προηγούμενο κουμπί δεν φαίνεται πια επιλεγμένο. Ένα διαγώνιο σάρωμα δεν μετρά πλέον ως αριστερά ή δεξιά, οπότε ένα σάρωμα προς τα κάτω στη γραμμή προόδου δεν γίνεται μετακίνηση."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the transport bar the highlight now moves the moment focus does, so the previous button no longer looks selected. A diagonal swipe no longer counts as left or right, so a swipe down into the progress bar cannot turn into a scrub."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la barra de reproducción, el resaltado se mueve ahora en el mismo instante que el foco, así que el botón anterior ya no parece seleccionado. Un gesto en diagonal ya no cuenta como izquierda o derecha, así que deslizar hacia abajo hasta la barra de progreso no acaba avanzando o retrocediendo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toistopalkissa korostus siirtyy nyt samalla hetkellä kuin kohdistus, joten edellinen painike ei enää näytä valitulta. Vino pyyhkäisy ei enää lasketa vasemmalle tai oikealle, joten pyyhkäisy alas edistymispalkkiin ei muutu kelaukseksi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans la barre de lecture, la surbrillance se déplace désormais au même instant que le focus, le bouton précédent ne paraît donc plus sélectionné. Un geste en diagonale ne compte plus comme gauche ou droite, si bien qu’un balayage vers la barre de progression ne se transforme plus en avance ou retour."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na traci za reprodukciju isticanje se sada pomiče istog trenutka kad i fokus, pa prethodni gumb više ne izgleda odabrano. Dijagonalni pokret više se ne računa kao lijevo ili desno, pa se pokret prema dolje na traku napretka više ne pretvara u premotavanje."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszósávon a kiemelés most ugyanabban a pillanatban mozdul, mint a fókusz, így az előző gomb már nem tűnik kiválasztottnak. Az átlós húzás már nem számít balra vagy jobbra, így a folyamatjelzőre lefelé húzás nem válik tekeréssé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nella barra di riproduzione l’evidenziazione ora si sposta nello stesso istante del focus, quindi il pulsante precedente non sembra più selezionato. Uno swipe in diagonale non conta più come sinistra o destra, quindi uno swipe verso il basso sulla barra di avanzamento non diventa più uno scorrimento."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生バーのハイライトがフォーカスと同時に移動するようになり、直前のボタンが選択されたままに見えなくなりました。斜めのスワイプは左右として扱われなくなったため、プログレスバーへの下スワイプが早送りや巻き戻しになることはありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 막대의 강조 표시가 이제 포커스와 동시에 이동하므로 이전 버튼이 더 이상 선택된 것처럼 보이지 않습니다. 대각선 스와이프는 더 이상 왼쪽이나 오른쪽으로 인식되지 않아, 진행 막대로 아래로 스와이프해도 탐색으로 바뀌지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I avspillingslinjen flytter markeringen seg nå i samme øyeblikk som fokuset, så den forrige knappen ser ikke lenger valgt ut. Et skrått sveip teller ikke lenger som venstre eller høyre, så et sveip ned til fremdriftslinjen blir ikke til spoling."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In de bedieningsbalk verschuift de markering nu op hetzelfde moment als de focus, dus de vorige knop lijkt niet meer geselecteerd. Een schuine veegbeweging telt niet meer als links of rechts, dus omlaag vegen naar de voortgangsbalk wordt geen spoelbeweging meer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na pasku odtwarzania podświetlenie przesuwa się teraz w tej samej chwili co fokus, więc poprzedni przycisk nie wygląda już na zaznaczony. Ukośny gest nie liczy się już jako lewo lub prawo, więc przesunięcie w dół na pasek postępu nie zamienia się w przewijanie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na barra de reprodução, o destaque agora se move no mesmo instante que o foco, então o botão anterior não parece mais selecionado. Um gesto na diagonal não conta mais como esquerda ou direita, então deslizar para baixo até a barra de progresso não vira mais avanço ou retrocesso."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na barra de reprodução, o destaque move-se agora no mesmo instante que o foco, pelo que o botão anterior já não parece selecionado. Um gesto na diagonal já não conta como esquerda ou direita, pelo que deslizar para baixo até à barra de progresso já não se transforma em avanço ou recuo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "În bara de redare, evidențierea se mută acum în același moment cu focalizarea, așa că butonul anterior nu mai pare selectat. Un gest în diagonală nu mai contează ca stânga sau dreapta, așa că un gest în jos spre bara de progres nu se mai transformă în derulare."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На панели воспроизведения подсветка теперь перемещается одновременно с фокусом, поэтому предыдущая кнопка больше не выглядит выбранной. Диагональный жест больше не считается движением влево или вправо, поэтому жест вниз к полосе прогресса не превращается в перемотку."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na lište prehrávania sa zvýraznenie teraz presunie v tom istom okamihu ako fokus, takže predchádzajúce tlačidlo už nevyzerá ako vybrané. Šikmé potiahnutie sa už nepočíta ako vľavo alebo vpravo, takže potiahnutie nadol na ukazovateľ priebehu sa nezmení na pretáčanie."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I uppspelningsfältet flyttas markeringen nu i samma ögonblick som fokus, så den föregående knappen ser inte längre vald ut. Ett snett svep räknas inte längre som vänster eller höger, så ett svep ned till förloppsindikatorn blir inte längre en spolning."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma çubuğunda vurgu artık odakla aynı anda hareket ediyor, böylece önceki düğme artık seçili görünmüyor. Çapraz bir kaydırma artık sola veya sağa sayılmıyor, bu yüzden ilerleme çubuğuna doğru aşağı kaydırma ileri veya geri sarmaya dönüşmüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На панелі відтворення підсвічування тепер переміщується одночасно з фокусом, тож попередня кнопка більше не виглядає вибраною. Діагональний жест більше не вважається рухом ліворуч чи праворуч, тож жест униз до смуги прогресу не перетворюється на перемотування."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放控制栏中的高亮现在会与焦点同时移动，之前的按钮不再看起来仍被选中。斜向滑动不再被当作向左或向右，因此向下滑到进度条时不会变成快进或快退。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放控制列中的醒目標示現在會與焦點同時移動，先前的按鈕不再看起來仍被選取。斜向滑動不再被當作向左或向右，因此向下滑到進度列時不會變成快轉或倒轉。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.transportFocus.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládání přehrávače reaguje přesněji"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspillerknapperne følger dit swipe"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player-Steuerung folgt dem Wischen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα χειριστήρια αναπαραγωγής ακολουθούν το σάρωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player controls follow your swipe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los controles del reproductor siguen tu gesto"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soittimen painikkeet seuraavat pyyhkäisyä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les commandes du lecteur suivent votre geste"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrole playera prate vaš pokret"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszó vezérlői követik a húzást"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I controlli del player seguono lo swipe"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレーヤーの操作がスワイプに正確に追従"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "플레이어 컨트롤이 스와이프를 정확히 따름"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spillerknappene følger sveipet ditt"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelerknoppen volgen je veegbeweging"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sterowanie odtwarzaczem podąża za gestem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os controles do player seguem seu gesto"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os controlos do leitor seguem o seu gesto"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comenzile playerului urmează gestul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управление плеером точнее следует за жестом"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládanie prehrávača reaguje presnejšie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelarens knappar följer ditt svep"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatıcı kontrolleri kaydırmanızı izler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Керування плеєром точніше стежить за жестом"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放器控制更准确地跟随滑动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放器控制更準確地跟隨滑動"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.tvLogin.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
