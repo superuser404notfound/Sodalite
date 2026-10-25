@@ -382,11 +382,12 @@ struct CatalogDetailView: View {
             for request in failedRequests {
                 try await dependencies.seerrRequestService.retryRequest(requestID: request.id)
             }
-            NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
-            await refreshDetailAfterRequest()
         } catch {
             requestActionError = ErrorText.user(for: error)
         }
+        // Also after a partial failure: the requests already re-sent are approved now, and a second press on stale state would only earn a 409 for them.
+        NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
+        await refreshDetailAfterRequest()
     }
 
     /// Deletes every open request for this title, then refreshes so the chips drop their pipeline state.
