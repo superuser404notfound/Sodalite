@@ -36,10 +36,16 @@ struct SidebarProfileHeader: View {
 
 /// The header's avatar, shared with the profile row that takes its place when there is more than
 /// one profile to switch between.
+///
+/// On the focused row's white pill it goes black like the glyphs beside it: white initials in a
+/// white-on-white circle and a white hairline left nothing to see there (Sodalite#207).
 struct SidebarProfileAvatar: View {
     let user: JellyfinUser
+    var state: SidebarItemState = .rest
 
     @Environment(\.dependencies) private var dependencies
+
+    private var isOnFocusPill: Bool { state == .focused }
 
     var body: some View {
         ZStack {
@@ -57,15 +63,20 @@ struct SidebarProfileAvatar: View {
                 initialsCircle(for: user)
             }
         }
-        .overlay(Circle().strokeBorder(Color.Theme.hairline, lineWidth: 1))
+        .overlay(
+            Circle().strokeBorder(
+                isOnFocusPill ? state.labelColor : Color.Theme.hairline,
+                lineWidth: isOnFocusPill ? 2 : 1
+            )
+        )
     }
 
     private func initialsCircle(for user: JellyfinUser) -> some View {
         ZStack {
-            Circle().fill(Color.Theme.restFill)
+            Circle().fill(isOnFocusPill ? Color.clear : Color.Theme.restFill)
             Text(Self.initials(for: user.name))
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(state.labelColor)
         }
     }
 

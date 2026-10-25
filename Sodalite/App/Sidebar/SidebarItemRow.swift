@@ -31,7 +31,7 @@ struct SidebarItemRow: View {
     var body: some View {
         HStack(spacing: 0) {
             if tab == .profiles, let user = appState.activeUser {
-                SidebarProfileAvatar(user: user)
+                SidebarProfileAvatar(user: user, state: state)
                     .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
             } else {
                 // .monochrome for the same reason the tab bar needs it: "tv" renders hierarchically

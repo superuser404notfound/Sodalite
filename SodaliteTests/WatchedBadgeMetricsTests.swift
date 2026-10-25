@@ -61,12 +61,13 @@ struct WatchedBadgeMetricsTests {
     }
 
     /// The glyph is drawn, not knocked out. Two styles on the symbol is what selects palette
-    /// rendering, and losing the white one silently returns the transparent check (Sodalite#89).
+    /// rendering, and losing the glyph one silently returns the transparent check (Sodalite#89). The
+    /// glyph is the accent's foreground, not white, which vanished on Silver (Sodalite#207).
     @Test func theCheckIsPaletteRenderedWithAShadowAndNoTextStyle() throws {
         let badge = try source("Sodalite/Components/ArtworkStateBadges.swift")
 
         #expect(badge.contains("foregroundStyle(glyph, .tint)"))
-        #expect(badge.contains("badge(\"checkmark.circle.fill\", glyph: .white)"))
+        #expect(badge.contains("badge(\"checkmark.circle.fill\", glyph: appearanceTheme.palette.foreground.color)"))
         #expect(badge.contains(".shadow("))
         // A text style is what tied the old badge to Dynamic Type and to nothing else.
         #expect(!badge.contains(".font("))
