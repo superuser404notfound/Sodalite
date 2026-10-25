@@ -80019,6 +80019,328 @@
         }
       }
     },
+    "changelog.1_1_0.searchRetap.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu a iPadu klepnutí na kartu Hledat, když už je otevřená, umístí kurzor rovnou do vyhledávacího pole a otevře klávesnici."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad sætter et tryk på fanen Søg, mens den allerede er åben, markøren direkte i søgefeltet og viser tastaturet."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf iPhone und iPad setzt ein Tippen auf den Tab Suche, wenn er schon offen ist, den Cursor direkt ins Suchfeld und blendet die Tastatur ein."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone και iPad, ένα πάτημα στην καρτέλα Αναζήτηση όταν είναι ήδη ανοιχτή βάζει τον κέρσορα κατευθείαν στο πεδίο αναζήτησης και εμφανίζει το πληκτρολόγιο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On iPhone and iPad, tapping the Search tab while it is already open puts the cursor straight in the search field and brings up the keyboard."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iPhone y iPad, tocar la pestaña Buscar cuando ya está abierta coloca el cursor directamente en el campo de búsqueda y muestra el teclado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhonessa ja iPadissa Haku-välilehden napauttaminen, kun se on jo auki, vie kohdistimen suoraan hakukenttään ja tuo näppäimistön esiin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur iPhone et iPad, toucher l’onglet Recherche alors qu’il est déjà ouvert place le curseur directement dans le champ de recherche et affiche le clavier."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhoneu i iPadu dodir kartice Pretraga dok je već otvorena stavlja pokazivač izravno u polje za pretraživanje i prikazuje tipkovnicu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone-on és iPaden a már megnyitott Keresés lapra koppintva a kurzor egyből a keresőmezőbe kerül, és megjelenik a billentyűzet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su iPhone e iPad, toccare la scheda Cerca quando è già aperta porta il cursore direttamente nel campo di ricerca e mostra la tastiera."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhoneとiPadでは、開いている検索タブをもう一度タップすると、カーソルが検索フィールドに移動してキーボードが表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone과 iPad에서 이미 열려 있는 검색 탭을 다시 탭하면 커서가 바로 검색 필드로 이동하고 키보드가 나타납니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone og iPad setter et trykk på Søk-fanen mens den allerede er åpen, markøren rett i søkefeltet og viser tastaturet."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op iPhone en iPad zet een tik op het tabblad Zoeken terwijl het al open is de cursor direct in het zoekveld en verschijnt het toetsenbord."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie i iPadzie stuknięcie karty Szukaj, gdy jest już otwarta, umieszcza kursor od razu w polu wyszukiwania i wyświetla klawiaturę."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e no iPad, tocar na aba Buscar quando ela já está aberta coloca o cursor direto no campo de busca e mostra o teclado."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No iPhone e no iPad, tocar no separador Pesquisar quando já está aberto coloca o cursor diretamente no campo de pesquisa e mostra o teclado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe iPhone și iPad, atingerea filei Căutare când este deja deschisă pune cursorul direct în câmpul de căutare și afișează tastatura."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone и iPad нажатие на уже открытую вкладку «Поиск» сразу ставит курсор в поле поиска и показывает клавиатуру."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone a iPade ťuknutie na kartu Hľadať, keď je už otvorená, umiestni kurzor priamo do vyhľadávacieho poľa a zobrazí klávesnicu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På iPhone och iPad placerar ett tryck på fliken Sök när den redan är öppen markören direkt i sökfältet och visar tangentbordet."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone ve iPad'de zaten açık olan Ara sekmesine dokunmak imleci doğrudan arama alanına yerleştirir ve klavyeyi gösterir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone та iPad натискання на вже відкриту вкладку «Пошук» одразу ставить курсор у поле пошуку й показує клавіатуру."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上，在已打开的搜索标签上再次轻点，光标会直接进入搜索栏并弹出键盘。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPhone 和 iPad 上，於已開啟的搜尋標籤上再點一下，游標會直接進入搜尋欄位並顯示鍵盤。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.searchRetap.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Druhým klepnutím na Hledat rovnou psát"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryk på Søg igen for at skrive"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche nochmal tippen zum Schreiben"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πατήστε ξανά Αναζήτηση για πληκτρολόγηση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap Search again to type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca Buscar otra vez para escribir"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napauta Haku uudelleen kirjoittaaksesi"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez à nouveau Recherche pour saisir"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponovno dodirnite Pretraga za upis"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppints újra a Keresésre a gépeléshez"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca di nuovo Cerca per scrivere"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索をもう一度タップして入力"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색을 다시 탭하여 입력"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trykk på Søk igjen for å skrive"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tik nogmaals op Zoeken om te typen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stuknij ponownie Szukaj, aby pisać"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em Buscar de novo para digitar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque novamente em Pesquisar para escrever"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atinge din nou Căutare pentru a scrie"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторное нажатие на «Поиск» для ввода"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opätovným ťuknutím na Hľadať rovno písať"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryck på Sök igen för att skriva"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yazmak için Ara'ya tekrar dokunun"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторне натискання «Пошук» для введення"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再次轻点搜索即可输入"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再次點一下搜尋即可輸入"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.settingsList.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

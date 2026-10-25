@@ -38,6 +38,9 @@ struct SearchTextField: UIViewRepresentable {
         context.coordinator.parent = self
         if !isEditing && uiView.isFirstResponder {
             uiView.resignFirstResponder()
+        } else if isEditing && !uiView.isFirstResponder && uiView.window != nil {
+            // Sodalite#209: a second tap on the Search tab asks for the keyboard.
+            uiView.becomeFirstResponder()
         }
     }
 

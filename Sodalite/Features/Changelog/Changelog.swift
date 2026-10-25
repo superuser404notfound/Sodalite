@@ -160,6 +160,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
+                    "changelog.1_1_0.searchRetap.title",
+                    "changelog.1_1_0.searchRetap.body",
+                    icon: "keyboard"
+                ),
+                ChangelogHighlight(
+                    .improve,
                     "changelog.1_1_0.sleepClose.title",
                     "changelog.1_1_0.sleepClose.body",
                     icon: "moon.zzz.fill"

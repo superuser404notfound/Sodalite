@@ -46,6 +46,10 @@ final class AppState {
     /// Bumped by the deep-link path to dismiss a presented player before the new sheet, else a TopShelf tap brings the app forward with the stale player on top. Detail views driving a PlayerLauncher clear showPlayer on change.
     var requestPlayerDismissal: Int = 0
 
+    /// iOS: the Search tab was tapped while it was already open, which puts the cursor in the
+    /// search field the way the Apple TV app does (Sodalite#209). SearchView observes the bump.
+    var requestSearchFieldFocus: Int = 0
+
     /// True while a deep-link is in flight; AppRouter overlays a loading view so the prior detail view doesn't flash.
     var isResolvingDeepLink: Bool = false
 
