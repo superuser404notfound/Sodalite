@@ -237,6 +237,18 @@ struct PlaybackSettingsView: View {
                 #endif
 
                 ValuePickerRow(
+                    icon: "square.stack.3d.up",
+                    title: "settings.playback.versionOrder",
+                    subtitle: "settings.playback.versionOrder.subtitle",
+                    options: VersionOrder.allCases,
+                    selection: Binding(
+                        get: { prefs.versionOrder },
+                        set: { prefs.versionOrder = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
                     icon: "arrow.down.circle",
                     title: "settings.playback.buffer",
                     subtitle: "settings.playback.buffer.subtitle",

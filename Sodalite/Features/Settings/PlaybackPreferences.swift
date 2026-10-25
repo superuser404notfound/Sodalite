@@ -48,6 +48,7 @@ final class PlaybackPreferences {
         static let subtitlesOnSkipBack = "playback.subtitlesOnSkipBack"
         static let touchpadScrubbing = "playback.touchpadScrubbing"
         static let playerControls = "playback.playerControls"
+        static let versionOrder = "playback.versionOrder"
     }
 
     // MARK: - Allowed Values
@@ -293,6 +294,12 @@ final class PlaybackPreferences {
     /// Sodalite#48: a film played to its end, unrated, asks for the viewer's rating once the player closes.
     var askForRatingAfterMovie: Bool {
         didSet { store.set(askForRatingAfterMovie, forKey: Keys.askForRatingAfterMovie) }
+    }
+
+    /// Which version of a multi-version title is listed first and plays untouched: the largest frame,
+    /// or the server's own order for a library that puts a language first.
+    var versionOrder: VersionOrder {
+        didSet { store.set(versionOrder.rawValue, forKey: Keys.versionOrder) }
     }
 
     var autoSkipIntro: Bool {
@@ -570,6 +577,7 @@ final class PlaybackPreferences {
         self.autoplayCountdown = store.object(forKey: Keys.autoplayCountdown) as? Bool ?? true
         self.showNextEpisodeCard = store.object(forKey: Keys.showNextEpisodeCard) as? Bool ?? true
         self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
+        self.versionOrder = store.string(forKey: Keys.versionOrder).flatMap(VersionOrder.init(rawValue:)) ?? .quality
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false

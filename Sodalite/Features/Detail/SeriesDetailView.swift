@@ -32,7 +32,11 @@ struct SeriesDetailView: View {
     @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
     /// Which version the play target runs; keyed to that target, so tapping the next episode drops it (Sodalite#139).
-    @State private var versionSelection = VersionSelection()
+    @State private var versionPick = VersionSelection()
+    /// The pick under the profile's version order, read fresh so a changed setting applies at once.
+    private var versionSelection: VersionSelection {
+        versionPick.ordered(dependencies.playbackPreferences.versionOrder)
+    }
     /// Play launched from the glass-panel Play button vs an episode card; player-dismiss restores focus to the right control (else Down jumped past the seasons row to cast).
     @State private var playOriginatedFromPlayButton = false
     @State private var isShuffleLoading = false
@@ -297,9 +301,10 @@ struct SeriesDetailView: View {
                 tintColor: dependencies.appearancePreferences.effectiveTint(
                     isSupporter: dependencies.storeKitService.isSupporter
                 ),
-                selectedID: choice.selectedID
+                selectedID: choice.selectedID,
+                order: dependencies.playbackPreferences.versionOrder
             ) { source in
-                versionSelection.choose(source, for: choice.item)
+                versionPick.choose(source, for: choice.item)
                 versionChoice = nil
             }
         }

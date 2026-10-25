@@ -164,6 +164,20 @@ struct ProfileSyncPayloadsTests {
         #expect(target.askForRatingAfterMovie)
     }
 
+    @Test func theVersionOrderTravelsAndAnOlderRecordKeepsIt() {
+        let source = PlaybackPreferences(store: scratch("versionOrderSource"))
+        source.versionOrder = .server
+        let target = PlaybackPreferences(store: scratch("versionOrderTarget"))
+        ProfilePlaybackPayload(collecting: source, stamp: .now).apply(to: target)
+        #expect(target.versionOrder == .server)
+
+        var older = ProfilePlaybackPayload(collecting: source, stamp: .now)
+        older.versionOrder = nil
+        target.versionOrder = .quality
+        older.apply(to: target)
+        #expect(target.versionOrder == .quality)
+    }
+
     @Test func aDecodeFailureNamesTheKeyAndNoValue() {
         let data = Data(#"{"schemaVersion":1,"secret":"hunter2"}"#.utf8)
         do {

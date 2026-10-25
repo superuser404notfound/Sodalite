@@ -32,6 +32,7 @@ protocol DownloadBackend: AnyObject {
     var authorization: String { get }
     var userID: String { get }
     var preferredAudioLanguage: String? { get }
+    var versionOrder: VersionOrder { get }
     var allowsCellular: Bool { get }
     /// False for a user whose policy forbids video transcoding: every rung downloads the original (Sodalite#202).
     var canTranscodeVideo: Bool { get }
@@ -82,7 +83,7 @@ final class DownloadManager {
         let quality = backend.canTranscodeVideo ? requested : .original
         guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
 
-        let versionID = mediaSourceID ?? VersionSelection().preferredSourceID(for: item)
+        let versionID = mediaSourceID ?? VersionSelection(order: backend.versionOrder).preferredSourceID(for: item)
         let probe = try await backend.playbackInfo(itemID: item.id, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: quality.maxStreamingBitrate), mediaSourceID: versionID, audioStreamIndex: nil)
         guard let first = probe.mediaSources.first(where: { $0.id == versionID }) ?? probe.mediaSources.first else { throw DownloadEnqueueError.noSource }
         let audio = DownloadPlanner.audioStreamIndex(preferredLanguage: backend.preferredAudioLanguage, streams: first.mediaStreams ?? [])
