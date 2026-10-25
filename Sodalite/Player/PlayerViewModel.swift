@@ -2143,8 +2143,11 @@ final class PlayerViewModel {
 
     func togglePlayPause() {
         if isAwaitingBackgroundReload { userToggledDuringBackgroundReload = true }
-        resumePressPending = !isPlaying
+        let stateBeforePress = player.state
         player.togglePlayPause()
+        // `play()` publishes `.playing` synchronously, so a delivery that consumes the flag is already
+        // queued; a press the engine ignored (seeking, ended, error) cannot leave it behind.
+        resumePressPending = stateBeforePress != .playing && player.state == .playing
         reportProgressIfNeeded()
         showControls = true
         scheduleControlsHide()
