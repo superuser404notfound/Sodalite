@@ -352,9 +352,11 @@ extension HomeViewModel {
                 return nil
             }
 
-            let tagItems: [(String, JellyfinItem?)] = await withTaskGroup(
-                of: (String, JellyfinItem?).self,
-                returning: [(String, JellyfinItem?)].self
+            let probeLimit = GenreTilePick.candidateCount
+            let probeFields = GenreTilePick.fields(JellyfinEndpoint.homeRowFields)
+            let probes: [(String, [JellyfinItem])] = await withTaskGroup(
+                of: (String, [JellyfinItem]).self,
+                returning: [(String, [JellyfinItem])].self
             ) { group in
                 // Bounded fan-out: at most maxConcurrent backdrop queries at a time, not all ~15-20 up front, so a genre-heavy library doesn't burst the HTTPClient limiter on first load.
                 var iter = tags.makeIterator()
@@ -366,14 +368,14 @@ extension HomeViewModel {
                         let query = ItemQuery(
                             includeItemTypes: [.movie, .series],
                             sortBy: "Random",
-                            limit: 1,
+                            limit: probeLimit,
                             genres: [tag.name],
-                            fields: JellyfinEndpoint.homeRowFields
+                            fields: probeFields
                         )
                         let service = owner?.libraryService ?? self.libraryService
                         let user = owner?.userID ?? self.userID
-                        let item = try? await service.getItems(userID: user, query: query).items.first
-                        return (tag.id, item)
+                        let items = (try? await service.getItems(userID: user, query: query).items) ?? []
+                        return (tag.id, items)
                     }
                 }
 
@@ -381,7 +383,7 @@ extension HomeViewModel {
                     guard let next = iter.next() else { break }
                     enqueue(next)
                 }
-                var results: [(String, JellyfinItem?)] = []
+                var results: [(String, [JellyfinItem])] = []
                 for await result in group {
                     results.append(result)
                     if let next = iter.next() { enqueue(next) }
@@ -390,13 +392,19 @@ extension HomeViewModel {
             }
 
             // Build cards on MainActor (image URL construction needs it)
-            let itemMap = Dictionary(uniqueKeysWithValues: tagItems)
+            let picks = GenreTilePick.pick(tags: tags, candidates: Dictionary(uniqueKeysWithValues: probes))
+            let ignored = picks.values.filter { $0?.id == nil }.count
+            if ignored > 0 {
+                LogTap.shared.note("[home] Genres filter not applied by the server for \(ignored) of \(picks.count) genre tiles")
+            }
             // Only surface genres that actually have movie/series content; the per-genre probe above
-            // returns nil for empty genres, so drop those instead of rendering dead tiles.
+            // comes back empty for those, so drop them instead of rendering dead tiles.
             let cardData: [TagCardData] = tags.compactMap { tag in
-                guard let item = itemMap[tag.id].flatMap({ $0 }) else { return nil }
-                let backdropURL = imageService.backdropURL(for: item, maxWidth: ImageWidth.wideCard)
-                    ?? imageService.posterURL(for: item, maxWidth: ImageWidth.wideCard)
+                guard let pick = picks[tag.id] else { return nil }
+                let backdropURL = pick.flatMap { item in
+                    imageService.backdropURL(for: item, maxWidth: ImageWidth.wideCard)
+                        ?? imageService.posterURL(for: item, maxWidth: ImageWidth.wideCard)
+                }
                 return TagCardData(id: tag.id, name: tag.name, backdropURL: backdropURL)
             }
 
