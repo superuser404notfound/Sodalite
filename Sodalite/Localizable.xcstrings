@@ -77915,6 +77915,330 @@
         }
       }
     },
+    "changelog.1_1_0.playlistFromHere.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výběrem položky v playlistu se spustí a playlist pokračuje od ní. Podrobnosti najdete po podržení položky."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg et punkt i en playliste, så afspilles det, og playlisten fortsætter derfra. Hold punktet nede for at se detaljer."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein ausgewählter Eintrag einer Playlist startet sofort, danach geht die Playlist ab dort weiter. Die Details öffnet ein langer Druck auf den Eintrag."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιλέγοντας ένα στοιχείο σε μια playlist ξεκινά η αναπαραγωγή του και η playlist συνεχίζει από εκεί. Κρατήστε πατημένο το στοιχείο για τις λεπτομέρειες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecting an entry in a playlist plays it, and the playlist carries on from there. Hold the entry for its details."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al elegir un elemento de una playlist se reproduce y la playlist continúa desde ahí. Mantén pulsado el elemento para ver sus detalles."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soittolistan kohteen valitseminen toistaa sen, ja soittolista jatkuu siitä eteenpäin. Pidä kohdetta painettuna nähdäksesi tiedot."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un élément d'une playlist le lance, puis la playlist continue à partir de là. Maintenez l'élément enfoncé pour afficher ses détails."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabirom stavke u playlisti ona se reproducira, a playlista se nastavlja od nje. Zadržite stavku za pojedinosti."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy lejátszási lista elemét kiválasztva az elindul, és a lista onnan folytatódik. A részletekért tartsd lenyomva az elemet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegliendo un elemento di una playlist parte la riproduzione e la playlist prosegue da lì. Tieni premuto l'elemento per i dettagli."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリストの項目を選ぶとその項目が再生され、続けてプレイリストの残りが再生されます。詳細は項目を長押しして開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생목록에서 항목을 선택하면 바로 재생되고, 이어서 재생목록이 그 지점부터 계속됩니다. 세부 정보는 항목을 길게 눌러 확인하세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velg et punkt i en spilleliste, så spilles det av, og spillelisten fortsetter derfra. Hold inne punktet for å se detaljer."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een item in een playlist kiezen speelt het af, daarna gaat de playlist vanaf daar verder. Houd het item ingedrukt voor de details."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybranie pozycji na playliście ją odtwarza, a playlista toczy się dalej od tego miejsca. Przytrzymaj pozycję, aby zobaczyć szczegóły."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher um item de uma playlist inicia a reprodução, e a playlist continua a partir dele. Mantenha o item pressionado para ver os detalhes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher um item de uma playlist inicia a reprodução e a playlist continua a partir daí. Mantenha o item premido para ver os detalhes."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alegerea unui element dintr-un playlist îl redă, iar playlistul continuă de acolo. Ține apăsat elementul pentru detalii."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранный элемент плейлиста сразу воспроизводится, а затем плейлист продолжается с этого места. Чтобы открыть подробности, удерживайте элемент."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Výberom položky v playliste sa spustí a playlist pokračuje od nej. Podrobnosti zobrazíte podržaním položky."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj ett objekt i en spellista så spelas det upp, och spellistan fortsätter därifrån. Håll in objektet för att se detaljer."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çalma listesinde bir öğe seçmek onu oynatır ve liste oradan devam eder. Ayrıntılar için öğeyi basılı tut."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибраний елемент плейлиста одразу відтворюється, а далі плейлист продовжується з цього місця. Щоб відкрити подробиці, утримуйте елемент."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择播放列表中的条目即可播放，之后播放列表从该处继续。长按条目可查看详情。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇播放清單中的項目即可播放，之後播放清單從該處繼續。長按項目可查看詳細資訊。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.playlistFromHere.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist od libovolné položky"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspil en playliste fra ethvert punkt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist ab jedem Eintrag"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist από οποιοδήποτε στοιχείο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play a playlist from any entry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduce una playlist desde cualquier elemento"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toista soittolista mistä tahansa kohdasta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire une playlist depuis n'importe quel élément"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlista od bilo koje stavke"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátszási lista bármelyik elemtől"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci una playlist da qualsiasi elemento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリストを任意の項目から再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원하는 항목부터 재생목록 재생"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spill av en spilleliste fra hvilket som helst punkt"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speel een playlist af vanaf elk item"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarzaj playlistę od dowolnej pozycji"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduza uma playlist a partir de qualquer item"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduza uma playlist a partir de qualquer item"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redă un playlist de la orice element"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плейлист с любого элемента"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist od ľubovoľnej položky"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela en spellista från valfritt objekt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çalma listesini istediğin öğeden oynat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Плейлист з будь-якого елемента"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从任意条目播放播放列表"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從任意項目播放播放清單"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.playlistOrder.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

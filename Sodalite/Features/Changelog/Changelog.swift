@@ -219,6 +219,12 @@ enum Changelog {
                     icon: "list.number"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.playlistFromHere.title",
+                    "changelog.1_1_0.playlistFromHere.body",
+                    icon: "text.line.first.and.arrowtriangle.forward"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_1_0.similarRow.title",
                     "changelog.1_1_0.similarRow.body",

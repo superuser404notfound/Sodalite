@@ -14,6 +14,8 @@ struct PlaylistDetailView: View {
     @State private var showPlayer = false
     @State private var playItem: JellyfinItem?
     @State private var playQueue: [JellyfinItem] = []
+    /// Play and Shuffle start every entry from the top; a picked row resumes it (Sodalite#213).
+    @State private var playFromBeginning = true
     /// Value-based focus, keyed by item id, same shape as CollectionDetailView.
     @FocusState private var focusedItemID: String?
     /// Target for the up-move correction below the fold (Sodalite#53 follow-up).
@@ -53,7 +55,7 @@ struct PlaylistDetailView: View {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
-                    startFromBeginning: true,
+                    startFromBeginning: playFromBeginning,
                     playbackService: session.playbackService,
                     itemService: session.itemService,
                     userID: userID,
@@ -69,6 +71,11 @@ struct PlaylistDetailView: View {
         }
         .onChange(of: appState.requestPlayerDismissal) { _, _ in
             if showPlayer { showPlayer = false }
+        }
+        // The rows' menu marks watched in place; their checkmarks come from this list.
+        .onReceive(NotificationCenter.default.publisher(for: .homePlayedDidChange)) { _ in
+            guard let vm = viewModel else { return }
+            Task { await vm.loadPlaylistItems() }
         }
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
@@ -213,6 +220,7 @@ struct PlaylistDetailView: View {
                 guard let first = queue.first else { return }
                 playItem = first
                 playQueue = queue
+                playFromBeginning = true
                 showPlayer = true
             }
         )
@@ -229,6 +237,7 @@ struct PlaylistDetailView: View {
                 guard let first = queue.first else { return }
                 playItem = first
                 playQueue = queue
+                playFromBeginning = true
                 showPlayer = true
             }
         )
@@ -238,6 +247,18 @@ struct PlaylistDetailView: View {
             systemImage: vm.isFavorite ? "heart.fill" : "heart",
             action: { Task { await vm.toggleFavorite() } }
         )
+    }
+
+    /// A picked row plays and the playlist carries on behind it (Sodalite#213), the way Jellyfin's
+    /// web client answers it; the detail page moved into the row's menu. Resolved by row id at call
+    /// time: `PlayMediaItemAction` compares equal, so a captured index would outlive a reorder.
+    private func play(fromRow rowID: String, vm: DetailViewModel, fromBeginning: Bool) {
+        let items = videoItems(vm)
+        guard let start = Self.uniqueRowIDs(for: items).firstIndex(of: rowID) else { return }
+        playItem = items[start]
+        playQueue = Array(items[start...])
+        playFromBeginning = fromBeginning
+        showPlayer = true
     }
 
     // MARK: - Playlist Items (vertical list)
@@ -258,8 +279,12 @@ struct PlaylistDetailView: View {
                     CollectionItemRow(
                         item: media,
                         imageURL: dependencies.jellyfinImageService.posterURL(for: media, maxWidth: ImageWidth.thumbnail),
-                        onSelect: { selectedItem = media }
+                        onSelect: { play(fromRow: rowID, vm: vm, fromBeginning: false) }
                     )
+                    .mediaContextMenu(for: media, open: { selectedItem = $0 })
+                    .environment(\.playMediaItem, PlayMediaItemAction { _, fromBeginning in
+                        play(fromRow: rowID, vm: vm, fromBeginning: fromBeginning)
+                    })
                     .focused($focusedItemID, equals: rowID)
                     .onFocusMoveUp(active: correctsUpMove && index == 0) {
                         playButtonFocused = true
