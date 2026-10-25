@@ -44,7 +44,7 @@ struct SeerrMediaCard: View {
         // covers the neighbour drawn before it (discussion #98).
         .contentShape(RoundedRectangle(cornerRadius: ArtworkCorner.radius))
         .overlay(alignment: .topTrailing) {
-            if let status = media.mediaInfo?.status, status != .unknown {
+            if let status = media.mediaInfo?.displayStatus, status != .unknown {
                 SeerrStatusBadge(status: status, compact: true)
                     .padding(8)
             }

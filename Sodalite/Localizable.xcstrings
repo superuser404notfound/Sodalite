@@ -22884,6 +22884,168 @@
         }
       }
     },
+    "catalog.request.failed.hint" : {
+      "comment" : "Detail page note under a request whose Radarr/Sonarr handover failed; Seerr keeps no reason",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr nemohl předat požadavek do Sonarr ani Radarr. Důvod najdete v serverovém logu Seerr."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr kunne ikke sende anmodningen videre til Sonarr eller Radarr. Årsagen står i Seerrs serverlog."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr konnte die Anfrage nicht an Sonarr oder Radarr übergeben. Der Grund steht im Server-Log von Seerr."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Seerr δεν μπόρεσε να παραδώσει το αίτημα στο Sonarr ή στο Radarr. Η αιτία βρίσκεται στο αρχείο καταγραφής του διακομιστή Seerr."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr could not hand this request to Sonarr or Radarr. The reason is in the Seerr server log."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr no pudo enviar la solicitud a Sonarr ni a Radarr. El motivo está en el registro del servidor de Seerr."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr ei voinut välittää pyyntöä Sonarrille tai Radarrille. Syy löytyy Seerrin palvelinlokista."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr n’a pas pu transmettre la demande à Sonarr ou Radarr. La raison figure dans le journal du serveur Seerr."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr nije mogao proslijediti zahtjev Sonarru ili Radarru. Razlog je u zapisniku Seerr poslužitelja."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Seerr nem tudta átadni a kérést a Sonarrnak vagy a Radarrnak. Az ok a Seerr szervernaplójában található."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr non è riuscito a passare la richiesta a Sonarr o Radarr. Il motivo è nel log del server Seerr."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr はこのリクエストを Sonarr または Radarr に渡せませんでした。原因は Seerr のサーバーログに記録されています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr가 이 요청을 Sonarr 또는 Radarr에 전달하지 못했습니다. 원인은 Seerr 서버 로그에 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr kunne ikke sende forespørselen videre til Sonarr eller Radarr. Årsaken står i serverloggen til Seerr."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr kon het verzoek niet doorgeven aan Sonarr of Radarr. De reden staat in het serverlogboek van Seerr."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr nie mógł przekazać prośby do Sonarr ani Radarr. Przyczyna jest w logu serwera Seerr."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Seerr não conseguiu repassar a solicitação ao Sonarr ou ao Radarr. O motivo está no log do servidor do Seerr."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Seerr não conseguiu passar o pedido ao Sonarr ou ao Radarr. O motivo está no registo do servidor do Seerr."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr nu a putut transmite cererea către Sonarr sau Radarr. Motivul se află în jurnalul serverului Seerr."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr не смог передать запрос в Sonarr или Radarr. Причина указана в журнале сервера Seerr."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr nemohol odovzdať požiadavku do Sonarr ani Radarr. Dôvod nájdete v serverovom logu Seerr."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr kunde inte lämna över förfrågan till Sonarr eller Radarr. Orsaken finns i Seerrs serverlogg."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr bu isteği Sonarr veya Radarr’a iletemedi. Nedeni Seerr sunucu günlüğünde yer alıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr не зміг передати запит до Sonarr або Radarr. Причина вказана в журналі сервера Seerr."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr 无法将此请求交给 Sonarr 或 Radarr。原因记录在 Seerr 服务器日志中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr 無法將此請求交給 Sonarr 或 Radarr。原因記錄在 Seerr 伺服器日誌中。"
+          }
+        }
+      }
+    },
     "catalog.request.loadingTitle" : {
       "comment" : "Placeholder title while the request's media detail loads",
       "extractionState" : "manual",
@@ -69989,6 +70151,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "花絮與片段"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.failedRequests.body" : {
+      "comment" : "In-app changelog 1.1.0: failed Seerr request body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Požadavek, který Seerr nedokázal předat do Sonarr nebo Radarr, se na stránce detailu nyní zobrazuje jako neúspěšný místo zpracovávaného, s poznámkou, kde najít důvod. Správci jej odtud mohou odeslat znovu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En anmodning, som Seerr ikke kunne sende videre til Sonarr eller Radarr, vises nu som mislykket på detaljesiden i stedet for under behandling, med en note om, hvor årsagen står. Administratorer kan sende den igen derfra."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Anfrage, die Seerr nicht an Sonarr oder Radarr übergeben konnte, steht auf der Detailseite jetzt als fehlgeschlagen statt in Bearbeitung, mit einem Hinweis, wo der Grund zu finden ist. Admins können sie dort erneut senden."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα αίτημα που το Seerr δεν μπόρεσε να παραδώσει στο Sonarr ή στο Radarr εμφανίζεται πλέον ως αποτυχημένο στη σελίδα λεπτομερειών αντί για «σε επεξεργασία», με σημείωση για το πού βρίσκεται η αιτία. Οι διαχειριστές μπορούν να το στείλουν ξανά από εκεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A request Seerr could not hand to Sonarr or Radarr now shows as failed on its detail page instead of processing, with a note on where to find the reason. Admins can send it again from there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una solicitud que Seerr no pudo enviar a Sonarr o Radarr ahora aparece como fallida en su página de detalles en lugar de en proceso, con una nota sobre dónde encontrar el motivo. Los administradores pueden volver a enviarla desde ahí."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pyyntö, jota Seerr ei voinut välittää Sonarrille tai Radarrille, näkyy nyt tietosivulla epäonnistuneena käsittelyssä olevan sijaan, ja mukana on huomautus siitä, mistä syy löytyy. Ylläpitäjät voivat lähettää sen sieltä uudelleen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une demande que Seerr n’a pas pu transmettre à Sonarr ou Radarr apparaît désormais comme échouée sur sa page de détails au lieu d’en cours, avec une note indiquant où trouver la raison. Les administrateurs peuvent la renvoyer depuis cette page."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zahtjev koji Seerr nije mogao proslijediti Sonarru ili Radarru sada se na stranici s detaljima prikazuje kao neuspio umjesto u obradi, uz napomenu gdje pronaći razlog. Administratori ga odatle mogu ponovno poslati."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az a kérés, amelyet a Seerr nem tudott átadni a Sonarrnak vagy a Radarrnak, a részletek oldalán mostantól sikertelenként jelenik meg feldolgozás alatti helyett, egy megjegyzéssel arról, hol található az ok. Az adminisztrátorok onnan újra elküldhetik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una richiesta che Seerr non è riuscito a passare a Sonarr o Radarr ora appare come non riuscita nella pagina dei dettagli invece che in elaborazione, con una nota su dove trovare il motivo. Gli amministratori possono inviarla di nuovo da lì."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr が Sonarr または Radarr に渡せなかったリクエストは、詳細ページで「処理中」ではなく「失敗」と表示され、原因の確認場所も案内されます。管理者はそこから再送信できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr가 Sonarr 또는 Radarr에 전달하지 못한 요청은 이제 상세 페이지에서 처리 중 대신 실패로 표시되며, 원인을 확인할 수 있는 위치도 안내됩니다. 관리자는 그곳에서 다시 보낼 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En forespørsel som Seerr ikke kunne sende videre til Sonarr eller Radarr, vises nå som mislykket på detaljsiden i stedet for under behandling, med en merknad om hvor årsaken står. Administratorer kan sende den på nytt derfra."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een verzoek dat Seerr niet aan Sonarr of Radarr kon doorgeven, staat op de detailpagina nu als mislukt in plaats van in behandeling, met een opmerking waar de reden te vinden is. Beheerders kunnen het daar opnieuw versturen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prośba, której Seerr nie mógł przekazać do Sonarr ani Radarr, jest teraz na stronie szczegółów oznaczona jako nieudana zamiast przetwarzanej, z informacją, gdzie znaleźć przyczynę. Administratorzy mogą wysłać ją stamtąd ponownie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma solicitação que o Seerr não conseguiu repassar ao Sonarr ou ao Radarr agora aparece como falha na página de detalhes em vez de em processamento, com uma nota sobre onde encontrar o motivo. Administradores podem enviá-la novamente por ali."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um pedido que o Seerr não conseguiu passar ao Sonarr ou ao Radarr aparece agora como falhado na página de detalhes em vez de em processamento, com uma nota sobre onde encontrar o motivo. Os administradores podem reenviá-lo a partir daí."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O cerere pe care Seerr nu a putut-o transmite către Sonarr sau Radarr apare acum ca eșuată pe pagina de detalii în loc de în procesare, cu o notă despre unde se găsește motivul. Administratorii o pot retrimite de acolo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрос, который Seerr не смог передать в Sonarr или Radarr, теперь отображается на странице сведений как неудачный, а не как обрабатываемый, с пояснением, где найти причину. Администраторы могут отправить его повторно оттуда же."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Požiadavka, ktorú Seerr nedokázal odovzdať do Sonarr alebo Radarr, sa na stránke s podrobnosťami teraz zobrazuje ako neúspešná namiesto spracovávanej, s poznámkou, kde nájsť dôvod. Správcovia ju odtiaľ môžu odoslať znova."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En förfrågan som Seerr inte kunde lämna över till Sonarr eller Radarr visas nu som misslyckad på detaljsidan i stället för under behandling, med en notering om var orsaken finns. Administratörer kan skicka den igen därifrån."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr’ın Sonarr veya Radarr’a iletemediği bir istek artık ayrıntı sayfasında işleniyor yerine başarısız olarak görünür ve nedenin nerede bulunacağına dair bir not içerir. Yöneticiler isteği oradan yeniden gönderebilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запит, який Seerr не зміг передати до Sonarr або Radarr, тепер на сторінці відомостей позначається як невдалий, а не як такий, що обробляється, з приміткою, де знайти причину. Адміністратори можуть надіслати його повторно звідти."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr 无法交给 Sonarr 或 Radarr 的请求，现在会在详情页显示为失败而不是处理中，并提示在哪里查看原因。管理员可以在那里重新发送。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seerr 無法交給 Sonarr 或 Radarr 的請求，現在會在詳細資料頁顯示為失敗而非處理中，並提示在哪裡查看原因。管理員可以在那裡重新傳送。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.failedRequests.title" : {
+      "comment" : "In-app changelog 1.1.0: failed Seerr request title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neúspěšné požadavky jsou vidět"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mislykkede anmodninger vises som sådan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlgeschlagene Anfragen sind als solche erkennbar"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα αποτυχημένα αιτήματα φαίνονται ως τέτοια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed requests show as failed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las solicitudes fallidas se muestran como tales"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epäonnistuneet pyynnöt näkyvät epäonnistuneina"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les demandes échouées sont signalées"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuspjeli zahtjevi prikazuju se kao neuspjeli"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sikertelen kérések sikertelenként jelennek meg"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le richieste non riuscite si riconoscono"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失敗したリクエストを失敗として表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실패한 요청이 실패로 표시됨"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mislykkede forespørsler vises som mislykket"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mislukte verzoeken zijn als zodanig zichtbaar"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieudane prośby są oznaczone jako nieudane"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solicitações com falha aparecem como falha"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pedidos falhados aparecem como falhados"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cererile eșuate apar ca eșuate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неудачные запросы отображаются как неудачные"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neúspešné požiadavky sú viditeľné"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Misslyckade förfrågningar visas som misslyckade"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başarısız istekler başarısız olarak görünür"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Невдалі запити позначаються як невдалі"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失败的请求会显示为失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失敗的請求會顯示為失敗"
           }
         }
       }

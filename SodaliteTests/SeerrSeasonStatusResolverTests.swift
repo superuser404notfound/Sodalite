@@ -97,4 +97,59 @@ struct SeerrSeasonStatusResolverTests {
     @Test func noMediaInfoHasNoStatus() {
         #expect(SeerrSeasonStatusResolver.status(seasonNumber: 1, mediaInfo: nil) == nil)
     }
+
+    // MARK: - Failed handover (Sodalite#210)
+
+    /// Jellyseerr moves the title to PROCESSING on approval and leaves it there when the Sonarr/Radarr handover fails; only the request turns FAILED (4).
+    @Test func failedHandoverOverridesStaleProcessingTitle() throws {
+        let info = try mediaInfo("""
+        {"id": 1, "tmdbId": 42, "status": 3, "seasons": [],
+         "requests": [{"id": 7, "status": 4, "type": "movie"}]}
+        """)
+        #expect(info.displayStatus == .failed)
+    }
+
+    /// A retried or second request that is still open means the title really is on its way.
+    @Test func openRequestBesideFailedOneKeepsProcessing() throws {
+        let info = try mediaInfo("""
+        {"id": 1, "tmdbId": 42, "status": 3, "seasons": [],
+         "requests": [{"id": 7, "status": 4, "type": "movie"},
+                      {"id": 8, "status": 2, "type": "movie"}]}
+        """)
+        #expect(info.displayStatus == .processing)
+    }
+
+    /// A failed 4K request says nothing about the regular status axis.
+    @Test func failed4kRequestLeavesRegularStatusAlone() throws {
+        let info = try mediaInfo("""
+        {"id": 1, "tmdbId": 42, "status": 3, "seasons": [],
+         "requests": [{"id": 7, "status": 4, "type": "movie", "is4k": true}]}
+        """)
+        #expect(info.displayStatus == .processing)
+    }
+
+    /// Availability is never overridden by an old failed request.
+    @Test func failedRequestDoesNotHideAvailability() throws {
+        let info = try mediaInfo("""
+        {"id": 1, "tmdbId": 42, "status": 5, "seasons": [],
+         "requests": [{"id": 7, "status": 4, "type": "movie"}]}
+        """)
+        #expect(info.displayStatus == .available)
+    }
+
+    /// The season rows Jellyseerr created for the request stay PROCESSING too; the failed request covering them wins.
+    @Test func failedHandoverOverridesStaleProcessingSeason() throws {
+        let info = try mediaInfo("""
+        {"id": 1, "tmdbId": 42, "status": 3,
+         "seasons": [{"id": 3, "seasonNumber": 1, "status": 3, "status4k": 1},
+                     {"id": 4, "seasonNumber": 2, "status": 3, "status4k": 1}],
+         "requests": [{"id": 7, "status": 4, "type": "tv",
+                       "seasons": [{"id": 11, "seasonNumber": 1, "status": 2}]},
+                      {"id": 8, "status": 2, "type": "tv",
+                       "seasons": [{"id": 12, "seasonNumber": 2, "status": 2}]}]}
+        """)
+        #expect(SeerrSeasonStatusResolver.status(seasonNumber: 1, mediaInfo: info) == .failed)
+        #expect(SeerrSeasonStatusResolver.status(seasonNumber: 2, mediaInfo: info) == .processing)
+        #expect(info.displayStatus == .processing)
+    }
 }

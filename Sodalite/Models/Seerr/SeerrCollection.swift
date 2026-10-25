@@ -29,7 +29,7 @@ enum SeerrCollectionRequestPlan {
     static func missingParts(in parts: [SeerrMedia]) -> [SeerrMedia] {
         parts.filter { part in
             switch part.mediaInfo?.status {
-            case .none, .unknown, .deleted: true
+            case .none, .unknown, .deleted, .failed: true
             case .pending, .processing, .partiallyAvailable, .available: false
             }
         }

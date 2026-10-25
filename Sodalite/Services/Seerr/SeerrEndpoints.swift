@@ -46,6 +46,8 @@ enum SeerrEndpoint: APIEndpoint {
     case approveRequest(requestID: Int)
     /// POST decline: pending → declined; same response shape as approve.
     case declineRequest(requestID: Int)
+    /// POST retry: failed → approved, hands the request to Radarr/Sonarr again; 409 unless failed, 403 without MANAGE_REQUESTS.
+    case retryRequest(requestID: Int)
     /// DELETE the request entry; does not delete an already-downloaded file.
     case deleteRequest(requestID: Int)
     /// PUT to modify server/profile/root-folder/seasons; partial body, only changed fields.
@@ -96,6 +98,7 @@ enum SeerrEndpoint: APIEndpoint {
         case .allRequests: "/api/v1/request"
         case .approveRequest(let id): "/api/v1/request/\(id)/approve"
         case .declineRequest(let id): "/api/v1/request/\(id)/decline"
+        case .retryRequest(let id): "/api/v1/request/\(id)/retry"
         case .deleteRequest(let id): "/api/v1/request/\(id)"
         case .updateRequest(let id, _): "/api/v1/request/\(id)"
         case .radarrServers: "/api/v1/service/radarr"
@@ -111,7 +114,7 @@ enum SeerrEndpoint: APIEndpoint {
         case .authJellyfin, .createRequest: .post
         case .authLogout: .post
         case .mediaFileDelete, .deleteRequest: .delete
-        case .approveRequest, .declineRequest: .post
+        case .approveRequest, .declineRequest, .retryRequest: .post
         case .updateRequest: .put
         default: .get
         }

@@ -165,10 +165,10 @@ final class SeerrRequestDraft {
 
     /// Availability and pipeline states say "not this one": present, half present, approved and on its
     /// way, or waiting for an admin. A deleted season is explicitly worth asking for again, which is
-    /// the whole point of the Jellyfin ground-truth reconcile that produces it.
+    /// the whole point of the Jellyfin ground-truth reconcile that produces it. So is a failed one.
     static func isWorthRequesting(_ status: SeerrMediaStatus?) -> Bool {
         switch status {
-        case .none, .unknown, .deleted: true
+        case .none, .unknown, .deleted, .failed: true
         case .available, .partiallyAvailable, .processing, .pending: false
         }
     }
