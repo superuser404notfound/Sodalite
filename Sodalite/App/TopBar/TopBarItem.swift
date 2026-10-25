@@ -70,7 +70,7 @@ struct TopBarItem: View {
     @ViewBuilder
     private var icon: some View {
         if tab == .profiles, let user = appState.activeUser {
-            SidebarProfileAvatar(user: user)
+            SidebarProfileAvatar(user: user, state: state)
                 .frame(width: TopBarMetrics.avatarDiameter, height: TopBarMetrics.avatarDiameter)
         } else {
             // .monochrome: "tv" renders hierarchically and would otherwise ignore the colour.
