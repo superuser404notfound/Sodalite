@@ -51,10 +51,19 @@ struct TransportTrackLabel: View {
         return labelWidth > 0 ? labelWidth : nil
     }
 
+    /// Focused, the chip is a filled accent pill, so its glyph and label take the accent's own
+    /// paired foreground rather than white (Sodalite#124, the role pair Now Playing already uses).
+    private var foreground: AnyShapeStyle {
+        isFocused
+            ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
+            : AnyShapeStyle(.white.opacity(0.6))
+    }
+
     /// Collapsible trailing text, with the gap to the leading glyph baked into the measured width.
     private var labelInner: some View {
         Text(label)
             .font(.callout)
+            .modifier(SnappedFocusForeground(style: foreground, isFocused: isFocused))
             // Single-line guarantee so an open dropdown's layout pressure can't break labels mid-word.
             .lineLimit(1)
             .padding(.leading, 8)
@@ -70,6 +79,7 @@ struct TransportTrackLabel: View {
             } else {
                 Image(systemName: icon)
                     .font(.callout)
+                    .modifier(SnappedFocusForeground(style: foreground, isFocused: isFocused))
             }
 
             labelInner
@@ -77,11 +87,7 @@ struct TransportTrackLabel: View {
                 .opacity(showsLabel ? 1 : 0)
                 .clipped()
         }
-        // Focused, the chip is a filled accent pill, so its glyph and label take the accent's own
-        // paired foreground rather than white (Sodalite#124, the role pair Now Playing already uses).
-        .foregroundStyle(isFocused
-            ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
-            : AnyShapeStyle(.white.opacity(0.6)))
+        .foregroundStyle(foreground)
         // Tighter padding for icon-only pills so they read as compact squares, not empty capsules.
         .padding(.horizontal, showsLabel ? 16 : 12)
         .padding(.vertical, 8)
@@ -104,14 +110,29 @@ struct TransportTrackLabel: View {
                 // fill, and over a bright video frame a see-through pill loses the 3:1 it guarantees.
                 // No focus ring here, an accent stroke on an accent fill is invisible; the fill,
                 // the scale step and the shadow carry the focus on their own.
-                .fill(isFocused
-                    ? AnyShapeStyle(appearanceTheme.palette.control.color)
-                    : AnyShapeStyle(.clear))
+                .fill(appearanceTheme.palette.control.color)
+                // The fill moves with the focus at once while width and reflow keep the row's curve:
+                // crossfaded over 0.32 s, the pill being left stayed lit long enough that a click
+                // looked like it would land there.
+                .animation(nil) { $0.opacity(isFocused ? 1 : 0) }
         )
         // Depth cue so the focused pill reads as raised, not just tinted. The role's curve is also
         // forced by the enclosing row via a transaction, so every sibling interpolates together
         // instead of distant pills snapping; that is why `.pill` is the one role not on `settle`.
         .focusResponse(.pill, isFocused: isFocused)
+    }
+}
+
+/// The glyph and label colour switch with the fill, outside the row's 0.32 s curve. It has to sit on the
+/// leaf: a scoped nil animation around the chip's `foregroundStyle` still let the colour crossfade.
+private struct SnappedFocusForeground: ViewModifier {
+    let style: AnyShapeStyle
+    let isFocused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(style)
+            .transaction(value: isFocused) { $0.animation = nil }
     }
 }
 

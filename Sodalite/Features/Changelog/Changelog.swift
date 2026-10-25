@@ -363,6 +363,12 @@ enum Changelog {
                     icon: "appletv"
                 ),
                 ChangelogHighlight(
+                    .fix,
+                    "changelog.1_1_0.transportFocus.title",
+                    "changelog.1_1_0.transportFocus.body",
+                    icon: "hand.draw"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.dvScrubPreview.title",
                     "changelog.1_1_0.dvScrubPreview.body",
