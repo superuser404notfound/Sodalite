@@ -20,6 +20,9 @@ struct MediaBadges: Equatable, Sendable {
 
     enum DynamicRange: String, Sendable {
         case dolbyVision = "DV"
+        /// A Dolby Vision file whose base layer also carries ST 2094-40 (Sodalite#211). One pill,
+        /// not two: both name the same fact, how the picture looks.
+        case dolbyVisionHDR10Plus = "DV HDR10+"
         case hdr10Plus = "HDR10+"
         case hdr10 = "HDR10"
         case hlg = "HLG"
@@ -120,12 +123,14 @@ enum MediaBadgeResolver {
 
     private static func dynamicRange(_ video: MediaStream?) -> MediaBadges.DynamicRange? {
         guard let video else { return nil }
-        if video.dvProfile != nil { return .dolbyVision }
-        switch video.videoRangeType?.uppercased() {
+        let range = video.videoRangeType?.uppercased()
+        switch range {
+        case "DOVIWITHHDR10PLUS", "DOVIWITHELHDR10PLUS":         return .dolbyVisionHDR10Plus
+        case _ where video.dvProfile != nil:                    return .dolbyVision
         case "HDR10PLUS":                                       return .hdr10Plus
         case "HDR10":                                           return .hdr10
         case "HLG":                                             return .hlg
-        case "DOVI", "DOVIWITHHDR10", "DOVIWITHHLG", "DOVIWITHSDR":
+        case "DOVI", "DOVIWITHHDR10", "DOVIWITHHLG", "DOVIWITHSDR", "DOVIWITHEL":
             return .dolbyVision
         default:                                                return nil
         }
