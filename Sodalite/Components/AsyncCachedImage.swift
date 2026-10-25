@@ -67,6 +67,11 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         self.trimsTransparentMargin = trimsTransparentMargin
         self.content = sizedContent
         self.placeholder = placeholder
+        // A card that scrolls back into a lazy row is a new view, and an empty first frame faded its
+        // cached artwork in again over the placeholder, a reload in all but the network (Sodalite#212).
+        _loaded = State(initialValue: url.flatMap {
+            ImageCache.shared.image(for: Self.cacheKey(for: $0, trimmed: trimsTransparentMargin))
+        })
     }
 
     @Environment(\.dependencies) private var dependencies
@@ -123,6 +128,15 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
 
     @MainActor
     private func load() async {
+        // A hit is drawn without the reset below, so a card seeded from the cache in `init` keeps its
+        // first frame instead of blanking and fading back in.
+        if let url, let cached = ImageCache.shared.image(for: Self.cacheKey(for: url, trimmed: trimsTransparentMargin)) {
+            retryOnActivate = false
+            onLoadFailed?(false)
+            loaded = cached
+            onImageLoaded?(cached)
+            return
+        }
         // Reset on URL change so a stale image from the previous profile doesn't flash while the new one loads.
         loaded = nil
         retryOnActivate = false
@@ -175,6 +189,10 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         }
     }
 
+    nonisolated private static func cacheKey(for url: URL, trimmed: Bool) -> URL {
+        trimmed ? ImageCache.trimmedKey(for: url) : url
+    }
+
     /// "Logo", "Backdrop", "Primary": the segment after /Images/, which is what a reader of the
     /// diagnostic log is actually looking for.
     nonisolated private static func imageKind(_ url: URL?) -> String {
@@ -197,7 +215,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     @MainActor
     private func loadImage(from url: URL?, attempt: Int) async -> ImageLoadOutcome {
         guard let url else { return .noImage }
-        let cacheKey = trimsTransparentMargin ? ImageCache.trimmedKey(for: url) : url
+        let cacheKey = Self.cacheKey(for: url, trimmed: trimsTransparentMargin)
 
         if let cached = ImageCache.shared.image(for: cacheKey) {
             return .image(cached)
@@ -272,12 +290,45 @@ final class ImageCache: @unchecked Sendable {
     // `nonisolated(unsafe)`: NSCache is thread-safe, so prefetch can `store` from background tasks without a per-image MainActor hop.
     nonisolated(unsafe) private let cache: NSCache<NSURL, PlatformImage>
 
-    /// Cost-based eviction by decoded byte size; the 150 MB budget gates (countLimit stays generous), bounded so long sessions don't grow into hundreds of MB.
+    nonisolated private let evictions = EvictionCounter()
+
+    /// The decoded bytes the cache may hold, from `costLimit(physicalMemory:)`.
+    nonisolated let costLimit: Int
+
+    /// Cost-based eviction by decoded byte size; the byte budget gates (countLimit stays generous), bounded so long sessions don't grow into hundreds of MB.
     nonisolated private init() {
         let cache = NSCache<NSURL, PlatformImage>()
-        cache.totalCostLimit = 150_000_000
+        costLimit = Self.costLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
+        cache.totalCostLimit = costLimit
         cache.countLimit = 1000
+        cache.delegate = evictions
         self.cache = cache
+    }
+
+    /// 75 MB per GB of RAM, between 150 MB (Apple TV HD, 2 GB) and 300 MB (Apple TV 4K 2022, 4 GB).
+    ///
+    /// The budget is not a share of the RAM, it is a share of what jetsam allows the process, about
+    /// 2.1 GB on a 4 GB Apple TV (AE#104), and Home stays alive under the player: a 4K session put the
+    /// engine at some 900 MB on its own. A flat 150 MB held some 60 cards at the widths `ImageWidth`
+    /// asks for, under what one Home screen draws, so prefetching the lower rows evicted the ones on
+    /// screen (Sodalite#212). `NSCache` also empties itself under memory pressure, which is the
+    /// second line behind this one.
+    nonisolated static func costLimit(physicalMemory: UInt64) -> Int {
+        let gigabytes = (Double(physicalMemory) / Double(1 << 30)).rounded()
+        let budget = Int(gigabytes) * 75_000_000
+        return min(max(budget, 150_000_000), 300_000_000)
+    }
+
+    /// How many images a prefetch may warm: half the budget, counted in typical cards (a 640px
+    /// poster decodes to 2.46 MB, a 960px landscape card to 2.07 MB), so the screen keeps the other
+    /// half and a prefetch can never push out what it is drawing (Sodalite#212).
+    nonisolated static func prefetchLimit(costLimit: Int) -> Int {
+        costLimit / 2 / 2_500_000
+    }
+
+    /// Evictions since the last call, for the diagnostic line a prefetch writes.
+    nonisolated func takeEvictionCount() -> Int {
+        evictions.take()
     }
 
     // nonisolated so the prefetch hot path stores from off-actor tasks without a per-image MainActor hop (NSCache is thread-safe).
@@ -311,15 +362,35 @@ final class ImageCache: @unchecked Sendable {
     }
 }
 
+/// Counts what `NSCache` throws out. A cache that is too small for its screen shows up here first:
+/// in the log, a Home that evicts while it prefetches is Sodalite#212 coming back.
+nonisolated private final class EvictionCounter: NSObject, NSCacheDelegate, @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+
+    func cache(_ cache: NSCache<AnyObject, AnyObject>, willEvictObject obj: Any) {
+        lock.withLock { count += 1 }
+    }
+
+    func take() -> Int {
+        lock.withLock {
+            defer { count = 0 }
+            return count
+        }
+    }
+}
+
 // MARK: - Prefetch
 
 extension ImageCache {
     /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `auth` mirrors `load`: X-Emby-Token only for a participating Jellyfin server so external CDN URLs don't leak the token.
-    static func prefetch(_ urls: [URL], auth: ImageAuth) async {
+    /// Returns how many images it decoded into the cache, for the caller's diagnostic line.
+    @discardableResult
+    static func prefetch(_ urls: [URL], auth: ImageAuth) async -> Int {
         let pending = urls.filter { ImageCache.shared.image(for: $0) == nil }
-        guard !pending.isEmpty else { return }
+        guard !pending.isEmpty else { return 0 }
 
-        await withTaskGroup(of: Void.self) { group in
+        return await withTaskGroup(of: Bool.self) { group in
             // 6 in flight: saturates a home LAN without crowding foreground fetches; matches URLSession's per-host default.
             let maxConcurrent = 6
             var iter = pending.makeIterator()
@@ -330,17 +401,20 @@ extension ImageCache {
                     await prefetchOne(url: url, auth: auth)
                 }
             }
-            for await _ in group {
+            var warmed = 0
+            for await stored in group {
+                if stored { warmed += 1 }
                 if let url = iter.next() {
                     group.addTask {
                         await prefetchOne(url: url, auth: auth)
                     }
                 }
             }
+            return warmed
         }
     }
 
-    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async {
+    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async -> Bool {
         var request = URLRequest(url: url)
         request.timeoutInterval = 15
         if let token = auth.token(for: url) {
@@ -351,7 +425,8 @@ extension ImageCache {
         // the first focus would then read (Sodalite#123).
         guard case .whole(let data) = await ImageFetch.load(request),
               let image = PlatformImage(data: data)
-        else { return }
+        else { return false }
         ImageCache.shared.store(image.preparedForDisplay() ?? image, for: url)
+        return true
     }
 }

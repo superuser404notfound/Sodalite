@@ -372,26 +372,33 @@ struct HomeView: View {
         )
     }
 
-    /// Hand the loaded rows' artwork URLs to `ImageCache.prefetch` so first focus doesn't pay round-trip + decode. Mirrors `SearchView.prefetchSearchPosters`: cached URLs are skipped and the fan-out is bounded, so it never starves foreground fetches. Reuses `vm.imageURL` so prefetched URLs match exactly what the cards request.
+    /// Hand the head of each row's artwork to `ImageCache.prefetch` so first focus doesn't pay round-trip + decode. Only the head, and only up to half the cache: the whole page was several times the budget and evicted the cards on screen (Sodalite#212, see `HomePrefetchPlan`). Reuses `vm.imageURL` so prefetched URLs match exactly what the cards request.
     private func prefetchHomePosters(_ vm: HomeViewModel) {
-        var urls: [URL] = []
-        for row in vm.rows {
+        let rows: [[URL]] = vm.rows.map { row in
             let cwImage = row.type.usesBackdrop
                 ? dependencies.appearancePreferences.continueWatchingImage
                 : .still
-            for item in row.items {
+            return row.items.prefix(HomePrefetchPlan.headPerRow).compactMap { item in
                 let spoilerSafe = needsSpoilerSafeArtwork(item, cwImage: cwImage)
-                if let url = vm.imageURL(
+                return vm.imageURL(
                     for: item, rowType: row.type, cwImage: cwImage, spoilerSafe: spoilerSafe
-                ) {
-                    urls.append(url)
-                }
+                )
             }
         }
+        let limit = ImageCache.prefetchLimit(costLimit: ImageCache.shared.costLimit)
+        let urls = HomePrefetchPlan.urls(rows: rows, limit: limit)
         guard !urls.isEmpty else { return }
         let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
         Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, auth: auth)
+            let warmed = await ImageCache.prefetch(urls, auth: auth)
+            let evicted = ImageCache.shared.takeEvictionCount()
+            if warmed > 0 || evicted > 0 {
+                LogTap.shared.note(
+                    "[ImageCache] home prefetch warmed \(warmed) of \(urls.count) (limit \(limit),"
+                        + " budget \(ImageCache.shared.costLimit / 1_000_000) MB),"
+                        + " evicted \(evicted) since last"
+                )
+            }
         }
     }
 

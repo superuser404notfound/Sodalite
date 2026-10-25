@@ -118,13 +118,17 @@ enum ImageFetch {
     /// Artwork's own session, because `URLSession.shared` cannot carry a delegate and this is where
     /// every image in the app is fetched. Its cache is its own for the same reason: `forget()` has to
     /// be able to drop the entry this session wrote, and the shared cache is no longer the one that
-    /// holds it. Sized like the shared default it replaces, which is what the retry ladder above was
-    /// measured against.
+    /// holds it.
+    ///
+    /// The disk half is what an image evicted from `ImageCache` comes back from without asking the
+    /// server to resize it again. At 40 MB, the size of the shared default this replaced, it held
+    /// fewer of Home's encoded cards than the decoded cache did, so an eviction went all the way to
+    /// the server (Sodalite#212). `Library/Caches` is purgeable, and Settings > Cached Data shows it.
     nonisolated static let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.urlCache = URLCache(
             memoryCapacity: 8 * 1024 * 1024,
-            diskCapacity: 40 * 1024 * 1024,
+            diskCapacity: 200 * 1024 * 1024,
             diskPath: "sodalite-image-cache"
         )
         return URLSession(
