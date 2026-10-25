@@ -79859,6 +79859,330 @@
         }
       }
     },
+    "changelog.1_1_0.resumeHide.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po obnovení přehrávání z pozastavení nyní ovládací prvky zmizí po chvilce místo po pěti sekundách, protože stisknutí Přehrát znamená, že už je nepotřebujete."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når afspilningen genoptages efter en pause, skjules betjeningen nu efter et øjeblik i stedet for efter fem sekunder, for et tryk på Afspil betyder, at du er færdig med den."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird die Wiedergabe nach einer Pause fortgesetzt, blendet die Wiedergabesteuerung jetzt nach einem kurzen Moment aus statt nach fünf Sekunden, denn wer Play drückt, ist mit ihr fertig."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όταν η αναπαραγωγή συνεχίζεται μετά από παύση, τα χειριστήρια κρύβονται πλέον σε μια στιγμή αντί για πέντε δευτερόλεπτα, αφού το πάτημα της Αναπαραγωγής σημαίνει ότι δεν τα χρειάζεστε πια."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resuming playback after a pause now hides the controls after a moment instead of five seconds, since pressing Play means you are done with them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al reanudar la reproducción tras una pausa, los controles se ocultan ahora al momento en lugar de tras cinco segundos, ya que pulsar Reproducir significa que ya no los necesitas."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun toistoa jatketaan tauon jälkeen, säätimet katoavat nyt hetken kuluttua viiden sekunnin sijaan, koska toistopainikkeen painaminen tarkoittaa, ettei niitä enää tarvita."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand la lecture reprend après une pause, les commandes disparaissent désormais au bout d'un instant au lieu de cinq secondes, puisqu'appuyer sur Lecture signifie que vous n'en avez plus besoin."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kada se reprodukcija nastavi nakon pauze, kontrole sada nestaju nakon trenutka umjesto nakon pet sekundi, jer pritisak na Reproduciraj znači da vam više ne trebaju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szünet után folytatott lejátszáskor a vezérlők most egy pillanat múlva eltűnnek öt másodperc helyett, hiszen a Lejátszás megnyomása azt jelenti, hogy már nincs rájuk szükség."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando la riproduzione riprende dopo una pausa, i controlli ora spariscono dopo un attimo invece che dopo cinque secondi, perché premere Play significa che non servono più."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時停止から再生を再開すると、コントロールは5秒後ではなく少し経ってから消えるようになりました。再生を押したら、もう操作は不要だからです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일시 정지 후 재생을 재개하면 이제 컨트롤이 5초가 아니라 잠시 후에 사라집니다. 재생을 누르면 더 이상 컨트롤이 필요 없기 때문입니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når avspillingen gjenopptas etter en pause, skjules kontrollene nå etter et øyeblikk i stedet for etter fem sekunder, for et trykk på Spill av betyr at du er ferdig med dem."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wanneer het afspelen na een pauze wordt hervat, verdwijnt de bediening nu na een ogenblik in plaats van na vijf seconden, want wie op Afspelen drukt, is er klaar mee."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po wznowieniu odtwarzania z pauzy elementy sterujące znikają teraz po chwili zamiast po pięciu sekundach, bo naciśnięcie Odtwórz oznacza, że nie są już potrzebne."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao retomar a reprodução após uma pausa, os controles agora somem após um instante em vez de cinco segundos, já que tocar em Reproduzir significa que você terminou de usá-los."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao retomar a reprodução após uma pausa, os controlos desaparecem agora após um instante em vez de cinco segundos, já que premir Reproduzir significa que já não precisa deles."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reluarea redării după o pauză, comenzile dispar acum după o clipă în loc de cinci secunde, fiindcă apăsarea pe Redare înseamnă că nu mai ai nevoie de ele."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При возобновлении воспроизведения после паузы элементы управления теперь скрываются через мгновение, а не через пять секунд: нажатие «Воспроизвести» означает, что они больше не нужны."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po obnovení prehrávania z pozastavenia teraz ovládacie prvky zmiznú po chvíľke namiesto po piatich sekundách, pretože stlačenie Prehrať znamená, že ich už nepotrebujete."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När uppspelningen återupptas efter en paus döljs kontrollerna nu efter ett ögonblick i stället för efter fem sekunder, eftersom ett tryck på Spela upp betyder att du är klar med dem."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklatmadan sonra oynatma sürdürüldüğünde kontroller artık beş saniye yerine kısa bir süre sonra gizleniyor, çünkü Oynat'a basmak artık onlara ihtiyaç olmadığı anlamına geliyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Після відновлення відтворення з паузи елементи керування тепер зникають за мить, а не через п'ять секунд: натискання «Відтворити» означає, що вони більше не потрібні."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂停后恢复播放时，控件现在会在片刻后隐藏，而不是五秒后，因为按下播放就表示已经不需要它们了。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫停後恢復播放時，控制項現在會在片刻後隱藏，而不是五秒後，因為按下播放就表示已經不需要它們了。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.resumeHide.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládací prvky po spuštění zmizí dříve"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betjeningen forsvinder hurtigere efter Afspil"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steuerung blendet nach Play schneller aus"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα χειριστήρια φεύγουν νωρίτερα μετά την Αναπαραγωγή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controls leave sooner after Play"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los controles se ocultan antes al reanudar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Säätimet poistuvat nopeammin toiston jatkuessa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les commandes disparaissent plus vite après Lecture"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrole nestaju brže nakon reprodukcije"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A vezérlők hamarabb eltűnnek lejátszáskor"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I controlli spariscono prima dopo Play"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生後にコントロールがすぐ消えるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 후 컨트롤이 더 빨리 사라짐"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollene forsvinner raskere etter Spill av"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bediening verdwijnt sneller na Afspelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elementy sterujące znikają szybciej po wznowieniu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os controles somem mais rápido ao retomar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os controlos desaparecem mais depressa ao retomar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comenzile dispar mai repede după Redare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Элементы управления скрываются быстрее после воспроизведения"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládacie prvky po spustení zmiznú skôr"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerna försvinner snabbare efter Spela upp"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat sonrası kontroller daha erken kayboluyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Елементи керування зникають швидше після відтворення"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放后控件更快隐藏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放後控制項更快隱藏"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.scrimFade.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

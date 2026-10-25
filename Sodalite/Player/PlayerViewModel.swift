@@ -699,6 +699,8 @@ final class PlayerViewModel {
     var progressTimer: Task<Void, Never>?
     var progressReportOnDemandTask: Task<Void, Never>?
     var controlsTimer: Task<Void, Never>?
+    /// Sodalite#168: set by a play/pause press that resumed, consumed by the next `.playing`.
+    var resumePressPending = false
     /// Sodalite#104: the idle a left/right press waits before it seeks, on its own field.
     ///
     /// It used to ride on `controlsTimer`, which is also the auto-hide, and every re-arm of the
@@ -1746,9 +1748,14 @@ final class PlayerViewModel {
                         // then resumes, so clearing immediately would reveal a frozen frame).
                         self.liveFirstPlayingAt = Date()
                     }
-                    if self.showControls { self.scheduleControlsHide() }
+                    let afterResumePress = self.resumePressPending
+                    self.resumePressPending = false
+                    if self.showControls {
+                        self.scheduleControlsHide(after: TransportAutoHide.delay(afterResumePress: afterResumePress))
+                    }
                 case .paused:
                     self.isPlaying = false
+                    self.resumePressPending = false
                     // Sodalite#93: this sink is the ONLY place that learns about every pause, including
                     // the ones raised from outside the app. See `TransportAutoHide` for why the two
                     // exceptions are the ones they are.
@@ -2136,6 +2143,7 @@ final class PlayerViewModel {
 
     func togglePlayPause() {
         if isAwaitingBackgroundReload { userToggledDuringBackgroundReload = true }
+        resumePressPending = !isPlaying
         player.togglePlayPause()
         reportProgressIfNeeded()
         showControls = true
@@ -3848,14 +3856,14 @@ final class PlayerViewModel {
         isInputLocked = false
     }
 
-    func scheduleControlsHide() {
+    func scheduleControlsHide(after delay: Duration = TransportAutoHide.idleDelay) {
         controlsTimer?.cancel()
         guard isPlaying else { return }
         // Sodalite#156: hiding the transport over the remote view would reveal nothing, because there
         // is no picture on this screen to look at.
         guard ExternalPlaybackPresentation.autoHideApplies(destination: externalPlaybackDestination) else { return }
         controlsTimer = Task {
-            try? await Task.sleep(for: TransportAutoHide.idleDelay)
+            try? await Task.sleep(for: delay)
             guard !Task.isCancelled else { return }
             hideControlsIfPlaying()
         }

@@ -36,4 +36,17 @@ struct TransportAutoHideTests {
         #expect(!TransportAutoHide.raisesTransport(errorVisible: false, inputLocked: true))
         #expect(!TransportAutoHide.raisesTransport(errorVisible: true, inputLocked: true))
     }
+
+    // MARK: - Resume press (Sodalite#168)
+
+    @Test("A press that resumed hides the transport sooner than the idle countdown")
+    func resumePressUsesTheShortDelay() {
+        #expect(TransportAutoHide.delay(afterResumePress: true) == TransportAutoHide.resumeDelay)
+        #expect(TransportAutoHide.resumeDelay < TransportAutoHide.idleDelay)
+    }
+
+    @Test("Every other return to playing keeps the idle countdown")
+    func otherPlayingTransitionsKeepTheIdleDelay() {
+        #expect(TransportAutoHide.delay(afterResumePress: false) == TransportAutoHide.idleDelay)
+    }
 }

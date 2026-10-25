@@ -21,6 +21,17 @@ enum TransportAutoHide {
     /// title and ten reads as broken rather than deliberate.
     static let idleDelay: Duration = .seconds(5)
 
+    /// Sodalite#168: a press that resumes playback says the user is done with the transport, so it
+    /// leaves after a beat instead of the full idle. Long enough to watch the play icon flip, which is
+    /// the press's only confirmation.
+    static let resumeDelay: Duration = .milliseconds(1500)
+
+    /// Which countdown a `.playing` transition arms. Decided from the press's intent, recorded before
+    /// the engine is asked, because `isPlaying` on that press still carries the old state (#93).
+    static func delay(afterResumePress: Bool) -> Duration {
+        afterResumePress ? resumeDelay : idleDelay
+    }
+
     /// Also the music Now Playing chrome's rule (Sodalite#110), asked at its fire time for the same
     /// reason. That screen carries no extra clause of its own. It briefly had one, refusing to fire
     /// while a queue row held focus, on the theory that hiding the focused view strands the user; in
