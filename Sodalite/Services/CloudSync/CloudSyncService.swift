@@ -458,6 +458,9 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         guard let engine else { return }
         do {
             try await engine.fetchChanges()
+            // One line per fetch: a fetch that brings nothing logs nothing else, which reads the
+            // same as a fetch that never ran.
+            LogTap.shared.note("[CloudSync] fetch done")
             // A fetch that changed nothing posts no event, so an earlier fetch failure would
             // otherwise stay on the status row. A latched upload rejection survives this.
             if case .error = status { settleActive() }
@@ -1047,8 +1050,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applyProfilePayload(cloud, key: profile)
                 lastProfileSnapshot[name] = dependencies.collectProfilePayload(kind, key: profile, stamp: .distantPast)
                 preferences.setLocalStamp(cloud.updatedAt, for: name)
-            } else if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
-                addPendingSave(recordName: name)
+            } else {
+                Self.noteLocalKept(name, local: localStamp, cloud: cloud.updatedAt)
+                if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
+                    addPendingSave(recordName: name)
+                }
             }
         } else if let key = CloudSyncRecordName.storeKey(fromRecordName: name) {
             guard let cloud = decodeOrSkip(name, "settings", { try SettingsSyncPayload.decode(data, key: key) }) else {
@@ -1110,8 +1116,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applySettingsPayload(cloud)
                 lastSettingsSnapshot[key] = dependencies.collectSettingsPayload(key, stamp: .distantPast)
                 preferences.setLocalStamp(cloud.updatedAt, for: name)
-            } else if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
-                addPendingSave(recordName: name)
+            } else {
+                Self.noteLocalKept(name, local: localStamp, cloud: cloud.updatedAt)
+                if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
+                    addPendingSave(recordName: name)
+                }
             }
         } else if name == CloudSyncRecordName.securitySingleton {
             guard let cloud = decodeOrSkip(name, "security", { try JSONDecoder().decode(SecuritySyncPayload.self, from: data) }) else {
@@ -1127,6 +1136,15 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 addPendingSave(recordName: name)
             }
         }
+    }
+
+    /// A fetched record that loses last-writer-wins changes nothing here, so without this line a
+    /// device that keeps its own copy looks exactly like one that never received the record.
+    private static func noteLocalKept(_ name: String, local: Date, cloud: Date) {
+        let verdict = local == cloud ? "tie" : "local newer, re-uploading"
+        LogTap.shared.note(
+            "[CloudSync] kept local \(name) (\(verdict)): local \(local.timeIntervalSince1970) cloud \(cloud.timeIntervalSince1970)"
+        )
     }
 
     /// A server record can move the default-server pin, which lives in the auth store, so the auth
