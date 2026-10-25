@@ -326,6 +326,7 @@ struct FilteredGridView: View {
                     }
                 }
                 .coordinateSpace(.named(Self.gridSpace))
+                .hidesSystemScrollIndex(showsRail)
             }
             .scrollPosition($scrollPosition)
             .overlay(alignment: .trailing) {
