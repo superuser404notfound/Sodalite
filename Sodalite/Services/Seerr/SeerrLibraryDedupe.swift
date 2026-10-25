@@ -61,7 +61,7 @@ extension SeerrMedia {
     var isOnServer: Bool {
         switch mediaInfo?.status {
         case .available, .partiallyAvailable: true
-        case .none, .unknown, .pending, .processing, .deleted: false
+        case .none, .unknown, .pending, .processing, .deleted, .failed: false
         }
     }
 }

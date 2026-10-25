@@ -12,9 +12,12 @@ enum SeerrSeasonStatusResolver {
                 switch s.status {
                 case .available: return .available
                 case .partiallyAvailable: return .partiallyAvailable
-                case .processing: return .processing
-                case .pending: return .pending
+                case .processing, .pending:
+                    return failedHandover(s.status, requests: mediaInfo?.requests) { request in
+                        request.seasons?.contains { $0.seasonNumber == n } == true
+                    }
                 case .deleted: return .deleted
+                case .failed: return .failed
                 case .unknown, .none: break
                 }
             }
@@ -38,5 +41,30 @@ enum SeerrSeasonStatusResolver {
         if hasProcessing { return .processing }
         if hasPending { return .pending }
         return nil
+    }
+
+    /// The title-level status Jellyseerr reports, with the failed-handover override applied.
+    static func titleStatus(_ status: SeerrMediaStatus?, requests: [SeerrRequest]?) -> SeerrMediaStatus? {
+        failedHandover(status, requests: requests) { _ in true }
+    }
+
+    /// Jellyseerr moves the media and its seasons to PROCESSING on approval and never moves them back when the Radarr/Sonarr handover then fails: only the request turns FAILED. A pipeline state with nothing open behind it but a failed request is therefore a failure. Only the regular axis is read, a 4K request drives `status4k`.
+    private static func failedHandover(
+        _ status: SeerrMediaStatus?,
+        requests: [SeerrRequest]?,
+        covers: (SeerrRequest) -> Bool
+    ) -> SeerrMediaStatus? {
+        guard status == .processing || status == .pending else { return status }
+        let covering = (requests ?? []).filter { $0.is4k != true && covers($0) }
+        guard !covering.contains(where: \.isOpen),
+              covering.contains(where: { $0.status == .failed }) else { return status }
+        return .failed
+    }
+}
+
+extension SeerrMediaInfo {
+    /// `status` as the UI shows it: a title stuck on PROCESSING behind a failed request reads as failed.
+    var displayStatus: SeerrMediaStatus? {
+        SeerrSeasonStatusResolver.titleStatus(status, requests: requests)
     }
 }

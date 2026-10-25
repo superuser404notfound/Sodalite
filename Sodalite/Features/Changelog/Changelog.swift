@@ -232,6 +232,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.failedRequests.title",
+                    "changelog.1_1_0.failedRequests.body",
+                    icon: "exclamationmark.triangle"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.repromptPaused.title",
                     "changelog.1_1_0.repromptPaused.body",
                     icon: "person.crop.circle.badge.questionmark"

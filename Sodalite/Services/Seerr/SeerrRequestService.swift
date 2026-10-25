@@ -63,6 +63,9 @@ protocol SeerrRequestServiceProtocol: Sendable {
     @discardableResult
     func declineRequest(requestID: Int) async throws -> SeerrRequest
 
+    @discardableResult
+    func retryRequest(requestID: Int) async throws -> SeerrRequest
+
     func deleteRequest(requestID: Int) async throws
 
     @discardableResult
@@ -158,6 +161,14 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
     func declineRequest(requestID: Int) async throws -> SeerrRequest {
         try await client.request(
             endpoint: SeerrEndpoint.declineRequest(requestID: requestID),
+            responseType: SeerrRequest.self
+        )
+    }
+
+    @discardableResult
+    func retryRequest(requestID: Int) async throws -> SeerrRequest {
+        try await client.request(
+            endpoint: SeerrEndpoint.retryRequest(requestID: requestID),
             responseType: SeerrRequest.self
         )
     }

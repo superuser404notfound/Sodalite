@@ -77,6 +77,7 @@ struct SeerrRequestDraftTests {
         func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult { throw Boom() }
         func allRequests(filter: SeerrRequestFilter, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
         func approveRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
+        func retryRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func declineRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func deleteRequest(requestID: Int) async throws { throw Boom() }
         func updateRequest(requestID: Int, body: SeerrRequestUpdateBody) async throws -> SeerrRequest { throw Boom() }

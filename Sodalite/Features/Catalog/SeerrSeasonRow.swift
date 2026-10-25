@@ -73,6 +73,7 @@ extension SeerrMediaStatus {
         case .pending: "catalog.seasons.pendingApproval"
         case .partiallyAvailable: "catalog.status.partiallyAvailable"
         case .deleted: "catalog.status.removed"
+        case .failed: "catalog.requestStatus.failed"
         case .unknown: "catalog.status.unknown"
         }
     }

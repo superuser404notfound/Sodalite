@@ -25,11 +25,11 @@ struct SeerrCollectionRef: Codable, Sendable, Identifiable, Equatable, Hashable 
 enum SeerrCollectionRequestPlan {
     /// The parts a bulk request should actually post. `.pending`/`.processing` are already requested and
     /// `.available`/`.partiallyAvailable` are already on the server, so re-requesting either would only earn a 202
-    /// from Seerr. `.deleted` is deliberately included: a removed title has to stay re-requestable.
+    /// from Seerr. `.deleted` and `.failed` are deliberately included: a removed or failed title has to stay re-requestable.
     static func missingParts(in parts: [SeerrMedia]) -> [SeerrMedia] {
         parts.filter { part in
-            switch part.mediaInfo?.status {
-            case .none, .unknown, .deleted: true
+            switch part.mediaInfo?.displayStatus {
+            case .none, .unknown, .deleted, .failed: true
             case .pending, .processing, .partiallyAvailable, .available: false
             }
         }
