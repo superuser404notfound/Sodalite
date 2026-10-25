@@ -44,8 +44,8 @@ struct VersionSelectionTests {
         #expect(selection.resolvedSource(for: item)?.id == "src-transcode")
     }
 
-    /// Frame size leads and bitrate only breaks ties: a fat 1080p remux is not the better version of
-    /// a 4K encode, however many bits it spends.
+    /// Frame size decides: a fat 1080p remux is not the better version of a 4K encode, however many
+    /// bits it spends.
     @Test func frameSizeOutranksBitrate() throws {
         let item = try decode(#"""
         {"Id":"m","Name":"M","Type":"Movie",
@@ -66,6 +66,42 @@ struct VersionSelectionTests {
         let sources = try #require(item.mediaSources)
         #expect(sources.rankedByQuality().map(\.id) == ["ep2-a", "ep2-b"])
         #expect(VersionSelection().preferredSourceID(for: item) == "ep2-a")
+    }
+
+    /// Bitrate no longer breaks a tie (Discord, minimafy, 2026-10-25): two versions of one frame size
+    /// are usually two languages or two cuts, and the server's order says more about which one comes
+    /// first than the bigger file does.
+    @Test func bitrateDoesNotReorderVersionsOfOneFrameSize() throws {
+        let item = try decode(#"""
+        {"Id":"m","Name":"M","Type":"Movie",
+         "MediaSources":[
+           {"Id":"spanish","Name":"Castellano","Bitrate":8000000,
+            "MediaStreams":[{"Index":0,"Type":"Video","Codec":"h264","Width":1920,"Height":1080}]},
+           {"Id":"english","Name":"English","Bitrate":20000000,
+            "MediaStreams":[{"Index":0,"Type":"Video","Codec":"h264","Width":1920,"Height":1080}]}
+         ]}
+        """#)
+        #expect(VersionSelection().preferredSourceID(for: item) == "spanish")
+    }
+
+    /// Server order hands the list over untouched: a library that puts a 1080p Spanish version ahead
+    /// of a 4K English one gets exactly that, in the picker and as the version the page stands on.
+    @Test func serverOrderKeepsTheServersFirstEvenAboveALargerFrame() throws {
+        let item = try decode(Self.twoVersionJSON)
+        let sources = try #require(item.mediaSources)
+        #expect(sources.ordered(.server).map(\.id) == ["src-original", "src-transcode"])
+        #expect(sources.ordered(.quality).map(\.id) == ["src-transcode", "src-original"])
+        #expect(VersionSelection(order: .server).preferredSourceID(for: item) == "src-original")
+    }
+
+    /// The views keep the pick in state and lay the profile's order over it on every read, so a pick
+    /// must survive that and only the untouched default may move.
+    @Test func reorderingKeepsThePickAndMovesOnlyTheDefault() throws {
+        let item = try decode(Self.twoVersionJSON)
+        var pick = VersionSelection()
+        #expect(pick.ordered(.server).preferredSourceID(for: item) == "src-original")
+        pick.choose(try #require(item.mediaSources?.last), for: item)
+        #expect(pick.ordered(.server).preferredSourceID(for: item) == "src-transcode")
     }
 
     /// One version is not a choice, so nothing is preferred and playback keeps the path it had

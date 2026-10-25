@@ -51,15 +51,26 @@ extension MediaSource {
         return parts.joined(separator: " · ")
     }
 
-    /// Sort key for "highest quality first": frame size, then bitrate.
+    /// Sort key for "highest quality first": frame size alone.
     ///
-    /// Frame size leads, and bitrate only breaks its ties. Bitrate alone ranks a 1080p remux at
-    /// 30 Mbit above a 4K encode at 12, which is the opposite of what someone who keeps two versions
-    /// of a film means by the better one (Sodalite#139).
-    var qualityRank: (pixels: Int, bitrate: Int) {
+    /// A 1080p remux at 30 Mbit ranks below a 4K encode at 12, which is what someone who keeps two
+    /// versions of a film means by the better one (Sodalite#139). Bitrate used to break ties and no
+    /// longer does: two versions of one frame size are usually two languages or two cuts, and the
+    /// bigger file says nothing about which one the viewer wants, while the server's order often does.
+    var qualityRank: Int {
         let v = primaryVideoStream
-        return ((v?.width ?? 0) * (v?.height ?? 0), bitrate ?? 0)
+        return (v?.width ?? 0) * (v?.height ?? 0)
     }
+}
+
+/// How the versions of a title are listed, and so which one the page stands on untouched.
+enum VersionOrder: String, CaseIterable, Sendable, Identifiable {
+    /// Largest frame first, the server's order within one frame size.
+    case quality
+    /// Exactly as the server lists them, for libraries that put a language first on purpose.
+    case server
+    var id: String { rawValue }
+    var titleKey: String { "settings.playback.versionOrder.\(rawValue)" }
 }
 
 extension Array where Element == MediaSource {
@@ -76,6 +87,13 @@ extension Array where Element == MediaSource {
             }
             .map(\.element)
     }
+
+    func ordered(_ order: VersionOrder) -> [MediaSource] {
+        switch order {
+        case .quality: rankedByQuality()
+        case .server: self
+        }
+    }
 }
 
 // MARK: - Version picker presentation payload
@@ -91,12 +109,13 @@ struct VersionPickerChoice: Identifiable {
 
 // MARK: - Version picker sheet
 
-/// Multi-source version picker (highest quality first); `onSelect` gets the chosen source, dismissing without one leaves the page on the version it already showed.
+/// Multi-source version picker (highest quality first, or the server's order by setting); `onSelect` gets the chosen source, dismissing without one leaves the page on the version it already showed.
 struct VersionPickerSheet: View {
     let sources: [MediaSource]
     let tintColor: Color
     /// The version in force, checked and focused on open. A picker that only offers is half an answer: it has to say where the page stands (Sodalite#139).
     var selectedID: String?
+    var order: VersionOrder = .quality
     let onSelect: (MediaSource) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -106,7 +125,7 @@ struct VersionPickerSheet: View {
     private var isCompact: Bool { hSizeClass == .compact }
 
     private var sorted: [MediaSource] {
-        sources.rankedByQuality()
+        sources.ordered(order)
     }
 
     var body: some View {

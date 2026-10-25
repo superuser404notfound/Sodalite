@@ -63,11 +63,11 @@ struct DownloadRungOption: Identifiable, Equatable {
         }
     }
 
-    /// Several versions: each one is an original of its own, best first like the version picker, and
+    /// Several versions: each one is an original of its own, in the version picker's order, and
     /// the rungs below them transcode the version the page has selected (Sodalite#200).
     static func options(versions: [MediaSource], selected: MediaSource, runtimeTicks: Int64?,
-                        canTranscodeVideo: Bool = true) -> [DownloadRungOption] {
-        let originals = versions.rankedByQuality().map {
+                        canTranscodeVideo: Bool = true, order: VersionOrder = .quality) -> [DownloadRungOption] {
+        let originals = versions.ordered(order).map {
             DownloadRungOption(quality: .original, estimatedBytes: $0.size, source: $0)
         }
         let rungs = options(sourceBitrate: selected.bitrate, sourceSize: selected.size, runtimeTicks: runtimeTicks,

@@ -27,7 +27,11 @@ struct MovieDetailView: View {
     /// The film just played to its end unrated; the prompt goes up once the player has closed.
     @State private var ratingPromptAfterPlayer: RatingPrompt?
     /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
-    @State private var versionSelection = VersionSelection()
+    @State private var versionPick = VersionSelection()
+    /// The pick under the profile's version order, read fresh so a changed setting applies at once.
+    private var versionSelection: VersionSelection {
+        versionPick.ordered(dependencies.playbackPreferences.versionOrder)
+    }
     @State private var showExtra = false
     /// The local trailer or an Extras card (Sodalite#179); both are distinct server items played from the start.
     @State private var extraItem: JellyfinItem?
@@ -183,9 +187,10 @@ struct MovieDetailView: View {
                 tintColor: dependencies.appearancePreferences.effectiveTint(
                     isSupporter: dependencies.storeKitService.isSupporter
                 ),
-                selectedID: choice.selectedID
+                selectedID: choice.selectedID,
+                order: dependencies.playbackPreferences.versionOrder
             ) { source in
-                versionSelection.choose(source, for: choice.item)
+                versionPick.choose(source, for: choice.item)
                 versionChoice = nil
             }
         }

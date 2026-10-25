@@ -200,6 +200,7 @@ final class FakeDownloadBackend: DownloadBackend {
     let baseURL: URL? = URL(string: "https://jf.example")
     let userID = "usr"
     let preferredAudioLanguage: String? = nil
+    var versionOrder: VersionOrder = .quality
     var canTranscodeVideo = true
 
     func playbackInfo(itemID: String, profile: [String: Any], mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {

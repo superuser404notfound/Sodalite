@@ -16,6 +16,7 @@ final class JellyfinDownloadBackend: DownloadBackend {
     var authorization: String { container?.jellyfinClient.buildAuthHeader() ?? "" }
     var userID: String { container?.activeUserID ?? "" }
     var preferredAudioLanguage: String? { container?.playbackPreferences.preferredAudioLanguage }
+    var versionOrder: VersionOrder { container?.playbackPreferences.versionOrder ?? .quality }
     var allowsCellular: Bool { !(container?.downloadPreferences.wifiOnly ?? true) }
     var canTranscodeVideo: Bool { container?.appState?.activeUser?.canTranscodeVideo ?? true }
 

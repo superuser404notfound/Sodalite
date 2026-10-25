@@ -225,6 +225,12 @@ enum Changelog {
                     icon: "text.line.first.and.arrowtriangle.forward"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.versionOrder.title",
+                    "changelog.1_1_0.versionOrder.body",
+                    icon: "square.stack.3d.up"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_1_0.similarRow.title",
                     "changelog.1_1_0.similarRow.body",

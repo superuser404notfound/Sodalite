@@ -6,15 +6,16 @@ struct DownloadFacts: Equatable {
     let size: Int64?
     let runtimeTicks: Int64?
 
-    static func of(_ item: JellyfinItem, sourceID: String?) -> DownloadFacts {
-        let source = item.effectiveMediaSource(id: sourceID ?? VersionSelection().preferredSourceID(for: item))
+    static func of(_ item: JellyfinItem, sourceID: String?, order: VersionOrder) -> DownloadFacts {
+        let source = item.effectiveMediaSource(id: sourceID ?? VersionSelection(order: order).preferredSourceID(for: item))
         return DownloadFacts(bitrate: source?.bitrate, size: source?.size, runtimeTicks: item.runTimeTicks)
     }
 
     /// A season is an estimate over its episodes: the highest bitrate decides which rungs bite, sizes
     /// and runtimes add up, and one unknown size makes the original's total unknown.
-    static func of(season episodes: [JellyfinItem]) -> DownloadFacts {
-        let sources = episodes.map { $0.effectiveMediaSource(id: VersionSelection().preferredSourceID(for: $0)) }
+    static func of(season episodes: [JellyfinItem], order: VersionOrder) -> DownloadFacts {
+        let selection = VersionSelection(order: order)
+        let sources = episodes.map { $0.effectiveMediaSource(id: selection.preferredSourceID(for: $0)) }
         let sizes = sources.map { $0?.size }
         return DownloadFacts(
             bitrate: sources.compactMap { $0?.bitrate }.max(),
@@ -36,10 +37,10 @@ enum DownloadTarget: Identifiable {
         }
     }
 
-    var facts: DownloadFacts {
+    func facts(order: VersionOrder) -> DownloadFacts {
         switch self {
-        case .item(let item, let sourceID): .of(item, sourceID: sourceID)
-        case .season(_, _, let episodes): .of(season: episodes)
+        case .item(let item, let sourceID): .of(item, sourceID: sourceID, order: order)
+        case .season(_, _, let episodes): .of(season: episodes, order: order)
         }
     }
 }
@@ -93,12 +94,14 @@ private struct DownloadRungDialog: ViewModifier {
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
         let canTranscodeVideo = appState.activeUser?.canTranscodeVideo ?? true
+        let order = dependencies.playbackPreferences.versionOrder
         if case .item(let item, let sourceID) = target, item.selectableMediaSources.count > 1,
-           let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection().preferredSourceID(for: item)) {
+           let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection(order: order).preferredSourceID(for: item)) {
             return DownloadRungOption.options(versions: item.selectableMediaSources, selected: selected,
-                                              runtimeTicks: item.runTimeTicks, canTranscodeVideo: canTranscodeVideo)
+                                              runtimeTicks: item.runTimeTicks, canTranscodeVideo: canTranscodeVideo,
+                                              order: order)
         }
-        let facts = target.facts
+        let facts = target.facts(order: order)
         return DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size,
                                           runtimeTicks: facts.runtimeTicks, canTranscodeVideo: canTranscodeVideo)
     }

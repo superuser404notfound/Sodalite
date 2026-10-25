@@ -87623,6 +87623,328 @@
         }
       }
     },
+    "changelog.1_1_0.versionOrder.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové nastavení Pořadí verzí v Přehrávání: pořadí serveru zobrazí verze filmu nebo epizody tak, jak je seřadil Jellyfin, a jako výchozí přehraje první, například když jazyk řadíte na první místo. Výchozí nejlepší kvalita nyní u verzí se stejným rozlišením zachová pořadí serveru, místo aby je řadila podle datového toku."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny indstilling Versionsrækkefølge under Afspilning: Serverens rækkefølge viser en films eller et afsnits versioner, som Jellyfin ordner dem, og afspiller den første som standard, f.eks. når et sprog skal stå først. Standarden Bedste kvalitet beholder nu serverens rækkefølge for versioner med samme opløsning i stedet for at sortere dem efter bitrate."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Einstellung Versionsreihenfolge unter Wiedergabe: Wie auf dem Server zeigt die Versionen eines Films oder einer Folge so, wie Jellyfin sie ordnet, und spielt die erste standardmäßig ab, etwa wenn eine Sprache vorne stehen soll. Die Vorgabe Beste Qualität behält bei Versionen gleicher Auflösung jetzt die Serverreihenfolge, statt sie nach Bitrate zu sortieren."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέα ρύθμιση Σειρά εκδόσεων στην Αναπαραγωγή: η σειρά του διακομιστή δείχνει τις εκδόσεις μιας ταινίας ή ενός επεισοδίου όπως τις ταξινομεί το Jellyfin και αναπαράγει την πρώτη από προεπιλογή, π.χ. όταν μια γλώσσα πρέπει να είναι πρώτη. Η προεπιλογή Καλύτερη ποιότητα διατηρεί πλέον τη σειρά του διακομιστή για εκδόσεις ίδιας ανάλυσης αντί να τις ταξινομεί κατά ρυθμό bit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Version Order setting under Playback: Server Order lists a movie's or episode's versions the way Jellyfin orders them and plays the first one by default, for example when a language should come first. The default, Best Quality, now keeps the server's order for versions of the same resolution instead of sorting them by bitrate."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo ajuste Orden de versiones en Reproducción: Orden del servidor muestra las versiones de una película o episodio tal como las ordena Jellyfin y reproduce la primera por defecto, por ejemplo cuando un idioma debe ir primero. El valor predeterminado, Mejor calidad, ahora mantiene el orden del servidor para versiones de la misma resolución en lugar de ordenarlas por tasa de bits."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uusi asetus Versioiden järjestys kohdassa Toisto: Palvelimen järjestys näyttää elokuvan tai jakson versiot Jellyfinin järjestyksessä ja toistaa oletuksena ensimmäisen, esimerkiksi kun tietyn kielen halutaan olevan ensin. Oletusarvo Paras laatu säilyttää nyt palvelimen järjestyksen saman resoluution versioille sen sijaan, että lajittelisi ne bittinopeuden mukaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau réglage Ordre des versions dans Lecture : Ordre du serveur affiche les versions d'un film ou d'un épisode dans l'ordre de Jellyfin et lit la première par défaut, par exemple quand une langue doit venir en premier. Le réglage par défaut, Meilleure qualité, conserve désormais l'ordre du serveur pour les versions de même résolution au lieu de les trier par débit."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova postavka Redoslijed verzija u Reprodukciji: Redoslijed poslužitelja prikazuje verzije filma ili epizode onako kako ih slaže Jellyfin i prema zadanim postavkama reproducira prvu, npr. kada jezik treba biti prvi. Zadana Najbolja kvaliteta sada zadržava redoslijed poslužitelja za verzije iste rezolucije umjesto da ih slaže po brzini prijenosa."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Új beállítás a Lejátszás alatt: Verziók sorrendje. A Szerver sorrendje a film vagy epizód verzióit a Jellyfin sorrendjében mutatja, és alapértelmezésként az elsőt játssza le, például ha egy nyelvnek elöl kell állnia. Az alapértelmezett Legjobb minőség mostantól az azonos felbontású verzióknál megtartja a szerver sorrendjét, ahelyett hogy bitráta szerint rendezné őket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuova impostazione Ordine delle versioni in Riproduzione: Ordine del server mostra le versioni di un film o di un episodio come le ordina Jellyfin e riproduce la prima di default, ad esempio quando una lingua deve venire per prima. L'impostazione predefinita, Qualità migliore, ora mantiene l'ordine del server per le versioni con la stessa risoluzione invece di ordinarle per bitrate."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生設定に「バージョンの順序」を追加しました。「サーバーの順序」では、映画やエピソードのバージョンを Jellyfin の並びのまま表示し、先頭のものを既定で再生します。特定の言語を先頭にしたい場合などに便利です。既定の「最高画質」も、同じ解像度のバージョンはビットレートで並べ替えず、サーバーの順序を保つようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생 설정에 버전 순서가 추가되었습니다. 서버 순서를 선택하면 영화나 에피소드의 버전을 Jellyfin의 순서대로 표시하고 첫 번째 버전을 기본으로 재생합니다. 특정 언어를 먼저 두고 싶을 때 유용합니다. 기본값인 최고 화질도 이제 해상도가 같은 버전은 비트레이트로 정렬하지 않고 서버 순서를 유지합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny innstilling Versjonsrekkefølge under Avspilling: Serverrekkefølge viser versjonene av en film eller episode slik Jellyfin ordner dem og spiller av den første som standard, for eksempel når et språk skal stå først. Standarden Beste kvalitet beholder nå serverens rekkefølge for versjoner med samme oppløsning i stedet for å sortere dem etter bitrate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieuwe instelling Volgorde van versies onder Afspelen: Servervolgorde toont de versies van een film of aflevering zoals Jellyfin ze ordent en speelt standaard de eerste af, bijvoorbeeld als een taal vooraan moet staan. De standaard, Beste kwaliteit, houdt nu de servervolgorde aan voor versies met dezelfde resolutie in plaats van ze op bitrate te sorteren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowe ustawienie Kolejność wersji w Odtwarzaniu: Kolejność serwera pokazuje wersje filmu lub odcinka tak, jak układa je Jellyfin, i domyślnie odtwarza pierwszą, np. gdy dany język ma być na początku. Domyślna Najlepsza jakość zachowuje teraz kolejność serwera dla wersji o tej samej rozdzielczości zamiast sortować je według przepływności."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo ajuste Ordem das versões em Reprodução: Ordem do servidor mostra as versões de um filme ou episódio do jeito que o Jellyfin as ordena e reproduz a primeira por padrão, por exemplo quando um idioma deve vir primeiro. O padrão, Melhor qualidade, agora mantém a ordem do servidor para versões com a mesma resolução em vez de ordená-las por taxa de bits."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova definição Ordem das versões em Reprodução: Ordem do servidor mostra as versões de um filme ou episódio tal como o Jellyfin as ordena e reproduz a primeira por predefinição, por exemplo quando um idioma deve vir primeiro. A predefinição, Melhor qualidade, mantém agora a ordem do servidor para versões com a mesma resolução em vez de as ordenar por taxa de bits."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setare nouă Ordinea versiunilor în Redare: Ordinea serverului afișează versiunile unui film sau episod așa cum le ordonează Jellyfin și o redă implicit pe prima, de exemplu când o limbă trebuie să fie prima. Valoarea implicită, Cea mai bună calitate, păstrează acum ordinea serverului pentru versiunile cu aceeași rezoluție în loc să le sorteze după bitrate."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая настройка «Порядок версий» в разделе «Воспроизведение»: «Порядок сервера» показывает версии фильма или серии так, как их упорядочивает Jellyfin, и по умолчанию воспроизводит первую, например когда определённый язык должен идти первым. Вариант по умолчанию, «Лучшее качество», теперь сохраняет порядок сервера для версий с одинаковым разрешением, а не сортирует их по битрейту."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nové nastavenie Poradie verzií v Prehrávaní: Poradie servera zobrazí verzie filmu alebo epizódy tak, ako ich zoradil Jellyfin, a predvolene prehrá prvú, napríklad keď má byť jazyk na prvom mieste. Predvolená Najlepšia kvalita teraz pri verziách s rovnakým rozlíšením zachová poradie servera namiesto triedenia podľa dátového toku."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ny inställning Versionsordning under Uppspelning: Serverns ordning visar en films eller ett avsnitts versioner så som Jellyfin ordnar dem och spelar upp den första som standard, till exempel när ett språk ska stå först. Standardvalet Bästa kvalitet behåller nu serverns ordning för versioner med samma upplösning i stället för att sortera dem efter bithastighet."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma altında yeni Sürüm sırası ayarı: Sunucu sırası, bir filmin veya bölümün sürümlerini Jellyfin'in sıraladığı gibi listeler ve varsayılan olarak ilkini oynatır; örneğin bir dilin önde olması gerektiğinde. Varsayılan En iyi kalite artık aynı çözünürlükteki sürümleri bit hızına göre sıralamak yerine sunucu sırasını korur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нове налаштування «Порядок версій» у розділі «Відтворення»: «Порядок сервера» показує версії фільму чи серії так, як їх упорядковує Jellyfin, і за замовчуванням відтворює першу, наприклад коли певна мова має йти першою. Варіант за замовчуванням, «Найкраща якість», тепер зберігає порядок сервера для версій з однаковою роздільністю, а не сортує їх за бітрейтом."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放设置新增“版本顺序”：选择“服务器顺序”后，电影或剧集的版本会按 Jellyfin 的排列显示，并默认播放第一个，适合希望某种语言排在最前的情况。默认的“最佳画质”现在对分辨率相同的版本保留服务器顺序，不再按码率排序。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放設定新增「版本順序」：選擇「伺服器順序」後，電影或劇集的版本會依 Jellyfin 的排列顯示，並預設播放第一個，適合希望某種語言排在最前的情況。預設的「最佳畫質」現在對解析度相同的版本保留伺服器順序，不再依位元率排序。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.versionOrder.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořadí verzí podle serveru"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsrækkefølge som på serveren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsreihenfolge wie auf dem Server"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά εκδόσεων όπως στον διακομιστή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version order from the server"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden de versiones como en el servidor"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versioiden järjestys palvelimelta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre des versions du serveur"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redoslijed verzija kao na poslužitelju"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verziósorrend a szerver szerint"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordine delle versioni dal server"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーどおりのバージョン順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 기준 버전 순서"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versjonsrekkefølge fra serveren"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versievolgorde van de server"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolejność wersji z serwera"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem das versões do servidor"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem das versões do servidor"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinea versiunilor de pe server"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок версий как на сервере"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poradie verzií podľa servera"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsordning från servern"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucudaki sürüm sırası"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок версій як на сервері"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按服务器排列版本"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依伺服器排列版本"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.youTubeTrailers.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -228967,6 +229289,650 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 7.1.4 混音，並選擇你所用語言的此類音軌。有損。關閉時依上方設定播放。"
+          }
+        }
+      }
+    },
+    "settings.playback.versionOrder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořadí verzí"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsrækkefølge"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsreihenfolge"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά εκδόσεων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version Order"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden de versiones"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versioiden järjestys"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre des versions"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redoslijed verzija"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verziók sorrendje"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordine delle versioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョンの順序"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 순서"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versjonsrekkefølge"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgorde van versies"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolejność wersji"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem das versões"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem das versões"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinea versiunilor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок версий"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poradie verzií"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versionsordning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sürüm sırası"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок версій"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本顺序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本順序"
+          }
+        }
+      }
+    },
+    "settings.playback.versionOrder.quality" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nejlepší kvalita"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedste kvalitet"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beste Qualität"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καλύτερη ποιότητα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best Quality"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mejor calidad"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paras laatu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meilleure qualité"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najbolja kvaliteta"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legjobb minőség"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualità migliore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最高画質"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최고 화질"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beste kvalitet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beste kwaliteit"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najlepsza jakość"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melhor qualidade"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melhor qualidade"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cea mai bună calitate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лучшее качество"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najlepšia kvalita"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bästa kvalitet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En iyi kalite"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найкраща якість"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最佳画质"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最佳畫質"
+          }
+        }
+      }
+    },
+    "settings.playback.versionOrder.server" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořadí serveru"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverens rækkefølge"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie auf dem Server"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σειρά διακομιστή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server Order"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden del servidor"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palvelimen järjestys"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre du serveur"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redoslijed poslužitelja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szerver sorrendje"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordine del server"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーの順序"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 순서"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverrekkefølge"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servervolgorde"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolejność serwera"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem do servidor"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordem do servidor"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinea serverului"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок сервера"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poradie servera"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverns ordning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu sırası"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Порядок сервера"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器顺序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器順序"
+          }
+        }
+      }
+    },
+    "settings.playback.versionOrder.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Která verze titulu se zobrazí první a přehraje se jako výchozí. Pořadí serveru zachová pořadí z Jellyfinu, například jazyk na prvním místě."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvilken version af en titel der vises først og afspilles som standard. Serverens rækkefølge beholder rækkefølgen fra Jellyfin, f.eks. et sprog først."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welche Version eines Titels zuerst steht und standardmäßig abgespielt wird. Die Serverreihenfolge übernimmt die Reihenfolge aus Jellyfin, etwa eine Sprache zuerst."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ποια έκδοση ενός τίτλου εμφανίζεται πρώτη και αναπαράγεται από προεπιλογή. Η σειρά του διακομιστή διατηρεί τη σειρά του Jellyfin, π.χ. μια γλώσσα πρώτη."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which version of a title is listed first and plays by default. Server order keeps the order Jellyfin gives, for example a language first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué versión de un título aparece primero y se reproduce por defecto. El orden del servidor mantiene el orden de Jellyfin, por ejemplo un idioma primero."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikä nimikkeen versio näytetään ensin ja toistetaan oletuksena. Palvelimen järjestys säilyttää Jellyfinin järjestyksen, esimerkiksi kielen ensimmäisenä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle version d'un titre apparaît en premier et est lue par défaut. L'ordre du serveur conserve l'ordre de Jellyfin, par exemple une langue en premier."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koja se verzija naslova prikazuje prva i reproducira prema zadanim postavkama. Redoslijed poslužitelja zadržava redoslijed iz Jellyfina, npr. jezik na prvom mjestu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy cím melyik verziója áll elöl és indul alapértelmezésként. A szerver sorrendje megtartja a Jellyfin sorrendjét, például egy nyelvet előre."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quale versione di un titolo appare per prima e viene riprodotta di default. L'ordine del server mantiene l'ordine di Jellyfin, ad esempio una lingua per prima."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルのどのバージョンを最初に表示し、既定で再生するか。サーバーの順序では、言語を先頭にするなど Jellyfin の並びをそのまま使います。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타이틀의 어떤 버전을 먼저 표시하고 기본으로 재생할지 정합니다. 서버 순서는 특정 언어를 먼저 두는 등 Jellyfin의 순서를 그대로 따릅니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvilken versjon av en tittel som vises først og spilles av som standard. Serverrekkefølge beholder rekkefølgen fra Jellyfin, for eksempel et språk først."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welke versie van een titel als eerste staat en standaard wordt afgespeeld. Servervolgorde houdt de volgorde van Jellyfin aan, bijvoorbeeld een taal eerst."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Która wersja tytułu jest wyświetlana jako pierwsza i odtwarzana domyślnie. Kolejność serwera zachowuje kolejność z Jellyfin, np. język na pierwszym miejscu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qual versão de um título aparece primeiro e é reproduzida por padrão. A ordem do servidor mantém a ordem do Jellyfin, por exemplo um idioma primeiro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que versão de um título aparece primeiro e é reproduzida por predefinição. A ordem do servidor mantém a ordem do Jellyfin, por exemplo um idioma primeiro."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce versiune a unui titlu apare prima și este redată implicit. Ordinea serverului păstrează ordinea din Jellyfin, de exemplu o limbă pe primul loc."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Какая версия фильма или серии показывается первой и воспроизводится по умолчанию. Порядок сервера сохраняет порядок из Jellyfin, например язык на первом месте."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ktorá verzia titulu sa zobrazí prvá a prehrá sa predvolene. Poradie servera zachová poradie z Jellyfinu, napríklad jazyk na prvom mieste."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vilken version av en titel som visas först och spelas upp som standard. Serverns ordning behåller ordningen från Jellyfin, till exempel ett språk först."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir başlığın hangi sürümünün önce listeleneceği ve varsayılan olarak oynatılacağı. Sunucu sırası, örneğin bir dili öne alarak Jellyfin'in sırasını korur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Яка версія фільму чи серії показується першою та відтворюється за замовчуванням. Порядок сервера зберігає порядок із Jellyfin, наприклад мову на першому місці."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标题的哪个版本排在最前并默认播放。服务器顺序沿用 Jellyfin 的排列，例如让某种语言排在最前。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "標題的哪個版本排在最前並預設播放。伺服器順序沿用 Jellyfin 的排列，例如讓某種語言排在最前。"
           }
         }
       }
