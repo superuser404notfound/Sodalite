@@ -184,6 +184,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
+                    "changelog.1_1_0.resumeHide.title",
+                    "changelog.1_1_0.resumeHide.body",
+                    icon: "play.fill"
+                ),
+                ChangelogHighlight(
+                    .improve,
                     "changelog.1_1_0.statusPill.title",
                     "changelog.1_1_0.statusPill.body",
                     icon: "paintpalette.fill"
