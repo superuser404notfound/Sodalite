@@ -83,6 +83,27 @@ struct MediaBadgeTests {
         #expect(badges.dynamicRange == .dolbyVision)
     }
 
+    @Test("a DV file with an HDR10+ base layer names both, profile or not (Sodalite#211)",
+          arguments: [nil, 8] as [Int?])
+    func dolbyVisionWithHDR10Plus(dvProfile: Int?) {
+        let badges = MediaBadgeResolver.badges(width: 3840, height: 2160, streams: [video(width: 3840, range: "DOVIWithHDR10Plus", dvProfile: dvProfile)])
+        #expect(badges.dynamicRange == .dolbyVisionHDR10Plus)
+        #expect(badges.pills == ["4K", "DV HDR10+"])
+    }
+
+    @Test("the dual-layer variants are Dolby Vision too")
+    func dolbyVisionWithEnhancementLayer() {
+        #expect(MediaBadgeResolver.badges(width: 3840, height: 2160, streams: [video(width: 3840, range: "DOVIWithEL")]).dynamicRange == .dolbyVision)
+        #expect(MediaBadgeResolver.badges(width: 3840, height: 2160, streams: [video(width: 3840, range: "DOVIWithELHDR10Plus")]).dynamicRange == .dolbyVisionHDR10Plus)
+    }
+
+    @Test("the info panel spells out DV with HDR10+ (Sodalite#211)")
+    func techFactsDolbyVisionWithHDR10Plus() {
+        #expect(TechFacts.dynamicRangeLabel(video(width: 3840, range: "DOVIWithHDR10Plus")) == "Dolby Vision + HDR10+")
+        #expect(TechFacts.dynamicRangeLabel(video(width: 3840, range: "DOVIWithHDR10Plus", dvProfile: 8)) == "Dolby Vision P8 + HDR10+")
+        #expect(TechFacts.dynamicRangeLabel(video(width: 3840, range: "DOVIWithHDR10", dvProfile: 8)) == "Dolby Vision P8")
+    }
+
     @Test("HDR10+ is told apart from plain HDR10")
     func hdr10Plus() {
         let badges = MediaBadgeResolver.badges(width: 3840, height: 2160, streams: [video(width: 3840, range: "HDR10Plus")])
