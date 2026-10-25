@@ -11,7 +11,7 @@ struct CombinedTagRowTests {
         var genreItems: [JellyfinItem] = []
         func getGenres(userID: String) async throws -> [NamedItem] { genres }
         func getItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse {
-            if query.limit == 1 { return .init(items: sample.map { [$0] } ?? [], totalRecordCount: sample == nil ? 0 : 1) }
+            if query.sortBy == "Random" { return .init(items: sample.map { [$0] } ?? [], totalRecordCount: sample == nil ? 0 : 1) }
             return .init(items: genreItems, totalRecordCount: genreItems.count)
         }
         func getLibraries(userID: String) async throws -> [JellyfinLibrary] { [] }
@@ -27,7 +27,7 @@ struct CombinedTagRowTests {
 
     private func movie(_ id: String, server: String) throws -> JellyfinItem {
         try JSONDecoder().decode(JellyfinItem.self, from: Data(
-            #"{"Id":"\#(id)","Name":"\#(id)","Type":"Movie","ServerId":"\#(server)","ImageTags":{"Primary":"p"}}"#.utf8))
+            #"{"Id":"\#(id)","Name":"\#(id)","Type":"Movie","ServerId":"\#(server)","ImageTags":{"Primary":"p"},"Genres":["Drama","Horror"]}"#.utf8))
     }
 
     private func model(_ a: GenreLibrary, _ b: GenreLibrary) -> HomeViewModel {
