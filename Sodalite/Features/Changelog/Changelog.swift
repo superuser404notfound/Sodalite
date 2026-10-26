@@ -370,6 +370,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
+                    "changelog.1_1_0.scrubPreviewExact.title",
+                    "changelog.1_1_0.scrubPreviewExact.body",
+                    icon: "scope"
+                ),
+                ChangelogHighlight(
+                    .improve,
                     "changelog.1_1_0.dvScrubPreview.title",
                     "changelog.1_1_0.dvScrubPreview.body",
                     icon: "film"

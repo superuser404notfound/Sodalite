@@ -1100,6 +1100,19 @@ final class PlayerViewModel {
                 }
                 return await engine.scrubThumbnail(atSeconds: seconds, maxWidth: maxWidth)
             }
+            // Once the knob rests: the frame at the position instead of the keyframe before it, from the
+            // same resident bytes and on the same axis. A position the cache does not hold stays coarse.
+            // Paused only: that decode runs up to a whole GOP, and beside a playing 4K title on an A10X a
+            // second decoder is what failed the player's own frames (VT -12909, 3e063185).
+            let refinedThumbnail: (Double, Int, @escaping @Sendable () -> Bool) async -> CGImage? = {
+                [weak self, weak engine] seconds, maxWidth, isCancelled in
+                guard let self, !self.isPlaying,
+                      let engine, engine.supportsCacheBackedStills, engine.discTitles.isEmpty else {
+                    return nil
+                }
+                return await engine.scrubPreviewFrame(atSeconds: seconds, refined: true, maxWidth: maxWidth,
+                                                      isCancelled: isCancelled)?.image
+            }
             // Dolby Vision Profile 5 / 10.0: no still of it can be coloured here, so the engine shows
             // the keyframe through the system compositor in a view instead. Same axis as above.
             let viewPreview: (Double, AetherScrubPreviewView) async -> Bool = { [weak engine] seconds, view in
@@ -1109,6 +1122,7 @@ final class PlayerViewModel {
             scrubPreview.configure(
                 extractor: frameExtractor,
                 cacheThumbnail: cacheThumbnail,
+                refinedThumbnail: refinedThumbnail,
                 viewPreview: viewPreview,
                 enabled: preferences.showScrubPreview
             )

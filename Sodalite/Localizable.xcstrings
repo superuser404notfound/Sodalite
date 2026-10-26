@@ -80831,6 +80831,328 @@
         }
       }
     },
+    "changelog.1_1_0.scrubPreviewExact.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Když je přehrávání pozastavené, náhled při posouvání po zastavení ukazatele ukáže přesný snímek pod ním místo předchozího klíčového snímku, a to ve všech již načtených částech titulu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når afspilningen er sat på pause, viser forhåndsvisningen den præcise ramme under markøren, så snart den står stille, i stedet for nøglerammen før den, i alle dele af titlen, der allerede er indlæst."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei pausierter Wiedergabe zeigt die Vorschau beim Spulen das genaue Bild unter dem Regler, sobald er stehen bleibt, statt des Keyframes davor, überall dort, wo der Titel schon geladen ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Με την αναπαραγωγή σε παύση, η προεπισκόπηση κύλισης δείχνει το ακριβές καρέ κάτω από τον δείκτη μόλις σταματήσει, αντί για το προηγούμενο καρέ-κλειδί, σε κάθε τμήμα του τίτλου που έχει ήδη φορτωθεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With playback paused, the scrub preview shows the exact frame under the knob once it comes to rest, instead of the keyframe before it, for every part of the title that has already loaded."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con la reproducción en pausa, la vista previa muestra el fotograma exacto bajo el indicador en cuanto se detiene, en lugar del fotograma clave anterior, en todas las partes del título que ya se han cargado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun toisto on keskeytetty, kelauksen esikatselu näyttää osoittimen kohdalla olevan tarkan ruudun heti sen pysähdyttyä edeltävän avainruudun sijaan kaikissa nimikkeen jo ladatuissa osissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture en pause, l’aperçu de défilement affiche l’image exacte sous le curseur dès qu’il s’arrête, au lieu de l’image clé précédente, sur toutes les parties du titre déjà chargées."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kad je reprodukcija pauzirana, pregled premotavanja prikazuje točan kadar ispod pokazivača čim se zaustavi, umjesto prethodnog ključnog kadra, u svim već učitanim dijelovima naslova."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szüneteltetett lejátszásnál a tekerési előnézet a csúszka megállása után a pontos képkockát mutatja alatta az előző kulcskocka helyett, a cím minden már betöltött részén."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con la riproduzione in pausa, l’anteprima di scorrimento mostra il fotogramma esatto sotto il cursore non appena si ferma, invece del fotogramma chiave precedente, in tutte le parti del titolo già caricate."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生を一時停止しているとき、スクラブプレビューはつまみが止まると直前のキーフレームではなく、その位置の正確なフレームを表示します。タイトルの読み込み済みの部分すべてで有効です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재생이 일시 정지된 상태에서 탐색 미리보기는 노브가 멈추면 이전 키프레임 대신 그 위치의 정확한 프레임을 보여 줍니다. 이미 불러온 모든 구간에서 적용됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når avspillingen er satt på pause, viser forhåndsvisningen den nøyaktige rammen under markøren så snart den står stille, i stedet for nøkkelrammen før, i alle deler av tittelen som allerede er lastet inn."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met het afspelen gepauzeerd toont de scrubvoorvertoning het exacte beeld onder de schuifknop zodra die stilstaat, in plaats van het keyframe ervoor, in elk deel van de titel dat al geladen is."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gdy odtwarzanie jest wstrzymane, podgląd przewijania po zatrzymaniu suwaka pokazuje dokładną klatkę pod nim zamiast poprzedniej klatki kluczowej, we wszystkich już wczytanych częściach tytułu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com a reprodução pausada, a prévia de rolagem mostra o quadro exato sob o marcador assim que ele para, em vez do quadro-chave anterior, em todas as partes do título já carregadas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com a reprodução em pausa, a pré-visualização de deslocação mostra a imagem exata sob o marcador assim que ele para, em vez da imagem-chave anterior, em todas as partes do título já carregadas."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cu redarea în pauză, previzualizarea la derulare arată cadrul exact de sub cursor imediat ce se oprește, în locul cadrului cheie dinainte, în toate părțile deja încărcate ale titlului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда воспроизведение на паузе, предпросмотр перемотки после остановки ползунка показывает точный кадр под ним, а не предыдущий ключевой кадр, во всех уже загруженных частях фильма."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keď je prehrávanie pozastavené, náhľad pri posúvaní po zastavení ukazovateľa ukáže presnú snímku pod ním namiesto predchádzajúcej kľúčovej snímky, a to vo všetkých už načítaných častiach titulu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När uppspelningen är pausad visar förhandsvisningen den exakta bildrutan under reglaget så fort det står still, i stället för nyckelbildrutan före, i alla delar av titeln som redan har lästs in."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatma duraklatıldığında sarma önizlemesi, imleç durur durmaz önceki anahtar kare yerine tam altındaki kareyi gösterir; bu, başlığın zaten yüklenmiş her bölümünde geçerlidir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коли відтворення на паузі, попередній перегляд після зупинки повзунка показує точний кадр під ним, а не попередній ключовий кадр, в усіх уже завантажених частинах."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂停播放时，拖动预览在滑块停下后会显示该位置的精确画面，而不是之前的关键帧，适用于影片中已加载的所有部分。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫停播放時，拖曳預覽在滑桿停下後會顯示該位置的精確畫面，而非之前的關鍵影格，適用於影片中已載入的所有部分。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.scrubPreviewExact.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přesný náhled při posouvání během pauzy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Præcis spoleforhåndsvisning ved pause"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genaue Spulvorschau bei Pause"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ακριβής προεπισκόπηση κύλισης σε παύση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exact scrub previews when paused"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vista previa exacta al desplazarse en pausa"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarkka kelausesikatselu taukotilassa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçu de défilement exact en pause"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Točan pregled premotavanja tijekom pauze"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pontos tekerési előnézet szüneteltetéskor"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anteprima di scorrimento esatta in pausa"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時停止中の正確なスクラブプレビュー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일시 정지 중 정확한 탐색 미리보기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nøyaktig spoleforhåndsvisning ved pause"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exacte scrubvoorvertoning bij pauze"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokładny podgląd przewijania podczas pauzy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prévia de rolagem exata na pausa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pré-visualização de deslocação exata em pausa"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previzualizare exactă la derulare în pauză"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Точный предпросмотр перемотки на паузе"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presný náhľad pri posúvaní počas pauzy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exakt spolförhandsvisning vid paus"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklatıldığında tam sarma önizlemesi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Точний попередній перегляд перемотування на паузі"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂停时精确的拖动预览"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫停時精確的拖曳預覽"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.scrubPreviewPlayback.body" : {
       "extractionState" : "manual",
       "localizations" : {
