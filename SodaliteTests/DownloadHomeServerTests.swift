@@ -93,6 +93,42 @@ struct DownloadHomeServerTests {
         #expect(store.item("y") != nil)
     }
 
+    @Test func anItemOfAServerNotTakingPartIsRefusedNotAskedOfTheActiveOne() async {
+        let (manager, store, transport, _) = makeManager(secondaries: [:])
+        await #expect(throws: DownloadEnqueueError.noServer) {
+            try await manager.enqueue(item: movie("x", server: "b"), quality: .original)
+        }
+        #expect(store.item("x") == nil)
+        #expect(transport.started.isEmpty)
+    }
+
+    @Test func aServerSignedInAsSomeoneElseLeavesTheDownloadWaiting() async throws {
+        let (manager, store, _, box) = makeManager(secondaries: ["b": secondary()])
+        try await manager.enqueue(item: movie("x", server: "b"), quality: .original)
+        await manager.pause(itemID: "x")
+        let other = secondary()
+        other.userIDOverride = "someone-else"
+        box.backends["b"] = other
+        manager.resume(itemID: "x")
+        #expect(store.item("x")?.manifest.state == .queued)
+    }
+
+    @Test func pausingABatchStartsNothingOfIt() async throws {
+        let (manager, store, transport, _) = makeManager(secondaries: [:])
+        for id in ["a", "b", "c"] { try await manager.enqueue(item: movie(id, server: nil), quality: .original) }
+        let startedBefore = transport.started.count
+        await manager.pause(itemIDs: ["a", "b", "c"])
+        #expect(transport.started.count == startedBefore)
+        #expect(store.item("c")?.manifest.state == .paused)
+    }
+
+    @Test func signingOneAccountOutLeavesWhatAnotherProfileFetchedThroughIt() async throws {
+        let (manager, store, _, _) = makeManager(secondaries: ["b": secondary()])
+        try await manager.enqueue(item: movie("x", server: "b"), quality: .original)
+        await DownloadCleanup.perform(.profile(serverID: "b", userID: "usr"), store: store, manager: manager)
+        #expect(store.item("x") != nil)
+    }
+
     @Test func progressSyncsWithTheServerItCameFrom() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("DHS-\(UUID().uuidString)")
         let store = DownloadStore(paths: DownloadPaths(root: root))

@@ -69,7 +69,9 @@ final class DownloadProgressSync {
         defer { isRunning = false }
         for item in store.items.values where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
             let id = item.manifest.itemID
+            // A server now signed in as someone else would get this user's history pushed into theirs.
             guard let (service, userID) = route(item.manifest.originServerID),
+                  item.manifest.originUserID == nil || item.manifest.originUserID == userID,
                   let server = try? await service.userData(itemID: id, userID: userID) else { continue }
             let local = item.manifest.progress
             switch Self.decide(local: local, server: server) {

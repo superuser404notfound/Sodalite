@@ -86,7 +86,7 @@ final class DownloadManager {
     func enqueue(item: JellyfinItem, quality requested: StreamingQuality, mediaSourceID: String? = nil) async throws {
         guard store.item(item.id) == nil else { return }
         // An item of another server in a combined Home is fetched from that server, as its user.
-        let origin = item.serverID.flatMap { id in secondaryBackend(id).map { (serverID: id, backend: $0) } }
+        let origin = try homeBackend(serverID: item.serverID)
         let backend = origin?.backend ?? self.backend
         let quality = backend.canTranscodeVideo ? requested : .original
         guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
@@ -147,7 +147,7 @@ final class DownloadManager {
     /// since every episode after it would be refused the same way. The first error is still reported.
     func enqueueSeason(seriesID: String, seasonID: String, serverID: String? = nil, quality: StreamingQuality) async throws {
         var firstError: Error?
-        let backend = serverID.flatMap(secondaryBackend) ?? self.backend
+        let backend = try homeBackend(serverID: serverID)?.backend ?? self.backend
         for episode in try await backend.seasonEpisodes(seriesID: seriesID, seasonID: seasonID) {
             do {
                 try await enqueue(item: episode, quality: quality)
@@ -163,19 +163,25 @@ final class DownloadManager {
     // MARK: Control
 
     func pause(itemID: String) async {
+        await pauseOne(itemID)
+        pumpQueue()
+    }
+
+    /// The viewer stopped the system's progress activity, which iOS reports the same way as its own
+    /// expiry: the batch is paused, never deleted, so either way nothing is lost. The queue is
+    /// pumped once at the end, or every pause would start the next item of the same batch.
+    func pause(itemIDs: [String]) async {
+        for id in itemIDs { await pauseOne(id) }
+        pumpQueue()
+    }
+
+    private func pauseOne(_ itemID: String) async {
         guard let item = store.item(itemID), item.manifest.state == .downloading || item.manifest.state == .queued,
               let tag = tag(for: item) else { return }
         let data = await transport.cancel(tag: tag, producingResumeData: item.manifest.route == .original)
         if let data { try? data.write(to: resumeURL(tag)) }
         try? store.update(itemID: itemID) { $0.transition(to: .paused) }
         liveProgress[itemID] = nil
-        pumpQueue()
-    }
-
-    /// The viewer stopped the system's progress activity, which iOS reports the same way as its own
-    /// expiry: the batch is paused, never deleted, so either way nothing is lost.
-    func pause(itemIDs: [String]) async {
-        for id in itemIDs { await pause(itemID: id) }
     }
 
     func resume(itemID: String) {
@@ -366,9 +372,20 @@ final class DownloadManager {
                         resumeData: data, tag: tag, allowsCellular: backend.allowsCellular)
     }
 
+    /// The backend of a download's server, as the user it was fetched as: one that signed in as
+    /// someone else since would resume it under their token, so it waits instead.
     private func backend(for manifest: DownloadManifest) -> (any DownloadBackend)? {
         guard let origin = manifest.originServerID else { return backend }
-        return secondaryBackend(origin)
+        guard let found = secondaryBackend(origin), manifest.originUserID == nil || found.userID == manifest.originUserID else { return nil }
+        return found
+    }
+
+    /// Nil for the active server's items; throws for an item of a server that takes no part right
+    /// now, which the active server would only answer with someone else's item or none.
+    private func homeBackend(serverID: String?) throws -> (serverID: String, backend: any DownloadBackend)? {
+        guard let serverID, serverID != store.activeProfile?.serverID else { return nil }
+        guard let found = secondaryBackend(serverID) else { throw DownloadEnqueueError.noServer }
+        return (serverID, found)
     }
 
     private func tag(for item: DownloadedItem) -> DownloadTaskTag? {

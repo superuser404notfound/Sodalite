@@ -198,7 +198,8 @@ final class FakeDownloadBackend: DownloadBackend {
     var seasonEpisodes: [String] = []
     var killedSessions: [String] = []
     let baseURL: URL? = URL(string: "https://jf.example")
-    let userID = "usr"
+    var userIDOverride: String?
+    var userID: String { userIDOverride ?? "usr" }
     let preferredAudioLanguage: String? = nil
     var versionOrder: VersionOrder = .quality
     var canTranscodeVideo = true

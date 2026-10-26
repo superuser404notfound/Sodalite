@@ -104,17 +104,16 @@ final class DownloadStore {
         let itemID: String
     }
 
-    /// Items of any profile that came from `serverID` through a combined Home, as the `userID` there
-    /// when one is given (Sodalite#202). They live under the profile that downloaded them, so the
-    /// server's own directory does not hold them.
-    func originItems(serverID: String, userID: String?) -> [StoredItem] {
+    /// Items of any profile that came from `serverID` through a combined Home (Sodalite#202). They
+    /// live under the profile that downloaded them, so the server's own directory does not hold them.
+    func originItems(serverID: String) -> [StoredItem] {
         var result: [StoredItem] = []
         for server in children(of: paths.root) {
             for profile in children(of: server) {
                 for item in children(of: profile) {
                     guard let data = try? Data(contentsOf: item.appendingPathComponent(DownloadPaths.manifestName)),
                           let manifest = try? JSONDecoder().decode(DownloadManifest.self, from: data),
-                          manifest.originServerID == serverID, userID == nil || manifest.originUserID == userID else { continue }
+                          manifest.originServerID == serverID else { continue }
                     result.append(StoredItem(serverID: server.lastPathComponent, userID: profile.lastPathComponent,
                                              itemID: manifest.itemID))
                 }

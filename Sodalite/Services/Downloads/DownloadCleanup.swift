@@ -20,14 +20,12 @@ enum DownloadCleanup {
         return DownloadStore.Usage(items: own.items + fetched.items, bytes: own.bytes + fetched.bytes)
     }
 
-    /// What other profiles downloaded from this server or account through a combined Home
-    /// (Sodalite#202): it goes with the account it came from, like the account's own downloads.
+    /// What other profiles downloaded from this server through a combined Home (Sodalite#202) goes
+    /// when the server is removed. A profile scope leaves it: signing one account out, or its own
+    /// Delete All, must not reach into another profile's Downloads it never listed.
     static func fetchedThroughHome(_ scope: DownloadCleanupScope, store: DownloadStore) -> [DownloadStore.StoredItem] {
-        switch scope {
-        case .everything: []
-        case .server(let id): store.originItems(serverID: id, userID: nil)
-        case .profile(let serverID, let userID): store.originItems(serverID: serverID, userID: userID)
-        }
+        guard case .server(let id) = scope else { return [] }
+        return store.originItems(serverID: id)
     }
 
     static func perform(_ scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?) async {

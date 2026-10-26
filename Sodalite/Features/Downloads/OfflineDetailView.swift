@@ -41,19 +41,22 @@ struct OfflineDetailView: View {
         .navigationTitle(displayName)
         .inlineNavigationTitle()
         .overlay {
-            if let userID = appState.activeUser?.id ?? appState.profileKey?.userID {
+            // A download from another server of a combined Home reports to that server (Sodalite#202).
+            let home = item.manifest.originServerID.flatMap { dependencies.sessionRegistry.secondary(serverID: $0) }
+            if let userID = home?.userID ?? appState.activeUser?.id ?? appState.profileKey?.userID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? snapshot : nil,
                     startFromBeginning: false,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: home?.playbackService ?? dependencies.jellyfinPlaybackService,
+                    itemService: home?.itemService ?? dependencies.jellyfinItemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
                     localDownload: dependencies.downloadStore.completedItem(item.id),
                     downloadStore: dependencies.downloadStore
                 )
+                .environment(\.serverSession, home)
                 .allowsHitTesting(false)
             }
         }
