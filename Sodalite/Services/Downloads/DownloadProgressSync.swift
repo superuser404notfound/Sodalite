@@ -33,17 +33,23 @@ enum DownloadSyncDecision: Equatable {
 /// a phone that watched its first ten minutes offline a day earlier.
 @MainActor
 final class DownloadProgressSync {
+    typealias Route = (service: any UserItemDataServing, userID: String)
+
     private let store: DownloadStore
-    private let service: any UserItemDataServing
-    private let userID: String
+    /// Where an item's progress lives, by the manifest's `originServerID` (nil = the profile's own
+    /// server); nil skips the item this run.
+    private let route: (String?) -> Route?
     private let now: () -> Date
     private var isRunning = false
 
-    init(store: DownloadStore, service: any UserItemDataServing, userID: String, now: @escaping () -> Date = Date.init) {
+    init(store: DownloadStore, now: @escaping () -> Date = Date.init, route: @escaping (String?) -> Route?) {
         self.store = store
-        self.service = service
-        self.userID = userID
+        self.route = route
         self.now = now
+    }
+
+    convenience init(store: DownloadStore, service: any UserItemDataServing, userID: String, now: @escaping () -> Date = Date.init) {
+        self.init(store: store, now: now) { $0 == nil ? (service, userID) : nil }
     }
 
     static func decide(local: DownloadLocalProgress, server: UserItemData) -> DownloadSyncDecision {
@@ -63,7 +69,8 @@ final class DownloadProgressSync {
         defer { isRunning = false }
         for item in store.items.values where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
             let id = item.manifest.itemID
-            guard let server = try? await service.userData(itemID: id, userID: userID) else { continue }
+            guard let (service, userID) = route(item.manifest.originServerID),
+                  let server = try? await service.userData(itemID: id, userID: userID) else { continue }
             let local = item.manifest.progress
             switch Self.decide(local: local, server: server) {
             case .push:

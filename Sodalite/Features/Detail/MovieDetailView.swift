@@ -69,7 +69,7 @@ struct MovieDetailView: View {
     /// account granted deletion on one library. The policy remains the fallback for a response
     /// without the field, read from AppState.activeUser so a profile switch updates visibility.
     private func canDelete(_ item: JellyfinItem) -> Bool {
-        guard session.allowsDeleteAndDownload else { return false }
+        guard session.allowsDelete else { return false }
         if let serverAnswer = item.canDelete { return serverAnswer }
         return appState.activeUser?.canDeleteContent == true
     }
@@ -778,9 +778,7 @@ struct MovieDetailView: View {
             .focused($focusedAction, equals: .rating)
 
             #if os(iOS)
-            if session.allowsDeleteAndDownload {
-                DownloadActionButton(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item), target: $downloadTarget)
-            }
+            DownloadActionButton(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item), target: $downloadTarget)
             #endif
 
             // Last of the informational controls, and the page's only route to the full synopsis

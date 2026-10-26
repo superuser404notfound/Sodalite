@@ -14,7 +14,7 @@ extension EnvironmentValues {
 }
 
 extension ServerSession {
-    /// Delete is coupled to the active server's Seerr/Radarr, downloads to the active server's
-    /// download manager, so both stay with it.
-    var allowsDeleteAndDownload: Bool { isActive }
+    /// Delete is coupled to the active server's Seerr/Radarr, so it stays with it. Downloads are not:
+    /// the manager fetches from any server of the Home (Sodalite#202).
+    var allowsDelete: Bool { isActive }
 }

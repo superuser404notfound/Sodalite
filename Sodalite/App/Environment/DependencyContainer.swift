@@ -311,6 +311,8 @@ final class DependencyContainer {
         #if os(iOS)
         downloadActivity = DownloadProgressActivity(store: downloadStore, liveProgress: { [weak manager] in
             manager?.liveProgress ?? [:]
+        }, pause: { [weak manager] ids in
+            await manager?.pause(itemIDs: ids)
         })
         #endif
     }

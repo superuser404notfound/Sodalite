@@ -65,13 +65,18 @@ final class DownloadManager {
     private let store: DownloadStore
     @ObservationIgnored private let backend: any DownloadBackend
     @ObservationIgnored private let transport: any DownloadTransport
+    /// The backend of another server in a combined Home, by server id (Sodalite#202); nil for the
+    /// active server and for a server that takes no part right now.
+    @ObservationIgnored private let secondaryBackend: (String) -> (any DownloadBackend)?
     /// itemID to a 0...1 fraction while a task runs; not persisted.
     private(set) var liveProgress: [String: Double] = [:]
 
-    init(store: DownloadStore, backend: any DownloadBackend, transport: any DownloadTransport) {
+    init(store: DownloadStore, backend: any DownloadBackend, transport: any DownloadTransport,
+         secondaryBackend: @escaping (String) -> (any DownloadBackend)? = { _ in nil }) {
         self.store = store
         self.backend = backend
         self.transport = transport
+        self.secondaryBackend = secondaryBackend
     }
 
     // MARK: Enqueue
@@ -80,6 +85,9 @@ final class DownloadManager {
     /// default, not whichever the server lists first (Sodalite#200).
     func enqueue(item: JellyfinItem, quality requested: StreamingQuality, mediaSourceID: String? = nil) async throws {
         guard store.item(item.id) == nil else { return }
+        // An item of another server in a combined Home is fetched from that server, as its user.
+        let origin = item.serverID.flatMap { id in secondaryBackend(id).map { (serverID: id, backend: $0) } }
+        let backend = origin?.backend ?? self.backend
         let quality = backend.canTranscodeVideo ? requested : .original
         guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
 
@@ -119,6 +127,8 @@ final class DownloadManager {
         manifest.expectedBytes = plan.expectedBytes
         manifest.transcodeURL = plan.route == .transcode ? plan.url.absoluteString : nil
         manifest.versionID = versionID == nil ? nil : source.id
+        manifest.originServerID = origin?.serverID
+        manifest.originUserID = origin?.backend.userID
         manifest.progress.positionTicks = detail.userData?.playbackPositionTicks ?? 0
         manifest.progress.played = detail.userData?.played ?? false
         manifest.progress.lastPlayed = JellyfinDate.parse(detail.userData?.lastPlayedDate)
@@ -128,15 +138,16 @@ final class DownloadManager {
         guard store.item(item.id) == nil, store.activeProfile == profile else { return }
         let created = try store.create(manifest, snapshot: DownloadSnapshot(item: detail, series: series, season: season, source: plan.localSource))
 
-        await fetchSidecars(plan: plan, item: created, profile: profile)
-        await fetchArtwork(for: detail, series: series, into: created.directory)
+        await fetchSidecars(plan: plan, item: created, backend: backend)
+        await fetchArtwork(for: detail, into: created.directory, backend: backend)
         pumpQueue()
     }
 
     /// One episode the server refuses does not cost the rest of the season; running out of space does,
     /// since every episode after it would be refused the same way. The first error is still reported.
-    func enqueueSeason(seriesID: String, seasonID: String, quality: StreamingQuality) async throws {
+    func enqueueSeason(seriesID: String, seasonID: String, serverID: String? = nil, quality: StreamingQuality) async throws {
         var firstError: Error?
+        let backend = serverID.flatMap(secondaryBackend) ?? self.backend
         for episode in try await backend.seasonEpisodes(seriesID: seriesID, seasonID: seasonID) {
             do {
                 try await enqueue(item: episode, quality: quality)
@@ -161,6 +172,12 @@ final class DownloadManager {
         pumpQueue()
     }
 
+    /// The viewer stopped the system's progress activity, which iOS reports the same way as its own
+    /// expiry: the batch is paused, never deleted, so either way nothing is lost.
+    func pause(itemIDs: [String]) async {
+        for id in itemIDs { await pause(itemID: id) }
+    }
+
     func resume(itemID: String) {
         try? store.update(itemID: itemID) { $0.transition(to: .queued) }
         pumpQueue()
@@ -175,10 +192,15 @@ final class DownloadManager {
         guard let item = store.item(itemID) else { return }
         if let tag = tag(for: item) { _ = await transport.cancel(tag: tag, producingResumeData: false) }
         if item.manifest.route == .transcode, item.manifest.state != .complete, let session = item.manifest.playSessionID {
-            await backend.stopEncoding(playSessionID: session)
+            await backend(for: item.manifest)?.stopEncoding(playSessionID: session)
         }
         liveProgress[itemID] = nil
         try? store.delete(itemID: itemID)
+        pumpQueue()
+    }
+
+    /// A server of a combined Home joined, came back or moved: what waited for it can start.
+    func serversChanged() {
         pumpQueue()
     }
 
@@ -187,6 +209,15 @@ final class DownloadManager {
     func cancelTasks(serverID: String?, userID: String?) async {
         await transport.cancelAll { tag in
             (serverID == nil || tag.serverID == serverID) && (userID == nil || tag.userID == userID)
+        }
+    }
+
+    func cancelTasks(of stored: [DownloadStore.StoredItem]) async {
+        guard !stored.isEmpty else { return }
+        let keys = Set(stored)
+        for item in stored { liveProgress[item.itemID] = nil }
+        await transport.cancelAll { tag in
+            keys.contains(DownloadStore.StoredItem(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID))
         }
     }
 
@@ -298,15 +329,23 @@ final class DownloadManager {
 
     // MARK: Private
 
+    /// A download from a server that takes no part right now (muted, left the Home, not loaded yet
+    /// after a launch) waits in the queue without taking a slot.
     private func pumpQueue() {
         let all = Array(store.items.values.map(\.manifest))
-        let ids = DownloadScheduler.toStart(queued: all.filter { $0.state == .queued },
+        let ids = DownloadScheduler.toStart(queued: all.filter { $0.state == .queued && backend(for: $0) != nil },
                                             running: all.filter { $0.state == .downloading })
         for id in ids { start(itemID: id) }
     }
 
     private func start(itemID: String) {
-        guard let item = store.item(itemID), let baseURL = backend.baseURL, let tag = tag(for: item) else { return }
+        guard let item = store.item(itemID) else { return }
+        guard let backend = backend(for: item.manifest) else {
+            // Its server left the Home since the queue picked it: back to waiting, not stuck as running.
+            try? store.update(itemID: itemID) { $0.transition(to: .queued) }
+            return
+        }
+        guard let baseURL = backend.baseURL, let tag = tag(for: item) else { return }
         let url: URL
         switch item.manifest.route {
         case .original:
@@ -327,6 +366,11 @@ final class DownloadManager {
                         resumeData: data, tag: tag, allowsCellular: backend.allowsCellular)
     }
 
+    private func backend(for manifest: DownloadManifest) -> (any DownloadBackend)? {
+        guard let origin = manifest.originServerID else { return backend }
+        return secondaryBackend(origin)
+    }
+
     private func tag(for item: DownloadedItem) -> DownloadTaskTag? {
         guard let profile = store.activeProfile else { return nil }
         let ext = item.manifest.route == .transcode ? "mp4" : (item.snapshot.source.container.flatMap { $0.split(separator: ",").first.map(String.init) } ?? "mkv")
@@ -343,7 +387,7 @@ final class DownloadManager {
         store.activeProfile?.serverID == tag.serverID && store.activeProfile?.userID == tag.userID
     }
 
-    private func fetchSidecars(plan: DownloadPlanner.Plan, item: DownloadedItem, profile: ProfileKey) async {
+    private func fetchSidecars(plan: DownloadPlanner.Plan, item: DownloadedItem, backend: any DownloadBackend) async {
         var files: [Int: String] = [:]
         for stream in plan.sidecarStreams {
             guard let url = backend.subtitleURL(itemID: item.id, mediaSourceID: item.manifest.mediaSourceID, stream: stream),
@@ -355,7 +399,7 @@ final class DownloadManager {
         try? store.update(itemID: item.id) { $0.subtitleFiles = files }
     }
 
-    private func fetchArtwork(for item: JellyfinItem, series: JellyfinItem?, into directory: URL) async {
+    private func fetchArtwork(for item: JellyfinItem, into directory: URL, backend: any DownloadBackend) async {
         for (kind, url) in backend.artworkURLs(for: item) {
             guard let data = try? await backend.fetch(DownloadPlanner.authorizedRequest(url: url, authorization: backend.authorization)) else { continue }
             try? data.write(to: directory.appendingPathComponent(kind.fileName), options: .atomic)

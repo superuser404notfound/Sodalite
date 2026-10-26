@@ -75,7 +75,7 @@ struct SeriesDetailView: View {
     /// See `MovieDetailView.canDelete(_:)`: the item's own `CanDelete` decides wherever the server
     /// sent it, the user policy is the fallback for a response without it (Sodalite#146).
     private func canDelete(_ item: JellyfinItem) -> Bool {
-        guard session.allowsDeleteAndDownload else { return false }
+        guard session.allowsDelete else { return false }
         if let serverAnswer = item.canDelete { return serverAnswer }
         return appState.activeUser?.canDeleteContent == true
     }
@@ -1161,9 +1161,7 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .watched)
 
                 #if os(iOS)
-                if session.allowsDeleteAndDownload {
-                    DownloadActionButton(item: ep, sourceID: versionSelection.preferredSourceID(for: ep), target: $downloadTarget)
-                }
+                DownloadActionButton(item: ep, sourceID: versionSelection.preferredSourceID(for: ep), target: $downloadTarget)
                 #endif
             }
 
@@ -1371,7 +1369,7 @@ struct SeriesDetailView: View {
         }
 
         #if os(iOS)
-        if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
+        if dependencies.downloadManager != nil {
             if dependencies.downloadStore.completedItem(episode.id) != nil {
                 Button {
                     streamFromServer = true
@@ -1753,11 +1751,12 @@ struct SeriesDetailView: View {
             )
         }
         #if os(iOS)
-        if session.allowsDeleteAndDownload, dependencies.downloadManager != nil {
+        if dependencies.downloadManager != nil {
             Button {
                 downloadTarget = .season(
                     seriesID: vm.item.id, seasonID: season.id,
-                    episodes: vm.selectedSeasonID == season.id ? vm.episodes : [])
+                    episodes: vm.selectedSeasonID == season.id ? vm.episodes : [],
+                    serverID: vm.item.serverID)
             } label: {
                 Label("downloads.action.downloadSeason", systemImage: "arrow.down.circle")
             }

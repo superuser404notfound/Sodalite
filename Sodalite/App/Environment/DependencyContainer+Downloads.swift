@@ -8,7 +8,11 @@ extension DependencyContainer {
         let delegate = DownloadSessionDelegate(paths: downloadStore.paths, relay: relay)
         let manager = DownloadManager(store: downloadStore,
                                       backend: JellyfinDownloadBackend(container: self),
-                                      transport: BackgroundDownloadTransport(delegate: delegate))
+                                      transport: BackgroundDownloadTransport(delegate: delegate),
+                                      secondaryBackend: { [weak self] serverID in
+                                          guard let self, sessionRegistry.secondary(serverID: serverID) != nil else { return nil }
+                                          return JellyfinDownloadBackend(container: self, serverID: serverID)
+                                      })
         relay.attach { [weak manager] event in
             Task { @MainActor in await manager?.handle(event: event) }
         }
@@ -43,8 +47,14 @@ extension DependencyContainer {
         guard downloadSyncTask == nil, let profile = downloadStore.activeProfile, !downloadStore.items.isEmpty,
               let service = jellyfinItemService as? UserItemDataServing else { return }
         // The store's profile, not the container's active user: during a switch they can disagree,
-        // and the manifests being reconciled are the store's.
-        let sync = DownloadProgressSync(store: downloadStore, service: service, userID: profile.userID)
+        // and the manifests being reconciled are the store's. A download from another server of a
+        // combined Home reconciles with that server, as its user, while it takes part (Sodalite#202).
+        let sync = DownloadProgressSync(store: downloadStore) { [weak self] originServerID in
+            guard let originServerID else { return (service, profile.userID) }
+            guard let session = self?.sessionRegistry.secondary(serverID: originServerID),
+                  let secondary = session.itemService as? UserItemDataServing else { return nil }
+            return (secondary, session.userID)
+        }
         downloadSyncTask = Task { [weak self] in
             await sync.run()
             self?.downloadSyncTask = nil
