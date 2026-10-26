@@ -20,6 +20,7 @@ extension DependencyContainer {
             secondaries: candidates,
             baseURL: { preferredURL(for: $0) }
         )
+        downloadManager?.serversChanged()
     }
 
     /// Points each secondary at whichever of its addresses answers, as `resolveJellyfinRoute` does
@@ -36,6 +37,7 @@ extension DependencyContainer {
             serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
             sessionRegistry.updateRoute(resolved.url, for: session)
         }
+        downloadManager?.serversChanged()
     }
 }
 

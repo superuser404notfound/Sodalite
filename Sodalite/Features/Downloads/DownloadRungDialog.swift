@@ -28,19 +28,20 @@ struct DownloadFacts: Equatable {
 /// selected, nil where there is no choice (Sodalite#200).
 enum DownloadTarget: Identifiable {
     case item(JellyfinItem, sourceID: String?)
-    case season(seriesID: String, seasonID: String, episodes: [JellyfinItem])
+    /// `serverID` is the series' server in a combined Home (Sodalite#202).
+    case season(seriesID: String, seasonID: String, episodes: [JellyfinItem], serverID: String?)
 
     var id: String {
         switch self {
         case .item(let item, _): item.id
-        case .season(_, let seasonID, _): "season-\(seasonID)"
+        case .season(_, let seasonID, _, _): "season-\(seasonID)"
         }
     }
 
     func facts(order: VersionOrder) -> DownloadFacts {
         switch self {
         case .item(let item, let sourceID): .of(item, sourceID: sourceID, order: order)
-        case .season(_, _, let episodes): .of(season: episodes, order: order)
+        case .season(_, _, let episodes, _): .of(season: episodes, order: order)
         }
     }
 }
@@ -68,6 +69,7 @@ private struct DownloadRungDialog: ViewModifier {
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
+    @Environment(\.serverSession) private var serverSession
     @State private var errorMessage: String?
 
     func body(content: Content) -> some View {
@@ -93,7 +95,7 @@ private struct DownloadRungDialog: ViewModifier {
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
-        let canTranscodeVideo = appState.activeUser?.canTranscodeVideo ?? true
+        let canTranscodeVideo = appState.canTranscodeVideo(on: serverSession)
         let order = dependencies.playbackPreferences.versionOrder
         if case .item(let item, let sourceID) = target, item.selectableMediaSources.count > 1,
            let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection(order: order).preferredSourceID(for: item)) {
@@ -123,8 +125,8 @@ private struct DownloadRungDialog: ViewModifier {
                 switch target {
                 case .item(let item, let sourceID):
                     try await manager.enqueue(item: item, quality: option.quality, mediaSourceID: option.source?.id ?? sourceID)
-                case .season(let seriesID, let seasonID, _):
-                    try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, quality: option.quality)
+                case .season(let seriesID, let seasonID, _, let serverID):
+                    try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, serverID: serverID, quality: option.quality)
                 }
                 dependencies.beginDownloadActivity()
             } catch {

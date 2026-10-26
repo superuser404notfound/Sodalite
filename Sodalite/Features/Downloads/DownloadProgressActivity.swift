@@ -5,8 +5,9 @@ import Foundation
 /// The system's progress activity for running downloads (Sodalite#81): a `BGContinuedProcessingTask`,
 /// which iOS draws in the Dynamic Island and on the Lock Screen and which keeps the app awake long
 /// enough to feed it. The transfers themselves stay on the background URLSession, so the activity
-/// is only a view of them: when the system ends it early, or the viewer dismisses it, the downloads
-/// carry on and the Downloads tab still shows them.
+/// is only a view of them. Stopping it pauses what it was showing (Sodalite#202: a stop that let the
+/// downloads carry on read as broken); iOS reports its own early end the same way, so that pauses too,
+/// and the Downloads tab resumes either.
 ///
 /// It may only start from something the viewer just did (Apple's rule for this task type), so
 /// `begin()` is called from the download, resume and retry buttons and nowhere else.
@@ -16,15 +17,17 @@ final class DownloadProgressActivity {
 
     private let store: DownloadStore
     private let liveProgress: () -> [String: Double]
+    private let pause: ([String]) async -> Void
     private var batch: Set<String> = []
     private var isRegistered = false
     private var isSubmitted = false
     private var task: BGContinuedProcessingTask?
     private var feed: Task<Void, Never>?
 
-    init(store: DownloadStore, liveProgress: @escaping () -> [String: Double]) {
+    init(store: DownloadStore, liveProgress: @escaping () -> [String: Double], pause: @escaping ([String]) async -> Void) {
         self.store = store
         self.liveProgress = liveProgress
+        self.pause = pause
     }
 
     /// Adds whatever is queued or running to the batch, and shows the activity if it is not up yet.
@@ -64,7 +67,7 @@ final class DownloadProgressActivity {
         self.task = task
         // Called on a system queue too, so not main-actor isolated either.
         task.expirationHandler = { @Sendable [weak self] in
-            Task { @MainActor in self?.end(success: false) }
+            Task { @MainActor in self?.stop() }
         }
         feed = Task { [weak self] in
             while !Task.isCancelled {
@@ -112,6 +115,18 @@ final class DownloadProgressActivity {
             task.progress.completedUnitCount = Int64(summary.finished)
         }
         task.updateTitle(String(localized: "tab.downloads"), subtitle: subtitle(for: summary))
+    }
+
+    /// The viewer's stop and the system's expiry are one callback, so both pause the batch.
+    private func stop() {
+        let unfinished = batch.filter {
+            let state = store.item($0)?.manifest.state
+            return state == .queued || state == .downloading
+        }
+        end(success: false)
+        guard !unfinished.isEmpty else { return }
+        LogTap.shared.note("[Downloads] progress activity stopped, pausing \(unfinished.count)")
+        Task { await pause(Array(unfinished)) }
     }
 
     private func end(success: Bool) {

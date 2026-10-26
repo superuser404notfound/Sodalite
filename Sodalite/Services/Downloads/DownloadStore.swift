@@ -97,6 +97,47 @@ final class DownloadStore {
         items = [:]
     }
 
+    /// An item on disk under whichever profile downloaded it.
+    nonisolated struct StoredItem: Hashable, Sendable {
+        let serverID: String
+        let userID: String
+        let itemID: String
+    }
+
+    /// Items of any profile that came from `serverID` through a combined Home (Sodalite#202). They
+    /// live under the profile that downloaded them, so the server's own directory does not hold them.
+    func originItems(serverID: String) -> [StoredItem] {
+        var result: [StoredItem] = []
+        for server in children(of: paths.root) {
+            for profile in children(of: server) {
+                for item in children(of: profile) {
+                    guard let data = try? Data(contentsOf: item.appendingPathComponent(DownloadPaths.manifestName)),
+                          let manifest = try? JSONDecoder().decode(DownloadManifest.self, from: data),
+                          manifest.originServerID == serverID else { continue }
+                    result.append(StoredItem(serverID: server.lastPathComponent, userID: profile.lastPathComponent,
+                                             itemID: manifest.itemID))
+                }
+            }
+        }
+        return result
+    }
+
+    func delete(_ stored: [StoredItem]) {
+        for item in stored {
+            try? removeIfPresent(paths.itemDirectory(serverID: item.serverID, userID: item.userID, itemID: item.itemID))
+            if activeProfile?.serverID == item.serverID, activeProfile?.userID == item.userID {
+                items[item.itemID] = nil
+            }
+        }
+    }
+
+    func usage(of stored: [StoredItem]) -> Usage {
+        stored.reduce(Usage(items: 0, bytes: 0)) { total, item in
+            let one = measure(paths.itemDirectory(serverID: item.serverID, userID: item.userID, itemID: item.itemID), depth: 0)
+            return Usage(items: total.items + one.items, bytes: total.bytes + one.bytes)
+        }
+    }
+
     struct Usage: Equatable, Sendable {
         var items: Int
         var bytes: Int64
@@ -128,6 +169,10 @@ final class DownloadStore {
             result[manifest.itemID] = DownloadedItem(manifest: manifest, snapshot: snapshot, directory: child)
         }
         return result
+    }
+
+    private func children(of url: URL) -> [URL] {
+        (try? fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
     }
 
     private func write(_ manifest: DownloadManifest, to directory: URL) throws {

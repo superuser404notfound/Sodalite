@@ -44,6 +44,10 @@ struct DownloadManifest: Codable, Sendable, Equatable {
     /// A picked version's own item id, which an original downloads from in place of `itemID`
     /// (Sodalite#200). Nil for a single-version item and for every manifest written before.
     var versionID: String?
+    /// The server an item from another server of a combined Home came from, and the user it was
+    /// fetched as (Sodalite#202). Nil for the profile's own server and for every manifest written before.
+    var originServerID: String?
+    var originUserID: String?
     var mediaFileName: String?
     /// Stream index to sidecar file name inside the item directory.
     var subtitleFiles: [Int: String] = [:]

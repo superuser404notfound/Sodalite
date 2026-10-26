@@ -89,6 +89,10 @@ final class ServerSessionRegistry {
 
     func session(for item: JellyfinItem) -> ServerSession { session(forServerID: item.serverID) }
 
+    /// The secondary session of a server, nil for the active one and for a server not taking part,
+    /// where `session(forServerID:)` would fall back to the active one.
+    func secondary(serverID: String) -> ServerSession? { secondaries[serverID]?.session }
+
     func endpoint(forServerID serverID: String?) -> (baseURL: URL, token: String?)? {
         let client = session(forServerID: serverID).client
         guard let base = client.baseURL else { return nil }

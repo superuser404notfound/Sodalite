@@ -11,15 +11,27 @@ enum DownloadCleanupScope: Equatable {
 @MainActor
 enum DownloadCleanup {
     static func usage(_ scope: DownloadCleanupScope, store: DownloadStore) -> DownloadStore.Usage {
-        switch scope {
+        let own = switch scope {
         case .everything: store.totalUsage()
         case .server(let id): store.usage(serverID: id)
         case .profile(let serverID, let userID): store.usage(serverID: serverID, userID: userID)
         }
+        let fetched = store.usage(of: fetchedThroughHome(scope, store: store))
+        return DownloadStore.Usage(items: own.items + fetched.items, bytes: own.bytes + fetched.bytes)
+    }
+
+    /// What other profiles downloaded from this server through a combined Home (Sodalite#202) goes
+    /// when the server is removed. A profile scope leaves it: signing one account out, or its own
+    /// Delete All, must not reach into another profile's Downloads it never listed.
+    static func fetchedThroughHome(_ scope: DownloadCleanupScope, store: DownloadStore) -> [DownloadStore.StoredItem] {
+        guard case .server(let id) = scope else { return [] }
+        return store.originItems(serverID: id)
     }
 
     static func perform(_ scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?) async {
+        let fetched = fetchedThroughHome(scope, store: store)
         if let manager {
+            await manager.cancelTasks(of: fetched)
             if let active = store.activeProfile, covers(scope, active) {
                 for item in store.items.values where item.manifest.state != .complete && item.manifest.state != .missingOnServer {
                     await manager.cancel(itemID: item.id)
@@ -32,6 +44,8 @@ enum DownloadCleanup {
             case .profile(let serverID, let userID): await manager.cancelTasks(serverID: serverID, userID: userID)
             }
         }
+        store.delete(fetched)
+        if !fetched.isEmpty { manager?.serversChanged() }
         switch scope {
         case .everything: try? store.deleteAll()
         case .server(let id): try? store.deleteServer(serverID: id)

@@ -20,7 +20,10 @@ struct ServerSessionEnvironmentTests {
                 server: JellyfinServer(id: "b", name: "B", internalURL: URL(string: "http://b.lan:8096"), externalURL: nil),
                 credential: SessionCredential(userID: "u-b", token: "t"))],
             baseURL: { $0.url })
-        #expect(registry.active.allowsDeleteAndDownload)
-        #expect(!registry.session(forServerID: "b").allowsDeleteAndDownload)
+        #expect(registry.active.allowsDelete)
+        #expect(!registry.session(forServerID: "b").allowsDelete)
+        #expect(registry.secondary(serverID: "b") != nil)
+        #expect(registry.secondary(serverID: "a") == nil)
+        #expect(registry.secondary(serverID: "c") == nil)
     }
 }
