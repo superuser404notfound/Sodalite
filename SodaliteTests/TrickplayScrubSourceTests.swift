@@ -102,4 +102,65 @@ struct ScrubPreviewResolutionTests {
         #expect(result == nil)
         #expect(cacheCalls == 0)
     }
+
+    /// Waits up to two seconds for `condition`, so a timing test fails on its claim, not on a slow runner.
+    private func eventually(_ condition: () -> Bool) async -> Bool {
+        for _ in 0..<200 {
+            if condition() { return true }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return condition()
+    }
+
+    @Test("a resting knob replaces the coarse keyframe with the exact frame")
+    func restRefines() async {
+        let provider = ScrubPreviewProvider()
+        let coarse = dummyImage(), exact = dummyImage()
+        var refinedAt: [Double] = []
+        provider.configure(extractor: nil,
+                           cacheThumbnail: { _, _ in coarse },
+                           refinedThumbnail: { seconds, _, _ in refinedAt.append(seconds); return exact },
+                           enabled: true)
+        provider.refineDelay = .milliseconds(20)
+        provider.update(fraction: 0.5, durationSeconds: 100)
+        #expect(await eventually { provider.previewImage === exact })
+        #expect(refinedAt == [50])
+    }
+
+    @Test("a knob that keeps moving never pays for the exact frame")
+    func movingSkipsRefine() async {
+        let provider = ScrubPreviewProvider()
+        let coarse = dummyImage()
+        var refineCalls = 0
+        provider.configure(extractor: nil,
+                           cacheThumbnail: { _, _ in coarse },
+                           refinedThumbnail: { _, _, _ in refineCalls += 1; return nil },
+                           enabled: true)
+        provider.refineDelay = .seconds(10)
+        provider.update(fraction: 0.2, durationSeconds: 100)
+        #expect(await eventually { provider.previewImage === coarse })
+        provider.update(fraction: 0.3, durationSeconds: 100)
+        provider.clear()
+        try? await Task.sleep(for: .milliseconds(100))
+        #expect(refineCalls == 0)
+        #expect(provider.previewImage === coarse)
+    }
+
+    @Test("a position the cache does not hold is not refined, and a refine miss keeps the keyframe")
+    func refineNeedsCoarseAndKeepsItOnMiss() async {
+        let provider = ScrubPreviewProvider()
+        let coarse = dummyImage()
+        var refined: [Double] = []
+        provider.configure(extractor: nil,
+                           cacheThumbnail: { seconds, _ in seconds < 60 ? coarse : nil },
+                           refinedThumbnail: { seconds, _, _ in refined.append(seconds); return nil },
+                           enabled: true)
+        provider.refineDelay = .milliseconds(20)
+        provider.update(fraction: 0.75, durationSeconds: 100)
+        try? await Task.sleep(for: .milliseconds(200))
+        #expect(refined.isEmpty)
+        provider.update(fraction: 0.25, durationSeconds: 100)
+        #expect(await eventually { refined == [25] })
+        #expect(provider.previewImage === coarse)
+    }
 }

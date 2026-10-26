@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import Synchronization
 import AetherEngine
 
 /// Session-scoped scrub-preview source. Configured per session with the
@@ -23,6 +24,11 @@ final class ScrubPreviewProvider {
     /// Cache-backed VOD still source (engine SegmentCache, no second connection).
     /// Tried before `extractor`; nil when not resident so the extractor fallback runs.
     @ObservationIgnored private var cacheThumbnail: ((Double, Int) async -> CGImage?)?
+    /// Frame-accurate resident still (seconds, maxWidth, isCancelled), asked once the knob has rested
+    /// for `refineDelay` after a coarse keyframe was shown. nil result keeps the coarse picture.
+    @ObservationIgnored private var refinedThumbnail: ((Double, Int, @escaping @Sendable () -> Bool) async -> CGImage?)?
+    /// How long the knob has to rest before the coarse keyframe is replaced by the exact frame.
+    @ObservationIgnored var refineDelay: Duration = .milliseconds(250)
     /// Live mode: thumbnails from the engine's DVR segment cache (seconds,
     /// maxWidth) instead of a session FrameExtractor.
     @ObservationIgnored private var liveThumbnail: ((Double, Int) async -> CGImage?)?
@@ -44,11 +50,13 @@ final class ScrubPreviewProvider {
     /// is tried before the extractor: a resident segment decodes with no second connection.
     func configure(extractor: FrameExtractor?,
                    cacheThumbnail: ((Double, Int) async -> CGImage?)? = nil,
+                   refinedThumbnail: ((Double, Int, @escaping @Sendable () -> Bool) async -> CGImage?)? = nil,
                    viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)? = nil,
                    enabled: Bool) {
         reset()
         self.extractor = extractor
         self.cacheThumbnail = cacheThumbnail
+        self.refinedThumbnail = refinedThumbnail
         self.viewPreview = viewPreview
         self.enabled = enabled
     }
@@ -119,6 +127,24 @@ final class ScrubPreviewProvider {
         guard gen == generation else { return }
         previewImage = image
         showsPreviewView = false
+        guard image != nil, serverThumbnail == nil else { return }
+        await refine(seconds: seconds, gen: gen)
+    }
+
+    /// Replaces the coarse keyframe with the frame at `seconds` once the knob rests. The next
+    /// `update` cancels the load task, which ends the wait or flags the decode in flight.
+    private func refine(seconds: Double, gen: Int) async {
+        guard let refinedThumbnail else { return }
+        try? await Task.sleep(for: refineDelay)
+        guard !Task.isCancelled, gen == generation else { return }
+        let cancelled = CancelFlag()
+        let image = await withTaskCancellationHandler {
+            await refinedThumbnail(seconds, 320) { cancelled.isSet }
+        } onCancel: {
+            cancelled.set()
+        }
+        guard let image, gen == generation, !Task.isCancelled else { return }
+        previewImage = image
     }
 
     /// Drive the preview to a scrub position (`fraction` 0...1). Debounced so a
@@ -161,8 +187,16 @@ final class ScrubPreviewProvider {
         viewPreview = nil
         extractor = nil
         cacheThumbnail = nil
+        refinedThumbnail = nil
         liveThumbnail = nil
         serverThumbnail = nil
         enabled = false
     }
+}
+
+/// Polled by the engine's decode queue, set from the task's cancellation handler.
+nonisolated private final class CancelFlag: Sendable {
+    private let value = Atomic<Bool>(false)
+    var isSet: Bool { value.load(ordering: .relaxed) }
+    func set() { value.store(true, ordering: .relaxed) }
 }
