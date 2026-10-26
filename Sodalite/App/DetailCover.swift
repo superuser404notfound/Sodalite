@@ -30,6 +30,45 @@ extension View {
     ) -> some View {
         modifier(DetailCoverPresenter(item: item, coverContent: content))
     }
+
+    /// For a screen that is sometimes a cover's page and sometimes straight in a tab's stack (a
+    /// library grid, Watch Stats): pushes inside a cover, opens a cover of its own otherwise.
+    ///
+    /// tvOS only differs. A detail pushed into a sidebar tab other than Home keeps the rail's slot
+    /// beside it, because the tab's stack starts there and clips (Sodalite#215), so it has to sit
+    /// above the shell the way every other detail does. Inside a cover the stack already runs from
+    /// the screen edge, and a push keeps the cover's back arrow.
+    func detailDestination<Item: Identifiable & Hashable, Content: View>(
+        item: Binding<Item?>,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        modifier(DetailDestinationPresenter(item: item, destination: content))
+    }
+}
+
+private struct DetailDestinationPresenter<Item: Identifiable & Hashable, Destination: View>: ViewModifier {
+    @Environment(\.detailCoverStack) private var coverStack
+    @Binding var item: Item?
+    @ViewBuilder let destination: (Item) -> Destination
+
+    func body(content: Content) -> some View {
+        #if os(tvOS)
+        if coverStack == nil {
+            content.detailCoverModal(item: $item, content: destination)
+        } else {
+            push(content)
+        }
+        #else
+        push(content)
+        #endif
+    }
+
+    private func push(_ content: Content) -> some View {
+        content.navigationDestination(item: $item) { value in
+            destination(value)
+                .detailCoverPush()
+        }
+    }
 }
 
 #if os(macOS) || os(iOS)
