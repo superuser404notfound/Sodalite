@@ -364,12 +364,10 @@ struct FilteredGridView: View {
         // iOS keeps the bar: the grid is pushed there, and the bar carries its way back.
         .hidesNavigationBarChrome()
         .hidesShellTabBar(!isTabRoot)
-        // A tab root's pushes take the screen the way a pushed settings page does.
-        .navigationDestination(item: $selectedItem) { item in
+        .detailDestination(item: $selectedItem) { item in
             DetailRouterView(item: item, autoPlay: selectedPlays, autoPlayFromBeginning: selectedPlaysFromBeginning)
-                .detailCoverPush()
-                .hidesShellTabBar(isTabRoot)
         }
+        // A tab root's folders take the screen the way a pushed settings page does.
         .navigationDestination(item: $selectedFolder) { folder in
             // The library's sort scope carries down, so one choice orders the whole tree.
             FilteredGridView(
