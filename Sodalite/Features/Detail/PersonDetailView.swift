@@ -327,11 +327,8 @@ struct PersonDetailView: View {
             itemService: session.itemService,
             mediaService: dependencies.seerrMediaService,
             searchService: dependencies.seerrSearchService,
-            // Follows the Catalog tab: with it hidden, the filmography would be the same catalog one level deeper (Sodalite#62).
-            isSeerrConnected: SeerrSurfacePolicy.browsingEnabled(
-                appState: appState,
-                appearance: dependencies.appearancePreferences
-            ),
+            // Deliberately not tied to the Catalog tab: hiding it silently dropped the filmography, which read as a missing feature (Sodalite#143).
+            isSeerrConnected: appState.isSeerrConnected,
             userID: sessionUserID
         )
         viewModel = vm

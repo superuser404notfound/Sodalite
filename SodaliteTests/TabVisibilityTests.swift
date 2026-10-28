@@ -145,7 +145,8 @@ struct TabVisibilityTests {
         #expect(!search.contains("appState.isSeerrConnected ? dependencies.seerrSearchService"))
 
         let person = try sourceFile("Sodalite/Features/Detail/PersonDetailView.swift")
-        #expect(person.contains("SeerrSurfacePolicy.browsingEnabled"))
+        #expect(!person.contains("SeerrSurfacePolicy.browsingEnabled"))
+        #expect(person.contains("isSeerrConnected: appState.isSeerrConnected"))
     }
 
     private func sourceFile(_ relativePath: String) throws -> String {
