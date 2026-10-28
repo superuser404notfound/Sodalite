@@ -542,10 +542,11 @@ final class PlaybackPreferences {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
     }
 
-    /// 7.1.4 whatever the room: the receiver renders the bed onto the speakers it really has, and a
-    /// larger bed mostly costs bitrate.
+    /// 9.1.6 whatever the room: the receiver renders the bed onto the speakers it really has, and on
+    /// HDMI and headphones the bed goes out as lossless PCM, so the larger bed costs nothing but
+    /// loopback bandwidth (AirPlay keeps APAC, the engine decides per route).
     var objectAudioRendering: ObjectAudioRendering {
-        trueHDAtmosHeights ? .apac(.l714) : .off
+        trueHDAtmosHeights ? .render(.l916) : .off
     }
 
     // MARK: - Init
