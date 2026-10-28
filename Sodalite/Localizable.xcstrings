@@ -66924,157 +66924,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stopy TrueHD a DTS s objektovým zvukem si nyní mohou zachovat výškové kanály: Sodalite je na zařízení vykreslí do mixu 7.1.4 a zvolí takovou stopu ve vašem jazyce, pokud ji film má. Ve výchozím stavu zapnuté, vypnete v nastavení přehrávání v části Zvuk."
+            "value" : "Stopy TrueHD a DTS s objektovým zvukem si nyní mohou zachovat výškové kanály: Sodalite je na zařízení vykreslí do mixu 9.1.6 a zvolí takovou stopu ve vašem jazyce, pokud ji film má. Ve výchozím stavu zapnuté, vypnete v nastavení přehrávání v části Zvuk. Přes HDMI dorazí mix do přijímače bezztrátově."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD- og DTS-spor med objektlyd kan nu beholde deres højdekanaler: Sodalite renderer dem på enheden til et 7.1.4-mix og vælger et sådant spor på dit sprog, når en film har et. Slået til som standard, slå den fra i afspilningsindstillingerne under Lyd."
+            "value" : "TrueHD- og DTS-spor med objektlyd kan nu beholde deres højdekanaler: Sodalite renderer dem på enheden til et 9.1.6-mix og vælger et sådant spor på dit sprog, når en film har et. Slået til som standard, slå den fra i afspilningsindstillingerne under Lyd. Via HDMI når mixet din receiver tabsfrit."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD- und DTS-Spuren mit Objekt-Audio können jetzt ihre Höhenkanäle behalten: Sodalite rendert sie auf dem Gerät zu einem 7.1.4-Mix und wählt eine solche Spur in deiner Sprache, wenn ein Film eine hat. Standardmäßig an, abschaltbar in den Wiedergabe-Einstellungen unter Audio."
+            "value" : "TrueHD- und DTS-Spuren mit Objekt-Audio können jetzt ihre Höhenkanäle behalten: Sodalite rendert sie auf dem Gerät zu einem 9.1.6-Mix und wählt eine solche Spur in deiner Sprache, wenn ein Film eine hat. Standardmäßig an, abschaltbar in den Wiedergabe-Einstellungen unter Audio. Über HDMI kommt der Mix verlustfrei am Receiver an."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Τα κομμάτια TrueHD και DTS με ήχο αντικειμένων μπορούν τώρα να κρατούν τα κανάλια ύψους: το Sodalite τα αποδίδει στη συσκευή σε μίξη 7.1.4 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας, όταν μια ταινία έχει. Ενεργό από προεπιλογή, απενεργοποιείται στις ρυθμίσεις αναπαραγωγής στην ενότητα Ήχος."
+            "value" : "Τα κομμάτια TrueHD και DTS με ήχο αντικειμένων μπορούν τώρα να κρατούν τα κανάλια ύψους: το Sodalite τα αποδίδει στη συσκευή σε μίξη 9.1.6 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας, όταν μια ταινία έχει. Ενεργό από προεπιλογή, απενεργοποιείται στις ρυθμίσεις αναπαραγωγής στην ενότητα Ήχος. Μέσω HDMI η μίξη φτάνει στον δέκτη σας χωρίς απώλειες."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD and DTS tracks with object audio can now keep their height channels: Sodalite renders them on the device into a 7.1.4 mix and picks such a track in your language when a film has one. On by default, switch it off in the playback settings under Audio."
+            "value" : "TrueHD and DTS tracks with object audio can now keep their height channels: Sodalite renders them on the device into a 9.1.6 mix and picks such a track in your language when a film has one. On by default, switch it off in the playback settings under Audio. Over HDMI the mix reaches your receiver lossless."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las pistas TrueHD y DTS con audio de objetos ahora pueden conservar sus canales de altura: Sodalite los renderiza en el dispositivo en una mezcla 7.1.4 y elige una pista así en tu idioma cuando la película la tiene. Activado por defecto, desactívalo en los ajustes de reproducción, en Audio."
+            "value" : "Las pistas TrueHD y DTS con audio de objetos ahora pueden conservar sus canales de altura: Sodalite los renderiza en el dispositivo en una mezcla 9.1.6 y elige una pista así en tu idioma cuando la película la tiene. Activado por defecto, desactívalo en los ajustes de reproducción, en Audio. Por HDMI, la mezcla llega a tu receptor sin pérdida."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Objektiääntä sisältävät TrueHD- ja DTS-raidat voivat nyt säilyttää korkeuskanavansa: Sodalite renderöi ne laitteella 7.1.4-miksaukseksi ja valitsee tällaisen raidan kielelläsi, jos elokuvassa sellainen on. Oletuksena päällä, kytke pois toistoasetusten kohdasta Ääni."
+            "value" : "Objektiääntä sisältävät TrueHD- ja DTS-raidat voivat nyt säilyttää korkeuskanavansa: Sodalite renderöi ne laitteella 9.1.6-miksaukseksi ja valitsee tällaisen raidan kielelläsi, jos elokuvassa sellainen on. Oletuksena päällä, kytke pois toistoasetusten kohdasta Ääni. HDMI:n kautta miksaus saapuu vastaanottimeen häviöttömänä."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les pistes TrueHD et DTS à audio objet peuvent désormais conserver leurs canaux de hauteur : Sodalite les calcule sur l’appareil en un mixage 7.1.4 et choisit une telle piste dans votre langue quand un film en a une. Activé par défaut, à désactiver dans les réglages de lecture, sous Audio."
+            "value" : "Les pistes TrueHD et DTS à audio objet peuvent désormais conserver leurs canaux de hauteur : Sodalite les calcule sur l’appareil en un mixage 9.1.6 et choisit une telle piste dans votre langue quand un film en a une. Activé par défaut, à désactiver dans les réglages de lecture, sous Audio. En HDMI, le mixage arrive sans perte à votre ampli."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD i DTS zapisi s objektnim zvukom sada mogu zadržati visinske kanale: Sodalite ih na uređaju renderira u miks 7.1.4 i bira takav zapis na vašem jeziku kada ga film ima. Uključeno prema zadanim postavkama, isključite u postavkama reprodukcije pod Zvuk."
+            "value" : "TrueHD i DTS zapisi s objektnim zvukom sada mogu zadržati visinske kanale: Sodalite ih na uređaju renderira u miks 9.1.6 i bira takav zapis na vašem jeziku kada ga film ima. Uključeno prema zadanim postavkama, isključite u postavkama reprodukcije pod Zvuk. Preko HDMI-ja miks stiže do vašeg prijemnika bez gubitaka."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok mostantól megtarthatják magassági csatornáikat: a Sodalite az eszközön 7.1.4-es keverékké rendereli őket, és ilyen sávot választ az Ön nyelvén, ha a filmben van. Alapértelmezésben be van kapcsolva, a lejátszási beállítások Hang részében kapcsolható ki."
+            "value" : "Az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok mostantól megtarthatják magassági csatornáikat: a Sodalite az eszközön 9.1.6-es keverékké rendereli őket, és ilyen sávot választ az Ön nyelvén, ha a filmben van. Alapértelmezésben be van kapcsolva, a lejátszási beállítások Hang részében kapcsolható ki. HDMI-n a keverék veszteségmentesen jut el az erősítőhöz."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le tracce TrueHD e DTS con audio a oggetti ora possono mantenere i canali di altezza: Sodalite ne esegue il rendering sul dispositivo in un mix 7.1.4 e sceglie una traccia simile nella tua lingua quando un film ne ha una. Attivo per impostazione predefinita, disattivalo nelle impostazioni di riproduzione, sezione Audio."
+            "value" : "Le tracce TrueHD e DTS con audio a oggetti ora possono mantenere i canali di altezza: Sodalite ne esegue il rendering sul dispositivo in un mix 9.1.6 e sceglie una traccia simile nella tua lingua quando un film ne ha una. Attivo per impostazione predefinita, disattivalo nelle impostazioni di riproduzione, sezione Audio. Via HDMI il mix arriva al ricevitore senza perdita."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックでハイトチャンネルを保持できるようになりました。Sodalite がデバイス上で 7.1.4 ミックスにレンダリングし、映画にあればあなたの言語のそのようなトラックを選びます。デフォルトはオンです。再生設定の「オーディオ」でオフにできます。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックでハイトチャンネルを保持できるようになりました。Sodalite がデバイス上で 9.1.6 ミックスにレンダリングし、映画にあればあなたの言語のそのようなトラックを選びます。デフォルトはオンです。再生設定の「オーディオ」でオフにできます。HDMI 経由ではミックスがロスレスでレシーバーに届きます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙이 이제 높이 채널을 유지할 수 있습니다. Sodalite가 기기에서 7.1.4 믹스로 렌더링하고, 영화에 있으면 사용자 언어의 해당 트랙을 선택합니다. 기본값은 켜짐이며, 재생 설정의 오디오에서 끌 수 있습니다."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙이 이제 높이 채널을 유지할 수 있습니다. Sodalite가 기기에서 9.1.6 믹스로 렌더링하고, 영화에 있으면 사용자 언어의 해당 트랙을 선택합니다. 기본값은 켜짐이며, 재생 설정의 오디오에서 끌 수 있습니다. HDMI로는 믹스가 무손실로 리시버에 전달됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD- og DTS-spor med objektlyd kan nå beholde høydekanalene: Sodalite rendrer dem på enheten til en 7.1.4-miks og velger et slikt spor på ditt språk når en film har et. På som standard, slå den av i avspillingsinnstillingene under Lyd."
+            "value" : "TrueHD- og DTS-spor med objektlyd kan nå beholde høydekanalene: Sodalite rendrer dem på enheten til en 9.1.6-miks og velger et slikt spor på ditt språk når en film har et. På som standard, slå den av i avspillingsinnstillingene under Lyd. Via HDMI når miksen mottakeren din tapsfritt."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD- en DTS-sporen met objectaudio kunnen nu hun hoogtekanalen behouden: Sodalite rendert ze op het apparaat tot een 7.1.4-mix en kiest zo’n spoor in jouw taal als een film er een heeft. Standaard aan, zet het uit in de afspeelinstellingen onder Audio."
+            "value" : "TrueHD- en DTS-sporen met objectaudio kunnen nu hun hoogtekanalen behouden: Sodalite rendert ze op het apparaat tot een 9.1.6-mix en kiest zo’n spoor in jouw taal als een film er een heeft. Standaard aan, zet het uit in de afspeelinstellingen onder Audio. Via HDMI komt de mix verliesvrij bij je receiver aan."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ścieżki TrueHD i DTS z dźwiękiem obiektowym mogą teraz zachować kanały wysokości: Sodalite renderuje je na urządzeniu do miksu 7.1.4 i wybiera taką ścieżkę w Twoim języku, jeśli film ją ma. Domyślnie włączone, wyłączysz je w ustawieniach odtwarzania w sekcji Audio."
+            "value" : "Ścieżki TrueHD i DTS z dźwiękiem obiektowym mogą teraz zachować kanały wysokości: Sodalite renderuje je na urządzeniu do miksu 9.1.6 i wybiera taką ścieżkę w Twoim języku, jeśli film ją ma. Domyślnie włączone, wyłączysz je w ustawieniach odtwarzania w sekcji Audio. Przez HDMI miks trafia do amplitunera bezstratnie."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Faixas TrueHD e DTS com áudio de objetos agora podem manter os canais de altura: o Sodalite os renderiza no dispositivo em uma mixagem 7.1.4 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Ativado por padrão, desative nos ajustes de reprodução, em Áudio."
+            "value" : "Faixas TrueHD e DTS com áudio de objetos agora podem manter os canais de altura: o Sodalite os renderiza no dispositivo em uma mixagem 9.1.6 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Ativado por padrão, desative nos ajustes de reprodução, em Áudio. Via HDMI, a mixagem chega ao seu receiver sem perdas."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As faixas TrueHD e DTS com áudio de objetos podem agora manter os canais de altura: o Sodalite renderiza-os no dispositivo numa mistura 7.1.4 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Ativado por omissão, desative nas definições de reprodução, em Áudio."
+            "value" : "As faixas TrueHD e DTS com áudio de objetos podem agora manter os canais de altura: o Sodalite renderiza-os no dispositivo numa mistura 9.1.6 e escolhe uma faixa assim no seu idioma quando o filme tem uma. Ativado por omissão, desative nas definições de reprodução, em Áudio. Via HDMI, a mistura chega ao seu recetor sem perdas."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pistele TrueHD și DTS cu audio pe obiecte își pot păstra acum canalele de înălțime: Sodalite le randează pe dispozitiv într-un mix 7.1.4 și alege o astfel de pistă în limba ta când filmul are una. Activat implicit, îl dezactivezi în setările de redare, la Audio."
+            "value" : "Pistele TrueHD și DTS cu audio pe obiecte își pot păstra acum canalele de înălțime: Sodalite le randează pe dispozitiv într-un mix 9.1.6 și alege o astfel de pistă în limba ta când filmul are una. Activat implicit, îl dezactivezi în setările de redare, la Audio. Prin HDMI, mixul ajunge la receiver fără pierderi."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дорожки TrueHD и DTS с объектным звуком теперь могут сохранять высотные каналы: Sodalite рендерит их на устройстве в микс 7.1.4 и выбирает такую дорожку на вашем языке, если она есть в фильме. По умолчанию включено, отключается в настройках воспроизведения в разделе «Аудио»."
+            "value" : "Дорожки TrueHD и DTS с объектным звуком теперь могут сохранять высотные каналы: Sodalite рендерит их на устройстве в микс 9.1.6 и выбирает такую дорожку на вашем языке, если она есть в фильме. По умолчанию включено, отключается в настройках воспроизведения в разделе «Аудио». Через HDMI микс приходит на ресивер без потерь."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stopy TrueHD a DTS s objektovým zvukom si teraz môžu zachovať výškové kanály: Sodalite ich na zariadení vykreslí do mixu 7.1.4 a zvolí takú stopu vo vašom jazyku, ak ju film má. Predvolene zapnuté, vypnete v nastaveniach prehrávania v časti Zvuk."
+            "value" : "Stopy TrueHD a DTS s objektovým zvukom si teraz môžu zachovať výškové kanály: Sodalite ich na zariadení vykreslí do mixu 9.1.6 a zvolí takú stopu vo vašom jazyku, ak ju film má. Predvolene zapnuté, vypnete v nastaveniach prehrávania v časti Zvuk. Cez HDMI dorazí mix do prijímača bezstratovo."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TrueHD- och DTS-spår med objektljud kan nu behålla sina höjdkanaler: Sodalite renderar dem på enheten till en 7.1.4-mix och väljer ett sådant spår på ditt språk när en film har ett. På som standard, stäng av den i uppspelningsinställningarna under Ljud."
+            "value" : "TrueHD- och DTS-spår med objektljud kan nu behålla sina höjdkanaler: Sodalite renderar dem på enheten till en 9.1.6-mix och väljer ett sådant spår på ditt språk när en film har ett. På som standard, stäng av den i uppspelningsinställningarna under Ljud. Via HDMI når mixen din receiver förlustfritt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçaları artık yükseklik kanallarını koruyabilir: Sodalite bunları cihazda 7.1.4 miksine dönüştürür ve filmde varsa dilinizde böyle bir parça seçer. Varsayılan olarak açıktır, oynatma ayarlarında Ses bölümünden kapatabilirsiniz."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçaları artık yükseklik kanallarını koruyabilir: Sodalite bunları cihazda 9.1.6 miksine dönüştürür ve filmde varsa dilinizde böyle bir parça seçer. Varsayılan olarak açıktır, oynatma ayarlarında Ses bölümünden kapatabilirsiniz. HDMI üzerinden miks, alıcınıza kayıpsız ulaşır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Доріжки TrueHD і DTS з об’єктним звуком тепер можуть зберігати висотні канали: Sodalite рендерить їх на пристрої у мікс 7.1.4 і вибирає таку доріжку вашою мовою, якщо вона є у фільмі. Типово ввімкнено, вимикається в налаштуваннях відтворення в розділі «Аудіо»."
+            "value" : "Доріжки TrueHD і DTS з об’єктним звуком тепер можуть зберігати висотні канали: Sodalite рендерить їх на пристрої у мікс 9.1.6 і вибирає таку доріжку вашою мовою, якщо вона є у фільмі. Типово ввімкнено, вимикається в налаштуваннях відтворення в розділі «Аудіо». Через HDMI мікс надходить на ресивер без втрат."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "带对象音频的 TrueHD 和 DTS 音轨现在可以保留高度声道：Sodalite 在设备上将其渲染为 7.1.4 混音，并在影片有此类音轨时选择你所用语言的音轨。默认开启，可在播放设置的“音频”中关闭。"
+            "value" : "带对象音频的 TrueHD 和 DTS 音轨现在可以保留高度声道：Sodalite 在设备上将其渲染为 9.1.6 混音，并在影片有此类音轨时选择你所用语言的音轨。默认开启，可在播放设置的“音频”中关闭。通过 HDMI，混音以无损方式送达你的功放。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "帶物件音訊的 TrueHD 與 DTS 音軌現在可以保留高度聲道：Sodalite 在裝置上將其算繪為 7.1.4 混音，並在影片有此類音軌時選擇你所用語言的音軌。預設開啟，可在播放設定的「音訊」中關閉。"
+            "value" : "帶物件音訊的 TrueHD 與 DTS 音軌現在可以保留高度聲道：Sodalite 在裝置上將其算繪為 9.1.6 混音，並在影片有此類音軌時選擇你所用語言的音軌。預設開啟，可在播放設定的「音訊」中關閉。透過 HDMI，混音以無損方式送達你的擴大機。"
           }
         }
       }
@@ -229782,157 +229782,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 7.1.4 a zvolí takovou stopu ve vašem jazyce. Ztrátové. Vypnuto přehrává podle nastavení výše."
+            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 9.1.6 a zvolí takovou stopu ve vašem jazyce. Bezztrátové přes HDMI, ztrátové přes AirPlay. Vypnuto přehrává podle nastavení výše."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 7.1.4-mix og vælger et sådant spor på dit sprog. Tabsgivende. Fra afspiller dem efter indstillingen ovenfor."
+            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 9.1.6-mix og vælger et sådant spor på dit sprog. Tabsfri via HDMI, tabsgivende via AirPlay. Fra afspiller dem efter indstillingen ovenfor."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 7.1.4-Mix und wählt eine solche Spur in deiner Sprache. Verlustbehaftet. Aus: Wiedergabe nach der Einstellung darüber."
+            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 9.1.6-Mix und wählt eine solche Spur in deiner Sprache. Verlustfrei über HDMI, verlustbehaftet über AirPlay. Aus: Wiedergabe nach der Einstellung darüber."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 7.1.4 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Με απώλειες. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση."
+            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 9.1.6 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Χωρίς απώλειες μέσω HDMI, με απώλειες μέσω AirPlay. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 7.1.4 mix, and picks such a track in your language. Lossy. Off plays them through the setting above."
+            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 9.1.6 mix, and picks such a track in your language. Lossless over HDMI, lossy over AirPlay. Off plays them through the setting above."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 7.1.4 y elige una pista así en tu idioma. Con pérdida. Desactivado, se reproducen según el ajuste anterior."
+            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 9.1.6 y elige una pista así en tu idioma. Sin pérdida por HDMI, con pérdida por AirPlay. Desactivado, se reproducen según el ajuste anterior."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 7.1.4-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviöllinen. Pois päältä toistaa ne yllä olevan asetuksen mukaan."
+            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 9.1.6-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviötön HDMI:n kautta, häviöllinen AirPlayn kautta. Pois päältä toistaa ne yllä olevan asetuksen mukaan."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 7.1.4 et choisit une telle piste dans votre langue. Avec perte. Désactivé, elles sont lues selon le réglage ci-dessus."
+            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 9.1.6 et choisit une telle piste dans votre langue. Sans perte en HDMI, avec perte en AirPlay. Désactivé, elles sont lues selon le réglage ci-dessus."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 7.1.4 i bira takav zapis na vašem jeziku. S gubicima. Isključeno reproducira ih prema postavci iznad."
+            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 9.1.6 i bira takav zapis na vašem jeziku. Bez gubitaka preko HDMI-ja, s gubicima preko AirPlaya. Isključeno reproducira ih prema postavci iznad."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ezen az eszközön 7.1.4-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. Veszteséges. Kikapcsolva a fenti beállítás szerint szólnak."
+            "value" : "Ezen az eszközön 9.1.6-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. HDMI-n veszteségmentes, AirPlay-en veszteséges. Kikapcsolva a fenti beállítás szerint szólnak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 7.1.4 e sceglie una traccia simile nella tua lingua. Con perdita. Se disattivato, vengono riprodotte secondo l’impostazione sopra."
+            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 9.1.6 e sceglie una traccia simile nella tua lingua. Senza perdita via HDMI, con perdita via AirPlay. Se disattivato, vengono riprodotte secondo l’impostazione sopra."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 7.1.4 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。非可逆。オフの場合は上の設定に従って再生します。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 9.1.6 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。HDMI ではロスレス、AirPlay では非可逆。オフの場合は上の設定に従って再生します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 7.1.4 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. 손실 압축. 끄면 위 설정에 따라 재생됩니다."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 9.1.6 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. HDMI에서는 무손실, AirPlay에서는 손실 압축. 끄면 위 설정에 따라 재생됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 7.1.4-miks og velger et slikt spor på ditt språk. Tapsbasert. Av spiller dem etter innstillingen over."
+            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 9.1.6-miks og velger et slikt spor på ditt språk. Tapsfritt via HDMI, tapsbasert via AirPlay. Av spiller dem etter innstillingen over."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 7.1.4-mix en kiest zo’n spoor in jouw taal. Met verlies. Uit speelt ze af volgens de instelling hierboven."
+            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 9.1.6-mix en kiest zo’n spoor in jouw taal. Verliesvrij via HDMI, met verlies via AirPlay. Uit speelt ze af volgens de instelling hierboven."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 7.1.4 i wybiera taką ścieżkę w Twoim języku. Stratne. Wyłączone odtwarza je według ustawienia powyżej."
+            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 9.1.6 i wybiera taką ścieżkę w Twoim języku. Bezstratne przez HDMI, stratne przez AirPlay. Wyłączone odtwarza je według ustawienia powyżej."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 7.1.4 e escolhe uma faixa assim no seu idioma. Com perdas. Desativado, elas tocam conforme o ajuste acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, elas tocam conforme o ajuste acima."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 7.1.4 e escolhe uma faixa assim no seu idioma. Com perdas. Desativado, são reproduzidas conforme a definição acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, são reproduzidas conforme a definição acima."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 7.1.4 și alege o astfel de pistă în limba ta. Cu pierderi. Dezactivat, sunt redate conform setării de mai sus."
+            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 9.1.6 și alege o astfel de pistă în limba ta. Fără pierderi prin HDMI, cu pierderi prin AirPlay. Dezactivat, sunt redate conform setării de mai sus."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 7.1.4 и выбирает такую дорожку на вашем языке. С потерями. Выключено: воспроизведение по настройке выше."
+            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 9.1.6 и выбирает такую дорожку на вашем языке. Без потерь через HDMI, с потерями через AirPlay. Выключено: воспроизведение по настройке выше."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 7.1.4 a zvolí takú stopu vo vašom jazyku. Stratové. Vypnuté prehráva podľa nastavenia vyššie."
+            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 9.1.6 a zvolí takú stopu vo vašom jazyku. Bezstratové cez HDMI, stratové cez AirPlay. Vypnuté prehráva podľa nastavenia vyššie."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 7.1.4-mix och väljer ett sådant spår på ditt språk. Förstörande. Av spelar dem enligt inställningen ovan."
+            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 9.1.6-mix och väljer ett sådant spår på ditt språk. Förlustfritt via HDMI, förstörande via AirPlay. Av spelar dem enligt inställningen ovan."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 7.1.4 miksine dönüştürür ve dilinizde böyle bir parça seçer. Kayıplı. Kapalıyken yukarıdaki ayara göre çalınır."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 9.1.6 miksine dönüştürür ve dilinizde böyle bir parça seçer. HDMI'da kayıpsız, AirPlay'de kayıplı. Kapalıyken yukarıdaki ayara göre çalınır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 7.1.4 і вибирає таку доріжку вашою мовою. Із втратами. Вимкнено: відтворення за налаштуванням вище."
+            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 9.1.6 і вибирає таку доріжку вашою мовою. Без втрат через HDMI, із втратами через AirPlay. Вимкнено: відтворення за налаштуванням вище."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 7.1.4 混音，并选择你所用语言的此类音轨。有损。关闭时按上方设置播放。"
+            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 9.1.6 混音，并选择你所用语言的此类音轨。通过 HDMI 无损，通过 AirPlay 有损。关闭时按上方设置播放。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 7.1.4 混音，並選擇你所用語言的此類音軌。有損。關閉時依上方設定播放。"
+            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 9.1.6 混音，並選擇你所用語言的此類音軌。透過 HDMI 無損，透過 AirPlay 有損。關閉時依上方設定播放。"
           }
         }
       }
