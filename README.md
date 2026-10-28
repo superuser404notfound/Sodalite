@@ -42,8 +42,8 @@ It brings **Jellyfin and Seerr together in the same UI**. Watch what's already o
 
 <table>
   <tr>
-    <td width="50%"><a href=".github/media/screenshot-home.jpg"><img src=".github/media/screenshot-home.jpg" alt="Home: Continue Watching, Next Up and Favorites rows"></a></td>
-    <td width="50%"><a href=".github/media/screenshot-tv.jpg"><img src=".github/media/screenshot-tv.jpg" alt="Live TV: On Now and Series rows in the overview tab"></a></td>
+    <td width="50%"><a href=".github/media/screenshot-home.jpg"><img src=".github/media/screenshot-home.jpg" alt="Home: featured hero and Continue Watching"></a></td>
+    <td width="50%"><a href=".github/media/screenshot-tv.jpg"><img src=".github/media/screenshot-tv.jpg" alt="Live TV: program guide with favorites and categories"></a></td>
   </tr>
   <tr>
     <td align="center"><b>Home</b> (Apple TV)</td>
@@ -51,20 +51,20 @@ It brings **Jellyfin and Seerr together in the same UI**. Watch what's already o
   </tr>
   <tr>
     <td width="50%"><a href=".github/media/screenshot-catalog.jpg"><img src=".github/media/screenshot-catalog.jpg" alt="Catalog: Seerr Discover with Trending and Upcoming Movies"></a></td>
-    <td width="50%"><a href=".github/media/screenshot-music.jpg"><img src=".github/media/screenshot-music.jpg" alt="Music: album track list with play and shuffle"></a></td>
+    <td width="50%"><a href=".github/media/screenshot-detail.jpg"><img src=".github/media/screenshot-detail.jpg" alt="Detail page: backdrop, ratings, format badges and Play"></a></td>
   </tr>
   <tr>
     <td align="center"><b>Catalog</b> (Apple TV)</td>
-    <td align="center"><b>Music</b> (Apple TV)</td>
+    <td align="center"><b>Detail</b> (Apple TV)</td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="19%"><a href=".github/media/ios-home.jpg"><img src=".github/media/ios-home.jpg" alt="iPhone: Home with Continue Watching in portrait"></a></td>
-    <td width="19%"><a href=".github/media/ios-detail.jpg"><img src=".github/media/ios-detail.jpg" alt="iPhone: movie detail page"></a></td>
-    <td width="31%"><a href=".github/media/ipad-home.jpg"><img src=".github/media/ipad-home.jpg" alt="iPad: Home with Continue Watching and Next Up"></a></td>
-    <td width="31%"><a href=".github/media/ipad-catalog.jpg"><img src=".github/media/ipad-catalog.jpg" alt="iPad: Seerr Catalog with Discover rows"></a></td>
+    <td width="13%"><a href=".github/media/ios-home.jpg"><img src=".github/media/ios-home.jpg" alt="iPhone: Home with Continue Watching in portrait"></a></td>
+    <td width="13%"><a href=".github/media/ios-detail.jpg"><img src=".github/media/ios-detail.jpg" alt="iPhone: movie detail page"></a></td>
+    <td width="37%"><a href=".github/media/ipad-home.jpg"><img src=".github/media/ipad-home.jpg" alt="iPad: Home with featured hero and Continue Watching"></a></td>
+    <td width="37%"><a href=".github/media/ipad-catalog.jpg"><img src=".github/media/ipad-catalog.jpg" alt="iPad: Seerr Catalog with Discover rows"></a></td>
   </tr>
   <tr>
     <td align="center"><b>Home</b> (iPhone)</td>
