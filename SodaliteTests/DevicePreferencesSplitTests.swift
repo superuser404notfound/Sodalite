@@ -98,7 +98,7 @@ struct DevicePreferencesSplitTests {
         let bob = PlaybackPreferences(store: defaults, scope: "s:bob", device: device)
 
         #expect(device.trueHDAtmosHeights)
-        #expect(alice.objectAudioRendering == .apac(.l714))
+        #expect(alice.objectAudioRendering == .render(.l916))
 
         alice.trueHDAtmosHeights = false
 
