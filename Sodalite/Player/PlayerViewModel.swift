@@ -2882,9 +2882,17 @@ final class PlayerViewModel {
             audioTracks: player.audioTracks
         )
 
+        // AetherEngine#919: with nothing remembered, the system's Audio Descriptions setting swaps the
+        // engine's pick for the described track of the same language.
+        let audioTrackID = plan.audioTrackID ?? (AudioDescriptionPreference.isPreferred
+            ? TrackSelectionMatcher.describedAudio(
+                for: player.audioTracks.first { $0.id == player.activeAudioTrackIndex },
+                in: player.audioTracks)?.id
+            : nil)
+
         // Raw engine select, not selectAudioTrack: the wrapper re-runs the automatic
         // subtitle resolution, which would overwrite the remembered subtitle below.
-        if let audioTrackID = plan.audioTrackID, audioTrackID != player.activeAudioTrackIndex {
+        if let audioTrackID, audioTrackID != player.activeAudioTrackIndex {
             markRebuildKeepsPicture()
             player.selectAudioTrack(index: audioTrackID)
         }

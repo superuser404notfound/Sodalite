@@ -9,7 +9,7 @@ struct TrackSignature: Codable, Equatable, Sendable {
     var isForced: Bool
     var isExternal: Bool
     var codec: String?
-    /// Normalized track role: commentary | signs | songs | sdh | forced, else nil.
+    /// Normalized track role: commentary | described | signs | songs | sdh | forced, else nil.
     var descriptor: String?
     /// Audio only (2 = stereo, 6 = 5.1); nil for subtitles.
     var channels: Int?
@@ -68,10 +68,15 @@ enum TrackSelectionMatcher {
             isForced: false,
             isExternal: false,
             codec: track.codec.lowercased(),
-            descriptor: descriptor(title: track.name, isCommentary: track.isCommentary),
+            descriptor: track.isVisualImpaired
+                ? describedDescriptor
+                : descriptor(title: track.name, isCommentary: track.isCommentary),
             channels: track.channels
         )
     }
+
+    /// AetherEngine#919: an audio description, from the container's disposition only.
+    static let describedDescriptor = "described"
 
     /// Same vocabulary the subtitle deduping already uses, collapsed to one canonical token
     /// so "German (SDH)" and "Deutsch SDH" compare equal across episodes.
@@ -107,8 +112,14 @@ enum TrackSelectionMatcher {
              })
     }
 
+    /// An audio description and the programme mix are different choices, like forced and full
+    /// subtitles, so the descriptor is a hard filter on that axis: neither ever adopts the other.
     static func matchAudio(_ signature: TrackSignature, in tracks: [TrackInfo]) -> TrackInfo? {
-        best(in: tracks.filter { languageMatches(signature.language, $0.language) },
+        let wantsDescribed = signature.descriptor == describedDescriptor
+        let candidates = tracks.filter {
+            languageMatches(signature.language, $0.language) && $0.isVisualImpaired == wantsDescribed
+        }
+        return best(in: candidates,
              index: { $0.id },
              score: { track in
                  let candidate = audioSignature(track)
@@ -118,6 +129,16 @@ enum TrackSelectionMatcher {
                  if candidate.codec == signature.codec { score += 1 }
                  return score
              })
+    }
+
+    /// The system's Audio Descriptions setting, applied where nothing remembered decided the audio:
+    /// the audio description in the language the engine picked, or nil when the pick already is one
+    /// or that language has none. Never crosses a language.
+    static func describedAudio(for active: TrackInfo?, in tracks: [TrackInfo]) -> TrackInfo? {
+        guard let active, !active.isVisualImpaired else { return nil }
+        return best(in: tracks.filter { $0.isVisualImpaired && languageMatches(active.language, $0.language) },
+                    index: { $0.id },
+                    score: { $0.channels == active.channels ? 1 : 0 })
     }
 
     // MARK: - Plan

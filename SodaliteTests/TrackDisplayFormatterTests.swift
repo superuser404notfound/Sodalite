@@ -101,4 +101,13 @@ struct TrackDisplayFormatterTests {
         let track = audio(language: nil, codec: "", channels: 0, name: "Commentary")
         #expect(TrackDisplayFormatter.shortName(for: track) == "Commentary")
     }
+
+    @Test("an audio description says so in the menu row")
+    func describedInMenuRow() {
+        let described = TrackInfo(id: 1, name: "a", codec: "ac3", language: "en", channels: 6, isDefault: false,
+                                  isVisualImpaired: true)
+        let suffix = String(localized: "player.track.audioDescription", defaultValue: "Audio Description")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: described).hasSuffix(suffix))
+        #expect(!TrackDisplayFormatter.audioDisplayName(for: audio(language: "en")).hasSuffix(suffix))
+    }
 }

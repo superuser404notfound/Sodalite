@@ -422,6 +422,12 @@ enum Changelog {
                     "changelog.1_1_0.upcomingRow.body",
                     icon: "calendar.badge.plus"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.audioDescription.title",
+                    "changelog.1_1_0.audioDescription.body",
+                    icon: "speaker.wave.2.bubble.fill"
+                ),
             ]
         ),
         // MARK: 1.0.0

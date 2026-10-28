@@ -28,6 +28,10 @@ enum TrackDisplayFormatter {
             }
         }
 
+        if track.isVisualImpaired {
+            parts.append(String(localized: "player.track.audioDescription", defaultValue: "Audio Description"))
+        }
+
         if parts.isEmpty {
             return String(localized: "player.track.unknown", defaultValue: "Unknown")
         }

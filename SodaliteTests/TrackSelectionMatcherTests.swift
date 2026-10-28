@@ -21,10 +21,10 @@ struct TrackSelectionMatcherTests {
 
     private func audio(id: Int, codec: String = "eac3", lang: String? = "ger",
                        name: String = "German", channels: Int = 6,
-                       commentary: Bool = false) -> TrackInfo {
+                       commentary: Bool = false, described: Bool = false) -> TrackInfo {
         TrackInfo(id: id, name: name, codec: codec, language: lang, channels: channels,
                   bitrate: 0, isDefault: false, isForced: false, isHearingImpaired: false,
-                  isCommentary: commentary, isAtmos: false, assHeader: nil)
+                  isCommentary: commentary, isVisualImpaired: described, isAtmos: false, assHeader: nil)
     }
 
     // MARK: - Signatures
@@ -142,6 +142,35 @@ struct TrackSelectionMatcherTests {
         let tracks = [audio(id: 4, channels: 6, commentary: false),
                       audio(id: 5, channels: 2, commentary: true)]
         #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 5)
+    }
+
+    // MARK: - Audio description (AetherEngine#919)
+
+    @Test("a remembered main mix never resolves to an audio description, even one with its channel count")
+    func mainMixNeverAdoptsDescribed() {
+        let signature = TrackSelectionMatcher.audioSignature(audio(id: 1, channels: 6))
+        let tracks = [audio(id: 2, channels: 6, described: true), audio(id: 3, channels: 2)]
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 3)
+    }
+
+    @Test("a remembered audio description resolves to this title's described track or to nothing")
+    func describedOnlyAdoptsDescribed() {
+        let signature = TrackSelectionMatcher.audioSignature(audio(id: 1, channels: 6, described: true))
+        #expect(signature.descriptor == TrackSelectionMatcher.describedDescriptor)
+        let tracks = [audio(id: 2, channels: 6), audio(id: 3, channels: 2, described: true)]
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 3)
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: [audio(id: 2, channels: 6)]) == nil)
+    }
+
+    @Test("the system setting takes the described track of the picked language, never another language's")
+    func systemSettingStaysInLanguage() {
+        let tracks = [audio(id: 1, lang: "eng", channels: 6), audio(id: 2, lang: "ger", channels: 6, described: true),
+                      audio(id: 3, lang: "eng", channels: 2, described: true),
+                      audio(id: 4, lang: "eng", channels: 6, described: true)]
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[0], in: tracks)?.id == 4)
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[3], in: tracks) == nil)
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[0], in: Array(tracks.prefix(2))) == nil)
+        #expect(TrackSelectionMatcher.describedAudio(for: nil, in: tracks) == nil)
     }
 
     // MARK: - Plan

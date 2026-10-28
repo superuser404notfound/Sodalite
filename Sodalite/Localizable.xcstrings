@@ -67241,6 +67241,328 @@
         }
       }
     },
+    "changelog.1_1_0.audioDescription.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopy se zvukovým popisem jsou v nabídce zvuku označené. Když je v systémových nastaveních Zpřístupnění zapnutý zvukový popis, film začne se svým zvukovým popisem a volba pro něj či proti němu platí i pro další díl."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spor med synstolkning er markeret i lydmenuen. Når Synstolkning er slået til i systemets indstillinger for Tilgængelighed, starter en film med sin synstolkning, og et valg for eller imod den følger med til næste afsnit."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodeskriptions-Spuren sind im Audiomenü gekennzeichnet. Sind Audiobeschreibungen in den Bedienungshilfen des Systems eingeschaltet, startet ein Film mit seiner Audiodeskription, und die Wahl für oder gegen sie gilt auch für die nächste Folge."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα κομμάτια ηχητικής περιγραφής επισημαίνονται στο μενού ήχου. Με τις Ηχητικές περιγραφές ενεργές στις ρυθμίσεις Προσβασιμότητας του συστήματος, μια ταινία ξεκινά με την ηχητική της περιγραφή, και η επιλογή υπέρ ή κατά αυτής ισχύει και για το επόμενο επεισόδιο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio description tracks are marked in the audio menu. With Audio Descriptions turned on in the system's Accessibility settings, a film starts on its audio description, and a pick for or against one carries over to the next episode."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las pistas de audiodescripción aparecen marcadas en el menú de audio. Con la audiodescripción activada en los ajustes de Accesibilidad del sistema, una película empieza con su audiodescripción, y la elección a favor o en contra se mantiene en el siguiente episodio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuvailutulkkausraidat on merkitty ääniraitavalikkoon. Kun kuvailutulkkaus on päällä järjestelmän Käyttöapu-asetuksissa, elokuva alkaa kuvailutulkkauksella, ja valinta sen puolesta tai sitä vastaan säilyy seuraavaan jaksoon."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pistes d’audiodescription sont signalées dans le menu audio. Lorsque l’audiodescription est activée dans les réglages d’Accessibilité du système, un film démarre sur son audiodescription, et le choix pour ou contre elle est conservé pour l’épisode suivant."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapisi sa zvučnim opisom označeni su u izborniku zvuka. Kad je zvučni opis uključen u postavkama Pristupačnosti sustava, film počinje sa svojim zvučnim opisom, a odabir za ili protiv njega vrijedi i za sljedeću epizodu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A hangos leírást tartalmazó sávok jelölve vannak a hangmenüben. Ha a rendszer Kisegítő lehetőségek beállításaiban be van kapcsolva a hangos leírás, a film a hangos leírásával indul, és a mellette vagy ellene hozott döntés a következő epizódra is érvényes."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le tracce con audiodescrizione sono contrassegnate nel menu audio. Con l’audiodescrizione attiva nelle impostazioni di Accessibilità del sistema, un film parte con la sua audiodescrizione, e la scelta a favore o contro vale anche per l’episodio successivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声解説トラックはオーディオメニューで区別して表示されます。システムのアクセシビリティ設定で音声解説がオンのとき、映画は音声解説で始まり、音声解説を選ぶかどうかの選択は次のエピソードにも引き継がれます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화면 해설 트랙이 오디오 메뉴에 표시됩니다. 시스템 손쉬운 사용 설정에서 화면 해설을 켜면 영화가 화면 해설로 시작되며, 화면 해설을 고르거나 고르지 않은 선택은 다음 에피소드에도 이어집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spor med synstolking er merket i lydmenyen. Når Synstolking er slått på i systemets innstillinger for Tilgjengelighet, starter en film med synstolkingen, og et valg for eller mot den følger med til neste episode."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescriptiesporen zijn gemarkeerd in het audiomenu. Met Audiodescriptie aan in de Toegankelijkheidsinstellingen van het systeem start een film met zijn audiodescriptie, en een keuze voor of tegen die track geldt ook voor de volgende aflevering."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ścieżki z audiodeskrypcją są oznaczone w menu dźwięku. Gdy audiodeskrypcja jest włączona w systemowych ustawieniach Dostępności, film zaczyna się od audiodeskrypcji, a wybór za nią lub przeciw niej przechodzi na następny odcinek."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As faixas de audiodescrição aparecem marcadas no menu de áudio. Com a Audiodescrição ativada nos ajustes de Acessibilidade do sistema, um filme começa na sua audiodescrição, e a escolha a favor ou contra ela vale também para o próximo episódio."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As faixas de audiodescrição aparecem assinaladas no menu de áudio. Com a Audiodescrição ativada nas definições de Acessibilidade do sistema, um filme começa na sua audiodescrição, e a escolha a favor ou contra ela mantém-se no episódio seguinte."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pistele cu audiodescriere sunt marcate în meniul audio. Cu audiodescrierea activată în setările de Accesibilitate ale sistemului, un film pornește cu audiodescrierea sa, iar alegerea pentru sau împotriva ei se păstrează și la episodul următor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дорожки с тифлокомментарием отмечены в меню звука. Если в настройках универсального доступа системы включены аудиоописания, фильм начинается с тифлокомментария, а выбор за или против него сохраняется и для следующей серии."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopy so zvukovým opisom sú v ponuke zvuku označené. Keď je v systémových nastaveniach Prístupnosti zapnutý zvukový opis, film sa spustí so svojím zvukovým opisom a voľba za neho či proti nemu platí aj pre ďalšiu epizódu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spår med syntolkning är markerade i ljudmenyn. När Syntolkning är på i systemets inställningar för Hjälpmedel startar en film med sin syntolkning, och ett val för eller emot den följer med till nästa avsnitt."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesli betimleme parçaları ses menüsünde işaretlenir. Sistemin Erişilebilirlik ayarlarında Sesli Betimleme açıkken film sesli betimlemesiyle başlar, onu seçip seçmeme tercihi de sonraki bölüme taşınır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доріжки з аудіоописом позначено в меню звуку. Якщо в системних налаштуваннях Доступності ввімкнено аудіоописи, фільм починається з аудіоопису, а вибір на користь нього чи проти зберігається й для наступної серії."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像音轨会在音频菜单中标注。在系统的辅助功能设置中打开口述影像后，影片会以口述影像音轨开始播放，选择或不选择口述影像的决定也会沿用到下一集。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像音軌會在音訊選單中標示。在系統的輔助使用設定中開啟口述影像後，影片會以口述影像音軌開始播放，選擇或不選擇口述影像的決定也會沿用到下一集。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.audioDescription.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvukový popis"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synstolkning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodeskription"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ηχητική περιγραφή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio description"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescripción"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuvailutulkkaus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescription"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvučni opis"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangos leírás"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrizione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声解説"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화면 해설"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synstolking"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescriptie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodeskrypcja"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrição"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrição"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescriere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тифлокомментарий"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvukový opis"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syntolkning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesli betimleme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аудіоопис"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.audioSwitchPicture.body" : {
       "comment" : "What's New 1.1.0: body for the audio switch that holds the picture instead of going black.",
       "extractionState" : "manual",
@@ -173622,6 +173944,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "關閉"
+          }
+        }
+      }
+    },
+    "player.track.audioDescription" : {
+      "comment" : "Audio track menu suffix for an audio description track (narration of the picture for blind and low-vision viewers).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvukový popis"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synstolkning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodeskription"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ηχητική περιγραφή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Description"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescripción"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuvailutulkkaus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescription"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvučni opis"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangos leírás"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrizione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声解説"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화면 해설"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synstolking"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescriptie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodeskrypcja"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrição"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescrição"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodescriere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тифлокомментарий"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvukový opis"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syntolkning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesli Betimleme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аудіоопис"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "口述影像"
           }
         }
       }
