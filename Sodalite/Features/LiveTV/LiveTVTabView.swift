@@ -81,6 +81,10 @@ struct LiveTVTabView: View {
         return all.first { $0.serverID == chosenServerID } ?? all.first { $0.isActive }
     }
 
+    private var policy: LiveTVPolicy {
+        LiveTVPolicy(isActiveSource: source?.isActive ?? true, activeUser: appState.activeUser, sessionUser: sessionUser)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             headerRow
@@ -173,8 +177,7 @@ struct LiveTVTabView: View {
             // Every view below holds its model in @State, so a new server or user needs new views,
             // not just new models; the guide's scroll and focus belong to other channels too.
             .id(builtForKey)
-            .environment(\.liveTVPolicy, LiveTVPolicy(
-                isActiveSource: source?.isActive ?? true, activeUser: appState.activeUser, sessionUser: sessionUser))
+            .environment(\.liveTVPolicy, policy)
         }
         .task(id: appState.profileKey) {
             rememberedServerID = dependencies.rememberedLiveTVServerID()
@@ -251,7 +254,8 @@ struct LiveTVTabView: View {
                     userID: source.userID,
                     serverName: source.serverName,
                     preferences: dependencies.playbackPreferences,
-                    directStreamMemory: dependencies.liveDirectStreamMemory
+                    directStreamMemory: dependencies.liveDirectStreamMemory,
+                    canTranscodeAudio: policy.canTranscodeAudio
                 )
                 .allowsHitTesting(false)
             }

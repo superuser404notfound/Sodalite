@@ -30,6 +30,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
         var allowedTags: [String]? = nil
         var blockUnratedItems: [String]? = nil
         var enableVideoPlaybackTranscoding: Bool? = nil
+        var enableAudioPlaybackTranscoding: Bool? = nil
 
         enum CodingKeys: String, CodingKey {
             case isAdministrator = "IsAdministrator"
@@ -41,6 +42,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             case allowedTags = "AllowedTags"
             case blockUnratedItems = "BlockUnratedItems"
             case enableVideoPlaybackTranscoding = "EnableVideoPlaybackTranscoding"
+            case enableAudioPlaybackTranscoding = "EnableAudioPlaybackTranscoding"
         }
 
         /// Every field is optional on the wire: a server that omits one (seen in TestFlight feedback for
@@ -56,6 +58,7 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             allowedTags = try c.decodeIfPresent([String].self, forKey: .allowedTags)
             blockUnratedItems = try c.decodeIfPresent([String].self, forKey: .blockUnratedItems)
             enableVideoPlaybackTranscoding = try c.decodeIfPresent(Bool.self, forKey: .enableVideoPlaybackTranscoding)
+            enableAudioPlaybackTranscoding = try c.decodeIfPresent(Bool.self, forKey: .enableAudioPlaybackTranscoding)
         }
     }
 
@@ -76,6 +79,14 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
     /// True while the policy is unloaded: that is the server default, and the rungs were offered before.
     var canTranscodeVideo: Bool {
         policy?.enableVideoPlaybackTranscoding != false
+    }
+
+    /// Jellyfin's `EnableAudioPlaybackTranscoding`. Without it the server still names
+    /// AudioCodecNotSupported and hands out a TranscodingUrl, but `TryStreamCopy` copies the audio, so
+    /// a live channel whose sound only the server can decode plays silent (Sodalite#100).
+    /// True while the policy is unloaded, like `canTranscodeVideo`.
+    var canTranscodeAudio: Bool {
+        policy?.enableAudioPlaybackTranscoding != false
     }
 
     /// Nothing in the policy keeps library items from this user: every folder, no rating ceiling, no tag

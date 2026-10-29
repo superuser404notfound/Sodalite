@@ -75007,6 +75007,330 @@
         }
       }
     },
+    "changelog.1_1_0.liveAudioPermission.body" : {
+      "comment" : "What's New 1.1.0: live channel needing server audio transcoding now explains the missing permission",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanál, jehož zvuk umí převést jen server, to nyní řekne hned, pokud váš účet Jellyfin nesmí překódovávat zvuk, místo aby přehrál obraz bez zvuku."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En kanal, hvis lyd kun serveren kan konvertere, siger det nu med det samme, når din Jellyfin-konto ikke må omkode lyd, i stedet for at vise et billede uden lyd."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Sender, dessen Ton nur der Server umwandeln kann, sagt das jetzt sofort, wenn dein Jellyfin-Konto keinen Ton transkodieren darf, statt ein stummes Bild zu zeigen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα κανάλι του οποίου τον ήχο μπορεί να μετατρέψει μόνο ο διακομιστής το λέει πλέον αμέσως, όταν ο λογαριασμός σας Jellyfin δεν επιτρέπεται να διακωδικοποιεί ήχο, αντί να δείχνει εικόνα χωρίς ήχο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A channel whose sound only the server can convert now says so straight away when your Jellyfin account may not transcode audio, instead of playing a silent picture."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canal cuyo audio solo puede convertir el servidor ahora lo indica de inmediato cuando tu cuenta de Jellyfin no puede transcodificar audio, en lugar de mostrar una imagen sin sonido."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanava, jonka äänen vain palvelin voi muuntaa, kertoo sen nyt heti, jos Jellyfin-tililläsi ei ole lupaa transkoodata ääntä, eikä näytä kuvaa ilman ääntä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une chaîne dont seul le serveur peut convertir le son le signale désormais immédiatement lorsque votre compte Jellyfin n'est pas autorisé à transcoder l'audio, au lieu d'afficher une image muette."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanal čiji zvuk može pretvoriti samo poslužitelj sada to odmah kaže kada vaš Jellyfin račun ne smije transkodirati zvuk, umjesto da prikaže sliku bez zvuka."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az a csatorna, amelynek hangját csak a szerver tudja átalakítani, most azonnal jelzi ezt, ha a Jellyfin-fiókod nem kódolhat át hangot, ahelyett hogy hang nélküli képet mutatna."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canale il cui audio può essere convertito solo dal server ora lo dice subito quando il tuo account Jellyfin non può transcodificare l'audio, invece di mostrare un'immagine muta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーでしか音声を変換できないチャンネルは、Jellyfin アカウントに音声のトランスコードが許可されていない場合、無音の映像を再生せずにすぐその旨を表示するようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버에서만 소리를 변환할 수 있는 채널은 Jellyfin 계정에 오디오 트랜스코딩 권한이 없으면 소리 없는 화면을 재생하지 않고 바로 알려 줍니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En kanal der bare serveren kan konvertere lyden, sier nå fra med en gang når Jellyfin-kontoen din ikke får omkode lyd, i stedet for å vise et bilde uten lyd."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een kanaal waarvan alleen de server de audio kan omzetten, meldt dat nu meteen als je Jellyfin-account geen audio mag transcoderen, in plaats van een beeld zonder geluid te tonen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanał, którego dźwięk może przekonwertować tylko serwer, od razu to zgłasza, gdy Twoje konto Jellyfin nie może transkodować dźwięku, zamiast pokazywać obraz bez dźwięku."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um canal cujo áudio só o servidor consegue converter agora avisa na hora quando sua conta do Jellyfin não pode transcodificar áudio, em vez de exibir uma imagem sem som."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um canal cujo áudio só o servidor consegue converter passa a avisar de imediato quando a sua conta Jellyfin não pode transcodificar áudio, em vez de mostrar uma imagem sem som."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un canal al cărui sunet poate fi convertit doar de server spune acum imediat acest lucru când contul tău Jellyfin nu poate transcoda sunetul, în loc să arate o imagine fără sunet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Канал, звук которого может преобразовать только сервер, теперь сразу сообщает об этом, если вашей учётной записи Jellyfin не разрешено перекодировать звук, вместо того чтобы показывать картинку без звука."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanál, ktorého zvuk dokáže previesť iba server, to teraz povie hneď, ak váš účet Jellyfin nesmie prekódovať zvuk, namiesto prehrávania obrazu bez zvuku."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En kanal vars ljud bara servern kan konvertera säger nu det direkt när ditt Jellyfin-konto inte får omkoda ljud, i stället för att visa en bild utan ljud."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesini yalnızca sunucunun dönüştürebildiği bir kanal, Jellyfin hesabınızın ses dönüştürme izni yoksa artık sessiz görüntü oynatmak yerine bunu hemen bildiriyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Канал, звук якого може перетворити лише сервер, тепер одразу про це повідомляє, якщо вашому обліковому запису Jellyfin не дозволено перекодовувати звук, замість того щоб показувати картинку без звуку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频只能由服务器转换的频道，在你的 Jellyfin 账户无权转码音频时，现在会立即说明，而不是播放无声画面。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音訊只能由伺服器轉換的頻道，在你的 Jellyfin 帳號無權轉碼音訊時，現在會立即說明，而不是播放無聲畫面。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.liveAudioPermission.title" : {
+      "comment" : "What's New 1.1.0 title: live channels whose audio only the server can convert",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Živé kanály se zvukem jen přes server"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livekanaler med lyd kun via serveren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Sender mit Ton nur über den Server"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ζωντανά κανάλια με ήχο μόνο μέσω διακομιστή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live channels with server-only audio"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canales en directo con audio solo vía servidor"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suorat kanavat, joiden ääni vaatii palvelimen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaînes en direct à l'audio converti par le serveur"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanali uživo sa zvukom samo preko poslužitelja"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Élő csatornák csak szerveren át lejátszható hanggal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canali live con audio solo tramite server"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバー経由でのみ音声が再生できるライブチャンネル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버를 거쳐야만 소리가 나는 라이브 채널"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direktekanaler med lyd bare via serveren"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livekanalen met audio alleen via de server"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanały na żywo z dźwiękiem tylko przez serwer"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canais ao vivo com áudio só pelo servidor"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canais em direto com áudio só pelo servidor"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canale live cu sunet doar prin server"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прямые каналы со звуком только через сервер"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Živé kanály so zvukom iba cez server"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livekanaler med ljud bara via servern"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesi yalnızca sunucu üzerinden çalınabilen canlı kanallar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прямі канали зі звуком лише через сервер"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只能经服务器播放音频的直播频道"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只能經伺服器播放音訊的直播頻道"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.liveDelay.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -156567,6 +156891,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法開始播放"
+          }
+        }
+      }
+    },
+    "player.error.liveAudioNeedsServerTranscoding.body" : {
+      "comment" : "Error body when a live channel's audio (AC-4, MPEG-H) needs the server to transcode it but the Jellyfin user may not transcode audio",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk tohoto kanálu je %@, který umí převést jen server, a tento účet Jellyfin nemá povoleno překódovávat zvuk. Správce to může povolit v nastavení přehrávání účtu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne kanals lyd er %@, som kun serveren kan konvertere, og denne Jellyfin-konto må ikke omkode lyd. En administrator kan tillade det i kontoens afspilningsindstillinger."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ton dieses Senders ist %@, den nur der Server umwandeln kann, und dieses Jellyfin-Konto darf keinen Ton transkodieren. Ein Administrator kann das in den Wiedergabe-Einstellungen des Kontos erlauben."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ο ήχος αυτού του καναλιού είναι %@, τον οποίο μπορεί να μετατρέψει μόνο ο διακομιστής, και αυτός ο λογαριασμός Jellyfin δεν επιτρέπεται να διακωδικοποιεί ήχο. Ένας διαχειριστής μπορεί να το επιτρέψει στις ρυθμίσεις αναπαραγωγής του λογαριασμού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This channel's audio is %@, which only the server can convert, and this Jellyfin account is not allowed to transcode audio. An administrator can allow it in the account's playback settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El audio de este canal es %@, que solo el servidor puede convertir, y esta cuenta de Jellyfin no tiene permiso para transcodificar audio. Un administrador puede permitirlo en los ajustes de reproducción de la cuenta."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tämän kanavan ääni on %@, jonka vain palvelin voi muuntaa, eikä tällä Jellyfin-tilillä ole lupaa transkoodata ääntä. Ylläpitäjä voi sallia sen tilin toistoasetuksissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'audio de cette chaîne est en %@, que seul le serveur peut convertir, et ce compte Jellyfin n'est pas autorisé à transcoder l'audio. Un administrateur peut l'autoriser dans les réglages de lecture du compte."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk ovog kanala je %@, koji može pretvoriti samo poslužitelj, a ovaj Jellyfin račun nema dopuštenje za transkodiranje zvuka. Administrator to može dopustiti u postavkama reprodukcije računa."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A csatorna hangja %@, amelyet csak a szerver tud átalakítani, és ennek a Jellyfin-fióknak nincs engedélye a hang átkódolására. Egy rendszergazda engedélyezheti a fiók lejátszási beállításaiban."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'audio di questo canale è %@, che solo il server può convertire, e questo account Jellyfin non è autorizzato a transcodificare l'audio. Un amministratore può consentirlo nelle impostazioni di riproduzione dell'account."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このチャンネルの音声は %@ で、サーバーでしか変換できませんが、この Jellyfin アカウントには音声のトランスコードが許可されていません。管理者がアカウントの再生設定で許可できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 채널의 오디오는 %@이며 서버에서만 변환할 수 있지만, 이 Jellyfin 계정은 오디오 트랜스코딩이 허용되지 않습니다. 관리자가 계정의 재생 설정에서 허용할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lyden på denne kanalen er %@, som bare serveren kan konvertere, og denne Jellyfin-kontoen har ikke lov til å omkode lyd. En administrator kan tillate det i kontoens avspillingsinnstillinger."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De audio van dit kanaal is %@, wat alleen de server kan omzetten, en dit Jellyfin-account mag geen audio transcoderen. Een beheerder kan dit toestaan in de afspeelinstellingen van het account."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dźwięk tego kanału to %@, który może przekonwertować tylko serwer, a to konto Jellyfin nie ma uprawnień do transkodowania dźwięku. Administrator może na to zezwolić w ustawieniach odtwarzania konta."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O áudio deste canal é %@, que só o servidor consegue converter, e esta conta do Jellyfin não tem permissão para transcodificar áudio. Um administrador pode permitir isso nas configurações de reprodução da conta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O áudio deste canal é %@, que só o servidor consegue converter, e esta conta Jellyfin não tem permissão para transcodificar áudio. Um administrador pode permiti-lo nas definições de reprodução da conta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunetul acestui canal este %@, pe care doar serverul îl poate converti, iar acest cont Jellyfin nu are permisiunea de a transcoda sunetul. Un administrator îl poate permite în setările de redare ale contului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звук этого канала в формате %@, который может преобразовать только сервер, а этой учётной записи Jellyfin не разрешено перекодировать звук. Администратор может разрешить это в настройках воспроизведения учётной записи."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk tohto kanála je %@, ktorý dokáže previesť iba server, a tento účet Jellyfin nemá povolené prekódovať zvuk. Správca to môže povoliť v nastaveniach prehrávania účtu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanalens ljud är %@, som bara servern kan konvertera, och det här Jellyfin-kontot får inte omkoda ljud. En administratör kan tillåta det i kontots uppspelningsinställningar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu kanalın sesi %@ biçiminde; bunu yalnızca sunucu dönüştürebilir ve bu Jellyfin hesabının sesi dönüştürme izni yok. Bir yönetici bunu hesabın oynatma ayarlarından etkinleştirebilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звук цього каналу у форматі %@, який може перетворити лише сервер, а цьому обліковому запису Jellyfin не дозволено перекодовувати звук. Адміністратор може дозволити це в налаштуваннях відтворення облікового запису."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此频道的音频为 %@，只有服务器能转换，而此 Jellyfin 账户无权转码音频。管理员可以在该账户的播放设置中允许。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此頻道的音訊為 %@，只有伺服器能轉換，而此 Jellyfin 帳號無權轉碼音訊。管理員可以在該帳號的播放設定中允許。"
           }
         }
       }

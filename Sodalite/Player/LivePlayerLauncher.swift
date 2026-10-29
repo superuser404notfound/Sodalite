@@ -20,6 +20,8 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     let serverName: String
     let preferences: PlaybackPreferences
     let directStreamMemory: LiveDirectStreamMemory
+    /// The channel's server user's `EnableAudioPlaybackTranscoding` (#100).
+    let canTranscodeAudio: Bool
     /// Same reason as PlayerLauncher: the theme has to be picked up on the SwiftUI side and carried
     /// across the UIKit boundary by hand.
     @Environment(\.appearanceTheme) private var appearanceTheme
@@ -103,6 +105,7 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
             playbackService: playbackService,
             userID: userID,
             preferences: preferences,
+            canTranscodeAudio: canTranscodeAudio,
             isLiveSession: true,
             liveChannel: liveContext.channel,
             liveProgram: liveContext.program,
@@ -147,6 +150,7 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
         let userID = userID
         let preferences = preferences
         let directStreamMemory = directStreamMemory
+        let canTranscodeAudio = canTranscodeAudio
         let serverName = serverName
         let reachability = reachability
         return { channel, engine in
@@ -156,6 +160,7 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
                 playbackService: playbackService,
                 userID: userID,
                 preferences: preferences,
+                canTranscodeAudio: canTranscodeAudio,
                 isLiveSession: true,
                 liveChannel: channel,
                 liveProgram: channel.currentProgram,

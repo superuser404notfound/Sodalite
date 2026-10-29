@@ -250,6 +250,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.liveAudioPermission.title",
+                    "changelog.1_1_0.liveAudioPermission.body",
+                    icon: "waveform.slash"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.failedRequests.title",
                     "changelog.1_1_0.failedRequests.body",
                     icon: "exclamationmark.triangle"
