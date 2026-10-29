@@ -4,8 +4,10 @@ import UIKit
 #endif
 
 enum MyRequestsPresentationPolicy {
-    static func shouldPresent(unseen: Int, authenticated: Bool, loading: Bool, modalActive: Bool) -> Bool {
-        unseen > 0 && authenticated && !loading && !modalActive
+    /// `profileLocked`: a profile picker or PIN entry is up or due. The events belong to the profile
+    /// behind it, so they wait until that profile has been let in.
+    static func shouldPresent(unseen: Int, authenticated: Bool, loading: Bool, modalActive: Bool, profileLocked: Bool) -> Bool {
+        unseen > 0 && authenticated && !loading && !modalActive && !profileLocked
     }
 
     /// Anything already presented (player, What's New, profile picker): a second cover would fail
@@ -56,9 +58,9 @@ struct MyRequestsPanelFlow {
         return .dismissPanel
     }
 
-    /// Leaving the app takes the panel down without counting it as read, so it comes back on return
-    /// and never sits under the profile reprompt.
-    mutating func didEnterBackground(panelPresented: Bool) -> Action {
+    /// Leaving the app, or a profile picker or PIN entry that is due, takes the panel down without
+    /// counting it as read, so it comes back once the profile is let in.
+    mutating func closeUnread(panelPresented: Bool) -> Action {
         guard panelPresented else { return .none }
         silent = true
         return .dismissPanel
@@ -75,13 +77,14 @@ struct MyRequestsPanelFlow {
 
 private struct MyRequestsTickKey: Equatable {
     let scope: String?
-    let connected: Bool
+    let seerrUserID: Int?
     let active: Bool
 }
 
 /// Drives the my-requests watcher from AppRouter: foreground, Seerr connect, profile switch, a
 /// 10-minute tick while in front, request edits, and shows the hint panel once nothing else is up.
 private struct MyRequestsPresentation: ViewModifier {
+    let profileLocked: Bool
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
     @Environment(\.scenePhase) private var scenePhase
@@ -103,12 +106,12 @@ private struct MyRequestsPresentation: ViewModifier {
         content
             .task(id: MyRequestsTickKey(
                 scope: dependencies.myRequestsScope,
-                connected: appState.isSeerrConnected,
+                seerrUserID: dependencies.myRequestsSeerrUserID,
                 active: scenePhase == .active
             )) {
                 watcher.reloadForActiveProfile()
                 await dependencies.syncAppIconBadge()
-                guard scenePhase == .active, appState.isSeerrConnected else { return }
+                guard scenePhase == .active, dependencies.myRequestsSeerrUserID != nil else { return }
                 while !Task.isCancelled {
                     await watcher.refresh()
                     evaluate()
@@ -133,9 +136,12 @@ private struct MyRequestsPresentation: ViewModifier {
                 perform(flow.bannerOpened(itemID, panelPresented: isPresented))
             }
             .onChange(of: watcher.unseenEvents.count) { _, _ in evaluate() }
+            .onChange(of: profileLocked) { _, locked in
+                if locked { perform(flow.closeUnread(panelPresented: isPresented)) } else { evaluate() }
+            }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .background else { return }
-                perform(flow.didEnterBackground(panelPresented: isPresented))
+                perform(flow.closeUnread(panelPresented: isPresented))
                 #if !os(macOS)
                 if watcher.isEnabled { MyRequestsBackgroundRefresh.schedule() }
                 #endif
@@ -160,10 +166,11 @@ private struct MyRequestsPresentation: ViewModifier {
             unseen: watcher.unseenEvents.count,
             authenticated: appState.isAuthenticated,
             loading: appState.isLoading,
-            modalActive: modalActive
+            modalActive: modalActive,
+            profileLocked: profileLocked
         ) {
             appState.isMyRequestsPanelPresented = true
-        } else if modalActive, !PlayerModalPresence.isPlayerActive, !retryPending {
+        } else if modalActive, !profileLocked, !PlayerModalPresence.isPlayerActive, !retryPending {
             // What's New or a picker is up and has no close signal of its own: look again shortly.
             retryPending = true
             Task {
@@ -193,7 +200,7 @@ private struct MyRequestsPresentation: ViewModifier {
 }
 
 extension View {
-    func myRequestsPresentation() -> some View {
-        modifier(MyRequestsPresentation())
+    func myRequestsPresentation(profileLocked: Bool) -> some View {
+        modifier(MyRequestsPresentation(profileLocked: profileLocked))
     }
 }

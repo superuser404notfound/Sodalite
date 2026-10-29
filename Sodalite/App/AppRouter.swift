@@ -24,8 +24,9 @@ struct AppRouter: View {
     @State private var lastBackgroundedAt: ContinuousClock.Instant?
     /// Whether the trip stamped above reached .background, or only the screensaver's .inactive.
     @State private var tripReachedBackground = false
-    /// Set while a due reprompt waits for the paused player it closed to leave the screen.
-    @State private var repromptAwaitsPlayerDismissal = false
+    /// Set while a due reprompt waits for the paused player or my-requests panel it closed to leave
+    /// the screen.
+    @State private var repromptAwaitsDismissal = false
     /// Non-nil while the who's-watching cover is up: which server's profiles it offers and why it was
     /// raised (the periodic reprompt for the active server, or a switch to a server this device holds
     /// no resumable session for, Sodalite#74).
@@ -81,7 +82,16 @@ struct AppRouter: View {
     /// True while the who's-watching reprompt is up. A deep link or Continue Watching request waits
     /// behind it and resolves for whoever it lets in: it used to drop the cover, and the link that
     /// opened the app became a way past an entry-locked profile's only gate.
-    private var repromptHolds: Bool { profileCover?.context == .reprompt || repromptAwaitsPlayerDismissal }
+    private var repromptHolds: Bool { profileCover?.context == .reprompt || repromptAwaitsDismissal }
+
+    /// A profile picker or PIN entry is up or may come due. The my-requests panel waits behind it,
+    /// because its events belong to whoever it lets in, and steps aside unread when one comes due over
+    /// it. A time away not yet weighed counts, so the panel neither stays up under the tvOS
+    /// screensaver nor shows on return ahead of the reprompt decision.
+    private var profileLocked: Bool {
+        profileCover != nil || repromptAwaitsDismissal || lastBackgroundedAt != nil
+            || dependencies.parentalGate.activeRequest != nil
+    }
 
     private struct PendingLink: Equatable {
         let itemID: String?
@@ -179,7 +189,7 @@ struct AppRouter: View {
                 dependencies.pendingRequestsMonitor.reset()
             }
         }
-        .myRequestsPresentation()
+        .myRequestsPresentation(profileLocked: profileLocked)
         .onReceive(NotificationCenter.default.publisher(for: .seerrPendingRequestsShouldRefresh)) { _ in
             Task { await refreshPending() }
         }
@@ -579,8 +589,10 @@ struct AppRouter: View {
         guard let backgroundedAt else { return }
         // Never arm over a sibling cover (one fullScreenCover per host view). A deep link in flight
         // does not stop it, it waits behind it.
+        // The my-requests panel is not one of them: it would let its viewer past an entry-locked
+        // profile's PIN, so it closes for the reprompt below.
         guard deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew, profileCover == nil,
-              !appState.isMyRequestsPanelPresented, !repromptAwaitsPlayerDismissal
+              !repromptAwaitsDismissal
         else { return }
         guard let server = appState.activeServer else { return }
         let should = ProfileRepromptPolicy.shouldReprompt(
@@ -594,19 +606,24 @@ struct AppRouter: View {
             wasBackgrounded: reachedBackground
         )
         guard should else { return }
-        guard PlayerModalPresence.isPlayerActive else {
+        let playerUp = PlayerModalPresence.isPlayerActive
+        let panelUp = appState.isMyRequestsPanelPresented
+        guard playerUp || panelUp else {
             profileCover = ProfileCoverRequest(server: server, context: .reprompt)
             return
         }
-        // A paused player left open would hand the next viewer this profile's title and library.
-        // Closed the way a deep link closes it, so the stop report saves the position.
-        repromptAwaitsPlayerDismissal = true
-        appState.requestPlayerDismissal &+= 1
-        PlayerModalDismisser.dismissActive(logPrefix: "[Reprompt]")
+        // Setting this closes the panel unread through `profileLocked`.
+        repromptAwaitsDismissal = true
+        if playerUp {
+            // A paused player left open would hand the next viewer this profile's title and library.
+            // Closed the way a deep link closes it, so the stop report saves the position.
+            appState.requestPlayerDismissal &+= 1
+            PlayerModalDismisser.dismissActive(logPrefix: "[Reprompt]")
+        }
         Task { @MainActor in
-            // Same settle as the deep-link path: a cover presented mid-dismiss never lands.
-            try? await Task.sleep(for: .milliseconds(250))
-            repromptAwaitsPlayerDismissal = false
+            // Same settles as the deep-link path: a cover presented mid-dismiss never lands.
+            try? await Task.sleep(for: .milliseconds(panelUp ? 450 : 250))
+            repromptAwaitsDismissal = false
             guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented,
                   let server = appState.activeServer
             else {

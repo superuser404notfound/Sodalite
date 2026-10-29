@@ -80181,6 +80181,330 @@
         }
       }
     },
+    "changelog.1_1_0.requestsAfterPin.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panel s vašimi vlastními žádostmi v Jellyseerr se nyní zobrazí až po otevření profilu, ke kterému patří, u zamčeného profilu tedy po zadání PIN. Už se neobjeví před výběrem profilu a jeden profil nikdy neuvidí žádosti jiného."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panelet om dine egne Jellyseerr-anmodninger vises nu først, når den profil, det hører til, er åben, på en låst profil altså efter dens PIN. Det dukker ikke længere op før profilvalget, og en profil ser aldrig en anden profils anmodninger."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Panel zu deinen eigenen Jellyseerr-Anfragen erscheint erst, wenn das Profil geöffnet ist, zu dem es gehört, bei gesperrten Profilen also nach der PIN. Es kommt der Profilauswahl nicht mehr zuvor, und ein Profil sieht nie die Anfragen eines anderen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ο πίνακας για τα δικά σας αιτήματα Jellyseerr εμφανίζεται πλέον μόνο όταν είναι ανοιχτό το προφίλ στο οποίο ανήκει, σε κλειδωμένο προφίλ μετά το PIN του. Δεν εμφανίζεται πια πριν από την επιλογή προφίλ, και ένα προφίλ δεν βλέπει ποτέ τα αιτήματα άλλου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The panel about your own Jellyseerr requests now appears only once the profile it belongs to is open, after its PIN on a locked profile. It no longer shows ahead of the profile picker, and one profile never sees another profile's requests."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El panel sobre tus propias solicitudes de Jellyseerr ahora solo aparece cuando está abierto el perfil al que pertenece, en un perfil bloqueado tras su PIN. Ya no se adelanta al selector de perfiles, y un perfil nunca ve las solicitudes de otro."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omista Jellyseerr-pyynnöistäsi kertova paneeli näkyy nyt vasta, kun sen profiili on avattu, lukitussa profiilissa siis PIN-koodin jälkeen. Se ei enää ilmesty ennen profiilin valintaa, eikä profiili koskaan näe toisen profiilin pyyntöjä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le panneau consacré à vos propres demandes Jellyseerr n'apparaît plus qu'une fois ouvert le profil auquel il appartient, après son code PIN pour un profil verrouillé. Il ne devance plus le choix du profil, et un profil ne voit jamais les demandes d'un autre."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ploča o vašim vlastitim Jellyseerr zahtjevima sada se prikazuje tek kada je otvoren profil kojem pripada, kod zaključanog profila nakon njegovog PIN-a. Više se ne pojavljuje prije odabira profila, a jedan profil nikad ne vidi zahtjeve drugoga."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A saját Jellyseerr-kéréseidről szóló panel mostantól csak akkor jelenik meg, ha a hozzá tartozó profil meg van nyitva, zárolt profilnál tehát a PIN után. Már nem előzi meg a profilválasztót, és egy profil soha nem látja egy másik kéréseit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il pannello sulle tue richieste Jellyseerr ora compare solo quando è aperto il profilo a cui appartiene, per un profilo bloccato dopo il suo PIN. Non anticipa più la scelta del profilo, e un profilo non vede mai le richieste di un altro."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の Jellyseerr リクエストに関するパネルは、対応するプロフィールが開かれてから表示されるようになりました。ロックされたプロフィールでは PIN の入力後です。プロフィール選択より先に表示されることはなくなり、別のプロフィールのリクエストが表示されることもありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 Jellyseerr 요청에 관한 패널은 이제 해당 프로필이 열린 뒤에만 표시되며, 잠긴 프로필에서는 PIN 입력 후에 표시됩니다. 프로필 선택보다 먼저 나타나지 않으며, 한 프로필이 다른 프로필의 요청을 보는 일도 없습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panelet om dine egne Jellyseerr-forespørsler vises nå først når profilen det hører til er åpen, på en låst profil altså etter PIN-koden. Det dukker ikke lenger opp før profilvalget, og en profil ser aldri en annen profils forespørsler."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het paneel over je eigen Jellyseerr-verzoeken verschijnt nu pas als het profiel waar het bij hoort open is, bij een vergrendeld profiel dus na de pincode. Het komt niet meer vóór de profielkeuze, en een profiel ziet nooit de verzoeken van een ander."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panel z Twoimi prośbami w Jellyseerr pojawia się teraz dopiero po otwarciu profilu, do którego należy, a w zablokowanym profilu po wpisaniu PIN-u. Nie wyprzedza już wyboru profilu, a jeden profil nigdy nie widzi próśb innego."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O painel sobre seus próprios pedidos no Jellyseerr agora só aparece quando o perfil a que pertence está aberto, em um perfil bloqueado depois do PIN. Ele não aparece mais antes da escolha de perfil, e um perfil nunca vê os pedidos de outro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O painel sobre os seus próprios pedidos no Jellyseerr só aparece agora quando o perfil a que pertence está aberto, num perfil bloqueado depois do PIN. Já não aparece antes da escolha de perfil, e um perfil nunca vê os pedidos de outro."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panoul despre propriile cereri Jellyseerr apare acum doar după ce profilul căruia îi aparține este deschis, la un profil blocat după PIN. Nu mai apare înaintea alegerii profilului, iar un profil nu vede niciodată cererile altuia."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Панель с вашими запросами в Jellyseerr теперь появляется только после открытия профиля, к которому она относится, а в заблокированном профиле после ввода PIN-кода. Она больше не опережает выбор профиля, и один профиль никогда не видит запросы другого."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panel s vašimi vlastnými žiadosťami v Jellyseerr sa teraz zobrazí až po otvorení profilu, ku ktorému patrí, pri zamknutom profile po zadaní PIN. Už sa neobjaví pred výberom profilu a jeden profil nikdy neuvidí žiadosti iného."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Panelen om dina egna Jellyseerr-förfrågningar visas nu först när profilen den hör till är öppen, för en låst profil alltså efter dess PIN-kod. Den dyker inte längre upp före profilvalet, och en profil ser aldrig en annan profils förfrågningar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kendi Jellyseerr isteklerinle ilgili panel artık yalnızca ait olduğu profil açıldığında, kilitli bir profilde PIN girildikten sonra görünür. Artık profil seçiminden önce çıkmaz ve bir profil başka bir profilin isteklerini asla görmez."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Панель із вашими запитами в Jellyseerr тепер з’являється лише після відкриття профілю, якому вона належить, а в заблокованому профілі після введення PIN-коду. Вона більше не випереджає вибір профілю, і один профіль ніколи не бачить запити іншого."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于你自己的 Jellyseerr 请求的面板，现在只会在其所属的个人资料打开后显示，锁定的个人资料则在输入 PIN 之后。它不再抢在个人资料选择之前出现，一个个人资料也永远不会看到另一个的请求。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關於你自己的 Jellyseerr 請求的面板，現在只會在其所屬的個人檔案開啟後顯示，鎖定的個人檔案則在輸入 PIN 之後。它不再搶在個人檔案選擇之前出現，一個個人檔案也永遠不會看到另一個的請求。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.requestsAfterPin.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oznámení o žádostech čekají na profil"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Besked om anmodninger venter på profilen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anfrage-Hinweise warten auf das Profil"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι ειδοποιήσεις αιτημάτων περιμένουν το προφίλ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Request updates wait for the profile"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los avisos de solicitudes esperan al perfil"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pyyntöjen ilmoitukset odottavat profiilia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les avis de demandes attendent le profil"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obavijesti o zahtjevima čekaju profil"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kérésértesítések megvárják a profilt"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli avvisi sulle richieste attendono il profilo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リクエストのお知らせはプロフィールの後に"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요청 알림은 프로필을 연 뒤에 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsler om forespørsler venter på profilen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meldingen over verzoeken wachten op het profiel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Powiadomienia o prośbach czekają na profil"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avisos de pedidos esperam pelo perfil"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avisos de pedidos esperam pelo perfil"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notificările despre cereri așteaptă profilul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уведомления о запросах ждут профиль"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upozornenia na žiadosti čakajú na profil"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aviseringar om förfrågningar väntar på profilen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstek bildirimleri profili bekler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сповіщення про запити чекають на профіль"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请求通知等待进入个人资料后显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請求通知等待進入個人檔案後顯示"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.restingTouch.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

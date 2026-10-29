@@ -136,7 +136,7 @@ struct ProfileSwitchBoundaryTests {
         let (container, appState) = try seerrSession(auth: auth)
         auth.onCurrentUser = {
             switchToB(container, appState)
-            appState.setSeerrConnected(server: seerrServer, user: SeerrUser.stub(id: 2))
+            appState.setSeerrConnected(server: seerrServer, user: SeerrUser.stub(id: 2), for: container.activeProfileRef())
         }
 
         await container.applySeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: server.id)
@@ -152,6 +152,19 @@ struct ProfileSwitchBoundaryTests {
         await container.applySeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: server.id)
 
         #expect(appState.activeSeerrUser?.id == 1)
+        #expect(container.myRequestsSeerrUserID == 1)
+    }
+
+    /// Until B's own Seerr sync lands, A's Seerr user is still connected. Its requests are not B's.
+    @Test func theLastProfilesSeerrUserOwnsNoRequestsOfTheNextOne() async throws {
+        let auth = HookedSeerrAuth(result: .success(SeerrUser.stub(id: 1)))
+        let (container, appState) = try seerrSession(auth: auth)
+        await container.applySeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: server.id)
+
+        switchToB(container, appState)
+
+        #expect(appState.activeSeerrUser?.id == 1)
+        #expect(container.myRequestsSeerrUserID == nil)
     }
 
     // MARK: Stubs

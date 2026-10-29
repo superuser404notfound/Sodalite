@@ -346,15 +346,20 @@ final class DependencyContainer {
         return "\(serverID)_\(userID)"
     }
 
+    /// The Seerr user whose requests belong to the active profile. Nil while a profile switch still
+    /// holds the previous profile's Seerr session, which would otherwise file that user's requests
+    /// under the profile switched to.
+    var myRequestsSeerrUserID: Int? {
+        guard let appState, appState.isSeerrConnected, appState.activeSeerrProfile == activeProfileRef() else { return nil }
+        return appState.activeSeerrUser?.id
+    }
+
     /// Connect the my-requests watcher to the live session. Called once from SodaliteApp.init next to
     /// `wirePendingRequestsMonitor()`.
     func wireMyRequestsWatcher() {
         let watcher = myRequestsWatcher
         watcher.scope = { [weak self] in self?.myRequestsScope }
-        watcher.selfSeerrID = { [weak self] in
-            guard let appState = self?.appState, appState.isSeerrConnected else { return nil }
-            return appState.activeSeerrUser?.id
-        }
+        watcher.selfSeerrID = { [weak self] in self?.myRequestsSeerrUserID }
         watcher.fetchRequests = { [weak self] userID in
             guard let self else { return [] }
             return try await self.seerrRequestService.myRequests(userID: userID, take: 50, skip: 0, sort: .modified).results
@@ -1849,7 +1854,7 @@ final class DependencyContainer {
         guard generation == seerrSyncGeneration, isActiveProfile(profile) else { return }
         switch outcome {
         case .connected(let server, let user):
-            appState?.setSeerrConnected(server: server, user: user)
+            appState?.setSeerrConnected(server: server, user: user, for: profile)
             scheduleRouteResolve()
         case .transientFailure where keepsSessionOnTransientFailure:
             break
