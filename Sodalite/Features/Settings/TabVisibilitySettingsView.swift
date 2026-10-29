@@ -23,7 +23,7 @@ struct TabVisibilitySettingsView: View {
     /// written, so a commit after a profile switch would hand these drafts to the next profile.
     @State private var draftProfile: ProfileKey?
 
-    #if os(tvOS)
+    #if os(tvOS) || os(iOS)
     @Environment(\.appState) private var appState
     /// The profile's browsable libraries in its My Media order, nil until they arrive.
     @State private var libraries: [JellyfinLibrary]?
@@ -82,10 +82,10 @@ struct TabVisibilitySettingsView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 24)
 
-                #if os(tvOS)
+                #if os(tvOS) || os(iOS)
                 // Last, because the list arrives from the server: rows appearing under the focused
                 // one would move it.
-                if let libraries, !libraries.isEmpty {
+                if ShellTab.supportsLibraryTabs, let libraries, !libraries.isEmpty {
                     sectionHeader("settings.tabs.section.libraries")
                     Text("settings.tabs.libraries.caption")
                         .font(.body)
@@ -121,7 +121,7 @@ struct TabVisibilitySettingsView: View {
                 draftProfile = dependencies.activeProfileKey
                 draft = nil
                 draftNavigationStyle = nil
-                #if os(tvOS)
+                #if os(tvOS) || os(iOS)
                 draftPins = nil
                 libraries = nil
                 #endif
@@ -130,8 +130,11 @@ struct TabVisibilitySettingsView: View {
             if draftNavigationStyle == nil { draftNavigationStyle = appearance.navigationStyle }
         }
         .onDisappear(perform: commit)
-        #if os(tvOS)
-        .task(id: draftProfile) { await loadLibraries() }
+        #if os(tvOS) || os(iOS)
+        .task(id: draftProfile) {
+            guard ShellTab.supportsLibraryTabs else { return }
+            await loadLibraries()
+        }
         #endif
     }
 
@@ -173,14 +176,14 @@ struct TabVisibilitySettingsView: View {
         if let draftNavigationStyle, draftNavigationStyle != appearance.navigationStyle {
             appearance.navigationStyle = draftNavigationStyle
         }
-        #if os(tvOS)
+        #if os(tvOS) || os(iOS)
         commitPins()
         #endif
         guard let draft else { return }
         appearance.setHiddenTabs(draft)
     }
 
-    #if os(tvOS)
+    #if os(tvOS) || os(iOS)
     private var editedPins: Set<String> {
         draftPins ?? Set(appearance.pinnedLibraryTabs.map(\.originKey))
     }

@@ -65,6 +65,16 @@ struct TabRootView: View {
         }
     }
 
+    /// The iPad bar shows a pinned tab as its icon at the trailing end, which keeps every tab on the
+    /// bar in portrait (Sodalite#140). A gear needs no label.
+    private func placement(for tab: ShellTab) -> TabPlacement {
+        #if os(iOS)
+        tab == .settings && UIDevice.current.userInterfaceIdiom == .pad ? .pinned : .automatic
+        #else
+        .automatic
+        #endif
+    }
+
     /// Pending-approval count for the Catalog tab badge; nil for other tabs or a zero count (a
     /// `.badge(0)` renders nothing).
     private func catalogBadgeCount(_ tab: ShellTab) -> Int? {
@@ -92,12 +102,24 @@ struct TabRootView: View {
         tabs = tabs.filter { $0 != .settings }
         #endif
         var shellTabs = tabs.map(ShellTab.app)
-        #if os(tvOS)
-        // Pinned libraries follow Home, where the viewer asked for them (Discord, 2026-10-23).
-        let libraries = appearance.pinnedLibraryTabs.filter(pinIsReachable).map(ShellTab.library)
-        shellTabs.insert(contentsOf: libraries, at: shellTabs.firstIndex(of: .home).map { $0 + 1 } ?? 0)
+        #if os(tvOS) || os(iOS)
+        if showsLibraryTabs {
+            // Pinned libraries follow Home, where the viewer asked for them (Discord, 2026-10-23).
+            let libraries = appearance.pinnedLibraryTabs.filter(pinIsReachable).map(ShellTab.library)
+            shellTabs.insert(contentsOf: libraries, at: shellTabs.firstIndex(of: .home).map { $0 + 1 } ?? 0)
+        }
         #endif
         return shellTabs
+    }
+
+    /// The iPad drops its pins where its bar turns into the iPhone's (Split View, Slide Over), the
+    /// way it drops Settings there.
+    private var showsLibraryTabs: Bool {
+        #if os(iOS)
+        ShellTab.supportsLibraryTabs && hSizeClass != .compact
+        #else
+        ShellTab.supportsLibraryTabs
+        #endif
     }
 
     private var tabsOnScreen: [ShellTab] {
@@ -144,6 +166,7 @@ struct TabRootView: View {
                         tabLabel(tab)
                     }
                     .badge(catalogBadgeCount(tab) ?? 0)
+                    .tabPlacement(placement(for: tab))
                 }
             }
         }
@@ -503,7 +526,7 @@ struct TabRootView: View {
         Group {
             switch tab {
             case .library(let pin):
-                #if os(tvOS)
+                #if os(tvOS) || os(iOS)
                 libraryTabContent(pin)
                 #else
                 EmptyView()
@@ -592,7 +615,7 @@ struct TabRootView: View {
         }
     }
 
-    #if os(tvOS)
+    #if os(tvOS) || os(iOS)
     /// A pinned library is reachable while its server is: the active one, or a combined participant.
     private func pinIsReachable(_ pin: PinnedLibraryTab) -> Bool {
         guard let serverID = pin.serverID, serverID != appState.activeServer?.id else { return true }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A place in the navigation shell: one of the app's own tabs, or a library the viewer pinned as a
-/// tab of its own (tvOS only). `AppTab` stays the closed set the settings, the sync payloads and the
+/// tab of its own (tvOS and iPad). `AppTab` stays the closed set the settings, the sync payloads and the
 /// optional-tab probes reason about; only the shell and its selection know about libraries.
 enum ShellTab: Hashable, Sendable {
     case app(AppTab)
@@ -16,6 +16,18 @@ enum ShellTab: Hashable, Sendable {
     static let downloads = ShellTab.app(.downloads)
     static let settings = ShellTab.app(.settings)
     static let profiles = ShellTab.app(.profiles)
+
+    /// The iPhone bar has no room for pins, and the Mac's sidebar is not the bar they were asked for.
+    @MainActor
+    static var supportsLibraryTabs: Bool {
+        #if os(tvOS)
+        true
+        #elseif os(iOS)
+        UIDevice.current.userInterfaceIdiom == .pad
+        #else
+        false
+        #endif
+    }
 
     var appTab: AppTab? {
         if case .app(let tab) = self { tab } else { nil }
