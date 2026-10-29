@@ -77,7 +77,8 @@ final class TabPushStacks {
     private let stacks: [AppTab: DetailCoverStack] = Dictionary(
         uniqueKeysWithValues: AppTab.allCases.map { ($0, DetailCoverStack()) })
 
-    /// A library tab exists only in the tvOS shell, which has no push stacks.
+    /// A library tab on the iPad needs none: the stacks only drive the iPhone's corner chrome, and
+    /// the iPad drops its pins where that chrome appears.
     func stack(for tab: ShellTab) -> DetailCoverStack { tab.appTab.flatMap { stacks[$0] } ?? DetailCoverStack() }
 }
 
