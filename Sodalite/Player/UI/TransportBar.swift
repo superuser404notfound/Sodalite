@@ -468,13 +468,7 @@ struct TransportBar: View {
 
     private var audioDropdownItems: [DropdownItem] {
         guard case .audio(let highlighted) = trackDropdown else { return [] }
-        return audioTracks.enumerated().map { idx, track in
-            DropdownItem(
-                title: TrackDisplayFormatter.audioDisplayName(for: track),
-                isActive: track.id == activeAudioIndex,
-                isHighlighted: idx == highlighted
-            )
-        }
+        return viewModel.audioDropdownItems(highlighted: highlighted)
     }
 
     private var subtitleDropdownItems: [DropdownItem] {
@@ -513,7 +507,7 @@ struct TransportBar: View {
                                   PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
                     isActive: false,
                     isHighlighted: highlighted == index,
-                    hint: highlighted == index ? "\u{2039} \u{203A}" : nil,
+                    hint: "\u{2039} \u{203A}",
                     isPinnedFooter: true,
                     separatorAbove: true
                 )

@@ -34,6 +34,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.audioShaping.title",
+                    "changelog.1_1_0.audioShaping.body",
+                    icon: "speaker.wave.3"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.libraryTabs.title",
                     "changelog.1_1_0.libraryTabs.body",
                     icon: "rectangle.topthird.inset.filled"

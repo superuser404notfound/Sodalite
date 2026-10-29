@@ -538,6 +538,36 @@ final class PlaybackPreferences {
         set { device.forceDolbyVisionOnNonDVDisplay = newValue }
     }
 
+    var speakerLayout: SpeakerLayout {
+        get { device.speakerLayout }
+        set { device.speakerLayout = newValue }
+    }
+
+    var dialogueBoost: DialogueBoost {
+        get { device.dialogueBoost }
+        set { device.dialogueBoost = newValue }
+    }
+
+    var nightMode: NightMode {
+        get { device.nightMode }
+        set { device.nightMode = newValue }
+    }
+
+    var nightModeStartHour: Int {
+        get { device.nightModeStartHour }
+        set { device.nightModeStartHour = newValue }
+    }
+
+    var nightModeEndHour: Int {
+        get { device.nightModeEndHour }
+        set { device.nightModeEndHour = newValue }
+    }
+
+    /// AetherEngine#923, resolved against the clock: a scheduled night mode is on or off by the hour.
+    func audioShaping(at date: Date = Date()) -> AudioShaping {
+        device.audioShapingSettings.shaping(at: date)
+    }
+
     var audioBridgeMode: AudioBridgeMode {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
     }

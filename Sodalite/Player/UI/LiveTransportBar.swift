@@ -57,15 +57,11 @@ struct LiveTransportBar: View {
         return TrackDisplayFormatter.shortName(for: track)
     }
 
-    /// Rows of the audio menu: every track the channel carries, in picker order. The highlight index
-    /// is the host's (`moveDropdownHighlight` walks `displayAudioTracks`), so this maps the same list.
+    /// Rows of the audio menu: every track the channel carries, then the shaping settings. The
+    /// highlight index is the host's (`moveDropdownHighlight` walks `audioMenuRows`).
     private var audioDropdownItems: [DropdownItem] {
         guard case .audio(let highlighted) = viewModel.trackDropdown else { return [] }
-        return viewModel.displayAudioTracks.enumerated().map { index, track in
-            DropdownItem(title: TrackDisplayFormatter.audioDisplayName(for: track),
-                         isActive: track.id == viewModel.activeAudioIndex,
-                         isHighlighted: highlighted == index)
-        }
+        return viewModel.audioDropdownItems(highlighted: highlighted)
     }
 
     /// Same rows the VOD bar shows, which on live means Off plus whatever the channel carries: no

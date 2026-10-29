@@ -79,7 +79,13 @@ final class PlayerViewModel {
     var scrubStartProgress: Float = 0
 
     var controlsFocus: ControlsFocus = .progressBar
-    var trackDropdown: TrackDropdown = .none
+    var trackDropdown: TrackDropdown = .none {
+        didSet { if case .audio = oldValue { applyAudioShapingAfterMenu() } }
+    }
+    /// The iOS audio panel, which is the touch layout's own state; see `isAudioMenuOpen`.
+    var audioPanelOpen = false {
+        didSet { if oldValue { applyAudioShapingAfterMenu() } }
+    }
 
     /// iOS child lock: when true, all touch input is disabled and PlayerLockOverlay is shown.
     /// Cross-platform property but only ever set on iOS; tvOS never engages it. Per player session
@@ -207,7 +213,7 @@ final class PlayerViewModel {
         case none
         case chapter(highlighted: Int)  // index into chapters
         case episode(highlighted: Int)  // index into seasonEpisodes
-        case audio(highlighted: Int)   // index into displayAudioTracks
+        case audio(highlighted: Int)   // index into audioMenuRows
         case subtitle(highlighted: Int) // index into subtitle items (0=Off, 1..=displaySubtitleStreams)
         case secondarySubtitle(highlighted: Int) // 0=Off, 1..=secondarySubtitleCandidates
         case speed(highlighted: Int)    // index into PlayerViewModel.speedOptions
@@ -1358,7 +1364,8 @@ final class PlayerViewModel {
                     maxAnalyzeDuration: probeBudget.maxAnalyzeDuration,
                     preferredAudioLanguages: preferredAudio.map { [$0] } ?? [],
                     externalSubtitles: externalSubs.descriptors,
-                    forwardBufferSegments: preferences.networkBufferDepth.forwardBufferSegments
+                    forwardBufferSegments: preferences.networkBufferDepth.forwardBufferSegments,
+                    audioShaping: preferences.audioShaping()
                 )
             )
 
@@ -3942,10 +3949,9 @@ final class PlayerViewModel {
     }
 
     func openAudioDropdown() {
-        let tracks = displayAudioTracks
-        guard !tracks.isEmpty else { return }
+        guard !displayAudioTracks.isEmpty else { return }
         controlsTimer?.cancel()
-        let currentIdx = tracks.firstIndex(where: { $0.id == activeAudioIndex }) ?? 0
+        let currentIdx = activeAudioIndex.flatMap { audioMenuRows.firstIndex(of: .track(id: $0)) } ?? 0
         trackDropdown = .audio(highlighted: currentIdx)
     }
 
@@ -4014,10 +4020,17 @@ final class PlayerViewModel {
             trackDropdown = .none
             Task { await selectEpisode(at: idx) }
         case .audio(let idx):
-            let tracks = displayAudioTracks
-            if idx < tracks.count { selectAudioTrack(id: tracks[idx].id, userInitiated: true) }
-            trackDropdown = .none
-            scheduleControlsHide()
+            let rows = audioMenuRows
+            guard rows.indices.contains(idx) else { return }
+            switch rows[idx] {
+            case .track(let id):
+                selectAudioTrack(id: id, userInitiated: true)
+                trackDropdown = .none
+                scheduleControlsHide()
+            case let row:
+                // A setting row keeps the menu open, like the subtitle timing row.
+                cycleAudioSetting(row)
+            }
         case .subtitle(let idx):
             let rows = subtitleMenuRows
             guard idx >= 0, idx < rows.count else { return }
