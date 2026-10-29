@@ -83739,6 +83739,328 @@
         }
       }
     },
+    "changelog.1_1_0.showEpisode.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stránka seriálu má vedle Přehrát tlačítko Zobrazit díl. Otevře díl, který tlačítko Přehrát jmenuje, a Zobrazit seriál na stejném místě vede zpět."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriesiden har en Vis afsnit-knap ved siden af Afspil. Den åbner det afsnit, Afspil-knappen nævner, og Vis serie på samme plads fører tilbage."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Serienseite hat neben Abspielen eine Schaltfläche Folge anzeigen. Sie öffnet die Folge, die die Abspielen-Taste nennt, und Serie anzeigen an derselben Stelle führt zurück."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η σελίδα της σειράς έχει δίπλα στην Αναπαραγωγή ένα κουμπί Εμφάνιση επεισοδίου. Ανοίγει το επεισόδιο που αναφέρει το κουμπί Αναπαραγωγής, και η Εμφάνιση σειράς στην ίδια θέση σάς επιστρέφει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The series page has a Show Episode button next to Play. It opens the episode the Play button names, and Show Series in the same spot takes you back."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La página de la serie tiene un botón Ver episodio junto a Reproducir. Abre el episodio que indica el botón Reproducir, y Ver serie en el mismo sitio te devuelve."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sarjan sivulla on Toista-painikkeen vieressä Näytä jakso -painike. Se avaa jakson, jonka Toista-painike nimeää, ja samassa kohdassa oleva Näytä sarja vie takaisin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La page de la série a un bouton Voir l'épisode à côté de Lire. Il ouvre l'épisode que nomme le bouton Lire, et Voir la série au même endroit ramène en arrière."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stranica serije ima gumb Prikaži epizodu pokraj Reproduciraj. Otvara epizodu koju navodi gumb Reproduciraj, a Prikaži seriju na istom mjestu vraća natrag."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sorozat oldalán a Lejátszás mellett Epizód megjelenítése gomb van. Megnyitja azt az epizódot, amelyet a Lejátszás gomb megnevez, és az ugyanott lévő Sorozat megjelenítése visz vissza."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La pagina della serie ha un pulsante Mostra episodio accanto a Riproduci. Apre l'episodio indicato dal pulsante Riproduci, e Mostra serie nello stesso punto riporta indietro."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズページの再生ボタンの横に「エピソードを表示」ボタンが追加されました。再生ボタンが示すエピソードを開き、同じ位置の「シリーズを表示」で戻れます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시리즈 페이지의 재생 옆에 에피소드 보기 버튼이 생겼습니다. 재생 버튼이 가리키는 에피소드를 열고, 같은 자리의 시리즈 보기로 돌아갑니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriesiden har en Vis episode-knapp ved siden av Spill av. Den åpner episoden Spill av-knappen nevner, og Vis serie på samme sted tar deg tilbake."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De seriepagina heeft naast Afspelen een knop Aflevering tonen. Die opent de aflevering die de afspeelknop noemt, en Serie tonen op dezelfde plek brengt je terug."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strona serialu ma obok Odtwórz przycisk Pokaż odcinek. Otwiera odcinek wskazany przez przycisk Odtwórz, a Pokaż serial w tym samym miejscu prowadzi z powrotem."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A página da série tem um botão Ver episódio ao lado de Reproduzir. Ele abre o episódio que o botão Reproduzir indica, e Ver série no mesmo lugar leva de volta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A página da série tem um botão Ver episódio ao lado de Reproduzir. Abre o episódio que o botão Reproduzir indica, e Ver série no mesmo sítio leva de volta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagina serialului are lângă Redă un buton Afișează episodul. Deschide episodul numit de butonul Redă, iar Afișează serialul din același loc te duce înapoi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На странице сериала рядом с «Воспроизвести» появилась кнопка «Показать эпизод». Она открывает эпизод, указанный на кнопке воспроизведения, а «Показать сериал» на том же месте возвращает назад."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stránka seriálu má vedľa Prehrať tlačidlo Zobraziť diel. Otvorí diel, ktorý tlačidlo Prehrať uvádza, a Zobraziť seriál na tom istom mieste vedie späť."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seriesidan har en Visa avsnitt-knapp bredvid Spela. Den öppnar avsnittet som Spela-knappen nämner, och Visa serie på samma plats tar dig tillbaka."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dizi sayfasında Oynat düğmesinin yanında Bölümü göster düğmesi var. Oynat düğmesinin belirttiği bölümü açar, aynı yerdeki Diziyi göster ise geri götürür."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сторінці серіалу поруч із «Відтворити» з’явилася кнопка «Показати епізод». Вона відкриває епізод, зазначений на кнопці відтворення, а «Показати серіал» на тому ж місці повертає назад."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剧集页面的播放按钮旁新增了“显示单集”按钮。它会打开播放按钮所指的那一集，同一位置的“显示剧集”可返回。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影集頁面的播放按鈕旁新增了「顯示單集」按鈕。它會開啟播放按鈕所指的那一集，同一位置的「顯示影集」可返回。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.showEpisode.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazit díl"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis afsnit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folge anzeigen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση επεισοδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Episode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episodio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näytä jakso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'épisode"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikaži epizodu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizód megjelenítése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra episodio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソードを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드 보기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis episode"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aflevering tonen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaż odcinek"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episódio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episódio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează episodul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать эпизод"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobraziť diel"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa avsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölümü göster"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати епізод"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示单集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示單集"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.sidebarKeep.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -101022,6 +101344,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 季"
+          }
+        }
+      }
+    },
+    "detail.showEpisode" : {
+      "comment" : "Open the episode the Play button names",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazit díl"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis afsnit"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folge anzeigen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση επεισοδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Episode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episodio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näytä jakso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'épisode"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikaži epizodu"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Epizód megjelenítése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra episodio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エピソードを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에피소드 보기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis episode"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aflevering tonen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaż odcinek"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episódio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver episódio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează episodul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать эпизод"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobraziť diel"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa avsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölümü göster"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати епізод"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示单集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示單集"
           }
         }
       }

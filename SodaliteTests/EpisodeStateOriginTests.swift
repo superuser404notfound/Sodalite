@@ -15,7 +15,7 @@ struct EpisodeStateOriginTests {
 
     @Test func openingAnEpisodeFromTheStripPutsTheSeriesBehindIt() {
         var origin = EpisodeStateOrigin()
-        origin.openedFromStrip()
+        origin.openedFromSeries()
         #expect(origin.hasSeriesStateBehind)
     }
 
@@ -40,7 +40,7 @@ struct EpisodeStateOriginTests {
 
     @Test func goingBackToTheSeriesEmptiesItAgain() {
         var origin = EpisodeStateOrigin()
-        origin.openedFromStrip()
+        origin.openedFromSeries()
         origin.returnedToSeries()
         #expect(!origin.hasSeriesStateBehind)
     }
