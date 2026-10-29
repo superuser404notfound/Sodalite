@@ -3,7 +3,7 @@ import SwiftUI
 /// The top of Home: the profile's HomeHeroMode titles as a full-width banner that pages by itself,
 /// the way the TV app opens. The art runs to the window's top edge under the toolbar; the title, a
 /// line of facts, the overview (not on tvOS) and Play sit at the bottom leading corner. An upright
-/// iPhone gets its own shape: the poster standing up, the text centred under it.
+/// iPhone gets its own shape: a tall crop of the backdrop, the text centred over its foot.
 struct HomeHeroCarousel: View {
     let items: [JellyfinItem]
     let backdropURL: (JellyfinItem) -> URL?
@@ -96,8 +96,8 @@ struct HomeHeroCarousel: View {
 
     private var isCompact: Bool { hSizeClass == .compact }
 
-    /// An iPhone held upright. A backdrop cropped to that width is a sliver of a face, so this shape
-    /// trades it for the poster. Landscape iPhones and compact iPad windows keep the wide banner.
+    /// An iPhone held upright, which crops the backdrop to a tall box. Landscape iPhones and compact
+    /// iPad windows keep the wide banner.
     private var isPortrait: Bool {
         #if os(iOS)
         isCompact && vSizeClass == .regular
@@ -297,7 +297,7 @@ struct HomeHeroCarousel: View {
     @ViewBuilder
     private var bannerBox: some View {
         if isPortrait {
-            // 4:5 holds a 2:3 poster with little lost at the sides and leaves the first row in view.
+            // 4:5 leaves the first row in view and still holds a 2:3 poster, the fallback, with little lost.
             Color.clear
                 .aspectRatio(4.0 / 5.0, contentMode: .fit)
                 .frame(maxWidth: .infinity)
@@ -311,7 +311,9 @@ struct HomeHeroCarousel: View {
     }
 
     private func artworkURL(for item: JellyfinItem) -> URL? {
-        isPortrait ? (posterURL(item) ?? backdropURL(item)) : backdropURL(item)
+        // The poster only where there is no backdrop: most carry the title printed at the foot, right
+        // where the logo and the facts go, and the two titles stacked (Blexbi).
+        isPortrait ? (backdropURL(item) ?? posterURL(item)) : backdropURL(item)
     }
 
     private var imageAuth: ImageAuth { ImageAuth.snapshot(dependencies.sessionRegistry) }
@@ -677,10 +679,10 @@ struct HomeHeroCarousel: View {
         return CGFloat(min(1, (dwellSpent + running) / Self.dwell))
     }
 
-    /// The upright iPhone's artwork. The poster hangs from just under the Dynamic Island, top edge
-    /// first, so its top (where most posters carry their title) is never behind the island or the
-    /// corner buttons; the overflow is cropped at the bottom, under the dissolve. Behind the island
-    /// sits a heavily blurred copy of the same art, and the poster emerges out of it. The bottom follows the detail page's recipe (DetailBackdrop's heroBand, tuned on
+    /// The upright iPhone's artwork. The backdrop, cropped to the box's middle, hangs from just under
+    /// the Dynamic Island, so nothing of it is behind the island or the corner buttons; a poster (the
+    /// fallback) runs over at the bottom, cropped under the dissolve. Behind the island sits a heavily
+    /// blurred copy of the same art, and the art emerges out of it. The bottom follows the detail page's recipe (DetailBackdrop's heroBand, tuned on
     /// the device): it dissolves into the artwork's colour, which then lets go into the page below.
     /// Every stop is that colour at some opacity, never `.clear`, which is transparent black and drags
     /// the art through a grey band on the way.
