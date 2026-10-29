@@ -69,6 +69,7 @@ struct PlayerTouchControls: View {
         .foregroundStyle(.white)
         // Keep the controls up while a picker is open; re-arm the auto-hide when it closes.
         .onChange(of: activePicker) { _, newValue in
+            viewModel.audioPanelOpen = newValue == .audio
             if newValue == nil { viewModel.scheduleControlsHide() }
             else { viewModel.cancelControlsHide() }
         }

@@ -26,6 +26,9 @@ struct DropdownItem {
     /// Pins this row as a fixed header above the scroll list (subtitle "Secondary: ...").
     var isPinnedHeader: Bool = false
     var separatorBelow: Bool = false
+    /// Titles this row can switch to; the row reserves the widest, so stepping a value does not
+    /// resize the menu.
+    var widthCandidates: [String] = []
 }
 
 // MARK: - The chip
@@ -267,10 +270,15 @@ struct PlayerTrackDropdownList: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
             }
 
-            Text(item.title)
-                .font(.callout)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
+            ZStack(alignment: .leading) {
+                ForEach(item.widthCandidates, id: \.self) { candidate in
+                    Text(candidate).font(.callout).lineLimit(2).hidden()
+                }
+                Text(item.title)
+                    .font(.callout)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
 
             Spacer()
 

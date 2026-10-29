@@ -27,24 +27,63 @@ extension PlayerViewModel {
     }
 
     func audioMenuLabel(for row: AudioMenuRow) -> String {
-        func value(_ key: String) -> String { String(localized: String.LocalizationValue(key)) }
         switch row {
         case .track(let id):
             return displayAudioTracks.first(where: { $0.id == id }).map(TrackDisplayFormatter.audioDisplayName(for:)) ?? ""
         case .speakers:
-            return String(format: String(localized: "player.audio.speakers.value", defaultValue: "Speakers: %@"),
-                          value(preferences.speakerLayout.titleKey))
+            return Self.speakersLabel(preferences.speakerLayout)
         case .dialogue:
-            return String(format: String(localized: "player.audio.dialogue.value", defaultValue: "Dialogue boost: %@"),
-                          value(preferences.dialogueBoost.titleKey))
+            return Self.dialogueLabel(preferences.dialogueBoost)
         case .nightMode:
-            var label = value(preferences.nightMode.titleKey)
-            if preferences.nightMode == .scheduled {
-                let active = preferences.device.audioShapingSettings.nightModeActive(at: Date())
-                label += " (" + String(localized: active ? "player.audio.nightMode.activeNow" : "player.audio.nightMode.inactiveNow") + ")"
-            }
-            return String(format: String(localized: "player.audio.nightMode.value", defaultValue: "Night mode: %@"), label)
+            let active = preferences.nightMode == .scheduled
+                ? preferences.device.audioShapingSettings.nightModeActive(at: Date()) : nil
+            return Self.nightModeLabel(preferences.nightMode, scheduledActive: active)
         }
+    }
+
+    /// Every label a setting row can show, so the menu can reserve the widest and keep its width
+    /// while a value is stepped.
+    static var audioSettingLabelCandidates: [String] {
+        SpeakerLayout.allCases.map(speakersLabel)
+            + DialogueBoost.allCases.map(dialogueLabel)
+            + NightMode.allCases.flatMap { mode in
+                mode == .scheduled ? [true, false].map { nightModeLabel(mode, scheduledActive: $0) }
+                                   : [nightModeLabel(mode, scheduledActive: nil)]
+            }
+    }
+
+    private static func localizedValue(_ key: String) -> String { String(localized: String.LocalizationValue(key)) }
+
+    private static func speakersLabel(_ value: SpeakerLayout) -> String {
+        String(format: String(localized: "player.audio.speakers.value", defaultValue: "Speakers: %@"),
+               localizedValue(value.titleKey))
+    }
+
+    private static func dialogueLabel(_ value: DialogueBoost) -> String {
+        String(format: String(localized: "player.audio.dialogue.value", defaultValue: "Dialogue boost: %@"),
+               localizedValue(value.titleKey))
+    }
+
+    private static func nightModeLabel(_ value: NightMode, scheduledActive: Bool?) -> String {
+        var label = localizedValue(value.titleKey)
+        if let scheduledActive {
+            label += " (" + String(localized: scheduledActive ? "player.audio.nightMode.activeNow" : "player.audio.nightMode.inactiveNow") + ")"
+        }
+        return String(format: String(localized: "player.audio.nightMode.value", defaultValue: "Night mode: %@"), label)
+    }
+
+    /// While the audio menu is open a setting change only moves its label: the engine rebuild waits
+    /// for the menu to close. Rebuilding per step put the session's spinner up, which hides the
+    /// transport and with it the still-open menu, so the next Select landed on an invisible row.
+    var isAudioMenuOpen: Bool {
+        if case .audio = trackDropdown { return true }
+        return audioPanelOpen
+    }
+
+    /// Called when either audio menu closes.
+    func applyAudioShapingAfterMenu() {
+        guard !isAudioMenuOpen else { return }
+        applyAudioShaping()
     }
 
     /// Left/right on a setting row. Clamped at both ends, the way the subtitle timing row is.
@@ -81,8 +120,9 @@ extension PlayerViewModel {
 
     /// Hands the engine what the settings resolve to now. A no-op when that is already in force, so
     /// the schedule check can call it on every tick: only a real change costs the engine a rebuild.
+    /// Deferred while the audio menu is open, see `isAudioMenuOpen`.
     func applyAudioShaping(at date: Date = Date()) {
-        guard !isTearingDown else { return }
+        guard !isTearingDown, !isAudioMenuOpen else { return }
         let next = preferences.audioShaping(at: date).clamped
         guard next != player.audioShaping else { return }
         LogTap.shared.note("[Audio] shaping \(next.summary) (was \(player.audioShaping.summary))")
@@ -95,7 +135,8 @@ extension PlayerViewModel {
     /// The audio menu as dropdown rows, shared by the VOD and the live transport bar. The setting rows
     /// are pinned under the track list, the first behind a separator.
     func audioDropdownItems(highlighted: Int) -> [DropdownItem] {
-        audioMenuRows.enumerated().map { index, row in
+        let widest = Self.audioSettingLabelCandidates
+        return audioMenuRows.enumerated().map { index, row in
             let isHighlighted = index == highlighted
             switch row {
             case .track(let id):
@@ -104,9 +145,10 @@ extension PlayerViewModel {
             case .speakers, .dialogue, .nightMode:
                 return DropdownItem(title: audioMenuLabel(for: row), isActive: false,
                                     isHighlighted: isHighlighted,
-                                    hint: isHighlighted ? "\u{2039} \u{203A}" : nil,
+                                    hint: "\u{2039} \u{203A}",
                                     isPinnedFooter: true,
-                                    separatorAbove: row == .speakers)
+                                    separatorAbove: row == .speakers,
+                                    widthCandidates: widest)
             }
         }
     }

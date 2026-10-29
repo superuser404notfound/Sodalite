@@ -507,7 +507,7 @@ struct TransportBar: View {
                                   PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
                     isActive: false,
                     isHighlighted: highlighted == index,
-                    hint: highlighted == index ? "\u{2039} \u{203A}" : nil,
+                    hint: "\u{2039} \u{203A}",
                     isPinnedFooter: true,
                     separatorAbove: true
                 )

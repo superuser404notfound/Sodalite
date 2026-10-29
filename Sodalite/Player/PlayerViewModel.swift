@@ -79,7 +79,13 @@ final class PlayerViewModel {
     var scrubStartProgress: Float = 0
 
     var controlsFocus: ControlsFocus = .progressBar
-    var trackDropdown: TrackDropdown = .none
+    var trackDropdown: TrackDropdown = .none {
+        didSet { if case .audio = oldValue { applyAudioShapingAfterMenu() } }
+    }
+    /// The iOS audio panel, which is the touch layout's own state; see `isAudioMenuOpen`.
+    var audioPanelOpen = false {
+        didSet { if oldValue { applyAudioShapingAfterMenu() } }
+    }
 
     /// iOS child lock: when true, all touch input is disabled and PlayerLockOverlay is shown.
     /// Cross-platform property but only ever set on iOS; tvOS never engages it. Per player session
