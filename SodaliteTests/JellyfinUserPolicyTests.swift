@@ -36,6 +36,16 @@ struct JellyfinUserPolicyTests {
         #expect(try user(policy: "").seesWholeLibrary == false)
     }
 
+    // MARK: - canTranscodeAudio (Sodalite#100)
+
+    /// Without the grant Jellyfin copies the audio under any TranscodingUrl (`TryStreamCopy`).
+    @Test func audioTranscodingFollowsThePolicy() throws {
+        #expect(try user(policy: #", "EnableAudioPlaybackTranscoding": false"#).canTranscodeAudio == false)
+        #expect(try user(policy: #", "EnableAudioPlaybackTranscoding": true"#).canTranscodeAudio)
+        #expect(try user(policy: nil).canTranscodeAudio)
+        #expect(try user(policy: "").canTranscodeAudio)
+    }
+
     // MARK: - canTranscodeVideo (Sodalite#202)
 
     /// Without the grant Jellyfin copies the video under every rung, so no cap is ever applied.

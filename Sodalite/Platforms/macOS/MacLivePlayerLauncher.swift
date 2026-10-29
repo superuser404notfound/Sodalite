@@ -12,6 +12,8 @@ struct LivePlayerLauncher: View {
     let serverName: String
     let preferences: PlaybackPreferences
     let directStreamMemory: LiveDirectStreamMemory
+    /// The channel's server user's `EnableAudioPlaybackTranscoding` (#100).
+    let canTranscodeAudio: Bool
 
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.appState) private var appState
@@ -44,6 +46,7 @@ struct LivePlayerLauncher: View {
             playbackService: playbackService,
             userID: userID,
             preferences: preferences,
+            canTranscodeAudio: canTranscodeAudio,
             isLiveSession: true,
             liveChannel: context.channel,
             liveProgram: context.program,

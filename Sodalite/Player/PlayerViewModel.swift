@@ -558,6 +558,9 @@ final class PlayerViewModel {
     /// False for a user whose policy forbids video transcoding: the server would copy the video under
     /// every rung, so the session stays on Original and the picker offers nothing else (Sodalite#202).
     let canTranscodeVideo: Bool
+    /// False for a user whose policy forbids audio transcoding: the server copies the soundtrack under
+    /// any TranscodingUrl, so a live channel only it could make audible is refused up front (#100).
+    let canTranscodeAudio: Bool
 
     /// When set, `startPlayback()` selects the matching PlaybackInfo source instead of first.
     /// Nil keeps default-first. Set by the detail-view version picker.
@@ -938,6 +941,7 @@ final class PlayerViewModel {
         trackMemory: TrackSelectionMemory? = nil,
         spoilerPolicy: SpoilerPolicy = .disabled,
         canTranscodeVideo: Bool = true,
+        canTranscodeAudio: Bool = true,
         cachedPlaybackInfo: PrefetchedPlaybackInfo? = nil,
         preferredMediaSourceID: String? = nil,
         playQueue: [JellyfinItem] = [],
@@ -965,6 +969,7 @@ final class PlayerViewModel {
         self.trackMemory = trackMemory
         self.spoilerPolicy = spoilerPolicy
         self.canTranscodeVideo = canTranscodeVideo
+        self.canTranscodeAudio = canTranscodeAudio
         self.scrubPreview = ScrubPreviewProvider()
         self.cachedPlaybackInfo = cachedPlaybackInfo
         self.preferredMediaSourceID = preferredMediaSourceID
@@ -1419,7 +1424,7 @@ final class PlayerViewModel {
             LogTap.shared.note(
                 PlayerEngineErrorPresentation.logLine(for: engineInfo, engineMessage: error.localizedDescription)
             )
-            if isLiveSession, case .liveAudioUnsupported = (error as? PlayerEngineError) {
+            if isLiveSession, (error as? PlayerEngineError)?.isLiveAudioRefusal == true {
                 // Refused before the engine was asked, so there is no classification to read and
                 // "the channel's source may be offline" would be a lie: it is on the air and we
                 // cannot decode it (#100).
@@ -2358,7 +2363,7 @@ final class PlayerViewModel {
             case .noSource, .noURL:
                 icon = "questionmark.video"
                 title = String(localized: "player.error.noVideo.title", defaultValue: "Couldn't open this video")
-            case .liveAudioUnsupported:
+            case .liveAudioUnsupported, .liveAudioNeedsServerTranscoding:
                 // Its own headline rather than "Channel unavailable": the advice is the opposite of
                 // every other live error, since no retry and no server setting can decode AC-4 (#100).
                 icon = "waveform.slash"
@@ -4106,6 +4111,16 @@ enum PlayerEngineError: LocalizedError {
     /// A live channel refused before the engine was asked, because every audio track the server named
     /// is a format nothing on this device decodes (#100). The payload is the format's display name.
     case liveAudioUnsupported(codec: String)
+    /// The same channel for a user whose policy forbids audio transcoding: the server could rebuild
+    /// the sound but would copy it instead, so the only fix is the permission (#100).
+    case liveAudioNeedsServerTranscoding(codec: String)
+
+    var isLiveAudioRefusal: Bool {
+        switch self {
+        case .liveAudioUnsupported, .liveAudioNeedsServerTranscoding: true
+        case .noSource, .noURL: false
+        }
+    }
 
     var errorDescription: String? {
         switch self {
@@ -4124,6 +4139,14 @@ enum PlayerEngineError: LocalizedError {
                 format: String(
                     localized: "player.error.liveAudioUnsupported.body",
                     defaultValue: "This channel's audio is %@, which no decoder on this device supports. Trying again will not help."
+                ),
+                codec
+            )
+        case .liveAudioNeedsServerTranscoding(let codec):
+            String(
+                format: String(
+                    localized: "player.error.liveAudioNeedsServerTranscoding.body",
+                    defaultValue: "This channel's audio is %@, which only the server can convert, and this Jellyfin account is not allowed to transcode audio. An administrator can allow it in the account's playback settings."
                 ),
                 codec
             )

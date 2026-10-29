@@ -95,6 +95,8 @@ struct LiveTVPolicy {
     private var user: JellyfinUser? { isActiveSource ? activeUser : sessionUser }
     var canManageLiveTv: Bool { user?.canManageLiveTv == true }
     var canDeleteContent: Bool { user?.canDeleteContent == true }
+    /// True while the user is unloaded: the server default, as `JellyfinUser.canTranscodeAudio` (#100).
+    var canTranscodeAudio: Bool { user?.canTranscodeAudio ?? true }
 }
 
 extension EnvironmentValues {

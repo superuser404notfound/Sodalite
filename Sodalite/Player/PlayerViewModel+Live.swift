@@ -96,6 +96,12 @@ extension PlayerViewModel {
             // "checked, the audio is fine" apart from "the server named no audio at all" (#100).
             var audioDecision = noteLiveAudioDecision(for: source)
             if case .refuse(let codec) = audioDecision {
+                // Without the permission a second ask would only reach a TranscodingUrl whose job
+                // copies the soundtrack (`TryStreamCopy`), a silent picture after a second tuner open.
+                guard canTranscodeAudio else {
+                    LogTap.shared.note("[Live] audio re-encode skipped: user policy forbids audio transcoding")
+                    throw PlayerEngineError.liveAudioNeedsServerTranscoding(codec: codec.displayName)
+                }
                 // A refusal used to end here, on the reasoning that a server offering no re-encode has
                 // none to give. It has: Jellyfin never CHECKS the audio codec of a tuner channel. The
                 // lineup-derived audio stream carries no `IsDefault` flag, `PlayDefaultAudioTrack` is
@@ -216,7 +222,8 @@ extension PlayerViewModel {
     private func noteLiveAudioDecision(
         for source: PlaybackMediaSource, pass: String? = nil
     ) -> LiveAudioSupport.Decision {
-        let serverOffersAudioReencode = Self.liveServerOffersAudioReencode(
+        // An offer the user's policy turns into a stream copy is no offer (#100).
+        let serverOffersAudioReencode = canTranscodeAudio && Self.liveServerOffersAudioReencode(
             transcodeReasons: source.transcodeReasons, transcodingURL: source.transcodingUrl)
         LogTap.shared.note(LiveAudioSupport.logLine(
             for: source.mediaStreams, serverOffersAudioReencode: serverOffersAudioReencode, pass: pass))
