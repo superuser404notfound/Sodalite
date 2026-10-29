@@ -123,10 +123,11 @@ final class AppState {
         )
     }
 
-    /// Whether a session on `session` may transcode video (Sodalite#202). Only the active server's
-    /// policy is loaded; a combined-Home server keeps the server default.
+    /// Whether a session on `session` may transcode video (Sodalite#202), by the policy of the account
+    /// that server knows. The server default (allowed) while that policy has not loaded.
     func canTranscodeVideo(on session: ServerSession?) -> Bool {
-        session?.isActive == false || activeUser?.canTranscodeVideo ?? true
+        guard let session, !session.isActive else { return activeUser?.canTranscodeVideo ?? true }
+        return session.user?.canTranscodeVideo ?? true
     }
 
     /// Replaces activeServer with a fresh copy (applies an updated version after a server upgrade). id guard so a racing switch doesn't apply another server's data.

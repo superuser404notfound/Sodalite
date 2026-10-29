@@ -21,6 +21,9 @@ extension DependencyContainer {
             baseURL: { preferredURL(for: $0) }
         )
         downloadManager?.serversChanged()
+        Task { [sessionRegistry] in
+            for session in sessionRegistry.participants { await session.loadUserIfNeeded() }
+        }
     }
 
     /// Points each secondary at whichever of its addresses answers, as `resolveJellyfinRoute` does
@@ -36,6 +39,7 @@ extension DependencyContainer {
             ) else { continue }
             serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
             sessionRegistry.updateRoute(resolved.url, for: session)
+            await session.loadUserIfNeeded()
         }
         downloadManager?.serversChanged()
     }

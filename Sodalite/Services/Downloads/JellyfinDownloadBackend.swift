@@ -33,8 +33,11 @@ final class JellyfinDownloadBackend: DownloadBackend {
     var preferredAudioLanguage: String? { container?.playbackPreferences.preferredAudioLanguage }
     var versionOrder: VersionOrder { container?.playbackPreferences.versionOrder ?? .quality }
     var allowsCellular: Bool { !(container?.downloadPreferences.wifiOnly ?? true) }
-    /// Another server's policy is not loaded, so its server default applies, as for streaming.
-    var canTranscodeVideo: Bool { serverID != nil || (container?.appState?.activeUser?.canTranscodeVideo ?? true) }
+    /// By the policy of the account the download is fetched as, as for streaming.
+    var canTranscodeVideo: Bool {
+        guard serverID != nil else { return container?.appState?.activeUser?.canTranscodeVideo ?? true }
+        return secondary?.user?.canTranscodeVideo ?? true
+    }
 
     struct Unavailable: LocalizedError {
         var errorDescription: String? {

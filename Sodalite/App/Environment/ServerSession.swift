@@ -1,8 +1,10 @@
 import Foundation
+import Observation
 
 /// One Jellyfin server's live session: a client and the services built on it (Sodalite#85). The
 /// active session wraps the container's own `jellyfinClient`, whose writers stay where they are.
 @MainActor
+@Observable
 final class ServerSession {
     let client: JellyfinClient
     let libraryService: JellyfinLibraryServiceProtocol
@@ -13,6 +15,9 @@ final class ServerSession {
     let isActive: Bool
     private(set) var server: JellyfinServer?
     private(set) var userID: String
+    /// A secondary's account as its server sees it, for the policy (Sodalite#202). nil until it has
+    /// loaded, and always on the active session, whose user lives in `AppState`.
+    private(set) var user: JellyfinUser?
 
     init(
         client: JellyfinClient,
@@ -55,6 +60,13 @@ final class ServerSession {
             server: candidate.server,
             userID: candidate.credential.userID
         )
+    }
+
+    /// Loads `user` once; a server that is away gets asked again on the next refresh or route probe.
+    func loadUserIfNeeded() async {
+        guard !isActive, user == nil,
+              let loaded = try? await JellyfinAuthService(client: client).getCurrentUser() else { return }
+        user = loaded
     }
 
     func updateActive(server: JellyfinServer?, userID: String) {

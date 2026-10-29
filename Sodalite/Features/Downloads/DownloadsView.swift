@@ -20,7 +20,7 @@ struct DownloadsView: View {
                 if !groups.active.isEmpty {
                     Section("downloads.section.active") {
                         ForEach(groups.active) { item in
-                            DownloadRow(item: item)
+                            DownloadRow(item: item, showsControls: true)
                         }
                     }
                 }
@@ -103,14 +103,29 @@ struct DownloadsView: View {
     }
 }
 
-/// One download: artwork, title, rung, size and state.
+/// One download: artwork, title, rung, size and state. With `showsControls` (a download in
+/// progress) it carries pause, resume or retry and cancel as buttons, and a tap on the row does the
+/// first of them, so nothing hides behind the long-press (Sodalite#202).
 struct DownloadRow: View {
     let item: DownloadedItem
+    var showsControls = false
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
 
     var body: some View {
         let state = DownloadButtonState.from(item, liveProgress: dependencies.downloadManager?.liveProgress[item.id])
+        if showsControls, let manager = dependencies.downloadManager {
+            let primary = DownloadPrimaryAction(itemID: item.id, state: state, manager: manager, dependencies: dependencies)
+            Button { primary?.perform() } label: {
+                content(state: state, controls: controls(primary: primary, manager: manager))
+            }
+            .buttonStyle(.plain)
+        } else {
+            content(state: state, controls: EmptyView())
+        }
+    }
+
+    private func content(state: DownloadButtonState, controls: some View) -> some View {
         HStack(spacing: 12) {
             LocalArtwork(url: item.artworkURL(.thumb) ?? item.artworkURL(.poster))
                 .frame(width: 96, height: 54)
@@ -129,12 +144,35 @@ struct DownloadRow: View {
             if item.manifest.progress.played {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.tint)
             }
+            controls
         }
+        .contentShape(Rectangle())
         .contextMenu {
             if let manager = dependencies.downloadManager {
                 DownloadMenuActions(itemID: item.id, state: state, manager: manager)
             }
         }
+    }
+
+    private func controls(primary: DownloadPrimaryAction?, manager: DownloadManager) -> some View {
+        HStack(spacing: 4) {
+            if let primary {
+                Button(action: primary.perform) {
+                    Image(systemName: primary.systemImage).font(.title2).frame(width: 44, height: 44)
+                }
+                .accessibilityLabel(Text(primary.titleKey))
+            }
+            // A menu, not a bare button: cancelling deletes what has arrived so far.
+            Menu {
+                Button("downloads.action.cancel", role: .destructive) {
+                    Task { await manager.cancel(itemID: item.id) }
+                }
+            } label: {
+                Image(systemName: "xmark.circle").font(.title2).frame(width: 44, height: 44)
+            }
+            .accessibilityLabel(Text("downloads.action.cancel"))
+        }
+        .buttonStyle(.borderless)
     }
 
     private var title: String {
