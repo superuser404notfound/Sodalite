@@ -1069,6 +1069,26 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .replay)
             }
 
+            // One button in one slot for both directions (Sodalite#217), so it keeps its identity
+            // and its focus across the switch and the round trip is a press each way.
+            // `tv`, not `xmark` (Sodalite#146): the glyph said "close this panel" while the
+            // label said "show the series", and only one of the two is what pressing it does.
+            if isShowingEpisode || playTarget(vm: vm) != nil {
+                GlassActionButton(
+                    title: isShowingEpisode ? "detail.showSeries" : "detail.showEpisode",
+                    systemImage: isShowingEpisode ? "tv" : "play.tv",
+                    action: {
+                        if isShowingEpisode {
+                            closeEpisodeState()
+                        } else if let target = playTarget(vm: vm) {
+                            withAnimation(.easeInOut(duration: 0.3)) { selectedEpisode = target }
+                            episodeOrigin.openedFromSeries()
+                        }
+                    }
+                )
+                .focused($focusedAction, equals: .goToShow)
+            }
+
             if !isShowingEpisode && vm.hasTrailer {
                 GlassActionButton(
                     title: "detail.trailer",
@@ -1125,17 +1145,6 @@ struct SeriesDetailView: View {
                 )
                 .focused($focusedAction, equals: .spoiler)
                 .contextMenu { spoilerRuleMenu(seriesID: seriesID) }
-            }
-
-            if isShowingEpisode {
-                // `tv`, not `xmark` (Sodalite#146): the glyph said "close this panel" while the
-                // label said "show the series", and only one of the two is what pressing it does.
-                GlassActionButton(
-                    title: "detail.showSeries",
-                    systemImage: "tv",
-                    action: { closeEpisodeState() }
-                )
-                .focused($focusedAction, equals: .goToShow)
             }
 
             // Deliberately selectedEpisode, not playTarget: playTarget also resolves to an episode
@@ -1335,7 +1344,7 @@ struct SeriesDetailView: View {
             withAnimation(.easeInOut(duration: 0.3)) {
                 selectedEpisode = episode
             }
-            episodeOrigin.openedFromStrip()
+            episodeOrigin.openedFromSeries()
             #if os(tvOS)
             // Context menu restores focus to this card on dismiss; flag it so the focusedEpisodeID observer bounces focus up to Play (a fixed delay lost the race against the restore). The delayed write is a fallback when focus never visibly cycles.
             pendingPlayFocusAfterMenu = true

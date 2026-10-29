@@ -446,6 +446,12 @@ enum Changelog {
                     "changelog.1_1_0.audioDescription.body",
                     icon: "speaker.wave.2.bubble.fill"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.showEpisode.title",
+                    "changelog.1_1_0.showEpisode.body",
+                    icon: "play.tv"
+                ),
             ]
         ),
         // MARK: 1.0.0
