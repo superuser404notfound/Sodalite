@@ -7758,7 +7758,7 @@
 			repositoryURL = "https://github.com/superuser404notfound/AetherEngine";
 			requirement = {
 				kind = revision;
-				revision = a877941bd3402d5f531edad0cbe4c9b33eefa856;
+				revision = db35d50e5c3d5b617551ca27ec7ef4a3d4e534e3;
 			};
 			traits = (
 				TrueHDObjectAudio,
