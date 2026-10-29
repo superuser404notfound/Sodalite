@@ -144,6 +144,8 @@ extension PlayerViewModel {
                 guard !Task.isCancelled else { return }
                 // Re-resolved per tick, so the timer never keeps a dismissed view model alive.
                 guard let self, !self.isTearingDown else { return }
+                // A scheduled night mode switches by the hour, mid-film included (AetherEngine#923).
+                self.applyAudioShaping()
                 await self.reportProgress()
             }
         }

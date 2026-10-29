@@ -1544,8 +1544,15 @@ final class PlayerHostController: AVPlayerViewController {
         }
     }
 
-    /// Left/right are otherwise inert in a dropdown; on the subtitle menu's timing row they step it.
+    /// Left/right are otherwise inert in a dropdown; on the subtitle menu's timing row they step it,
+    /// and on the audio menu's shaping rows they step the setting one value (a hold too).
     private func stepHighlightedSubtitleOffset(by steps: Int) {
+        if case .audio(let idx) = viewModel.trackDropdown {
+            let rows = viewModel.audioMenuRows
+            guard rows.indices.contains(idx) else { return }
+            viewModel.stepAudioSetting(rows[idx], by: steps.signum())
+            return
+        }
         guard case .subtitle(let idx) = viewModel.trackDropdown,
               viewModel.subtitleMenuRows.indices.contains(idx),
               viewModel.subtitleMenuRows[idx] == .offset else { return }
@@ -1774,7 +1781,7 @@ final class PlayerHostController: AVPlayerViewController {
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .episode(highlighted: newIdx)
         case .audio(let idx):
-            let count = viewModel.displayAudioTracks.count
+            let count = viewModel.audioMenuRows.count
             guard count > 0 else { return }
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .audio(highlighted: newIdx)

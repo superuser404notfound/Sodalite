@@ -518,6 +518,74 @@ struct PlaybackSettingsView: View {
                     )
                 )
                 .settingsValueScope(.device)
+
+                // AetherEngine#923: shaping decodes the audio, so it also takes a track off passthrough.
+                ValuePickerRow(
+                    icon: "speaker.wave.3",
+                    title: "settings.playback.speakers",
+                    subtitle: "settings.playback.speakers.subtitle",
+                    options: SpeakerLayout.allCases,
+                    selection: Binding(
+                        get: { prefs.speakerLayout },
+                        set: { prefs.speakerLayout = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "person.wave.2",
+                    title: "settings.playback.dialogueBoost",
+                    subtitle: "settings.playback.dialogueBoost.subtitle",
+                    options: DialogueBoost.allCases,
+                    selection: Binding(
+                        get: { prefs.dialogueBoost },
+                        set: { prefs.dialogueBoost = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "moon.zzz",
+                    title: "settings.playback.nightMode",
+                    subtitle: "settings.playback.nightMode.subtitle",
+                    options: NightMode.allCases,
+                    selection: Binding(
+                        get: { prefs.nightMode },
+                        set: { prefs.nightMode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                if prefs.nightMode == .scheduled {
+                    ValuePickerRow(
+                        icon: "clock",
+                        title: "settings.playback.nightMode.start",
+                        subtitle: "settings.playback.nightMode.start.subtitle",
+                        options: Array(0...23),
+                        selection: Binding(
+                            get: { prefs.nightModeStartHour },
+                            set: { prefs.nightModeStartHour = $0 }
+                        ),
+                        label: { AudioShapingSettings.hourLabel($0) }
+                    )
+                    .settingsValueScope(.device)
+
+                    ValuePickerRow(
+                        icon: "clock.badge.checkmark",
+                        title: "settings.playback.nightMode.end",
+                        subtitle: "settings.playback.nightMode.end.subtitle",
+                        options: Array(0...23),
+                        selection: Binding(
+                            get: { prefs.nightModeEndHour },
+                            set: { prefs.nightModeEndHour = $0 }
+                        ),
+                        label: { AudioShapingSettings.hourLabel($0) }
+                    )
+                    .settingsValueScope(.device)
+                }
             }
             .screenContentInset()
             .task { displayHasDolbyVision = AetherEngine.displayCapabilities.supportsDolbyVision }

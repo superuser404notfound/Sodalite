@@ -25,6 +25,11 @@ final class DevicePreferences {
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
+        static let speakerLayout = "playback.speakerLayout"
+        static let dialogueBoost = "playback.dialogueBoost"
+        static let nightMode = "playback.nightMode"
+        static let nightModeStartHour = "playback.nightModeStartHour"
+        static let nightModeEndHour = "playback.nightModeEndHour"
     }
 
     /// Stats panel "i" button. Read-only, so it is App Store safe and needs no diagnostic-build gate.
@@ -110,6 +115,32 @@ final class DevicePreferences {
         didSet { store.set(topShelfImage.rawValue, forKey: Keys.topShelfImage) }
     }
 
+    /// AetherEngine#923: the most channels this box sends; see `AudioShapingSettings`.
+    var speakerLayout: SpeakerLayout {
+        didSet { store.set(speakerLayout.rawValue, forKey: Keys.speakerLayout) }
+    }
+
+    var dialogueBoost: DialogueBoost {
+        didSet { store.set(dialogueBoost.rawValue, forKey: Keys.dialogueBoost) }
+    }
+
+    var nightMode: NightMode {
+        didSet { store.set(nightMode.rawValue, forKey: Keys.nightMode) }
+    }
+
+    var nightModeStartHour: Int {
+        didSet { store.set(nightModeStartHour, forKey: Keys.nightModeStartHour) }
+    }
+
+    var nightModeEndHour: Int {
+        didSet { store.set(nightModeEndHour, forKey: Keys.nightModeEndHour) }
+    }
+
+    var audioShapingSettings: AudioShapingSettings {
+        AudioShapingSettings(speakers: speakerLayout, dialogue: dialogueBoost, nightMode: nightMode,
+                             nightStartHour: nightModeStartHour, nightEndHour: nightModeEndHour)
+    }
+
     private let store: PreferenceKeyspace
 
     init(keyspace store: PreferenceKeyspace) {
@@ -135,6 +166,11 @@ final class DevicePreferences {
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
             .flatMap(AppearancePreferences.ContinueWatchingImage.init(rawValue:)) ?? .thumb
+        self.speakerLayout = store.string(forKey: Keys.speakerLayout).flatMap(SpeakerLayout.init(rawValue:)) ?? .auto
+        self.dialogueBoost = store.string(forKey: Keys.dialogueBoost).flatMap(DialogueBoost.init(rawValue:)) ?? .off
+        self.nightMode = store.string(forKey: Keys.nightMode).flatMap(NightMode.init(rawValue:)) ?? .off
+        self.nightModeStartHour = (store.object(forKey: Keys.nightModeStartHour) as? Int).map { min(max($0, 0), 23) } ?? 22
+        self.nightModeEndHour = (store.object(forKey: Keys.nightModeEndHour) as? Int).map { min(max($0, 0), 23) } ?? 7
     }
 
     /// Reads every value again, for a factory reset that wiped the store underneath this object:
@@ -159,6 +195,11 @@ final class DevicePreferences {
         update(\.forceDolbyVisionOnNonDVDisplay)
         update(\.showTopShelfRow)
         update(\.topShelfImage)
+        update(\.speakerLayout)
+        update(\.dialogueBoost)
+        update(\.nightMode)
+        update(\.nightModeStartHour)
+        update(\.nightModeEndHour)
     }
 
     convenience init(store defaults: UserDefaults = .standard) {

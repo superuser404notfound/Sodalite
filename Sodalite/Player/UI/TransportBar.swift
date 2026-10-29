@@ -468,13 +468,7 @@ struct TransportBar: View {
 
     private var audioDropdownItems: [DropdownItem] {
         guard case .audio(let highlighted) = trackDropdown else { return [] }
-        return audioTracks.enumerated().map { idx, track in
-            DropdownItem(
-                title: TrackDisplayFormatter.audioDisplayName(for: track),
-                isActive: track.id == activeAudioIndex,
-                isHighlighted: idx == highlighted
-            )
-        }
+        return viewModel.audioDropdownItems(highlighted: highlighted)
     }
 
     private var subtitleDropdownItems: [DropdownItem] {

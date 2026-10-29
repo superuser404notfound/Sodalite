@@ -429,8 +429,8 @@ struct PlayerTouchControls: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(panelRows.enumerated()), id: \.offset) { _, row in
-                        if row.isOffsetStepper {
-                            offsetStepperRow(row, height: rowHeight)
+                        if let step = row.stepper {
+                            stepperRow(row, step: step, height: rowHeight)
                         } else {
                             HStack(spacing: 0) {
                                 Button {
@@ -484,9 +484,9 @@ struct PlayerTouchControls: View {
         .transition(.opacity)
     }
 
-    private func offsetStepperRow(_ row: PickerRow, height: CGFloat) -> some View {
+    private func stepperRow(_ row: PickerRow, step: @escaping (Int) -> Void, height: CGFloat) -> some View {
         HStack(spacing: 0) {
-            offsetStepButton("minus", steps: -1, height: height)
+            stepButton("minus", steps: -1, step: step, height: height)
             Button(action: row.action) {
                 Text(row.label)
                     .foregroundStyle(.white)
@@ -496,12 +496,13 @@ struct PlayerTouchControls: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            offsetStepButton("plus", steps: 1, height: height)
+            stepButton("plus", steps: 1, step: step, height: height)
         }
     }
 
-    private func offsetStepButton(_ symbol: String, steps: Int, height: CGFloat) -> some View {
-        Button { viewModel.stepSubtitleOffset(by: steps) } label: {
+    private func stepButton(_ symbol: String, steps: Int, step: @escaping (Int) -> Void,
+                            height: CGFloat) -> some View {
+        Button { step(steps) } label: {
             Image(systemName: symbol)
                 .foregroundStyle(tint)
                 .frame(width: 52, height: height)
@@ -535,18 +536,27 @@ struct PlayerTouchControls: View {
         var opensSubmenu: PickerKind? = nil
         /// Non-nil on a deletable (external/downloaded) subtitle row: shows a trailing trash button.
         var deleteStreamIndex: Int? = nil
-        /// The subtitle timing row: minus and plus buttons step it, the label resets it, the panel stays.
-        var isOffsetStepper = false
+        /// A stepper row (subtitle timing, the audio shaping settings): minus and plus call this with
+        /// -1 / +1, the label runs `action`, the panel stays.
+        var stepper: ((Int) -> Void)? = nil
         let action: () -> Void
     }
 
     private func rows(for picker: PickerKind) -> [PickerRow] {
         switch picker {
         case .audio:
-            return viewModel.displayAudioTracks.map { track in
-                PickerRow(label: TrackDisplayFormatter.audioDisplayName(for: track),
-                          isActive: track.id == viewModel.activeAudioIndex) {
-                    viewModel.selectAudioTrack(id: track.id, userInitiated: true)
+            return viewModel.audioMenuRows.map { row in
+                switch row {
+                case .track(let id):
+                    return PickerRow(label: viewModel.audioMenuLabel(for: row),
+                                     isActive: id == viewModel.activeAudioIndex) {
+                        viewModel.selectAudioTrack(id: id, userInitiated: true)
+                    }
+                case .speakers, .dialogue, .nightMode:
+                    return PickerRow(label: viewModel.audioMenuLabel(for: row), isActive: false,
+                                     stepper: { viewModel.stepAudioSetting(row, by: $0) }) {
+                        viewModel.cycleAudioSetting(row)
+                    }
                 }
             }
         case .subtitle:
@@ -581,7 +591,7 @@ struct PlayerTouchControls: View {
                     label: String(format: String(localized: "player.subtitle.offset.value", defaultValue: "Timing: %@"),
                                   PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
                     isActive: false,
-                    isOffsetStepper: true) {
+                    stepper: { viewModel.stepSubtitleOffset(by: $0) }) {
                     viewModel.setSubtitleOffset(0)
                 })
             }
