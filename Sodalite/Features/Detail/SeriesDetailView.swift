@@ -1354,18 +1354,11 @@ struct SeriesDetailView: View {
             Label("detail.episode.showDetails", systemImage: "info.circle")
         }
 
+        // No Resume: a tap on the card already resumes it (Blexbi).
         Button {
             requestPlay(episode, fromBeginning: true, fromPlayButton: false)
         } label: {
             Label("detail.play", systemImage: "play.fill")
-        }
-
-        if let ticks = episode.userData?.playbackPositionTicks, ticks > 0 {
-            Button {
-                requestPlay(episode, fromBeginning: false, fromPlayButton: false)
-            } label: {
-                Label("detail.resume", systemImage: "play.circle")
-            }
         }
 
         #if os(iOS)
