@@ -188,6 +188,39 @@ struct DownloadActionButton: View {
 }
 
 /// The actions every place that shows a download offers for it.
+/// Pause, resume or retry: what a download in progress does besides cancelling.
+@MainActor
+struct DownloadPrimaryAction {
+    let titleKey: LocalizedStringKey
+    let systemImage: String
+    let perform: () -> Void
+
+    init?(itemID: String, state: DownloadButtonState, manager: DownloadManager, dependencies: DependencyContainer) {
+        switch state {
+        case .queued, .downloading:
+            titleKey = "downloads.action.pause"
+            systemImage = "pause.circle"
+            perform = { Task { await manager.pause(itemID: itemID) } }
+        case .paused:
+            titleKey = "downloads.action.resume"
+            systemImage = "play.circle"
+            perform = {
+                manager.resume(itemID: itemID)
+                dependencies.beginDownloadActivity()
+            }
+        case .failed:
+            titleKey = "downloads.action.retry"
+            systemImage = "arrow.clockwise.circle"
+            perform = {
+                manager.retry(itemID: itemID)
+                dependencies.beginDownloadActivity()
+            }
+        case .available, .downloaded:
+            return nil
+        }
+    }
+}
+
 struct DownloadMenuActions: View {
     let itemID: String
     let state: DownloadButtonState
@@ -195,21 +228,8 @@ struct DownloadMenuActions: View {
     @Environment(\.dependencies) private var dependencies
 
     var body: some View {
-        switch state {
-        case .downloading:
-            Button("downloads.action.pause") { Task { await manager.pause(itemID: itemID) } }
-        case .paused:
-            Button("downloads.action.resume") {
-                manager.resume(itemID: itemID)
-                dependencies.beginDownloadActivity()
-            }
-        case .failed:
-            Button("downloads.action.retry") {
-                manager.retry(itemID: itemID)
-                dependencies.beginDownloadActivity()
-            }
-        default:
-            EmptyView()
+        if let primary = DownloadPrimaryAction(itemID: itemID, state: state, manager: manager, dependencies: dependencies) {
+            Button(primary.titleKey, action: primary.perform)
         }
         Button(state == .downloaded ? "downloads.action.remove" : "downloads.action.cancel", role: .destructive) {
             Task { await manager.cancel(itemID: itemID) }
