@@ -31,6 +31,27 @@ final class AppearancePreferences {
         }
     }
 
+    // MARK: - Upright artwork
+
+    /// What the 4:5 hero on an upright iPhone shows (Home's banner, the detail pages). The backdrop
+    /// by default: most posters carry the title printed at the foot, under the logo and the facts.
+    enum UprightArtwork: String, CaseIterable, Identifiable, Sendable {
+        case backdrop
+        case poster
+
+        var id: String { rawValue }
+
+        /// Literal keys/defaults so `String(localized:defaultValue:)` compile-time-literal requirement holds.
+        var title: String {
+            switch self {
+            case .backdrop:
+                String(localized: "settings.appearance.uprightArtwork.backdrop", defaultValue: "Backdrop")
+            case .poster:
+                String(localized: "settings.appearance.uprightArtwork.poster", defaultValue: "Poster")
+            }
+        }
+    }
+
     // MARK: - Navigation style
 
     /// Sodalite#140. tvOS only: the shell navigates either from the bar across the top or from the
@@ -62,6 +83,7 @@ final class AppearancePreferences {
         static let backgroundStyle = "appearance.backgroundStyle"
         static let showContentLogos = "appearance.showContentLogos"
         static let continueWatchingImage = "appearance.continueWatchingImage"
+        static let uprightArtwork = "appearance.uprightArtwork"
         static let largeCards = "appearance.largeCards"
         static let nowPlayingUsesSeriesPoster = "appearance.nowPlayingUsesSeriesPoster"
         static let spoilerProtectionEnabled = "appearance.spoilerProtection"
@@ -101,6 +123,10 @@ final class AppearancePreferences {
 
     var continueWatchingImage: ContinueWatchingImage {
         didSet { store.set(continueWatchingImage.rawValue, forKey: Keys.continueWatchingImage) }
+    }
+
+    var uprightArtwork: UprightArtwork {
+        didSet { store.set(uprightArtwork.rawValue, forKey: Keys.uprightArtwork) }
     }
 
     var largeCards: Bool {
@@ -290,6 +316,8 @@ final class AppearancePreferences {
         self.showContentLogos = store.object(forKey: Keys.showContentLogos) as? Bool ?? true
         self.continueWatchingImage = store.string(forKey: Keys.continueWatchingImage)
             .flatMap(ContinueWatchingImage.init(rawValue:)) ?? .still
+        self.uprightArtwork = store.string(forKey: Keys.uprightArtwork)
+            .flatMap(UprightArtwork.init(rawValue:)) ?? .backdrop
         self.largeCards = store.object(forKey: Keys.largeCards) as? Bool ?? false
         self.nowPlayingUsesSeriesPoster = store.object(forKey: Keys.nowPlayingUsesSeriesPoster) as? Bool ?? false
         self.spoilerProtectionEnabled = store.object(forKey: Keys.spoilerProtectionEnabled) as? Bool ?? false

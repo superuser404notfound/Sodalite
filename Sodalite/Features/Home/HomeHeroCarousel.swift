@@ -278,7 +278,7 @@ struct HomeHeroCarousel: View {
                 }
                 // Every page is made ready as soon as the banner knows its titles, the one on screen
                 // first, so paging never waits on the network or on a colour still being read.
-                .task(id: "\(items.map(\.originKey))|\(isPortrait)") {
+                .task(id: "\(items.map(\.originKey))|\(isPortrait)|\(uprightArtwork)") {
                     held = [:]
                     palettes = [:]
                     await prepare(current)
@@ -314,9 +314,16 @@ struct HomeHeroCarousel: View {
     }
 
     private func artworkURL(for item: JellyfinItem) -> URL? {
-        // The poster only where there is no backdrop: most carry the title printed at the foot, right
-        // where the logo and the facts go, and the two titles stacked (Blexbi).
-        isPortrait ? (tallBackdropURL(item) ?? posterURL(item)) : backdropURL(item)
+        guard isPortrait else { return backdropURL(item) }
+        // The poster only on request or without a backdrop: most carry the title printed at the
+        // foot, right where the logo and the facts go, and the two titles stacked (Blexbi).
+        return uprightArtwork == .poster
+            ? (posterURL(item) ?? tallBackdropURL(item))
+            : (tallBackdropURL(item) ?? posterURL(item))
+    }
+
+    private var uprightArtwork: AppearancePreferences.UprightArtwork {
+        dependencies.appearancePreferences.uprightArtwork
     }
 
     private var imageAuth: ImageAuth { ImageAuth.snapshot(dependencies.sessionRegistry) }

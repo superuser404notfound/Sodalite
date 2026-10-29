@@ -45,6 +45,7 @@ struct ProfileSyncPayloadsTests {
         let look = AppearancePreferences(store: defaults, scope: "s:a", device: device)
         look.hiddenTabs = [.catalog]
         look.navigationStyle = .sidebar
+        look.uprightArtwork = .poster
 
         let data = try ProfileSyncPayload.playback(ProfilePlaybackPayload(collecting: source, stamp: .now)).encoded()
         let lookData = try ProfileSyncPayload.appearance(ProfileAppearancePayload(collecting: look, stamp: .now)).encoded()
@@ -61,6 +62,11 @@ struct ProfileSyncPayloadsTests {
         #expect(target.nextEpisodeCountdownAnchor == .end)
         #expect(targetLook.hiddenTabs == [.catalog])
         #expect(targetLook.navigationStyle == .sidebar)
+        #expect(targetLook.uprightArtwork == .poster)
+    }
+
+    @Test func theUprightArtworkDefaultsToTheBackdrop() {
+        #expect(AppearancePreferences(store: scratch("uprightDefault")).uprightArtwork == .backdrop)
     }
 
     /// The keys each profile record carried when it first shipped (aca3e7a7, 2026-09-17). A record

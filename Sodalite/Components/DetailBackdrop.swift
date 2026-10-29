@@ -117,6 +117,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     @State private var belowFoldHeight: CGFloat = 0
     @State private var hintSettled = false
 
+    @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
@@ -659,15 +660,19 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         )
     }
 
-    /// The backdrop on both shapes. The tall hero stands the poster in only when there is no backdrop:
-    /// most posters carry the title printed at the foot, under the logo and the panel, and the page
-    /// showed it twice (Blexbi, the same doubling Sodalite#95 took the poster away for once).
+    /// The backdrop on both shapes, unless the profile asks for the poster in the tall hero
+    /// (`AppearancePreferences.UprightArtwork`): most posters carry the title printed at the foot,
+    /// under the logo and the panel, and the page showed it twice (Blexbi, the same doubling
+    /// Sodalite#95 took the poster away for once).
     private var artworkURL: URL? {
         usesTallHero ? tallHeroURL : (heroImageURL ?? heroPosterURL)
     }
 
     private var tallHeroURL: URL? {
-        heroTallImageURL ?? heroImageURL ?? heroPosterURL
+        let backdrop = heroTallImageURL ?? heroImageURL
+        return dependencies.appearancePreferences.uprightArtwork == .poster
+            ? (heroPosterURL ?? backdrop)
+            : (backdrop ?? heroPosterURL)
     }
 
     /// Upright iPhone only. Every other tier draws the fixed `DetailBackdrop`, which keys its colour
