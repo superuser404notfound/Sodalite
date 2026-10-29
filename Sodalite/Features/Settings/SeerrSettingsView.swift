@@ -630,7 +630,7 @@ struct SeerrSettingsView: View {
             showSuccess = true
 
             try? await Task.sleep(for: .seconds(1.5))
-            appState.setSeerrConnected(server: connected, user: user)
+            appState.setSeerrConnected(server: connected, user: user, for: dependencies.activeProfileRef())
             dependencies.scheduleRouteResolve()
             showSuccess = false
         } catch {

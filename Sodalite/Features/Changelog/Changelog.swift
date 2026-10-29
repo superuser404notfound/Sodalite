@@ -261,6 +261,12 @@ enum Changelog {
                     icon: "person.crop.circle.badge.questionmark"
                 ),
                 ChangelogHighlight(
+                    .fix,
+                    "changelog.1_1_0.requestsAfterPin.title",
+                    "changelog.1_1_0.requestsAfterPin.body",
+                    icon: "lock"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_1_0.privacyShield.title",
                     "changelog.1_1_0.privacyShield.body",

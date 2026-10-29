@@ -67,7 +67,7 @@ final class MyRequestsWatcher {
         guard isEnabled, let scope = scope(), let selfID = selfSeerrID() else { return }
         lookupCache = [:]
 
-        guard let requests = try? await fetchRequests(selfID), scope == self.scope() else { return }
+        guard let requests = try? await fetchRequests(selfID), isCurrent(scope, selfID) else { return }
         let own = requests.filter { $0.requestedBy?.id == selfID }
         let snapshot = preferences.myRequestsSnapshot(scope: scope)
         var observations: [MyRequestObservation] = []
@@ -75,7 +75,7 @@ final class MyRequestsWatcher {
             let available = await availableSeasons(for: request, snapshot: snapshot)
             observations.append(MyRequestObservation(request: request, availableSeasons: available))
         }
-        guard scope == self.scope() else { return }
+        guard isCurrent(scope, selfID) else { return }
         hasOwnRequests = !own.isEmpty
 
         let result = MyRequestsDiff.apply(snapshot: snapshot, observations: observations, selfID: selfID, now: now())
@@ -91,10 +91,14 @@ final class MyRequestsWatcher {
             }
             enriched.append(event)
         }
-        guard scope == self.scope() else { return }
+        guard isCurrent(scope, selfID) else { return }
         unseenEvents = MyRequestEvent.merging(enriched, into: preferences.unseenMyRequestEvents(scope: scope))
         preferences.setUnseenMyRequestEvents(unseenEvents, scope: scope)
         await onNewEvents(enriched)
+    }
+
+    private func isCurrent(_ scope: String, _ selfID: Int) -> Bool {
+        scope == self.scope() && selfID == selfSeerrID()
     }
 
     func markAllSeen() {

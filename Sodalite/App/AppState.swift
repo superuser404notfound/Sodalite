@@ -14,6 +14,10 @@ final class AppState {
 
     var activeSeerrServer: SeerrServer?
     var activeSeerrUser: SeerrUser?
+    /// The Jellyfin profile the Seerr session was connected for. A profile switch moves the active
+    /// profile at once and the Seerr user only after its own sync, so anything asking whose requests
+    /// these are compares the two.
+    private(set) var activeSeerrProfile: ProfileRef?
 
     /// `sodalite://item/{id}` id set by onOpenURL (usually TopShelf); AppRouter clears it after presenting so a repeat tap re-fires. The deep-link signal field.
     var pendingDeepLinkItemID: String?
@@ -143,16 +147,19 @@ final class AppState {
         isAuthenticated = false
         activeSeerrServer = nil
         activeSeerrUser = nil
+        activeSeerrProfile = nil
     }
 
-    func setSeerrConnected(server: SeerrServer, user: SeerrUser) {
+    func setSeerrConnected(server: SeerrServer, user: SeerrUser, for profile: ProfileRef?) {
         activeSeerrServer = server
         activeSeerrUser = user
+        activeSeerrProfile = profile
     }
 
     func disconnectSeerr() {
         activeSeerrServer = nil
         activeSeerrUser = nil
+        activeSeerrProfile = nil
     }
 }
 
