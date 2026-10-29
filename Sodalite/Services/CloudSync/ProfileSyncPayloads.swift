@@ -179,6 +179,8 @@ struct ProfileAppearancePayload: Codable, Equatable {
     var spoilerHideEpisodeTitles: Bool? = nil
     /// nil from a build without library tabs, unapplied for the same reason.
     var pinnedLibraryTabs: [PinnedLibraryTab]? = nil
+    /// nil from a build without the upright artwork choice, unapplied for the same reason.
+    var uprightArtwork: String? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -207,7 +209,8 @@ extension ProfileAppearancePayload {
             showCriticRating: a.showCriticRating,
             showTagline: a.showTagline,
             spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
-            pinnedLibraryTabs: a.pinnedLibraryTabs
+            pinnedLibraryTabs: a.pinnedLibraryTabs,
+            uprightArtwork: a.uprightArtwork.rawValue
         )
     }
 
@@ -233,6 +236,9 @@ extension ProfileAppearancePayload {
         if let showTagline { a.showTagline = showTagline }
         if let spoilerHideEpisodeTitles { a.spoilerHideEpisodeTitles = spoilerHideEpisodeTitles }
         if let pinnedLibraryTabs { a.setPinnedLibraryTabs(pinnedLibraryTabs) }
+        if let artwork = uprightArtwork.flatMap(AppearancePreferences.UprightArtwork.init(rawValue:)) {
+            a.uprightArtwork = artwork
+        }
     }
 }
 

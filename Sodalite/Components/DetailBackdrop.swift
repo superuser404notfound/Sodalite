@@ -92,9 +92,11 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// `DetailBackdrop` owns the artwork). Same two URLs that surface passes to the backdrop.
     var heroImageURL: URL? = nil
     var heroPosterURL: URL? = nil
-    /// iPhone portrait: the poster stands as the hero instead of the 16:9 band, the shape Home's
-    /// banner takes on an upright iPhone. Only for items whose poster is a real upright poster
-    /// (films, series, collections); an episode still or a home video's thumb is wide.
+    /// The same backdrop at `ImageWidth.tallHero`, for the 4:5 crop; nil falls back to `heroImageURL`.
+    var heroTallImageURL: URL? = nil
+    /// iPhone portrait: a tall 4:5 hero instead of the 16:9 band, the shape Home's banner takes on an
+    /// upright iPhone. Only for items with a real upright poster to fall back on (films, series,
+    /// collections); an episode still or a home video's thumb is wide.
     var portraitHero: Bool = false
     @ViewBuilder let hero: () -> Hero
     @ViewBuilder let primary: () -> Primary
@@ -115,6 +117,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     @State private var belowFoldHeight: CGFloat = 0
     @State private var hintSettled = false
 
+    @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
@@ -204,6 +207,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
         portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder primary: @escaping () -> Primary,
@@ -211,6 +215,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     ) {
         self.heroImageURL = heroImageURL
         self.heroPosterURL = heroPosterURL
+        self.heroTallImageURL = heroTallImageURL
         self.portraitHero = portraitHero
         self.hero = hero
         self.primary = primary
@@ -369,8 +374,8 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     private var portraitBody: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                if usesPosterHero {
-                    posterHero
+                if usesTallHero {
+                    tallHero
                 } else {
                     heroBand
                 }
@@ -379,8 +384,8 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                     VStack(alignment: .leading, spacing: 0) {
                         primary()
                     }
-                    // Over the poster's dissolve by `posterOverlap`: see there.
-                    .padding(.top, usesPosterHero ? 20 - Self.posterOverlap : 20)
+                    // Over the tall hero's dissolve by `tallHeroOverlap`: see there.
+                    .padding(.top, usesTallHero ? 20 - Self.tallHeroOverlap : 20)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 40) {
@@ -418,7 +423,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             .overlay(alignment: .top) {
                 hero()
                     .padding(.horizontal, metrics.rowInset)
-                    .frame(height: max(0, safeTop + heroHeight - 12 - (usesPosterHero ? Self.posterOverlap : 0)), alignment: .bottom)
+                    .frame(height: max(0, safeTop + heroHeight - 12 - (usesTallHero ? Self.tallHeroOverlap : 0)), alignment: .bottom)
                     .allowsHitTesting(false)
             }
         }
@@ -445,26 +450,26 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         .animation(.easeInOut(duration: 0.4), value: artworkPalette)
     }
 
-    /// The upright poster, on Home's upright banner recipe (HomeHeroCarousel.portraitArtwork): the
-    /// poster hangs from just under the Dynamic Island, so its top, where most posters carry their
-    /// title, is never behind the island or the back button, and a heavily blurred copy of the same
-    /// art fills the island strip. The bottom dissolves into the artwork's colour like the band does.
+    /// The tall hero, on Home's upright banner recipe (HomeHeroCarousel.portraitArtwork): the
+    /// backdrop, cropped to the 4:5 box's middle, hangs from just under the Dynamic Island, so none
+    /// of it is behind the island or the back button, and a heavily blurred copy of the same art
+    /// fills the island strip. The bottom dissolves into the artwork's colour like the band does.
     ///
     /// Pulling the page down past its top stretches the artwork instead of uncovering what is above
     /// it: the whole hero scales up from its bottom edge by exactly the overscroll, so its top stays
     /// on the screen's edge. Read per frame in `visualEffect` rather than through scroll state, which
     /// lags a drag (see the trailing filler's note).
-    private var posterHero: some View {
+    private var tallHero: some View {
         let near = artworkPalette.near
         return ZStack(alignment: .top) {
-            posterImage(alignment: .center)
+            tallHeroImage(alignment: .center)
                 .blur(radius: 30, opaque: true)
-                // Keeps the clock legible on a bright poster.
+                // Keeps the clock legible on bright art.
                 .overlay(alignment: .top) {
                     LinearGradient(colors: [.black.opacity(0.25), .black.opacity(0)], startPoint: .top, endPoint: .bottom)
                         .frame(height: safeTop)
                 }
-            posterImage(alignment: .top)
+            tallHeroImage(alignment: .top)
                 .mask {
                     VStack(spacing: 0) {
                         LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
@@ -474,7 +479,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                 }
                 .padding(.top, safeTop)
         }
-        .frame(maxWidth: .infinity, minHeight: safeTop + posterHeight, maxHeight: safeTop + posterHeight)
+        .frame(maxWidth: .infinity, minHeight: safeTop + tallHeroHeight, maxHeight: safeTop + tallHeroHeight)
         .overlay(alignment: .bottom) {
             LinearGradient(
                 stops: [
@@ -500,14 +505,14 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         .allowsHitTesting(false)
     }
 
-    /// The poster laid over a surface that takes exactly the space it is offered: framed directly, a
+    /// The art laid over a surface that takes exactly the space it is offered: framed directly, a
     /// filled image grows its frame to the overflow, as on Home's banner.
-    private func posterImage(alignment: Alignment) -> some View {
+    private func tallHeroImage(alignment: Alignment) -> some View {
         Color.clear
             .overlay(alignment: alignment) {
-                AsyncCachedImage(url: heroPosterURL, onImageLoaded: { image in
+                AsyncCachedImage(url: artworkURL, onImageLoaded: { image in
                     #if canImport(UIKit)
-                    if let url = heroPosterURL {
+                    if let url = artworkURL {
                         ArtworkTintStore.shared.resolve(image, for: url)
                     }
                     #endif
@@ -655,26 +660,37 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         )
     }
 
+    /// The backdrop on both shapes, unless the profile asks for the poster in the tall hero
+    /// (`AppearancePreferences.UprightArtwork`): most posters carry the title printed at the foot,
+    /// under the logo and the panel, and the page showed it twice (Blexbi, the same doubling
+    /// Sodalite#95 took the poster away for once).
     private var artworkURL: URL? {
-        usesPosterHero ? heroPosterURL : (heroImageURL ?? heroPosterURL)
+        usesTallHero ? tallHeroURL : (heroImageURL ?? heroPosterURL)
+    }
+
+    private var tallHeroURL: URL? {
+        let backdrop = heroTallImageURL ?? heroImageURL
+        return dependencies.appearancePreferences.uprightArtwork == .poster
+            ? (heroPosterURL ?? backdrop)
+            : (backdrop ?? heroPosterURL)
     }
 
     /// Upright iPhone only. Every other tier draws the fixed `DetailBackdrop`, which keys its colour
     /// by the backdrop URL, so asking for the poster's colour there found none and the page under
     /// the fold went black.
-    private var usesPosterHero: Bool {
-        isPhonePortrait && portraitHero && heroPosterURL != nil
+    private var usesTallHero: Bool {
+        isPhonePortrait && portraitHero && tallHeroURL != nil
     }
 
-    /// The artwork's height below the island: the 16:9 band, or the poster's 4:5 box.
+    /// The artwork's height below the island: the 16:9 band, or the tall hero's 4:5 box.
     private var heroHeight: CGFloat {
-        usesPosterHero ? posterHeight : bandHeight
+        usesTallHero ? tallHeroHeight : bandHeight
     }
 
     /// 4:5 off the window width, as Home's upright banner, and the same on every page: a height
     /// derived from the panel below gave each title its own crop and resized the art whenever the
     /// panel's text changed (device, 2026-10-14).
-    private var posterHeight: CGFloat {
+    private var tallHeroHeight: CGFloat {
         #if os(iOS)
         let width = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.bounds.width ?? 390
@@ -684,11 +700,11 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         #endif
     }
 
-    /// How far the logo and the panel reach up over the poster's bottom. That stretch is already the
+    /// How far the logo and the panel reach up over the tall hero's bottom. That stretch is already the
     /// dissolve into the page colour (220 pt), so it reads as the page rather than the picture, and
-    /// taking the room from there is what keeps Play on the first screen under a full 4:5 poster with
+    /// taking the room from there is what keeps Play on the first screen under a full 4:5 hero with
     /// an episode's title in the panel.
-    private static var posterOverlap: CGFloat { 56 }
+    private static var tallHeroOverlap: CGFloat { 56 }
 
     private var portraitBandUsesPoster: Bool {
         heroImageURL == nil && heroPosterURL != nil
@@ -824,6 +840,7 @@ extension DetailContentOverlay where Primary == EmptyView {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
         portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder content: @escaping () -> Content
@@ -831,6 +848,7 @@ extension DetailContentOverlay where Primary == EmptyView {
         self.init(
             heroImageURL: heroImageURL,
             heroPosterURL: heroPosterURL,
+            heroTallImageURL: heroTallImageURL,
             portraitHero: portraitHero,
             hero: hero,
             primary: { EmptyView() },

@@ -144,6 +144,7 @@ struct CatalogDetailView: View {
             DetailContentOverlay(
                 heroImageURL: SeerrImageURL.backdrop(path: backdropPath),
                 heroPosterURL: SeerrImageURL.poster(path: posterPath, size: .w780),
+                heroTallImageURL: SeerrImageURL.backdrop(path: backdropPath, size: .original),
                 portraitHero: true,
                 hero: {
                 heroTitle

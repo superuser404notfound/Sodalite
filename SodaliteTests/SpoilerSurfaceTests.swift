@@ -64,7 +64,7 @@ struct SpoilerSurfaceTests {
         let service = try sourceFile("Sodalite/Services/Jellyfin/JellyfinImageService.swift")
         #expect(service.contains("func parentBackdropURL("))
         let series = try sourceFile("Sodalite/Features/Detail/SeriesDetailView.swift")
-        #expect(series.contains("parentBackdropURL(for: episode)"))
+        #expect(series.contains("parentBackdropURL(for: episode, maxWidth: maxWidth)"))
     }
 
     @Test("the player takes an injected policy rather than reading the environment")

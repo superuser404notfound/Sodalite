@@ -70,6 +70,12 @@ nonisolated enum ImageWidth {
     /// asking for more only makes the server upscale.
     static let fullBleed = 1920
 
+    /// The backdrop cropped to the upright iPhone's 4:5 hero (Home's banner, the detail pages). The
+    /// crop keeps 45% of a 16:9 width, so a 440pt phone at 3x needs a source 1650px tall, 2933 wide.
+    /// Past `fullBleed` on purpose: a 1920 source passes through unresized, and the 3840 ones TMDB
+    /// carries for newer titles stop being upscaled 1.5x.
+    static let tallHero = 2880
+
     /// Top Shelf cell art, download AND decode. The shelf is not one of our tiers, tvOS fixes the
     /// cell, so the size comes from the screen: on tvOS 26 two cells and a bit fill the 1920pt row,
     /// which puts one at around 800pt, or 1600px at the 2x the TV renders. That is twice the 404pt

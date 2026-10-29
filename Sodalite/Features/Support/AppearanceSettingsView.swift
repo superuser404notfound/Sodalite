@@ -77,6 +77,20 @@ struct AppearanceSettingsView: View {
                 label: { $0.title }
             )
 
+            #if os(iOS)
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                ValuePickerRow(
+                    icon: "iphone",
+                    title: "settings.appearance.uprightArtwork",
+                    subtitle: "settings.appearance.uprightArtwork.subtitle",
+                    options: AppearancePreferences.UprightArtwork.allCases,
+                    selection: Binding(get: { appearance.uprightArtwork },
+                                       set: { appearance.uprightArtwork = $0 }),
+                    label: { $0.title }
+                )
+            }
+            #endif
+
             boolRow(
                 icon: "rectangle.expand.vertical",
                 title: "settings.appearance.largeCards",

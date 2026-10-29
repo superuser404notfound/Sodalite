@@ -121,6 +121,7 @@ struct CollectionDetailView: View {
             DetailContentOverlay(
                 heroImageURL: vm.backdropURL(for: vm.item),
                 heroPosterURL: vm.heroPosterURL(for: vm.item),
+                heroTallImageURL: vm.backdropURL(for: vm.item, maxWidth: ImageWidth.tallHero),
                 portraitHero: true,
                 primary: {
                 // Glass panel + action buttons as the bottom-aligned first-page block, matching movie/series detail (Sodalite#15 round 6).

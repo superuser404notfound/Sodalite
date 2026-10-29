@@ -59,9 +59,10 @@ struct CloudSyncSettingsParityTests {
     @Test func everyAppearanceSettingIsInThePayload() {
         let defaults = scratchDefaults("appearance")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
-        // `pinnedLibraryTabs` postdates the legacy record and travels in the profile record alone.
+        // `pinnedLibraryTabs` and `uprightArtwork` postdate the legacy record and travel in the
+        // profile record alone.
         let profile = storedSettingNames(of: AppearancePreferences(store: defaults))
-            .subtracting(["pinnedLibraryTabs"])
+            .subtracting(["pinnedLibraryTabs", "uprightArtwork"])
         let payload = payloadFieldNames(.appearance)
         #expect(profile.isDisjoint(with: device))
         #expect(profile.union(device.intersection(payload)) == payload)

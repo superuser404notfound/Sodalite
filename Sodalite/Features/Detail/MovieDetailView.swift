@@ -379,6 +379,7 @@ struct MovieDetailView: View {
             DetailContentOverlay(
                 heroImageURL: vm.backdropURL(for: vm.item),
                 heroPosterURL: vm.heroPosterURL(for: vm.item),
+                heroTallImageURL: vm.backdropURL(for: vm.item, maxWidth: ImageWidth.tallHero),
                 portraitHero: vm.item.type == .movie,
                 hero: {
                 DetailHeroLogo(viewModel: vm)
