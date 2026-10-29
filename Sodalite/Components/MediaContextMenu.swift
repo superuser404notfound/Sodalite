@@ -110,8 +110,11 @@ private struct MediaContextMenu: View {
         }
 
         if let playMediaItem, PlayMediaItemAction.plays(item) {
-            Button(hasPosition ? "detail.resume" : "detail.play", systemImage: "play.fill") {
-                playMediaItem(item)
+            // No Resume: a tap on a started card already resumes it (Blexbi).
+            if !hasPosition {
+                Button("detail.play", systemImage: "play.fill") {
+                    playMediaItem(item)
+                }
             }
             if hasPosition, offersWatched {
                 Button("contextMenu.playFromBeginning", systemImage: "arrow.counterclockwise") {
