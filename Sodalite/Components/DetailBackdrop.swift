@@ -92,6 +92,8 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// `DetailBackdrop` owns the artwork). Same two URLs that surface passes to the backdrop.
     var heroImageURL: URL? = nil
     var heroPosterURL: URL? = nil
+    /// The same backdrop at `ImageWidth.tallHero`, for the 4:5 crop; nil falls back to `heroImageURL`.
+    var heroTallImageURL: URL? = nil
     /// iPhone portrait: a tall 4:5 hero instead of the 16:9 band, the shape Home's banner takes on an
     /// upright iPhone. Only for items with a real upright poster to fall back on (films, series,
     /// collections); an episode still or a home video's thumb is wide.
@@ -204,6 +206,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
         portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder primary: @escaping () -> Primary,
@@ -211,6 +214,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     ) {
         self.heroImageURL = heroImageURL
         self.heroPosterURL = heroPosterURL
+        self.heroTallImageURL = heroTallImageURL
         self.portraitHero = portraitHero
         self.hero = hero
         self.primary = primary
@@ -659,14 +663,18 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// most posters carry the title printed at the foot, under the logo and the panel, and the page
     /// showed it twice (Blexbi, the same doubling Sodalite#95 took the poster away for once).
     private var artworkURL: URL? {
-        heroImageURL ?? heroPosterURL
+        usesTallHero ? tallHeroURL : (heroImageURL ?? heroPosterURL)
+    }
+
+    private var tallHeroURL: URL? {
+        heroTallImageURL ?? heroImageURL ?? heroPosterURL
     }
 
     /// Upright iPhone only. Every other tier draws the fixed `DetailBackdrop`, which keys its colour
     /// by the backdrop URL, so asking for the poster's colour there found none and the page under
     /// the fold went black.
     private var usesTallHero: Bool {
-        isPhonePortrait && portraitHero && artworkURL != nil
+        isPhonePortrait && portraitHero && tallHeroURL != nil
     }
 
     /// The artwork's height below the island: the 16:9 band, or the tall hero's 4:5 box.
@@ -827,6 +835,7 @@ extension DetailContentOverlay where Primary == EmptyView {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
         portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder content: @escaping () -> Content
@@ -834,6 +843,7 @@ extension DetailContentOverlay where Primary == EmptyView {
         self.init(
             heroImageURL: heroImageURL,
             heroPosterURL: heroPosterURL,
+            heroTallImageURL: heroTallImageURL,
             portraitHero: portraitHero,
             hero: hero,
             primary: { EmptyView() },

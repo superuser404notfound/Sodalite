@@ -724,7 +724,7 @@ final class DetailViewModel {
         return imageService.imageURL(itemID: seriesID, serverID: episode.serverID, imageType: .primary, tag: tag, maxWidth: 1290)
     }
 
-    func backdropURL(for item: JellyfinItem) -> URL? {
-        imageService.backdropURL(for: item)
+    func backdropURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.fullBleed) -> URL? {
+        imageService.backdropURL(for: item, maxWidth: maxWidth)
     }
 }

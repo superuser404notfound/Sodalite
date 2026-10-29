@@ -105,6 +105,7 @@ struct CatalogCollectionView: View {
             DetailContentOverlay(
                 heroImageURL: SeerrImageURL.backdrop(path: detail?.backdropPath ?? collection.backdropPath),
                 heroPosterURL: SeerrImageURL.poster(path: detail?.posterPath ?? collection.posterPath, size: .w780),
+                heroTallImageURL: SeerrImageURL.backdrop(path: detail?.backdropPath ?? collection.backdropPath, size: .original),
                 portraitHero: true,
                 primary: {
                 VStack(alignment: .leading, spacing: 24) {

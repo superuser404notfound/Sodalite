@@ -7,6 +7,7 @@ import SwiftUI
 struct HomeHeroCarousel: View {
     let items: [JellyfinItem]
     let backdropURL: (JellyfinItem) -> URL?
+    let tallBackdropURL: (JellyfinItem) -> URL?
     let posterURL: (JellyfinItem) -> URL?
     let onOpen: (JellyfinItem) -> Void
     let onPlay: (JellyfinItem) -> Void
@@ -22,12 +23,14 @@ struct HomeHeroCarousel: View {
     init(
         items: [JellyfinItem],
         backdropURL: @escaping (JellyfinItem) -> URL?,
+        tallBackdropURL: @escaping (JellyfinItem) -> URL?,
         posterURL: @escaping (JellyfinItem) -> URL?,
         onOpen: @escaping (JellyfinItem) -> Void,
         onPlay: @escaping (JellyfinItem) -> Void
     ) {
         self.items = items
         self.backdropURL = backdropURL
+        self.tallBackdropURL = tallBackdropURL
         self.posterURL = posterURL
         self.onOpen = onOpen
         self.onPlay = onPlay
@@ -313,7 +316,7 @@ struct HomeHeroCarousel: View {
     private func artworkURL(for item: JellyfinItem) -> URL? {
         // The poster only where there is no backdrop: most carry the title printed at the foot, right
         // where the logo and the facts go, and the two titles stacked (Blexbi).
-        isPortrait ? (backdropURL(item) ?? posterURL(item)) : backdropURL(item)
+        isPortrait ? (tallBackdropURL(item) ?? posterURL(item)) : backdropURL(item)
     }
 
     private var imageAuth: ImageAuth { ImageAuth.snapshot(dependencies.sessionRegistry) }

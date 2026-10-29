@@ -410,6 +410,7 @@ struct HomeView: View {
                 HomeHeroCarousel(
                     items: vm.heroItems,
                     backdropURL: vm.heroBackdropURL(for:),
+                    tallBackdropURL: vm.heroTallBackdropURL(for:),
                     posterURL: vm.heroPosterURL(for:),
                     onOpen: { selectedItem = $0 },
                     onPlay: {

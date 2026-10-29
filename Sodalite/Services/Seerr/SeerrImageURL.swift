@@ -23,6 +23,8 @@ enum SeerrImageURL {
 
     enum BackdropSize: String {
         case w780, w1280
+        /// The upright iPhone's 4:5 crop of a backdrop needs more than w1280's 720 rows.
+        case original
 
         /// Smallest rendition that still covers `pixelWidth`. The 16:9 tiles reach 936px at Large
         /// Cards on tvOS, past what w780 carries.

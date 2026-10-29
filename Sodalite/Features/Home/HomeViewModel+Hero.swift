@@ -117,6 +117,11 @@ extension HomeViewModel {
         imageService.backdropURL(for: item, maxWidth: ImageWidth.fullBleed)
     }
 
+    /// The upright iPhone's banner crops the backdrop to 4:5 (see `ImageWidth.tallHero`).
+    func heroTallBackdropURL(for item: JellyfinItem) -> URL? {
+        imageService.backdropURL(for: item, maxWidth: ImageWidth.tallHero)
+    }
+
     /// The upright iPhone's banner falls back to the poster for a title without a backdrop. 1280 covers the widest iPhone at 3x (440pt is 1320px, cropped at the sides by the 4:5
     /// box); `fullBleed` decoded a 2:3 poster at 1920x2880, 22MB per page, and slowed every swipe.
     func heroPosterURL(for item: JellyfinItem) -> URL? {

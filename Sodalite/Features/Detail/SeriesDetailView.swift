@@ -18,6 +18,7 @@ struct SeriesDetailView: View {
     @State private var navigateToPerson: PersonRoute?
     @State private var navigateToSeerrRequest: SeerrMedia?
     @State private var backdropURL: URL?
+    @State private var tallBackdropURL: URL?
     @State private var showPlayer = false
     @State private var playQueue: [JellyfinItem] = []
     @State private var playItem: JellyfinItem?
@@ -573,22 +574,23 @@ struct SeriesDetailView: View {
     }
 
     private func updateBackdropURL() {
+        backdropURL = resolvedBackdropURL(maxWidth: ImageWidth.fullBleed)
+        tallBackdropURL = resolvedBackdropURL(maxWidth: ImageWidth.tallHero)
+    }
+
+    private func resolvedBackdropURL(maxWidth: Int) -> URL? {
         // Always the series backdrop (higher-res than the per-episode thumbnail, and dodges corrupt episode thumbnails). On an episode deep-link the series stub has no backdrop tags yet, so fall back to the episode's parent-series tags (same image) to paint on the first frame.
-        guard let viewModel else {
-            backdropURL = nil
-            return
-        }
-        if let url = viewModel.backdropURL(for: viewModel.item) {
-            backdropURL = url
+        guard let viewModel else { return nil }
+        if let url = viewModel.backdropURL(for: viewModel.item, maxWidth: maxWidth) {
+            return url
         } else if let episode = selectedEpisode {
             // Sodalite#50: this fallback would otherwise take the episode's OWN backdrop first and
             // paint it full bleed. While veiled, go straight to the parent series art.
-            backdropURL = SpoilerReveal.isHidden(episode, dependencies: dependencies, appState: appState, surface: .artwork)
-                ? dependencies.jellyfinImageService.parentBackdropURL(for: episode)
-                : viewModel.backdropURL(for: episode)
-        } else {
-            backdropURL = nil
+            return SpoilerReveal.isHidden(episode, dependencies: dependencies, appState: appState, surface: .artwork)
+                ? dependencies.jellyfinImageService.parentBackdropURL(for: episode, maxWidth: maxWidth)
+                : viewModel.backdropURL(for: episode, maxWidth: maxWidth)
         }
+        return nil
     }
 
     /// The whole scrolling page. Extracted from `body` because the type checker gave up on it as one
@@ -599,6 +601,7 @@ struct SeriesDetailView: View {
         DetailContentOverlay(
             heroImageURL: backdropURL,
             heroPosterURL: vm.seriesHeroPosterURL(for: vm.item, episode: initialEpisode),
+            heroTallImageURL: tallBackdropURL,
             portraitHero: true,
             hero: {
             // Series logo, both modes (episode has none); observes the VM so it appears once an episode deep-link's series stub loads imageTags, no scroll needed.
