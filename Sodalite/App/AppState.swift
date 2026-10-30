@@ -25,6 +25,9 @@ final class AppState {
     /// Set with pendingDeepLinkItemID when the link was the TopShelf's playAction. AppRouter forwards it into DetailRouterView, which starts playback once. Cleared with the id.
     var pendingDeepLinkAutoPlay = false
 
+    /// Set with pendingDeepLinkItemID when the item lives on another server of a combined shelf (Sodalite#218). Cleared with the id.
+    var pendingDeepLinkServerID: String?
+
     /// Flipped by ContinueWatchingIntent; AppRouter fetches the latest Resume item then routes via pendingDeepLinkItemID. Separate because the intent runs before the target item is known.
     var requestContinueWatching: Bool = false
 

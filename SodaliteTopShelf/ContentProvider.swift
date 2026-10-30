@@ -12,36 +12,26 @@ final class ContentProvider: TVTopShelfContentProvider {
             log.notice("Top Shelf switched off in Settings; rendering empty.")
             return nil
         }
-        guard let session = SharedSession.read() else {
+        guard let sessions = ShelfSessions.read() else {
             log.notice("No shared session in keychain; TopShelf will render empty.")
             return nil
         }
-        let api = TopShelfAPI(session: session)
+        let session = sessions.active
 
-        async let resume = Self.fetch("resume") { try await api.resumeItems() }
-        async let nextUp = Self.fetch("nextUp") { try await api.nextUp() }
-
-        let fetchedResume = await resume
-        let fetchedNextUp = await nextUp
-
-        // Failure path only: a healthy load never touches the container, which keeps the
-        // extension's tight budget clear of a read + decode it has no use for.
-        let cached = (fetchedResume == nil || fetchedNextUp == nil)
-            ? Self.usableCache(session: session)
-            : nil
-
-        let (shownResume, shownNextUp) = TopShelfItem.shelfRows(resume: fetchedResume ?? cached?.resume ?? [],
-                                                                nextUp: fetchedNextUp ?? cached?.nextUp ?? [])
         // Shows hidden from Home's rows stay off the shelf too; the server knows nothing of them.
-        let hidden = TopShelfHiddenShows.read()?.hidden(for: session.userID) ?? []
-        let resumeItems = TopShelfItem.removingHidden(shownResume, hidden: hidden)
-        let nextUpItems = TopShelfItem.removingHidden(shownNextUp, hidden: hidden)
-        log.info("Fetched resume=\(resumeItems.count) nextUp=\(nextUpItems.count) usedCache=\(cached != nil)")
+        // The cache is read on the failure path only, which keeps the extension's tight budget
+        // clear of a read + decode a healthy load has no use for.
+        let feed = await TopShelfFeed.load(sessions: sessions,
+                                           hidden: TopShelfHiddenShows.read(),
+                                           cache: { TopShelfCache.usable(for: session) })
+        let resumeItems = feed.resume
+        let nextUpItems = feed.nextUp
+        log.info("Fetched resume=\(resumeItems.count) nextUp=\(nextUpItems.count) servers=\(sessions.all.count) usedCache=\(feed.usedCache)")
 
         // Writes the merged view, not just what came back, so a partial failure still leaves
         // both sections populated for the next total failure.
-        if TopShelfCachePolicy.shouldWrite(resumeSucceeded: fetchedResume != nil,
-                                           nextUpSucceeded: fetchedNextUp != nil) {
+        if TopShelfCachePolicy.shouldWrite(resumeSucceeded: feed.resumeFetched,
+                                           nextUpSucceeded: feed.nextUpFetched) {
             TopShelfCache(serverURL: session.baseURL.absoluteString,
                           userID: session.userID,
                           resume: resumeItems,
@@ -54,7 +44,7 @@ final class ContentProvider: TVTopShelfContentProvider {
         let artwork = TopShelfArtwork.read()
         let titleVeil = TopShelfTitleVeil.read()
         let bars = ResumeBarArtwork.existing(cells: (resumeItems + nextUpItems)
-                                                 .compactMap { $0.artworkCell(session: session, artwork: artwork) },
+                                                 .compactMap { $0.artworkCell(session: sessions.session(for: $0), artwork: artwork) },
                                              accent: TopShelfAccent.read())
         log.info("shelf artwork local=\(bars.count)")
 
@@ -62,7 +52,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
         if !resumeItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: resumeItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork, titleVeil: titleVeil)
+                makeItem(item: $0, session: sessions.session(for: $0), barURL: bars[$0.shelfKey], artwork: artwork, titleVeil: titleVeil)
             })
             collection.title = String(
                 localized: "TopShelf.ContinueWatching",
@@ -73,7 +63,7 @@ final class ContentProvider: TVTopShelfContentProvider {
 
         if !nextUpItems.isEmpty {
             let collection = TVTopShelfItemCollection(items: nextUpItems.map {
-                makeItem(item: $0, session: session, barURL: bars[$0.id], artwork: artwork, titleVeil: titleVeil)
+                makeItem(item: $0, session: sessions.session(for: $0), barURL: bars[$0.shelfKey], artwork: artwork, titleVeil: titleVeil)
             })
             collection.title = String(
                 localized: "TopShelf.NextUp",
@@ -94,7 +84,7 @@ final class ContentProvider: TVTopShelfContentProvider {
                           barURL: URL?,
                           artwork: TopShelfArtwork.Choice,
                           titleVeil: TopShelfTitleVeil) -> TVTopShelfSectionedItem {
-        let cell = TVTopShelfSectionedItem(identifier: item.id)
+        let cell = TVTopShelfSectionedItem(identifier: item.shelfKey)
         cell.title = item.topShelfTitle(veil: titleVeil)
         cell.imageShape = .hdtv
         // Both actions play. A shelf cell is an invitation to keep watching, not a link to a
@@ -119,32 +109,9 @@ final class ContentProvider: TVTopShelfContentProvider {
     }
 
     /// `sodalite://play/{id}`: the main app's `onOpenURL` opens the item's detail route and starts playback on arrival. The app still understands `sodalite://item/{id}` (detail without playing), the shelf just has no use for it.
+    /// An item from another server of a combined shelf names it in `?server=` (Sodalite#218), so the app asks that server rather than the active one.
     private func playLink(for item: TopShelfItem) -> URL {
-        URL(string: "sodalite://play/\(item.id)")!
-    }
-
-    /// Last good content, but only when it belongs to the session just read from the keychain.
-    /// A cache from another server or profile is deleted rather than carried forward.
-    private static func usableCache(session: SharedSession) -> TopShelfCache? {
-        guard let stored = TopShelfCache.read() else { return nil }
-        guard TopShelfCachePolicy.matches(cachedServerURL: stored.serverURL,
-                                          cachedUserID: stored.userID,
-                                          sessionServerURL: session.baseURL.absoluteString,
-                                          sessionUserID: session.userID)
-        else {
-            TopShelfCachePolicy.delete()
-            return nil
-        }
-        return stored
-    }
-
-    /// nil is a failed fetch, [] is a genuinely empty section; the cache fallback needs to tell them apart.
-    private static func fetch(_ label: String, _ work: () async throws -> [TopShelfItem]) async -> [TopShelfItem]? {
-        do {
-            return try await work()
-        } catch {
-            log.error("\(label) fetch failed: \(error.localizedDescription)")
-            return nil
-        }
+        let server = item.sourceServerID.map { "?server=\($0)" } ?? ""
+        return URL(string: "sodalite://play/\(item.id)\(server)")!
     }
 }

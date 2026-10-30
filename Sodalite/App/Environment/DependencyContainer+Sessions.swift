@@ -20,6 +20,8 @@ extension DependencyContainer {
             secondaries: candidates,
             baseURL: { preferredURL(for: $0) }
         )
+        // Also when nothing changed: a logout cleared the slot, and the registry only reports change.
+        SharedSessionMirror.writeParticipants(sessionRegistry.shelfParticipants)
         downloadManager?.serversChanged()
         Task { [sessionRegistry] in
             for session in sessionRegistry.participants { await session.loadUserIfNeeded() }

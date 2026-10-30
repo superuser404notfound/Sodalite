@@ -56,14 +56,16 @@ enum DroppedSeriesStore {
         }
     }
 
-    /// What the Top Shelf extension gets: the profile's hidden shows on its own server, which is
-    /// the one the shelf's session talks to.
+    /// What the Top Shelf extension gets: the profile's hidden shows on its own server, and on
+    /// every other one for a combined shelf (Sodalite#218).
     static func shelfMirror(for profile: ProfileKey) -> TopShelfHiddenShows {
-        TopShelfHiddenShows(
+        let list = load(scope: profile.storageScope)
+        let others = Dictionary(grouping: list.filter { $0.serverID != profile.serverID }, by: \.serverID)
+            .mapValues { $0.map(\.seriesID) }
+        return TopShelfHiddenShows(
             userID: profile.userID,
-            seriesIDs: load(scope: profile.storageScope)
-                .filter { $0.serverID == profile.serverID }
-                .map(\.seriesID)
+            seriesIDs: list.filter { $0.serverID == profile.serverID }.map(\.seriesID),
+            otherServers: others.isEmpty ? nil : others
         )
     }
 

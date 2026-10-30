@@ -28,20 +28,19 @@ enum TopShelfPrerender {
     private static let gate = Gate()
 
     private static func pass() async {
-        guard TopShelfEnabled.read(), let session = SharedSession.read() else { return }
-        let api = TopShelfAPI(session: session)
-        async let resume = try? api.resumeItems()
-        async let nextUp = try? api.nextUp()
-        // Both rows or no pass. `prepare` sweeps every file outside the set it is handed, so a pass
-        // built from one row deleted the other row's artwork, and the extension then had to
-        // download and composite it again while tvOS waited for the shelf.
-        guard let fetchedResume = await resume, let fetchedNextUp = await nextUp else { return }
-        let rows = TopShelfItem.shelfRows(resume: fetchedResume, nextUp: fetchedNextUp)
-        let items = rows.resume + rows.nextUp
+        guard TopShelfEnabled.read(), let sessions = ShelfSessions.read() else { return }
+        let feed = await TopShelfFeed.load(sessions: sessions,
+                                           hidden: TopShelfHiddenShows.read(),
+                                           cache: { TopShelfCache.usable(for: sessions.active) })
+        // Every row of every server, or no pass. `prepare` sweeps every file outside the set it is
+        // handed, so a pass built from part of the shelf deleted the rest's artwork, and the
+        // extension then had to download and composite it again while tvOS waited for the shelf.
+        guard feed.complete else { return }
+        let items = feed.resume + feed.nextUp
         guard !items.isEmpty else { return }
 
         let artwork = TopShelfArtwork.read()
-        let cells = items.compactMap { $0.artworkCell(session: session, artwork: artwork) }
+        let cells = items.compactMap { $0.artworkCell(session: sessions.session(for: $0), artwork: artwork) }
         _ = await ResumeBarArtwork.prepare(cells: cells, accent: TopShelfAccent.read())
     }
 

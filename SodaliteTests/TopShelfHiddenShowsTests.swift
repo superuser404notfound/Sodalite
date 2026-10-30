@@ -28,9 +28,9 @@ struct TopShelfHiddenShowsTests {
         #expect(mirror.hidden(for: "u2").isEmpty)
     }
 
-    /// The shelf talks to the profile's own server only, so a show hidden on a combined Home's
-    /// secondary server is not part of what crosses over.
-    @Test("the mirror carries only the profile's own server")
+    /// A combined shelf asks the profile's other servers too (Sodalite#218), so their hidden shows
+    /// cross over keyed by server, and the active server's stay where an older extension reads them.
+    @Test("the mirror carries every server, the own one in its old place")
     func mirrorKeepsOwnServer() throws {
         let profile = ProfileKey(serverID: "srv-\(UUID().uuidString)", userID: "u1")
         let scope = profile.storageScope
@@ -40,6 +40,24 @@ struct TopShelfHiddenShowsTests {
         defer { UserDefaults.standard.removeObject(forKey: "homeDroppedSeries.\(scope)") }
 
         let mirror = DroppedSeriesStore.shelfMirror(for: profile)
-        #expect(mirror == TopShelfHiddenShows(userID: "u1", seriesIDs: ["s1"]))
+        #expect(mirror == TopShelfHiddenShows(userID: "u1", seriesIDs: ["s1"], otherServers: ["other": ["s2"]]))
+    }
+
+    @Test("each server's items are filtered by that server's list")
+    func hiddenPerServer() {
+        let mirror = TopShelfHiddenShows(userID: "u1", seriesIDs: ["s1"], otherServers: ["b": ["s2"]])
+        #expect(mirror.hidden(for: "u1", serverID: nil) == ["s1"])
+        #expect(mirror.hidden(for: "u1", serverID: "b") == ["s2"])
+        #expect(mirror.hidden(for: "u1", serverID: "c").isEmpty)
+        #expect(mirror.hidden(for: "u2", serverID: "b").isEmpty)
+    }
+
+    /// The extension of an earlier build wrote no `otherServers`; that mirror still has to decode.
+    @Test("a mirror without other servers still decodes")
+    func decodesOldMirror() throws {
+        let mirror = try JSONDecoder().decode(TopShelfHiddenShows.self,
+                                              from: Data(#"{"userID":"u1","seriesIDs":["s1"]}"#.utf8))
+        #expect(mirror.hidden(for: "u1", serverID: nil) == ["s1"])
+        #expect(mirror.otherServers == nil)
     }
 }

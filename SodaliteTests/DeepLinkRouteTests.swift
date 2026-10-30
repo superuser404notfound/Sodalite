@@ -71,6 +71,21 @@ struct DeepLinkRouteTests {
         #expect(DeepLinkRoute.parse(URL(string: "sodalite://item/gf9b1c2d3e4f5061728394a5b6c7d8e9")!) == nil)
     }
 
+    /// A combined shelf's item from another server names it (Sodalite#218).
+    @Test("a server parameter rides along")
+    func serverParameter() {
+        let server = "aa11bb22cc33dd44ee55ff6600778899"
+        let route = DeepLinkRoute.parse(URL(string: "sodalite://play/\(Self.itemID)?server=\(server)")!)
+        #expect(route == DeepLinkRoute(itemID: Self.itemID, autoPlay: true, serverID: server))
+    }
+
+    /// The server id picks the session the request goes out on, so it is held to the item id's shape.
+    @Test("a server that is not a GUID rejects the link")
+    func badServerParameter() {
+        #expect(DeepLinkRoute.parse(URL(string: "sodalite://play/\(Self.itemID)?server=../x")!) == nil)
+        #expect(DeepLinkRoute.parse(URL(string: "sodalite://play/\(Self.itemID)?server=")!) == nil)
+    }
+
     /// `Character.isHexDigit` says yes to the fullwidth forms; a GUID is ASCII.
     @Test("fullwidth digits are not hex digits")
     func fullwidthDigits() {
