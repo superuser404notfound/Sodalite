@@ -40,6 +40,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.enhancedUpscaling.title",
+                    "changelog.1_1_0.enhancedUpscaling.body",
+                    icon: "wand.and.sparkles"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.libraryTabs.title",
                     "changelog.1_1_0.libraryTabs.body",
                     icon: "rectangle.topthird.inset.filled"

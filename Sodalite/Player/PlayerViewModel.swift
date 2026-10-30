@@ -1341,6 +1341,7 @@ final class PlayerViewModel {
                 options: LoadOptions(
                     suppressDisplayCriteria: false,
                     forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
+                    upscalesLowResolutionVideo: preferences.enhancedUpscaling,
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,

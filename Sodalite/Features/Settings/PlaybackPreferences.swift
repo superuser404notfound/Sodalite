@@ -538,6 +538,11 @@ final class PlaybackPreferences {
         set { device.forceDolbyVisionOnNonDVDisplay = newValue }
     }
 
+    var enhancedUpscaling: Bool {
+        get { device.enhancedUpscaling }
+        set { device.enhancedUpscaling = newValue }
+    }
+
     var speakerLayout: SpeakerLayout {
         get { device.speakerLayout }
         set { device.speakerLayout = newValue }

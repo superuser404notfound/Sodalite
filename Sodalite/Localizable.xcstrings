@@ -70153,6 +70153,330 @@
         }
       }
     },
+    "changelog.1_1_0.enhancedUpscaling.body" : {
+      "comment" : "What's New 1.1.0 highlight body",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálování v Nastavení > Přehrávání zostří video v SD a 720p pomocí strojového učení přímo v zařízení, než se zobrazí na obrazovce. Ve výchozím stavu je vypnuté a 1080p, HDR a Dolby Vision se přehrávají jako dosud."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret opskalering under Indstillinger > Afspilning gør SD- og 720p-video skarpere med maskinlæring på enheden, før det når skærmen. Den er slået fra som standard, og 1080p, HDR og Dolby Vision afspilles som før."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbessertes Hochskalieren in Einstellungen > Wiedergabe schärft SD- und 720p-Videos mit maschinellem Lernen auf dem Gerät, bevor sie den Bildschirm erreichen. Es ist standardmäßig aus, und 1080p, HDR und Dolby Vision laufen wie bisher."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η Βελτιωμένη αναβάθμιση ανάλυσης στις Ρυθμίσεις > Αναπαραγωγή κάνει πιο ευκρινές το βίντεο SD και 720p με μηχανική μάθηση στη συσκευή, πριν φτάσει στην οθόνη. Είναι απενεργοποιημένη από προεπιλογή, και τα 1080p, HDR και Dolby Vision αναπαράγονται όπως πριν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Upscaling in Settings > Playback sharpens SD and 720p video with on-device machine learning before it reaches the screen. It is off by default, and 1080p, HDR and Dolby Vision play as before."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado mejorado en Ajustes > Reproducción hace más nítido el vídeo SD y 720p con aprendizaje automático en el dispositivo antes de que llegue a la pantalla. Viene desactivado, y 1080p, HDR y Dolby Vision se reproducen como antes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parannettu skaalaus kohdassa Asetukset > Toisto terävöittää SD- ja 720p-videota laitteen omalla koneoppimisella ennen kuin kuva päätyy näytölle. Se on oletuksena pois päältä, ja 1080p, HDR ja Dolby Vision toistetaan kuten ennenkin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle améliorée, dans Réglages > Lecture, rend plus nettes les vidéos SD et 720p grâce à l'apprentissage automatique sur l'appareil, avant qu'elles n'atteignent l'écran. Elle est désactivée par défaut, et le 1080p, le HDR et Dolby Vision sont lus comme avant."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poboljšano skaliranje u Postavke > Reprodukcija izoštrava SD i 720p video strojnim učenjem na uređaju prije nego što stigne do zaslona. Zadano je isključeno, a 1080p, HDR i Dolby Vision reproduciraju se kao i prije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Beállítások > Lejátszás menü Továbbfejlesztett felskálázás opciója az eszközön futó gépi tanulással élesíti az SD és 720p videót, mielőtt a képernyőre kerül. Alapból ki van kapcsolva, az 1080p, a HDR és a Dolby Vision pedig a megszokott módon játszódik le."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling avanzato in Impostazioni > Riproduzione rende più nitidi i video SD e 720p con il machine learning sul dispositivo prima che arrivino allo schermo. È disattivato di default, e 1080p, HDR e Dolby Vision vengono riprodotti come prima."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定 > 再生の「高品位アップスケーリング」が、画面に届く前にSDと720pの映像をデバイス上の機械学習でシャープにします。初期設定はオフで、1080p、HDR、Dolby Visionはこれまでどおり再生されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 > 재생의 향상된 업스케일링이 SD 및 720p 영상을 화면에 표시하기 전에 기기 내 머신 러닝으로 선명하게 만듭니다. 기본값은 끔이며, 1080p, HDR, Dolby Vision은 이전과 같이 재생됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret oppskalering i Innstillinger > Avspilling gjør SD- og 720p-video skarpere med maskinlæring på enheten før det når skjermen. Den er av som standard, og 1080p, HDR og Dolby Vision spilles som før."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbeterde upscaling in Instellingen > Afspelen maakt SD- en 720p-video scherper met machine learning op het apparaat, voordat het het scherm bereikt. Het staat standaard uit, en 1080p, HDR en Dolby Vision spelen zoals voorheen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ulepszone skalowanie w Ustawienia > Odtwarzanie wyostrza wideo SD i 720p za pomocą uczenia maszynowego na urządzeniu, zanim trafi na ekran. Domyślnie jest wyłączone, a 1080p, HDR i Dolby Vision odtwarzają się jak dotąd."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling aprimorado em Ajustes > Reprodução deixa vídeos SD e 720p mais nítidos com aprendizado de máquina no próprio aparelho antes de chegarem à tela. Vem desativado, e 1080p, HDR e Dolby Vision são reproduzidos como antes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling melhorado em Definições > Reprodução torna mais nítidos os vídeos SD e 720p com aprendizagem automática no próprio dispositivo antes de chegarem ao ecrã. Vem desativado, e 1080p, HDR e Dolby Vision são reproduzidos como antes."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling îmbunătățit din Setări > Redare clarifică videoclipurile SD și 720p cu învățare automată pe dispozitiv înainte să ajungă pe ecran. Este oprit implicit, iar 1080p, HDR și Dolby Vision se redau ca înainte."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Улучшенное масштабирование» в разделе «Настройки» > «Воспроизведение» повышает чёткость видео SD и 720p с помощью машинного обучения на устройстве, прежде чем оно попадёт на экран. По умолчанию функция выключена, а 1080p, HDR и Dolby Vision воспроизводятся как раньше."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálovanie v Nastavenia > Prehrávanie zaostrí video v SD a 720p pomocou strojového učenia priamo v zariadení, skôr než sa zobrazí na obrazovke. Predvolene je vypnuté a 1080p, HDR a Dolby Vision sa prehrávajú ako doteraz."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förbättrad uppskalning i Inställningar > Uppspelning gör SD- och 720p-video skarpare med maskininlärning på enheten innan den når skärmen. Den är av som standard, och 1080p, HDR och Dolby Vision spelas som förut."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar > Oynatma bölümündeki Gelişmiş Ölçeklendirme, SD ve 720p videoyu ekrana ulaşmadan önce cihaz üzerinde makine öğrenimiyle keskinleştirir. Varsayılan olarak kapalıdır, 1080p, HDR ve Dolby Vision ise eskisi gibi oynatılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Покращене масштабування» в розділі «Налаштування» > «Відтворення» підвищує чіткість відео SD і 720p за допомогою машинного навчання на пристрої, перш ніж воно потрапить на екран. Типово функцію вимкнено, а 1080p, HDR і Dolby Vision відтворюються як раніше."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“设置”>“播放”中的“增强型画面放大”会在视频显示到屏幕之前，用设备上的机器学习让 SD 和 720p 视频更清晰。此功能默认关闭，1080p、HDR 和 Dolby Vision 照常播放。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「設定」>「播放」中的「增強型畫面放大」會在影片顯示到螢幕之前，以裝置上的機器學習讓 SD 和 720p 影片更清晰。此功能預設關閉，1080p、HDR 和 Dolby Vision 照常播放。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.enhancedUpscaling.title" : {
+      "comment" : "What's New 1.1.0 highlight title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálování"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret opskalering"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbessertes Hochskalieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βελτιωμένη αναβάθμιση ανάλυσης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Upscaling"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado mejorado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parannettu skaalaus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle améliorée"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poboljšano skaliranje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Továbbfejlesztett felskálázás"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling avanzato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高品位アップスケーリング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "향상된 업스케일링"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret oppskalering"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbeterde upscaling"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ulepszone skalowanie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling aprimorado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling melhorado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling îmbunătățit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улучшенное масштабирование"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálovanie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förbättrad uppskalning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelişmiş Ölçeklendirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покращене масштабування"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增强型画面放大"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增強型畫面放大"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.episodeTitles.body" : {
       "comment" : "Changelog 1.1.0 body for hidden episode titles",
       "extractionState" : "manual",
@@ -172852,6 +173176,167 @@
         }
       }
     },
+    "player.stats.upscaling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálování"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opskalering"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalierung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναβάθμιση ανάλυσης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliranje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felskálázás"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケーリング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업스케일링"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppskalering"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalowanie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабирование"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovanie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppskalning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçeklendirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабування"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画面放大"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "畫面放大"
+          }
+        }
+      }
+    },
     "player.stats.videoDecoder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -212540,6 +213025,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "引擎診斷"
+          }
+        }
+      }
+    },
+    "settings.playback.enhancedUpscaling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálování"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret opskalering"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbessertes Hochskalieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βελτιωμένη αναβάθμιση ανάλυσης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Upscaling"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado mejorado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parannettu skaalaus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle améliorée"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poboljšano skaliranje"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Továbbfejlesztett felskálázás"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling avanzato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高品位アップスケーリング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "향상된 업스케일링"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbedret oppskalering"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbeterde upscaling"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ulepszone skalowanie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling aprimorado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling melhorado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling îmbunătățit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Улучшенное масштабирование"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vylepšené škálovanie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förbättrad uppskalning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelişmiş Ölçeklendirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покращене масштабування"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增强型画面放大"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增強型畫面放大"
+          }
+        }
+      }
+    },
+    "settings.playback.enhancedUpscaling.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zostří video v SD a 720p pomocí strojového učení přímo v zařízení, než se zobrazí na obrazovce. 1080p, HDR a Dolby Vision se přehrávají jako dosud. Tituly, které ho využívají, běží přes vlastní renderer Sodalite, takže Dolby Atmos zní jako prostorový zvuk bez výškových kanálů a zrnitý film může působit zrnitěji."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gør SD- og 720p-video skarpere med maskinlæring på enheden, før det når skærmen. 1080p, HDR og Dolby Vision afspilles som før. Titler, der bruger det, afspilles gennem Sodalites egen renderer, så Dolby Atmos afspilles som surround uden højdekanaler, og kornet film kan se mere kornet ud."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schärft SD- und 720p-Videos mit maschinellem Lernen auf dem Gerät, bevor sie den Bildschirm erreichen. 1080p, HDR und Dolby Vision laufen wie bisher. Titel, die es nutzen, laufen über Sodalites eigenen Renderer, daher spielt Dolby Atmos dort als Surround ohne Höhenkanäle, und körniger Film kann körniger wirken."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάνει πιο ευκρινές το βίντεο SD και 720p με μηχανική μάθηση στη συσκευή, πριν φτάσει στην οθόνη. Τα 1080p, HDR και Dolby Vision αναπαράγονται όπως πριν. Οι τίτλοι που τη χρησιμοποιούν περνούν από τον δικό renderer του Sodalite, οπότε το Dolby Atmos ακούγεται ως surround χωρίς κανάλια ύψους και ένα φιλμ με κόκκο μπορεί να δείχνει πιο κοκκώδες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sharpens SD and 720p video with on-device machine learning before it reaches the screen. 1080p, HDR and Dolby Vision play as before. Titles that use it play through Sodalite's own renderer, so Dolby Atmos plays as its surround bed and grainy film can look grainier."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace más nítido el vídeo SD y 720p con aprendizaje automático en el dispositivo antes de que llegue a la pantalla. 1080p, HDR y Dolby Vision se reproducen como antes. Los títulos que lo usan pasan por el renderizador propio de Sodalite, así que Dolby Atmos suena como surround sin canales de altura y el cine con grano puede verse más granulado."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terävöittää SD- ja 720p-videota laitteen omalla koneoppimisella ennen kuin kuva päätyy näytölle. 1080p, HDR ja Dolby Vision toistetaan kuten ennenkin. Sitä käyttävät nimikkeet toistetaan Sodaliten omalla renderöijällä, joten Dolby Atmos kuuluu tilaäänenä ilman korkeuskanavia ja rakeinen filmi voi näyttää rakeisemmalta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rend plus nettes les vidéos SD et 720p grâce à l'apprentissage automatique sur l'appareil, avant qu'elles n'atteignent l'écran. Le 1080p, le HDR et Dolby Vision sont lus comme avant. Les titres concernés passent par le moteur de rendu de Sodalite, donc Dolby Atmos y est lu en surround sans canaux de hauteur et un film granuleux peut paraître plus granuleux."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izoštrava SD i 720p video strojnim učenjem na uređaju prije nego što stigne do zaslona. 1080p, HDR i Dolby Vision reproduciraju se kao i prije. Naslovi koji ga koriste reproduciraju se kroz Sodaliteov vlastiti renderer, pa Dolby Atmos svira kao surround bez visinskih kanala, a zrnati film može izgledati zrnatije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az eszközön futó gépi tanulással élesíti az SD és 720p videót, mielőtt a képernyőre kerül. Az 1080p, a HDR és a Dolby Vision a megszokott módon játszódik le. Az ezt használó címek a Sodalite saját megjelenítőjén futnak, így a Dolby Atmos magassági csatornák nélküli térhangként szól, a szemcsés film pedig szemcsésebbnek tűnhet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rende più nitidi i video SD e 720p con il machine learning sul dispositivo prima che arrivino allo schermo. 1080p, HDR e Dolby Vision vengono riprodotti come prima. I titoli che lo usano passano dal renderer di Sodalite, quindi Dolby Atmos viene riprodotto come surround senza canali di altezza e la pellicola granulosa può apparire più granulosa."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SDと720pの映像を、画面に届く前にデバイス上の機械学習でシャープにします。1080p、HDR、Dolby Visionはこれまでどおり再生されます。この機能を使うタイトルはSodalite独自のレンダラーで再生されるため、Dolby Atmosはハイトチャンネルなしのサラウンドで再生され、粒子の粗いフィルムはより粗く見えることがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SD 및 720p 영상을 화면에 표시하기 전에 기기 내 머신 러닝으로 선명하게 만듭니다. 1080p, HDR, Dolby Vision은 이전과 같이 재생됩니다. 이 기능을 사용하는 콘텐츠는 Sodalite 자체 렌더러로 재생되므로 Dolby Atmos는 높이 채널 없이 서라운드로 재생되고, 입자가 거친 필름은 더 거칠게 보일 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gjør SD- og 720p-video skarpere med maskinlæring på enheten før det når skjermen. 1080p, HDR og Dolby Vision spilles som før. Titler som bruker det, spilles gjennom Sodalites egen renderer, så Dolby Atmos spilles som surround uten høydekanaler, og kornete film kan se mer kornete ut."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maakt SD- en 720p-video scherper met machine learning op het apparaat, voordat het het scherm bereikt. 1080p, HDR en Dolby Vision spelen zoals voorheen. Titels die het gebruiken lopen via de eigen renderer van Sodalite, dus Dolby Atmos speelt daar als surround zonder hoogtekanalen en korrelige film kan korreliger ogen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyostrza wideo SD i 720p za pomocą uczenia maszynowego na urządzeniu, zanim trafi na ekran. 1080p, HDR i Dolby Vision odtwarzają się jak dotąd. Tytuły, które z tego korzystają, przechodzą przez własny renderer Sodalite, więc Dolby Atmos gra jako dźwięk przestrzenny bez kanałów wysokości, a ziarnisty film może wyglądać na bardziej ziarnisty."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixa vídeos SD e 720p mais nítidos com aprendizado de máquina no próprio aparelho antes de chegarem à tela. 1080p, HDR e Dolby Vision são reproduzidos como antes. Títulos que usam o recurso passam pelo renderizador do próprio Sodalite, então o Dolby Atmos toca como surround sem canais de altura e filmes granulados podem parecer mais granulados."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Torna mais nítidos os vídeos SD e 720p com aprendizagem automática no próprio dispositivo antes de chegarem ao ecrã. 1080p, HDR e Dolby Vision são reproduzidos como antes. Os títulos que a usam passam pelo renderizador do próprio Sodalite, por isso o Dolby Atmos é reproduzido como surround sem canais de altura e um filme com grão pode parecer mais granulado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clarifică videoclipurile SD și 720p cu învățare automată pe dispozitiv înainte să ajungă pe ecran. 1080p, HDR și Dolby Vision se redau ca înainte. Titlurile care o folosesc trec prin propriul renderer al Sodalite, așa că Dolby Atmos se aude ca surround fără canale de înălțime, iar filmul granulat poate părea mai granulat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повышает чёткость видео SD и 720p с помощью машинного обучения на устройстве, прежде чем оно попадёт на экран. 1080p, HDR и Dolby Vision воспроизводятся как раньше. Такие видео проходят через собственный рендерер Sodalite, поэтому Dolby Atmos звучит как объёмный звук без каналов высоты, а зернистая плёнка может выглядеть зернистее."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaostrí video v SD a 720p pomocou strojového učenia priamo v zariadení, skôr než sa zobrazí na obrazovke. 1080p, HDR a Dolby Vision sa prehrávajú ako doteraz. Tituly, ktoré ho využívajú, bežia cez vlastný renderer Sodalite, takže Dolby Atmos znie ako priestorový zvuk bez výškových kanálov a zrnitý film môže pôsobiť zrnitejšie."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gör SD- och 720p-video skarpare med maskininlärning på enheten innan den når skärmen. 1080p, HDR och Dolby Vision spelas som förut. Titlar som använder det spelas via Sodalites egen renderare, så Dolby Atmos spelas som surround utan höjdkanaler och kornig film kan se kornigare ut."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SD ve 720p videoyu ekrana ulaşmadan önce cihaz üzerinde makine öğrenimiyle keskinleştirir. 1080p, HDR ve Dolby Vision eskisi gibi oynatılır. Bunu kullanan içerikler Sodalite'ın kendi işleyicisinden geçer, bu yüzden Dolby Atmos yükseklik kanalları olmadan surround olarak çalar ve grenli film daha grenli görünebilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Підвищує чіткість відео SD і 720p за допомогою машинного навчання на пристрої, перш ніж воно потрапить на екран. 1080p, HDR і Dolby Vision відтворюються як раніше. Такі відео проходять через власний рендерер Sodalite, тому Dolby Atmos звучить як об'ємний звук без каналів висоти, а зерниста плівка може виглядати зернистішою."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在视频显示到屏幕之前，用设备上的机器学习让 SD 和 720p 视频更清晰。1080p、HDR 和 Dolby Vision 照常播放。使用此功能的影片会经由 Sodalite 自己的渲染器播放，因此 Dolby Atmos 将以不含高度声道的环绕声播放，颗粒感强的胶片画面也可能显得更粗糙。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在影片顯示到螢幕之前，以裝置上的機器學習讓 SD 和 720p 影片更清晰。1080p、HDR 和 Dolby Vision 照常播放。使用此功能的影片會經由 Sodalite 自己的渲染器播放，因此 Dolby Atmos 會以不含高度聲道的環繞聲播放，顆粒感重的底片畫面也可能顯得更粗糙。"
           }
         }
       }
