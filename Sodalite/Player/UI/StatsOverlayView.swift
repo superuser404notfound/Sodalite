@@ -335,6 +335,11 @@ struct StatsOverlayView: View {
             if let decoded = player.decodedVideoFormat {
                 row("player.stats.displayBuffer", value: decoded.pixelBufferLabel)
             }
+            if let upscale = player.activeUpscale {
+                row("player.stats.upscaling", value: Self.upscaleLabel(
+                    sourceSize: upscale.sourceSize, mlScale: upscale.mlScale, targetSize: upscale.targetSize,
+                    degraded: upscale.degraded, disabledReason: upscale.disabledReason))
+            }
         }
     }
 
@@ -550,6 +555,27 @@ struct StatsOverlayView: View {
         guard let name = engineName?.uppercased() ?? file?.codec?.uppercased() else { return nil }
         let profile = engineProfile ?? file?.profile ?? ""
         return profile.isEmpty ? name : "\(name) \(profile)"
+    }
+
+    /// AetherEngine#846: the stage chain, source to delivered size. MetalFX runs unless the stage degraded
+    /// or the VideoToolbox pass alone already lands on the target (the ML-only route of a slower GPU).
+    static func upscaleLabel(
+        sourceSize: CGSize, mlScale: Float?, targetSize: CGSize, degraded: Bool, disabledReason: String?
+    ) -> String {
+        if let disabledReason { return "off (\(disabledReason))" }
+        func size(_ s: CGSize) -> String { "\(Int(s.width.rounded()))×\(Int(s.height.rounded()))" }
+        var steps = [size(sourceSize)]
+        var runsMetalFX = !degraded
+        if let mlScale {
+            steps.append("ML \(String(format: "%g", Double(mlScale)))x")
+            let mlWidth = sourceSize.width * CGFloat(mlScale)
+            let mlHeight = sourceSize.height * CGFloat(mlScale)
+            let landsOnTarget = abs(mlWidth - targetSize.width) <= 1 && abs(mlHeight - targetSize.height) <= 1
+            if landsOnTarget { runsMetalFX = false }
+        }
+        if runsMetalFX { steps.append("MetalFX") }
+        steps.append(size(targetSize))
+        return steps.joined(separator: " → ")
     }
 
     private var resolutionLabel: String? {

@@ -495,6 +495,18 @@ struct PlaybackSettingsView: View {
                 .disabled(displayHasDolbyVision)
                 .opacity(displayHasDolbyVision ? 0.4 : 1)
 
+                // AetherEngine#846: sub-1080p 8-bit SDR only, the engine leaves everything else alone.
+                boolRow(
+                    icon: "wand.and.sparkles",
+                    title: "settings.playback.enhancedUpscaling",
+                    subtitle: "settings.playback.enhancedUpscaling.subtitle",
+                    value: Binding(
+                        get: { prefs.enhancedUpscaling },
+                        set: { prefs.enhancedUpscaling = $0 }
+                    )
+                )
+                .settingsValueScope(.device)
+
                 sectionHeader("settings.playback.section.audio")
 
                 boolRow(

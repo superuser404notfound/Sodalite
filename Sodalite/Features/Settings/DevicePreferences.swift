@@ -23,6 +23,7 @@ final class DevicePreferences {
         static let streamingQualityWifi = "playback.streamingQualityWifi"
         static let streamingQualityCellular = "playback.streamingQualityCellular"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
+        static let enhancedUpscaling = "playback.enhancedUpscaling"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
         static let speakerLayout = "playback.speakerLayout"
@@ -99,6 +100,12 @@ final class DevicePreferences {
         didSet { store.set(forceDolbyVisionOnNonDVDisplay, forKey: Keys.forceDolbyVisionOnNonDVDisplay) }
     }
 
+    /// AetherEngine#846, default OFF. Upscales 8-bit SDR below 1080p on this device's GPU before it
+    /// reaches the screen. A device value: what the hardware can afford is not the profile's business.
+    var enhancedUpscaling: Bool {
+        didSet { store.set(enhancedUpscaling, forKey: Keys.enhancedUpscaling) }
+    }
+
     /// tvOS Top Shelf row. On by default; see TopShelfEnabled for why it can be turned off at all.
     var showTopShelfRow: Bool {
         didSet { store.set(showTopShelfRow, forKey: Keys.showTopShelfRow) }
@@ -163,6 +170,7 @@ final class DevicePreferences {
         self.streamingQualityCellular = store.string(forKey: Keys.streamingQualityCellular)
             .flatMap(StreamingQuality.init(rawValue:)) ?? .original
         self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool ?? false
+        self.enhancedUpscaling = store.object(forKey: Keys.enhancedUpscaling) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
             .flatMap(AppearancePreferences.ContinueWatchingImage.init(rawValue:)) ?? .thumb
@@ -193,6 +201,7 @@ final class DevicePreferences {
         update(\.streamingQualityWifi)
         update(\.streamingQualityCellular)
         update(\.forceDolbyVisionOnNonDVDisplay)
+        update(\.enhancedUpscaling)
         update(\.showTopShelfRow)
         update(\.topShelfImage)
         update(\.speakerLayout)
