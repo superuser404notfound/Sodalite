@@ -16,6 +16,11 @@ nonisolated struct TopShelfItem: Codable, Sendable {
     let parentThumbItemId: String?
     let runTimeTicks: Int64?
     let userData: TopShelfUserData?
+    let providerIds: [String: String]?
+    /// The secondary server this came from in a combined shelf (Sodalite#218), stamped after the
+    /// fetch rather than read off `ServerId`: two servers cloned from one setup can share that.
+    /// nil for the active server. Not a Jellyfin field; it only round-trips through the cache.
+    var sourceServerID: String?
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -32,6 +37,8 @@ nonisolated struct TopShelfItem: Codable, Sendable {
         case parentThumbItemId = "ParentThumbItemId"
         case runTimeTicks = "RunTimeTicks"
         case userData = "UserData"
+        case providerIds = "ProviderIds"
+        case sourceServerID = "SodaliteSourceServerID"
     }
 }
 
@@ -61,22 +68,38 @@ nonisolated struct TopShelfImageTags: Codable, Sendable {
 nonisolated struct TopShelfUserData: Codable, Sendable {
     let playedPercentage: Double?
     let playbackPositionTicks: Int64?
+    let lastPlayedDate: String?
 
     enum CodingKeys: String, CodingKey {
         case playedPercentage = "PlayedPercentage"
         case playbackPositionTicks = "PlaybackPositionTicks"
+        case lastPlayedDate = "LastPlayedDate"
     }
 }
 
 nonisolated extension TopShelfItem {
+    /// The cell's identity on the shelf and in the artwork file names. The bare item id for the
+    /// active server, so nothing a single-server shelf already rendered changes name; a secondary's
+    /// carries its server, since two servers can hold the same id. Item first: `ResumeBarFile`
+    /// keeps 48 characters of it, which must still hold the whole item id.
+    var shelfKey: String {
+        sourceServerID.map { "\(id)-\($0)" } ?? id
+    }
+
+    func stamped(serverID: String?) -> TopShelfItem {
+        var copy = self
+        copy.sourceServerID = serverID
+        return copy
+    }
+
     /// The two rows as the shelf shows them: an item appears once, in Continue Watching if it is
     /// there. `EnableResumable=false` keeps a part-watched episode out of Next Up on current
     /// servers, older ones ignore it, and a repeated identifier is one the shelf has no use for.
     static func shelfRows(resume: [TopShelfItem],
                           nextUp: [TopShelfItem]) -> (resume: [TopShelfItem], nextUp: [TopShelfItem]) {
         var seen = Set<String>()
-        let resume = resume.filter { seen.insert($0.id).inserted }
-        let nextUp = nextUp.filter { seen.insert($0.id).inserted }
+        let resume = resume.filter { seen.insert($0.shelfKey).inserted }
+        let nextUp = nextUp.filter { seen.insert($0.shelfKey).inserted }
         return (resume, nextUp)
     }
 
@@ -114,7 +137,7 @@ nonisolated extension TopShelfItem {
                                             token: session.accessToken,
                                             artwork: artwork)
         else { return nil }
-        return ResumeBarArtwork.Cell(itemID: id, remote: remote, fraction: topShelfProgress)
+        return ResumeBarArtwork.Cell(itemID: shelfKey, remote: remote, fraction: topShelfProgress)
     }
 
     /// Resume bar for the cell. Percentage first (what /Items/Resume returns), ticks as the

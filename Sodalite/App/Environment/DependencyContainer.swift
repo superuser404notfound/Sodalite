@@ -298,6 +298,10 @@ final class DependencyContainer {
         jellyfinClient.onAccessTokenSet = { LogSecrets.register($0) }
         seerrClient.onSessionCookieSet = { LogSecrets.registerCookie($0) }
 
+        sessionRegistry.onSessionsChanged = { [weak sessionRegistry] in
+            SharedSessionMirror.writeParticipants(sessionRegistry?.shelfParticipants)
+        }
+
         // Last, because the closures capture self and the migration reads the keychain through it.
         profileSettings.activeKey = { [weak self] in self?.appState?.profileKey }
         profileSettings.isApplyingCloudChanges = { [weak self] in self?.isApplyingCloudChanges ?? false }

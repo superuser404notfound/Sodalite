@@ -19,6 +19,9 @@ final class ServerSessionRegistry {
     /// in again brings the server back at once instead of at the next launch.
     @ObservationIgnored private var muted: [String: SessionCredential] = [:]
     @ObservationIgnored private var lastSignature: [String] = []
+    /// Fires when a session joins, leaves, rotates its token or moves address: the container
+    /// mirrors the secondaries to the Top Shelf off it (Sodalite#218).
+    @ObservationIgnored var onSessionsChanged: (() -> Void)?
 
     init(
         activeClient: JellyfinClient,
@@ -103,6 +106,21 @@ final class ServerSessionRegistry {
         guard session.client.baseURL != url else { return }
         session.client.baseURL = url
         routesRevision &+= 1
+        onSessionsChanged?()
+    }
+
+    /// The secondaries as the Top Shelf extension reads them, nil while no profile is active.
+    var shelfParticipants: ShelfParticipants? {
+        guard !active.userID.isEmpty else { return nil }
+        let members = participants.filter { !$0.isActive }.compactMap { session -> ShelfParticipants.Member? in
+            guard let serverID = session.server?.id,
+                  let url = session.client.baseURL,
+                  let token = session.client.accessToken
+            else { return nil }
+            return ShelfParticipants.Member(serverID: serverID, serverURL: url.absoluteString,
+                                            userID: session.userID, accessToken: token)
+        }
+        return ShelfParticipants(activeUserID: active.userID, secondaries: members)
     }
 
     private func noteParticipantsChanged() {
@@ -110,5 +128,6 @@ final class ServerSessionRegistry {
         guard signature != lastSignature else { return }
         lastSignature = signature
         participantsRevision &+= 1
+        onSessionsChanged?()
     }
 }

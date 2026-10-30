@@ -36,9 +36,28 @@ enum SharedSessionMirror {
         #endif
     }
 
+    /// The other servers of a combined Home (Sodalite#218), in a slot of their own so the many
+    /// writers of the active session's slot need not know about them. Written only on a change,
+    /// since every route probe lands here; nil or no secondaries removes the slot.
+    static func writeParticipants(_ participants: ShelfParticipants?) {
+        #if !os(tvOS)
+        delete(account: ShelfParticipants.slot)
+        #else
+        let wanted = participants.flatMap { $0.secondaries.isEmpty ? nil : $0 }
+        guard wanted != ShelfParticipants.read() else { return }
+        if let wanted, let data = try? JSONEncoder().encode(wanted) {
+            save(data, account: ShelfParticipants.slot)
+        } else {
+            delete(account: ShelfParticipants.slot)
+        }
+        TopShelfRefresher.invalidate()
+        #endif
+    }
+
     static func clear() {
         let slot = KeychainKeys.sharedSession
         delete(account: slot)
+        delete(account: ShelfParticipants.slot)
         // The extension's own identity check already refuses a foreign cache; this is the
         // tidy-up so a logged-out device carries no library titles in its container.
         TopShelfCachePolicy.delete()

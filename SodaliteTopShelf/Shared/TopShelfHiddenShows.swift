@@ -12,6 +12,9 @@ nonisolated struct TopShelfHiddenShows: Codable, Equatable {
 
     let userID: String
     let seriesIDs: [String]
+    /// The same profile's hidden shows on its other servers, by server id, for a combined shelf
+    /// (Sodalite#218). Optional so a mirror written by an earlier build still decodes.
+    var otherServers: [String: [String]]? = nil
 
     static func read() -> TopShelfHiddenShows? {
         guard let defaults = UserDefaults(suiteName: TopShelfCachePolicy.appGroup),
@@ -30,6 +33,14 @@ nonisolated struct TopShelfHiddenShows: Codable, Equatable {
     /// The ids to leave out for `userID`, empty when the mirror belongs to someone else.
     func hidden(for userID: String) -> Set<String> {
         userID == self.userID ? Set(seriesIDs) : []
+    }
+
+    /// `serverID` nil is the active server. `userID` is always the active profile's: the list
+    /// belongs to the profile that hid the shows, whichever server they live on.
+    func hidden(for userID: String, serverID: String?) -> Set<String> {
+        guard userID == self.userID else { return [] }
+        guard let serverID else { return Set(seriesIDs) }
+        return Set(otherServers?[serverID] ?? [])
     }
 }
 

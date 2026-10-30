@@ -257,6 +257,7 @@ struct SodaliteApp: App {
         appState.isResolvingDeepLink = true
         // Assigned before the id: AppRouter's .task is keyed on the id, so the flag has to be in place when it fires.
         appState.pendingDeepLinkAutoPlay = route.autoPlay
+        appState.pendingDeepLinkServerID = route.serverID
         appState.pendingDeepLinkItemID = route.itemID
     }
 }

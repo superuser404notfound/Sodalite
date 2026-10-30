@@ -56,20 +56,28 @@ nonisolated struct TopShelfAPI: Sendable {
     /// on the strength of a proxy's headers would hand back the previous state. The resource
     /// timeout caps the whole request; the request timeout alone only measures idle gaps, so a
     /// server trickling bytes could hold the shelf's answer indefinitely.
-    private static let urlSession: URLSession = {
+    ///
+    /// A secondary server of a combined shelf gets a shorter cap (Sodalite#218): the shelf waits for
+    /// its slowest server, and one that is away must cost the active server's rows as little as
+    /// Home's own deadline for it does.
+    private static let urlSession = makeSession(request: 8, resource: 10)
+    private static let secondaryURLSession = makeSession(request: 4, resource: 4)
+
+    private static func makeSession(request: TimeInterval, resource: TimeInterval) -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.urlCache = nil
-        configuration.timeoutIntervalForRequest = 8
-        configuration.timeoutIntervalForResource = 10
+        configuration.timeoutIntervalForRequest = request
+        configuration.timeoutIntervalForResource = resource
         return URLSession(configuration: configuration)
-    }()
+    }
 
     private func get<T: Decodable>(_ url: URL) async throws -> T {
         var request = URLRequest(url: url)
         request.setValue(authHeader, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        let (data, response) = try await Self.urlSession.data(for: request)
+        let urlSession = session.serverID == nil ? Self.urlSession : Self.secondaryURLSession
+        let (data, response) = try await urlSession.data(for: request)
         // A 401 after a token rotation used to surface as a JSON decode error, which named the
         // wrong cause in the log.
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
@@ -90,8 +98,9 @@ nonisolated struct TopShelfAPI: Sendable {
     }
 
     /// `ParentThumbImageTag` rides along for the Thumb artwork option; a server that does not fill
-    /// it simply leaves that chain empty and the cell falls through to the backdrop.
-    private static let fields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,ParentThumbImageTag"
+    /// it simply leaves that chain empty and the cell falls through to the backdrop. `ProviderIds`
+    /// is what a combined shelf recognises one title on two servers by.
+    private static let fields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,ParentThumbImageTag,ProviderIds"
 }
 
 nonisolated private struct ItemsResponse: Decodable {

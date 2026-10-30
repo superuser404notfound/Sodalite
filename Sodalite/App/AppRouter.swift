@@ -471,6 +471,7 @@ struct AppRouter: View {
         guard !Task.isCancelled else { return }
         appState.requestContinueWatching = false
         if let item = response?.items.first {
+            appState.pendingDeepLinkServerID = nil
             appState.pendingDeepLinkItemID = item.id
         }
     }
@@ -495,6 +496,7 @@ struct AppRouter: View {
     private func resolvePendingDeepLink() async {
         guard let id = appState.pendingDeepLinkItemID else {
             appState.pendingDeepLinkAutoPlay = false
+            appState.pendingDeepLinkServerID = nil
             appState.isResolvingDeepLink = false
             return
         }
@@ -509,6 +511,7 @@ struct AppRouter: View {
             // Couldn't restore in time: drop the pending link + overlay so the user can interact with picker/discovery.
             appState.pendingDeepLinkItemID = nil
             appState.pendingDeepLinkAutoPlay = false
+            appState.pendingDeepLinkServerID = nil
             appState.isResolvingDeepLink = false
             return
         }
@@ -535,10 +538,7 @@ struct AppRouter: View {
         // Let UIKit finish the dismiss before the new fullScreenCover, else it races and SwiftUI warns "presenting from a VC that is being dismissed" or the modal never lands.
         try? await Task.sleep(for: .milliseconds(250))
 
-        let item = try? await dependencies.jellyfinItemService.getItemDetail(
-            userID: user.id,
-            itemID: id
-        )
+        let item = await fetchDeepLinkItem(id: id, serverID: appState.pendingDeepLinkServerID, activeUserID: user.id)
         guard !Task.isCancelled else { return }
         deepLinkPresentation = item.map {
             DeepLinkPresentation(item: $0, autoPlay: appState.pendingDeepLinkAutoPlay)
@@ -547,7 +547,26 @@ struct AppRouter: View {
         try? await Task.sleep(for: .milliseconds(300))
         appState.isResolvingDeepLink = false
         appState.pendingDeepLinkAutoPlay = false
+        appState.pendingDeepLinkServerID = nil
         appState.pendingDeepLinkItemID = nil
+    }
+
+    /// An item from another server of a combined shelf is asked of that server and keeps its id, so
+    /// the detail page plays it and reports progress there (Sodalite#218). A server that is no
+    /// longer a secondary is either the active one by now, which then answers, or one Combine left
+    /// since the shelf drew it, which the active server knows nothing of: that link opens nothing,
+    /// as one to an item deleted since does.
+    private func fetchDeepLinkItem(id: String, serverID: String?, activeUserID: String) async -> JellyfinItem? {
+        let registry = dependencies.sessionRegistry
+        guard let serverID, let session = registry.secondary(serverID: serverID) else {
+            if let serverID, serverID != registry.active.server?.id {
+                LogTap.shared.note("[deeplink] server \(serverID.prefix(8)) is not combined any more, asking the active one")
+            }
+            return try? await dependencies.jellyfinItemService.getItemDetail(userID: activeUserID, itemID: id)
+        }
+        var item = try? await session.itemService.getItemDetail(userID: session.userID, itemID: id)
+        if item != nil, item?.serverID == nil { item?.serverID = serverID }
+        return item
     }
 
     /// Consumed on every .active entry (a player dismissal re-fires the scenePhase task while still
