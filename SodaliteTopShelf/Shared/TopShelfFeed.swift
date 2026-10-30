@@ -16,6 +16,9 @@ nonisolated struct TopShelfFeed: Sendable {
     /// Every row of every server either answered or had a cache to stand in. A pass built from less
     /// would sweep the missing server's artwork.
     let complete: Bool
+    /// The secondaries whose rows this holds, fetched or from a cache that covered them: what a
+    /// cache written from this feed may claim to cover.
+    let coveredSecondaries: [String]
 
     static let rowLimit = 10
 
@@ -47,6 +50,8 @@ nonisolated struct TopShelfFeed: Sendable {
         var nextUpLists: [[TopShelfItem]] = []
         var resumeFetched = false
         var nextUpFetched = false
+        var complete = true
+        var coveredSecondaries: [String] = []
         for (index, session) in all.enumerated() {
             let fromSource = { (items: [TopShelfItem]) in items.filter { $0.sourceServerID == session.serverID } }
             let hiddenHere = hidden?.hidden(for: sessions.active.userID, serverID: session.serverID) ?? []
@@ -54,6 +59,9 @@ nonisolated struct TopShelfFeed: Sendable {
             let nextUp = fetched[index]?.1
             resumeFetched = resumeFetched || resume != nil
             nextUpFetched = nextUpFetched || nextUp != nil
+            let covered = (resume != nil && nextUp != nil) || cached?.covers(serverID: session.serverID) == true
+            complete = complete && covered
+            if covered, let serverID = session.serverID { coveredSecondaries.append(serverID) }
             resumeLists.append(TopShelfItem.removingHidden(resume ?? cached.map { fromSource($0.resume) } ?? [],
                                                            hidden: hiddenHere))
             nextUpLists.append(TopShelfItem.removingHidden(nextUp ?? cached.map { fromSource($0.nextUp) } ?? [],
@@ -73,7 +81,8 @@ nonisolated struct TopShelfFeed: Sendable {
                             resumeFetched: resumeFetched,
                             nextUpFetched: nextUpFetched,
                             usedCache: cached != nil,
-                            complete: !anyFailure || cached != nil)
+                            complete: complete,
+                            coveredSecondaries: coveredSecondaries)
     }
 
     /// nil is a failed fetch, [] is a genuinely empty row; the cache fallback needs to tell them apart.

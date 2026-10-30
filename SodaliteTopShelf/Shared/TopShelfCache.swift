@@ -12,6 +12,15 @@ nonisolated struct TopShelfCache: Codable, Sendable {
     let userID: String
     let resume: [TopShelfItem]
     let nextUp: [TopShelfItem]
+    /// The secondary servers whose rows this holds (Sodalite#218). A server missing here has no
+    /// rows in the cache to stand in for it, which is not the same as rows that were empty; nil, as
+    /// an earlier build wrote it, covers the active server only.
+    var secondaryServerIDs: [String]? = nil
+
+    func covers(serverID: String?) -> Bool {
+        guard let serverID else { return true }
+        return secondaryServerIDs?.contains(serverID) ?? false
+    }
 
     /// Best-effort throughout: an unwritable container or an undecodable file behaves exactly
     /// like no cache at all, which is the pre-cache behaviour.

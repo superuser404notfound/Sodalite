@@ -59,6 +59,21 @@ struct TopShelfCombinedSessionsTests {
         #expect(decoded.sourceServerID == "b")
     }
 
+    /// A cache from before a server joined holds no rows for it; standing in with nothing would let
+    /// the artwork pass sweep that server's files.
+    @Test func aCacheCoversOnlyTheServersItWasWrittenWith() throws {
+        let cache = TopShelfCache(serverURL: "http://a.lan:8096", userID: "u-a", resume: [], nextUp: [],
+                                  secondaryServerIDs: ["b"])
+        #expect(cache.covers(serverID: nil))
+        #expect(cache.covers(serverID: "b"))
+        #expect(!cache.covers(serverID: "c"))
+
+        let old = try JSONDecoder().decode(TopShelfCache.self, from: Data(
+            #"{"serverURL":"http://a.lan:8096","userID":"u-a","resume":[],"nextUp":[]}"#.utf8))
+        #expect(old.covers(serverID: nil))
+        #expect(!old.covers(serverID: "b"))
+    }
+
     @Test func theRegistryMirrorsItsSecondaries() {
         let http = HTTPClient()
         let live = JellyfinClient(httpClient: http)

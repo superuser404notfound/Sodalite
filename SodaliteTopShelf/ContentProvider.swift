@@ -35,7 +35,8 @@ final class ContentProvider: TVTopShelfContentProvider {
             TopShelfCache(serverURL: session.baseURL.absoluteString,
                           userID: session.userID,
                           resume: resumeItems,
-                          nextUp: nextUpItems).write()
+                          nextUp: nextUpItems,
+                          secondaryServerIDs: feed.coveredSecondaries).write()
         }
 
         // Every cell of both rows, bar or no bar, and only what the app has already rendered: either
