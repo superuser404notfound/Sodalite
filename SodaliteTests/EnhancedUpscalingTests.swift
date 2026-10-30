@@ -41,6 +41,9 @@ struct EnhancedUpscalingTests {
             sourceSize: CGSize(width: 1280, height: 720), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
             degraded: false, disabledReason: nil) == "1280×720 → MetalFX → 3840×2160")
         #expect(StatsOverlayView.upscaleLabel(
+            sourceSize: CGSize(width: 1280, height: 720), mlScale: nil, targetSize: CGSize(width: 1280, height: 720),
+            degraded: true, disabledReason: nil) == "1280×720 → 1280×720")
+        #expect(StatsOverlayView.upscaleLabel(
             sourceSize: sd, mlScale: 2, targetSize: CGSize(width: 2880, height: 2160),
             degraded: false, disabledReason: "frame budget overrun") == "off (frame budget overrun)")
     }

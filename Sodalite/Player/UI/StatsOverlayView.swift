@@ -565,13 +565,13 @@ struct StatsOverlayView: View {
         if let disabledReason { return "off (\(disabledReason))" }
         func size(_ s: CGSize) -> String { "\(Int(s.width.rounded()))×\(Int(s.height.rounded()))" }
         var steps = [size(sourceSize)]
-        var runsMetalFX = true
+        var runsMetalFX = !degraded
         if let mlScale {
             steps.append("ML \(String(format: "%g", Double(mlScale)))x")
             let mlWidth = sourceSize.width * CGFloat(mlScale)
             let mlHeight = sourceSize.height * CGFloat(mlScale)
             let landsOnTarget = abs(mlWidth - targetSize.width) <= 1 && abs(mlHeight - targetSize.height) <= 1
-            runsMetalFX = !degraded && !landsOnTarget
+            if landsOnTarget { runsMetalFX = false }
         }
         if runsMetalFX { steps.append("MetalFX") }
         steps.append(size(targetSize))
