@@ -46,9 +46,9 @@ final class DevicePreferences {
         didSet { store.set(preferLosslessAudioBridge, forKey: Keys.preferLosslessAudioBridge) }
     }
 
-    /// AetherEngine#731 and #744, one switch for both formats, default ON. ON keeps a TrueHD Atmos or DTS:X
-    /// track's heights in a 7.1.4 bed handed to tvOS as Apple Positional Audio: TrueHD's from its own 7.1
-    /// presentation split by where the objects' energy lies, DTS:X's from its four height channels. Lossy, so
+    /// AetherEngine#731 and #744, one switch for both formats, default ON. ON renders a TrueHD or DTS:X
+    /// track's objects and heights into a 9.1.6 bed, PCM over HDMI and APAC over AirPlay. A legacy-ARC sink
+    /// takes only stereo PCM, so there it has to go OFF (with `preferLosslessAudioBridge`) to keep surround.
     /// OFF falls back to `preferLosslessAudioBridge`'s choice. A device value: it describes the speakers
     /// behind this box.
     var trueHDAtmosHeights: Bool {

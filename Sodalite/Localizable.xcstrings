@@ -236582,157 +236582,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 9.1.6 a zvolí takovou stopu ve vašem jazyce. Bezztrátové přes HDMI, ztrátové přes AirPlay. Vypnuto přehrává podle nastavení výše."
+            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 9.1.6 a zvolí takovou stopu ve vašem jazyce. Bezztrátové přes HDMI, ztrátové přes AirPlay. Vypnuto přehrává podle nastavení výše. Pro soundbar přes ARC vypněte obě."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 9.1.6-mix og vælger et sådant spor på dit sprog. Tabsfri via HDMI, tabsgivende via AirPlay. Fra afspiller dem efter indstillingen ovenfor."
+            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 9.1.6-mix og vælger et sådant spor på dit sprog. Tabsfri via HDMI, tabsgivende via AirPlay. Fra afspiller dem efter indstillingen ovenfor. Til en soundbar via ARC skal begge slås fra."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 9.1.6-Mix und wählt eine solche Spur in deiner Sprache. Verlustfrei über HDMI, verlustbehaftet über AirPlay. Aus: Wiedergabe nach der Einstellung darüber."
+            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 9.1.6-Mix und wählt eine solche Spur in deiner Sprache. Verlustfrei über HDMI, verlustbehaftet über AirPlay. Aus: Wiedergabe nach der Einstellung darüber. Für Soundbars an ARC beide ausschalten."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 9.1.6 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Χωρίς απώλειες μέσω HDMI, με απώλειες μέσω AirPlay. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση."
+            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 9.1.6 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Χωρίς απώλειες μέσω HDMI, με απώλειες μέσω AirPlay. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση. Για soundbar μέσω ARC, απενεργοποιήστε και τα δύο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 9.1.6 mix, and picks such a track in your language. Lossless over HDMI, lossy over AirPlay. Off plays them through the setting above."
+            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 9.1.6 mix, and picks such a track in your language. Lossless over HDMI, lossy over AirPlay. Off plays them through the setting above. For a soundbar on ARC, turn both off."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 9.1.6 y elige una pista así en tu idioma. Sin pérdida por HDMI, con pérdida por AirPlay. Desactivado, se reproducen según el ajuste anterior."
+            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 9.1.6 y elige una pista así en tu idioma. Sin pérdida por HDMI, con pérdida por AirPlay. Desactivado, se reproducen según el ajuste anterior. Para una barra de sonido por ARC, desactiva ambos."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 9.1.6-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviötön HDMI:n kautta, häviöllinen AirPlayn kautta. Pois päältä toistaa ne yllä olevan asetuksen mukaan."
+            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 9.1.6-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviötön HDMI:n kautta, häviöllinen AirPlayn kautta. Pois päältä toistaa ne yllä olevan asetuksen mukaan. ARC-soundbarille kytke molemmat pois."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 9.1.6 et choisit une telle piste dans votre langue. Sans perte en HDMI, avec perte en AirPlay. Désactivé, elles sont lues selon le réglage ci-dessus."
+            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 9.1.6 et choisit une telle piste dans votre langue. Sans perte en HDMI, avec perte en AirPlay. Désactivé, elles sont lues selon le réglage ci-dessus. Pour une barre de son en ARC, désactivez les deux."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 9.1.6 i bira takav zapis na vašem jeziku. Bez gubitaka preko HDMI-ja, s gubicima preko AirPlaya. Isključeno reproducira ih prema postavci iznad."
+            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 9.1.6 i bira takav zapis na vašem jeziku. Bez gubitaka preko HDMI-ja, s gubicima preko AirPlaya. Isključeno reproducira ih prema postavci iznad. Za soundbar na ARC-u isključite oboje."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ezen az eszközön 9.1.6-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. HDMI-n veszteségmentes, AirPlay-en veszteséges. Kikapcsolva a fenti beállítás szerint szólnak."
+            "value" : "Ezen az eszközön 9.1.6-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. HDMI-n veszteségmentes, AirPlay-en veszteséges. Kikapcsolva a fenti beállítás szerint szólnak. ARC-os hangprojektorhoz kapcsolja ki mindkettőt."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 9.1.6 e sceglie una traccia simile nella tua lingua. Senza perdita via HDMI, con perdita via AirPlay. Se disattivato, vengono riprodotte secondo l’impostazione sopra."
+            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 9.1.6 e sceglie una traccia simile nella tua lingua. Senza perdita via HDMI, con perdita via AirPlay. Se disattivato, vengono riprodotte secondo l’impostazione sopra. Per una soundbar su ARC, disattiva entrambe."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 9.1.6 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。HDMI ではロスレス、AirPlay では非可逆。オフの場合は上の設定に従って再生します。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 9.1.6 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。HDMI ではロスレス、AirPlay では非可逆。オフの場合は上の設定に従って再生します。ARC 接続のサウンドバーでは両方をオフにしてください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 9.1.6 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. HDMI에서는 무손실, AirPlay에서는 손실 압축. 끄면 위 설정에 따라 재생됩니다."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 9.1.6 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. HDMI에서는 무손실, AirPlay에서는 손실 압축. 끄면 위 설정에 따라 재생됩니다. ARC 사운드바에서는 둘 다 끄세요."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 9.1.6-miks og velger et slikt spor på ditt språk. Tapsfritt via HDMI, tapsbasert via AirPlay. Av spiller dem etter innstillingen over."
+            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 9.1.6-miks og velger et slikt spor på ditt språk. Tapsfritt via HDMI, tapsbasert via AirPlay. Av spiller dem etter innstillingen over. For en soundbar via ARC, slå av begge."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 9.1.6-mix en kiest zo’n spoor in jouw taal. Verliesvrij via HDMI, met verlies via AirPlay. Uit speelt ze af volgens de instelling hierboven."
+            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 9.1.6-mix en kiest zo’n spoor in jouw taal. Verliesvrij via HDMI, met verlies via AirPlay. Uit speelt ze af volgens de instelling hierboven. Zet voor een soundbar via ARC beide uit."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 9.1.6 i wybiera taką ścieżkę w Twoim języku. Bezstratne przez HDMI, stratne przez AirPlay. Wyłączone odtwarza je według ustawienia powyżej."
+            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 9.1.6 i wybiera taką ścieżkę w Twoim języku. Bezstratne przez HDMI, stratne przez AirPlay. Wyłączone odtwarza je według ustawienia powyżej. Dla soundbaru przez ARC wyłącz oba."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, elas tocam conforme o ajuste acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, elas tocam conforme o ajuste acima. Para soundbar via ARC, desative os dois."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, são reproduzidas conforme a definição acima."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, são reproduzidas conforme a definição acima. Para uma soundbar via ARC, desative ambos."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 9.1.6 și alege o astfel de pistă în limba ta. Fără pierderi prin HDMI, cu pierderi prin AirPlay. Dezactivat, sunt redate conform setării de mai sus."
+            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 9.1.6 și alege o astfel de pistă în limba ta. Fără pierderi prin HDMI, cu pierderi prin AirPlay. Dezactivat, sunt redate conform setării de mai sus. Pentru un soundbar prin ARC, dezactivează-le pe amândouă."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 9.1.6 и выбирает такую дорожку на вашем языке. Без потерь через HDMI, с потерями через AirPlay. Выключено: воспроизведение по настройке выше."
+            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 9.1.6 и выбирает такую дорожку на вашем языке. Без потерь через HDMI, с потерями через AirPlay. Выключено: воспроизведение по настройке выше. Для саундбара через ARC выключите обе."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 9.1.6 a zvolí takú stopu vo vašom jazyku. Bezstratové cez HDMI, stratové cez AirPlay. Vypnuté prehráva podľa nastavenia vyššie."
+            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 9.1.6 a zvolí takú stopu vo vašom jazyku. Bezstratové cez HDMI, stratové cez AirPlay. Vypnuté prehráva podľa nastavenia vyššie. Pre soundbar cez ARC vypnite obe."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 9.1.6-mix och väljer ett sådant spår på ditt språk. Förlustfritt via HDMI, förstörande via AirPlay. Av spelar dem enligt inställningen ovan."
+            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 9.1.6-mix och väljer ett sådant spår på ditt språk. Förlustfritt via HDMI, förstörande via AirPlay. Av spelar dem enligt inställningen ovan. För en soundbar via ARC, stäng av båda."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 9.1.6 miksine dönüştürür ve dilinizde böyle bir parça seçer. HDMI'da kayıpsız, AirPlay'de kayıplı. Kapalıyken yukarıdaki ayara göre çalınır."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 9.1.6 miksine dönüştürür ve dilinizde böyle bir parça seçer. HDMI'da kayıpsız, AirPlay'de kayıplı. Kapalıyken yukarıdaki ayara göre çalınır. ARC soundbar için ikisini de kapatın."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 9.1.6 і вибирає таку доріжку вашою мовою. Без втрат через HDMI, із втратами через AirPlay. Вимкнено: відтворення за налаштуванням вище."
+            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 9.1.6 і вибирає таку доріжку вашою мовою. Без втрат через HDMI, із втратами через AirPlay. Вимкнено: відтворення за налаштуванням вище. Для саундбара через ARC вимкніть обидва."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 9.1.6 混音，并选择你所用语言的此类音轨。通过 HDMI 无损，通过 AirPlay 有损。关闭时按上方设置播放。"
+            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 9.1.6 混音，并选择你所用语言的此类音轨。通过 HDMI 无损，通过 AirPlay 有损。关闭时按上方设置播放。通过 ARC 连接的条形音箱请同时关闭两项。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 9.1.6 混音，並選擇你所用語言的此類音軌。透過 HDMI 無損，透過 AirPlay 有損。關閉時依上方設定播放。"
+            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 9.1.6 混音，並選擇你所用語言的此類音軌。透過 HDMI 無損，透過 AirPlay 有損。關閉時依上方設定播放。透過 ARC 連接的 Soundbar 請同時關閉兩項。"
           }
         }
       }
