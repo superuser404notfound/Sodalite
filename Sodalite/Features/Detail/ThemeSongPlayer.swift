@@ -37,8 +37,7 @@ final class ThemeSongPlayer {
     private struct Entry {
         let claim: Claim
         let key: String
-        let resolve: @MainActor () async -> ThemeSongTarget?
-        var spent = false
+        let resolve: @MainActor () async throws -> ThemeSongTarget?
     }
 
     private let output: ThemeSongOutput
@@ -48,6 +47,9 @@ final class ThemeSongPlayer {
     private let resumeDelay: Duration
 
     private var entries: [Entry] = []
+    /// Set by `silence()` and cleared by `resume()` on the player, not per page, so a page opened in
+    /// between (a Top Shelf deep link while in the background) stays silent too.
+    private var isSilenced = false
     /// Per item, nil included, so walking back to a page plays without a round trip. Dropped once no
     /// page is left, which is also how a song added on the server gets picked up.
     private var resolved: [String: ThemeSongTarget?] = [:]
@@ -72,8 +74,9 @@ final class ThemeSongPlayer {
         self.resumeDelay = resumeDelay
     }
 
-    /// `key` names the item (server and id); `resolve` fetches its song once per key.
-    func claim(key: String, resolve: @escaping @MainActor () async -> ThemeSongTarget?) -> Claim {
+    /// `key` names the item (server and id); `resolve` fetches its song once per key. A throw is not
+    /// cached, so the next visit asks again.
+    func claim(key: String, resolve: @escaping @MainActor () async throws -> ThemeSongTarget?) -> Claim {
         let claim = Claim()
         entries.append(Entry(claim: claim, key: key, resolve: resolve))
         evaluate()
@@ -95,20 +98,20 @@ final class ThemeSongPlayer {
     /// keep the pages that are open now silent until `resume()`.
     func silence() {
         evaluation?.cancel()
-        for index in entries.indices { entries[index].spent = true }
+        isSilenced = true
         output.stop()
     }
 
     /// The trailer closed or the app is back in front: the page on top plays again.
     func resume() {
-        for index in entries.indices { entries[index].spent = false }
+        isSilenced = false
         evaluate()
     }
 
     /// Re-checks against the switch and the blockers, after the setting changed or playback ended.
     func evaluate() {
         evaluation?.cancel()
-        guard let top = entries.last, !top.spent, isEnabled() else {
+        guard let top = entries.last, !isSilenced, isEnabled() else {
             output.stop()
             return
         }
@@ -124,10 +127,16 @@ final class ThemeSongPlayer {
         let key = top.key
         let resolve = top.resolve
         evaluation = Task { [weak self] in
-            let target = await resolve()
+            let target: ThemeSongTarget?
+            do {
+                target = try await resolve()
+            } catch {
+                LogTap.shared.note("[ThemeSong] lookup failed for \(key): \(error)")
+                return
+            }
             guard !Task.isCancelled, let self else { return }
             self.resolved[key] = target
-            guard self.entries.last?.claim == claim, self.entries.last?.spent == false,
+            guard self.entries.last?.claim == claim, !self.isSilenced,
                   self.isEnabled(), !self.isBlocked() else { return }
             self.apply(target)
         }

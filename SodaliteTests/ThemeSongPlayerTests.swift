@@ -47,7 +47,7 @@ struct ThemeSongPlayerTests {
         return (player, output, switches)
     }
 
-    private func resolver(_ songID: String?, key: String, _ switches: Switches) -> @MainActor () async -> ThemeSongTarget? {
+    private func resolver(_ songID: String?, key: String, _ switches: Switches) -> @MainActor () async throws -> ThemeSongTarget? {
         { [song] in
             switches.lookups.append(key)
             return songID.map(song)
@@ -183,6 +183,39 @@ struct ThemeSongPlayerTests {
         switches.enabled = false
         player.evaluate()
         #expect(output.currentSongID == nil)
+    }
+
+    @Test("a failed lookup is asked again on the next visit")
+    func failureIsNotCached() async {
+        struct Offline: Error {}
+        let (player, output, switches) = make()
+        var attempts = 0
+        let flaky: @MainActor () async throws -> ThemeSongTarget? = { [song] in
+            attempts += 1
+            if attempts == 1 { throw Offline() }
+            return song("theme-a")
+        }
+        _ = player.claim(key: "s:series", resolve: flaky)
+        await settle()
+        #expect(output.plays.isEmpty)
+        let season = player.claim(key: "s:season", resolve: resolver(nil, key: "s:season", switches))
+        await settle()
+        player.release(season)
+        await settle()
+        #expect(attempts == 2)
+        #expect(output.plays == ["theme-a"])
+    }
+
+    @Test("a page opened while silenced stays silent until resume")
+    func silenceCoversLaterPages() async {
+        let (player, output, switches) = make()
+        player.silence()
+        _ = player.claim(key: "s:movie", resolve: resolver("theme-a", key: "s:movie", switches))
+        await settle()
+        #expect(output.plays.isEmpty)
+        player.resume()
+        await settle()
+        #expect(output.plays == ["theme-a"])
     }
 
     @Test("only a session-less engine leaves room for a song")

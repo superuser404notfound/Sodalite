@@ -22,12 +22,7 @@ struct ThemeSongClaim: ViewModifier {
         let client = session.client
         let userID = session.userID
         claim = dependencies.themeSongPlayer.claim(key: "\(session.server?.id ?? ""):\(itemID)") {
-            do {
-                return try await JellyfinThemeSongService(client: client).themeSong(userID: userID, itemID: itemID)
-            } catch {
-                LogTap.shared.note("[ThemeSong] lookup failed for \(itemID): \(error)")
-                return nil
-            }
+            try await JellyfinThemeSongService(client: client).themeSong(userID: userID, itemID: itemID)
         }
     }
 
