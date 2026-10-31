@@ -280,6 +280,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.remotePlayPause.title",
+                    "changelog.1_1_0.remotePlayPause.body",
+                    icon: "airpods"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.requestsAfterPin.title",
                     "changelog.1_1_0.requestsAfterPin.body",
                     icon: "lock"

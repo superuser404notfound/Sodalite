@@ -80829,6 +80829,330 @@
         }
       }
     },
+    "changelog.1_1_0.remotePlayPause.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videa přehrávaná softwarovým dekodérem (například AV1 bez hardwarového dekódování nebo VP9) nyní reagují na přehrávání a pauzu z AirPods, sluchátek Bluetooth a Ovládacího centra a zobrazují se v Právě hraje."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoer, der afspilles med softwaredekoderen (f.eks. AV1 uden hardwareafkodning eller VP9), reagerer nu på afspil og pause fra AirPods, Bluetooth-headsets og Kontrolcenter og vises i Afspiller nu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videos, die über den Software-Decoder laufen (etwa AV1 ohne Hardware-Decodierung oder VP9), reagieren jetzt auf Play und Pause von AirPods, Bluetooth-Headsets und dem Kontrollzentrum und erscheinen unter „Jetzt läuft“."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα βίντεο που αναπαράγονται μέσω του αποκωδικοποιητή λογισμικού (π.χ. AV1 χωρίς αποκωδικοποίηση υλικού ή VP9) ανταποκρίνονται πλέον σε αναπαραγωγή και παύση από AirPods, ακουστικά Bluetooth και το Κέντρο ελέγχου και εμφανίζονται στο «Παίζει τώρα»."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videos that play through the software decoder (such as AV1 without hardware decoding, or VP9) now respond to play and pause from AirPods, Bluetooth headsets and Control Center, and show up in Now Playing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los vídeos que se reproducen con el decodificador por software (como AV1 sin decodificación por hardware o VP9) ahora responden a reproducir y pausar desde AirPods, auriculares Bluetooth y el centro de control, y aparecen en «A la escucha»."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohjelmistodekooderilla toistettavat videot (kuten AV1 ilman laitteistodekoodausta tai VP9) reagoivat nyt AirPodsien, Bluetooth-kuulokkeiden ja Ohjauskeskuksen toisto- ja taukokomentoihin ja näkyvät Toistossa-näkymässä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vidéos lues par le décodeur logiciel (comme l’AV1 sans décodage matériel, ou le VP9) répondent désormais à la lecture et à la pause depuis les AirPods, les casques Bluetooth et le centre de contrôle, et apparaissent dans « À l’écoute »."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videozapisi koji se reproduciraju softverskim dekoderom (npr. AV1 bez hardverskog dekodiranja ili VP9) sada reagiraju na reprodukciju i pauzu s AirPods slušalica, Bluetooth slušalica i Kontrolnog centra te se prikazuju u Sada svira."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A szoftveres dekóderrel lejátszott videók (például hardveres dekódolás nélküli AV1 vagy VP9) mostantól reagálnak az AirPods, a Bluetooth-headsetek és a Vezérlőközpont lejátszás és szünet parancsaira, és megjelennek a Most játszott részben."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I video riprodotti tramite il decoder software (come AV1 senza decodifica hardware o VP9) ora rispondono a riproduci e pausa da AirPods, cuffie Bluetooth e Centro di Controllo, e compaiono in In riproduzione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソフトウェアデコーダで再生されるビデオ（ハードウェアデコードなしのAV1やVP9など）も、AirPods、Bluetoothヘッドセット、コントロールセンターからの再生と一時停止に反応し、「再生中」に表示されるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소프트웨어 디코더로 재생되는 동영상(하드웨어 디코딩이 없는 AV1 또는 VP9 등)도 이제 AirPods, 블루투스 헤드셋 및 제어 센터의 재생 및 일시 정지에 반응하며 지금 재생 중에 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoer som spilles av med programvaredekoderen (for eksempel AV1 uten maskinvaredekoding, eller VP9) reagerer nå på spill av og pause fra AirPods, Bluetooth-hodesett og Kontrollsenter, og vises under Spilles nå."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video’s die via de softwaredecoder worden afgespeeld (zoals AV1 zonder hardwaredecodering, of VP9) reageren nu op afspelen en pauzeren via AirPods, bluetoothheadsets en het bedieningspaneel, en verschijnen bij Huidige weergave."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filmy odtwarzane przez dekoder programowy (np. AV1 bez sprzętowego dekodowania lub VP9) reagują teraz na odtwarzanie i pauzę z AirPods, słuchawek Bluetooth i centrum sterowania oraz pojawiają się w sekcji Teraz odtwarzane."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos reproduzidos pelo decodificador de software (como AV1 sem decodificação por hardware, ou VP9) agora respondem a reproduzir e pausar pelos AirPods, fones Bluetooth e pela Central de Controle, e aparecem em Reproduzindo Agora."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os vídeos reproduzidos pelo descodificador de software (como AV1 sem descodificação por hardware, ou VP9) respondem agora a reproduzir e pausar a partir dos AirPods, auscultadores Bluetooth e da central de controlo, e aparecem em A reproduzir."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoclipurile redate prin decodorul software (de exemplu AV1 fără decodare hardware sau VP9) răspund acum la redare și pauză din AirPods, căștile Bluetooth și Centrul de control și apar în În redare."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видео, воспроизводимые программным декодером (например, AV1 без аппаратного декодирования или VP9), теперь реагируют на воспроизведение и паузу с AirPods, Bluetooth-гарнитур и Пункта управления и отображаются в «Исполняется»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videá prehrávané softvérovým dekodérom (napríklad AV1 bez hardvérového dekódovania alebo VP9) teraz reagujú na prehrávanie a pauzu z AirPods, slúchadiel Bluetooth a Ovládacieho centra a zobrazujú sa v časti Práve hrá."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videor som spelas upp via programvaruavkodaren (till exempel AV1 utan maskinvaruavkodning, eller VP9) reagerar nu på spela upp och pausa från AirPods, Bluetooth-headset och Kontrollcenter, och visas i Spelas nu."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yazılım kod çözücüsüyle oynatılan videolar (donanımsal kod çözme olmadan AV1 veya VP9 gibi) artık AirPods, Bluetooth kulaklıklar ve Denetim Merkezi'nden gelen oynatma ve duraklatma komutlarına yanıt veriyor ve Şimdi Çalıyor'da görünüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відео, що відтворюються програмним декодером (наприклад, AV1 без апаратного декодування або VP9), тепер реагують на відтворення й паузу з AirPods, Bluetooth-гарнітур і Центру керування та відображаються в «Зараз грає»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过软件解码器播放的视频（例如无硬件解码的 AV1 或 VP9）现在也会响应来自 AirPods、蓝牙耳机和控制中心的播放与暂停，并显示在“正在播放”中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "透過軟體解碼器播放的影片（例如無硬體解碼的 AV1 或 VP9）現在也會回應來自 AirPods、藍牙耳機與控制中心的播放與暫停，並顯示在「正在播放」中。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.remotePlayPause.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrávání a pauza ze sluchátek u každého videa"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspil og pause fra hovedtelefoner i alle videoer"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play und Pause per Kopfhörer bei jedem Video"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναπαραγωγή και παύση από ακουστικά σε κάθε βίντεο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play and pause from headphones in every video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir y pausar desde los auriculares en cualquier vídeo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toisto ja tauko kuulokkeista jokaisessa videossa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture et pause depuis les écouteurs pour chaque vidéo"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprodukcija i pauza sa slušalica za svaki videozapis"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátszás és szünet a fülhallgatóról minden videónál"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci e metti in pausa dalle cuffie in ogni video"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのビデオでヘッドフォンから再生と一時停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 동영상에서 헤드폰으로 재생 및 일시 정지"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spill av og pause fra hodetelefoner i alle videoer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspelen en pauzeren via koptelefoon bij elke video"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarzanie i pauza ze słuchawek w każdym wideo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir e pausar pelos fones em qualquer vídeo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir e pausar a partir dos auscultadores em qualquer vídeo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redare și pauză din căști pentru fiecare videoclip"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизведение и пауза с наушников для любого видео"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehrávanie a pauza zo slúchadiel pri každom videu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela upp och pausa från hörlurar i alla videor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her videoda kulaklıktan oynatma ve duraklatma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворення й пауза з навушників для будь-якого відео"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有视频均可通过耳机播放和暂停"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有影片皆可透過耳機播放與暫停"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.repromptPaused.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

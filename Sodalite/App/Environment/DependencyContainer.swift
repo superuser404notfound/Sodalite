@@ -13,6 +13,9 @@ final class DependencyContainer {
         // the shared AVAudioSession when playback ends. Without it, an E-AC-3/Atmos bitstream-passthrough
         // route leaves the HDMI sink looping the last MAT frame after the player is gone.
         engine.deactivatesAudioSessionOnStop = true
+        // Sodalite#220: the software host has no AVPlayer, so AVKit publishes no Now Playing for it and
+        // headphone or Control Center play/pause would land nowhere. The native path stays with AVKit.
+        engine.ownsSoftwareNowPlaying = true
         return engine
     }()
     @MainActor static let multiviewEnginePool = MultiviewEnginePool(primary: playerEngine)
