@@ -40,6 +40,7 @@ struct YouTubeTrailerSheet: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black)
             .onAppear { dependencies.themeSongPlayer.silence() }
+            .onDisappear { dependencies.themeSongPlayer.resume() }
             .navigationTitle(trailer.title ?? String(localized: "detail.trailer"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)

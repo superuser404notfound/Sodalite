@@ -11,7 +11,7 @@ final class AVThemeSongOutput: ThemeSongOutput {
     /// Theme songs are mastered loud and play under reading, not instead of it.
     static let peakVolume: Float = 0.5
     static let fadeIn: Duration = .milliseconds(1500)
-    static let fadeOut: Duration = .milliseconds(1000)
+    static let fadeOut: Duration = .milliseconds(600)
 
     private let player = AVPlayer()
     private(set) var currentSongID: String?

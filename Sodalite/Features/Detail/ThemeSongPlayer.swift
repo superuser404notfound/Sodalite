@@ -26,8 +26,8 @@ protocol ThemeSongOutput: AnyObject {
 /// the series it came from does. A page that goes away is released after `releaseGrace`, so the
 /// disappear of one page and the appear of the next never stop the song in between.
 ///
-/// Playback of anything else (engine loading, playing, paused, seeking, a player on screen) silences it
-/// and spends the claims it found: closing the player does not bring the song back, opening a page does.
+/// Playback of anything else (engine loading, playing, paused, seeking, a player on screen) silences it,
+/// and the page on top fades back in `resumeDelay` after that playback is gone, as Jellyfin Web does.
 @MainActor
 final class ThemeSongPlayer {
     struct Claim: Hashable {
@@ -45,6 +45,7 @@ final class ThemeSongPlayer {
     private let isEnabled: @MainActor () -> Bool
     private let isBlocked: @MainActor () -> Bool
     private let releaseGrace: Duration
+    private let resumeDelay: Duration
 
     private var entries: [Entry] = []
     /// Per item, nil included, so walking back to a page plays without a round trip. Dropped once no
@@ -52,18 +53,23 @@ final class ThemeSongPlayer {
     private var resolved: [String: ThemeSongTarget?] = [:]
     private var evaluation: Task<Void, Never>?
     private var pendingRelease: Task<Void, Never>?
+    private var pendingResume: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
 
     init(
         output: ThemeSongOutput,
         isEnabled: @escaping @MainActor () -> Bool,
         isBlocked: @escaping @MainActor () -> Bool,
-        releaseGrace: Duration = .milliseconds(800)
+        releaseGrace: Duration = .milliseconds(250),
+        // The engine releases the shared audio session off-main once its playback stops; a song started
+        // before that lands would be cut by it.
+        resumeDelay: Duration = .seconds(1)
     ) {
         self.output = output
         self.isEnabled = isEnabled
         self.isBlocked = isBlocked
         self.releaseGrace = releaseGrace
+        self.resumeDelay = resumeDelay
     }
 
     /// `key` names the item (server and id); `resolve` fetches its song once per key.
@@ -85,15 +91,15 @@ final class ThemeSongPlayer {
         }
     }
 
-    /// Something else is about to make sound (a YouTube trailer, playback starting): stop, and keep the
-    /// pages that are open now silent.
+    /// Something outside the engine makes sound (a YouTube trailer) or the app leaves the front: stop, and
+    /// keep the pages that are open now silent until `resume()`.
     func silence() {
         evaluation?.cancel()
         for index in entries.indices { entries[index].spent = true }
         output.stop()
     }
 
-    /// The app is back in front: the page on top plays again.
+    /// The trailer closed or the app is back in front: the page on top plays again.
     func resume() {
         for index in entries.indices { entries[index].spent = false }
         evaluate()
@@ -107,7 +113,7 @@ final class ThemeSongPlayer {
             return
         }
         if isBlocked() {
-            silence()
+            output.stop()
             return
         }
         if let cached = resolved[top.key] {
@@ -136,20 +142,38 @@ final class ThemeSongPlayer {
         output.play(target)
     }
 
+    /// Playback started or is still around: stop now, and drop a resume that was waiting.
+    func playbackDidStart() {
+        pendingResume?.cancel()
+        evaluation?.cancel()
+        output.stop()
+    }
+
+    /// Playback may be over: the page on top comes back once `resumeDelay` has passed with nothing
+    /// playing. `evaluate` re-checks the blockers, so a player still on screen keeps it silent.
+    func playbackDidSettle() {
+        pendingResume?.cancel()
+        pendingResume = Task { [weak self, resumeDelay] in
+            try? await Task.sleep(for: resumeDelay)
+            guard !Task.isCancelled, let self else { return }
+            self.evaluate()
+        }
+    }
+
     /// Wires the app's own signals: engine activity, a player on screen, the app leaving the front.
     func observe(engine: AetherEngine) {
         engine.$state
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                guard let self, !Self.isQuiet(state) else { return }
-                self.silence()
+                guard let self else { return }
+                if Self.isQuiet(state) { self.playbackDidSettle() } else { self.playbackDidStart() }
             }
             .store(in: &cancellables)
         NotificationCenter.default.publisher(for: .playerModalPresenceDidChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self, PlayerModalPresence.isPlayerActive else { return }
-                self.silence()
+                guard let self else { return }
+                if PlayerModalPresence.isPlayerActive { self.playbackDidStart() } else { self.playbackDidSettle() }
             }
             .store(in: &cancellables)
         #if canImport(UIKit)

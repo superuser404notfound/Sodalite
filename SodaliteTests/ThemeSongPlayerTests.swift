@@ -41,7 +41,8 @@ struct ThemeSongPlayerTests {
             output: output,
             isEnabled: { switches.enabled },
             isBlocked: { switches.blocked },
-            releaseGrace: .milliseconds(20)
+            releaseGrace: .milliseconds(20),
+            resumeDelay: .milliseconds(20)
         )
         return (player, output, switches)
     }
@@ -122,16 +123,34 @@ struct ThemeSongPlayerTests {
         #expect(output.currentSongID == nil)
     }
 
-    @Test("playback silences the song and it stays silent after the player closes")
-    func silenceSpendsOpenPages() async {
+    @Test("playback silences the song and it fades back in once the player is gone")
+    func playbackSilencesThenResumes() async {
         let (player, output, switches) = make()
         _ = player.claim(key: "s:movie", resolve: resolver("theme-a", key: "s:movie", switches))
         await settle()
         switches.blocked = true
-        player.silence()
+        player.playbackDidStart()
         #expect(output.currentSongID == nil)
+        player.playbackDidSettle()
+        await settle()
+        #expect(output.currentSongID == nil, "a player still on screen keeps it silent")
         switches.blocked = false
-        player.evaluate()
+        player.playbackDidSettle()
+        await settle()
+        #expect(output.plays == ["theme-a", "theme-a"])
+        #expect(switches.lookups == ["s:movie"])
+    }
+
+    @Test("playback starting again drops the pending resume")
+    func restartCancelsResume() async {
+        let (player, output, switches) = make()
+        _ = player.claim(key: "s:movie", resolve: resolver("theme-a", key: "s:movie", switches))
+        await settle()
+        player.playbackDidStart()
+        player.playbackDidSettle()
+        switches.blocked = true
+        player.playbackDidStart()
+        switches.blocked = false
         await settle()
         #expect(output.plays == ["theme-a"])
     }
