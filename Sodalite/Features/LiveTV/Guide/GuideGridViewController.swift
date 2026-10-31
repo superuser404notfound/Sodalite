@@ -178,6 +178,7 @@ final class GuideGridViewController: UIViewController,
 
 
         rebuildRows()
+        seedFirstVisit()
         gridView.reloadData()
         columnView.reloadData()
         rulerView.reloadData()
@@ -484,6 +485,7 @@ final class GuideGridViewController: UIViewController,
     private func applyRowChange() {
         let old = rows
         rebuildRows()
+        seedFirstVisit()
         guard !old.isEmpty, isPrefix(old, of: rows) else {
             gridView.reloadData()
             columnView.reloadData()

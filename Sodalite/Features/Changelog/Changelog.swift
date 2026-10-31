@@ -261,6 +261,12 @@ enum Changelog {
                     icon: "line.3.horizontal.decrease.circle"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.guideNavigation.title",
+                    "changelog.1_1_0.guideNavigation.body",
+                    icon: "clock"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_1_0.sparsePolicy.title",
                     "changelog.1_1_0.sparsePolicy.body",

@@ -70,9 +70,10 @@ struct GuideAxisAdvanceTests {
     @Test("the time position moves up with the window instead of pointing outside it")
     func anchorIsClamped() {
         let model = model(now: slotStart + 60)
-        #expect(model.anchorTime == slotStart + 60)
+        model.anchor = .at(slotStart + 60)
+        #expect(model.anchorTime(at: slotStart + 60) == slotStart + 60)
         model.refreshAxis(now: slotStart + 2 * slot)
-        #expect(model.anchorTime == model.axis.start)
+        #expect(model.anchorTime(at: slotStart + 2 * slot) == model.axis.start)
     }
 
     // MARK: - What the moved window does to the programmes already fetched
@@ -151,7 +152,7 @@ struct GuideAxisAdvanceTests {
 
 /// Answers the guide's three startup questions and counts the programme requests, which is how the
 /// refetch policy is observed.
-private final class StubGuideService: JellyfinLiveTvServiceProtocol, @unchecked Sendable {
+final class StubGuideService: JellyfinLiveTvServiceProtocol, @unchecked Sendable {
     let guideEnd: Date?
     let programs: [JellyfinProgram]
     /// Handed out instead of `programs` from the second request on.

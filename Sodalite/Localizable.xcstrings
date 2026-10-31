@@ -72745,6 +72745,330 @@
         }
       }
     },
+    "changelog.1_1_0.guideNavigation.body" : {
+      "comment" : "What's New 1.1.0: Live TV guide Up/Down keep a live or picked time (#221)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV nyní šipky nahoru a dolů v průvodci živé TV přistávají na tom, co se právě vysílá, bez ohledu na délku pořadu, ze kterého vycházejí, a platí to i s plynoucím časem. Pozdější čas zvolený vlevo, vpravo, volbou Dnes večer nebo Zítra večer zůstává, dokud se znovu nepohnete do strany. Při první návštěvě průvodce rovnou popisuje aktuální pořad prvního kanálu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV lander Op og Ned i Live TV-guiden nu på det, der sendes lige nu, uanset hvor langt programmet er, man starter fra, og det bliver ved, mens tiden går. Et senere tidspunkt valgt med Venstre, Højre, I aften eller I morgen aften bliver stående til næste bevægelse til siden. Ved første besøg viser guiden allerede den første kanals aktuelle program."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV landen Hoch und Runter im Live-TV-Guide jetzt auf dem, was gerade läuft, egal wie lang die Sendung ist, von der aus es losgeht, und das bleibt so, während die Uhr weiterläuft. Eine spätere Uhrzeit, gewählt mit Links, Rechts, Heute Abend oder Morgen Abend, bleibt stehen bis zur nächsten Bewegung zur Seite. Beim ersten Besuch beschreibt der Guide schon die aktuelle Sendung des ersten Senders."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο Apple TV, τα Πάνω και Κάτω στον οδηγό Live TV προσγειώνονται πλέον σε ό,τι προβάλλεται τώρα, όσο μεγάλο κι αν είναι το πρόγραμμα από το οποίο ξεκινούν, και συνεχίζουν έτσι καθώς περνά η ώρα. Μια μεταγενέστερη ώρα που επιλέγεται με Αριστερά, Δεξιά, Απόψε ή Αύριο βράδυ μένει σταθερή μέχρι την επόμενη πλάγια κίνηση. Στην πρώτη επίσκεψη ο οδηγός περιγράφει ήδη το τρέχον πρόγραμμα του πρώτου καναλιού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV, Up and Down in the Live TV guide now land on what is airing right now, however long the program they start from, and keep doing so as the clock moves. A later time picked with Left, Right, Tonight or Tomorrow night stays put until the next sideways move. On the first visit the guide already describes the first channel's current program."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Apple TV, Arriba y Abajo en la guía de TV en directo ahora caen en lo que se emite en este momento, sin importar la duración del programa de partida, y siguen haciéndolo a medida que avanza el reloj. Una hora posterior elegida con Izquierda, Derecha, Esta noche o Mañana por la noche se mantiene hasta el siguiente movimiento lateral. En la primera visita la guía ya describe el programa actual del primer canal."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä Ylös ja Alas osuvat suoran TV:n oppaassa nyt siihen, mikä on juuri nyt ohjelmassa, oli lähtöohjelma kuinka pitkä tahansa, ja niin käy myös kellon edetessä. Vasemmalla, Oikealla, valinnalla Tänä iltana tai Huomenna illalla valittu myöhempi aika pysyy, kunnes liikutaan taas sivulle. Ensimmäisellä käynnillä opas kuvaa jo ensimmäisen kanavan nykyisen ohjelman."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur Apple TV, Haut et Bas dans le guide TV en direct atterrissent désormais sur ce qui est diffusé en ce moment, quelle que soit la durée du programme de départ, et continuent ainsi à mesure que l'heure avance. Un horaire ultérieur choisi avec Gauche, Droite, Ce soir ou Demain soir reste en place jusqu'au prochain déplacement latéral. Dès la première visite, le guide décrit le programme en cours de la première chaîne."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u gore i dolje u vodiču TV uživo sada slijeću na ono što se upravo emitira, bez obzira na duljinu emisije od koje kreću, i tako ostaje kako vrijeme prolazi. Kasnije vrijeme odabrano lijevo, desno, odabirom Večeras ili Sutra navečer ostaje do sljedećeg pomaka u stranu. Pri prvom posjetu vodič već opisuje trenutačnu emisiju prvog kanala."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n a Fel és Le gomb az élő TV műsorújságban mostantól arra ugrik, ami éppen most megy, bármilyen hosszú is a kiinduló műsor, és ez az idő múlásával is így marad. A Balra, Jobbra, Ma este vagy Holnap este gombbal választott későbbi időpont a következő oldalirányú mozgásig megmarad. Az első látogatáskor a műsorújság már az első csatorna aktuális műsorát mutatja."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV, Su e Giù nella guida TV in diretta ora arrivano su ciò che va in onda in questo momento, qualunque sia la durata del programma di partenza, e continuano a farlo mentre l'orologio avanza. Un orario successivo scelto con Sinistra, Destra, Stasera o Domani sera resta fermo fino al prossimo spostamento laterale. Alla prima visita la guida descrive già il programma in corso del primo canale."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVのライブTV番組表で、上下の移動が起点の番組の長さに関係なく、今放送中の番組に止まるようになりました。時間が進んでも同様です。左右、「今夜」、「明日の夜」で選んだ後の時刻は、次に横へ移動するまで保たれます。初めて開いたときから、最初のチャンネルの放送中の番組が表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV의 라이브 TV 편성표에서 위아래 이동이 시작한 프로그램의 길이와 관계없이 지금 방송 중인 프로그램에 멈추며, 시간이 흘러도 마찬가지입니다. 왼쪽, 오른쪽, 오늘 밤 또는 내일 밤로 고른 이후 시간은 다음 좌우 이동 전까지 유지됩니다. 처음 방문할 때부터 첫 번째 채널의 현재 프로그램을 보여 줍니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV lander Opp og Ned i Direkte-TV-guiden nå på det som sendes akkurat nå, uansett hvor langt programmet man starter fra er, og det fortsetter mens klokken går. Et senere tidspunkt valgt med Venstre, Høyre, I kveld eller I morgen kveld blir stående til neste bevegelse til siden. Ved første besøk viser guiden allerede den første kanalens nåværende program."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op Apple TV komen Omhoog en Omlaag in de Live TV-gids nu uit op wat er nu wordt uitgezonden, hoe lang het programma waar ze vandaan komen ook is, en dat blijft zo terwijl de klok doorloopt. Een later tijdstip gekozen met Links, Rechts, Vanavond of Morgenavond blijft staan tot de volgende zijwaartse beweging. Bij het eerste bezoek beschrijft de gids al het huidige programma van het eerste kanaal."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV strzałki w górę i w dół w przewodniku telewizji na żywo trafiają teraz na to, co jest właśnie nadawane, niezależnie od długości programu, od którego zaczynają, i tak zostaje w miarę upływu czasu. Późniejsza godzina wybrana w lewo, w prawo, opcją Dziś wieczorem lub Jutro wieczorem zostaje do następnego ruchu w bok. Przy pierwszej wizycie przewodnik od razu opisuje bieżący program pierwszego kanału."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Apple TV, Cima e Baixo no guia de TV ao vivo agora caem no que está passando agora, não importa a duração do programa de partida, e continuam assim conforme o relógio avança. Um horário posterior escolhido com Esquerda, Direita, Hoje à noite ou Amanhã à noite fica fixo até o próximo movimento lateral. Na primeira visita, o guia já descreve o programa atual do primeiro canal."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Apple TV, Cima e Baixo no guia de TV em direto passam a cair no que está a dar agora, seja qual for a duração do programa de partida, e continuam assim à medida que o relógio avança. Uma hora posterior escolhida com Esquerda, Direita, Hoje à noite ou Amanhã à noite mantém-se até ao próximo movimento lateral. Na primeira visita, o guia já descreve o programa atual do primeiro canal."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, Sus și Jos în ghidul TV în direct ajung acum pe ceea ce se difuzează chiar acum, indiferent cât de lung este programul de pornire, și rămân așa pe măsură ce trece timpul. O oră ulterioară aleasă cu Stânga, Dreapta, Diseară sau Mâine seară rămâne fixă până la următoarea mișcare laterală. La prima vizită, ghidul descrie deja programul curent al primului canal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV кнопки вверх и вниз в телегиде прямого эфира теперь попадают на то, что идёт прямо сейчас, какой бы длинной ни была исходная передача, и так остаётся по мере хода времени. Более позднее время, выбранное влево, вправо, кнопкой «Сегодня вечером» или «Завтра вечером», сохраняется до следующего движения в сторону. При первом открытии телегид сразу показывает текущую передачу первого канала."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV teraz šípky hore a dole v sprievodcovi živej TV pristávajú na tom, čo sa práve vysiela, bez ohľadu na dĺžku relácie, z ktorej vychádzajú, a platí to aj s plynúcim časom. Neskorší čas zvolený vľavo, vpravo, voľbou Dnes večer alebo Zajtra večer zostáva, kým sa znova nepohnete do strany. Pri prvej návšteve sprievodca rovno opisuje aktuálnu reláciu prvého kanála."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV landar Upp och Ned i Live-TV-guiden nu på det som sänds just nu, oavsett hur långt programmet man utgår från är, och det fortsätter medan klockan går. En senare tid vald med Vänster, Höger, I kväll eller I morgon kväll ligger kvar till nästa rörelse åt sidan. Vid första besöket visar guiden redan den första kanalens aktuella program."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'de canlı TV rehberinde Yukarı ve Aşağı artık başlanan programın uzunluğu ne olursa olsun şu anda yayında olana gidiyor ve saat ilerledikçe de böyle kalıyor. Sol, Sağ, Bu akşam veya Yarın akşam ile seçilen daha sonraki bir saat, bir sonraki yana harekete kadar sabit kalıyor. İlk ziyarette rehber ilk kanalın şu anki programını zaten gösteriyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV кнопки вгору і вниз у телегіді прямого ефіру тепер потрапляють на те, що йде просто зараз, хоч якою довгою була б вихідна передача, і так залишається з плином часу. Пізніший час, вибраний ліворуч, праворуч, кнопкою «Сьогодні ввечері» або «Завтра ввечері», зберігається до наступного руху вбік. Під час першого відкриття телегід одразу показує поточну передачу першого каналу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，直播电视节目指南中的上下移动现在会停在正在播出的节目上，无论起点节目有多长，并且随时间推移依然如此。通过左、右、“今晚”或“明晚”选择的较晚时间会保持不变，直到下一次左右移动。首次打开时，指南就会显示第一个频道当前的节目。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，直播電視節目表中的上下移動現在會停在正在播出的節目上，無論起點節目有多長，並且隨時間推移依然如此。透過左、右、「今晚」或「明晚」選擇的較晚時間會保持不變，直到下一次左右移動。首次開啟時，節目表就會顯示第一個頻道目前的節目。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.guideNavigation.title" : {
+      "comment" : "What's New 1.1.0: Live TV guide Up/Down keep a live or picked time (#221)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigace v průvodci drží svůj čas"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidenavigationen holder fast i tidspunktet"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guide-Navigation behält ihre Uhrzeit"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η πλοήγηση στον οδηγό κρατά την ώρα της"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guide navigation keeps its time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La navegación de la guía mantiene su hora"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppaan navigointi pitää kellonaikansa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La navigation du guide garde son horaire"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigacija vodičem zadržava svoje vrijeme"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A műsorújság navigációja megtartja az időpontot"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La navigazione della guida mantiene l'orario"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "番組表の移動が時刻を保つように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "편성표 이동이 시간을 유지합니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidenavigasjonen holder på tidspunktet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigatie in de gids houdt het tijdstip vast"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nawigacja w przewodniku trzyma się godziny"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A navegação do guia mantém o horário"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A navegação do guia mantém a hora"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigarea în ghid își păstrează ora"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Навигация по телегиду держит выбранное время"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigácia v sprievodcovi drží svoj čas"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidenavigeringen håller fast vid tiden"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rehberde gezinme saatini koruyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Навігація телегідом тримає вибраний час"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "节目指南导航保持所选时间"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "節目表導覽保持所選時間"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.homeBanner.body" : {
       "comment" : "What's New 1.1.0: body of the highlight introducing the banner at the top of Home",
       "extractionState" : "manual",

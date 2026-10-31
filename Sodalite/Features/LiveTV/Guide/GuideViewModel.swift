@@ -36,10 +36,15 @@ final class GuideViewModel {
     private(set) var heroChannel: JellyfinChannel?
 
     /// The user's time position, as a time rather than an x. It survives reloads, filter switches
-    /// and jumps, and it is what the ruler hands back when focus returns to the grid.
-    var anchorTime: Date
+    /// and jumps, and it is what vertical moves aim at.
+    var anchor: GuideAnchor = .live
+    /// The anchor as a moment on the current axis.
+    var anchorTime: Date { anchorTime(at: Date()) }
     /// Channel row focus returns to when it comes down from the ruler.
     var anchorChannelID: String?
+    /// Whether focus has been in the grid yet. Until then the first channel stands in for the hero
+    /// and the landing row.
+    var didEnterGrid = false
 
     /// Bumped when something other than the grid moved the time position (a quick target, a
     /// category snap), so the controller scrolls rather than follows.
@@ -77,7 +82,6 @@ final class GuideViewModel {
         self.timers = timers
         self.metrics = metrics
         self.axis = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute)
-        self.anchorTime = now
         self.genres = GuideGenreController(service: service, userID: userID)
         self.categories = GuideCategoryController(service: service, userID: userID)
         genres.guideWindow = { [unowned self] in (axis.start, axis.end) }
@@ -147,7 +151,6 @@ final class GuideViewModel {
         // they are requested again as they come into view. That is also the only thing that brings a
         // long-running guide a fresh EPG.
         requestedProgramChannelIDs = []
-        anchorTime = min(max(anchorTime, rebuilt.start), rebuilt.end)
         genres.invalidate()
         categories.invalidate()
         return true
@@ -306,6 +309,12 @@ final class GuideViewModel {
         return best
     }
 
+    // MARK: - Anchor
+
+    func anchorTime(at now: Date) -> Date {
+        min(max(anchor.resolved(now: now), axis.start), axis.end)
+    }
+
     // MARK: - Hero and navigation
 
     func setHero(program: JellyfinProgram?, channel: JellyfinChannel?) {
@@ -314,20 +323,44 @@ final class GuideViewModel {
     }
 
     /// Move the time position and tell the controller to scroll there.
-    func requestScroll(to date: Date) {
-        anchorTime = min(max(date, axis.start), axis.end)
+    func requestScroll(to anchor: GuideAnchor) {
+        self.anchor = anchor
         scrollRequestVersion += 1
     }
 
-    func jumpToNow() { requestScroll(to: Date()) }
+    func jumpToNow() { requestScroll(to: .live) }
 
     /// Jump to 20:15 `days` from now. Returns false when that target is past or outside the axis,
     /// so the caller can hide the chip instead of offering a jump that does nothing.
     @discardableResult
     func jumpToPrimeTime(days: Int) -> Bool {
         guard let target = axis.primeTime(days: days, from: Date()) else { return false }
-        requestScroll(to: target)
+        requestScroll(to: .at(target))
         return true
+    }
+}
+
+/// Where vertical moves aim (Sodalite#221). Live follows the clock, so channel surfing keeps
+/// landing on what airs now however long the guide stays open; a picked time stays put until a
+/// horizontal move replaces it.
+enum GuideAnchor: Equatable {
+    case live
+    case at(Date)
+
+    /// A picked time the clock has overtaken is live again: an anchor behind the clock only ever
+    /// aims at programs that have ended.
+    func resolved(now: Date) -> Date {
+        switch self {
+        case .live: now
+        case .at(let date): max(date, now)
+        }
+    }
+
+    /// The anchor a horizontal move onto a cell spanning `start..<end` sets. Its start, not its
+    /// midpoint, so a long block passed on the way does not drag the time hours ahead; clamped to
+    /// the viewport so a block reaching in from the left aims where the user is looking.
+    static func focused(start: Date, visibleStart: Date, now: Date) -> GuideAnchor {
+        start <= now ? .live : .at(max(start, visibleStart))
     }
 }
 
