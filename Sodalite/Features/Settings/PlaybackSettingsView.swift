@@ -133,6 +133,21 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                sectionHeader("settings.playback.section.detailPages")
+
+                boolRow(
+                    icon: "music.note",
+                    title: "settings.playback.themeSongs",
+                    subtitle: "settings.playback.themeSongs.subtitle",
+                    value: Binding(
+                        get: { prefs.playThemeSongs },
+                        set: {
+                            prefs.playThemeSongs = $0
+                            dependencies.themeSongPlayer.evaluate()
+                        }
+                    )
+                )
+
                 sectionHeader("settings.playback.section.controls")
 
                 ValuePickerRow(
