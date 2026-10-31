@@ -18,6 +18,7 @@ final class AVThemeSongOutput: ThemeSongOutput {
     private var fade: Task<Void, Never>?
     private var start: Task<Void, Never>?
     private var loopObserver: NSObjectProtocol?
+    private var statusObservation: NSKeyValueObservation?
 
     init() {
         #if !os(macOS)
@@ -59,6 +60,12 @@ final class AVThemeSongOutput: ThemeSongOutput {
         player.volume = 0
         player.replaceCurrentItem(with: item)
         observeLoop(of: item)
+        let songID = target.songID
+        statusObservation = item.observe(\.status) { item, _ in
+            guard item.status == .failed else { return }
+            let reason = item.error.map { String(describing: $0) } ?? "unknown"
+            Task { @MainActor in LogTap.shared.note("[ThemeSong] stream failed for \(songID): \(reason)") }
+        }
         player.play()
         ramp(to: Self.peakVolume, over: Self.fadeIn)
         LogTap.shared.note("[ThemeSong] playing \(target.songID)")
@@ -68,7 +75,10 @@ final class AVThemeSongOutput: ThemeSongOutput {
     private func observeLoop(of item: AVPlayerItem?) {
         if let loopObserver { NotificationCenter.default.removeObserver(loopObserver) }
         loopObserver = nil
-        guard let item else { return }
+        guard let item else {
+            statusObservation = nil
+            return
+        }
         loopObserver = NotificationCenter.default.addObserver(
             forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main
         ) { [weak self] _ in
