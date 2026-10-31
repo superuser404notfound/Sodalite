@@ -18,9 +18,19 @@ struct ChangelogListView: View {
                 .padding(.top, 60)
                 .padding(.bottom, 32)
 
-                LazyVStack(spacing: 56) {
+                // One flat lazy stack of headers and rows: a section built as a block put all of a
+                // release's highlights (75 for 1.1.0) on screen at once and stalled the push.
+                LazyVStack(alignment: .leading, spacing: 24) {
                     ForEach(Changelog.entries) { entry in
-                        VersionSection(entry: entry)
+                        Text("Version \(entry.version)")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            // 24 + 32 keeps the 56 between releases.
+                            .padding(.top, entry.id == Changelog.entries.first?.id ? 0 : 32)
+                        ForEach(entry.highlights) { highlight in
+                            HighlightRow(highlight: highlight)
+                        }
                     }
                 }
                 .frame(maxWidth: 900)
@@ -45,26 +55,6 @@ struct ChangelogListView: View {
         .hidesNavigationBarChrome()
         // Belt and braces: catch the Menu button and pop back even if focus drifts off the focusable rows.
         .onExitCommandCompat { dismiss() }
-    }
-}
-
-private struct VersionSection: View {
-    let entry: ChangelogEntry
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            // "Version" prefix kept verbatim, reads correctly in every shipped locale, no catalog entry needed.
-            Text("Version \(entry.version)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            VStack(alignment: .leading, spacing: 24) {
-                ForEach(entry.highlights) { highlight in
-                    HighlightRow(highlight: highlight)
-                }
-            }
-        }
     }
 }
 

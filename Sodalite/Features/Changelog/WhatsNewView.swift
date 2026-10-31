@@ -60,8 +60,10 @@ struct WhatsNewView: View {
         .padding(.bottom, isCompact ? 28 : 50)
     }
 
+    /// Lazy: a release carries dozens of highlights, and building every focusable row at once
+    /// stalled the cover's slide-in.
     private var highlightsList: some View {
-        VStack(alignment: .leading, spacing: 28) {
+        LazyVStack(alignment: .leading, spacing: 28) {
             ForEach(Array(entry.highlights.enumerated()), id: \.element.id) { index, highlight in
                 HighlightRow(highlight: highlight)
                     .prefersDefaultFocusCompat(index == 0, in: focusNamespace)
