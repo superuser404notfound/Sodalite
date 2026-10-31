@@ -30,6 +30,9 @@ enum JellyfinEndpoint: APIEndpoint {
     case localTrailers(userID: String, itemID: String)
     /// GET SpecialFeatures: bare array like LocalTrailers. The server already filters to the displayable extra types, trailers and theme media excluded.
     case specialFeatures(userID: String, itemID: String)
+    /// GET ThemeSongs (Sodalite#219): `{Items, TotalRecordCount, OwnerId}`. InheritFromParent lets a season or an
+    /// episode's series stub play the series' song. Empty when the item has none.
+    case themeSongs(userID: String, itemID: String)
     case resumeItems(userID: String, mediaType: String, limit: Int)
     case nextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool)
     case latestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int)
@@ -134,6 +137,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/Items/\(itemID)/LocalTrailers"
         case .specialFeatures(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)/SpecialFeatures"
+        case .themeSongs(_, let itemID):
+            "/Items/\(itemID)/ThemeSongs"
         case .resumeItems(let userID, _, _):
             "/Users/\(userID)/Items/Resume"
         case .nextUp:
@@ -292,6 +297,12 @@ enum JellyfinEndpoint: APIEndpoint {
             return [
                 URLQueryItem(name: "UserId", value: userID),
                 URLQueryItem(name: "Fields", value: Self.detailFields),
+            ]
+
+        case .themeSongs(let userID, _):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "InheritFromParent", value: "true"),
             ]
 
         case .itemDetail:

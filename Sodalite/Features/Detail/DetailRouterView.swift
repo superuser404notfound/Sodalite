@@ -39,6 +39,16 @@ struct DetailRouterView: View {
         }
         .hidesShellTabBar()
         .environment(\.serverSession, session)
+        .modifier(ThemeSongClaim(itemID: themeSongItemID, session: session))
+    }
+
+    /// Sodalite#219. An episode plays its series' song (the server inherits it); a playlist has none.
+    private var themeSongItemID: String? {
+        switch item.type {
+        case .movie, .series, .season, .boxSet: item.id
+        case .episode: item.seriesId
+        default: nil
+        }
     }
 
     /// An item without a `ServerId` (the series stub built for an episode) stays on the session it

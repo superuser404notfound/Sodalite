@@ -1,5 +1,6 @@
 import Foundation
 import AetherEngine
+import AVFoundation
 
 @MainActor
 @Observable
@@ -95,6 +96,8 @@ final class DependencyContainer {
     let mediaDeletionService: any MediaDeletionServiceProtocol
 
     let musicPlaybackCoordinator: MusicPlaybackCoordinator
+    /// Sodalite#219, the detail pages' theme song.
+    let themeSongPlayer: ThemeSongPlayer
 
     /// Back-reference so switchServer / removeServer can bump serverDidSwitch. Weak: AppState does not own the container.
     weak var appState: AppState?
@@ -280,6 +283,22 @@ final class DependencyContainer {
                 return (session.playbackService, session.userID)
             }
         )
+
+        let capturedSettings = profileSettings
+        self.themeSongPlayer = ThemeSongPlayer(
+            output: AVThemeSongOutput(),
+            isEnabled: { [weak capturedSettings] in capturedSettings?.current.playback.playThemeSongs ?? false },
+            isBlocked: {
+                if PlayerModalPresence.isPlayerActive { return true }
+                if !ThemeSongPlayer.isQuiet(DependencyContainer.playerEngine.state) { return true }
+                #if os(iOS)
+                // Starting would stop the music another app is playing.
+                if AVAudioSession.sharedInstance().isOtherAudioPlaying { return true }
+                #endif
+                return false
+            }
+        )
+        themeSongPlayer.observe(engine: DependencyContainer.playerEngine)
 
         // Idempotent, and cheap once the legacy entries are gone (one miss per known server).
         migrateLegacyJellyfinPasswords()

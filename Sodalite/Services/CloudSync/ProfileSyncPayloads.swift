@@ -70,6 +70,8 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     var playerControls: String?
     /// Raw value of `VersionOrder`. Optional for the same reason; nil keeps the local value.
     var versionOrder: String?
+    /// Sodalite#219. Optional for the same reason; nil keeps the local value.
+    var playThemeSongs: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -107,7 +109,8 @@ extension ProfilePlaybackPayload {
             showNextEpisodeCard: p.showNextEpisodeCard,
             askForRatingAfterMovie: p.askForRatingAfterMovie,
             playerControls: p.playerControls.encoded(),
-            versionOrder: p.versionOrder.rawValue
+            versionOrder: p.versionOrder.rawValue,
+            playThemeSongs: p.playThemeSongs
         )
     }
 
@@ -147,6 +150,7 @@ extension ProfilePlaybackPayload {
             p.playerControls = PlayerControlsLayout.decoded(playerControls, showsStats: p.showStatsForNerds)
         }
         if let order = versionOrder.flatMap(VersionOrder.init(rawValue:)) { p.versionOrder = order }
+        if let playThemeSongs { p.playThemeSongs = playThemeSongs }
     }
 }
 

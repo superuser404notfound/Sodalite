@@ -88593,6 +88593,328 @@
         }
       }
     },
+    "changelog.1_1_0.themeSongs.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodní melodie v Nastavení > Přehrávání přehrává ze serveru úvodní melodii filmu, seriálu nebo kolekce, dokud je jejich stránka otevřená, a při spuštění přehrávání ji ztlumí. Ve výchozím stavu je vypnutá."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasange under Indstillinger > Afspilning afspiller en films, series eller samlings temasang fra din server, mens siden er åben, og toner den ud, når afspilningen starter. Det er slået fra som standard."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titelmusik in Einstellungen > Wiedergabe spielt die Titelmusik eines Films, einer Serie oder Sammlung von deinem Server, solange die Seite offen ist, und blendet sie aus, sobald die Wiedergabe beginnt. Sie ist standardmäßig aus."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα Μουσικά θέματα στις Ρυθμίσεις > Αναπαραγωγή παίζουν το μουσικό θέμα μιας ταινίας, σειράς ή συλλογής από τον διακομιστή σας όσο η σελίδα της είναι ανοιχτή και το σβήνουν σταδιακά όταν ξεκινά η αναπαραγωγή. Είναι απενεργοποιημένα από προεπιλογή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme Songs in Settings > Playback plays a movie's, show's or collection's theme song from your server while its page is open, and fades it out when playback starts. It is off by default."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canciones temáticas en Ajustes > Reproducción reproduce desde tu servidor la canción temática de una película, serie o colección mientras su página está abierta, y la desvanece al empezar la reproducción. Está desactivado por defecto."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tunnusmusiikki kohdassa Asetukset > Toisto toistaa elokuvan, sarjan tai kokoelman tunnusmusiikkia palvelimeltasi, kun sen sivu on auki, ja häivyttää sen, kun toisto alkaa. Se on oletuksena pois päältä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Musiques de thème, dans Réglages > Lecture, joue depuis votre serveur la musique de thème d'un film, d'une série ou d'une collection tant que sa page est ouverte, et l'estompe dès que la lecture commence. L'option est désactivée par défaut."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glazbene teme u Postavkama > Reprodukcija reproduciraju glazbenu temu filma, serije ili zbirke s vašeg poslužitelja dok je stranica otvorena i utišaju je kad počne reprodukcija. Prema zadanim postavkama isključene su."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Beállítások > Lejátszás alatti Főcímzenék lejátssza a szerveredről a film, sorozat vagy gyűjtemény főcímzenéjét, amíg az oldala nyitva van, és elhalkítja, amikor elindul a lejátszás. Alapértelmezés szerint ki van kapcsolva."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigle in Impostazioni > Riproduzione riproduce dal tuo server la sigla di un film, una serie o una raccolta mentre la sua pagina è aperta e la sfuma all'avvio della riproduzione. È disattivata per impostazione predefinita."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「設定」>「再生」の「テーマソング」をオンにすると、映画・番組・コレクションのページを開いている間、サーバーにあるテーマソングを再生し、再生を始めるとフェードアウトします。デフォルトではオフです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 > 재생의 테마 음악을 켜면 영화, 시리즈 또는 컬렉션 페이지가 열려 있는 동안 서버의 테마 음악을 재생하고, 재생이 시작되면 서서히 줄어듭니다. 기본값은 꺼짐입니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasanger under Innstillinger > Avspilling spiller en films, series eller samlings temasang fra serveren din mens siden er åpen, og toner den ut når avspillingen starter. Det er av som standard."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Themamuziek in Instellingen > Afspelen speelt de themamuziek van een film, serie of collectie vanaf je server zolang de pagina open is, en laat die wegvloeien zodra het afspelen begint. Het staat standaard uit."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motywy muzyczne w Ustawieniach > Odtwarzanie odtwarzają z Twojego serwera motyw filmu, serialu lub kolekcji, gdy ich strona jest otwarta, i wyciszają go po rozpoczęciu odtwarzania. Domyślnie są wyłączone."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema em Ajustes > Reprodução toca do seu servidor a música-tema de um filme, série ou coleção enquanto a página estiver aberta e a esmaece quando a reprodução começa. Vem desativado por padrão."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema em Definições > Reprodução reproduz a partir do seu servidor a música-tema de um filme, série ou coleção enquanto a página estiver aberta e desvanece-a quando a reprodução começa. Está desativado por predefinição."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melodii tematice din Setări > Redare redă de pe serverul tău melodia tematică a unui film, serial sau colecții cât timp pagina este deschisă și o estompează când începe redarea. Este dezactivată implicit."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музыкальные темы в разделе «Настройки» > «Воспроизведение» воспроизводят с вашего сервера тему фильма, сериала или коллекции, пока открыта их страница, и плавно приглушают её при начале воспроизведения. По умолчанию выключено."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodné melódie v Nastaveniach > Prehrávanie prehrávajú zo servera úvodnú melódiu filmu, seriálu alebo kolekcie, kým je ich stránka otvorená, a pri spustení prehrávania ju stlmia. Predvolene sú vypnuté."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temalåtar under Inställningar > Uppspelning spelar en films, series eller samlings temalåt från din server medan sidan är öppen och tonar ut den när uppspelningen börjar. Det är avstängt som standard."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar > Oynatma altındaki Tema müzikleri, bir filmin, dizinin veya koleksiyonun sayfası açıkken tema müziğini sunucunuzdan çalar ve oynatma başladığında sesi kısarak kapatır. Varsayılan olarak kapalıdır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музичні теми в розділі «Налаштування» > «Відтворення» відтворюють із вашого сервера тему фільму, серіалу або колекції, поки відкрита їхня сторінка, і плавно приглушують її, коли починається відтворення. Типово вимкнено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在“设置”>“播放”中打开“主题曲”后，电影、剧集或合集页面打开时会播放服务器上的主题曲，开始播放时淡出。默认关闭。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在「設定」>「播放」中開啟「主題曲」後，電影、影集或合輯頁面開啟時會播放伺服器上的主題曲，開始播放時淡出。預設為關閉。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.themeSongs.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodní melodie"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasange"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titelmusik"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μουσικά θέματα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme Songs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canciones temáticas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tunnusmusiikki"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Musiques de thème"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glazbene teme"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Főcímzenék"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマソング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "테마 음악"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasanger"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Themamuziek"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motywy muzyczne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melodii tematice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музыкальные темы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodné melódie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temalåtar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema müzikleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музичні теми"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主题曲"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主題曲"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.topBar.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",
@@ -227070,6 +227392,167 @@
         }
       }
     },
+    "settings.playback.section.detailPages" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stránky s detaily"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detaljesider"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detailseiten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδες λεπτομερειών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detail Pages"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Páginas de detalle"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tietosivut"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages de détail"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stranice s detaljima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Részletes oldalak"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagine di dettaglio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細ページ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상세 페이지"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detaljsider"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detailpagina's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strony szczegółów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Páginas de detalhes"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Páginas de detalhes"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagini de detalii"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Страницы с подробностями"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stránky s podrobnosťami"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detaljsidor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntı sayfaları"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сторінки з подробицями"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详情页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細資料頁面"
+          }
+        }
+      }
+    },
     "settings.playback.section.episodes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -237056,6 +237539,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "圖文電視頁面"
+          }
+        }
+      }
+    },
+    "settings.playback.themeSongs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodní melodie"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasange"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titelmusik"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μουσικά θέματα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme Songs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canciones temáticas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tunnusmusiikki"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Musiques de thème"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glazbene teme"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Főcímzenék"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマソング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "테마 음악"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temasanger"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Themamuziek"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motywy muzyczne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas-tema"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melodii tematice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музыкальные темы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Úvodné melódie"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temalåtar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema müzikleri"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музичні теми"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主题曲"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主題曲"
+          }
+        }
+      }
+    },
+    "settings.playback.themeSongs.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrává ze serveru úvodní melodii filmu nebo seriálu, dokud je jeho stránka otevřená, například z pluginu Themerr. Zastaví se při spuštění přehrávání."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspiller en films eller series temasang fra serveren, mens siden er åben, for eksempel fra Themerr-pluginnet. Stopper, når afspilningen starter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spielt die Titelmusik eines Films oder einer Serie vom Server, solange die Seite offen ist, zum Beispiel vom Themerr-Plugin. Stoppt, sobald die Wiedergabe beginnt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παίζει το μουσικό θέμα μιας ταινίας ή σειράς από τον διακομιστή όσο η σελίδα της είναι ανοιχτή, για παράδειγμα από το πρόσθετο Themerr. Σταματά όταν ξεκινά η αναπαραγωγή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plays a movie's or show's theme song from the server while its page is open, for example one added by the Themerr plugin. Stops when playback starts."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduce desde el servidor la canción temática de una película o serie mientras su página está abierta, por ejemplo la del plugin Themerr. Se detiene al empezar la reproducción."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toistaa elokuvan tai sarjan tunnusmusiikkia palvelimelta, kun sen sivu on auki, esimerkiksi Themerr-lisäosan lataamaa. Pysähtyy, kun toisto alkaa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joue depuis le serveur la musique de thème d'un film ou d'une série tant que sa page est ouverte, par exemple celle du plugin Themerr. S'arrête dès que la lecture commence."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducira glazbenu temu filma ili serije s poslužitelja dok je njezina stranica otvorena, na primjer iz dodatka Themerr. Zaustavlja se kad počne reprodukcija."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátssza a szerverről a film vagy sorozat főcímzenéjét, amíg az oldala nyitva van, például a Themerr bővítménytől. Leáll, amikor elindul a lejátszás."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduce dal server la sigla di un film o di una serie mentre la sua pagina è aperta, ad esempio quella del plugin Themerr. Si ferma all'avvio della riproduzione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作品のページを開いている間、サーバーにある映画や番組のテーマソング（Themerr プラグインで追加したものなど）を再生します。再生を始めると停止します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페이지가 열려 있는 동안 서버에 있는 영화나 시리즈의 테마 음악(예: Themerr 플러그인이 추가한 음악)을 재생합니다. 재생이 시작되면 멈춥니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spiller en films eller series temasang fra serveren mens siden er åpen, for eksempel fra Themerr-tillegget. Stopper når avspillingen starter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speelt de themamuziek van een film of serie vanaf de server af zolang de pagina open is, bijvoorbeeld van de Themerr-plug-in. Stopt zodra het afspelen begint."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarza z serwera motyw muzyczny filmu lub serialu, gdy jego strona jest otwarta, na przykład z wtyczki Themerr. Zatrzymuje się po rozpoczęciu odtwarzania."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca do servidor a música-tema de um filme ou série enquanto a página estiver aberta, por exemplo a do plugin Themerr. Para quando a reprodução começa."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduz a partir do servidor a música-tema de um filme ou série enquanto a página estiver aberta, por exemplo a do plugin Themerr. Para quando a reprodução começa."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redă de pe server melodia tematică a unui film sau serial cât timp pagina este deschisă, de exemplu cea din pluginul Themerr. Se oprește când începe redarea."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизводит с сервера музыкальную тему фильма или сериала, пока открыта его страница, например из плагина Themerr. Останавливается при начале воспроизведения."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehráva zo servera úvodnú melódiu filmu alebo seriálu, kým je jeho stránka otvorená, napríklad z pluginu Themerr. Zastaví sa pri spustení prehrávania."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelar en films eller series temalåt från servern medan sidan är öppen, till exempel från Themerr-pluginet. Stoppar när uppspelningen börjar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfası açıkken bir filmin veya dizinin tema müziğini sunucudan çalar, örneğin Themerr eklentisinin eklediğini. Oynatma başladığında durur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворює з сервера музичну тему фільму або серіалу, поки відкрита його сторінка, наприклад із плагіна Themerr. Зупиняється, коли починається відтворення."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开电影或剧集页面时播放服务器上的主题曲（例如 Themerr 插件添加的）。开始播放时停止。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟電影或影集頁面時播放伺服器上的主題曲（例如 Themerr 外掛程式加入的）。開始播放時停止。"
           }
         }
       }

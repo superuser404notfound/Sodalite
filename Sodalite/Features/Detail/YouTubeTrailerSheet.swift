@@ -12,6 +12,7 @@ struct YouTubeTrailerSheet: View {
     let trailer: YouTubeTrailer
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.dependencies) private var dependencies
     @State private var failed = false
 
     var body: some View {
@@ -38,6 +39,8 @@ struct YouTubeTrailerSheet: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black)
+            .onAppear { dependencies.themeSongPlayer.silence() }
+            .onDisappear { dependencies.themeSongPlayer.resume() }
             .navigationTitle(trailer.title ?? String(localized: "detail.trailer"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)

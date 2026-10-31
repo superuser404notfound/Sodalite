@@ -44,12 +44,12 @@ struct CloudSyncSettingsParityTests {
     /// overlay flags are required by 1.0.0's synthesized decoder. `playerControls` (Sodalite#194)
     /// postdates the legacy record and travels in the profile record alone; no build that reads the
     /// legacy record knows it, and its Stats half still goes out as `showStatsForNerds`. `versionOrder`
-    /// postdates it the same way.
+    /// and `playThemeSongs` (Sodalite#219) postdate it the same way.
     @Test func everyPlaybackSettingIsInThePayload() {
         let defaults = scratchDefaults("playback")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
         let profile = storedSettingNames(of: PlaybackPreferences(store: defaults))
-            .subtracting(["playerControls", "versionOrder"])
+            .subtracting(["playerControls", "versionOrder", "playThemeSongs"])
         let payload = payloadFieldNames(.playback)
             .subtracting(["skipIntervalSeconds", "showDiagnosticOverlay", "focusDiagnosticOverlayOnDV"])
         #expect(profile.isDisjoint(with: device))
