@@ -122,8 +122,7 @@ struct SidebarShell<Content: View>: View {
         }
         .onChange(of: selectedTab) { old, tab in
             switchDirection = ShellPageSwitch.direction(from: old, to: tab, in: tabs)
-            // The rail's own curve, so the page settles as the rail collapses beside it.
-            withAnimation(.easeInOut(duration: SidebarMetrics.expandDuration)) {
+            withAnimation(ShellPageSwitch.fadeIn) {
                 builtTabs.insert(tab)
                 shownTab = tab
             }
@@ -190,7 +189,11 @@ struct SidebarShell<Content: View>: View {
         // It fades out towards the side its row sits on, and the arriving one fades in from the other.
         .opacity(isShown ? 1 : 0)
         .offset(y: slideDistance * ShellPageSwitch.restingSide(of: tab, shown: shownTab, in: tabs))
-        .transition(.opacity.combined(with: .offset(y: slideDistance * switchDirection)))
+        .transition(
+            AnyTransition.opacity.combined(with: .offset(y: slideDistance * switchDirection))
+                .animation(ShellPageSwitch.fadeIn)
+        )
+        .animation(ShellPageSwitch.animation(isShown: isShown), value: isShown)
         .allowsHitTesting(isSelected)
         .disabled(!isSelected)
         .accessibilityHidden(!isSelected)

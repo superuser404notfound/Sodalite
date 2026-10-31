@@ -69,7 +69,7 @@ struct TopBarShell<Content: View>: View {
         }
         .onChange(of: selectedTab) { old, tab in
             switchDirection = ShellPageSwitch.direction(from: old, to: tab, in: tabs)
-            withAnimation(Self.pageSwitch) {
+            withAnimation(ShellPageSwitch.fadeIn) {
                 builtTabs.insert(tab)
                 shownTab = tab
             }
@@ -119,15 +119,16 @@ struct TopBarShell<Content: View>: View {
             // towards the side it lies on, and the arriving one fades in from the other.
             .opacity(isShown ? 1 : 0)
             .offset(x: slideDistance * ShellPageSwitch.restingSide(of: tab, shown: shownTab, in: tabs))
-            .transition(.opacity.combined(with: .offset(x: slideDistance * switchDirection)))
+            .transition(
+                AnyTransition.opacity.combined(with: .offset(x: slideDistance * switchDirection))
+                    .animation(ShellPageSwitch.fadeIn)
+            )
+            .animation(ShellPageSwitch.animation(isShown: isShown), value: isShown)
             .allowsHitTesting(isSelected)
             .accessibilityHidden(!isSelected)
             // The shell opens on the content, as it did under the system bar.
             .prefersDefaultFocus(isSelected, in: shellFocus)
     }
-
-    /// The bar's own curve, so the page and the pill moving over it arrive together.
-    private static var pageSwitch: Animation { .smooth(duration: 0.32) }
 
     private var slideDistance: CGFloat {
         reduceMotion ? 0 : TopBarMetrics.pageSlide
