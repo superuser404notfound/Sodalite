@@ -77,6 +77,8 @@ enum SidebarMetrics {
 
     /// Matches the scrim in `menuPresentation`, the app's other "a panel arrives" curve.
     static let expandDuration: Double = 0.35
+    /// How far a page slides while it fades on a tab switch, towards the side its row sits on.
+    static let pageSlide: CGFloat = 60
 
     static var itemHeight: CGFloat { iconSize + itemVerticalPadding * 2 }
     static var itemSpacing: CGFloat { rowPitch - itemHeight }

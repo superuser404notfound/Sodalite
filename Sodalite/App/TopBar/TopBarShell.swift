@@ -35,7 +35,7 @@ struct TopBarShell<Content: View>: View {
     /// The page on screen. It trails `selectedTab` by one update so the switch can run in an
     /// animation that knows its direction, including the first visit that builds the page.
     @State private var shownTab: ShellTab?
-    /// -1 when the new tab sits left of the old one, 1 when right, for the arriving page's slide.
+    /// Where the arriving page comes from, see `ShellPageSwitch`.
     @State private var switchDirection: CGFloat = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -68,7 +68,7 @@ struct TopBarShell<Content: View>: View {
             shownTab = selectedTab
         }
         .onChange(of: selectedTab) { old, tab in
-            switchDirection = slideSign(from: old, to: tab)
+            switchDirection = ShellPageSwitch.direction(from: old, to: tab, in: tabs)
             withAnimation(Self.pageSwitch) {
                 builtTabs.insert(tab)
                 shownTab = tab
@@ -118,7 +118,7 @@ struct TopBarShell<Content: View>: View {
             // A kept page stays mounted but leaves the screen and the focus engine. It fades out
             // towards the side it lies on, and the arriving one fades in from the other.
             .opacity(isShown ? 1 : 0)
-            .offset(x: restingOffset(for: tab))
+            .offset(x: slideDistance * ShellPageSwitch.restingSide(of: tab, shown: shownTab, in: tabs))
             .transition(.opacity.combined(with: .offset(x: slideDistance * switchDirection)))
             .allowsHitTesting(isSelected)
             .accessibilityHidden(!isSelected)
@@ -131,19 +131,6 @@ struct TopBarShell<Content: View>: View {
 
     private var slideDistance: CGFloat {
         reduceMotion ? 0 : TopBarMetrics.pageSlide
-    }
-
-    private func slideSign(from old: ShellTab, to new: ShellTab) -> CGFloat {
-        guard let from = tabs.firstIndex(of: old), let to = tabs.firstIndex(of: new) else { return 0 }
-        return to < from ? -1 : 1
-    }
-
-    /// Where a page waits off screen: on the side of the shown page it sits on in the bar.
-    private func restingOffset(for tab: ShellTab) -> CGFloat {
-        guard let shownTab, tab != shownTab,
-              let index = tabs.firstIndex(of: tab),
-              let shownIndex = tabs.firstIndex(of: shownTab) else { return 0 }
-        return index < shownIndex ? -slideDistance : slideDistance
     }
 
     private var bar: some View {

@@ -43,6 +43,12 @@ struct SidebarShell<Content: View>: View {
     @State private var chromeHidden: [ShellTab: Bool] = [:]
     /// Tabs whose page exists. A page is built on its first visit.
     @State private var builtTabs: Set<ShellTab> = []
+    /// The page on screen, trailing `selectedTab` by one update so the switch animates with a
+    /// direction (see TopBarShell).
+    @State private var shownTab: ShellTab?
+    /// Where the arriving page comes from, see `ShellPageSwitch`.
+    @State private var switchDirection: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
@@ -68,7 +74,7 @@ struct SidebarShell<Content: View>: View {
 
     var body: some View {
         ZStack {
-            ForEach(tabs.filter { builtTabs.contains($0) || $0 == selectedTab }, id: \.self) { tab in
+            ForEach(tabs.filter { builtTabs.contains($0) }, id: \.self) { tab in
                 page(for: tab)
             }
         }
@@ -110,9 +116,17 @@ struct SidebarShell<Content: View>: View {
         .ignoresSafeArea(edges: .leading)
         .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInRail)
 
-        .onAppear { builtTabs.insert(selectedTab) }
-        .onChange(of: selectedTab) { _, tab in
-            builtTabs.insert(tab)
+        .onAppear {
+            builtTabs.insert(selectedTab)
+            shownTab = selectedTab
+        }
+        .onChange(of: selectedTab) { old, tab in
+            switchDirection = ShellPageSwitch.direction(from: old, to: tab, in: tabs)
+            // The rail's own curve, so the page settles as the rail collapses beside it.
+            withAnimation(.easeInOut(duration: SidebarMetrics.expandDuration)) {
+                builtTabs.insert(tab)
+                shownTab = tab
+            }
         }
         .onChange(of: tabs) { _, now in
             builtTabs.formIntersection(now)
@@ -149,6 +163,7 @@ struct SidebarShell<Content: View>: View {
 
     private func page(for tab: ShellTab) -> some View {
         let isSelected = tab == selectedTab
+        let isShown = tab == shownTab
         let isFullBleed = Self.fullBleedTabs.contains(tab)
         return HStack(spacing: 0) {
             // Layout placeholder only. The rail itself is an overlay, so it can move freely while
@@ -172,12 +187,19 @@ struct SidebarShell<Content: View>: View {
         // testing alone leave its focus section in place, and a kept page stacked above the
         // selected one caught the move and found nothing in it: Down from Live TV's segments went
         // nowhere once Settings had been visited (Sodalite#140, reproduced in the tvOS simulator).
-        .opacity(isSelected ? 1 : 0)
+        // It fades out towards the side its row sits on, and the arriving one fades in from the other.
+        .opacity(isShown ? 1 : 0)
+        .offset(y: slideDistance * ShellPageSwitch.restingSide(of: tab, shown: shownTab, in: tabs))
+        .transition(.opacity.combined(with: .offset(y: slideDistance * switchDirection)))
         .allowsHitTesting(isSelected)
         .disabled(!isSelected)
         .accessibilityHidden(!isSelected)
         // The shell opens on the content, not on the rail, which is what the top bar does.
         .prefersDefaultFocus(isSelected, in: shellFocus)
+    }
+
+    private var slideDistance: CGFloat {
+        reduceMotion ? 0 : SidebarMetrics.pageSlide
     }
 }
 #endif
