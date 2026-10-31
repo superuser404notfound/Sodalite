@@ -28,4 +28,6 @@ enum TopBarMetrics {
     /// Same diameter the sidebar gives its profile avatar, so the two shells show one picture.
     static let avatarDiameter: CGFloat = 36
     static let labelSpacing: CGFloat = 12
+    /// How far a page slides while it fades on a tab switch, towards the side its tab sits on.
+    static let pageSlide: CGFloat = 60
 }

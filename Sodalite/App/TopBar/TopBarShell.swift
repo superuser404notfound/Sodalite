@@ -32,6 +32,12 @@ struct TopBarShell<Content: View>: View {
     /// Bumped per tab when Menu brings the viewer up to the bar, which the page answers by
     /// scrolling to its top (see `drivesShellBar`).
     @State private var scrollToTopRequests: [ShellTab: Int] = [:]
+    /// The page on screen. It trails `selectedTab` by one update so the switch can run in an
+    /// animation that knows its direction, including the first visit that builds the page.
+    @State private var shownTab: ShellTab?
+    /// Where the arriving page comes from, see `ShellPageSwitch`.
+    @State private var switchDirection: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var selectedHidesChrome: Bool { chromeHidden[selectedTab] ?? false }
 
@@ -41,7 +47,7 @@ struct TopBarShell<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            ForEach(tabs.filter { builtTabs.contains($0) || $0 == selectedTab }, id: \.self) { tab in
+            ForEach(tabs.filter { builtTabs.contains($0) }, id: \.self) { tab in
                 page(for: tab)
             }
         }
@@ -57,9 +63,16 @@ struct TopBarShell<Content: View>: View {
                 .animation(.easeInOut(duration: SidebarMetrics.expandDuration), value: focusIsInBar)
                 .ignoresSafeArea(edges: .top)
         }
-        .onAppear { builtTabs.insert(selectedTab) }
-        .onChange(of: selectedTab) { _, tab in
-            builtTabs.insert(tab)
+        .onAppear {
+            builtTabs.insert(selectedTab)
+            shownTab = selectedTab
+        }
+        .onChange(of: selectedTab) { old, tab in
+            switchDirection = ShellPageSwitch.direction(from: old, to: tab, in: tabs)
+            withAnimation(ShellPageSwitch.fadeIn) {
+                builtTabs.insert(tab)
+                shownTab = tab
+            }
         }
         .onChange(of: tabs) { _, now in
             builtTabs.formIntersection(now)
@@ -92,6 +105,7 @@ struct TopBarShell<Content: View>: View {
 
     private func page(for tab: ShellTab) -> some View {
         let isSelected = tab == selectedTab
+        let isShown = tab == shownTab
         return content(tab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             // The room the bar takes, which the page's ROOT claims (see `reservesShellBar`).
@@ -101,12 +115,23 @@ struct TopBarShell<Content: View>: View {
             .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                 chromeHidden[tab] = hidden
             }
-            // A kept page stays mounted but leaves the screen and the focus engine.
-            .opacity(isSelected ? 1 : 0)
+            // A kept page stays mounted but leaves the screen and the focus engine. It fades out
+            // towards the side it lies on, and the arriving one fades in from the other.
+            .opacity(isShown ? 1 : 0)
+            .offset(x: slideDistance * ShellPageSwitch.restingSide(of: tab, shown: shownTab, in: tabs))
+            .transition(
+                AnyTransition.opacity.combined(with: .offset(x: slideDistance * switchDirection))
+                    .animation(ShellPageSwitch.fadeIn)
+            )
+            .animation(ShellPageSwitch.animation(isShown: isShown), value: isShown)
             .allowsHitTesting(isSelected)
             .accessibilityHidden(!isSelected)
             // The shell opens on the content, as it did under the system bar.
             .prefersDefaultFocus(isSelected, in: shellFocus)
+    }
+
+    private var slideDistance: CGFloat {
+        reduceMotion ? 0 : TopBarMetrics.pageSlide
     }
 
     private var bar: some View {
