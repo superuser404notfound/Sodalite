@@ -298,6 +298,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_1_0.errorSwipe.title",
+                    "changelog.1_1_0.errorSwipe.body",
+                    icon: "hand.draw"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_1_0.requestsAfterPin.title",
                     "changelog.1_1_0.requestsAfterPin.body",
                     icon: "lock"

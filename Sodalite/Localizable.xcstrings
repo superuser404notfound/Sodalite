@@ -70801,6 +70801,330 @@
         }
       }
     },
+    "changelog.1_1_0.errorSwipe.body" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na chybových obrazovkách přehrávače, například při ztrátě spojení se serverem, a v dotazu na smazání titulků nyní mezi tlačítky přepíná i přejetí po dotykové ploše ovladače, nejen kliknutí."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På afspillerens fejlskærme, f.eks. ved mistet serverforbindelse, og i spørgsmålet om at slette undertekster skifter et swipe på fjernbetjeningens touchflade nu også mellem knapperne, ikke kun et klik."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf den Fehlerseiten des Players, etwa bei verlorener Serververbindung, und in der Abfrage zum Löschen von Untertiteln wechselt jetzt auch ein Wischen auf der Touch-Fläche der Fernbedienung zwischen den Buttons, nicht nur ein Klick."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στις οθόνες σφάλματος του player, για παράδειγμα όταν χαθεί η σύνδεση με τον διακομιστή, και στο ερώτημα διαγραφής υποτίτλων, μια σάρωση στην επιφάνεια αφής του τηλεχειριστηρίου μετακινεί πλέον ανάμεσα στα κουμπιά, όχι μόνο ένα κλικ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the player's error screens, such as a lost server connection, and in the subtitle delete prompt, a swipe on the remote's touch surface now moves between the buttons, not only a click."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En las pantallas de error del reproductor, como una conexión perdida con el servidor, y en la confirmación para eliminar subtítulos, ahora también un deslizamiento en la superficie táctil del mando cambia entre los botones, no solo un clic."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soittimen virhenäkymissä, kuten palvelinyhteyden katketessa, ja tekstityksen poistokyselyssä myös pyyhkäisy kaukosäätimen kosketuspinnalla siirtää nyt painikkeiden välillä, ei pelkkä painallus."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur les écrans d’erreur du lecteur, par exemple une connexion au serveur perdue, et dans la demande de suppression des sous-titres, un balayage sur la surface tactile de la télécommande passe désormais d’un bouton à l’autre, pas seulement un clic."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na zaslonima pogreške playera, primjerice kod izgubljene veze s poslužiteljem, i u upitu za brisanje titlova sada i prelazak prstom po dodirnoj površini daljinskog upravljača mijenja gumbe, ne samo klik."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszó hibaképernyőin, például megszakadt szerverkapcsolatnál, és a felirat törlésére vonatkozó kérdésnél most már a távirányító érintőfelületén való pöccintés is vált a gombok között, nem csak a kattintás."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nelle schermate di errore del player, ad esempio con la connessione al server persa, e nella richiesta di eliminazione dei sottotitoli, ora anche uno scorrimento sulla superficie touch del telecomando passa da un pulsante all’altro, non solo un clic."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバー接続が切れたときなどのプレーヤーのエラー画面や字幕の削除確認で、クリックだけでなくリモコンのタッチ面のスワイプでもボタンを移動できるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버 연결 끊김 등 플레이어의 오류 화면과 자막 삭제 확인에서 이제 클릭뿐 아니라 리모컨 터치 표면의 스와이프로도 버튼 사이를 이동할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På avspillerens feilskjermer, for eksempel ved tapt serverforbindelse, og i spørsmålet om å slette undertekster, bytter nå også et sveip på fjernkontrollens berøringsflate mellom knappene, ikke bare et klikk."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op de foutschermen van de speler, zoals bij een verbroken serververbinding, en in de vraag om ondertitels te verwijderen, wisselt nu ook een veeg over het aanraakoppervlak van de afstandsbediening tussen de knoppen, niet alleen een klik."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na ekranach błędów odtwarzacza, na przykład po utracie połączenia z serwerem, oraz w pytaniu o usunięcie napisów, między przyciskami przełącza teraz także przesunięcie palcem po powierzchni dotykowej pilota, nie tylko kliknięcie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nas telas de erro do player, como uma conexão perdida com o servidor, e na confirmação para excluir legendas, agora também um deslize na superfície de toque do controle alterna entre os botões, não apenas um clique."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nos ecrãs de erro do leitor, como uma ligação perdida ao servidor, e na confirmação para eliminar legendas, agora também um deslize na superfície tátil do comando alterna entre os botões, não apenas um clique."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe ecranele de eroare ale playerului, de exemplu la pierderea conexiunii cu serverul, și în întrebarea de ștergere a subtitrărilor, acum și o glisare pe suprafața tactilă a telecomenzii trece între butoane, nu doar un clic."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На экранах ошибок плеера, например при потере связи с сервером, и в запросе на удаление субтитров между кнопками теперь переключает и свайп по сенсорной поверхности пульта, а не только нажатие."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na chybových obrazovkách prehrávača, napríklad pri strate spojenia so serverom, a v otázke na odstránenie titulkov teraz medzi tlačidlami prepína aj potiahnutie po dotykovej ploche ovládača, nielen kliknutie."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På spelarens felskärmar, till exempel vid förlorad serveranslutning, och i frågan om att radera undertexter byter nu även ett svep på fjärrkontrollens pekyta mellan knapparna, inte bara ett klick."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatıcının hata ekranlarında, örneğin sunucu bağlantısı koptuğunda, ve altyazı silme sorusunda artık yalnızca tıklama değil, kumandanın dokunmatik yüzeyinde kaydırma da düğmeler arasında geçiş yapıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На екранах помилок плеєра, наприклад у разі втрати зʼєднання із сервером, і в запиті на видалення субтитрів між кнопками тепер перемикає й свайп сенсорною поверхнею пульта, а не лише натискання."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在播放器的错误界面（例如与服务器的连接中断时）以及删除字幕的确认中，现在不仅可以点按，也可以在遥控器触控表面上轻扫来切换按钮。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在播放器的錯誤畫面（例如與伺服器的連線中斷時）以及刪除字幕的確認中，現在不僅可以按一下，也可以在遙控器觸控表面上輕掃來切換按鈕。"
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.errorSwipe.title" : {
+      "comment" : "Changelog highlight for the 1.1.0 release",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přejíždění mezi tlačítky na chybových obrazovkách"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe mellem knapperne på fejlskærme"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischen zwischen den Buttons auf Fehlerseiten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σάρωση ανάμεσα στα κουμπιά στις οθόνες σφάλματος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe between the buttons on error screens"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza entre los botones en las pantallas de error"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pyyhkäise painikkeiden välillä virhenäkymissä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balayer entre les boutons des écrans d’erreur"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prelazak prstom između gumba na zaslonima pogreške"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pöccintés a gombok között a hibaképernyőkön"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorri tra i pulsanti nelle schermate di errore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー画面のボタン間をスワイプで移動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오류 화면에서 버튼 사이를 스와이프로 이동"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sveip mellom knappene på feilskjermer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vegen tussen de knoppen op foutschermen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przesuwanie między przyciskami na ekranach błędów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize entre os botões nas telas de erro"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deslize entre os botões nos ecrãs de erro"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisare între butoane pe ecranele de eroare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свайп между кнопками на экранах ошибок"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potiahnutie medzi tlačidlami na chybových obrazovkách"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svep mellan knapparna på felskärmar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata ekranlarında düğmeler arasında kaydırma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свайп між кнопками на екранах помилок"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在错误界面中轻扫切换按钮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在錯誤畫面中輕掃切換按鈕"
+          }
+        }
+      }
+    },
     "changelog.1_1_0.extras.body" : {
       "comment" : "Changelog highlight for the 1.1.0 release",
       "extractionState" : "manual",

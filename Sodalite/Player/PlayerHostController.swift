@@ -1864,7 +1864,34 @@ final class PlayerHostController: AVPlayerViewController {
     private static let dropdownStepSize: CGFloat = 300
 
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
-        if viewModel.isSubtitleDeletePromptVisible { return }
+        // Error screen and subtitle delete prompt: one horizontal swipe = one step between their buttons, like
+        // a click. Without this the error screen's swipe fell through to the scrub branch below and the
+        // prompt swallowed it, so only clicks moved the highlight.
+        if viewModel.errorMessage != nil || viewModel.isSubtitleDeletePromptVisible {
+            switch gesture.state {
+            case .began:
+                panAxis = .undetermined
+                horizontalStepFired = false
+            case .changed:
+                let t = gesture.translation(in: view)
+                if panAxis == .undetermined {
+                    panAxis = PlayerPanAxis.resolve(translation: t)
+                }
+                let v = gesture.velocity(in: view)
+                guard panAxis == .horizontal, !horizontalStepFired,
+                      abs(t.x) >= Self.horizontalFireThreshold,
+                      abs(v.x) >= Self.stepMinVelocity
+                else { break }
+                horizontalStepFired = true
+                if t.x < 0 { leftPressed() } else { rightPressed() }
+            case .ended, .cancelled:
+                panAxis = .undetermined
+                horizontalStepFired = false
+            default:
+                break
+            }
+            return
+        }
         // Subtitle search overlay: swipes route through the arrow-key @objc handlers via the cumulative dropdownStepSize model (one step per item, no overshoot).
         if viewModel.subtitleSearchVisible {
             switch gesture.state {
