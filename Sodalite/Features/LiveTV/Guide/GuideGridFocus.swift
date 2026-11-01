@@ -21,6 +21,8 @@ extension GuideGridViewController {
     func collectionView(_ collectionView: UICollectionView,
                         shouldUpdateFocusIn context: UICollectionViewFocusUpdateContext) -> Bool {
         guard collectionView === gridView, let next = context.nextFocusedIndexPath else { return true }
+        focusMoveIsVertical = next == pendingFocusRedirect
+            || context.focusHeading.contains(.up) || context.focusHeading.contains(.down)
         if next == pendingFocusRedirect { return true }
         guard let previous = context.previouslyFocusedIndexPath,
               next.section != previous.section,
@@ -93,13 +95,14 @@ extension GuideGridViewController {
             // already scrolled the ruler to show the chip, and scrollViewDidScroll copies that
             // offset to the grid. Scrolling here as well would fight it.
             guard indexPath.item < slots.count else { return }
-            model.anchorTime = slots[indexPath.item]
+            model.anchor = .at(slots[indexPath.item])
             return
         }
 
         if collectionView === columnView {
             // The column is where the restore actually lands, so it releases the chrome as well.
             onGridFocused?()
+            model.didEnterGrid = true
             if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
             guard indexPath.item < rows.count else { return }
             model.anchorChannelID = rows[indexPath.item].channel.id
@@ -109,6 +112,7 @@ extension GuideGridViewController {
 
         guard collectionView === gridView else { return }
         onGridFocused?()
+        model.didEnterGrid = true
         if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
         // Focus actually moved, so the redirect is healthy: clear the hatch so it only fires on a
         // genuinely repeated (failed) proposal.
@@ -127,14 +131,36 @@ extension GuideGridViewController {
             ensureFocusedCellVisible(section: indexPath.section, item: indexPath.item)
             return
         }
-        // Horizontal focus: re-anchor on the cell's VISIBLE midpoint, so a three-hour block
-        // anchors where the user is looking, not at its possibly off-screen centre.
-        let (x, width) = programXWidth(section: indexPath.section, item: indexPath.item)
-        let visibleMin = max(x, gridView.contentOffset.x)
-        let visibleMax = min(x + width, gridView.contentOffset.x + gridView.bounds.width)
-        let anchorX = visibleMax > visibleMin ? (visibleMin + visibleMax) / 2 : x + width / 2
-        model.anchorTime = model.axis.date(atX: anchorX)
+        // Horizontal focus picks the time. From the cell's geometry rather than the program, so
+        // the placeholder segments of a channel without EPG data answer the same way.
+        let (x, _) = programXWidth(section: indexPath.section, item: indexPath.item)
+        model.anchor = .focused(start: model.axis.date(atX: x),
+                                visibleStart: model.axis.date(atX: gridView.contentOffset.x),
+                                now: Date())
     }
+
+    /// Sodalite#221: until focus first reaches the grid, the hero describes what the first channel
+    /// airs and the first landing aims at that channel, instead of "Select a program" and a cell
+    /// picked by position. Re-run on every row change, because row 0 arrives without its programs
+    /// and a filter switch can replace it.
+    func seedFirstVisit() {
+        guard !model.didEnterGrid, let first = rows.first else { return }
+        model.anchorChannelID = first.channel.id
+        updateHero(section: 0, item: nil)
+    }
+
+    #if os(tvOS)
+    /// Sodalite#221: on a vertical move the focus engine scrolls the landed cell fully into view,
+    /// and for a long program that is a sideways jump of an hour or more, after which the screen no
+    /// longer shows the time the anchor holds. Focus-driven scrolling asks here for its target, so
+    /// the x stays put; a cell that ends up barely visible is still handled by
+    /// ensureFocusedCellVisible.
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint,
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        guard scrollView === gridView, focusMoveIsVertical else { return }
+        targetContentOffset.pointee.x = scrollView.contentOffset.x
+    }
+    #endif
 
     /// Scroll so the focused program is actually readable. The decision lives in `GuideRowMath` so
     /// it can be tested without a collection view.
