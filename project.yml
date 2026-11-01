@@ -52,7 +52,7 @@ packages:
     revision: ee5027c69a27aae97ed852ded0d1151d5d225c34
     # Package traits the engine is built with. XcodeGen does not know the key and ignores it;
     # Scripts/generate-project.sh writes it into the generated project (AetherEngine#731, #744).
-    traits: [TrueHDObjectAudio, DTSXObjectAudio]
+    traits: [TrueHDObjectAudio, DTSXObjectAudio, DolbyVisionStillReshaping]
   SwiftAssRenderer:
     url: https://github.com/mihai8804858/swift-ass-renderer
     version: 1.3.1
