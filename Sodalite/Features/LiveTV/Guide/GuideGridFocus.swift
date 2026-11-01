@@ -21,6 +21,8 @@ extension GuideGridViewController {
     func collectionView(_ collectionView: UICollectionView,
                         shouldUpdateFocusIn context: UICollectionViewFocusUpdateContext) -> Bool {
         guard collectionView === gridView, let next = context.nextFocusedIndexPath else { return true }
+        focusMoveIsVertical = next == pendingFocusRedirect
+            || context.focusHeading.contains(.up) || context.focusHeading.contains(.down)
         if next == pendingFocusRedirect { return true }
         guard let previous = context.previouslyFocusedIndexPath,
               next.section != previous.section,
@@ -146,6 +148,19 @@ extension GuideGridViewController {
         model.anchorChannelID = first.channel.id
         updateHero(section: 0, item: nil)
     }
+
+    #if os(tvOS)
+    /// Sodalite#221: on a vertical move the focus engine scrolls the landed cell fully into view,
+    /// and for a long program that is a sideways jump of an hour or more, after which the screen no
+    /// longer shows the time the anchor holds. Focus-driven scrolling asks here for its target, so
+    /// the x stays put; a cell that ends up barely visible is still handled by
+    /// ensureFocusedCellVisible.
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint,
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        guard scrollView === gridView, focusMoveIsVertical else { return }
+        targetContentOffset.pointee.x = scrollView.contentOffset.x
+    }
+    #endif
 
     /// Scroll so the focused program is actually readable. The decision lives in `GuideRowMath` so
     /// it can be tested without a collection view.

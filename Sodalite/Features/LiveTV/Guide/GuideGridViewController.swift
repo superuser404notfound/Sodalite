@@ -62,6 +62,9 @@ final class GuideGridViewController: UIViewController,
     var isSyncingScroll = false
     /// One-shot focus redirect, served by the focus extension.
     var pendingFocusRedirect: IndexPath?
+    /// The focus move in flight is Up or Down (or the redirect serving one), so the scroll it
+    /// triggers must not move the grid sideways.
+    var focusMoveIsVertical = false
     /// Last vetoed (previous, next) pair. The same proposal arriving twice means the redirect did
     /// not take, and re-vetoing it strands focus with no way out in ANY direction. Accept the
     /// engine's pick instead. The old guide had this hatch; the rebuild dropped it on the theory
