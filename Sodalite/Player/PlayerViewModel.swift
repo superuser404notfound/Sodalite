@@ -2741,7 +2741,7 @@ final class PlayerViewModel {
     func selectChapter(at index: Int) {
         guard chapters.indices.contains(index) else { return }
         let target = chapters[index].startSeconds
-        Task { [weak self] in await self?.player.seek(to: target) }
+        Task { [weak self] in await self?.player.seek(to: target, exact: true) }
     }
 
     /// Jump to the start of the current item and play. Live is excluded: tvOS renders LiveTransportBar
@@ -3216,8 +3216,9 @@ final class PlayerViewModel {
         setActiveSkipSegment(nil)
         didSkipCurrentSegment = segment.kind
         Task { [weak self] in
-            // endSeconds is absolute source time; seek(to:) is source-PTS based and applies the clock shift itself.
-            await self?.player.seek(to: segment.endSeconds)
+            // endSeconds is absolute source time; seek(to:) is source-PTS based and applies the clock shift itself. Exact,
+            // because a keyframe landing on the AV1 software route would replay the intro tail or cut the first line.
+            await self?.player.seek(to: segment.endSeconds, exact: true)
             // Clear the lockout after a 500ms settle (absorbs post-seek jitter) so a deliberate
             // backward scrub re-offers the pill; without it the lockout persists the whole episode.
             try? await Task.sleep(for: .milliseconds(500))
@@ -3240,7 +3241,7 @@ final class PlayerViewModel {
                 await self?.playNextEpisode()
             }
         } else {
-            Task { [weak self] in await self?.player.seek(to: seg.endSeconds) }
+            Task { [weak self] in await self?.player.seek(to: seg.endSeconds, exact: true) }
         }
     }
 
