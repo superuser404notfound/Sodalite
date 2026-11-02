@@ -19,7 +19,7 @@ struct ChangelogListView: View {
                 .padding(.bottom, 32)
 
                 // One flat lazy stack of headers and rows: a section built as a block put all of a
-                // release's highlights (75 for 1.1.0) on screen at once and stalled the push.
+                // release's highlights on screen at once and stalled the push.
                 LazyVStack(alignment: .leading, spacing: 24) {
                     ForEach(Changelog.entries) { entry in
                         Text("Version \(entry.version)")

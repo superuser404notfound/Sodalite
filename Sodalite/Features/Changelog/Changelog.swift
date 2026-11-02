@@ -16,81 +16,9 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.homeBanner.title",
-                    "changelog.1_1_0.homeBanner.body",
-                    icon: "rectangle.topthird.inset.filled"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.detailPoster.title",
-                    "changelog.1_1_0.detailPoster.body",
-                    icon: "rectangle.portrait"
-                ),
-                ChangelogHighlight(
-                    .new,
                     "changelog.1_1_0.combinedServers.title",
                     "changelog.1_1_0.combinedServers.body",
                     icon: "square.stack.3d.up.fill"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.audioShaping.title",
-                    "changelog.1_1_0.audioShaping.body",
-                    icon: "speaker.wave.3"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.enhancedUpscaling.title",
-                    "changelog.1_1_0.enhancedUpscaling.body",
-                    icon: "wand.and.sparkles"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.themeSongs.title",
-                    "changelog.1_1_0.themeSongs.body",
-                    icon: "music.note"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.libraryTabs.title",
-                    "changelog.1_1_0.libraryTabs.body",
-                    icon: "rectangle.topthird.inset.filled"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.libraryOrder.title",
-                    "changelog.1_1_0.libraryOrder.body",
-                    icon: "square.grid.2x2"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.latestPerLibrary.title",
-                    "changelog.1_1_0.latestPerLibrary.body",
-                    icon: "rectangle.stack"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.alphabetRail.title",
-                    "changelog.1_1_0.alphabetRail.body",
-                    icon: "textformat.abc"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.restingTouch.title",
-                    "changelog.1_1_0.restingTouch.body",
-                    icon: "hand.tap.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.settingsList.title",
-                    "changelog.1_1_0.settingsList.body",
-                    icon: "list.bullet"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.streamingQuality.title",
-                    "changelog.1_1_0.streamingQuality.body",
-                    icon: "dial.medium"
                 ),
                 ChangelogHighlight(
                     .new,
@@ -100,243 +28,69 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.channelZap.title",
-                    "changelog.1_1_0.channelZap.body",
-                    icon: "tv"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.firstTune.title",
-                    "changelog.1_1_0.firstTune.body",
-                    icon: "bolt.horizontal"
+                    "changelog.1_1_0.home.title",
+                    "changelog.1_1_0.home.body",
+                    icon: "rectangle.topthird.inset.filled"
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.extras.title",
-                    "changelog.1_1_0.extras.body",
+                    "changelog.1_1_0.cards.title",
+                    "changelog.1_1_0.cards.body",
+                    icon: "contextualmenu.and.cursorarrow"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.libraries.title",
+                    "changelog.1_1_0.libraries.body",
+                    icon: "rectangle.stack"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.detailPages.title",
+                    "changelog.1_1_0.detailPages.body",
                     icon: "popcorn.fill"
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.youTubeTrailers.title",
-                    "changelog.1_1_0.youTubeTrailers.body",
-                    icon: "play.rectangle"
+                    "changelog.1_1_0.sound.title",
+                    "changelog.1_1_0.sound.body",
+                    icon: "speaker.wave.3"
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.homeVideos.title",
-                    "changelog.1_1_0.homeVideos.body",
-                    icon: "folder.fill"
+                    "changelog.1_1_0.picture.title",
+                    "changelog.1_1_0.picture.body",
+                    icon: "wand.and.sparkles"
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.legacyFormats.title",
-                    "changelog.1_1_0.legacyFormats.body",
-                    icon: "film.stack"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.myRequestNotifications.title",
-                    "changelog.1_1_0.myRequestNotifications.body",
-                    icon: "bell.badge"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.subtitleTiming.title",
-                    "changelog.1_1_0.subtitleTiming.body",
-                    icon: "captions.bubble"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.atmosHeights.title",
-                    "changelog.1_1_0.atmosHeights.body",
-                    icon: "hifispeaker.2.fill"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.nextEpisodeCard.title",
-                    "changelog.1_1_0.nextEpisodeCard.body",
-                    icon: "rectangle.on.rectangle"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.fastForward.title",
-                    "changelog.1_1_0.fastForward.body",
-                    icon: "forward.fill"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.playerControls.title",
-                    "changelog.1_1_0.playerControls.body",
+                    "changelog.1_1_0.controls.title",
+                    "changelog.1_1_0.controls.body",
                     icon: "slider.horizontal.below.rectangle"
                 ),
                 ChangelogHighlight(
                     .improve,
-                    "changelog.1_1_0.inlineSearch.title",
-                    "changelog.1_1_0.inlineSearch.body",
-                    icon: "magnifyingglass"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.searchRetap.title",
-                    "changelog.1_1_0.searchRetap.body",
-                    icon: "keyboard"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.sleepClose.title",
-                    "changelog.1_1_0.sleepClose.body",
-                    icon: "moon.zzz.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.durations.title",
-                    "changelog.1_1_0.durations.body",
-                    icon: "clock.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.scrimFade.title",
-                    "changelog.1_1_0.scrimFade.body",
-                    icon: "circle.lefthalf.filled"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.resumeHide.title",
-                    "changelog.1_1_0.resumeHide.body",
-                    icon: "play.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.statusPill.title",
-                    "changelog.1_1_0.statusPill.body",
-                    icon: "paintpalette.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.streamFormat.title",
-                    "changelog.1_1_0.streamFormat.body",
-                    icon: "waveform.path.ecg"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.versionLabel.title",
-                    "changelog.1_1_0.versionLabel.body",
-                    icon: "film.stack"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.playlistSeries.title",
-                    "changelog.1_1_0.playlistSeries.body",
-                    icon: "list.bullet.rectangle"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.playlistOrder.title",
-                    "changelog.1_1_0.playlistOrder.body",
-                    icon: "list.number"
+                    "changelog.1_1_0.scrubbing.title",
+                    "changelog.1_1_0.scrubbing.body",
+                    icon: "forward.fill"
                 ),
                 ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.playlistFromHere.title",
-                    "changelog.1_1_0.playlistFromHere.body",
-                    icon: "text.line.first.and.arrowtriangle.forward"
+                    "changelog.1_1_0.playbackChoices.title",
+                    "changelog.1_1_0.playbackChoices.body",
+                    icon: "dial.medium"
                 ),
                 ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.versionOrder.title",
-                    "changelog.1_1_0.versionOrder.body",
-                    icon: "square.stack.3d.up"
+                    .improve,
+                    "changelog.1_1_0.liveTV.title",
+                    "changelog.1_1_0.liveTV.body",
+                    icon: "tv"
                 ),
                 ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.similarRow.title",
-                    "changelog.1_1_0.similarRow.body",
-                    icon: "square.stack"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.guideChips.title",
-                    "changelog.1_1_0.guideChips.body",
+                    .improve,
+                    "changelog.1_1_0.guide.title",
+                    "changelog.1_1_0.guide.body",
                     icon: "line.3.horizontal.decrease.circle"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.guideNavigation.title",
-                    "changelog.1_1_0.guideNavigation.body",
-                    icon: "clock"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.sparsePolicy.title",
-                    "changelog.1_1_0.sparsePolicy.body",
-                    icon: "person.badge.key"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.liveAudioPermission.title",
-                    "changelog.1_1_0.liveAudioPermission.body",
-                    icon: "waveform.slash"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.failedRequests.title",
-                    "changelog.1_1_0.failedRequests.body",
-                    icon: "exclamationmark.triangle"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.repromptPaused.title",
-                    "changelog.1_1_0.repromptPaused.body",
-                    icon: "person.crop.circle.badge.questionmark"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.remotePlayPause.title",
-                    "changelog.1_1_0.remotePlayPause.body",
-                    icon: "airpods"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.errorSwipe.title",
-                    "changelog.1_1_0.errorSwipe.body",
-                    icon: "hand.draw"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.requestsAfterPin.title",
-                    "changelog.1_1_0.requestsAfterPin.body",
-                    icon: "lock"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.privacyShield.title",
-                    "changelog.1_1_0.privacyShield.body",
-                    icon: "eye.slash"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.synopsisTap.title",
-                    "changelog.1_1_0.synopsisTap.body",
-                    icon: "text.alignleft"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.profileTab.title",
-                    "changelog.1_1_0.profileTab.body",
-                    icon: "person.2"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.topBar.title",
-                    "changelog.1_1_0.topBar.body",
-                    icon: "menubar.rectangle"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.sidebarKeep.title",
-                    "changelog.1_1_0.sidebarKeep.body",
-                    icon: "sidebar.left"
                 ),
                 ChangelogHighlight(
                     .new,
@@ -345,142 +99,46 @@ enum Changelog {
                     icon: "rectangle.split.2x2"
                 ),
                 ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.audioSwitchPicture.title",
-                    "changelog.1_1_0.audioSwitchPicture.body",
-                    icon: "waveform"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.storageFull.title",
-                    "changelog.1_1_0.storageFull.body",
-                    icon: "externaldrive.badge.exclamationmark"
-                ),
-                ChangelogHighlight(
                     .new,
-                    "changelog.1_1_0.showAll.title",
-                    "changelog.1_1_0.showAll.body",
-                    icon: "square.grid.2x2"
+                    "changelog.1_1_0.requests.title",
+                    "changelog.1_1_0.requests.body",
+                    icon: "bell.badge"
                 ),
                 ChangelogHighlight(
                     .improve,
-                    "changelog.1_1_0.swipeBack.title",
-                    "changelog.1_1_0.swipeBack.body",
-                    icon: "hand.draw"
+                    "changelog.1_1_0.profiles.title",
+                    "changelog.1_1_0.profiles.body",
+                    icon: "person.2"
                 ),
                 ChangelogHighlight(
                     .improve,
-                    "changelog.1_1_0.iosLogin.title",
-                    "changelog.1_1_0.iosLogin.body",
+                    "changelog.1_1_0.appleTVNavigation.title",
+                    "changelog.1_1_0.appleTVNavigation.body",
+                    icon: "appletv"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.signIn.title",
+                    "changelog.1_1_0.signIn.body",
                     icon: "person.badge.key"
                 ),
                 ChangelogHighlight(
                     .improve,
-                    "changelog.1_1_0.tvLogin.title",
-                    "changelog.1_1_0.tvLogin.body",
-                    icon: "appletv"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.guideGenres.title",
-                    "changelog.1_1_0.guideGenres.body",
-                    icon: "tag"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.liveReconnect.title",
-                    "changelog.1_1_0.liveReconnect.body",
-                    icon: "antenna.radiowaves.left.and.right"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.episodeTitles.title",
-                    "changelog.1_1_0.episodeTitles.body",
-                    icon: "eye.slash"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.userRating.title",
-                    "changelog.1_1_0.userRating.body",
-                    icon: "star"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.scrubPreviewPlayback.title",
-                    "changelog.1_1_0.scrubPreviewPlayback.body",
-                    icon: "appletv"
-                ),
-                ChangelogHighlight(
-                    .fix,
-                    "changelog.1_1_0.transportFocus.title",
-                    "changelog.1_1_0.transportFocus.body",
-                    icon: "hand.draw"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.scrubPreviewExact.title",
-                    "changelog.1_1_0.scrubPreviewExact.body",
-                    icon: "scope"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.dvScrubPreview.title",
-                    "changelog.1_1_0.dvScrubPreview.body",
-                    icon: "film"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.cardMenu.title",
-                    "changelog.1_1_0.cardMenu.body",
-                    icon: "contextualmenu.and.cursorarrow"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.playButton.title",
-                    "changelog.1_1_0.playButton.body",
-                    icon: "playpause.fill"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.logoMargin.title",
-                    "changelog.1_1_0.logoMargin.body",
-                    icon: "crop"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.liveDelay.title",
-                    "changelog.1_1_0.liveDelay.body",
-                    icon: "clock.arrow.circlepath"
-                ),
-                ChangelogHighlight(
-                    .improve,
-                    "changelog.1_1_0.iphoneCleanup.title",
-                    "changelog.1_1_0.iphoneCleanup.body",
+                    "changelog.1_1_0.iPhoneAndIPad.title",
+                    "changelog.1_1_0.iPhoneAndIPad.body",
                     icon: "iphone"
                 ),
                 ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.silverAccent.title",
-                    "changelog.1_1_0.silverAccent.body",
+                    .improve,
+                    "changelog.1_1_0.look.title",
+                    "changelog.1_1_0.look.body",
                     icon: "paintpalette.fill"
                 ),
                 ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.upcomingRow.title",
-                    "changelog.1_1_0.upcomingRow.body",
-                    icon: "calendar.badge.plus"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.audioDescription.title",
-                    "changelog.1_1_0.audioDescription.body",
-                    icon: "speaker.wave.2.bubble.fill"
-                ),
-                ChangelogHighlight(
-                    .new,
-                    "changelog.1_1_0.showEpisode.title",
-                    "changelog.1_1_0.showEpisode.body",
-                    icon: "play.tv"
+                    .improve,
+                    "changelog.1_1_0.smallThings.title",
+                    "changelog.1_1_0.smallThings.body",
+                    icon: "sparkles"
                 ),
             ]
         ),

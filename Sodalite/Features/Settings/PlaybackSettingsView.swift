@@ -19,6 +19,60 @@ struct PlaybackSettingsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
 
+                sectionHeader("settings.playback.section.languages")
+
+                languageRow(
+                    icon: "speaker.wave.2",
+                    title: "settings.playback.preferredAudio",
+                    subtitle: "settings.playback.preferredAudio.subtitle",
+                    choices: PlaybackPreferences.audioLanguageChoices,
+                    selection: Binding(
+                        get: { prefs.preferredAudioLanguage },
+                        set: { prefs.preferredAudioLanguage = $0 }
+                    )
+                )
+
+                languageRow(
+                    icon: "captions.bubble",
+                    title: "settings.playback.preferredSubtitle",
+                    subtitle: "settings.playback.preferredSubtitle.subtitle",
+                    choices: PlaybackPreferences.subtitleLanguageChoices,
+                    selection: Binding(
+                        get: { prefs.preferredSubtitleLanguage },
+                        set: { prefs.preferredSubtitleLanguage = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "captions.bubble.fill",
+                    title: "settings.playback.autoSubtitleForeign",
+                    subtitle: "settings.playback.autoSubtitleForeign.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSubtitleForForeignAudio },
+                        set: { prefs.autoSubtitleForForeignAudio = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "text.bubble.fill",
+                    title: "settings.playback.autoForcedSubtitles",
+                    subtitle: "settings.playback.autoForcedSubtitles.subtitle",
+                    value: Binding(
+                        get: { prefs.autoForcedSubtitles },
+                        set: { prefs.autoForcedSubtitles = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "bookmark",
+                    title: "settings.playback.rememberTracks",
+                    subtitle: "settings.playback.rememberTracks.subtitle",
+                    value: Binding(
+                        get: { prefs.rememberTrackSelections },
+                        set: { prefs.rememberTrackSelections = $0 }
+                    )
+                )
+
                 sectionHeader("settings.playback.section.episodes")
 
                 boolRow(
@@ -133,21 +187,6 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
-                sectionHeader("settings.playback.section.detailPages")
-
-                boolRow(
-                    icon: "music.note",
-                    title: "settings.playback.themeSongs",
-                    subtitle: "settings.playback.themeSongs.subtitle",
-                    value: Binding(
-                        get: { prefs.playThemeSongs },
-                        set: {
-                            prefs.playThemeSongs = $0
-                            dependencies.themeSongPlayer.evaluate()
-                        }
-                    )
-                )
-
                 sectionHeader("settings.playback.section.controls")
 
                 ValuePickerRow(
@@ -172,6 +211,16 @@ struct PlaybackSettingsView: View {
                         set: { prefs.skipBackwardSeconds = $0 }
                     ),
                     label: { seconds in "\(seconds) s" }
+                )
+
+                boolRow(
+                    icon: "gobackward",
+                    title: "settings.playback.subtitlesOnSkipBack",
+                    subtitle: "settings.playback.subtitlesOnSkipBack.subtitle",
+                    value: Binding(
+                        get: { prefs.subtitlesOnSkipBack },
+                        set: { prefs.subtitlesOnSkipBack = $0 }
+                    )
                 )
 
                 #if os(tvOS)
@@ -207,6 +256,121 @@ struct PlaybackSettingsView: View {
                         )
                     )
                 }
+
+                sectionHeader("settings.playback.section.subtitleStyle")
+
+                ValuePickerRow(
+                    icon: "textformat",
+                    title: "settings.playback.subtitle.font",
+                    subtitle: "settings.playback.subtitle.font.subtitle",
+                    options: PlaybackPreferences.SubtitleFont.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleFont },
+                        set: { prefs.subtitleFont = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "bold",
+                    title: "settings.playback.subtitle.weight",
+                    subtitle: "settings.playback.subtitle.weight.subtitle",
+                    options: PlaybackPreferences.SubtitleWeight.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleWeight },
+                        set: { prefs.subtitleWeight = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "textformat.size",
+                    title: "settings.playback.subtitle.size",
+                    subtitle: "settings.playback.subtitle.size.subtitle",
+                    options: PlaybackPreferences.SubtitleFontSize.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleFontSize },
+                        set: { prefs.subtitleFontSize = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "paintpalette",
+                    title: "settings.playback.subtitle.color",
+                    subtitle: "settings.playback.subtitle.color.subtitle",
+                    options: PlaybackPreferences.SubtitleColor.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleColor },
+                        set: { prefs.subtitleColor = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "rectangle.fill",
+                    title: "settings.playback.subtitle.background",
+                    subtitle: "settings.playback.subtitle.background.subtitle",
+                    options: PlaybackPreferences.SubtitleBackground.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleBackground },
+                        set: { prefs.subtitleBackground = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "arrow.up.and.down",
+                    title: "settings.playback.subtitle.position",
+                    subtitle: "settings.playback.subtitle.position.subtitle",
+                    options: PlaybackPreferences.SubtitleVerticalPosition.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleVerticalPosition },
+                        set: { prefs.subtitleVerticalPosition = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "metronome",
+                    title: "settings.playback.subtitle.delay",
+                    subtitle: "settings.playback.subtitle.delay.subtitle",
+                    options: PlaybackPreferences.subtitleDelayChoices,
+                    selection: Binding(
+                        get: {
+                            // Snap persisted value to nearest option so a stale value doesn't render as a no-op picker.
+                            let stored = prefs.subtitleDelaySeconds
+                            return PlaybackPreferences.subtitleDelayChoices
+                                .min(by: { abs($0 - stored) < abs($1 - stored) })
+                                ?? 0
+                        },
+                        set: { prefs.subtitleDelaySeconds = $0 }
+                    ),
+                    label: PlaybackSettingsView.formatSubtitleDelay
+                )
+
+                boolRow(
+                    icon: "wand.and.stars",
+                    title: "settings.playback.subtitle.styledASS",
+                    subtitle: "settings.playback.subtitle.styledASS.subtitle",
+                    value: Binding(
+                        get: { prefs.styledASSSubtitles },
+                        set: { prefs.styledASSSubtitles = $0 }
+                    )
+                )
+
+                ValuePickerRow(
+                    icon: "number.square",
+                    title: "settings.playback.teletext.title",
+                    subtitle: "settings.playback.teletext.subtitle",
+                    options: PlaybackPreferences.LiveTeletextPage.allCases,
+                    selection: Binding(
+                        get: { prefs.liveTeletextPage },
+                        set: { prefs.liveTeletextPage = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
 
                 sectionHeader("settings.playback.section.streaming")
 
@@ -301,185 +465,6 @@ struct PlaybackSettingsView: View {
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
                 .settingsValueScope(.device)
-
-                sectionHeader("settings.playback.section.languages")
-
-                languageRow(
-                    icon: "speaker.wave.2",
-                    title: "settings.playback.preferredAudio",
-                    subtitle: "settings.playback.preferredAudio.subtitle",
-                    choices: PlaybackPreferences.audioLanguageChoices,
-                    selection: Binding(
-                        get: { prefs.preferredAudioLanguage },
-                        set: { prefs.preferredAudioLanguage = $0 }
-                    )
-                )
-
-                languageRow(
-                    icon: "captions.bubble",
-                    title: "settings.playback.preferredSubtitle",
-                    subtitle: "settings.playback.preferredSubtitle.subtitle",
-                    choices: PlaybackPreferences.subtitleLanguageChoices,
-                    selection: Binding(
-                        get: { prefs.preferredSubtitleLanguage },
-                        set: { prefs.preferredSubtitleLanguage = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "captions.bubble.fill",
-                    title: "settings.playback.autoSubtitleForeign",
-                    subtitle: "settings.playback.autoSubtitleForeign.subtitle",
-                    value: Binding(
-                        get: { prefs.autoSubtitleForForeignAudio },
-                        set: { prefs.autoSubtitleForForeignAudio = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "text.bubble.fill",
-                    title: "settings.playback.autoForcedSubtitles",
-                    subtitle: "settings.playback.autoForcedSubtitles.subtitle",
-                    value: Binding(
-                        get: { prefs.autoForcedSubtitles },
-                        set: { prefs.autoForcedSubtitles = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "gobackward",
-                    title: "settings.playback.subtitlesOnSkipBack",
-                    subtitle: "settings.playback.subtitlesOnSkipBack.subtitle",
-                    value: Binding(
-                        get: { prefs.subtitlesOnSkipBack },
-                        set: { prefs.subtitlesOnSkipBack = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "bookmark",
-                    title: "settings.playback.rememberTracks",
-                    subtitle: "settings.playback.rememberTracks.subtitle",
-                    value: Binding(
-                        get: { prefs.rememberTrackSelections },
-                        set: { prefs.rememberTrackSelections = $0 }
-                    )
-                )
-
-                sectionHeader("settings.playback.section.subtitleStyle")
-
-                boolRow(
-                    icon: "wand.and.stars",
-                    title: "settings.playback.subtitle.styledASS",
-                    subtitle: "settings.playback.subtitle.styledASS.subtitle",
-                    value: Binding(
-                        get: { prefs.styledASSSubtitles },
-                        set: { prefs.styledASSSubtitles = $0 }
-                    )
-                )
-
-                ValuePickerRow(
-                    icon: "textformat.size",
-                    title: "settings.playback.subtitle.size",
-                    subtitle: "settings.playback.subtitle.size.subtitle",
-                    options: PlaybackPreferences.SubtitleFontSize.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleFontSize },
-                        set: { prefs.subtitleFontSize = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "paintpalette",
-                    title: "settings.playback.subtitle.color",
-                    subtitle: "settings.playback.subtitle.color.subtitle",
-                    options: PlaybackPreferences.SubtitleColor.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleColor },
-                        set: { prefs.subtitleColor = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "number.square",
-                    title: "settings.playback.teletext.title",
-                    subtitle: "settings.playback.teletext.subtitle",
-                    options: PlaybackPreferences.LiveTeletextPage.allCases,
-                    selection: Binding(
-                        get: { prefs.liveTeletextPage },
-                        set: { prefs.liveTeletextPage = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-                .settingsValueScope(.device)
-
-                ValuePickerRow(
-                    icon: "rectangle.fill",
-                    title: "settings.playback.subtitle.background",
-                    subtitle: "settings.playback.subtitle.background.subtitle",
-                    options: PlaybackPreferences.SubtitleBackground.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleBackground },
-                        set: { prefs.subtitleBackground = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "metronome",
-                    title: "settings.playback.subtitle.delay",
-                    subtitle: "settings.playback.subtitle.delay.subtitle",
-                    options: PlaybackPreferences.subtitleDelayChoices,
-                    selection: Binding(
-                        get: {
-                            // Snap persisted value to nearest option so a stale value doesn't render as a no-op picker.
-                            let stored = prefs.subtitleDelaySeconds
-                            return PlaybackPreferences.subtitleDelayChoices
-                                .min(by: { abs($0 - stored) < abs($1 - stored) })
-                                ?? 0
-                        },
-                        set: { prefs.subtitleDelaySeconds = $0 }
-                    ),
-                    label: PlaybackSettingsView.formatSubtitleDelay
-                )
-
-                ValuePickerRow(
-                    icon: "arrow.up.and.down",
-                    title: "settings.playback.subtitle.position",
-                    subtitle: "settings.playback.subtitle.position.subtitle",
-                    options: PlaybackPreferences.SubtitleVerticalPosition.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleVerticalPosition },
-                        set: { prefs.subtitleVerticalPosition = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "textformat",
-                    title: "settings.playback.subtitle.font",
-                    subtitle: "settings.playback.subtitle.font.subtitle",
-                    options: PlaybackPreferences.SubtitleFont.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleFont },
-                        set: { prefs.subtitleFont = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-
-                ValuePickerRow(
-                    icon: "bold",
-                    title: "settings.playback.subtitle.weight",
-                    subtitle: "settings.playback.subtitle.weight.subtitle",
-                    options: PlaybackPreferences.SubtitleWeight.allCases,
-                    selection: Binding(
-                        get: { prefs.subtitleWeight },
-                        set: { prefs.subtitleWeight = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
 
                 sectionHeader("settings.playback.section.picture")
 
@@ -634,12 +619,7 @@ struct PlaybackSettingsView: View {
     }
 
     private func sectionHeader(_ key: LocalizedStringKey) -> some View {
-        Text(key)
-            .font(.title3)
-            .fontWeight(.semibold)
-            .foregroundStyle(.secondary)
-            .padding(.top, 24)
-            .padding(.bottom, 4)
+        SettingsSectionHeader(key)
     }
 
     // MARK: - Rows
