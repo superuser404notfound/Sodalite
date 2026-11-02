@@ -185,6 +185,8 @@ struct ProfileAppearancePayload: Codable, Equatable {
     var pinnedLibraryTabs: [PinnedLibraryTab]? = nil
     /// nil from a build without the upright artwork choice, unapplied for the same reason.
     var uprightArtwork: String? = nil
+    /// nil from a build without the poster rating pill, unapplied for the same reason.
+    var showPosterRating: Bool? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -214,7 +216,8 @@ extension ProfileAppearancePayload {
             showTagline: a.showTagline,
             spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
             pinnedLibraryTabs: a.pinnedLibraryTabs,
-            uprightArtwork: a.uprightArtwork.rawValue
+            uprightArtwork: a.uprightArtwork.rawValue,
+            showPosterRating: a.showPosterRating
         )
     }
 
@@ -243,6 +246,7 @@ extension ProfileAppearancePayload {
         if let artwork = uprightArtwork.flatMap(AppearancePreferences.UprightArtwork.init(rawValue:)) {
             a.uprightArtwork = artwork
         }
+        if let showPosterRating { a.showPosterRating = showPosterRating }
     }
 }
 

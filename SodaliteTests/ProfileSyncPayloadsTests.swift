@@ -46,6 +46,7 @@ struct ProfileSyncPayloadsTests {
         look.hiddenTabs = [.catalog]
         look.navigationStyle = .sidebar
         look.uprightArtwork = .poster
+        look.showPosterRating = true
 
         let data = try ProfileSyncPayload.playback(ProfilePlaybackPayload(collecting: source, stamp: .now)).encoded()
         let lookData = try ProfileSyncPayload.appearance(ProfileAppearancePayload(collecting: look, stamp: .now)).encoded()
@@ -63,6 +64,7 @@ struct ProfileSyncPayloadsTests {
         #expect(targetLook.hiddenTabs == [.catalog])
         #expect(targetLook.navigationStyle == .sidebar)
         #expect(targetLook.uprightArtwork == .poster)
+        #expect(targetLook.showPosterRating)
     }
 
     @Test func theUprightArtworkDefaultsToTheBackdrop() {
