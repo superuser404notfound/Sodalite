@@ -38,6 +38,9 @@ extension GuideGridViewController {
             return true
         }
         if let last = lastVetoedMove, last.previous == previous, last.next == next {
+            // tvOS offers a vetoed move again a few milliseconds later, before the redirect has
+            // run (measured in the simulator, Sodalite#221). That is not a failed redirect yet.
+            if redirectInFlight { return false }
             // Second time we are offered this exact move: the redirect did not take. Vetoing again
             // leaves focus with nowhere to go at all, which is worse than an unanchored move.
             focusLog("accepted engine pick", previous: previous, next: next)
@@ -50,10 +53,18 @@ extension GuideGridViewController {
         let target = IndexPath(item: desired, section: next.section)
         pendingFocusRedirect = target
         focusLog("veto", previous: previous, next: next, target: target)
+        redirectInFlight = true
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.pendingFocusRedirect != nil else { return }
+            guard let self else { return }
+            self.redirectInFlight = false
+            guard self.pendingFocusRedirect != nil else { return }
+            // The remembered index path outranks indexPathForPreferredFocusedView while focus is
+            // inside the grid: with it on, this update re-resolved to the cell focus was already
+            // on and every redirect was refused (simulator, Sodalite#221).
+            self.gridView.remembersLastFocusedIndexPath = false
             self.gridView.setNeedsFocusUpdate()
             self.gridView.updateFocusIfNeeded()
+            self.gridView.remembersLastFocusedIndexPath = true
             // A landing clears the redirect, so one still standing here is one the engine refused.
             if self.pendingFocusRedirect == target {
                 self.focusLog("redirect did not take", previous: previous, next: target)
