@@ -5,6 +5,7 @@ struct AppearanceSettingsView: View {
     @Environment(\.dependencies) private var dependencies
 
     private var appearance: AppearancePreferences { dependencies.appearancePreferences }
+    private var playback: PlaybackPreferences { dependencies.playbackPreferences }
     private var isSupporter: Bool { dependencies.storeKitService.isSupporter }
     private var effectiveTheme: ResolvedAppearanceTheme {
         appearance.resolvedTheme(isSupporter: isSupporter)
@@ -25,8 +26,11 @@ struct AppearanceSettingsView: View {
                     .frame(maxWidth: .infinity)
 
                 header
-                togglesSection
                 personalizationSection
+                cardsSection
+                detailPagesSection
+                spoilersSection
+                systemSection
             }
             .screenContentInset()
         }
@@ -56,16 +60,9 @@ struct AppearanceSettingsView: View {
 
     // MARK: - Options (free for everyone)
 
-    /// Free rows above the supporter-gated accent picker; same ValuePickerRow as Playback for consistency.
-    private var togglesSection: some View {
-        VStack(spacing: 4) {
-            boolRow(
-                icon: "photo.on.rectangle",
-                title: "settings.appearance.showLogos",
-                subtitle: "settings.appearance.showLogos.subtitle",
-                value: Binding(get: { appearance.showContentLogos },
-                               set: { appearance.showContentLogos = $0 })
-            )
+    private var cardsSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.appearance.section.cards", topPadding: 0)
 
             ValuePickerRow(
                 icon: "rectangle.on.rectangle.angled",
@@ -121,6 +118,32 @@ struct AppearanceSettingsView: View {
                                set: { appearance.showPosterBadges = $0 })
             )
 
+            // Sodalite#84. Off by default: most library images have the library's name burnt in,
+            // and ours on top makes two captions. On for viewers whose images carry no text.
+            boolRow(
+                icon: "textformat",
+                title: "settings.appearance.libraryNames",
+                subtitle: "settings.appearance.libraryNames.subtitle",
+                value: Binding(get: { appearance.showLibraryNames },
+                               set: { appearance.showLibraryNames = $0 })
+            )
+        }
+    }
+
+    /// Theme music is a playback preference, but what it changes is how a detail page behaves, so it
+    /// is set here next to the page's other choices.
+    private var detailPagesSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.playback.section.detailPages", topPadding: 0)
+
+            boolRow(
+                icon: "photo.on.rectangle",
+                title: "settings.appearance.showLogos",
+                subtitle: "settings.appearance.showLogos.subtitle",
+                value: Binding(get: { appearance.showContentLogos },
+                               set: { appearance.showContentLogos = $0 })
+            )
+
             // Sodalite#145. On by default, unlike the poster corners above: a detail page already
             // holds the streams these read, so the pills cost no request.
             boolRow(
@@ -131,15 +154,99 @@ struct AppearanceSettingsView: View {
                                set: { appearance.showDetailBadges = $0 })
             )
 
-            // Sodalite#84. Off by default: most library images have the library's name burnt in,
-            // and ours on top makes two captions. On for viewers whose images carry no text.
+            // Sodalite#127. On by default, one row per source: the star is a community average,
+            // the percentage is the tomatometer, and a viewer can object to either alone.
+            boolRow(
+                icon: "star",
+                title: "settings.appearance.communityRating",
+                subtitle: "settings.appearance.communityRating.subtitle",
+                value: Binding(get: { appearance.showCommunityRating },
+                               set: { appearance.showCommunityRating = $0 })
+            )
+
+            boolRow(
+                icon: "percent",
+                title: "settings.appearance.criticRating",
+                subtitle: "settings.appearance.criticRating.subtitle",
+                value: Binding(get: { appearance.showCriticRating },
+                               set: { appearance.showCriticRating = $0 })
+            )
+
+            // Sodalite#146 round 4. Next to the scores because it is the same kind of choice: a
+            // line of scraped copy on a detail page that a viewer may not want there.
+            boolRow(
+                icon: "text.quote",
+                title: "settings.appearance.tagline",
+                subtitle: "settings.appearance.tagline.subtitle",
+                value: Binding(get: { appearance.showTagline },
+                               set: { appearance.showTagline = $0 })
+            )
+
+            ValuePickerRow(
+                icon: "music.note",
+                title: "settings.playback.themeSongs",
+                subtitle: "settings.playback.themeSongs.subtitle",
+                options: [false, true],
+                selection: Binding(
+                    get: { playback.playThemeSongs },
+                    set: {
+                        playback.playThemeSongs = $0
+                        dependencies.themeSongPlayer.evaluate()
+                    }
+                ),
+                label: { on in
+                    on
+                        ? String(localized: "settings.playback.on", defaultValue: "On")
+                        : String(localized: "settings.playback.off", defaultValue: "Off")
+                }
+            )
+        }
+    }
+
+    private var spoilersSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.appearance.section.spoilers", topPadding: 0)
+
+            // Sodalite#50. The sub-rows stay visible while protection is off: this screen has
+            // no conditional rows, and rows appearing under the focused one is a tvOS focus hazard.
+            boolRow(
+                icon: "eye.slash",
+                title: "settings.appearance.spoiler",
+                subtitle: "settings.appearance.spoiler.subtitle",
+                value: Binding(get: { appearance.spoilerProtectionEnabled },
+                               set: { appearance.spoilerProtectionEnabled = $0 })
+            )
+
+            boolRow(
+                icon: "tv",
+                title: "settings.appearance.spoilerEpisodes",
+                subtitle: "settings.appearance.spoilerEpisodes.subtitle",
+                value: Binding(get: { appearance.spoilerHideEpisodes },
+                               set: { appearance.spoilerHideEpisodes = $0 })
+            )
+
+            boolRow(
+                icon: "film",
+                title: "settings.appearance.spoilerMovies",
+                subtitle: "settings.appearance.spoilerMovies.subtitle",
+                value: Binding(get: { appearance.spoilerHideMovies },
+                               set: { appearance.spoilerHideMovies = $0 })
+            )
+
             boolRow(
                 icon: "textformat",
-                title: "settings.appearance.libraryNames",
-                subtitle: "settings.appearance.libraryNames.subtitle",
-                value: Binding(get: { appearance.showLibraryNames },
-                               set: { appearance.showLibraryNames = $0 })
+                title: "settings.appearance.spoilerEpisodeTitles",
+                subtitle: "settings.appearance.spoilerEpisodeTitles.subtitle",
+                value: Binding(get: { appearance.spoilerHideEpisodeTitles },
+                               set: { appearance.spoilerHideEpisodeTitles = $0 })
             )
+        }
+    }
+
+    /// Surfaces outside the app: the Top Shelf and the system's Now Playing.
+    private var systemSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.appearance.section.system", topPadding: 0)
 
             #if os(tvOS)
             // The row can show another household member's Continue Watching, because the shelf
@@ -174,68 +281,6 @@ struct AppearanceSettingsView: View {
                 subtitle: "settings.appearance.nowPlayingPoster.subtitle",
                 value: Binding(get: { appearance.nowPlayingUsesSeriesPoster },
                                set: { appearance.nowPlayingUsesSeriesPoster = $0 })
-            )
-
-            // Sodalite#127. On by default, one row per source: the star is a community average,
-            // the percentage is the tomatometer, and a viewer can object to either alone.
-            boolRow(
-                icon: "star",
-                title: "settings.appearance.communityRating",
-                subtitle: "settings.appearance.communityRating.subtitle",
-                value: Binding(get: { appearance.showCommunityRating },
-                               set: { appearance.showCommunityRating = $0 })
-            )
-
-            boolRow(
-                icon: "percent",
-                title: "settings.appearance.criticRating",
-                subtitle: "settings.appearance.criticRating.subtitle",
-                value: Binding(get: { appearance.showCriticRating },
-                               set: { appearance.showCriticRating = $0 })
-            )
-
-            // Sodalite#146 round 4. Next to the scores because it is the same kind of choice: a
-            // line of scraped copy on a detail page that a viewer may not want there.
-            boolRow(
-                icon: "text.quote",
-                title: "settings.appearance.tagline",
-                subtitle: "settings.appearance.tagline.subtitle",
-                value: Binding(get: { appearance.showTagline },
-                               set: { appearance.showTagline = $0 })
-            )
-
-            // Sodalite#50. The two sub-rows stay visible while protection is off: this screen has
-            // no conditional rows, and rows appearing under the focused one is a tvOS focus hazard.
-            boolRow(
-                icon: "eye.slash",
-                title: "settings.appearance.spoiler",
-                subtitle: "settings.appearance.spoiler.subtitle",
-                value: Binding(get: { appearance.spoilerProtectionEnabled },
-                               set: { appearance.spoilerProtectionEnabled = $0 })
-            )
-
-            boolRow(
-                icon: "tv",
-                title: "settings.appearance.spoilerEpisodes",
-                subtitle: "settings.appearance.spoilerEpisodes.subtitle",
-                value: Binding(get: { appearance.spoilerHideEpisodes },
-                               set: { appearance.spoilerHideEpisodes = $0 })
-            )
-
-            boolRow(
-                icon: "film",
-                title: "settings.appearance.spoilerMovies",
-                subtitle: "settings.appearance.spoilerMovies.subtitle",
-                value: Binding(get: { appearance.spoilerHideMovies },
-                               set: { appearance.spoilerHideMovies = $0 })
-            )
-
-            boolRow(
-                icon: "textformat",
-                title: "settings.appearance.spoilerEpisodeTitles",
-                subtitle: "settings.appearance.spoilerEpisodeTitles.subtitle",
-                value: Binding(get: { appearance.spoilerHideEpisodeTitles },
-                               set: { appearance.spoilerHideEpisodeTitles = $0 })
             )
         }
     }

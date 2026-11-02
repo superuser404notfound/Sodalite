@@ -482,6 +482,12 @@ enum Changelog {
                     "changelog.1_1_0.showEpisode.body",
                     icon: "play.tv"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.settingsOrder.title",
+                    "changelog.1_1_0.settingsOrder.body",
+                    icon: "gearshape"
+                ),
             ]
         ),
         // MARK: 1.0.0

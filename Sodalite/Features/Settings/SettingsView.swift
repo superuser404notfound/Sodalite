@@ -179,8 +179,12 @@ struct SettingsView: View {
     // MARK: - Settings List
 
     private var settingsList: some View {
-        // Ordered by reach frequency: Profile, Home, Playback, Appearance (supporter-gated), iCloud Sync, Seerr, Support.
-        VStack(spacing: 4) {
+        // Grouped by what a tile is about rather than by how often it is opened: the account and its
+        // services, what playback does, what the screens look like, the app itself, then the tools
+        // for when something is wrong.
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.section.account", topPadding: 0)
+
             GatedSettingsTile(
                 icon: "person.2",
                 title: "settings.profile.title",
@@ -189,16 +193,6 @@ struct SettingsView: View {
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
                 ProfileSettingsView()
-            }
-
-            GatedSettingsTile(
-                icon: "server.rack",
-                title: "multiServer.settings.entry.title",
-                subtitle: "multiServer.settings.entry.subtitle",
-                reason: .serverManagement,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                ServerManagementView()
             }
 
             GatedSettingsTile(
@@ -215,25 +209,37 @@ struct SettingsView: View {
                 ParentalControlsSettingsView()
             }
 
-            SettingsTile(
-                icon: "square.grid.2x2",
-                title: "settings.home.customize",
-                subtitle: "settings.home.customizeSubtitle"
+            GatedSettingsTile(
+                icon: "server.rack",
+                title: "multiServer.settings.entry.title",
+                subtitle: "multiServer.settings.entry.subtitle",
+                reason: .serverManagement,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
-                HomeCustomizeView()
+                ServerManagementView()
             }
 
-            // Gated: hiding the Catalog tab is a parental measure (Sodalite#62), so an unlocked
-            // profile must not be able to switch it back on.
             GatedSettingsTile(
-                icon: "rectangle.3.group",
-                title: "settings.tabs.title",
-                subtitle: "settings.tabs.subtitle.short",
+                icon: "tray.and.arrow.down",
+                title: "settings.seerr.title",
+                subtitle: seerrSubtitle,
                 reason: .openParentalSettings,
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
-                TabVisibilitySettingsView()
+                SeerrSettingsView()
             }
+
+            GatedSettingsTile(
+                icon: "icloud",
+                title: "settings.cloudSync.title",
+                subtitle: "settings.cloudSync.subtitle",
+                reason: .serverManagement,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                CloudSyncSettingsView()
+            }
+
+            SettingsSectionHeader("settings.section.playback")
 
             SettingsTile(
                 icon: "play.circle",
@@ -264,6 +270,8 @@ struct SettingsView: View {
             }
             #endif
 
+            SettingsSectionHeader("settings.section.interface")
+
             SettingsTile(
                 icon: "paintpalette",
                 title: "settings.appearance.title",
@@ -272,36 +280,27 @@ struct SettingsView: View {
                 AppearanceSettingsView()
             }
 
-            GatedSettingsTile(
-                icon: "icloud",
-                title: "settings.cloudSync.title",
-                subtitle: "settings.cloudSync.subtitle",
-                reason: .serverManagement,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            SettingsTile(
+                icon: "square.grid.2x2",
+                title: "settings.home.customize",
+                subtitle: "settings.home.customizeSubtitle"
             ) {
-                CloudSyncSettingsView()
+                HomeCustomizeView()
             }
 
+            // Gated: hiding the Catalog tab is a parental measure (Sodalite#62), so an unlocked
+            // profile must not be able to switch it back on.
             GatedSettingsTile(
-                icon: "tray.and.arrow.down",
-                title: "settings.seerr.title",
-                subtitle: seerrSubtitle,
+                icon: "rectangle.3.group",
+                title: "settings.tabs.title",
+                subtitle: "settings.tabs.subtitle.short",
                 reason: .openParentalSettings,
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
-                SeerrSettingsView()
+                TabVisibilitySettingsView()
             }
 
-            // Gated: Support hosts the IAP purchase flow, off-limits to a kid on a protected profile.
-            GatedSettingsTile(
-                icon: "heart",
-                title: "settings.support.title",
-                subtitle: "settings.support.subtitle",
-                reason: .openParentalSettings,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                SupportDevelopmentView()
-            }
+            SettingsSectionHeader(verbatim: "Sodalite")
 
             SettingsTile(
                 icon: "chart.bar.xaxis",
@@ -319,6 +318,17 @@ struct SettingsView: View {
                 ChangelogListView()
             }
 
+            // Gated: Support hosts the IAP purchase flow, off-limits to a kid on a protected profile.
+            GatedSettingsTile(
+                icon: "heart",
+                title: "settings.support.title",
+                subtitle: "settings.support.subtitle",
+                reason: .openParentalSettings,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                SupportDevelopmentView()
+            }
+
             SettingsTile(
                 icon: "doc.text",
                 title: "settings.licenses.title",
@@ -326,6 +336,8 @@ struct SettingsView: View {
             ) {
                 LicensesView()
             }
+
+            SettingsSectionHeader("settings.section.troubleshooting")
 
             SettingsTile(
                 icon: "text.alignleft",
@@ -516,6 +528,36 @@ struct SettingsView: View {
             appState.logout()
             isResetting = false
         }
+    }
+}
+
+// MARK: - Section Header
+
+/// Group title over a run of settings rows or tiles. `topPadding` is 0 where the container's own
+/// spacing already separates the groups, or above the first group on a screen.
+struct SettingsSectionHeader: View {
+    private let text: Text
+    private let topPadding: CGFloat
+
+    init(_ key: LocalizedStringKey, topPadding: CGFloat = 24) {
+        text = Text(key)
+        self.topPadding = topPadding
+    }
+
+    /// For a name that is not translated.
+    init(verbatim: String, topPadding: CGFloat = 24) {
+        text = Text(verbatim: verbatim)
+        self.topPadding = topPadding
+    }
+
+    var body: some View {
+        text
+            .font(.title3)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .padding(.top, topPadding)
+            .padding(.bottom, 4)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
