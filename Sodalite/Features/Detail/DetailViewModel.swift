@@ -14,6 +14,8 @@ final class DetailViewModel {
     var playedOverrides: [String: Bool] = [:]
     /// Favorite overrides keyed by episode ID; same reason as playedOverrides, the heart badge has to update without mutating the item.
     var favoriteOverrides: [String: Bool] = [:]
+    /// Rating overrides keyed by episode ID, for the same reason; an inner nil is a cleared rating.
+    var ratingOverrides: [String: Double?] = [:]
     var seasons: [JellyfinItem] = []
     var episodes: [JellyfinItem] = []
     /// Cache-miss episode fetch for the selected season in flight; drives the skeleton row instead of a blank ("grey then everything at once" slow-CDN symptom).
@@ -432,6 +434,7 @@ final class DetailViewModel {
         episodeDetailCache[staleID] = nil
         playedOverrides[staleID] = nil
         favoriteOverrides[staleID] = nil
+        ratingOverrides[staleID] = nil
         if currentEpisodeID == staleID { currentEpisodeID = newItem.id }
         // The replacement is a different file, so the response fetched for the id that died describes
         // neither it nor its successor.
@@ -582,6 +585,24 @@ final class DetailViewModel {
             try await itemService.setRating(userID: userID, itemID: item.id, rating: newValue)
         } catch {
             rating = oldValue
+        }
+    }
+
+    /// Effective rating of an episode: in-session override wins over the server snapshot.
+    func rating(of item: JellyfinItem) -> Double? {
+        if let override = ratingOverrides[item.id] { return override }
+        return item.userData?.rating
+    }
+
+    /// nil clears the episode's rating. Optimistic, rolled back if the server refuses.
+    func setEpisodeRating(_ episode: JellyfinItem, rating newValue: Double?) async {
+        guard newValue != rating(of: episode) else { return }
+        let oldValue = ratingOverrides[episode.id]
+        ratingOverrides[episode.id] = .some(newValue)
+        do {
+            try await itemService.setRating(userID: userID, itemID: episode.id, rating: newValue)
+        } catch {
+            ratingOverrides[episode.id] = oldValue
         }
     }
 

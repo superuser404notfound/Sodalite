@@ -98,6 +98,7 @@ final class AppearancePreferences {
         static let showDetailBadges = "appearance.showDetailBadges"
         static let showLibraryNames = "appearance.showLibraryNames"
         static let showPosterProgress = "appearance.showPosterProgress"
+        static let showPosterRating = "appearance.showPosterRating"
         static let showCommunityRating = "appearance.showCommunityRating"
         static let showCriticRating = "appearance.showCriticRating"
         static let showTagline = "appearance.showTagline"
@@ -198,6 +199,13 @@ final class AppearancePreferences {
     /// counts children watched and there is no resume point behind it (Sodalite#135).
     var showPosterProgress: Bool {
         didSet { store.set(showPosterProgress, forKey: Keys.showPosterProgress) }
+    }
+
+    /// The viewer's own rating (Sodalite#48) as a star pill at the top of the poster corner. Off by
+    /// default: most cards carry none, and the corner belongs to the copy's facts first. Costs no
+    /// request, the rating rides in the UserData every card query already fetches.
+    var showPosterRating: Bool {
+        didSet { store.set(showPosterRating, forKey: Keys.showPosterRating) }
     }
 
     /// Sodalite#127. The star score a community voted on (Jellyfin's CommunityRating, TMDB's vote
@@ -328,6 +336,7 @@ final class AppearancePreferences {
         self.showDetailBadges = store.object(forKey: Keys.showDetailBadges) as? Bool ?? true
         self.showLibraryNames = store.object(forKey: Keys.showLibraryNames) as? Bool ?? false
         self.showPosterProgress = store.object(forKey: Keys.showPosterProgress) as? Bool ?? false
+        self.showPosterRating = store.object(forKey: Keys.showPosterRating) as? Bool ?? false
         self.showCommunityRating = store.object(forKey: Keys.showCommunityRating) as? Bool ?? true
         self.showCriticRating = store.object(forKey: Keys.showCriticRating) as? Bool ?? true
         self.showTagline = store.object(forKey: Keys.showTagline) as? Bool ?? true

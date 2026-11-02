@@ -65,6 +65,8 @@ struct SeriesDetailView: View {
     /// restoring what it replaced, so a mis-press costs per-episode progress a viewer may be three
     /// seasons into. Single episodes stay a plain toggle; they act on one asset and reverse cleanly.
     @State private var isConfirmingPlayedChange = false
+    /// The series' own rating or one episode's, told apart by the prompt's item id (Sodalite#48).
+    @State private var ratingPrompt: RatingPrompt?
     /// Set on episode "Show Details": the context menu restores focus to its anchor card on dismiss, so the focusedEpisodeID observer bounces focus up to the play button.
     @State private var pendingPlayFocusAfterMenu = false
 
@@ -296,6 +298,22 @@ struct SeriesDetailView: View {
         #if !os(tvOS)
         .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
         #endif
+        .menuPresentation(item: $ratingPrompt) { prompt in
+            RatingPickerSheet(
+                rating: currentRating(for: prompt),
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                )
+            ) { value in
+                ratingPrompt = nil
+                guard let vm = viewModel else { return }
+                if prompt.itemID == vm.item.id {
+                    Task { await vm.setRating(value) }
+                } else if let episode = ratedEpisode(for: prompt, vm: vm) {
+                    Task { await vm.setEpisodeRating(episode, rating: value) }
+                }
+            }
+        }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
@@ -1131,6 +1149,17 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .watched)
             }
 
+            // Sodalite#48: Jellyfin keeps a rating per item, the series' own as well as each episode's.
+            if !isShowingEpisode {
+                GlassActionButton(
+                    title: vm.rating == nil ? "detail.rate" : "detail.rating",
+                    systemImage: vm.rating == nil ? "star" : "star.fill",
+                    subtitle: vm.rating.map(RatingPickerSheet.label),
+                    action: { ratingPrompt = RatingPrompt(itemID: vm.item.id) }
+                )
+                .focused($focusedAction, equals: .rating)
+            }
+
             // Shows the EFFECTIVE state for this series, so a tap always reads as "do the other
             // thing"; the three explicit states live in the context menu.
             if !isShowingEpisode {
@@ -1171,6 +1200,14 @@ struct SeriesDetailView: View {
                     }
                 )
                 .focused($focusedAction, equals: .watched)
+
+                GlassActionButton(
+                    title: vm.rating(of: ep) == nil ? "detail.rate" : "detail.rating",
+                    systemImage: vm.rating(of: ep) == nil ? "star" : "star.fill",
+                    subtitle: vm.rating(of: ep).map(RatingPickerSheet.label),
+                    action: { ratingPrompt = RatingPrompt(itemID: ep.id) }
+                )
+                .focused($focusedAction, equals: .rating)
 
                 #if os(iOS)
                 DownloadActionButton(item: ep, sourceID: versionSelection.preferredSourceID(for: ep), target: $downloadTarget)
@@ -1220,6 +1257,18 @@ struct SeriesDetailView: View {
                 )
                 .focused($focusedAction, equals: .delete)
             }
+    }
+
+    /// The rating the panel opens on: the series' own, or the episode's with this session's change applied.
+    private func currentRating(for prompt: RatingPrompt) -> Double? {
+        guard let vm = viewModel else { return nil }
+        if prompt.itemID == vm.item.id { return vm.rating }
+        return ratedEpisode(for: prompt, vm: vm).flatMap(vm.rating(of:))
+    }
+
+    private func ratedEpisode(for prompt: RatingPrompt, vm: DetailViewModel) -> JellyfinItem? {
+        if let ep = selectedEpisode, ep.id == prompt.itemID { return ep }
+        return vm.episodes.first { $0.id == prompt.itemID }
     }
 
     /// Patch the open episode panel's resume position when the played item is selectedEpisode (issue #24). selectedEpisode lives on the view not the VM, and playTarget prioritises it, so applyPlaybackPosition can't reach it. No-op unless the id matches.
@@ -1418,6 +1467,12 @@ struct SeriesDetailView: View {
                 vm.isFavorite(episode) ? "detail.unfavorite" : "detail.favorite",
                 systemImage: vm.isFavorite(episode) ? "heart.fill" : "heart"
             )
+        }
+
+        Button {
+            ratingPrompt = RatingPrompt(itemID: episode.id)
+        } label: {
+            Label("detail.rate", systemImage: vm.rating(of: episode) == nil ? "star" : "star.fill")
         }
 
         // Sodalite#50. For an episode without a synopsis the box is

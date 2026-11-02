@@ -12,11 +12,11 @@ struct PosterBadgeOverlay: View {
     @Environment(\.dependencies) private var dependencies
 
     var body: some View {
-        if dependencies.appearancePreferences.showPosterBadges {
-            let pills = dependencies.posterBadgeStore.badges(for: item).pills
-            if !pills.isEmpty {
-                PosterBadgePills(pills: pills, fontSize: fontSize)
-            }
+        let appearance = dependencies.appearancePreferences
+        let pills = appearance.showPosterBadges ? dependencies.posterBadgeStore.badges(for: item).pills : []
+        let rating = appearance.showPosterRating ? item.userData?.rating : nil
+        if !pills.isEmpty || rating != nil {
+            PosterBadgePills(pills: pills, fontSize: fontSize, rating: rating)
         }
     }
 }

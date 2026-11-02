@@ -67896,157 +67896,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonusy a klipy mají vlastní řadu vedle upoutávek a na iPhonu, iPadu a Macu přijde upoutávka z YouTube, když ji váš server nemá. Hodnoťte filmy od 1 do 10, volitelně hned po jejich skončení. Úvodní melodie může hrát, dokud je stránka otevřená, stránka seriálu má tlačítko Zobrazit díl a tlačítko Verze uvádí jen to, čím se verze liší."
+            "value" : "Bonusy a klipy mají vlastní řadu vedle upoutávek a na iPhonu, iPadu a Macu přijde upoutávka z YouTube, když ji váš server nemá. Hodnoťte filmy, seriály i díly od 1 do 10, film volitelně hned po skončení, a své hodnocení si můžete zobrazit na plakátech. Úvodní melodie může hrát, dokud je stránka otevřená, stránka seriálu má tlačítko Zobrazit díl a tlačítko Verze uvádí jen to, čím se verze liší."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ekstramateriale og klip får deres egen række ved siden af trailerne, og på iPhone, iPad og Mac kommer en trailer fra YouTube, når din server ikke har en. Bedøm film fra 1 til 10, hvis du vil, når de slutter. Temasange kan spille, mens en side er åben, seriesiden har en Vis afsnit-knap, og Version-knappen nævner kun det, der adskiller en version."
+            "value" : "Ekstramateriale og klip får deres egen række ved siden af trailerne, og på iPhone, iPad og Mac kommer en trailer fra YouTube, når din server ikke har en. Bedøm film, serier og afsnit fra 1 til 10, en film også når den slutter, hvis du vil, og vis din bedømmelse på plakaterne. Temasange kan spille, mens en side er åben, seriesiden har en Vis afsnit-knap, og Version-knappen nævner kun det, der adskiller en version."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extras und Clips bekommen eine eigene Reihe neben den Trailern, und auf iPhone, iPad und Mac kommt ein Trailer von YouTube, wenn dein Server keinen hat. Bewerte Filme von 1 bis 10, auf Wunsch direkt nach dem Abspann. Titelmusik kann spielen, solange eine Seite offen ist, die Serienseite hat eine Taste Folge anzeigen, und die Versionstaste nennt nur noch, was eine Version unterscheidet."
+            "value" : "Extras und Clips bekommen eine eigene Reihe neben den Trailern, und auf iPhone, iPad und Mac kommt ein Trailer von YouTube, wenn dein Server keinen hat. Bewerte Filme, Serien und Folgen von 1 bis 10, einen Film auf Wunsch direkt nach dem Abspann, und lass deine Bewertung auf den Postern anzeigen. Titelmusik kann spielen, solange eine Seite offen ist, die Serienseite hat eine Taste Folge anzeigen, und die Versionstaste nennt nur noch, was eine Version unterscheidet."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Το επιπλέον υλικό και τα κλιπ έχουν δική τους σειρά δίπλα στα τρέιλερ, και σε iPhone, iPad και Mac ένα τρέιλερ έρχεται από το YouTube όταν ο διακομιστής σας δεν έχει. Βαθμολογήστε ταινίες από 1 έως 10, αν θέλετε μόλις τελειώσουν. Τα μουσικά θέματα μπορούν να παίζουν όσο είναι ανοιχτή μια σελίδα, η σελίδα σειράς έχει κουμπί Εμφάνιση επεισοδίου, και το κουμπί Έκδοση αναφέρει μόνο ό,τι ξεχωρίζει μια έκδοση."
+            "value" : "Το επιπλέον υλικό και τα κλιπ έχουν δική τους σειρά δίπλα στα τρέιλερ, και σε iPhone, iPad και Mac ένα τρέιλερ έρχεται από το YouTube όταν ο διακομιστής σας δεν έχει. Βαθμολογήστε ταινίες, σειρές και επεισόδια από 1 έως 10, μια ταινία αν θέλετε μόλις τελειώσει, και δείξτε τη βαθμολογία σας στις αφίσες. Τα μουσικά θέματα μπορούν να παίζουν όσο είναι ανοιχτή μια σελίδα, η σελίδα σειράς έχει κουμπί Εμφάνιση επεισοδίου, και το κουμπί Έκδοση αναφέρει μόνο ό,τι ξεχωρίζει μια έκδοση."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extras and clips get their own row beside the trailers, and on iPhone, iPad and Mac a trailer comes from YouTube when your server has none. Rate movies from 1 to 10, optionally when one ends. Theme songs can play while a page is open, a series page has a Show Episode button, and the Version button names only what sets a version apart."
+            "value" : "Extras and clips get their own row beside the trailers, and on iPhone, iPad and Mac a trailer comes from YouTube when your server has none. Rate movies, shows and episodes from 1 to 10, a movie optionally when it ends, and show your rating on the posters if you like. Theme songs can play while a page is open, a series page has a Show Episode button, and the Version button names only what sets a version apart."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los extras y clips tienen su propia fila junto a los tráileres, y en iPhone, iPad y Mac el tráiler llega de YouTube cuando tu servidor no tiene uno. Valora películas del 1 al 10, si quieres al terminar. Las canciones temáticas pueden sonar mientras una página está abierta, la página de una serie tiene un botón Ver episodio y el botón Versión solo indica lo que distingue a una versión."
+            "value" : "Los extras y clips tienen su propia fila junto a los tráileres, y en iPhone, iPad y Mac el tráiler llega de YouTube cuando tu servidor no tiene uno. Valora películas, series y episodios del 1 al 10, una película si quieres al terminar, y muestra tu valoración en los pósteres. Las canciones temáticas pueden sonar mientras una página está abierta, la página de una serie tiene un botón Ver episodio y el botón Versión solo indica lo que distingue a una versión."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lisämateriaali ja klipit saavat oman rivinsä trailerien viereen, ja iPhonessa, iPadissa ja Macissa traileri tulee YouTubesta, kun palvelimellasi ei ole omaa. Arvioi elokuvat asteikolla 1–10, halutessasi heti niiden päätyttyä. Tunnusmusiikki voi soida sivun ollessa auki, sarjan sivulla on Näytä jakso -painike, ja Versio-painike kertoo vain sen, mikä erottaa version muista."
+            "value" : "Lisämateriaali ja klipit saavat oman rivinsä trailerien viereen, ja iPhonessa, iPadissa ja Macissa traileri tulee YouTubesta, kun palvelimellasi ei ole omaa. Arvioi elokuvat, sarjat ja jaksot asteikolla 1–10, elokuvan halutessasi heti sen päätyttyä, ja näytä arviosi julisteissa. Tunnusmusiikki voi soida sivun ollessa auki, sarjan sivulla on Näytä jakso -painike, ja Versio-painike kertoo vain sen, mikä erottaa version muista."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les bonus et extraits ont leur propre rangée à côté des bandes-annonces, et sur iPhone, iPad et Mac une bande-annonce vient de YouTube quand votre serveur n’en a pas. Notez les films de 1 à 10, si vous le souhaitez dès leur fin. Les musiques de thème peuvent jouer tant qu’une page est ouverte, la page d’une série a un bouton Voir l’épisode, et le bouton Version n’indique plus que ce qui distingue une version."
+            "value" : "Les bonus et extraits ont leur propre rangée à côté des bandes-annonces, et sur iPhone, iPad et Mac une bande-annonce vient de YouTube quand votre serveur n’en a pas. Notez films, séries et épisodes de 1 à 10, un film si vous le souhaitez dès sa fin, et affichez votre note sur les affiches. Les musiques de thème peuvent jouer tant qu’une page est ouverte, la page d’une série a un bouton Voir l’épisode, et le bouton Version n’indique plus que ce qui distingue une version."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dodaci i isječci dobivaju vlastiti red pokraj najava, a na iPhoneu, iPadu i Macu najava dolazi s YouTubea kada je vaš poslužitelj nema. Ocijenite filmove od 1 do 10, po želji odmah nakon završetka. Glazbene teme mogu svirati dok je stranica otvorena, stranica serije ima gumb Prikaži epizodu, a gumb Verzija navodi samo ono po čemu se verzija razlikuje."
+            "value" : "Dodaci i isječci dobivaju vlastiti red pokraj najava, a na iPhoneu, iPadu i Macu najava dolazi s YouTubea kada je vaš poslužitelj nema. Ocijenite filmove, serije i epizode od 1 do 10, film po želji odmah nakon završetka, i prikažite svoju ocjenu na posterima. Glazbene teme mogu svirati dok je stranica otvorena, stranica serije ima gumb Prikaži epizodu, a gumb Verzija navodi samo ono po čemu se verzija razlikuje."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az extrák és klipek saját sort kapnak az előzetesek mellett, iPhone-on, iPaden és Macen pedig a YouTube-ról jön előzetes, ha a szervereden nincs. Értékeld a filmeket 1-től 10-ig, ha szeretnéd, rögtön a végükön. A főcímzene szólhat, amíg egy oldal nyitva van, a sorozat oldalán Epizód megjelenítése gomb van, a Verzió gomb pedig csak azt nevezi meg, ami egy verziót megkülönböztet."
+            "value" : "Az extrák és klipek saját sort kapnak az előzetesek mellett, iPhone-on, iPaden és Macen pedig a YouTube-ról jön előzetes, ha a szervereden nincs. Értékeld a filmeket, sorozatokat és epizódokat 1-től 10-ig, egy filmet ha szeretnéd, rögtön a végén, és mutasd az értékelésedet a posztereken. A főcímzene szólhat, amíg egy oldal nyitva van, a sorozat oldalán Epizód megjelenítése gomb van, a Verzió gomb pedig csak azt nevezi meg, ami egy verziót megkülönböztet."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Contenuti extra e clip hanno una propria riga accanto ai trailer, e su iPhone, iPad e Mac un trailer arriva da YouTube quando il tuo server non ne ha. Valuta i film da 1 a 10, se vuoi anche alla fine di un film. Le sigle possono suonare mentre una pagina è aperta, la pagina di una serie ha un pulsante Mostra episodio e il pulsante Versione indica solo ciò che distingue una versione."
+            "value" : "Contenuti extra e clip hanno una propria riga accanto ai trailer, e su iPhone, iPad e Mac un trailer arriva da YouTube quando il tuo server non ne ha. Valuta film, serie ed episodi da 1 a 10, un film se vuoi anche alla fine, e mostra il tuo voto sulle locandine. Le sigle possono suonare mentre una pagina è aperta, la pagina di una serie ha un pulsante Mostra episodio e il pulsante Versione indica solo ciò che distingue una versione."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "特典映像とクリップが予告編と並んで専用の列に表示され、iPhone、iPad、Macではサーバーに予告編がない場合にYouTubeから再生されます。映画を1〜10で評価でき、終了時に評価することもできます。ページを開いている間にテーマソングを再生でき、シリーズページには「エピソードを表示」ボタンがあり、「バージョン」ボタンにはバージョンを区別する部分だけが表示されます。"
+            "value" : "特典映像とクリップが予告編と並んで専用の列に表示され、iPhone、iPad、Macではサーバーに予告編がない場合にYouTubeから再生されます。映画、シリーズ、エピソードを1〜10で評価でき、映画は終了時に評価することもできます。自分の評価をポスターに表示することもできます。ページを開いている間にテーマソングを再生でき、シリーズページには「エピソードを表示」ボタンがあり、「バージョン」ボタンにはバージョンを区別する部分だけが表示されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "부가 영상과 클립이 예고편 옆에 별도의 줄로 표시되고, iPhone, iPad 및 Mac에서는 서버에 예고편이 없으면 YouTube에서 예고편을 가져옵니다. 영화를 1~10점으로 평가할 수 있으며, 원하면 영화가 끝날 때 평가할 수도 있습니다. 페이지가 열려 있는 동안 테마 음악을 재생할 수 있고, 시리즈 페이지에는 에피소드 보기 버튼이 있으며, 버전 버튼은 버전을 구분하는 부분만 표시합니다."
+            "value" : "부가 영상과 클립이 예고편 옆에 별도의 줄로 표시되고, iPhone, iPad 및 Mac에서는 서버에 예고편이 없으면 YouTube에서 예고편을 가져옵니다. 영화, 시리즈, 에피소드를 1~10점으로 평가할 수 있으며, 영화는 원하면 끝날 때 평가할 수도 있고, 내 평가를 포스터에 표시할 수도 있습니다. 페이지가 열려 있는 동안 테마 음악을 재생할 수 있고, 시리즈 페이지에는 에피소드 보기 버튼이 있으며, 버전 버튼은 버전을 구분하는 부분만 표시합니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ekstramateriale og klipp får sin egen rad ved siden av trailerne, og på iPhone, iPad og Mac kommer en trailer fra YouTube når serveren din ikke har noen. Gi filmer en vurdering fra 1 til 10, om du vil også når en film er ferdig. Temasanger kan spilles mens en side er åpen, en serieside har en Vis episode-knapp, og Versjon-knappen viser bare det som skiller en versjon fra de andre."
+            "value" : "Ekstramateriale og klipp får sin egen rad ved siden av trailerne, og på iPhone, iPad og Mac kommer en trailer fra YouTube når serveren din ikke har noen. Gi filmer, serier og episoder en vurdering fra 1 til 10, en film om du vil også når den er ferdig, og vis vurderingen din på plakatene. Temasanger kan spilles mens en side er åpen, en serieside har en Vis episode-knapp, og Versjon-knappen viser bare det som skiller en versjon fra de andre."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extra's en clips krijgen een eigen rij naast de trailers, en op iPhone, iPad en Mac komt een trailer van YouTube als je server er geen heeft. Beoordeel films van 1 tot 10, desgewenst wanneer er een afloopt. Themamuziek kan spelen zolang een pagina open is, een seriepagina heeft een knop Aflevering tonen en de knop Versie noemt alleen wat een versie onderscheidt."
+            "value" : "Extra's en clips krijgen een eigen rij naast de trailers, en op iPhone, iPad en Mac komt een trailer van YouTube als je server er geen heeft. Beoordeel films, series en afleveringen van 1 tot 10, een film desgewenst wanneer hij afloopt, en toon je beoordeling op de posters. Themamuziek kan spelen zolang een pagina open is, een seriepagina heeft een knop Aflevering tonen en de knop Versie noemt alleen wat een versie onderscheidt."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dodatki i klipy mają własny rząd obok zwiastunów, a na iPhonie, iPadzie i Macu zwiastun pochodzi z YouTube, gdy serwer nie ma własnego. Oceniaj filmy od 1 do 10, opcjonalnie po ich zakończeniu. Motywy muzyczne mogą grać, gdy strona jest otwarta, strona serialu ma przycisk Pokaż odcinek, a przycisk Wersja pokazuje tylko to, co odróżnia wersję."
+            "value" : "Dodatki i klipy mają własny rząd obok zwiastunów, a na iPhonie, iPadzie i Macu zwiastun pochodzi z YouTube, gdy serwer nie ma własnego. Oceniaj filmy, seriale i odcinki od 1 do 10, film opcjonalnie po jego zakończeniu, i pokazuj swoją ocenę na plakatach. Motywy muzyczne mogą grać, gdy strona jest otwarta, strona serialu ma przycisk Pokaż odcinek, a przycisk Wersja pokazuje tylko to, co odróżnia wersję."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extras e clipes ganham sua própria fileira ao lado dos trailers, e no iPhone, iPad e Mac um trailer vem do YouTube quando seu servidor não tem nenhum. Avalie filmes de 1 a 10, se quiser também quando um terminar. Músicas-tema podem tocar enquanto uma página está aberta, a página da série tem um botão Ver episódio e o botão Versão mostra só o que distingue uma versão."
+            "value" : "Extras e clipes ganham sua própria fileira ao lado dos trailers, e no iPhone, iPad e Mac um trailer vem do YouTube quando seu servidor não tem nenhum. Avalie filmes, séries e episódios de 1 a 10, um filme se quiser também quando terminar, e mostre sua nota nos pôsteres. Músicas-tema podem tocar enquanto uma página está aberta, a página da série tem um botão Ver episódio e o botão Versão mostra só o que distingue uma versão."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extras e clipes têm a sua própria fila ao lado dos trailers, e no iPhone, iPad e Mac um trailer vem do YouTube quando o seu servidor não tem nenhum. Avalie filmes de 1 a 10, se quiser também quando um termina. As músicas-tema podem tocar enquanto uma página está aberta, a página da série tem um botão Ver episódio e o botão Versão mostra apenas o que distingue uma versão."
+            "value" : "Extras e clipes têm a sua própria fila ao lado dos trailers, e no iPhone, iPad e Mac um trailer vem do YouTube quando o seu servidor não tem nenhum. Avalie filmes, séries e episódios de 1 a 10, um filme se quiser também quando termina, e mostre a sua classificação nos posters. As músicas-tema podem tocar enquanto uma página está aberta, a página da série tem um botão Ver episódio e o botão Versão mostra apenas o que distingue uma versão."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Materialele bonus și clipurile au propriul rând lângă trailere, iar pe iPhone, iPad și Mac un trailer vine de pe YouTube când serverul tău nu are unul. Evaluează filmele de la 1 la 10, opțional la finalul lor. Melodiile tematice pot rula cât timp o pagină este deschisă, pagina unui serial are un buton Afișează episodul, iar butonul Versiune numește doar ce deosebește o versiune."
+            "value" : "Materialele bonus și clipurile au propriul rând lângă trailere, iar pe iPhone, iPad și Mac un trailer vine de pe YouTube când serverul tău nu are unul. Evaluează filme, seriale și episoade de la 1 la 10, un film opțional la final, și afișează-ți nota pe postere. Melodiile tematice pot rula cât timp o pagină este deschisă, pagina unui serial are un buton Afișează episodul, iar butonul Versiune numește doar ce deosebește o versiune."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Доп. материалы и клипы получили отдельный ряд возле трейлеров, а на iPhone, iPad и Mac трейлер берётся с YouTube, если на вашем сервере его нет. Оценивайте фильмы от 1 до 10, по желанию сразу после окончания. Музыкальные темы могут звучать, пока открыта страница, на странице сериала есть кнопка «Показать эпизод», а кнопка «Версия» называет только то, чем версия отличается."
+            "value" : "Доп. материалы и клипы получили отдельный ряд возле трейлеров, а на iPhone, iPad и Mac трейлер берётся с YouTube, если на вашем сервере его нет. Оценивайте фильмы, сериалы и эпизоды от 1 до 10, фильм по желанию сразу после окончания, и показывайте свою оценку на постерах. Музыкальные темы могут звучать, пока открыта страница, на странице сериала есть кнопка «Показать эпизод», а кнопка «Версия» называет только то, чем версия отличается."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bonusy a klipy majú vlastný rad vedľa ukážok a na iPhone, iPade a Macu prichádza ukážka z YouTube, keď ju váš server nemá. Hodnoťte filmy od 1 do 10, na želanie hneď po ich skončení. Úvodné melódie môžu hrať, kým je stránka otvorená, stránka seriálu má tlačidlo Zobraziť diel a tlačidlo Verzia uvádza len to, čím sa verzia odlišuje."
+            "value" : "Bonusy a klipy majú vlastný rad vedľa ukážok a na iPhone, iPade a Macu prichádza ukážka z YouTube, keď ju váš server nemá. Hodnoťte filmy, seriály aj diely od 1 do 10, film na želanie hneď po skončení, a svoje hodnotenie si môžete zobraziť na plagátoch. Úvodné melódie môžu hrať, kým je stránka otvorená, stránka seriálu má tlačidlo Zobraziť diel a tlačidlo Verzia uvádza len to, čím sa verzia odlišuje."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extramaterial och klipp får en egen rad bredvid trailers, och på iPhone, iPad och Mac kommer en trailer från YouTube när din server saknar en. Betygsätt filmer från 1 till 10, om du vill när en film tar slut. Temalåtar kan spelas medan en sida är öppen, seriesidan har en Visa avsnitt-knapp och Version-knappen nämner bara det som skiljer en version åt."
+            "value" : "Extramaterial och klipp får en egen rad bredvid trailers, och på iPhone, iPad och Mac kommer en trailer från YouTube när din server saknar en. Betygsätt filmer, serier och avsnitt från 1 till 10, en film om du vill när den tar slut, och visa ditt betyg på affischerna. Temalåtar kan spelas medan en sida är öppen, seriesidan har en Visa avsnitt-knapp och Version-knappen nämner bara det som skiljer en version åt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ekstralar ve klipler fragmanların yanında kendi satırına kavuştu; iPhone, iPad ve Mac'te sunucunuzda fragman yoksa fragman YouTube'dan gelir. Filmleri 1'den 10'a kadar puanlayın, isterseniz film biter bitmez. Bir sayfa açıkken tema müzikleri çalabilir, dizi sayfasında bir Bölümü göster düğmesi var ve Sürüm düğmesi yalnızca bir sürümü farklı kılan şeyi belirtir."
+            "value" : "Ekstralar ve klipler fragmanların yanında kendi satırına kavuştu; iPhone, iPad ve Mac'te sunucunuzda fragman yoksa fragman YouTube'dan gelir. Filmleri, dizileri ve bölümleri 1'den 10'a kadar puanlayın, bir filmi isterseniz biter bitmez, ve puanınızı afişlerde gösterin. Bir sayfa açıkken tema müzikleri çalabilir, dizi sayfasında bir Bölümü göster düğmesi var ve Sürüm düğmesi yalnızca bir sürümü farklı kılan şeyi belirtir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Додаткові матеріали та кліпи отримали власний ряд поруч із трейлерами, а на iPhone, iPad і Mac трейлер береться з YouTube, якщо на вашому сервері його немає. Оцінюйте фільми від 1 до 10, за бажанням одразу після завершення. Музичні теми можуть звучати, поки відкрита сторінка, на сторінці серіалу є кнопка «Показати епізод», а кнопка «Версія» називає лише те, чим версія відрізняється."
+            "value" : "Додаткові матеріали та кліпи отримали власний ряд поруч із трейлерами, а на iPhone, iPad і Mac трейлер береться з YouTube, якщо на вашому сервері його немає. Оцінюйте фільми, серіали та епізоди від 1 до 10, фільм за бажанням одразу після завершення, і показуйте свою оцінку на постерах. Музичні теми можуть звучати, поки відкрита сторінка, на сторінці серіалу є кнопка «Показати епізод», а кнопка «Версія» називає лише те, чим версія відрізняється."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "花絮与片段在预告片旁有了自己的一行；在 iPhone、iPad 和 Mac 上，服务器没有预告片时会从 YouTube 获取。可为电影打 1 到 10 分，也可选择在影片结束时评分。页面打开时可播放主题曲，剧集页面有“显示单集”按钮，版本按钮只标出各版本的不同之处。"
+            "value" : "花絮与片段在预告片旁有了自己的一行；在 iPhone、iPad 和 Mac 上，服务器没有预告片时会从 YouTube 获取。可为电影、剧集和单集打 1 到 10 分，电影也可在结束时评分，还可在海报上显示你的评分。页面打开时可播放主题曲，剧集页面有“显示单集”按钮，版本按钮只标出各版本的不同之处。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "花絮與片段在預告片旁有了自己的一列；在 iPhone、iPad 和 Mac 上，伺服器沒有預告片時會從 YouTube 取得。可為電影打 1 到 10 分，也可選擇在影片結束時評分。頁面開啟時可播放主題曲，影集頁面有「顯示單集」按鈕，版本按鈕只標出各版本的不同之處。"
+            "value" : "花絮與片段在預告片旁有了自己的一列；在 iPhone、iPad 和 Mac 上，伺服器沒有預告片時會從 YouTube 取得。可為電影、影集和單集打 1 到 10 分，電影也可在結束時評分，還可在海報上顯示你的評分。頁面開啟時可播放主題曲，影集頁面有「顯示單集」按鈕，版本按鈕只標出各版本的不同之處。"
           }
         }
       }
@@ -172015,6 +172015,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在海報上也顯示續播進度條。劇集卡片一律顯示。"
+          }
+        }
+      }
+    },
+    "settings.appearance.posterRating" : {
+      "comment" : "Appearance toggle: show the viewer's own rating as a star pill on cards",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hodnocení na plakátech"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedømmelse på plakater"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewertung auf Postern"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Βαθμολογία στις αφίσες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rating on posters"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valoración en pósteres"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arvio julisteissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note sur les affiches"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocjena na posterima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Értékelés a posztereken"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voto sulle locandine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポスターに評価を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포스터에 평가 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vurdering på plakater"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beoordeling op posters"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocena na plakatach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota nos pôsteres"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classificação nos posters"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota pe postere"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оценка на постерах"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hodnotenie na plagátoch"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betyg på affischer"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afişlerde puan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оцінка на постерах"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "海报上的评分"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "海報上的評分"
+          }
+        }
+      }
+    },
+    "settings.appearance.posterRating.subtitle" : {
+      "comment" : "Subtitle for the poster rating toggle",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazit vaše vlastní hodnocení jako hvězdičku na kartách."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis din egen bedømmelse som en stjerne på kortene."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine eigene Bewertung als Stern auf den Karten anzeigen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση της δικής σας βαθμολογίας ως αστέρι στις κάρτες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show your own rating as a star on the cards."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra tu propia valoración como una estrella en las tarjetas."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näytä oma arviosi tähtenä korteissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher votre propre note sous forme d’étoile sur les cartes."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikaži vlastitu ocjenu kao zvjezdicu na karticama."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A saját értékelésed csillagként jelenik meg a kártyákon."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra il tuo voto come stella sulle schede."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の評価を星としてカードに表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 평가를 카드에 별로 표시합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis din egen vurdering som en stjerne på kortene."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toon je eigen beoordeling als ster op de kaarten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokazuj własną ocenę jako gwiazdkę na kartach."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra sua própria nota como uma estrela nos cards."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra a sua própria classificação como uma estrela nos cartões."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează nota ta ca stea pe carduri."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывать вашу оценку звездой на карточках."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobraziť vaše vlastné hodnotenie ako hviezdičku na kartách."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa ditt eget betyg som en stjärna på korten."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kendi puanınızı kartlarda yıldızla gösterin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показувати вашу оцінку зірочкою на картках."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在卡片上以星标显示你自己的评分。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在卡片上以星號顯示你自己的評分。"
           }
         }
       }

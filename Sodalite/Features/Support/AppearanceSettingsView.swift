@@ -118,6 +118,15 @@ struct AppearanceSettingsView: View {
                                set: { appearance.showPosterBadges = $0 })
             )
 
+            // Sodalite#48. Off by default, see AppearancePreferences.showPosterRating.
+            boolRow(
+                icon: "star.circle",
+                title: "settings.appearance.posterRating",
+                subtitle: "settings.appearance.posterRating.subtitle",
+                value: Binding(get: { appearance.showPosterRating },
+                               set: { appearance.showPosterRating = $0 })
+            )
+
             // Sodalite#84. Off by default: most library images have the library's name burnt in,
             // and ours on top makes two captions. On for viewers whose images carry no text.
             boolRow(
