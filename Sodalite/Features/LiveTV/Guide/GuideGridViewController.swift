@@ -70,6 +70,9 @@ final class GuideGridViewController: UIViewController,
     /// engine's pick instead. The old guide had this hatch; the rebuild dropped it on the theory
     /// that a time anchor always materializes its target, and Vincent's Apple TV disagreed.
     var lastVetoedMove: (previous: IndexPath, next: IndexPath)?
+    /// Between a veto and the run of its redirect. A repeat of the vetoed move inside that window
+    /// is the engine asking twice, not the redirect failing, so the hatch above stays shut.
+    var redirectInFlight = false
 
     private var nowLineTimer: Timer?
     /// Set when the window wanted to move while the guide held focus. Reloading out from under a

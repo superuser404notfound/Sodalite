@@ -38,19 +38,37 @@ extension GuideGridViewController {
             return true
         }
         if let last = lastVetoedMove, last.previous == previous, last.next == next {
+            // tvOS offers a vetoed move again a few milliseconds later, before the redirect has
+            // run (measured in the simulator, Sodalite#221). That is not a failed redirect yet.
+            if redirectInFlight { return false }
             // Second time we are offered this exact move: the redirect did not take. Vetoing again
             // leaves focus with nowhere to go at all, which is worse than an unanchored move.
+            focusLog("accepted engine pick", previous: previous, next: next)
             lastVetoedMove = nil
             pendingFocusRedirect = nil
             return true
         }
         lastVetoedMove = (previous, next)
         materialize(section: next.section, item: desired)
-        pendingFocusRedirect = IndexPath(item: desired, section: next.section)
+        let target = IndexPath(item: desired, section: next.section)
+        pendingFocusRedirect = target
+        focusLog("veto", previous: previous, next: next, target: target)
+        redirectInFlight = true
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.pendingFocusRedirect != nil else { return }
+            guard let self else { return }
+            self.redirectInFlight = false
+            guard self.pendingFocusRedirect != nil else { return }
+            // The remembered index path outranks indexPathForPreferredFocusedView while focus is
+            // inside the grid: with it on, this update re-resolved to the cell focus was already
+            // on and every redirect was refused (simulator, Sodalite#221).
+            self.gridView.remembersLastFocusedIndexPath = false
             self.gridView.setNeedsFocusUpdate()
             self.gridView.updateFocusIfNeeded()
+            self.gridView.remembersLastFocusedIndexPath = true
+            // A landing clears the redirect, so one still standing here is one the engine refused.
+            if self.pendingFocusRedirect == target {
+                self.focusLog("redirect did not take", previous: previous, next: target)
+            }
         }
         return false
     }
@@ -114,6 +132,10 @@ extension GuideGridViewController {
         onGridFocused?()
         model.didEnterGrid = true
         if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
+        let servedRedirect = indexPath == pendingFocusRedirect
+        if servedRedirect, let previous = context.previouslyFocusedIndexPath {
+            focusLog("redirect served", previous: previous, next: indexPath)
+        }
         // Focus actually moved, so the redirect is healthy: clear the hatch so it only fires on a
         // genuinely repeated (failed) proposal.
         pendingFocusRedirect = nil
@@ -122,8 +144,8 @@ extension GuideGridViewController {
         model.anchorChannelID = rows[indexPath.section].channel.id
         updateHero(section: indexPath.section, item: indexPath.item)
 
-        let vertical = context.focusHeading.contains(.up) || context.focusHeading.contains(.down)
-        if vertical || context.previouslyFocusedIndexPath == nil {
+        if !Self.moveSetsAnchor(heading: context.focusHeading, servedRedirect: servedRedirect,
+                                cameFromGrid: context.previouslyFocusedIndexPath != nil) {
             // Vertical moves keep the time position, so focus can land on a program that only just
             // reaches into the viewport. The focus engine does not scroll for that, and the result
             // is a rounded stub hugging the channel column while the hero describes a program the
@@ -137,6 +159,39 @@ extension GuideGridViewController {
         model.anchor = .focused(start: model.axis.date(atX: x),
                                 visibleStart: model.axis.date(atX: gridView.contentOffset.x),
                                 now: Date())
+    }
+
+    /// Sodalite#221: only a Left or Right move picks a time. The served redirect of a vertical move
+    /// is a programmatic update and carries no heading at all, so testing for Up/Down let it through
+    /// as horizontal: it re-anchored on the start of whatever long block covered the picked time,
+    /// and every such row pulled the time earlier. Any other headingless update says nothing about
+    /// time either.
+    static func moveSetsAnchor(heading: UIFocusHeading, servedRedirect: Bool,
+                               cameFromGrid: Bool) -> Bool {
+        guard cameFromGrid, !servedRedirect else { return false }
+        if heading.contains(.up) || heading.contains(.down) { return false }
+        return heading.contains(.left) || heading.contains(.right)
+    }
+
+    /// One line per veto, redirect and accepted engine pick, so a landing off the anchor can be
+    /// read back from Settings > Diagnostic Log without a Mac (Sodalite#221).
+    func focusLog(_ event: String, previous: IndexPath, next: IndexPath, target: IndexPath? = nil) {
+        let time = { (date: Date?) in date?.formatted(date: .omitted, time: .shortened) ?? "?" }
+        func cell(_ path: IndexPath) -> String {
+            guard path.section < rows.count else { return "r\(path.section)" }
+            let programs = rows[path.section].programs
+            guard path.item < programs.count else { return "r\(path.section) slot \(path.item)" }
+            let program = programs[path.item]
+            return "r\(path.section) \(time(program.startDate))-\(time(program.endDate))"
+        }
+        let anchor: String
+        switch model.anchor {
+        case .live: anchor = "live"
+        case .at(let date): anchor = "at \(time(date))"
+        }
+        var line = "[guide] \(event): \(cell(previous)) -> \(cell(next))"
+        if let target { line += " => \(cell(target))" }
+        LogTap.shared.note(line + ", anchor \(anchor)")
     }
 
     /// Sodalite#221: until focus first reaches the grid, the hero describes what the first channel
