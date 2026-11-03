@@ -110,6 +110,17 @@ nonisolated struct SpoilerPolicy: Sendable, Equatable {
     /// global default; it deliberately does NOT replace the reveal rules below, or a watched
     /// episode would stay blurred forever and Continue Watching would be a wall of blur again.
     func isHidden(_ item: JellyfinItem) -> Bool {
+        isVeiledByRules(item) && !revealedKeys.contains(key(for: item))
+    }
+
+    /// Sodalite#222. Visible only because the user revealed it by hand, so hiding it again would
+    /// veil it. Watched and started items never qualify, they stay visible whatever the reveals say.
+    func isManuallyRevealed(_ item: JellyfinItem) -> Bool {
+        revealedKeys.contains(key(for: item)) && isVeiledByRules(item)
+    }
+
+    /// Everything in the decision but the manual reveal.
+    private func isVeiledByRules(_ item: JellyfinItem) -> Bool {
         switch seriesOverride(for: item) {
         case .some(false):
             return false
@@ -133,7 +144,7 @@ nonisolated struct SpoilerPolicy: Sendable, Equatable {
         // this the one row users look at most would be a wall of blur.
         if (item.userData?.playedPercentage ?? 0) > 0 { return false }
         if hasWatchedChild(item) { return false }
-        return !revealedKeys.contains(key(for: item))
+        return true
     }
 
     /// Same "started reveals" intent one level up: a season carries no played percentage (Jellyfin

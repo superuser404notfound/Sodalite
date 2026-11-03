@@ -39,6 +39,16 @@ enum SpoilerReveal {
         let policy = dependencies.spoilerPolicy(userID: appState.activeUser?.id)
         dependencies.spoilerRevealMemory.reveal(policy.key(for: item))
     }
+
+    /// Sodalite#222. Whether `hide` would veil this item again.
+    static func canHide(_ item: JellyfinItem, dependencies: DependencyContainer, appState: AppState) -> Bool {
+        dependencies.spoilerPolicy(userID: appState.activeUser?.id).isManuallyRevealed(item)
+    }
+
+    static func hide(_ item: JellyfinItem, dependencies: DependencyContainer, appState: AppState) {
+        let policy = dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+        dependencies.spoilerRevealMemory.hide(policy.key(for: item))
+    }
 }
 
 private struct SpoilerVeilModifier: ViewModifier {

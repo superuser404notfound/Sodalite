@@ -3,6 +3,8 @@ import SwiftUI
 struct AppearanceSettingsView: View {
 
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
+    @State private var confirmHideReveals = false
 
     private var appearance: AppearancePreferences { dependencies.appearancePreferences }
     private var playback: PlaybackPreferences { dependencies.playbackPreferences }
@@ -36,6 +38,17 @@ struct AppearanceSettingsView: View {
         }
         // Inline largeTitle only; floating nav-title otherwise sits behind scroll content. Matches PlaybackSettingsView.
         .hidesNavigationBarChrome()
+        .alert(
+            Text("settings.appearance.spoilerHideReveals.confirm.title", bundle: .main),
+            isPresented: $confirmHideReveals
+        ) {
+            Button("settings.appearance.spoilerHideReveals.confirm.action", role: .destructive) {
+                dependencies.spoilerRevealMemory.hideAll(userID: appState.activeUser?.id ?? "")
+            }
+            Button("common.cancel", role: .cancel) {}
+        } message: {
+            Text("settings.appearance.spoilerHideReveals.confirm.message", bundle: .main)
+        }
     }
 
     // MARK: - Header
@@ -249,7 +262,37 @@ struct AppearanceSettingsView: View {
                 value: Binding(get: { appearance.spoilerHideEpisodeTitles },
                                set: { appearance.spoilerHideEpisodeTitles = $0 })
             )
+
+            hideRevealsRow
         }
+    }
+
+    /// Sodalite#222. Same shape as the clear row in Cached Data. Last in the section, so on tvOS a
+    /// disabled row never leaves the section without a focus target.
+    private var hideRevealsRow: some View {
+        let prefix = "\(appState.activeUser?.id ?? "")|"
+        let hasReveals = dependencies.spoilerRevealMemory.revealedKeys.contains { $0.hasPrefix(prefix) }
+        return Button { confirmHideReveals = true } label: {
+            HStack(spacing: 28) {
+                Image(systemName: "eye.slash.circle")
+                    .font(.title2)
+                    .frame(width: 56, alignment: .center)
+                    .foregroundStyle(.tint)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("settings.appearance.spoilerHideReveals", bundle: .main)
+                        .font(.body)
+                        .fontWeight(.medium)
+                    Text("settings.appearance.spoilerHideReveals.subtitle", bundle: .main)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(20)
+        }
+        .buttonStyle(SettingsTileButtonStyle())
+        .disabled(!hasReveals)
+        .opacity(hasReveals ? 1 : 0.4)
     }
 
     /// Surfaces outside the app: the Top Shelf and the system's Now Playing.

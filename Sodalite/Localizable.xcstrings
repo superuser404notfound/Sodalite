@@ -69840,157 +69840,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stříbrný akcent, stavové štítky ve vaší barvě zvýraznění a loga titulů bez prázdného okraje. Skrývání spoilerů teď umí skrýt i názvy epizod. Nastavení jsou rozdělena do sekcí a každá stránka začíná tím, co se mění nejčastěji."
+            "value" : "Stříbrný akcent, stavové štítky ve vaší barvě zvýraznění a loga titulů bez prázdného okraje. Skrývání spoilerů teď umí skrýt i názvy epizod. Zobrazený spoiler jde znovu skrýt. Nastavení jsou rozdělena do sekcí a každá stránka začíná tím, co se mění nejčastěji."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En Sølv-accent, statusmærker i din accentfarve og titellogoer uden deres tomme kant. Spoilerbeskyttelsen kan nu også skjule afsnitstitler. Indstillingerne er delt op i sektioner, og hver side starter med det, der ændres oftest."
+            "value" : "En Sølv-accent, statusmærker i din accentfarve og titellogoer uden deres tomme kant. Spoilerbeskyttelsen kan nu også skjule afsnitstitler. En spoiler, du har vist, kan skjules igen. Indstillingerne er delt op i sektioner, og hver side starter med det, der ændres oftest."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Silber-Akzent, Status-Badges in deiner Akzentfarbe und Titellogos ohne leeren Rand. Der Spoilerschutz kann jetzt auch Folgentitel verbergen. Die Einstellungen sind in Abschnitte gegliedert, und jede Seite beginnt mit dem, was man am häufigsten ändert."
+            "value" : "Ein Silber-Akzent, Status-Badges in deiner Akzentfarbe und Titellogos ohne leeren Rand. Der Spoilerschutz kann jetzt auch Folgentitel verbergen. Ein aufgedeckter Spoiler lässt sich wieder verbergen. Die Einstellungen sind in Abschnitte gegliedert, und jede Seite beginnt mit dem, was man am häufigsten ändert."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ένα Ασημί χρώμα έμφασης, ετικέτες κατάστασης στο χρώμα έμφασής σας και λογότυπα τίτλων χωρίς κενό περιθώριο. Η προστασία από σπόιλερ μπορεί πλέον να κρύβει και τους τίτλους επεισοδίων. Οι ρυθμίσεις χωρίζονται σε ενότητες και κάθε σελίδα ξεκινά με ό,τι αλλάζει πιο συχνά."
+            "value" : "Ένα Ασημί χρώμα έμφασης, ετικέτες κατάστασης στο χρώμα έμφασής σας και λογότυπα τίτλων χωρίς κενό περιθώριο. Η προστασία από σπόιλερ μπορεί πλέον να κρύβει και τους τίτλους επεισοδίων. Ένα σπόιλερ που αποκαλύψατε μπορεί να κρυφτεί ξανά. Οι ρυθμίσεις χωρίζονται σε ενότητες και κάθε σελίδα ξεκινά με ό,τι αλλάζει πιο συχνά."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Silver accent, status badges in your accent color, and title logos without their empty border. Spoiler protection can hide episode titles too. Settings are grouped into sections, and each page leads with what is changed most."
+            "value" : "A Silver accent, status badges in your accent color, and title logos without their empty border. Spoiler protection can hide episode titles too. A spoiler you revealed can be hidden again. Settings are grouped into sections, and each page leads with what is changed most."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un acento Plata, etiquetas de estado en tu color de acento y logotipos de título sin su borde vacío. La protección contra spoilers ahora también puede ocultar los títulos de los episodios. Los ajustes están agrupados en secciones y cada página empieza por lo que más se cambia."
+            "value" : "Un acento Plata, etiquetas de estado en tu color de acento y logotipos de título sin su borde vacío. La protección contra spoilers ahora también puede ocultar los títulos de los episodios. Un spoiler que mostraste se puede volver a ocultar. Los ajustes están agrupados en secciones y cada página empieza por lo que más se cambia."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hopea korostusväri, tilamerkit korostusvärilläsi ja nimilogot ilman tyhjää reunusta. Juonipaljastusten piilotus voi nyt piilottaa myös jaksojen nimet. Asetukset on jaettu osioihin, ja jokainen sivu alkaa siitä, mitä muutetaan useimmin."
+            "value" : "Hopea korostusväri, tilamerkit korostusvärilläsi ja nimilogot ilman tyhjää reunusta. Juonipaljastusten piilotus voi nyt piilottaa myös jaksojen nimet. Näytetyn juonipaljastuksen voi piilottaa uudelleen. Asetukset on jaettu osioihin, ja jokainen sivu alkaa siitä, mitä muutetaan useimmin."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un accent Argent, des badges d’état dans votre couleur d’accent et des logos de titre sans leur marge vide. La protection contre les spoilers peut aussi masquer les titres des épisodes. Les réglages sont regroupés en sections, et chaque page commence par ce que l’on modifie le plus."
+            "value" : "Un accent Argent, des badges d’état dans votre couleur d’accent et des logos de titre sans leur marge vide. La protection contre les spoilers peut aussi masquer les titres des épisodes. Un spoiler affiché peut être masqué à nouveau. Les réglages sont regroupés en sections, et chaque page commence par ce que l’on modifie le plus."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Srebrni naglasak, oznake statusa u vašoj boji isticanja i logotipovi naslova bez praznog ruba. Zaštita od spojlera sada može skriti i naslove epizoda. Postavke su podijeljene u odjeljke, a svaka stranica počinje onim što se najčešće mijenja."
+            "value" : "Srebrni naglasak, oznake statusa u vašoj boji isticanja i logotipovi naslova bez praznog ruba. Zaštita od spojlera sada može skriti i naslove epizoda. Prikazani spojler može se ponovno sakriti. Postavke su podijeljene u odjeljke, a svaka stranica počinje onim što se najčešće mijenja."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ezüst kiemelőszín, állapotjelzők a kiemelőszínedben és címlogók üres szegély nélkül. A spoilervédelem mostantól az epizódcímeket is elrejtheti. A beállítások szakaszokba rendeződnek, és minden oldal azzal kezdődik, amit a leggyakrabban módosítanak."
+            "value" : "Ezüst kiemelőszín, állapotjelzők a kiemelőszínedben és címlogók üres szegély nélkül. A spoilervédelem mostantól az epizódcímeket is elrejtheti. A megjelenített spoiler újra elrejthető. A beállítások szakaszokba rendeződnek, és minden oldal azzal kezdődik, amit a leggyakrabban módosítanak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un accento Argento, badge di stato nel tuo colore d’accento e loghi dei titoli senza il bordo vuoto. La protezione dagli spoiler può nascondere anche i titoli degli episodi. Le impostazioni sono raggruppate in sezioni e ogni pagina inizia da ciò che si modifica più spesso."
+            "value" : "Un accento Argento, badge di stato nel tuo colore d’accento e loghi dei titoli senza il bordo vuoto. La protezione dagli spoiler può nascondere anche i titoli degli episodi. Uno spoiler mostrato si può nascondere di nuovo. Le impostazioni sono raggruppate in sezioni e ogni pagina inizia da ciò che si modifica più spesso."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "シルバーのアクセント、アクセントカラーのステータスバッジ、余白のないタイトルロゴが加わりました。ネタバレ防止でエピソードのタイトルも隠せます。設定はセクションに分かれ、各ページはよく変更する項目から始まります。"
+            "value" : "シルバーのアクセント、アクセントカラーのステータスバッジ、余白のないタイトルロゴが加わりました。ネタバレ防止でエピソードのタイトルも隠せます。表示したネタバレは再び隠せます。設定はセクションに分かれ、各ページはよく変更する項目から始まります。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "실버 강조 색상, 강조 색상으로 표시되는 상태 배지, 빈 여백 없는 타이틀 로고가 추가되었습니다. 스포일러 방지로 에피소드 제목도 숨길 수 있습니다. 설정은 섹션으로 묶이고, 각 페이지는 가장 자주 바꾸는 항목부터 시작합니다."
+            "value" : "실버 강조 색상, 강조 색상으로 표시되는 상태 배지, 빈 여백 없는 타이틀 로고가 추가되었습니다. 스포일러 방지로 에피소드 제목도 숨길 수 있습니다. 표시한 스포일러는 다시 숨길 수 있습니다. 설정은 섹션으로 묶이고, 각 페이지는 가장 자주 바꾸는 항목부터 시작합니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En Sølv-aksent, statusmerker i aksentfargen din og tittellogoer uten tom kant. Spoilerbeskyttelse kan også skjule episodetitler. Innstillingene er delt inn i seksjoner, og hver side starter med det som endres oftest."
+            "value" : "En Sølv-aksent, statusmerker i aksentfargen din og tittellogoer uten tom kant. Spoilerbeskyttelse kan også skjule episodetitler. En spoiler du har vist, kan skjules igjen. Innstillingene er delt inn i seksjoner, og hver side starter med det som endres oftest."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Een zilveren accent, statuslabels in je accentkleur en titellogo's zonder lege rand. Spoilerbescherming kan ook afleveringstitels verbergen. De instellingen zijn in secties ingedeeld en elke pagina begint met wat het vaakst wordt aangepast."
+            "value" : "Een zilveren accent, statuslabels in je accentkleur en titellogo's zonder lege rand. Spoilerbescherming kan ook afleveringstitels verbergen. Een getoonde spoiler kan weer worden verborgen. De instellingen zijn in secties ingedeeld en elke pagina begint met wat het vaakst wordt aangepast."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Srebrny akcent, plakietki stanu w Twoim kolorze akcentu i loga tytułów bez pustego marginesu. Ochrona przed spoilerami może też ukrywać tytuły odcinków. Ustawienia są pogrupowane w sekcje, a każda strona zaczyna się od tego, co zmienia się najczęściej."
+            "value" : "Srebrny akcent, plakietki stanu w Twoim kolorze akcentu i loga tytułów bez pustego marginesu. Ochrona przed spoilerami może też ukrywać tytuły odcinków. Odsłonięty spoiler można ponownie ukryć. Ustawienia są pogrupowane w sekcje, a każda strona zaczyna się od tego, co zmienia się najczęściej."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Um destaque prata, selos de status na sua cor de destaque e logos de título sem a borda vazia. A proteção contra spoilers também pode ocultar títulos de episódios. As configurações estão agrupadas em seções, e cada página começa pelo que mais se altera."
+            "value" : "Um destaque prata, selos de status na sua cor de destaque e logos de título sem a borda vazia. A proteção contra spoilers também pode ocultar títulos de episódios. Um spoiler mostrado pode ser ocultado novamente. As configurações estão agrupadas em seções, e cada página começa pelo que mais se altera."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Um destaque prateado, etiquetas de estado na sua cor de realce e logótipos de título sem a margem vazia. A proteção contra spoilers também pode ocultar os títulos dos episódios. As definições estão agrupadas em secções, e cada página começa pelo que mais se altera."
+            "value" : "Um destaque prateado, etiquetas de estado na sua cor de realce e logótipos de título sem a margem vazia. A proteção contra spoilers também pode ocultar os títulos dos episódios. Um spoiler mostrado pode voltar a ser ocultado. As definições estão agrupadas em secções, e cada página começa pelo que mais se altera."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un accent argintiu, etichete de stare în culoarea ta de accent și logouri de titlu fără marginea goală. Protecția împotriva spoilerelor poate ascunde și titlurile episoadelor. Setările sunt grupate în secțiuni, iar fiecare pagină începe cu ce se schimbă cel mai des."
+            "value" : "Un accent argintiu, etichete de stare în culoarea ta de accent și logouri de titlu fără marginea goală. Protecția împotriva spoilerelor poate ascunde și titlurile episoadelor. Un spoiler afișat poate fi ascuns din nou. Setările sunt grupate în secțiuni, iar fiecare pagină începe cu ce se schimbă cel mai des."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Серебристый акцент, значки статуса в вашем акцентном цвете и логотипы без пустых полей. Защита от спойлеров может скрывать и названия эпизодов. Настройки разбиты на разделы, и каждая страница начинается с того, что меняют чаще всего."
+            "value" : "Серебристый акцент, значки статуса в вашем акцентном цвете и логотипы без пустых полей. Защита от спойлеров может скрывать и названия эпизодов. Показанный спойлер можно снова скрыть. Настройки разбиты на разделы, и каждая страница начинается с того, что меняют чаще всего."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Strieborný akcent, stavové štítky vo vašej farbe zvýraznenia a logá titulov bez prázdneho okraja. Ochrana pred spoilermi dokáže skryť aj názvy epizód. Nastavenia sú rozdelené do sekcií a každá stránka začína tým, čo sa mení najčastejšie."
+            "value" : "Strieborný akcent, stavové štítky vo vašej farbe zvýraznenia a logá titulov bez prázdneho okraja. Ochrana pred spoilermi dokáže skryť aj názvy epizód. Zobrazený spojler sa dá znova skryť. Nastavenia sú rozdelené do sekcií a každá stránka začína tým, čo sa mení najčastejšie."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En silveraccent, statusmärken i din accentfärg och titellogotyper utan sin tomma kant. Spoilerskyddet kan även dölja avsnittstitlar. Inställningarna är indelade i avsnitt, och varje sida börjar med det som ändras oftast."
+            "value" : "En silveraccent, statusmärken i din accentfärg och titellogotyper utan sin tomma kant. Spoilerskyddet kan även dölja avsnittstitlar. En spoiler du har visat kan döljas igen. Inställningarna är indelade i avsnitt, och varje sida börjar med det som ändras oftast."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gümüş vurgu rengi, vurgu renginizde durum rozetleri ve boş kenarı olmayan başlık logoları. Spoiler koruması bölüm adlarını da gizleyebilir. Ayarlar bölümlere ayrıldı ve her sayfa en sık değiştirilen şeyle başlıyor."
+            "value" : "Gümüş vurgu rengi, vurgu renginizde durum rozetleri ve boş kenarı olmayan başlık logoları. Spoiler koruması bölüm adlarını da gizleyebilir. Gösterdiğiniz bir spoiler yeniden gizlenebilir. Ayarlar bölümlere ayrıldı ve her sayfa en sık değiştirilen şeyle başlıyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сріблястий акцент, значки стану у вашому акцентному кольорі та логотипи без порожніх полів. Захист від спойлерів може приховувати й назви епізодів. Налаштування згруповано в розділи, і кожна сторінка починається з того, що змінюють найчастіше."
+            "value" : "Сріблястий акцент, значки стану у вашому акцентному кольорі та логотипи без порожніх полів. Захист від спойлерів може приховувати й назви епізодів. Показаний спойлер можна знову приховати. Налаштування згруповано в розділи, і кожна сторінка починається з того, що змінюють найчастіше."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "银色强调色、采用你的强调色的状态标签，以及去掉空白边距的标题标志。防剧透功能也可以隐藏剧集标题。设置已分组，每个页面都从最常更改的选项开始。"
+            "value" : "银色强调色、采用你的强调色的状态标签，以及去掉空白边距的标题标志。防剧透功能也可以隐藏剧集标题。已显示的剧透可以重新隐藏。设置已分组，每个页面都从最常更改的选项开始。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "銀色強調色、採用你的強調色的狀態標籤，以及去除空白邊距的標題標誌。防劇透功能也可以隱藏劇集標題。設定已分組，每個頁面都從最常更改的選項開始。"
+            "value" : "銀色強調色、採用你的強調色的狀態標籤，以及去除空白邊距的標題標誌。防劇透功能也可以隱藏劇集標題。已顯示的劇透可以重新隱藏。設定已分組，每個頁面都從最常更改的選項開始。"
           }
         }
       }
@@ -174122,6 +174122,816 @@
         }
       }
     },
+    "settings.appearance.spoilerHideReveals" : {
+      "comment" : "Appearance settings action: covers every manually revealed spoiler of this profile again (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrýt zobrazené spoilery"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul viste spoilere"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgedeckte Spoiler verbergen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη αποκαλυμμένων σπόιλερ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide revealed spoilers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoilers mostrados"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilota näytetyt juonipaljastukset"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les spoilers affichés"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakrij prikazane spojlere"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megjelenített spoilerek elrejtése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi spoiler mostrati"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示したネタバレを隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표시한 스포일러 숨기기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul viste spoilere"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getoonde spoilers verbergen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryj pokazane spoilery"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoilers mostrados"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoilers mostrados"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunde spoilerele afișate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть показанные спойлеры"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryť zobrazené spojlery"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj visade spoilers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gösterilen spoilerları gizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховати показані спойлери"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏已显示的剧透"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏已顯示的劇透"
+          }
+        }
+      }
+    },
+    "settings.appearance.spoilerHideReveals.confirm.action" : {
+      "comment" : "Destructive confirm button for hiding revealed spoilers (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrýt"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbergen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilota"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakrij"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elrejtés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "숨기기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbergen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryj"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunde"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryť"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховати"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏"
+          }
+        }
+      }
+    },
+    "settings.appearance.spoilerHideReveals.confirm.message" : {
+      "comment" : "Confirmation alert message for hiding revealed spoilers (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vše, co jste v tomto profilu zobrazili, bude znovu zakryto na všech vašich zařízeních."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alt, du har vist på denne profil, dækkes til igen på alle dine enheder."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles, was in diesem Profil aufgedeckt wurde, wird auf allen Geräten wieder verdeckt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ό,τι αποκαλύψατε σε αυτό το προφίλ καλύπτεται ξανά σε όλες τις συσκευές σας."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything you revealed on this profile is covered again, on all your devices."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo lo que mostraste en este perfil se vuelve a cubrir en todos tus dispositivos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaikki tässä profiilissa näytetty peitetään uudelleen kaikilla laitteillasi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout ce que vous avez affiché sur ce profil est de nouveau masqué, sur tous vos appareils."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sve što ste prikazali na ovom profilu ponovno se prekriva na svim vašim uređajima."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minden, amit ebben a profilban megjelenítettél, újra el lesz takarva az összes eszközödön."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutto ciò che hai mostrato in questo profilo viene coperto di nuovo, su tutti i tuoi dispositivi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このプロファイルで表示したものは、すべてのデバイスで再び隠されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 프로필에서 표시한 모든 항목이 모든 기기에서 다시 가려집니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alt du har vist på denne profilen dekkes til igjen på alle enhetene dine."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles wat je op dit profiel hebt getoond, wordt op al je apparaten weer bedekt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wszystko, co odsłonięto w tym profilu, zostanie ponownie zasłonięte na wszystkich urządzeniach."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo o que você mostrou neste perfil volta a ser coberto em todos os seus dispositivos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo o que mostrou neste perfil volta a ficar oculto em todos os seus dispositivos."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tot ce ai afișat în acest profil este acoperit din nou, pe toate dispozitivele tale."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё, что было показано в этом профиле, снова скроется на всех ваших устройствах."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Všetko, čo ste v tomto profile zobrazili, bude znova zakryté na všetkých vašich zariadeniach."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allt du har visat i den här profilen döljs igen på alla dina enheter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu profilde gösterdiğiniz her şey tüm cihazlarınızda yeniden gizlenir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усе, що було показано в цьому профілі, знову приховається на всіх ваших пристроях."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此个人资料中显示过的所有内容将在你的所有设备上重新隐藏。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此個人檔案中顯示過的所有內容將在你的所有裝置上重新隱藏。"
+          }
+        }
+      }
+    },
+    "settings.appearance.spoilerHideReveals.confirm.title" : {
+      "comment" : "Confirmation alert title for hiding revealed spoilers (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrýt zobrazené spoilery?"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul viste spoilere?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgedeckte Spoiler verbergen?"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη αποκαλυμμένων σπόιλερ;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide revealed spoilers?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Ocultar spoilers mostrados?"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilotetaanko näytetyt juonipaljastukset?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les spoilers affichés ?"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakriti prikazane spojlere?"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elrejted a megjelenített spoilereket?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondere gli spoiler mostrati?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示したネタバレを隠しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표시한 스포일러를 숨길까요?"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjule viste spoilere?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getoonde spoilers verbergen?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryć pokazane spoilery?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoilers mostrados?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoilers mostrados?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunzi spoilerele afișate?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скрыть показанные спойлеры?"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skryť zobrazené spojlery?"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölja visade spoilers?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gösterilen spoilerlar gizlensin mi?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приховати показані спойлери?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏已显示的剧透？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏已顯示的劇透？"
+          }
+        }
+      }
+    },
+    "settings.appearance.spoilerHideReveals.subtitle" : {
+      "comment" : "Subtitle of the hide revealed spoilers action (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Znovu zakryje vše, co jste ručně zobrazili. Zhlédnuté a rozkoukané tituly zůstanou viditelné."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dækker alt, du har vist manuelt, til igen. Sete og påbegyndte titler forbliver synlige."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verdeckt alles wieder, was von Hand aufgedeckt wurde. Gesehene und angefangene Titel bleiben sichtbar."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καλύπτει ξανά ό,τι αποκαλύψατε χειροκίνητα. Οι τίτλοι που έχετε δει ή ξεκινήσει παραμένουν ορατοί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Covers everything you revealed by hand again. Watched and started titles stay visible."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelve a cubrir todo lo que mostraste a mano. Los títulos vistos y empezados siguen visibles."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peittää uudelleen kaiken käsin näytetyn. Katsotut ja aloitetut nimikkeet pysyvät näkyvissä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masque à nouveau tout ce que vous avez affiché manuellement. Les titres vus et commencés restent visibles."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponovno prekriva sve što ste ručno prikazali. Pogledani i započeti naslovi ostaju vidljivi."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Újra eltakar mindent, amit kézzel megjelenítettél. A megnézett és elkezdett címek láthatók maradnak."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copre di nuovo tutto ciò che hai mostrato a mano. I titoli visti e iniziati restano visibili."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動で表示したものをすべて再び隠します。視聴済みと視聴中のタイトルは表示されたままです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직접 표시한 항목을 모두 다시 가립니다. 시청했거나 시청 중인 항목은 계속 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dekker til alt du har vist manuelt igjen. Sette og påbegynte titler forblir synlige."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedekt alles wat je met de hand hebt getoond opnieuw. Bekeken en begonnen titels blijven zichtbaar."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponownie zasłania wszystko, co odsłonięto ręcznie. Obejrzane i rozpoczęte tytuły pozostają widoczne."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cobre novamente tudo o que você mostrou manualmente. Títulos assistidos e iniciados continuam visíveis."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volta a ocultar tudo o que mostrou manualmente. Os títulos vistos e iniciados continuam visíveis."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acoperă din nou tot ce ai afișat manual. Titlurile vizionate și începute rămân vizibile."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снова скрывает всё, что было показано вручную. Просмотренные и начатые остаются видимыми."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Znova zakryje všetko, čo ste ručne zobrazili. Pozreté a rozpozerané tituly zostanú viditeľné."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Döljer allt du har visat manuellt igen. Sedda och påbörjade titlar förblir synliga."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle gösterdiğiniz her şeyi yeniden gizler. İzlenen ve başlanan içerikler görünür kalır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знову приховує все, що було показано вручну. Переглянуті й розпочаті лишаються видимими."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新隐藏所有手动显示的内容。已看过和看过一部分的内容仍保持可见。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新隱藏所有手動顯示的內容。已看過和看過一部分的內容仍保持可見。"
+          }
+        }
+      }
+    },
     "settings.appearance.spoilerMovies" : {
       "comment" : "Appearance toggle: apply spoiler protection to movies",
       "extractionState" : "manual",
@@ -234647,6 +235457,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "劇透已隱藏"
+          }
+        }
+      }
+    },
+    "spoiler.hideAgain" : {
+      "comment" : "Context menu action that covers a manually revealed spoiler again (Sodalite#222)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Znovu skrýt spoiler"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul spoiler igen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoiler wieder verbergen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εκ νέου απόκρυψη σπόιλερ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide spoiler again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a ocultar spoiler"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piilota juonipaljastus uudelleen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer à nouveau le spoiler"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponovno sakrij spojler"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoiler újbóli elrejtése"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi di nuovo lo spoiler"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ネタバレを再び隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스포일러 다시 숨기기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul spoiler igjen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoiler weer verbergen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukryj spoiler ponownie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoiler novamente"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar spoiler novamente"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascunde din nou spoilerul"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снова скрыть спойлер"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Znova skryť spojler"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj spoiler igen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoilerı yeniden gizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знову приховати спойлер"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新隐藏剧透"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新隱藏劇透"
           }
         }
       }

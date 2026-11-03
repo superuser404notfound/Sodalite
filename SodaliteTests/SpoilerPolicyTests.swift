@@ -117,6 +117,22 @@ struct SpoilerPolicyTests {
         #expect(policy(revealed: [key]).isHidden(try item(id: "i2")))
     }
 
+    @Test("only a reveal by hand can be hidden again, not a watched or started episode (Sodalite#222)")
+    func manuallyRevealed() throws {
+        let p = policy(revealed: ["u1|i1"])
+        #expect(p.isManuallyRevealed(try item()))
+        #expect(!p.isManuallyRevealed(try item(played: true)))
+        #expect(!p.isManuallyRevealed(try item(percentage: 40)))
+        #expect(!policy().isManuallyRevealed(try item()))
+        #expect(!policy(enabled: false, revealed: ["u1|i1"]).isManuallyRevealed(try item()))
+    }
+
+    @Test("a revealed episode under a hidden series rule can be hidden again (Sodalite#222)")
+    func manuallyRevealedUnderHiddenRule() throws {
+        let p = policy(enabled: false, revealed: ["u1|i1"], overrides: ["u1|s1": true])
+        #expect(p.isManuallyRevealed(try item(seriesID: "s1")))
+    }
+
     @Test("the key is scoped per user and per item, not per series")
     func keyShape() throws {
         #expect(SpoilerPolicy.key(userID: "u1", itemID: "i1") == "u1|i1")

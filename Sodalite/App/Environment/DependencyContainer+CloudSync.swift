@@ -403,7 +403,8 @@ extension DependencyContainer {
         case .spoilerReveals:
             return .spoilerReveals(SpoilerRevealPayload(
                 updatedAt: stamp,
-                entries: stores.spoilerReveals.entries
+                entries: stores.spoilerReveals.entries,
+                hiddenAt: stores.spoilerReveals.hiddenAt
             ))
         case .spoilerSeriesRules:
             return .spoilerSeriesRules(SpoilerSeriesRulesPayload(
@@ -517,7 +518,7 @@ extension DependencyContainer {
         case .trackMemory(let t):
             trackSelectionMemory.replaceAll(t.entries)
         case .spoilerReveals(let s):
-            spoilerRevealMemory.replaceAll(s.entries)
+            spoilerRevealMemory.replaceAll(s.entries, hiddenAt: s.hiddenAt)
         case .spoilerSeriesRules(let r):
             spoilerSeriesRules.replaceAll(r.entries)
         }

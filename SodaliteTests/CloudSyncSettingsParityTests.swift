@@ -111,9 +111,10 @@ struct CloudSyncSettingsParityTests {
 
     /// The other store keys are per-entry memories, not preference stores: their payload is one
     /// `entries` map that CloudSyncMerge merges per key, so there is no field list to keep in step.
+    /// The reveals carry a second such map, their hides (Sodalite#222), merged the same way.
     @Test func theMemoryStoresAreCoveredByTheirPerKeyMerge() {
         #expect(payloadFieldNames(.trackMemory) == ["entries"])
-        #expect(payloadFieldNames(.spoilerReveals) == ["entries"])
+        #expect(payloadFieldNames(.spoilerReveals) == ["entries", "hiddenAt"])
         #expect(payloadFieldNames(.spoilerSeriesRules) == ["entries"])
     }
 }

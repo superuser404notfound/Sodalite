@@ -1086,7 +1086,9 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applySettingsPayload(.spoilerReveals(merged))
                 lastSettingsSnapshot[key] = dependencies.collectSettingsPayload(key, stamp: .distantPast)
                 preferences.setLocalStamp(merged.updatedAt, for: name)
-                if merged.entries != cloudReveals.entries { addPendingSave(recordName: name) }
+                if merged.entries != cloudReveals.entries || merged.hiddenAt != (cloudReveals.hiddenAt ?? [:]) {
+                    addPendingSave(recordName: name)
+                }
                 return
             }
             // Sodalite#50 follow-up: series rules are per entry as well, and "never veil this show"

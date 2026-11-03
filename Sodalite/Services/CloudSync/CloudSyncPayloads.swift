@@ -203,6 +203,9 @@ struct SpoilerRevealPayload: Codable, Equatable {
     var schemaVersion: Int = 1
     var updatedAt: Date
     var entries: [String: Date]
+    /// Sodalite#222. Reveal key to the time it was hidden again, merged per key like `entries`.
+    /// Its own field so older builds keep unioning `entries` and carry this one forward unread.
+    var hiddenAt: [String: Date]? = nil
 }
 
 /// Sodalite#50 follow-up. Per entry like the reveals, but merged by
