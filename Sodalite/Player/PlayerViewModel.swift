@@ -395,6 +395,8 @@ final class PlayerViewModel {
 
     /// One toggle in flight at a time: a second press during the rebuild would race the first.
     @ObservationIgnored var upscaleToggleTask: Task<Void, Never>?
+    /// Which toggle owns `upscaleToggleTask`, so a cancelled one finishing late cannot clear a newer one.
+    @ObservationIgnored var upscaleToggleGeneration = 0
 
     var videoFormat: VideoFormat = .sdr
 

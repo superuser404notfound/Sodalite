@@ -48,10 +48,12 @@ extension PlayerViewModel {
         let enable = state == .off
         let previous = upscalingOverride
         upscalingOverride = enable
+        upscaleToggleGeneration += 1
+        let generation = upscaleToggleGeneration
         LogTap.shared.note("[Upscale] viewer turned it \(enable ? "on" : "off") for this video")
         upscaleToggleTask = Task { [weak self] in
             guard let self else { return }
-            defer { upscaleToggleTask = nil }
+            defer { if upscaleToggleGeneration == generation { upscaleToggleTask = nil } }
             do {
                 try await player.reloadAtCurrentPosition { $0.upscalesLowResolutionVideo = enable }
             } catch AetherEngineError.sessionNotReloadable(.upscaleRouteNeedsFreshLoad) where isLiveSession {
@@ -60,6 +62,7 @@ extension PlayerViewModel {
             } catch is CancellationError {
             } catch {
                 LogTap.shared.note("[Upscale] toggle refused: \(error)")
+                guard upscaleToggleGeneration == generation else { return }
                 upscalingOverride = previous
             }
         }
@@ -69,6 +72,7 @@ extension PlayerViewModel {
     func resetUpscaleOverride() {
         upscaleToggleTask?.cancel()
         upscaleToggleTask = nil
+        upscaleToggleGeneration += 1
         upscalingOverride = nil
         upscaleStatus = nil
     }
