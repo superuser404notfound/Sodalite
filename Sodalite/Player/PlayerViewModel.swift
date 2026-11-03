@@ -357,6 +357,17 @@ final class PlayerViewModel {
         return playMethod == .transcode && !isBitmapSubtitle(stream)
     }
 
+    /// The engine names an embedded track by its container index, Jellyfin by its place in a list
+    /// that starts with the source's external files, so every external stream numbered below an
+    /// embedded one pushes its Jellyfin index one place past the container's.
+    static func embeddedEngineTrackID(forJellyfinIndex index: Int, in streams: [MediaStream]) -> Int {
+        index - streams.filter { $0.isExternal == true && $0.index < index }.count
+    }
+
+    func embeddedEngineTrackID(_ index: Int) -> Int {
+        Self.embeddedEngineTrackID(forJellyfinIndex: index, in: sourceMediaStreams)
+    }
+
     /// Current season's episodes sorted by indexNumber, populated lazily after startPlayback for
     /// the transport-bar episode picker. Empty for movies/single-episode; TransportBar hides button at count <= 1.
     var seasonEpisodes: [JellyfinItem] = []
@@ -773,6 +784,9 @@ final class PlayerViewModel {
     /// The source a rung switch reopens, so the stream indexes above apply to it (Sodalite#87).
     @ObservationIgnored var pendingMediaSourceID: String?
     var subtitleStreams: [MediaStream] = []
+    /// Every stream of the played source, external ones included: what an embedded subtitle's
+    /// Jellyfin index is converted against (`embeddedEngineTrackID`).
+    @ObservationIgnored var sourceMediaStreams: [MediaStream] = []
     /// Lowercased Jellyfin codec of the active subtitle ("ass"/"ssa"/"subrip"/...), nil when off.
     /// The overlay reads it to gate the raw-ASS-event-line stripper.
     var activeSubtitleCodec: String?
@@ -815,6 +829,7 @@ final class PlayerViewModel {
         didAutoSelectLiveSubtitle = false
         lastLiveSubtitleIndices = nil
         subtitleStreams = []
+        sourceMediaStreams = []
     }
 
     /// Sodalite#63: playhead before the current burst of backward jumps, recorded on press and consumed
@@ -1233,6 +1248,7 @@ final class PlayerViewModel {
                 mediaSourceID = source.id
                 activePlaybackSource = source
                 subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+                sourceMediaStreams = source.mediaStreams ?? []
                 activePlayMethod = .directPlay
                 LogTap.shared.note("[Downloads] playing \(item.id) from the device (\(local.manifest.route.rawValue))")
             } else {
@@ -1521,6 +1537,7 @@ final class PlayerViewModel {
         // belong in the picker, and forced tracks stay (many releases mark every track forced). Dedupe
         // keys on forced/signs/sdh descriptors so distinct same-language tracks don't collapse.
         subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+        sourceMediaStreams = source.mediaStreams ?? []
 
         // The same resolution the successor warm uses, so the URL this opens and the URL that
         // was warmed for it are the same string (AetherEngine#551 adopts by exact URL).
@@ -2964,11 +2981,11 @@ final class PlayerViewModel {
                     mode = .none
                 }
             } else {
-                player.selectSubtitleTrack(index: index)
+                player.selectSubtitleTrack(index: embeddedEngineTrackID(index))
             }
             activeSubtitleCodec = stream?.codec?.lowercased()
         case .cueFilter(let index):
-            player.selectSubtitleTrack(index: index)
+            player.selectSubtitleTrack(index: embeddedEngineTrackID(index))
             activeSubtitleCodec = subtitleStreams.first(where: { $0.index == index })?.codec?.lowercased()
         case .none:
             if previous != .none {
@@ -3368,13 +3385,14 @@ final class PlayerViewModel {
         } else if activePlayMethod != .transcode {
             // Embedded stream on direct play/stream: engine streams cues from the main demux loop (text
             // and bitmap codecs alike), no second connection or server extraction.
-            player.selectSubtitleTrack(index: id)
+            let engineID = embeddedEngineTrackID(id)
+            player.selectSubtitleTrack(index: engineID)
             subtitleCues = player.subtitleCues
             // ASS/SSA gets the styled libass path on top (coordinator reassembles raw event cues for
             // swift-ass-renderer); falls back to the stripped-text overlay when the header is missing.
             if (activeSubtitleCodec == "ass" || activeSubtitleCodec == "ssa"),
                preferences.styledASSSubtitles {
-                let engineTrack = player.subtitleTracks.first(where: { $0.id == id })
+                let engineTrack = player.subtitleTracks.first(where: { $0.id == engineID })
                 // Renderer can arrive async when embedded font attachments need writing; the callback
                 // mirrors it then, the direct read below covers the synchronous warm path.
                 assCoordinator.onRendererChanged = { [weak self] renderer in
@@ -3605,7 +3623,7 @@ final class PlayerViewModel {
                 activeSecondarySubtitleIndex = nil
             }
         } else if activePlayMethod != .transcode {
-            player.selectSecondarySubtitleTrack(index: id)
+            player.selectSecondarySubtitleTrack(index: embeddedEngineTrackID(id))
             secondarySubtitleCues = player.secondarySubtitleCues
         } else {
             // Transcoded session: no secondary path in v1.

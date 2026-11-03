@@ -143,6 +143,7 @@ extension PlayerViewModel {
                 $0.isExternal == true && !before.contains($0.index)
             }) {
                 subtitleStreams = refreshed
+                sourceMediaStreams = source.mediaStreams ?? []
                 newStream = added
                 break
             }
