@@ -202,6 +202,38 @@ struct CloudSyncMergeTests {
         #expect(merged.entries["l0"] == nil)
     }
 
+    @Test("a hide on one device beats an older reveal on the other (Sodalite#222)")
+    func spoilerHideBeatsOlderReveal() {
+        let local = SpoilerRevealPayload(updatedAt: Date(timeIntervalSince1970: 20),
+                                         entries: ["u1|a": Date(timeIntervalSince1970: 10)],
+                                         hiddenAt: ["u1|a": Date(timeIntervalSince1970: 20)])
+        let cloud = SpoilerRevealPayload(updatedAt: Date(timeIntervalSince1970: 10),
+                                         entries: ["u1|a": Date(timeIntervalSince1970: 10)])
+        let merged = CloudSyncMerge.unionSpoilerReveals(local: local, cloud: cloud)
+        #expect(merged.hiddenAt?["u1|a"] == Date(timeIntervalSince1970: 20))
+        #expect(SpoilerRevealMemory.effectiveKeys(entries: merged.entries, hiddenAt: merged.hiddenAt ?? [:]).isEmpty)
+    }
+
+    @Test("a reveal newer than the other device's hide wins and the hide is pruned (Sodalite#222)")
+    func spoilerNewerRevealBeatsHide() {
+        let local = SpoilerRevealPayload(updatedAt: Date(timeIntervalSince1970: 20),
+                                         entries: ["u1|a": Date(timeIntervalSince1970: 10)],
+                                         hiddenAt: ["u1|a": Date(timeIntervalSince1970: 20)])
+        let cloud = SpoilerRevealPayload(updatedAt: Date(timeIntervalSince1970: 30),
+                                         entries: ["u1|a": Date(timeIntervalSince1970: 30)])
+        let merged = CloudSyncMerge.unionSpoilerReveals(local: local, cloud: cloud)
+        #expect(merged.hiddenAt?["u1|a"] == nil)
+        #expect(SpoilerRevealMemory.effectiveKeys(entries: merged.entries, hiddenAt: merged.hiddenAt ?? [:]) == ["u1|a"])
+    }
+
+    @Test("an older build's payload without hiddenAt still decodes, and the field stays optional")
+    func spoilerRevealPayloadDecodesWithoutHides() throws {
+        let json = #"{"schemaVersion":1,"updatedAt":0,"entries":{"u1|a":0}}"#
+        let decoded = try JSONDecoder().decode(SpoilerRevealPayload.self, from: Data(json.utf8))
+        #expect(decoded.hiddenAt == nil)
+        #expect(decoded.entries.keys.sorted() == ["u1|a"])
+    }
+
     @Test("an appearance payload without the spoiler keys decodes to the defaults")
     func appearancePayloadBackCompat() throws {
         let legacy = #"""

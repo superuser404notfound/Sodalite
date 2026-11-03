@@ -159,16 +159,25 @@ enum CloudSyncMerge {
     /// Sodalite#50. Union by reveal key, later reveal wins. Same shape as unionTrackMemory:
     /// eviction deliberately does not propagate, and the cap is re-applied so both devices
     /// converge on one set.
+    /// Sodalite#222: the hides union the same way, so a hide and a reveal on two devices both
+    /// survive and the newer one decides.
     static func unionSpoilerReveals(local: SpoilerRevealPayload, cloud: SpoilerRevealPayload) -> SpoilerRevealPayload {
-        var byKey = local.entries
-        for (key, revealedAt) in cloud.entries {
-            if let existing = byKey[key], existing >= revealedAt { continue }
-            byKey[key] = revealedAt
-        }
+        let entries = SpoilerRevealMemory.capped(newestPerKey(local.entries, cloud.entries))
+        let hidden = newestPerKey(local.hiddenAt ?? [:], cloud.hiddenAt ?? [:])
         return SpoilerRevealPayload(
             updatedAt: max(local.updatedAt, cloud.updatedAt),
-            entries: SpoilerRevealMemory.capped(byKey)
+            entries: entries,
+            hiddenAt: SpoilerRevealMemory.prunedHides(hidden, entries: entries)
         )
+    }
+
+    private static func newestPerKey(_ local: [String: Date], _ cloud: [String: Date]) -> [String: Date] {
+        var byKey = local
+        for (key, date) in cloud {
+            if let existing = byKey[key], existing >= date { continue }
+            byKey[key] = date
+        }
+        return byKey
     }
 
     /// Sodalite#50 follow-up. Per key, newest entry wins, `standard` included: the tombstone has to

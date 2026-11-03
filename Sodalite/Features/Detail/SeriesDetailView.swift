@@ -1483,6 +1483,13 @@ struct SeriesDetailView: View {
             } label: {
                 Label("spoiler.reveal", systemImage: "eye")
             }
+        } else if SpoilerReveal.canHide(episode, dependencies: dependencies, appState: appState) {
+            // Sodalite#222. Only for a reveal by hand: a watched or started episode stays visible.
+            Button {
+                SpoilerReveal.hide(episode, dependencies: dependencies, appState: appState)
+            } label: {
+                Label("spoiler.hideAgain", systemImage: "eye.slash")
+            }
         }
     }
 

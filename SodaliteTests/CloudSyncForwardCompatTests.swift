@@ -140,7 +140,7 @@ struct CloudSyncForwardCompatTests {
         case .trackMemory:
             return .trackMemory(TrackMemoryPayload(updatedAt: stamp, entries: [:]))
         case .spoilerReveals:
-            return .spoilerReveals(SpoilerRevealPayload(updatedAt: stamp, entries: [:]))
+            return .spoilerReveals(SpoilerRevealPayload(updatedAt: stamp, entries: [:], hiddenAt: [:]))
         case .spoilerSeriesRules:
             return .spoilerSeriesRules(SpoilerSeriesRulesPayload(updatedAt: stamp, entries: [:]))
         }
