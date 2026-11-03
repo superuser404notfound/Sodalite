@@ -194,6 +194,7 @@ extension PlayerViewModel {
         hasStartedPlaying = false
         liveTunerReleasedWhileSuspended = false
         pendingLiveAudioStreamIndex = nil
+        resetUpscaleOverride()
         errorMessage = nil
         videoFormat = .sdr
         clearVideoFormatAnnouncement()

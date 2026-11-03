@@ -294,6 +294,11 @@ struct PlayerTouchControls: View {
         case .picture where ExternalPlaybackPresentation.localPictureControlsApply(
             destination: viewModel.externalPlaybackDestination):
             iconButton(pictureIcon) { activePicker = .picture }
+        case .upscaling where viewModel.upscaleToggleState != nil:
+            iconButton(viewModel.upscaleChipIcon, active: viewModel.upscaleToggleState != .off) {
+                viewModel.toggleUpscaling()
+            }
+            .accessibilityLabel(Text(viewModel.upscaleChipLabel))
         case .stats:
             iconButton("info.circle", active: viewModel.showStatsOverlay) {
                 viewModel.showStatsOverlay.toggle()

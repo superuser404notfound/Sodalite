@@ -204,6 +204,13 @@ struct LiveTransportBar: View {
                     isFocused: subtitleFocused
                 )
             }
+        case .upscaleButton:
+            TransportTrackLabel(
+                label: viewModel.upscaleChipLabel,
+                icon: viewModel.upscaleChipIcon,
+                showsLabel: viewModel.upscaleToggleState == .off || viewModel.controlsFocus == .upscaleButton,
+                isFocused: viewModel.controlsFocus == .upscaleButton
+            )
         case .pipButton:
             TransportTrackLabel(
                 label: String(localized: "player.pip", defaultValue: "Picture in Picture"),

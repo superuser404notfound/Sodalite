@@ -694,6 +694,16 @@ struct TransportBar: View {
                 dropdown: pictureDropdownItems,
                 isOpen: isPictureDropdownOpen
             )
+        case .upscaleButton:
+            trackButton(
+                label: viewModel.upscaleChipLabel,
+                icon: viewModel.upscaleChipIcon,
+                isFocused: controlsFocus == .upscaleButton,
+                // Off for this video is the state worth saying out loud, as Subtitles pins a track.
+                persistsLabel: viewModel.upscaleToggleState == .off,
+                dropdown: [],
+                isOpen: false
+            )
         case .pipButton:
             trackButton(
                 label: String(localized: "player.pip", defaultValue: "Picture in Picture"),
