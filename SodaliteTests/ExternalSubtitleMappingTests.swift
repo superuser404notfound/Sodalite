@@ -19,6 +19,28 @@ struct ExternalSubtitleMappingTests {
                     realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: nil)
     }
 
+    @Test("an embedded track's engine id skips the external files Jellyfin numbers ahead of it")
+    func embeddedEngineTrackIDSkipsExternals() {
+        // The Red Shoes: one external .srt at 0, then the file's own video, audio, English, German.
+        let video = MediaStream(index: 1, type: .video, codec: "h264", language: nil,
+                                displayTitle: nil, title: nil, isDefault: nil, isForced: nil,
+                                isExternal: false, height: nil, width: nil, channels: nil,
+                                videoRange: nil, videoRangeType: nil, averageFrameRate: nil,
+                                realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: nil)
+        let streams = [stream(index: 0, external: true, lang: "en"), video,
+                       stream(index: 3, external: false, lang: "en"),
+                       stream(index: 4, external: false, lang: "de")]
+        #expect(PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: 3, in: streams) == 2)
+        #expect(PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: 4, in: streams) == 3)
+    }
+
+    @Test("without external files, or with them numbered last, the index is the container's")
+    func embeddedEngineTrackIDUnshifted() {
+        #expect(PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: 2, in: []) == 2)
+        let trailing = [stream(index: 2, external: false), stream(index: 5, external: true)]
+        #expect(PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: 2, in: trailing) == 2)
+    }
+
     @Test("the subtitle route asks for the extension Jellyfin serves, not the codec name")
     func subtitleRouteFormat() {
         // ffprobe names two of these differently from the file extension the route expects, and
