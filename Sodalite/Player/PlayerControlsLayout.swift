@@ -4,7 +4,7 @@ import Foundation
 /// Return to Live) are not in here on purpose: they appear on their own and lead the row, so nobody
 /// can hide them by accident.
 enum PlayerControl: String, CaseIterable, Codable, Sendable {
-    case restart, episodes, chapters, audio, subtitles, quality, speed, picture, pip, multiview, stats
+    case restart, episodes, chapters, audio, subtitles, quality, speed, picture, upscaling, pip, multiview, stats
     case rotationLock, childLock, airPlay
     case brightnessSwipe, volumeSwipe
 }
@@ -17,8 +17,8 @@ enum PlayerControlGroup: String, CaseIterable, Codable, Sendable {
     /// The order the player shipped with before the configurator existed.
     var defaultControls: [PlayerControl] {
         switch self {
-        case .transport: [.restart, .episodes, .chapters, .audio, .subtitles, .quality, .speed, .picture, .pip, .stats]
-        case .live: [.audio, .subtitles, .pip, .multiview, .stats]
+        case .transport: [.restart, .episodes, .chapters, .audio, .subtitles, .quality, .speed, .picture, .upscaling, .pip, .stats]
+        case .live: [.audio, .subtitles, .upscaling, .pip, .multiview, .stats]
         case .topBar: [.rotationLock, .childLock, .airPlay]
         case .gestures: [.brightnessSwipe, .volumeSwipe]
         }

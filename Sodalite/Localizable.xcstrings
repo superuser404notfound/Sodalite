@@ -71134,157 +71134,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vylepšené škálování zostří video v SD a 720p pomocí strojového učení přímo v zařízení. RealMedia, 3GP a Theora se nyní přehrávají přímo a Stats for Nerds ukazuje formát pixelů, bitovou hloubku a barevné údaje videa i formát zvuku."
+            "value" : "Vylepšené škálování zostří video v SD a 720p pomocí strojového učení přímo v zařízení. Tlačítkem v přehrávači ho lze pro právě přehrávané video vypnout a znovu zapnout. RealMedia, 3GP a Theora se nyní přehrávají přímo a Stats for Nerds ukazuje formát pixelů, bitovou hloubku a barevné údaje videa i formát zvuku."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forbedret opskalering gør SD- og 720p-video skarpere med maskinlæring på enheden. RealMedia, 3GP og Theora afspilles nu direkte, og Stats for Nerds viser pixelformat, bitdybde og farvedetaljer for videoen samt lydens format."
+            "value" : "Forbedret opskalering gør SD- og 720p-video skarpere med maskinlæring på enheden. En knap i afspilleren slår den fra og til igen for den video, der spiller. RealMedia, 3GP og Theora afspilles nu direkte, og Stats for Nerds viser pixelformat, bitdybde og farvedetaljer for videoen samt lydens format."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbesserte Hochskalierung schärft SD- und 720p-Videos mit maschinellem Lernen auf dem Gerät. RealMedia, 3GP und Theora laufen jetzt direkt, und Stats for Nerds zeigt Pixelformat, Bittiefe und Farbdaten des Videos sowie das Format des Tons."
+            "value" : "Verbesserte Hochskalierung schärft SD- und 720p-Videos mit maschinellem Lernen auf dem Gerät. Eine Taste im Player schaltet sie für das laufende Video aus und wieder ein. RealMedia, 3GP und Theora laufen jetzt direkt, und Stats for Nerds zeigt Pixelformat, Bittiefe und Farbdaten des Videos sowie das Format des Tons."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Η Βελτιωμένη αναβάθμιση ανάλυσης κάνει πιο ευκρινές το βίντεο SD και 720p με μηχανική μάθηση στη συσκευή. Τα RealMedia, 3GP και Theora αναπαράγονται πλέον απευθείας, και το Stats for Nerds δείχνει μορφή pixel, βάθος bit και στοιχεία χρώματος του βίντεο, καθώς και τη μορφή του ήχου."
+            "value" : "Η Βελτιωμένη αναβάθμιση ανάλυσης κάνει πιο ευκρινές το βίντεο SD και 720p με μηχανική μάθηση στη συσκευή. Ένα κουμπί στο πρόγραμμα αναπαραγωγής την απενεργοποιεί και την ενεργοποιεί ξανά για το βίντεο που παίζει. Τα RealMedia, 3GP και Theora αναπαράγονται πλέον απευθείας, και το Stats for Nerds δείχνει μορφή pixel, βάθος bit και στοιχεία χρώματος του βίντεο, καθώς και τη μορφή του ήχου."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enhanced Upscaling sharpens SD and 720p video with on-device machine learning. RealMedia, 3GP and Theora now play directly, and Stats for Nerds shows the pixel format, bit depth and color details of the video and the format of the audio."
+            "value" : "Enhanced Upscaling sharpens SD and 720p video with on-device machine learning. A button in the player turns it off and on again for the video that is playing. RealMedia, 3GP and Theora now play directly, and Stats for Nerds shows the pixel format, bit depth and color details of the video and the format of the audio."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escalado mejorado hace más nítido el vídeo SD y 720p con aprendizaje automático en el dispositivo. RealMedia, 3GP y Theora ahora se reproducen directamente, y Stats for Nerds muestra el formato de píxel, la profundidad de bits y los datos de color del vídeo, además del formato del audio."
+            "value" : "Escalado mejorado hace más nítido el vídeo SD y 720p con aprendizaje automático en el dispositivo. Un botón en el reproductor lo desactiva y lo vuelve a activar para el vídeo en curso. RealMedia, 3GP y Theora ahora se reproducen directamente, y Stats for Nerds muestra el formato de píxel, la profundidad de bits y los datos de color del vídeo, además del formato del audio."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parannettu skaalaus terävöittää SD- ja 720p-videota laitteen omalla koneoppimisella. RealMedia, 3GP ja Theora toistuvat nyt suoraan, ja Stats for Nerds näyttää videon pikselimuodon, bittisyvyyden ja väritiedot sekä äänen muodon."
+            "value" : "Parannettu skaalaus terävöittää SD- ja 720p-videota laitteen omalla koneoppimisella. Soittimen painike kytkee sen pois ja takaisin päälle toistettavalle videolle. RealMedia, 3GP ja Theora toistuvat nyt suoraan, ja Stats for Nerds näyttää videon pikselimuodon, bittisyvyyden ja väritiedot sekä äänen muodon."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mise à l’échelle améliorée rend plus nettes les vidéos SD et 720p grâce à l’apprentissage automatique sur l’appareil. RealMedia, 3GP et Theora se lisent désormais directement, et Stats for Nerds affiche le format de pixel, la profondeur de bits et les informations de couleur de la vidéo ainsi que le format de l’audio."
+            "value" : "Mise à l’échelle améliorée rend plus nettes les vidéos SD et 720p grâce à l’apprentissage automatique sur l’appareil. Un bouton du lecteur la désactive et la réactive pour la vidéo en cours. RealMedia, 3GP et Theora se lisent désormais directement, et Stats for Nerds affiche le format de pixel, la profondeur de bits et les informations de couleur de la vidéo ainsi que le format de l’audio."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poboljšano skaliranje izoštrava SD i 720p video strojnim učenjem na uređaju. RealMedia, 3GP i Theora sada se reproduciraju izravno, a Stats for Nerds prikazuje format piksela, dubinu bitova i podatke o bojama videa te format zvuka."
+            "value" : "Poboljšano skaliranje izoštrava SD i 720p video strojnim učenjem na uređaju. Gumb u playeru isključuje ga i ponovno uključuje za video koji se reproducira. RealMedia, 3GP i Theora sada se reproduciraju izravno, a Stats for Nerds prikazuje format piksela, dubinu bitova i podatke o bojama videa te format zvuka."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Továbbfejlesztett felskálázás az eszközön futó gépi tanulással élesíti az SD és 720p videót. A RealMedia, a 3GP és a Theora mostantól közvetlenül lejátszható, a Stats for Nerds pedig mutatja a videó pixelformátumát, bitmélységét és színadatait, valamint a hang formátumát."
+            "value" : "A Továbbfejlesztett felskálázás az eszközön futó gépi tanulással élesíti az SD és 720p videót. A lejátszó egy gombja kikapcsolja és újra bekapcsolja az éppen futó videónál. A RealMedia, a 3GP és a Theora mostantól közvetlenül lejátszható, a Stats for Nerds pedig mutatja a videó pixelformátumát, bitmélységét és színadatait, valamint a hang formátumát."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upscaling avanzato rende più nitidi i video SD e 720p con il machine learning sul dispositivo. RealMedia, 3GP e Theora ora vengono riprodotti direttamente, e Stats for Nerds mostra formato pixel, profondità di bit e dati colore del video e il formato dell’audio."
+            "value" : "Upscaling avanzato rende più nitidi i video SD e 720p con il machine learning sul dispositivo. Un pulsante nel player lo disattiva e lo riattiva per il video in riproduzione. RealMedia, 3GP e Theora ora vengono riprodotti direttamente, e Stats for Nerds mostra formato pixel, profondità di bit e dati colore del video e il formato dell’audio."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "高品位アップスケーリングが、デバイス上の機械学習でSDと720pの映像をシャープにします。RealMedia、3GP、Theoraが直接再生できるようになり、Stats for Nerdsには映像のピクセルフォーマット、ビット深度、色情報と、音声のフォーマットが表示されます。"
+            "value" : "高品位アップスケーリングが、デバイス上の機械学習でSDと720pの映像をシャープにします。プレーヤーのボタンで、再生中の映像だけオフにしたり再びオンにしたりできます。RealMedia、3GP、Theoraが直接再生できるようになり、Stats for Nerdsには映像のピクセルフォーマット、ビット深度、色情報と、音声のフォーマットが表示されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "향상된 업스케일링이 기기 내 머신 러닝으로 SD 및 720p 영상을 선명하게 만듭니다. 이제 RealMedia, 3GP, Theora를 바로 재생하며, Stats for Nerds는 비디오의 픽셀 형식, 비트 심도, 색상 정보와 오디오의 형식을 보여 줍니다."
+            "value" : "향상된 업스케일링이 기기 내 머신 러닝으로 SD 및 720p 영상을 선명하게 만듭니다. 플레이어의 버튼으로 재생 중인 영상에서만 끄고 다시 켤 수 있습니다. 이제 RealMedia, 3GP, Theora를 바로 재생하며, Stats for Nerds는 비디오의 픽셀 형식, 비트 심도, 색상 정보와 오디오의 형식을 보여 줍니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Forbedret oppskalering gjør SD- og 720p-video skarpere med maskinlæring på enheten. RealMedia, 3GP og Theora spilles nå av direkte, og Stats for Nerds viser pikselformat, bitdybde og fargedetaljer for videoen og formatet på lyden."
+            "value" : "Forbedret oppskalering gjør SD- og 720p-video skarpere med maskinlæring på enheten. En knapp i spilleren slår den av og på igjen for videoen som spilles. RealMedia, 3GP og Theora spilles nå av direkte, og Stats for Nerds viser pikselformat, bitdybde og fargedetaljer for videoen og formatet på lyden."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbeterde upscaling maakt SD- en 720p-video scherper met machine learning op het apparaat. RealMedia, 3GP en Theora spelen nu direct af, en Stats for Nerds toont het pixelformaat, de bitdiepte en de kleurgegevens van de video en het formaat van de audio."
+            "value" : "Verbeterde upscaling maakt SD- en 720p-video scherper met machine learning op het apparaat. Een knop in de speler zet het uit en weer aan voor de video die speelt. RealMedia, 3GP en Theora spelen nu direct af, en Stats for Nerds toont het pixelformaat, de bitdiepte en de kleurgegevens van de video en het formaat van de audio."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ulepszone skalowanie wyostrza wideo SD i 720p za pomocą uczenia maszynowego na urządzeniu. RealMedia, 3GP i Theora odtwarzają się teraz bezpośrednio, a Stats for Nerds pokazuje format pikseli, głębię bitową i dane o kolorach wideo oraz format dźwięku."
+            "value" : "Ulepszone skalowanie wyostrza wideo SD i 720p za pomocą uczenia maszynowego na urządzeniu. Przycisk w odtwarzaczu wyłącza je i ponownie włącza dla odtwarzanego wideo. RealMedia, 3GP i Theora odtwarzają się teraz bezpośrednio, a Stats for Nerds pokazuje format pikseli, głębię bitową i dane o kolorach wideo oraz format dźwięku."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upscaling aprimorado deixa vídeos SD e 720p mais nítidos com aprendizado de máquina no próprio aparelho. RealMedia, 3GP e Theora agora são reproduzidos diretamente, e o Stats for Nerds mostra o formato de pixel, a profundidade de bits e os dados de cor do vídeo e o formato do áudio."
+            "value" : "Upscaling aprimorado deixa vídeos SD e 720p mais nítidos com aprendizado de máquina no próprio aparelho. Um botão no player desativa e reativa o recurso para o vídeo em reprodução. RealMedia, 3GP e Theora agora são reproduzidos diretamente, e o Stats for Nerds mostra o formato de pixel, a profundidade de bits e os dados de cor do vídeo e o formato do áudio."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upscaling melhorado torna mais nítidos os vídeos SD e 720p com aprendizagem automática no próprio dispositivo. RealMedia, 3GP e Theora são agora reproduzidos diretamente, e o Stats for Nerds mostra o formato de píxel, a profundidade de bits e os dados de cor do vídeo e o formato do áudio."
+            "value" : "Upscaling melhorado torna mais nítidos os vídeos SD e 720p com aprendizagem automática no próprio dispositivo. Um botão no leitor desativa e reativa a funcionalidade para o vídeo em reprodução. RealMedia, 3GP e Theora são agora reproduzidos diretamente, e o Stats for Nerds mostra o formato de píxel, a profundidade de bits e os dados de cor do vídeo e o formato do áudio."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Upscaling îmbunătățit clarifică videoclipurile SD și 720p cu învățare automată pe dispozitiv. RealMedia, 3GP și Theora se redau acum direct, iar Stats for Nerds afișează formatul pixelilor, adâncimea de biți și detaliile de culoare ale video-ului, precum și formatul audio."
+            "value" : "Upscaling îmbunătățit clarifică videoclipurile SD și 720p cu învățare automată pe dispozitiv. Un buton din player îl dezactivează și îl reactivează pentru videoclipul redat. RealMedia, 3GP și Theora se redau acum direct, iar Stats for Nerds afișează formatul pixelilor, adâncimea de biți și detaliile de culoare ale video-ului, precum și formatul audio."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Улучшенное масштабирование» повышает чёткость видео SD и 720p с помощью машинного обучения на устройстве. RealMedia, 3GP и Theora теперь воспроизводятся напрямую, а Stats for Nerds показывает формат пикселей, разрядность и цветовые параметры видео, а также формат звука."
+            "value" : "«Улучшенное масштабирование» повышает чёткость видео SD и 720p с помощью машинного обучения на устройстве. Кнопка в плеере выключает и снова включает его для текущего видео. RealMedia, 3GP и Theora теперь воспроизводятся напрямую, а Stats for Nerds показывает формат пикселей, разрядность и цветовые параметры видео, а также формат звука."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vylepšené škálovanie zaostrí video v SD a 720p pomocou strojového učenia priamo v zariadení. RealMedia, 3GP a Theora sa teraz prehrávajú priamo a Stats for Nerds ukazuje formát pixelov, bitovú hĺbku a farebné údaje videa, ako aj formát zvuku."
+            "value" : "Vylepšené škálovanie zaostrí video v SD a 720p pomocou strojového učenia priamo v zariadení. Tlačidlom v prehrávači ho možno pre práve prehrávané video vypnúť a znova zapnúť. RealMedia, 3GP a Theora sa teraz prehrávajú priamo a Stats for Nerds ukazuje formát pixelov, bitovú hĺbku a farebné údaje videa, ako aj formát zvuku."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Förbättrad uppskalning gör SD- och 720p-video skarpare med maskininlärning på enheten. RealMedia, 3GP och Theora spelas nu upp direkt, och Stats for Nerds visar videons pixelformat, bitdjup och färgdetaljer samt ljudets format."
+            "value" : "Förbättrad uppskalning gör SD- och 720p-video skarpare med maskininlärning på enheten. En knapp i spelaren stänger av och slår på den igen för videon som spelas. RealMedia, 3GP och Theora spelas nu upp direkt, och Stats for Nerds visar videons pixelformat, bitdjup och färgdetaljer samt ljudets format."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gelişmiş Ölçeklendirme, SD ve 720p videoyu cihaz üzerinde makine öğrenimiyle keskinleştirir. RealMedia, 3GP ve Theora artık doğrudan oynatılıyor; Stats for Nerds ise videonun piksel biçimini, bit derinliğini ve renk bilgilerini, sesin de biçimini gösteriyor."
+            "value" : "Gelişmiş Ölçeklendirme, SD ve 720p videoyu cihaz üzerinde makine öğrenimiyle keskinleştirir. Oynatıcıdaki bir düğme, oynatılan video için onu kapatıp yeniden açar. RealMedia, 3GP ve Theora artık doğrudan oynatılıyor; Stats for Nerds ise videonun piksel biçimini, bit derinliğini ve renk bilgilerini, sesin de biçimini gösteriyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Покращене масштабування» підвищує чіткість відео SD і 720p за допомогою машинного навчання на пристрої. RealMedia, 3GP і Theora тепер відтворюються напряму, а Stats for Nerds показує формат пікселів, розрядність і параметри кольору відео, а також формат звуку."
+            "value" : "«Покращене масштабування» підвищує чіткість відео SD і 720p за допомогою машинного навчання на пристрої. Кнопка в плеєрі вимикає та знову вмикає його для поточного відео. RealMedia, 3GP і Theora тепер відтворюються напряму, а Stats for Nerds показує формат пікселів, розрядність і параметри кольору відео, а також формат звуку."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“增强型画面放大”利用设备上的机器学习让 SD 和 720p 视频更清晰。RealMedia、3GP 和 Theora 现在可直接播放，Stats for Nerds 会显示视频的像素格式、位深度和色彩信息以及音频格式。"
+            "value" : "“增强型画面放大”利用设备上的机器学习让 SD 和 720p 视频更清晰。播放器中的按钮可为正在播放的视频关闭或重新开启此功能。RealMedia、3GP 和 Theora 现在可直接播放，Stats for Nerds 会显示视频的像素格式、位深度和色彩信息以及音频格式。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「增強型畫面放大」利用裝置上的機器學習讓 SD 和 720p 影片更清晰。RealMedia、3GP 和 Theora 現在可直接播放，Stats for Nerds 會顯示影片的像素格式、位元深度和色彩資訊以及音訊格式。"
+            "value" : "「增強型畫面放大」利用裝置上的機器學習讓 SD 和 720p 影片更清晰。播放器中的按鈕可為正在播放的影片關閉或重新開啟此功能。RealMedia、3GP 和 Theora 現在可直接播放，Stats for Nerds 會顯示影片的像素格式、位元深度和色彩資訊以及音訊格式。"
           }
         }
       }
@@ -160207,6 +160207,486 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "即將播放"
+          }
+        }
+      }
+    },
+    "player.upscaling.off" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálování vypnuto"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opskalering fra"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalierung aus"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναβάθμιση ανάλυσης ανενεργή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling Off"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado desactivado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaus pois"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle désactivée"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliranje isključeno"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felskálázás ki"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling disattivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケーリング オフ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업스케일링 끔"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppskalering av"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling uit"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalowanie wyłączone"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling desativado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling desativado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling dezactivat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлинг выкл."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovanie vypnuté"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppskalning av"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçekleme kapalı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлінг вимк."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超分辨率已关闭"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超解析度已關閉"
+          }
+        }
+      }
+    },
+    "player.upscaling.on" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálování zapnuto"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opskalering til"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalierung an"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναβάθμιση ανάλυσης ενεργή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling On"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado activado"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaus päällä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle activée"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliranje uključeno"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felskálázás be"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling attivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケーリング オン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업스케일링 켬"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppskalering på"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling aan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalowanie włączone"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling ativado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling ativado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling activat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлинг вкл."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovanie zapnuté"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppskalning på"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçekleme açık"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлінг увімк."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超分辨率已开启"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超解析度已開啟"
+          }
+        }
+      }
+    },
+    "player.upscaling.reduced" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálování omezeno"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opskalering reduceret"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalierung reduziert"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναβάθμιση ανάλυσης μειωμένη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling Reduced"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalado reducido"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaus rajoitettu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l'échelle réduite"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliranje smanjeno"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Felskálázás csökkentve"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling ridotto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケーリング 軽減"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업스케일링 축소됨"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppskalering redusert"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling beperkt"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalowanie ograniczone"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling reduzido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling reduzido"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling redus"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлинг снижен"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovanie obmedzené"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppskalning reducerad"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçekleme azaltıldı"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Апскейлінг знижено"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超分辨率已降级"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超解析度已降級"
           }
         }
       }

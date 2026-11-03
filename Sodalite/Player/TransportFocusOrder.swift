@@ -17,6 +17,7 @@ extension PlayerViewModel {
         hasAudioTracks: Bool,
         hasSubtitles: Bool,
         hasQualityChoice: Bool,
+        offersUpscaleToggle: Bool = false,
         isPiPAvailable: Bool
     ) -> [ControlsFocus] {
         var order: [ControlsFocus] = []
@@ -34,6 +35,7 @@ extension PlayerViewModel {
             case .quality where hasQualityChoice: order.append(.qualityButton)
             case .speed: order.append(.speedButton)
             case .picture: order.append(.pictureButton)
+            case .upscaling where offersUpscaleToggle: order.append(.upscaleButton)
             case .pip where isPiPAvailable: order.append(.pipButton)
             case .stats: order.append(.infoButton)
             default: break
@@ -50,6 +52,7 @@ extension PlayerViewModel {
         isAtLiveEdge: Bool,
         hasAudioTracks: Bool,
         hasSubtitles: Bool,
+        offersUpscaleToggle: Bool = false,
         isPiPAvailable: Bool,
         offersMultiview: Bool
     ) -> [ControlsFocus] {
@@ -60,6 +63,7 @@ extension PlayerViewModel {
             switch control {
             case .audio where hasAudioTracks: order.append(.audioButton)
             case .subtitles where hasSubtitles: order.append(.subtitleButton)
+            case .upscaling where offersUpscaleToggle: order.append(.upscaleButton)
             case .pip where isPiPAvailable: order.append(.pipButton)
             case .multiview where offersMultiview: order.append(.multiviewButton)
             case .stats: order.append(.infoButton)
@@ -88,6 +92,7 @@ extension PlayerViewModel {
             hasAudioTracks: !player.audioTracks.isEmpty,
             hasSubtitles: !subtitleStreams.isEmpty || supportsSubtitleSearch,
             hasQualityChoice: supportsQualityChoice,
+            offersUpscaleToggle: upscaleToggleState != nil,
             isPiPAvailable: isPiPAvailable)
     }
 
@@ -98,6 +103,7 @@ extension PlayerViewModel {
             isAtLiveEdge: isAtLiveEdge,
             hasAudioTracks: !displayAudioTracks.isEmpty,
             hasSubtitles: !displaySubtitleStreams.isEmpty,
+            offersUpscaleToggle: upscaleToggleState != nil,
             isPiPAvailable: isPiPAvailable,
             offersMultiview: offersMultiview)
     }

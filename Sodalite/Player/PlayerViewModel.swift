@@ -149,6 +149,7 @@ final class PlayerViewModel {
         case qualityButton
         case speedButton
         case pictureButton
+        case upscaleButton
         case pipButton
         case multiviewButton
         case infoButton
@@ -384,6 +385,18 @@ final class PlayerViewModel {
     /// Session-local picture-fill mode, seeded from `PlaybackPreferences.pictureMode` at startPlayback.
     /// Transient override, not persisted; settings owns the global default.
     var pictureMode: PlaybackPreferences.PictureMode = .original
+
+    /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
+    /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
+    var upscalingOverride: Bool?
+
+    /// The engine's `activeUpscale`, mirrored so the chip can be gated on it.
+    var upscaleStatus: UpscaleStatus?
+
+    /// One toggle in flight at a time: a second press during the rebuild would race the first.
+    @ObservationIgnored var upscaleToggleTask: Task<Void, Never>?
+    /// Which toggle owns `upscaleToggleTask`, so a cancelled one finishing late cannot clear a newer one.
+    @ObservationIgnored var upscaleToggleGeneration = 0
 
     var videoFormat: VideoFormat = .sdr
 
@@ -1357,7 +1370,7 @@ final class PlayerViewModel {
                 options: LoadOptions(
                     suppressDisplayCriteria: false,
                     forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
-                    upscalesLowResolutionVideo: preferences.enhancedUpscaling,
+                    upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,
@@ -2097,6 +2110,11 @@ final class PlayerViewModel {
                 // showing HDR, and it would have overridden the engine's late panel probe right back.
                 self.videoFormat = format
             }
+            .store(in: &cancellables)
+
+        player.$activeUpscale
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in self?.upscaleStatus = status }
             .store(in: &cancellables)
 
         // Mirror engine cues into `subtitleCues` only when the engine is the source. The legacy HTTP path
@@ -3954,6 +3972,7 @@ final class PlayerViewModel {
         case .qualityButton: openQualityDropdown()
         case .speedButton: openSpeedDropdown()
         case .pictureButton: openPictureDropdown()
+        case .upscaleButton: toggleUpscaling()
         case .pipButton: requestPictureInPicture()
         case .multiviewButton: onMultiviewRequested?()
         case .infoButton:

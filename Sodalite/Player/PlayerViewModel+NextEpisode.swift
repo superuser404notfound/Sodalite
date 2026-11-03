@@ -282,6 +282,7 @@ extension PlayerViewModel {
         if cachedPlaybackInfo?.matching(newItem.id, quality: effectiveStreamingQuality) == nil {
             cachedPlaybackInfo = nil
         }
+        resetUpscaleOverride()
         errorMessage = nil
         videoFormat = .sdr
         clearVideoFormatAnnouncement()

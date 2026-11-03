@@ -7,7 +7,7 @@ struct TransportFocusOrderTests {
     private func order(hasSkippableSegment: Bool = false, hasNextEpisodePrompt: Bool = false,
                        episodeCount: Int = 1, chapterCount: Int = 0,
                        hasAudioTracks: Bool = true, hasSubtitles: Bool = true,
-                       hasQualityChoice: Bool = false,
+                       hasQualityChoice: Bool = false, offersUpscaleToggle: Bool = false,
                        isPiPAvailable: Bool = false, showsStats: Bool = false,
                        controls: [PlayerControl]? = nil) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.transportFocusOrder(
@@ -16,7 +16,16 @@ struct TransportFocusOrderTests {
             episodeCount: episodeCount, chapterCount: chapterCount,
             hasAudioTracks: hasAudioTracks, hasSubtitles: hasSubtitles,
             hasQualityChoice: hasQualityChoice,
+            offersUpscaleToggle: offersUpscaleToggle,
             isPiPAvailable: isPiPAvailable)
+    }
+
+    /// Sodalite#223: next to Picture Mode, and only while the session has something to toggle.
+    @Test("the upscaling chip follows picture mode, only when offered")
+    func upscalePosition() {
+        #expect(order(offersUpscaleToggle: true)
+                == [.restartButton, .audioButton, .subtitleButton, .speedButton, .pictureButton, .upscaleButton])
+        #expect(!order().contains(.upscaleButton))
     }
 
     /// Sodalite#87: the rung sits with the stream choices, after subtitles and before speed.
@@ -117,14 +126,21 @@ struct TransportFocusOrderTests {
 struct LiveTransportFocusOrderTests {
     private func order(isAtLiveEdge: Bool = true, hasAudioTracks: Bool = false,
                        hasSubtitles: Bool = false, isPiPAvailable: Bool = false,
-                       offersMultiview: Bool = false,
+                       offersMultiview: Bool = false, offersUpscaleToggle: Bool = false,
                        showsStats: Bool = false,
                        controls: [PlayerControl]? = nil) -> [PlayerViewModel.ControlsFocus] {
         PlayerViewModel.liveTransportFocusOrder(
             controls: controls ?? PlayerControlsLayout.defaults(showsStats: showsStats).visibleControls(in: .live),
             isAtLiveEdge: isAtLiveEdge, hasAudioTracks: hasAudioTracks,
-            hasSubtitles: hasSubtitles, isPiPAvailable: isPiPAvailable,
-            offersMultiview: offersMultiview)
+            hasSubtitles: hasSubtitles, offersUpscaleToggle: offersUpscaleToggle,
+            isPiPAvailable: isPiPAvailable, offersMultiview: offersMultiview)
+    }
+
+    @Test("the upscaling chip sits after subtitles on the live row, only when offered")
+    func upscaleInLiveOrder() {
+        #expect(order(hasSubtitles: true, isPiPAvailable: true, offersUpscaleToggle: true)
+                == [.subtitleButton, .upscaleButton, .pipButton])
+        #expect(!order(hasSubtitles: true).contains(.upscaleButton))
     }
 
     /// Sodalite#194: Return to Live is the live prompt and stays ahead of any arrangement.

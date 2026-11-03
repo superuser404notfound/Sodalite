@@ -7,8 +7,8 @@ struct PlayerControlsLayoutTests {
     func defaults() {
         let off = PlayerControlsLayout.defaults()
         #expect(off.visibleControls(in: .transport)
-                == [.restart, .episodes, .chapters, .audio, .subtitles, .quality, .speed, .picture, .pip])
-        #expect(off.visibleControls(in: .live) == [.audio, .subtitles, .pip, .multiview])
+                == [.restart, .episodes, .chapters, .audio, .subtitles, .quality, .speed, .picture, .upscaling, .pip])
+        #expect(off.visibleControls(in: .live) == [.audio, .subtitles, .upscaling, .pip, .multiview])
         #expect(off.entries(in: .transport).last == .init(control: .stats, isVisible: false))
         let on = PlayerControlsLayout.defaults(showsStats: true)
         #expect(on.visibleControls(in: .transport).last == .stats)
@@ -78,7 +78,16 @@ struct PlayerControlsLayoutTests {
         let restored = layout.restoringDefaults()
         #expect(restored.isVisible(.restart, in: .transport))
         #expect(!restored.isVisible(.stats, in: .transport))
-        #expect(restored.visibleControls(in: .live) == [.audio, .subtitles, .pip, .multiview, .stats])
+        #expect(restored.visibleControls(in: .live) == [.audio, .subtitles, .upscaling, .pip, .multiview, .stats])
+    }
+
+    /// Sodalite#223: a layout stored before the upscaling chip existed picks it up, visible.
+    @Test("a stored layout without the upscaling control gains it")
+    func upscalingAppendsToStoredLayout() {
+        let stored = #"{"transport":[{"control":"restart","visible":true},{"control":"stats","visible":false}]}"#
+        let layout = PlayerControlsLayout.decoded(stored)
+        #expect(layout.isVisible(.upscaling, in: .transport))
+        #expect(layout.isVisible(.upscaling, in: .live))
     }
 
     @Test("garbage falls back to the defaults")

@@ -275,6 +275,7 @@ struct PlayerControlsSettingsView: View {
         case .quality: String(localized: "settings.playback.quality", defaultValue: "Streaming Quality")
         case .speed: String(localized: "playerControls.control.speed", defaultValue: "Playback Speed")
         case .picture: String(localized: "playerControls.control.picture", defaultValue: "Picture Mode")
+        case .upscaling: String(localized: "settings.playback.enhancedUpscaling", defaultValue: "Enhanced Upscaling")
         case .pip: String(localized: "player.pip", defaultValue: "Picture in Picture")
         case .multiview: String(localized: "multiview.button", defaultValue: "Multiview")
         case .stats: String(localized: "player.stats.title", defaultValue: "Stats for Nerds")
@@ -297,6 +298,7 @@ struct PlayerControlsSettingsView: View {
         case .quality: "dial.medium"
         case .speed: "gauge.with.needle"
         case .picture: "rectangle.ratio.16.to.9"
+        case .upscaling: "wand.and.sparkles"
         case .pip: "pip.enter"
         case .multiview: "rectangle.split.2x2"
         case .stats: "info.circle"

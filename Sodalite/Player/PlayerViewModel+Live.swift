@@ -460,7 +460,7 @@ extension PlayerViewModel {
             options: LoadOptions(
                 suppressDisplayCriteria: false,
                 forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
-                upscalesLowResolutionVideo: preferences.enhancedUpscaling,
+                upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
                 matchContentEnabled: Self.matchContentEnabled,
                 panelIsInHDRMode: Self.panelIsInHDRMode,
                 audioBridgeMode: preferences.audioBridgeMode,
@@ -598,7 +598,7 @@ extension PlayerViewModel {
         let options = LoadOptions(
             suppressDisplayCriteria: false,
             forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
-            upscalesLowResolutionVideo: preferences.enhancedUpscaling,
+            upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
             matchContentEnabled: Self.matchContentEnabled,
             panelIsInHDRMode: Self.panelIsInHDRMode,
             audioBridgeMode: preferences.audioBridgeMode,

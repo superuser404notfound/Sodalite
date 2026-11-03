@@ -1715,7 +1715,7 @@ final class PlayerHostController: AVPlayerViewController {
                     viewModel.controlsFocus = landing
                 }
                 viewModel.scheduleControlsHide()
-            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
+            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .upscaleButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()
             }
         } else {
