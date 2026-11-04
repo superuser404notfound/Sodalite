@@ -276,9 +276,7 @@ private struct ServerManagementRow: View {
                     badges
                 }
                 #endif
-                Text(server.url.host() ?? server.url.absoluteString)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                address
                 Text("multiServer.row.userCount \(userCount)", bundle: .main)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -384,12 +382,44 @@ private struct ServerManagementRow: View {
         if isDefault {
             StatusPill("multiServer.row.default")
         }
-        #if os(iOS)
-        if isActive, let route = dependencies.activeJellyfinRoute {
-            StatusPill(route == .internal ? "multiServer.route.internal" : "multiServer.route.external",
-                       tone: .neutral)
+    }
+
+    /// The address the row names is the one in use: the live route for the active server, the
+    /// last-known route for the others. `server.url` is always the internal slot when one is set, so
+    /// a phone on cellular showed the home IP under an External tag (Sodalite#225).
+    private var shownRoute: ServerRoute? {
+        isActive ? dependencies.activeJellyfinRoute : nil
+    }
+
+    private var shownURL: URL {
+        if let shownRoute, let url = server.url(for: shownRoute) { return url }
+        return dependencies.preferredURL(for: server)
+    }
+
+    @ViewBuilder
+    private var address: some View {
+        HStack(spacing: 6) {
+            #if os(iOS)
+            // Labels the address itself rather than sitting among the pills, where a grey
+            // External next to Active and Default read as a switched-off state (Sodalite#225).
+            if let shownRoute {
+                Text(shownRoute == .internal ? "multiServer.route.internal" : "multiServer.route.external",
+                     bundle: .main)
+                    .fontWeight(.semibold)
+                    .fixedSize()
+                Text(verbatim: "·")
+                    .fixedSize()
+            }
+            #endif
+            // One line, cut in the middle: a long reverse-proxy host keeps its first label and its
+            // domain, which are the two parts that tell the addresses apart.
+            Text(verbatim: shownURL.host() ?? shownURL.absoluteString)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        #endif
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
     }
 
     @ViewBuilder
