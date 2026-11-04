@@ -72,6 +72,8 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     var versionOrder: String?
     /// Sodalite#219. Optional for the same reason; nil keeps the local value.
     var playThemeSongs: Bool?
+    /// Sodalite#224. Optional for the same reason; nil keeps the local value.
+    var autoSkipCommercials: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -110,7 +112,8 @@ extension ProfilePlaybackPayload {
             askForRatingAfterMovie: p.askForRatingAfterMovie,
             playerControls: p.playerControls.encoded(),
             versionOrder: p.versionOrder.rawValue,
-            playThemeSongs: p.playThemeSongs
+            playThemeSongs: p.playThemeSongs,
+            autoSkipCommercials: p.autoSkipCommercials
         )
     }
 
@@ -151,6 +154,7 @@ extension ProfilePlaybackPayload {
         }
         if let order = versionOrder.flatMap(VersionOrder.init(rawValue:)) { p.versionOrder = order }
         if let playThemeSongs { p.playThemeSongs = playThemeSongs }
+        if let autoSkipCommercials { p.autoSkipCommercials = autoSkipCommercials }
     }
 }
 

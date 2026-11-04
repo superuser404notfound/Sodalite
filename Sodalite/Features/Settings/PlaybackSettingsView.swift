@@ -175,6 +175,16 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                boolRow(
+                    icon: "forward.fill",
+                    title: "settings.playback.autoSkipCommercials",
+                    subtitle: "settings.playback.autoSkipCommercials.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSkipCommercials },
+                        set: { prefs.autoSkipCommercials = $0 }
+                    )
+                )
+
                 sectionHeader("settings.playback.section.movies")
 
                 boolRow(

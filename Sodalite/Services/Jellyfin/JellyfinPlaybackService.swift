@@ -240,18 +240,14 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         return response.items
     }
 
-    /// Intro + outro + recap markers in one call; empty struct on 404 (pre-10.10 without intro-skipper) or no segments.
+    /// Intro + outro + recap markers and all commercial breaks in one call; empty struct on 404 (pre-10.10 without intro-skipper) or no segments.
     func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments {
         do {
             let response: MediaSegmentsResponse = try await client.request(
                 endpoint: JellyfinEndpoint.mediaSegments(itemID: itemID),
                 responseType: MediaSegmentsResponse.self
             )
-            return EpisodeSegments(
-                intro: response.items.first(where: { $0.type == .intro }),
-                outro: response.items.first(where: { $0.type == .outro }),
-                recap: response.items.first(where: { $0.type == .recap })
-            )
+            return EpisodeSegments(items: response.items)
         } catch APIError.httpError(let status, _) where status == 404 {
             return EpisodeSegments(intro: nil, outro: nil, recap: nil)
         }

@@ -27,6 +27,7 @@ final class PlaybackPreferences {
         static let autoSkipIntro = "playback.autoSkipIntro"
         static let autoSkipRecap = "playback.autoSkipRecap"
         static let autoSkipOutro = "playback.autoSkipOutro"
+        static let autoSkipCommercials = "playback.autoSkipCommercials"
         static let autoSubtitleForForeignAudio = "playback.autoSubtitleForForeignAudio"
         static let autoForcedSubtitles = "playback.autoForcedSubtitles"
         static let styledASSSubtitles = "playback.styledASSSubtitles"
@@ -318,6 +319,11 @@ final class PlaybackPreferences {
 
     var autoSkipOutro: Bool {
         didSet { store.set(autoSkipOutro, forKey: Keys.autoSkipOutro) }
+    }
+
+    /// Sodalite#224, every commercial break the server marked, once each per playback.
+    var autoSkipCommercials: Bool {
+        didSet { store.set(autoSkipCommercials, forKey: Keys.autoSkipCommercials) }
     }
 
     /// How long the countdown runs once armed. Inert while `autoplayCountdown` is off; read through
@@ -624,6 +630,7 @@ final class PlaybackPreferences {
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false
+        self.autoSkipCommercials = store.object(forKey: Keys.autoSkipCommercials) as? Bool ?? false
         self.nextEpisodeCountdownSeconds = store.object(forKey: Keys.nextEpisodeCountdownSeconds) as? Int ?? 15
         self.nextEpisodeCountdownAnchor = (store.string(forKey: Keys.nextEpisodeCountdownAnchor))
             .flatMap(NextEpisodePolicy.CountdownAnchor.init(rawValue:)) ?? .outro

@@ -321,10 +321,12 @@ extension PlayerViewModel {
         introSegment = nil
         outroSegment = nil
         recapSegment = nil
+        commercialSegments = []
         activeSkipSegment = nil
         didAutoSkipCurrentIntro = false
         didAutoSkipCurrentRecap = false
         didAutoSkipCurrentOutro = false
+        autoSkippedCommercialStarts = []
         didSkipCurrentSegment = nil
     }
 

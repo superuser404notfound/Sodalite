@@ -109,7 +109,7 @@ struct JellyfinSessionInfo: Decodable, Sendable {
 
 // MARK: - Media Segments
 
-/// `/MediaSegments/{itemId}` intro/outro/preview markers; native on Jellyfin 10.10+, intro-skipper plugin on 10.9.
+/// `/MediaSegments/{itemId}` intro/outro/recap/commercial markers; native on Jellyfin 10.10+, intro-skipper plugin on 10.9.
 struct MediaSegmentsResponse: Codable, Sendable {
     let items: [MediaSegment]
     let totalRecordCount: Int?
@@ -140,13 +140,26 @@ struct MediaSegment: Codable, Sendable, Identifiable {
     var endSeconds: Double { Double(endTicks) / 10_000_000 }
 }
 
-/// Paired result for one item's intro + outro + recap markers, returned in a
-/// single request to `/MediaSegments/{itemId}`. Any of them may be nil if the
+/// One item's intro + outro + recap markers and every commercial break, returned in a
+/// single request to `/MediaSegments/{itemId}`. Any of them may be nil (or empty) if the
 /// server didn't detect that segment type.
 struct EpisodeSegments: Sendable {
     let intro: MediaSegment?
     let outro: MediaSegment?
     let recap: MediaSegment?
+    /// Sodalite#224. All of them, sorted by start: a recording has one per break.
+    var commercials: [MediaSegment] = []
+}
+
+extension EpisodeSegments {
+    init(items: [MediaSegment]) {
+        self.init(
+            intro: items.first(where: { $0.type == .intro }),
+            outro: items.first(where: { $0.type == .outro }),
+            recap: items.first(where: { $0.type == .recap }),
+            commercials: items.filter { $0.type == .commercial }.sorted { $0.startTicks < $1.startTicks }
+        )
+    }
 }
 
 enum SegmentType: String, Codable, Sendable {
