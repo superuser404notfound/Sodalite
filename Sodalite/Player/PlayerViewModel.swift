@@ -522,11 +522,12 @@ final class PlayerViewModel {
     /// changes, cutting ~9/10 redundant string allocations and label invalidations per second.
     @ObservationIgnored private var lastDisplayedSecond: Int = -1
 
-    // Intro + outro + recap markers, all from Jellyfin Media Segments / intro-skipper plugin in one call.
+    // Intro + outro + recap markers and commercial breaks, all from Jellyfin Media Segments / intro-skipper plugin in one call.
     var introSegment: MediaSegment?
     var outroSegment: MediaSegment?
     var recapSegment: MediaSegment?
-    /// The segment the player currently offers to skip (intro or recap), nil when there is nothing to
+    var commercialSegments: [MediaSegment] = []
+    /// The segment the player currently offers to skip (intro, recap or a break), nil when there is nothing to
     /// skip. Shows the skip pill even when controls are closed, and carries the seek target.
     var activeSkipSegment: ActiveSkipSegment?
     /// Set once per episode after auto-skip fires; keeps the time subscriber from re-triggering before
@@ -534,13 +535,16 @@ final class PlayerViewModel {
     /// intro's auto-skip swallow a recap that follows it in the same episode.
     var didAutoSkipCurrentIntro: Bool = false
     var didAutoSkipCurrentRecap: Bool = false
+    /// Breaks already auto-skipped, by start: one latch per break, so the first one can't swallow the rest.
+    var autoSkippedCommercialStarts: Set<Double> = []
     /// Outro equivalent; prevents repeat auto-skip while currentTime ticks toward outro.endSeconds.
     var didAutoSkipCurrentOutro: Bool = false
-    /// Skip-lockout latch: while it names a kind, `updateSkipSegmentVisibility` refuses to re-offer that
-    /// kind, so stale pre-seek ticks (between the flag flip and the seek landing) can't revive the pill
-    /// mid-fade. A different kind resolves immediately, which is what chains a recap into the intro
-    /// behind it. Cleared 500ms after `player.seek` returns (absorbs post-seek jitter) and on episode change.
-    var didSkipCurrentSegment: SkipSegmentKind?
+    /// Skip-lockout latch: while it names a segment, `updateSkipSegmentVisibility` refuses to re-offer
+    /// it, so stale pre-seek ticks (between the flag flip and the seek landing) can't revive the pill
+    /// mid-fade. A different segment resolves immediately, which is what chains a recap into the intro
+    /// behind it, or one break into the next. Cleared 500ms after `player.seek` returns (absorbs
+    /// post-seek jitter) and on episode change.
+    var didSkipCurrentSegment: ActiveSkipSegment?
 
     // MARK: - Dependencies
 
@@ -3197,18 +3201,20 @@ final class PlayerViewModel {
     /// Resolves the currently skippable segment from the playback-time sink so the UI shows or hides
     /// the skip pill, and fires the opt-in auto-skips.
     func updateSkipSegmentVisibility(time: Double) {
-        let resolved = SkipSegmentResolver.active(intro: introSegment, recap: recapSegment, time: time)
+        let resolved = SkipSegmentResolver.active(
+            intro: introSegment, recap: recapSegment, commercials: commercialSegments, time: time
+        )
 
         // Skip-lockout: a stale pre-seek tick still inside the segment we just skipped must not revive
-        // the pill. A different kind falls through, so a recap chains into its intro at once.
-        if let locked = didSkipCurrentSegment, resolved?.kind == locked {
+        // the pill. A different segment falls through, so a recap chains into its intro at once.
+        if let locked = didSkipCurrentSegment, resolved == locked {
             if activeSkipSegment != nil { setActiveSkipSegment(nil) }
             return
         }
 
-        // Auto-skip on the first tick inside the segment (opt-in), guarded to fire once per kind.
+        // Auto-skip on the first tick inside the segment (opt-in), guarded to fire once per segment.
         if let resolved, shouldAutoSkip(resolved) {
-            markAutoSkipped(resolved.kind)
+            markAutoSkipped(resolved)
             skip(resolved)
             return
         }
@@ -3222,13 +3228,15 @@ final class PlayerViewModel {
         switch segment.kind {
         case .intro: preferences.autoSkipIntro && !didAutoSkipCurrentIntro
         case .recap: preferences.autoSkipRecap && !didAutoSkipCurrentRecap
+        case .commercial: preferences.autoSkipCommercials && !autoSkippedCommercialStarts.contains(segment.startSeconds)
         }
     }
 
-    private func markAutoSkipped(_ kind: SkipSegmentKind) {
-        switch kind {
+    private func markAutoSkipped(_ segment: ActiveSkipSegment) {
+        switch segment.kind {
         case .intro: didAutoSkipCurrentIntro = true
         case .recap: didAutoSkipCurrentRecap = true
+        case .commercial: autoSkippedCommercialStarts.insert(segment.startSeconds)
         }
     }
 
@@ -3249,7 +3257,7 @@ final class PlayerViewModel {
 
     private func skip(_ segment: ActiveSkipSegment) {
         setActiveSkipSegment(nil)
-        didSkipCurrentSegment = segment.kind
+        didSkipCurrentSegment = segment
         Task { [weak self] in
             // endSeconds is absolute source time; seek(to:) is source-PTS based and applies the clock shift itself. Exact,
             // because a keyframe landing on the AV1 software route would replay the intro tail or cut the first line.
@@ -3257,7 +3265,7 @@ final class PlayerViewModel {
             // Clear the lockout after a 500ms settle (absorbs post-seek jitter) so a deliberate
             // backward scrub re-offers the pill; without it the lockout persists the whole episode.
             try? await Task.sleep(for: .milliseconds(500))
-            self?.didSkipCurrentSegment = nil
+            if self?.didSkipCurrentSegment == segment { self?.didSkipCurrentSegment = nil }
         }
     }
 
@@ -3280,18 +3288,20 @@ final class PlayerViewModel {
         }
     }
 
-    /// Fetch intro + outro + recap markers once on startup. Safe if the server lacks the endpoint
+    /// Fetch intro + outro + recap markers and commercial breaks once on startup. Safe if the server lacks the endpoint
     /// (empty struct, features stay off).
     func loadEpisodeSegments() async {
         didAutoSkipCurrentIntro = false
         didAutoSkipCurrentRecap = false
         didAutoSkipCurrentOutro = false
+        autoSkippedCommercialStarts = []
         didSkipCurrentSegment = nil
         do {
             let segments = try await playbackService.getEpisodeSegments(itemID: item.id)
             introSegment = segments.intro
             outroSegment = segments.outro
             recapSegment = segments.recap
+            commercialSegments = segments.commercials
         } catch {
             #if DEBUG
             print("[MediaSegments] Fetch failed: \(error)")
@@ -3299,6 +3309,7 @@ final class PlayerViewModel {
             introSegment = nil
             outroSegment = nil
             recapSegment = nil
+            commercialSegments = []
         }
     }
 

@@ -5,11 +5,13 @@ import Foundation
 enum SkipSegmentKind: Sendable {
     case recap
     case intro
+    case commercial
 
     var buttonLabel: String {
         switch self {
         case .recap: String(localized: "player.skipRecap", defaultValue: "Skip Recap")
         case .intro: String(localized: "player.skipIntro", defaultValue: "Skip Intro")
+        case .commercial: String(localized: "player.skipCommercial", defaultValue: "Skip Commercial")
         }
     }
 }
@@ -32,12 +34,19 @@ enum SkipSegmentResolver {
     static let hideBeforeEndSeconds: Double = 1
 
     /// Recap is checked first: when a recap runs straight into an intro, one press clears the recap
-    /// and the next tick re-resolves to the intro, relabelling the same pill.
-    static func active(intro: MediaSegment?, recap: MediaSegment?, time: Double) -> ActiveSkipSegment? {
+    /// and the next tick re-resolves to the intro, relabelling the same pill. Commercial breaks come
+    /// last, each one its own segment, so back-to-back breaks chain the same way.
+    static func active(
+        intro: MediaSegment?,
+        recap: MediaSegment?,
+        commercials: [MediaSegment] = [],
+        time: Double
+    ) -> ActiveSkipSegment? {
         let candidates = [
             recap.map { ActiveSkipSegment(kind: .recap, startSeconds: $0.startSeconds, endSeconds: $0.endSeconds) },
             intro.map { ActiveSkipSegment(kind: .intro, startSeconds: $0.startSeconds, endSeconds: $0.endSeconds) },
         ].compactMap { $0 }
+            + commercials.map { ActiveSkipSegment(kind: .commercial, startSeconds: $0.startSeconds, endSeconds: $0.endSeconds) }
         return candidates.first { contains($0, time: time) }
     }
 

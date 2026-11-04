@@ -71458,157 +71458,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači."
+            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači. Reklamní přestávky označené serverem lze přeskočit jedním stisknutím nebo automaticky."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren."
+            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren. Reklamepauser, som serveren har markeret, kan springes over med ét tryk eller automatisk."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player."
+            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player. Vom Server markierte Werbepausen lassen sich mit einem Klick oder automatisch überspringen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player."
+            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player. Τα διαφημιστικά διαλείμματα που έχει σημειώσει ο διακομιστής παραλείπονται με ένα πάτημα ή αυτόματα."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player."
+            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player. Commercial breaks the server has marked can be skipped with one press or automatically."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor."
+            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor. Las pausas publicitarias marcadas por el servidor se omiten con una pulsación o automáticamente."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta."
+            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta. Palvelimen merkitsemät mainoskatkot voi ohittaa yhdellä painalluksella tai automaattisesti."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur."
+            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur. Les coupures pub marquées par le serveur se passent en une pression ou automatiquement."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera."
+            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera. Reklamne pauze koje je označio poslužitelj preskaču se jednim pritiskom ili automatski."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el."
+            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el. A szerver által megjelölt reklámszünetek egy gombnyomással vagy automatikusan átugorhatók."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player."
+            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player. Le interruzioni pubblicitarie segnate dal server si saltano con un tocco o in automatico."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。"
+            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。サーバーがマークしたCM区間は、ワンタップまたは自動でスキップできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다."
+            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다. 서버가 표시한 광고 구간은 버튼 한 번으로 또는 자동으로 건너뛸 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren."
+            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren. Reklamepauser serveren har markert, kan hoppes over med ett trykk eller automatisk."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler."
+            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler. Door de server gemarkeerde reclameblokken sla je met één druk of automatisch over."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza."
+            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza. Przerwy reklamowe oznaczone przez serwer można pominąć jednym naciśnięciem lub automatycznie."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player."
+            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player. Intervalos comerciais marcados pelo servidor podem ser pulados com um toque ou automaticamente."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor."
+            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor. Os intervalos publicitários marcados pelo servidor podem ser saltados com um toque ou automaticamente."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player."
+            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player. Pauzele publicitare marcate de server pot fi omise cu o apăsare sau automat."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере."
+            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере. Рекламные паузы, отмеченные сервером, можно пропустить одним нажатием или автоматически."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači."
+            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači. Reklamné prestávky označené serverom preskočíte jedným stlačením alebo automaticky."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren."
+            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren. Reklampauser som servern har markerat kan hoppas över med ett tryck eller automatiskt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir."
+            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir. Sunucunun işaretlediği reklam araları tek dokunuşla veya otomatik olarak atlanabilir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі."
+            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі. Рекламні паузи, позначені сервером, можна пропустити одним натисканням або автоматично."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。"
+            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。服务器标记的广告时段可以一键跳过或自动跳过。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。"
+            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。伺服器標記的廣告時段可以一鍵跳過或自動跳過。"
           }
         }
       }
@@ -148475,6 +148475,167 @@
         }
       }
     },
+    "player.skipCommercial" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přeskočit reklamu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring reklamer over"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werbung überspringen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παράλειψη διαφήμισης"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip Commercial"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omitir anuncios"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohita mainokset"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer la pub"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preskoči reklame"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reklám átugrása"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta pubblicità"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CMをスキップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "광고 건너뛰기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopp over reklame"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reclame overslaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomiń reklamy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular comerciais"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saltar publicidade"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omite reclamele"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустить рекламу"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preskočiť reklamu"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoppa över reklam"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reklamı Atla"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустити рекламу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳过广告"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳過廣告"
+          }
+        }
+      }
+    },
     "player.skipIntro" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -193631,6 +193792,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前的劇集結束時自動開始下一集。"
+          }
+        }
+      }
+    },
+    "settings.playback.autoSkipCommercials" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky přeskakovat reklamy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring reklamer over automatisk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werbung automatisch überspringen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτόματη παράλειψη διαφημίσεων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-Skip Commercials"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omitir anuncios automáticamente"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohita mainokset automaattisesti"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer les pubs automatiquement"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatski preskoči reklame"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reklámok automatikus átugrása"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta pubblicità automaticamente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CMを自動スキップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "광고 자동 건너뛰기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopp over reklame automatisk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reclame automatisch overslaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatycznie pomijaj reklamy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular comerciais automaticamente"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saltar publicidade automaticamente"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omite automat reclamele"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автопропуск рекламы"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky preskakovať reklamy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoppa över reklam automatiskt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reklamları Otomatik Atla"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автопропуск реклами"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动跳过广告"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動跳過廣告"
+          }
+        }
+      }
+    },
+    "settings.playback.autoSkipCommercials.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky přeskočí reklamní přestávky označené serverem bez zobrazení tlačítka."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spring reklamepauser over, som serveren har markeret, uden at vise knappen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Server markierte Werbepausen überspringen, ohne den Button zu zeigen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παράλειψη διαφημιστικών διαλειμμάτων που έχει σημειώσει ο διακομιστής χωρίς εμφάνιση κουμπιού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip commercial breaks the server has marked without showing the button."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omite las pausas publicitarias marcadas por el servidor sin mostrar el botón."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohittaa palvelimen merkitsemät mainoskatkot ilman painikkeen näyttämistä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passe automatiquement les coupures pub marquées par le serveur sans afficher le bouton."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preskače reklamne pauze koje je označio poslužitelj bez prikaza gumba."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kihagyja a szerver által megjelölt reklámszüneteket gomb nélkül."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta le interruzioni pubblicitarie segnate dal server senza mostrare il pulsante."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーがマークしたCM区間をボタンを表示せずにスキップします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버가 표시한 광고 구간을 버튼 없이 건너뜁니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopp over reklamepauser serveren har markert, uten å vise knappen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slaat door de server gemarkeerde reclameblokken over zonder de knop te tonen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomija przerwy reklamowe oznaczone przez serwer bez pokazywania przycisku."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pula os intervalos comerciais marcados pelo servidor sem mostrar o botão."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta os intervalos publicitários marcados pelo servidor sem mostrar o botão."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omite pauzele publicitare marcate de server fără a afișa butonul."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускать рекламные паузы, отмеченные сервером, без показа кнопки."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky preskočí reklamné prestávky označené serverom bez zobrazenia tlačidla."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoppa över reklampauser som servern har markerat utan att visa knappen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun işaretlediği reklam aralarını düğme göstermeden atlar."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропускає рекламні паузи, позначені сервером, без показу кнопки."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳过服务器标记的广告时段,不显示按钮。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳過伺服器標記的廣告時段,不顯示按鈕。"
           }
         }
       }
