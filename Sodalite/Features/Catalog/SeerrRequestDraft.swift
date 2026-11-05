@@ -28,6 +28,7 @@ final class SeerrRequestOptions {
         self.profileID = profileID
         self.rootFolder = rootFolder
         self.implicit = implicit
+        self.tagIDs = implicit?.tagIDs ?? []
     }
 
     /// The instance rides along with the resolved server, it is never picked by hand.
@@ -48,9 +49,11 @@ final class SeerrRequestOptions {
         return rootFolder == implicit.rootFolder ? nil : rootFolder
     }
 
-    /// Send nil, not [], for "no tags": older Jellyseerr lacks the field entirely.
+    /// Send nil, not [], for "no tags": older Jellyseerr lacks the field entirely. The instance's own
+    /// default tags stay out too, so Seerr's Override Rules can still add theirs.
     var tagsPayload: [Int]? {
-        tagIDs.isEmpty ? nil : tagIDs.sorted()
+        if tagIDs.isEmpty || tagIDs == implicit?.tagIDs { return nil }
+        return tagIDs.sorted()
     }
 
     var availableTags: [SeerrTag] {
@@ -72,6 +75,7 @@ final class SeerrRequestOptions {
             profileID = resolved.profileID
             rootFolder = resolved.rootFolder
             implicit = resolved.implicit
+            tagIDs = resolved.implicit.tagIDs
         } catch {
             // Swallow: the option rows simply stay absent.
         }
@@ -221,6 +225,9 @@ enum SeerrRequestDefaults {
         let serverIsSeerrDefault: Bool
         let profileID: Int?
         let rootFolder: String?
+        /// Seerr adds these to every request on its own, so the picker opens with them ticked rather
+        /// than reading "None" for a request that will carry them (Sodalite#228).
+        var tagIDs: Set<Int> = []
     }
 
     static func resolve(
@@ -262,7 +269,8 @@ enum SeerrRequestDefaults {
             implicit: Implicit(
                 serverIsSeerrDefault: isSeerrDefault(chosen),
                 profileID: configuredProfile,
-                rootFolder: configuredFolder
+                rootFolder: configuredFolder,
+                tagIDs: defaultTags(chosen: chosen, details: details)
             )
         )
     }
@@ -273,6 +281,13 @@ enum SeerrRequestDefaults {
         servers.first(where: isSeerrDefault)
             ?? servers.first(where: { $0.is4k != true })
             ?? servers.first
+    }
+
+    /// Only tags the instance still has: a deleted tag would tick nothing and keep the label wrong.
+    private static func defaultTags(chosen: SeerrServiceServer, details: SeerrServiceDetails) -> Set<Int> {
+        let configured = chosen.activeTags ?? details.server.activeTags ?? []
+        let known = Set((details.tags ?? []).map(\.id))
+        return Set(configured).intersection(known)
     }
 
     private static func isSeerrDefault(_ server: SeerrServiceServer) -> Bool {

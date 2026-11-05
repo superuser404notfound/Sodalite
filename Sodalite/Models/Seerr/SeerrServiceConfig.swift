@@ -9,6 +9,9 @@ struct SeerrServiceServer: Codable, Sendable, Identifiable, Equatable {
     let activeProfileId: Int?
     let activeDirectory: String?
     let activeLanguageProfileId: Int?
+    /// The tags Seerr puts on every request to this instance. A request's own tags replace them, and an
+    /// empty list is stored as none, so it cannot take them away.
+    var activeTags: [Int]? = nil
 }
 
 struct SeerrServiceDetails: Codable, Sendable {
