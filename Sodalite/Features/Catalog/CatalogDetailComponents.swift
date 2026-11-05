@@ -139,10 +139,14 @@ private struct CatalogOptionPanel<Rows: View>: View {
         }
         #else
         if onCommit != nil {
+            // Done sits alone at the right edge while the rows are a centred 720 pt column, so Up from
+            // the list found nothing above it and the selection could not be saved (Sodalite#228). The
+            // section spans the full width, which gives Up a target wherever the row sits.
             HStack(spacing: 16) {
                 Spacer(minLength: 12)
                 commitButton
             }
+            .focusSection()
         }
         #endif
     }
