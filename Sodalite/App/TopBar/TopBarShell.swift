@@ -112,6 +112,7 @@ struct TopBarShell<Content: View>: View {
             .environment(\.shellBarInset, TopBarMetrics.contentInset)
             .environment(\.shellBarScroll, ShellBarScroll(ride: ride, tab: tab))
             .environment(\.shellBarScrollToTop, scrollToTopRequests[tab] ?? 0)
+            .environment(\.shellBarHoldsFocus, isSelected && focusIsInBar)
             .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                 chromeHidden[tab] = hidden
             }
@@ -225,6 +226,9 @@ extension EnvironmentValues {
     /// the page's root, and zeroed for everything inside it, so a pushed screen, a sheet or a cover
     /// never inherits it.
     @Entry var shellBarInset: CGFloat = 0
+    /// True on the selected page while the top bar holds focus, the moment a press down is about to
+    /// enter it. Only the top bar sets it; under the sidebar it stays false.
+    @Entry var shellBarHoldsFocus = false
 }
 
 extension View {
