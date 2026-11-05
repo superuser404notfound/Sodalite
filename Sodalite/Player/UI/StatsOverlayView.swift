@@ -308,6 +308,10 @@ struct StatsOverlayView: View {
                 ?? fileVideoStream?.realFrameRate ?? fileVideoStream?.averageFrameRate {
                 row("detail.tech.framerate", value: String(format: "%.3g fps", fps))
             }
+            if let deinterlace = player.decodedVideoFormat?.deinterlace {
+                row("player.stats.deinterlacing", value: Self.deinterlaceLabel(
+                    deinterlace, sourceFrameRate: player.sourceVideoFrameRate))
+            }
             if let bps = videoBitrate {
                 row("detail.tech.bitrate", value: Self.formatBitrate(bps))
             }
@@ -581,17 +585,37 @@ struct StatsOverlayView: View {
     private var resolutionLabel: String? {
         Self.resolutionLabel(engineWidth: Int(player.sourceVideoWidth),
                              engineHeight: Int(player.sourceVideoHeight),
-                             file: fileVideoStream)
+                             file: fileVideoStream,
+                             scan: player.sourceVideoScan)
     }
 
-    static func resolutionLabel(engineWidth: Int, engineHeight: Int, file: MediaStream?) -> String? {
+    /// AE#983: the engine's scan verdict rides on the height ("1920×1080i · TFF"), nothing when it is unknown.
+    static func resolutionLabel(
+        engineWidth: Int, engineHeight: Int, file: MediaStream?, scan: VideoScan = .unknown
+    ) -> String? {
+        let size: String
         if engineWidth > 0, engineHeight > 0 {
-            return "\(engineWidth)×\(engineHeight)"
+            size = "\(engineWidth)×\(engineHeight)"
+        } else if let w = file?.width, let h = file?.height {
+            size = "\(w)×\(h)"
+        } else {
+            return nil
         }
-        if let w = file?.width, let h = file?.height {
-            return "\(w)×\(h)"
+        switch scan {
+        case .unknown: return size
+        case .progressive: return size + "p"
+        case .interlaced(.topFieldFirst): return size + "i · TFF"
+        case .interlaced(.bottomFieldFirst): return size + "i · BFF"
+        case .interlaced(.unknown): return size + "i"
         }
-        return nil
+    }
+
+    /// "bwdif (CPU) → 25 fps": the filter, where it runs, and the rate it hands the display.
+    static func deinterlaceLabel(_ deinterlace: VideoDeinterlace, sourceFrameRate: Double?) -> String {
+        let label = "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
+        guard let rate = sourceFrameRate, rate > 0 else { return label }
+        let output = rate * Double(deinterlace.outputFramesPerSourceFrame)
+        return label + " → " + String(format: "%.3g fps", output)
     }
 
     /// The engine's declared VIDEO bitrate when the container carries one; the source-wide figure from
