@@ -338,7 +338,7 @@ struct PlaybackSettingsView: View {
                         get: { prefs.subtitleVerticalPosition },
                         set: { prefs.subtitleVerticalPosition = $0 }
                     ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                    label: { $0.label }
                 )
 
                 ValuePickerRow(

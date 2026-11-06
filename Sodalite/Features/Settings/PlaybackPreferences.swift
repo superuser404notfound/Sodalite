@@ -149,15 +149,30 @@ final class PlaybackPreferences {
     }
 
     /// Downward-only fraction-of-player-rect steps, no negative half; explicit `default` opt-out matters for PGS/DVB/DVD source-baked positions.
+    /// The `edge` steps fill the gap between Bottom Edge and Low, where a single line sits in the letterbox bar (#229).
     enum SubtitleVerticalPosition: String, CaseIterable, Sendable, Identifiable {
         case `default`
         case bottom
+        case edge2
+        case edge4
+        case edge6
+        case edge8
         case step1
         case step2
         case step3
 
         var id: String { rawValue }
         var titleKey: String { "settings.playback.subtitle.position.\(rawValue)" }
+
+        /// The named steps keep their words; the in-between ones read as a localized percentage, which needs no catalog entry.
+        var label: String {
+            switch self {
+            case .edge2, .edge4, .edge6, .edge8:
+                return (fractionFromBottom ?? 0).formatted(.percent.precision(.fractionLength(0)))
+            default:
+                return String(localized: String.LocalizationValue(titleKey))
+            }
+        }
 
         /// Fraction of player rect height from bottom edge; nil = no override (historical baseline, bitmap cues untouched).
         var fractionFromBottom: Double? {
@@ -166,6 +181,10 @@ final class PlaybackPreferences {
             // 0 = flush with the screen bottom, distinct from nil: the letterbox bar varies with
             // aspect ratio, so any positive anchor centres in it only at one ratio (#15).
             case .bottom:  return 0
+            case .edge2:   return 0.02
+            case .edge4:   return 0.04
+            case .edge6:   return 0.06
+            case .edge8:   return 0.08
             case .step1:   return 0.10
             case .step2:   return 0.20
             case .step3:   return 0.30
