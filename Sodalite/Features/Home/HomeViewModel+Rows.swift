@@ -53,6 +53,16 @@ extension HomeViewModel {
         return folded
     }
 
+    /// The source's library list, awaited rather than read off `myMediaLibraries`: the fan-out
+    /// fills that field from the same task group, so on the first load of a session it is empty.
+    private func homeLibraries(source: HomeSource) async -> [JellyfinLibrary] {
+        if let task = librariesTasks[source.serverID] ?? (source.isActive ? librariesTask : nil),
+           let fetched = await task.value {
+            return fetched
+        }
+        return myMediaLibraries.filter { ($0.serverID ?? source.serverID) == source.serverID }
+    }
+
     /// The active server's row, errors read as "no answer", which is what Home has always done.
     func loadRow(config: HomeRowConfig) async -> HomeRowData? {
         (try? await loadRow(config: config, source: sources[0])) ?? nil
@@ -99,13 +109,36 @@ extension HomeViewModel {
                 items = try await loadUpcoming(source: source)
 
             case .latestMovies:
-                // Native /Items/Latest for web-UI parity. ParentId omitted so multiple movie libraries all surface, which makes IncludeItemTypes=Movie mandatory (else Jellyfin jumbles movies/series/music into one row).
-                items = try await source.libraryService.getLatestMedia(
-                    userID: source.userID,
-                    parentID: nil,
-                    includeItemTypes: [.movie],
-                    limit: 16
-                )
+                // Per movies library, like Latest Shows. Without ParentId, Jellyfin 12 scans the
+                // newest Limit*2 items across every library before the type filter applies, so a
+                // server whose recent additions are all episodes answers zero movies (Sodalite#231).
+                let libraries = await homeLibraries(source: source)
+                let allMovieLibraries = libraries.filter { ($0.collectionType ?? "") == "movies" }
+                let movieLibraries = allMovieLibraries.filter {
+                    !libraryLayout.isHidden($0, fallbackServerID: source.serverID)
+                }
+                if !allMovieLibraries.isEmpty, movieLibraries.isEmpty {
+                    items = []
+                } else if movieLibraries.isEmpty {
+                    items = try await source.libraryService.getLatestMedia(
+                        userID: source.userID,
+                        parentID: nil,
+                        includeItemTypes: [.movie],
+                        limit: 16
+                    )
+                } else {
+                    var lists: [[JellyfinItem]] = []
+                    for library in movieLibraries {
+                        let list = (try? await source.libraryService.getLatestMedia(
+                            userID: source.userID,
+                            parentID: library.id,
+                            includeItemTypes: [.movie],
+                            limit: 16
+                        )) ?? []
+                        lists.append(list)
+                    }
+                    items = Array(HomeMerger.merge(lists, type: .latestMovies, mergedContinueWatching: false).prefix(16))
+                }
 
             case .latestShows:
                 // Per-library fan-out, not one typed aggregate: IncludeItemTypes=Series,Episode filters before grouping, so episode bursts from a few shows crowd out everything else (device reports 2026-06-11). ParentId-only queries group reliably (Sodalite#12). Round-robin interleave approximates global recency (a grouped entry carries the SERIES' DateCreated, not the new episode's, so it can't sort).
@@ -118,13 +151,7 @@ extension HomeViewModel {
                 // series in SQL and answers one entry per show; without it, the untyped path scans
                 // the newest Limit*2 items across every library and groups them in memory, so one
                 // bulk import fills the window and the row collapses to the few series inside it.
-                let libraries: [JellyfinLibrary]
-                if let task = librariesTasks[source.serverID] ?? (source.isActive ? librariesTask : nil),
-                   let fetched = await task.value {
-                    libraries = fetched
-                } else {
-                    libraries = myMediaLibraries.filter { ($0.serverID ?? source.serverID) == source.serverID }
-                }
+                let libraries = await homeLibraries(source: source)
                 let allShowLibraries = libraries.filter { ($0.collectionType ?? "") == "tvshows" }
                 let showLibraries = allShowLibraries.filter {
                     !libraryLayout.isHidden($0, fallbackServerID: source.serverID)

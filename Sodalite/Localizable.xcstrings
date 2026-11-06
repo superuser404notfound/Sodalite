@@ -68544,157 +68544,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domů začíná bannerem, který listuje novinkami, náhodnými tituly nebo vašimi oblíbenými. Každá knihovna filmů nebo seriálů má vlastní řádek Nejnovější, Všechny filmy a Všechny seriály končí kartou Zobrazit vše a nový řádek Připravované ukazuje, kdy vyjde další díl seriálu, který máte dokoukaný. Přizpůsobit domov teď také řadí a skrývá knihovny v Moje média."
+            "value" : "Domů začíná bannerem, který listuje novinkami, náhodnými tituly nebo vašimi oblíbenými. Každá knihovna filmů nebo seriálů má vlastní řádek Nejnovější, Všechny filmy a Všechny seriály končí kartou Zobrazit vše a nový řádek Připravované ukazuje, kdy vyjde další díl seriálu, který máte dokoukaný. Přizpůsobit domov teď také řadí a skrývá knihovny v Moje média. Řada Nejnovější filmy už nezůstane prázdná na serverech, kam naposledy přibyly jen epizody."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hjem åbner med et banner, der bladrer gennem nyheder, tilfældige titler eller dine favoritter. Hvert film- eller seriebibliotek får sin egen Nyeste-række, Alle film og Alle serier slutter med et Vis alle-kort, og en ny Kommende-række viser, hvornår næste afsnit af en serie, du er ajour med, sendes. Tilpas hjem ordner og skjuler nu også bibliotekerne i Mine medier."
+            "value" : "Hjem åbner med et banner, der bladrer gennem nyheder, tilfældige titler eller dine favoritter. Hvert film- eller seriebibliotek får sin egen Nyeste-række, Alle film og Alle serier slutter med et Vis alle-kort, og en ny Kommende-række viser, hvornår næste afsnit af en serie, du er ajour med, sendes. Tilpas hjem ordner og skjuler nu også bibliotekerne i Mine medier. Nyeste film forbliver ikke længere tom på servere, hvor de nyeste tilføjelser kun er afsnit."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Startseite beginnt mit einem Banner, das durch Neues, Zufallstitel oder deine Favoriten blättert. Jede Film- oder Serienbibliothek bekommt eine eigene Neu-Reihe, Alle Filme und Alle Serien enden in einer Karte Alle anzeigen, und eine neue Reihe Demnächst zeigt, wann die nächste Folge einer Serie kommt, bei der du auf dem Stand bist. Startseite anpassen ordnet und versteckt jetzt auch die Bibliotheken unter Meine Medien."
+            "value" : "Die Startseite beginnt mit einem Banner, das durch Neues, Zufallstitel oder deine Favoriten blättert. Jede Film- oder Serienbibliothek bekommt eine eigene Neu-Reihe, Alle Filme und Alle Serien enden in einer Karte Alle anzeigen, und eine neue Reihe Demnächst zeigt, wann die nächste Folge einer Serie kommt, bei der du auf dem Stand bist. Startseite anpassen ordnet und versteckt jetzt auch die Bibliotheken unter Meine Medien. Neueste Filme bleibt nicht mehr leer, wenn auf dem Server zuletzt nur Folgen hinzugekommen sind."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Η Αρχική ανοίγει με ένα banner που εναλλάσσει νέους τίτλους, τυχαίες επιλογές ή τα αγαπημένα σας. Κάθε βιβλιοθήκη ταινιών ή σειρών έχει τη δική της σειρά Πρόσφατα, οι σειρές Όλες οι ταινίες και Όλες οι σειρές τελειώνουν με μια κάρτα Εμφάνιση όλων, και μια νέα σειρά Προσεχώς δείχνει πότε προβάλλεται το επόμενο επεισόδιο μιας σειράς που έχετε προλάβει. Η Προσαρμογή αρχικής πλέον ταξινομεί και κρύβει και τις βιβλιοθήκες της ενότητας Τα πολυμέσα μου."
+            "value" : "Η Αρχική ανοίγει με ένα banner που εναλλάσσει νέους τίτλους, τυχαίες επιλογές ή τα αγαπημένα σας. Κάθε βιβλιοθήκη ταινιών ή σειρών έχει τη δική της σειρά Πρόσφατα, οι σειρές Όλες οι ταινίες και Όλες οι σειρές τελειώνουν με μια κάρτα Εμφάνιση όλων, και μια νέα σειρά Προσεχώς δείχνει πότε προβάλλεται το επόμενο επεισόδιο μιας σειράς που έχετε προλάβει. Η Προσαρμογή αρχικής πλέον ταξινομεί και κρύβει και τις βιβλιοθήκες της ενότητας Τα πολυμέσα μου. Η σειρά Τελευταίες ταινίες δεν μένει πλέον κενή σε διακομιστές όπου τα πιο πρόσφατα στοιχεία είναι μόνο επεισόδια."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Home opens on a banner that pages through new titles, random picks or your favorites. Each movies or shows library gets its own Latest row, All Movies and All Series end in a Show All card, and a new Upcoming row shows when the next episode of a show you are caught up on airs. Customize Home now also orders and hides the libraries in My Media."
+            "value" : "Home opens on a banner that pages through new titles, random picks or your favorites. Each movies or shows library gets its own Latest row, All Movies and All Series end in a Show All card, and a new Upcoming row shows when the next episode of a show you are caught up on airs. Customize Home now also orders and hides the libraries in My Media. Latest Movies no longer stays empty on servers whose newest additions are all episodes."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inicio abre con un banner que pasa por novedades, títulos al azar o tus favoritos. Cada biblioteca de películas o series tiene su propia fila de novedades, Todas las películas y Todas las series terminan en una tarjeta Ver todo, y una nueva fila Próximamente muestra cuándo se emite el próximo episodio de una serie que llevas al día. Personalizar inicio ahora también ordena y oculta las bibliotecas de Mi contenido."
+            "value" : "Inicio abre con un banner que pasa por novedades, títulos al azar o tus favoritos. Cada biblioteca de películas o series tiene su propia fila de novedades, Todas las películas y Todas las series terminan en una tarjeta Ver todo, y una nueva fila Próximamente muestra cuándo se emite el próximo episodio de una serie que llevas al día. Personalizar inicio ahora también ordena y oculta las bibliotecas de Mi contenido. Últimas películas ya no se queda vacía en servidores donde lo último añadido son solo episodios."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koti alkaa bannerilla, joka selaa uutuuksia, satunnaisia nimikkeitä tai suosikkejasi. Jokainen elokuva- tai sarjakirjasto saa oman Uusimmat-rivinsä, Kaikki elokuvat ja Kaikki sarjat päättyvät Näytä kaikki -korttiin, ja uusi Tulossa-rivi näyttää, milloin ajan tasalla olevan sarjasi seuraava jakso julkaistaan. Mukauta aloitusnäyttö myös järjestää ja piilottaa nyt Oma media -kirjastot."
+            "value" : "Koti alkaa bannerilla, joka selaa uutuuksia, satunnaisia nimikkeitä tai suosikkejasi. Jokainen elokuva- tai sarjakirjasto saa oman Uusimmat-rivinsä, Kaikki elokuvat ja Kaikki sarjat päättyvät Näytä kaikki -korttiin, ja uusi Tulossa-rivi näyttää, milloin ajan tasalla olevan sarjasi seuraava jakso julkaistaan. Mukauta aloitusnäyttö myös järjestää ja piilottaa nyt Oma media -kirjastot. Uusimmat elokuvat ei enää jää tyhjäksi palvelimilla, joille on viimeksi lisätty vain jaksoja."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’accueil s’ouvre sur une bannière qui fait défiler les nouveautés, des titres au hasard ou vos favoris. Chaque bibliothèque de films ou de séries a sa propre rangée Derniers ajouts, Tous les films et Toutes les séries se terminent par une carte Tout afficher, et une nouvelle rangée À venir indique quand sort le prochain épisode d’une série à laquelle vous êtes à jour. Personnaliser l’accueil permet aussi désormais d’ordonner et de masquer les bibliothèques de Ma médiathèque."
+            "value" : "L’accueil s’ouvre sur une bannière qui fait défiler les nouveautés, des titres au hasard ou vos favoris. Chaque bibliothèque de films ou de séries a sa propre rangée Derniers ajouts, Tous les films et Toutes les séries se terminent par une carte Tout afficher, et une nouvelle rangée À venir indique quand sort le prochain épisode d’une série à laquelle vous êtes à jour. Personnaliser l’accueil permet aussi désormais d’ordonner et de masquer les bibliothèques de Ma médiathèque. Derniers films ne reste plus vide sur les serveurs où les derniers ajouts ne sont que des épisodes."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Početna se otvara bannerom koji lista novosti, nasumične naslove ili vaše favorite. Svaka knjižnica filmova ili serija dobiva vlastiti redak Najnovije, Svi filmovi i Sve serije završavaju karticom Prikaži sve, a novi redak Uskoro pokazuje kada izlazi sljedeća epizoda serije koju ste sustigli. Prilagodi početnu sada i slaže i skriva knjižnice u Moji mediji."
+            "value" : "Početna se otvara bannerom koji lista novosti, nasumične naslove ili vaše favorite. Svaka knjižnica filmova ili serija dobiva vlastiti redak Najnovije, Svi filmovi i Sve serije završavaju karticom Prikaži sve, a novi redak Uskoro pokazuje kada izlazi sljedeća epizoda serije koju ste sustigli. Prilagodi početnu sada i slaže i skriva knjižnice u Moji mediji. Najnoviji filmovi više ne ostaju prazni na poslužiteljima na koje su nedavno dodane samo epizode."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Kezdőlap egy bannerrel nyílik, amely az újdonságokat, véletlenszerű címeket vagy a kedvenceidet lapozza. Minden film- vagy sorozatkönyvtár saját Legújabb sort kap, az Összes film és az Összes sorozat egy Összes megjelenítése kártyával zárul, egy új Hamarosan sor pedig megmutatja, mikor jelenik meg egy naprakészen követett sorozat következő epizódja. A Kezdőképernyő testreszabása mostantól a Saját média könyvtárait is rendezi és elrejti."
+            "value" : "A Kezdőlap egy bannerrel nyílik, amely az újdonságokat, véletlenszerű címeket vagy a kedvenceidet lapozza. Minden film- vagy sorozatkönyvtár saját Legújabb sort kap, az Összes film és az Összes sorozat egy Összes megjelenítése kártyával zárul, egy új Hamarosan sor pedig megmutatja, mikor jelenik meg egy naprakészen követett sorozat következő epizódja. A Kezdőképernyő testreszabása mostantól a Saját média könyvtárait is rendezi és elrejti. A Legújabb filmek sor már nem marad üres olyan szervereken, ahová legutóbb csak epizódok kerültek."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La Home si apre con un banner che scorre novità, titoli a caso o i tuoi preferiti. Ogni libreria di film o serie ha la sua riga Novità, Tutti i film e Tutte le serie terminano con una scheda Mostra tutto, e una nuova riga In arrivo mostra quando esce il prossimo episodio di una serie in cui sei in pari. Personalizza home ora ordina e nasconde anche le librerie di I miei contenuti."
+            "value" : "La Home si apre con un banner che scorre novità, titoli a caso o i tuoi preferiti. Ogni libreria di film o serie ha la sua riga Novità, Tutti i film e Tutte le serie terminano con una scheda Mostra tutto, e una nuova riga In arrivo mostra quando esce il prossimo episodio di una serie in cui sei in pari. Personalizza home ora ordina e nasconde anche le librerie di I miei contenuti. Ultimi film non resta più vuota sui server in cui le ultime aggiunte sono solo episodi."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ホームは、新着タイトル、ランダムな作品、お気に入りを順にめくるバナーで始まります。映画やシリーズのライブラリごとに専用の最新の行があり、「すべての映画」と「すべてのシリーズ」の行は「すべて表示」カードで終わります。新しい「近日公開」の行には、視聴が追いついている番組の次のエピソードがいつ放送されるかが表示されます。ホームをカスタマイズでは、マイメディアのライブラリの並べ替えと非表示もできるようになりました。"
+            "value" : "ホームは、新着タイトル、ランダムな作品、お気に入りを順にめくるバナーで始まります。映画やシリーズのライブラリごとに専用の最新の行があり、「すべての映画」と「すべてのシリーズ」の行は「すべて表示」カードで終わります。新しい「近日公開」の行には、視聴が追いついている番組の次のエピソードがいつ放送されるかが表示されます。ホームをカスタマイズでは、マイメディアのライブラリの並べ替えと非表示もできるようになりました。最近追加されたものがエピソードだけのサーバーでも、最新の映画が空のままにならなくなりました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "홈이 새 타이틀, 무작위 추천 또는 즐겨찾기를 넘겨 보여 주는 배너로 시작합니다. 영화나 시리즈 라이브러리마다 자체 최신 항목 행이 생기고, 모든 영화와 모든 시리즈 행은 모두 보기 카드로 끝나며, 새로운 방영 예정 행은 다 따라잡은 시리즈의 다음 에피소드 방영일을 보여 줍니다. 이제 홈 사용자 지정에서 내 미디어의 라이브러리도 정렬하고 숨길 수 있습니다."
+            "value" : "홈이 새 타이틀, 무작위 추천 또는 즐겨찾기를 넘겨 보여 주는 배너로 시작합니다. 영화나 시리즈 라이브러리마다 자체 최신 항목 행이 생기고, 모든 영화와 모든 시리즈 행은 모두 보기 카드로 끝나며, 새로운 방영 예정 행은 다 따라잡은 시리즈의 다음 에피소드 방영일을 보여 줍니다. 이제 홈 사용자 지정에서 내 미디어의 라이브러리도 정렬하고 숨길 수 있습니다. 최근 추가된 항목이 모두 에피소드인 서버에서도 최신 영화 행이 더 이상 비어 있지 않습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hjem åpner med et banner som blar gjennom nye titler, tilfeldige valg eller favorittene dine. Hvert film- eller seriebibliotek får sin egen Nyeste-rad, Alle filmer og Alle serier slutter med et Vis alle-kort, og en ny Kommende-rad viser når neste episode av en serie du er à jour med sendes. Tilpass hjem ordner og skjuler nå også bibliotekene i Mine medier."
+            "value" : "Hjem åpner med et banner som blar gjennom nye titler, tilfeldige valg eller favorittene dine. Hvert film- eller seriebibliotek får sin egen Nyeste-rad, Alle filmer og Alle serier slutter med et Vis alle-kort, og en ny Kommende-rad viser når neste episode av en serie du er à jour med sendes. Tilpass hjem ordner og skjuler nå også bibliotekene i Mine medier. Nyeste filmer blir ikke lenger stående tom på servere der de nyeste tilleggene bare er episoder."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Home opent met een banner die door nieuwe titels, willekeurige keuzes of je favorieten bladert. Elke film- of seriebibliotheek krijgt een eigen Nieuw-rij, Alle films en Alle series eindigen met een kaart Alles tonen, en een nieuwe rij Binnenkort toont wanneer de volgende aflevering verschijnt van een serie die je bij hebt. Home aanpassen ordent en verbergt nu ook de bibliotheken in Mijn media."
+            "value" : "Home opent met een banner die door nieuwe titels, willekeurige keuzes of je favorieten bladert. Elke film- of seriebibliotheek krijgt een eigen Nieuw-rij, Alle films en Alle series eindigen met een kaart Alles tonen, en een nieuwe rij Binnenkort toont wanneer de volgende aflevering verschijnt van een serie die je bij hebt. Home aanpassen ordent en verbergt nu ook de bibliotheken in Mijn media. Nieuwste films blijft niet meer leeg op servers waar de laatste toevoegingen alleen afleveringen zijn."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ekran główny otwiera się banerem, który przewija nowości, losowe tytuły lub ulubione. Każda biblioteka filmów lub seriali ma własny wiersz Najnowsze, Wszystkie filmy i Wszystkie seriale kończą się kartą Pokaż wszystko, a nowy wiersz Nadchodzące pokazuje, kiedy wyjdzie kolejny odcinek serialu, z którym jesteś na bieżąco. W Dostosuj stronę główną możesz teraz także porządkować i ukrywać biblioteki w Moje multimedia."
+            "value" : "Ekran główny otwiera się banerem, który przewija nowości, losowe tytuły lub ulubione. Każda biblioteka filmów lub seriali ma własny wiersz Najnowsze, Wszystkie filmy i Wszystkie seriale kończą się kartą Pokaż wszystko, a nowy wiersz Nadchodzące pokazuje, kiedy wyjdzie kolejny odcinek serialu, z którym jesteś na bieżąco. W Dostosuj stronę główną możesz teraz także porządkować i ukrywać biblioteki w Moje multimedia. Najnowsze filmy nie pozostają już puste na serwerach, na które ostatnio trafiły same odcinki."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Início abre com um banner que passa por títulos novos, escolhas aleatórias ou seus favoritos. Cada biblioteca de filmes ou séries ganha sua própria fileira de recentes, Todos os filmes e Todas as séries terminam com um cartão Ver tudo, e uma nova fileira Em breve mostra quando sai o próximo episódio de uma série que você está em dia. Personalizar início agora também ordena e oculta as bibliotecas de Minha mídia."
+            "value" : "O Início abre com um banner que passa por títulos novos, escolhas aleatórias ou seus favoritos. Cada biblioteca de filmes ou séries ganha sua própria fileira de recentes, Todos os filmes e Todas as séries terminam com um cartão Ver tudo, e uma nova fileira Em breve mostra quando sai o próximo episódio de uma série que você está em dia. Personalizar início agora também ordena e oculta as bibliotecas de Minha mídia. Filmes recentes não fica mais vazio em servidores cujas adições mais novas são só episódios."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Início abre com um banner que passa por títulos novos, escolhas aleatórias ou os seus favoritos. Cada biblioteca de filmes ou séries tem a sua própria fila de recentes, Todos os filmes e Todas as séries terminam com um cartão Ver tudo, e uma nova fila Brevemente mostra quando sai o próximo episódio de uma série que tem em dia. Personalizar início passa também a ordenar e ocultar as bibliotecas de A minha biblioteca."
+            "value" : "O Início abre com um banner que passa por títulos novos, escolhas aleatórias ou os seus favoritos. Cada biblioteca de filmes ou séries tem a sua própria fila de recentes, Todos os filmes e Todas as séries terminam com um cartão Ver tudo, e uma nova fila Brevemente mostra quando sai o próximo episódio de uma série que tem em dia. Personalizar início passa também a ordenar e ocultar as bibliotecas de A minha biblioteca. Últimos filmes já não fica vazio em servidores cujas adições mais recentes são só episódios."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ecranul principal se deschide cu un banner care derulează titluri noi, alegeri aleatorii sau favoritele tale. Fiecare bibliotecă de filme sau seriale are propriul rând Recente, Toate filmele și Toate serialele se termină cu un card Afișează tot, iar un nou rând În curând arată când apare următorul episod al unui serial la care ești la zi. Personalizează ecranul principal ordonează și ascunde acum și bibliotecile din Media mea."
+            "value" : "Ecranul principal se deschide cu un banner care derulează titluri noi, alegeri aleatorii sau favoritele tale. Fiecare bibliotecă de filme sau seriale are propriul rând Recente, Toate filmele și Toate serialele se termină cu un card Afișează tot, iar un nou rând În curând arată când apare următorul episod al unui serial la care ești la zi. Personalizează ecranul principal ordonează și ascunde acum și bibliotecile din Media mea. Ultimele filme nu mai rămâne gol pe serverele unde ultimele adăugări sunt doar episoade."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Главная открывается баннером, который листает новинки, случайные тайтлы или ваше избранное. У каждой медиатеки фильмов или сериалов есть своя строка «Новое», ряды «Все фильмы» и «Все сериалы» заканчиваются карточкой «Показать все», а новый ряд «Скоро» показывает, когда выйдет следующая серия сериала, который вы досмотрели. В «Настроить главную» теперь также можно упорядочивать и скрывать медиатеки в «Моя медиатека»."
+            "value" : "Главная открывается баннером, который листает новинки, случайные тайтлы или ваше избранное. У каждой медиатеки фильмов или сериалов есть своя строка «Новое», ряды «Все фильмы» и «Все сериалы» заканчиваются карточкой «Показать все», а новый ряд «Скоро» показывает, когда выйдет следующая серия сериала, который вы досмотрели. В «Настроить главную» теперь также можно упорядочивать и скрывать медиатеки в «Моя медиатека». Ряд «Последние фильмы» больше не остаётся пустым на серверах, куда в последнее время добавлялись только эпизоды."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domov sa otvára bannerom, ktorý listuje novinkami, náhodnými titulmi alebo vašimi obľúbenými. Každá knižnica filmov alebo seriálov má vlastný riadok Najnovšie, Všetky filmy a Všetky seriály končia kartou Zobraziť všetko a nový riadok Pripravované ukazuje, kedy vyjde ďalší diel seriálu, ktorý máte dopozeraný. Prispôsobiť domov teraz aj zoraďuje a skrýva knižnice v Moje médiá."
+            "value" : "Domov sa otvára bannerom, ktorý listuje novinkami, náhodnými titulmi alebo vašimi obľúbenými. Každá knižnica filmov alebo seriálov má vlastný riadok Najnovšie, Všetky filmy a Všetky seriály končia kartou Zobraziť všetko a nový riadok Pripravované ukazuje, kedy vyjde ďalší diel seriálu, ktorý máte dopozeraný. Prispôsobiť domov teraz aj zoraďuje a skrýva knižnice v Moje médiá. Rad Najnovšie filmy už nezostane prázdny na serveroch, kam naposledy pribudli len epizódy."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hem öppnar med en banner som bläddrar genom nya titlar, slumpvisa val eller dina favoriter. Varje film- eller seriebibliotek får en egen Senaste-rad, Alla filmer och Alla serier slutar med ett Visa alla-kort, och en ny Kommande-rad visar när nästa avsnitt av en serie du är ikapp med sänds. Anpassa hem ordnar och döljer nu även biblioteken i Mina media."
+            "value" : "Hem öppnar med en banner som bläddrar genom nya titlar, slumpvisa val eller dina favoriter. Varje film- eller seriebibliotek får en egen Senaste-rad, Alla filmer och Alla serier slutar med ett Visa alla-kort, och en ny Kommande-rad visar när nästa avsnitt av en serie du är ikapp med sänds. Anpassa hem ordnar och döljer nu även biblioteken i Mina media. Senaste filmer blir inte längre tom på servrar där de senaste tilläggen bara är avsnitt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ana Sayfa artık yeni başlıklar, rastgele seçimler veya favorileriniz arasında geçen bir afişle açılıyor. Her film veya dizi kitaplığının kendi En Yeniler satırı var, Tüm Filmler ve Tüm Diziler bir Tümünü göster kartıyla bitiyor ve yeni Yakında satırı, güncel olduğunuz bir dizinin sonraki bölümünün ne zaman yayınlanacağını gösteriyor. Ana Ekranı Özelleştir artık Medyam'daki kitaplıkları da sıralıyor ve gizliyor."
+            "value" : "Ana Sayfa artık yeni başlıklar, rastgele seçimler veya favorileriniz arasında geçen bir afişle açılıyor. Her film veya dizi kitaplığının kendi En Yeniler satırı var, Tüm Filmler ve Tüm Diziler bir Tümünü göster kartıyla bitiyor ve yeni Yakında satırı, güncel olduğunuz bir dizinin sonraki bölümünün ne zaman yayınlanacağını gösteriyor. Ana Ekranı Özelleştir artık Medyam'daki kitaplıkları da sıralıyor ve gizliyor. Son Filmler, son eklenenlerin yalnızca bölüm olduğu sunucularda artık boş kalmıyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Головна відкривається банером, який гортає новинки, випадкові тайтли або ваше обране. Кожна медіатека фільмів чи серіалів має власний рядок «Нове», ряди «Усі фільми» та «Усі серіали» завершуються карткою «Показати все», а новий ряд «Незабаром» показує, коли вийде наступна серія серіалу, який ви наздогнали. У «Налаштувати головну» тепер також можна впорядковувати й приховувати медіатеки в «Моя медіатека»."
+            "value" : "Головна відкривається банером, який гортає новинки, випадкові тайтли або ваше обране. Кожна медіатека фільмів чи серіалів має власний рядок «Нове», ряди «Усі фільми» та «Усі серіали» завершуються карткою «Показати все», а новий ряд «Незабаром» показує, коли вийде наступна серія серіалу, який ви наздогнали. У «Налаштувати головну» тепер також можна впорядковувати й приховувати медіатеки в «Моя медіатека». Ряд «Останні фільми» більше не лишається порожнім на серверах, куди останнім часом додавалися лише епізоди."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "首页以横幅开场，轮流展示新作品、随机推荐或你的收藏。每个电影或剧集媒体库都有自己的最新内容行，“所有电影”和“所有剧集”以“显示全部”卡片结尾，新的“即将播出”行会显示你已追平的剧集下一集何时播出。“自定义首页”现在还能排列和隐藏“我的媒体”中的媒体库。"
+            "value" : "首页以横幅开场，轮流展示新作品、随机推荐或你的收藏。每个电影或剧集媒体库都有自己的最新内容行，“所有电影”和“所有剧集”以“显示全部”卡片结尾，新的“即将播出”行会显示你已追平的剧集下一集何时播出。“自定义首页”现在还能排列和隐藏“我的媒体”中的媒体库。即使服务器最近添加的全是剧集，最新电影一行也不再显示为空。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "首頁以橫幅開場，輪流展示新作品、隨機推薦或你的收藏。每個電影或影集媒體庫都有自己的最新內容列，「所有電影」和「所有影集」以「顯示全部」卡片結尾，新的「即將播出」列會顯示你已追上的影集下一集何時播出。「自訂主畫面」現在還能排列和隱藏「我的媒體」中的媒體庫。"
+            "value" : "首頁以橫幅開場，輪流展示新作品、隨機推薦或你的收藏。每個電影或影集媒體庫都有自己的最新內容列，「所有電影」和「所有影集」以「顯示全部」卡片結尾，新的「即將播出」列會顯示你已追上的影集下一集何時播出。「自訂主畫面」現在還能排列和隱藏「我的媒體」中的媒體庫。即使伺服器最近新增的全是劇集，最新電影一列也不再顯示為空。"
           }
         }
       }
