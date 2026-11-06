@@ -360,6 +360,13 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     /// resume position at all.
     static let playedThresholdPercent: Double = 90
 
+    /// Whether a stop at `ticks` is past the point the server counts as watched. Nil runtime says
+    /// nothing, so it is not a finish.
+    func isFinished(byStopAt ticks: Int64) -> Bool {
+        guard let total = runTimeTicks, total > 0 else { return false }
+        return Double(ticks) / Double(total) * 100 >= Self.playedThresholdPercent
+    }
+
     /// Patch resume position in place after playback stops (issue #24): sets ticks + recomputes playedPercentage, no server round-trip. Creates userData if none.
     mutating func setResumePosition(_ ticks: Int64) {
         // Only a percentage computed from THIS stop may decide "watched": with no runtime the fallback

@@ -56,44 +56,32 @@ extension PlayerViewModel {
         guard let seriesID = item.seriesId else { return }
 
         // Snapshot identifiers up front in case `item` mutates mid-await.
+        let current = item
         let currentID = item.id
-        let currentIndex = item.indexNumber
-        let currentSeasonID = item.seasonId
 
-        // Strict physical ordering, deliberately NOT Jellyfin's NextUp: NextUp returns the next *unwatched* episode series-wide, skipping partly-watched seasons (S1E5 -> S3E1 over a partial S2). Auto-advance must move to the physically next episode.
-        guard let currentSeasonID, let currentIndex else { return }
+        // Strict physical ordering, see EpisodeSuccession.
+        guard let currentSeasonID = item.seasonId, item.indexNumber != nil else { return }
 
         do {
-            // 1. Next episode in the current season: lowest indexNumber strictly greater than the current one.
             let episodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: currentSeasonID, userID: userID
             )
-            if let candidate = episodes
-                .filter({ $0.id != currentID })
-                .filter({ ($0.indexNumber ?? -1) > currentIndex })
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }) {
+            if let candidate = EpisodeSuccession.next(after: current, in: episodes) {
                 // Episode may have been switched via the picker mid-fetch; a stale result would seed the OLD episode's successor.
                 guard item.id == currentID else { return }
                 nextEpisode = candidate
                 return
             }
 
-            // 2. End of season: roll over to the first episode of the next season by indexNumber. Lowest season index strictly greater than current skips Specials (season 0), so a finale advances to S2E1, not Specials.
             let seasons = try await playbackService.getSeasons(
                 seriesID: seriesID, userID: userID
             )
-            guard let currentSeasonIndex = seasons
-                .first(where: { $0.id == currentSeasonID })?.indexNumber,
-                  let nextSeason = seasons
-                .filter({ ($0.indexNumber ?? -1) > currentSeasonIndex })
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) })
-            else { return }
+            guard let nextSeason = EpisodeSuccession.season(after: currentSeasonID, in: seasons) else { return }
 
             let nextSeasonEpisodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: nextSeason.id, userID: userID
             )
-            if let firstEpisode = nextSeasonEpisodes
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }) {
+            if let firstEpisode = EpisodeSuccession.first(in: nextSeasonEpisodes) {
                 guard item.id == currentID else { return }
                 nextEpisode = firstEpisode
             }

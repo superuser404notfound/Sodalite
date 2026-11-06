@@ -405,15 +405,24 @@ struct SeriesDetailView: View {
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
             Task { @MainActor in
+                // Read before the patch, which turns a finish into "watched, no position", a state a
+                // page opened on a watched episode is also in.
+                let finished = finishedSelectedEpisode(itemID: itemID, ticks: ticks)
                 if let itemID, let ticks {
                     viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
                 }
                 patchSelectedEpisodePosition(itemID: itemID, ticks: ticks)
+                let successor = await advancePastFinishedEpisode(finished)
                 await viewModel?.refreshResumePosition()
                 if let itemID, let ticks {
                     viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
                 }
                 patchSelectedEpisodePosition(itemID: itemID, ticks: ticks)
+                // After the refresh, which re-fetches the season it started on and would put that
+                // list back over the one loaded here.
+                if let seasonID = successor?.seasonId, viewModel?.selectedSeasonID != seasonID {
+                    await viewModel?.loadEpisodes(seasonID: seasonID)
+                }
             }
         }
         .navigationDestination(item: $navigateToItem) { item in
@@ -1276,6 +1285,27 @@ struct SeriesDetailView: View {
         guard let itemID, let ticks,
               selectedEpisode?.id == itemID else { return }
         selectedEpisode?.setResumePosition(ticks)
+    }
+
+    /// The episode the page shows, when this stop finished it. A stop on any other item, or one short
+    /// of the watched threshold, leaves the page where it is.
+    private func finishedSelectedEpisode(itemID: String?, ticks: Int64?) -> JellyfinItem? {
+        guard let itemID, let ticks, let episode = selectedEpisode,
+              episode.id == itemID, episode.isFinished(byStopAt: ticks) else { return nil }
+        return episode
+    }
+
+    /// Sodalite#230: the series state already moves on to next up after a finished episode, and the
+    /// episode state kept offering Play Again on the one just watched. Move it to the next episode in
+    /// disc order; after the last one there is none and Play Again stays.
+    private func advancePastFinishedEpisode(_ finished: JellyfinItem?) async -> JellyfinItem? {
+        guard let finished, let vm = viewModel,
+              let next = await vm.successor(of: finished),
+              // The player may have moved the page on its own while the lookup ran.
+              selectedEpisode?.id == finished.id else { return nil }
+        withAnimation(.easeInOut(duration: 0.3)) { selectedEpisode = next }
+        episodeAim.sessionMoved(to: next.id)
+        return next
     }
 
     /// Single source of truth for which episode the play button acts on (playTitle/subtitle/progress + action all read this). Order: tapped selectedEpisode, currentEpisodeID match, getNextUp (lands before the full list), first loaded episode.
