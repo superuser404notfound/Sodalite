@@ -17,6 +17,7 @@ final class DependencyContainer {
         // Sodalite#220: the software host has no AVPlayer, so AVKit publishes no Now Playing for it and
         // headphone or Control Center play/pause would land nowhere. The native path stays with AVKit.
         engine.ownsSoftwareNowPlaying = true
+        engine.maximumSubtitleOffsetSeconds = SubtitleOffset.engineReach
         return engine
     }()
     @MainActor static let multiviewEnginePool = MultiviewEnginePool(primary: playerEngine)

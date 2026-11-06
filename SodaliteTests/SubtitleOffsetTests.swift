@@ -24,4 +24,9 @@ struct SubtitleOffsetTests {
         #expect(SubtitleOffset.stepped(9.95, by: 1) == 10)
         #expect(SubtitleOffset.stepped(-10, by: -1) == -10)
     }
+
+    @Test("the engine is told the full reach: the per-title offset plus the largest global delay")
+    func engineReachCoversBothControls() {
+        #expect(SubtitleOffset.engineReach == 15)
+    }
 }
