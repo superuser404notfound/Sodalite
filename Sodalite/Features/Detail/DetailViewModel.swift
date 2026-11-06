@@ -391,6 +391,24 @@ final class DetailViewModel {
         }
     }
 
+    /// The episode after `episode` in disc order, crossing into the next season (Sodalite#230). Reads
+    /// the season lists the page already holds and fetches only a list it has never loaded.
+    func successor(of episode: JellyfinItem) async -> JellyfinItem? {
+        guard let seasonID = episode.seasonId else { return nil }
+        if let list = await seasonEpisodes(seasonID: seasonID),
+           let next = EpisodeSuccession.next(after: episode, in: list) {
+            return next
+        }
+        guard let nextSeason = EpisodeSuccession.season(after: seasonID, in: seasons),
+              let list = await seasonEpisodes(seasonID: nextSeason.id) else { return nil }
+        return EpisodeSuccession.first(in: list)
+    }
+
+    private func seasonEpisodes(seasonID: String) async -> [JellyfinItem]? {
+        if let cached = episodesCache[seasonID] { return cached }
+        return try? await itemService.getEpisodes(seriesID: item.id, seasonID: seasonID, userID: userID).items
+    }
+
     /// Patch in-memory resume position for `itemID` straight from the playback-stop payload (issue #24). Deterministic counterpart to refreshResumePosition(): patches playbackPositionTicks on every in-memory copy rather than racing the server commit / ETag cache (re-fetch left the movie button stale ~10% and the episode button stale every time). Patches all holders (movie, next-up/current episode, loaded list, cached). @MainActor + synchronous so the @Observable mutation reliably re-renders.
     @MainActor
     func applyPlaybackPosition(itemID: String, ticks: Int64) {
