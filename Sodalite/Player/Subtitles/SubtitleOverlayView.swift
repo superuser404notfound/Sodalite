@@ -46,8 +46,12 @@ struct SubtitleOverlayView: View {
     /// (not libass) so both lines stack without overlap; libass positions ASS primaries opaquely
     /// so the secondary cannot reliably go above it (issue #47). Full ASS styling returns when off.
     let hasSecondaryTrack: Bool
-    /// Coded video dims for bitmap-canvas mapping; .zero falls back to full-bounds layout.
+    /// The picture's presented shape (coded size with the pixel aspect applied); .zero falls back to
+    /// full-bounds layout.
     var videoSize: CGSize = .zero
+    /// Display-width multiplier of the source's pixels. A bitmap canvas is in the video's coded
+    /// pixels (engine contract, AE#993), so it widens by the same factor the picture does.
+    var pixelAspect: CGFloat = 1
     /// Which rectangle the picture actually occupies. `.fill` draws the video `.resizeAspectFill`,
     /// so the picture covers the surface and overflows it; cues placed against the picture have to
     /// follow it there instead of staying on the aspect-fit band the video would occupy in
@@ -595,6 +599,7 @@ struct SubtitleOverlayView: View {
         let frame = Self.bitmapCueFrame(position: image.position,
                                         canvas: image.canvasSize,
                                         videoSize: videoSize,
+                                        pixelAspect: pixelAspect,
                                         in: size,
                                         verticalShift: bitmapVerticalShift(in: size),
                                         fillsSurface: pictureMode == .fill)
@@ -610,12 +615,18 @@ struct SubtitleOverlayView: View {
     /// canvas maps onto the aspect-fit video rect, center-anchored, and the cue rides along.
     /// Cues land where the disc authored them, including the lower letterbox bar.
     nonisolated static func bitmapCueFrame(position: CGRect,
-                                           canvas: CGSize,
+                                           canvas codedCanvas: CGSize,
                                            videoSize: CGSize,
+                                           pixelAspect: CGFloat = 1,
                                            in bounds: CGSize,
                                            verticalShift: CGFloat = 0,
                                            fillsSurface: Bool = false) -> CGRect {
         let videoRect = videoRect(videoSize: videoSize, in: bounds, fillsSurface: fillsSurface)
+        // The canvas is in coded pixels and `videoSize` is presented, so the canvas widens by the
+        // pixel aspect first. Without it a 720x576 DVB plane on 16:9 SD covered a 1024x576 picture
+        // as a 5:4 shape, 1.42x too tall, and every bottom line landed below the screen.
+        let canvas = CGSize(width: codedCanvas.width * (pixelAspect > 0 ? pixelAspect : 1),
+                            height: codedCanvas.height)
         let canvasRect: CGRect
         if videoRect.width > 0, canvas.width > 0, canvas.height > 0, videoSize.width > 0 {
             // Scale the canvas so it COVERS the video rect: the video is a crop of the plane

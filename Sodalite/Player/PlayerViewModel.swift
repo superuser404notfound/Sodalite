@@ -560,9 +560,18 @@ final class PlayerViewModel {
     /// Sodalite#175: why this tile could not tune, when the failures above say so. Nil outside a failed tile load.
     var tileRefusal: LiveTuneRefusal?
 
-    /// Coded video dims for the overlay's bitmap-canvas mapping (.zero before load).
+    /// The picture's presented shape (.zero before load): the coded size with the source's pixel
+    /// aspect applied, so an anamorphic title (720x576 at 16:9) lays its overlay and window out at
+    /// 1024x576 instead of the 5:4 coded grid.
     var videoSize: CGSize {
-        CGSize(width: Int(player.sourceVideoWidth), height: Int(player.sourceVideoHeight))
+        CGSize(width: CGFloat(player.sourceVideoWidth) * videoPixelAspect,
+               height: CGFloat(player.sourceVideoHeight))
+    }
+
+    /// Display-width multiplier of the source's pixels (1 on square pixels and before load).
+    var videoPixelAspect: CGFloat {
+        let ratio = player.sourceVideoPixelAspectRatio
+        return ratio.isFinite && ratio > 0 ? CGFloat(ratio) : 1
     }
 
     let playbackService: JellyfinPlaybackServiceProtocol
