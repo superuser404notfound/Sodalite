@@ -1,4 +1,5 @@
 import AetherEngine
+import AVFoundation
 import SwiftUI
 import UIKit
 
@@ -16,11 +17,13 @@ final class ExternalSoftwareVideoWindowController {
     private var window: UIWindow?
     private var surface: AetherPlayerView?
     private var sceneStateObservers: [NSObjectProtocol] = []
+    private var loggedMissingScene = false
 
     /// `connecting` is the scene a connect notification names, which may not be listed among the
     /// application's connected scenes yet while the notification is delivered.
     func update(engine: AetherEngine, viewModel: PlayerViewModel, connecting: UIWindowScene? = nil) {
         let scene = connecting ?? ExternalSubtitleWindowController.currentExternalScene()
+        noteMissingScene(backend: engine.playbackBackend, scenePresent: scene != nil)
         guard ExternalSoftwareVideoDecision.shouldOwnExternalScreen(
                 backend: engine.playbackBackend, externalScenePresent: scene != nil),
               let scene else {
@@ -48,6 +51,21 @@ final class ExternalSoftwareVideoWindowController {
         sceneStateObservers.forEach(NotificationCenter.default.removeObserver)
         sceneStateObservers.removeAll()
         LogTap.shared.note("[ExternalVideo] window torn down, software picture back on the device")
+    }
+
+    /// A software title on a wired display with no external scene stays mirrored, and without this line
+    /// that case logged nothing at all (Sodalite#189 on iPadOS 27). Once per change, not per update.
+    private func noteMissingScene(backend: PlaybackBackend, scenePresent: Bool) {
+        let software = ExternalSoftwareVideoDecision.shouldOwnExternalScreen(backend: backend, externalScenePresent: true)
+        let wired = AVAudioSession.sharedInstance().currentRoute.outputs.contains { $0.portType == .HDMI }
+        let missing = software && wired && !scenePresent
+        guard missing != loggedMissingScene else { return }
+        loggedMissingScene = missing
+        guard missing else { return }
+        LogTap.shared.note(
+            "[ExternalVideo] no external scene on HDMI, software picture stays mirrored backend=\(backend) "
+            + "scenes=\(ExternalSubtitleWindowController.connectedSceneRoles()) "
+            + "app=\(Self.describe(UIApplication.shared.applicationState))")
     }
 
     private func showWindow(on scene: UIWindowScene, engine: AetherEngine, viewModel: PlayerViewModel) {
