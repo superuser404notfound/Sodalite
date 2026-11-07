@@ -7,8 +7,10 @@ import UIKit
 /// committed. A UISearchContainerViewController rather than `.searchable()`, which rebuilt the tab on
 /// every switch.
 ///
-/// The controller runs the full height of the screen and gets the page's top and bottom room as
-/// safe area instead. Before focus moves, UIKit checks whether the view about to take it lies outside
+/// The controller runs the full screen and gets the page's top and bottom room as safe area instead.
+/// Full width too: once the results show a scroll view, UIKit lays the field out from the window's
+/// safe area, and on a view inset from the screen edge it ran past the right edge (field from x=160,
+/// 1764 pt wide). Before focus moves, UIKit checks whether the view about to take it lies outside
 /// the search view, and scrolls the keyboard off towards it if so. The top bar's focus view is the
 /// whole SwiftUI host, so from a search view that started under the bar every press up to the bar
 /// counted as leaving upwards: the field slid behind the bar and the keys came to rest across it
@@ -31,7 +33,7 @@ struct InlineSearchContainer<Results: View>: View {
                     pageFrame: pageFrame,
                     results: results
                 )
-                .ignoresSafeArea(edges: .vertical)
+                .ignoresSafeArea()
             }
     }
 }
