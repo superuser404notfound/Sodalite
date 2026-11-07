@@ -219,42 +219,66 @@ struct SearchView: View {
 
     @ViewBuilder
     private func resultsArea(vm: SearchViewModel) -> some View {
-        if vm.jellyfinResults.isEmpty && vm.seerrResults.isEmpty && vm.peopleResults.isEmpty {
+        let isEmpty = vm.jellyfinResults.isEmpty && vm.seerrResults.isEmpty && vm.peopleResults.isEmpty
+        #if os(tvOS)
+        // One scroll view for hits and empty states alike. Once the results host shows a scroll view,
+        // UISearchController moves the field and keys into a container that scrolls with it, and when
+        // the scroll view goes away again it lays the field out from the top of the screen, ignoring
+        // the safe area: the field slid behind the top bar and the line above the keys (measured on an
+        // Apple TV: field at y=0 instead of 157 after the hits gave way to an empty state).
+        ScrollView(.vertical, showsIndicators: false) {
+            if isEmpty {
+                emptyState(vm: vm)
+                    .containerRelativeFrame(.vertical)
+            } else {
+                resultsStack(vm: vm)
+            }
+        }
+        .scrollDismissesKeyboard(.immediately)
+        .drivesShellBar()
+        #else
+        if isEmpty {
             emptyState(vm: vm)
         } else {
             resultsView(vm: vm)
         }
+        #endif
     }
 
-    @ViewBuilder
+    #if !os(tvOS)
     private func resultsView(vm: SearchViewModel) -> some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(alignment: .leading, spacing: 40) {
-                if !vm.jellyfinResults.isEmpty {
-                    librarySection(items: vm.jellyfinResults)
-                }
-                // People sit between the two title rows: what the library already owns stays on top,
-                // and the person leads into the catalog titles they belong to.
-                if !vm.peopleResults.isEmpty {
-                    peopleSection(people: vm.peopleResults)
-                }
-                if !vm.seerrResults.isEmpty {
-                    catalogSection(items: vm.seerrResults)
-                }
-                if vm.isSearching {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    .padding(.vertical, 40)
-                }
-            }
-            .padding(.vertical, 20)
+            resultsStack(vm: vm)
         }
         // Scrolling the hits is the other way out of the keyboard, and it keeps the query.
         .scrollDismissesKeyboard(.immediately)
         .drivesShellBar()
+    }
+    #endif
+
+    private func resultsStack(vm: SearchViewModel) -> some View {
+        LazyVStack(alignment: .leading, spacing: 40) {
+            if !vm.jellyfinResults.isEmpty {
+                librarySection(items: vm.jellyfinResults)
+            }
+            // People sit between the two title rows: what the library already owns stays on top,
+            // and the person leads into the catalog titles they belong to.
+            if !vm.peopleResults.isEmpty {
+                peopleSection(people: vm.peopleResults)
+            }
+            if !vm.seerrResults.isEmpty {
+                catalogSection(items: vm.seerrResults)
+            }
+            if vm.isSearching {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, 40)
+            }
+        }
+        .padding(.vertical, 20)
     }
 
     private func librarySection(items: [JellyfinItem]) -> some View {
