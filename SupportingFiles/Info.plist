@@ -64,6 +64,25 @@
 	     Inert on iOS, where there is no remote to coalesce; this file is shared by both app targets. -->
 	<key>GCSupportsMultipleMicroGamepads</key>
 	<true/>
+	<!-- Sodalite#189: declares the wired external display role. Without it iPadOS 27 never connects a
+	     windowExternalDisplayNonInteractive scene for the app on its own and mirrors the device screen;
+	     measured on an iPad mini 6, the scene only appeared once an AVPlayer was attached (AVKit asks for
+	     it), so the software path, which has no AVPlayer, stayed mirrored. Inert on tvOS. -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleExternalDisplayNonInteractive</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>External Display</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AtkinsonHyperlegible-Regular.ttf</string>
