@@ -44,6 +44,8 @@ final class SiriRemoteSurfaceTracker {
     private var lastLivePosition: (x: Float, y: Float, at: Date)?
     private var observers: [NSObjectProtocol] = []
     private var attachedControllers: [ObjectIdentifier: GCController] = [:]
+    /// Each pad's own `reportsAbsoluteDpadValues` from before `attach` set it, restored by `stop`.
+    private var absoluteBeforeAttach: [ObjectIdentifier: Bool] = [:]
 
     /// Start watching for 1st-generation remotes. Idempotent per instance.
     func start() {
@@ -61,15 +63,18 @@ final class SiriRemoteSurfaceTracker {
         refreshControllers()
     }
 
-    /// Drop every handler and observer. Called from the host's teardown so a gone player stops holding
-    /// the remote's callbacks.
+    /// Drop every handler and observer and hand the remote back in the mode it came in. Called from the
+    /// host's teardown so a gone player stops holding the remote's callbacks, and the rest of the app
+    /// (the search keyboard among it) does not run on a pad left reporting absolute positions.
     func stop() {
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
         observers.removeAll()
-        for controller in attachedControllers.values {
+        for (id, controller) in attachedControllers {
             controller.microGamepad?.buttonA.pressedChangedHandler = nil
             controller.microGamepad?.dpad.valueChangedHandler = nil
+            controller.microGamepad?.reportsAbsoluteDpadValues = absoluteBeforeAttach[id] ?? false
         }
+        absoluteBeforeAttach.removeAll()
         attachedControllers.removeAll()
         lastLivePosition = nil
         latchedDirection = nil
@@ -92,6 +97,7 @@ final class SiriRemoteSurfaceTracker {
         let connected = GCController.controllers()
         let live = Set(connected.map(ObjectIdentifier.init))
         for id in attachedControllers.keys where !live.contains(id) {
+            absoluteBeforeAttach.removeValue(forKey: id)
             let pad = attachedControllers.removeValue(forKey: id)?.microGamepad
             pad?.buttonA.pressedChangedHandler = nil
             pad?.dpad.valueChangedHandler = nil
@@ -123,6 +129,7 @@ final class SiriRemoteSurfaceTracker {
               let pad = controller.microGamepad else { return }
         // Raw touchpad position instead of a sliding window centred on first contact: the window is the
         // right model for steering, the wrong one for "which part of the glass is under the thumb".
+        absoluteBeforeAttach[ObjectIdentifier(controller)] = pad.reportsAbsoluteDpadValues
         pad.reportsAbsoluteDpadValues = true
         pad.dpad.valueChangedHandler = { [weak self] _, x, y in
             guard x != 0 || y != 0 else { return }
