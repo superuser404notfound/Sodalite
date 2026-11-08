@@ -49,10 +49,17 @@ extension GuideGridViewController {
             return true
         }
         lastVetoedMove = (previous, next)
-        materialize(section: next.section, item: desired)
         let target = IndexPath(item: desired, section: next.section)
-        pendingFocusRedirect = target
         focusLog("veto", previous: previous, next: next, target: target)
+        redirectFocus(to: target, from: previous)
+        return false
+    }
+
+    /// Serve `target` on the next turn of the run loop. Used for a vetoed vertical move and for a
+    /// focused row whose schedule arrived under it.
+    func redirectFocus(to target: IndexPath, from previous: IndexPath) {
+        materialize(section: target.section, item: target.item)
+        pendingFocusRedirect = target
         redirectInFlight = true
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -70,7 +77,27 @@ extension GuideGridViewController {
                 self.focusLog("redirect did not take", previous: previous, next: target)
             }
         }
-        return false
+    }
+
+    /// Sodalite#221: a fast swipe lands on rows whose schedule is still loading, drawn as hourly
+    /// placeholders. When the programs arrive the reload puts focus back on the same item NUMBER,
+    /// which is now a different program, usually an earlier one. Aim it at the anchor again.
+    func refocusAfterReload(of sections: IndexSet) {
+        guard let focused = focusedGridIndexPath(), sections.contains(focused.section),
+              let desired = anchoredItemIndex(section: focused.section)
+        else { return }
+        guard desired != focused.item else {
+            // Same cell, new content: the hero still describes the placeholder.
+            updateHero(section: focused.section, item: focused.item)
+            return
+        }
+        let target = IndexPath(item: desired, section: focused.section)
+        focusLog("reload re-aim", previous: focused, next: target)
+        redirectFocus(to: target, from: focused)
+    }
+
+    private func focusedGridIndexPath() -> IndexPath? {
+        gridView.indexPathsForVisibleItems.first { gridView.cellForItem(at: $0)?.isFocused == true }
     }
 
     /// Force the collection view to create the cell the redirect is about to name. The anchor time

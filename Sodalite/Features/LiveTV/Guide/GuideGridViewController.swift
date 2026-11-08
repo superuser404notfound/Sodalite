@@ -507,6 +507,8 @@ final class GuideGridViewController: UIViewController,
             gridView.performBatchUpdates {
                 if !changed.isEmpty { gridView.reloadSections(changed) }
                 if !appended.isEmpty { gridView.insertSections(appended) }
+            } completion: { [weak self] _ in
+                self?.refocusAfterReload(of: changed)
             }
             if !appended.isEmpty {
                 columnView.insertItems(at: appended.map { IndexPath(item: $0, section: 0) })
