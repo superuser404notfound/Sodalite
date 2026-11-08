@@ -113,6 +113,8 @@ struct SeriesDetailView: View {
     private enum FocusArea { case none, season, episode }
     /// Bridge season→episode writes the target episode id here; the episode-row ScrollViewReader scrolls it into the LazyHStack then writes focusedEpisodeID, since a focusedEpisodeID write for an unrendered card is a silent no-op (right-side-takes-two-clicks case).
     @State private var pendingEpisodeFocus: String?
+    /// The player return sets this alongside pendingEpisodeFocus: the row jumps instead of animating, because the focus write lands mid-animation and the focus engine's own scroll then stops it short of the card.
+    @State private var pendingEpisodeFocusIsReturn = false
     /// Bridge episode→season synopsis. Plain @State for the same reason as pendingEpisodeFocus: the box owns its own @FocusState and defers the write itself.
     @State private var pendingSeasonOverviewFocus = false
     /// Which card the episode row aims at, so a return from above lands there instead of scrolling the row back to the start. Fed by the way OUT of the row and by the player's in-session item switches; see EpisodeRowAim for why it is never fed on the way in.
@@ -350,6 +352,7 @@ struct SeriesDetailView: View {
                     // effect on the aim is overwritten on the line below on purpose.
                     focusedEpisodeID = nil
                     episodeAim.sessionMoved(to: ep.id)
+                    pendingEpisodeFocusIsReturn = true
                     pendingEpisodeFocus = ep.id
                     let target = ep.id
                     deferOnMain(by: 0.6) {
@@ -1763,8 +1766,16 @@ struct SeriesDetailView: View {
                     .onChange(of: pendingEpisodeFocus) { _, target in
                         guard let target else { return }
                         // Scroll the target into the LazyHStack so its .focused modifier exists when we write focusedEpisodeID, else the write silently fails for an unrendered card (right-side 2-press case).
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        if pendingEpisodeFocusIsReturn {
+                            // Back from the player the row can be many cards away. The focus write below
+                            // lands 50 ms into a 0.2 s animation, the focus engine takes the scroll over and
+                            // the row stopped short of the focused card, so it jumps there instead.
+                            pendingEpisodeFocusIsReturn = false
                             episodeProxy.scrollTo(target, anchor: .center)
+                        } else {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                episodeProxy.scrollTo(target, anchor: .center)
+                            }
                         }
                         deferOnMain {
                             focusedEpisodeID = target
