@@ -7958,6 +7958,7 @@
 				TrueHDObjectAudio,
 				DTSXObjectAudio,
 				DolbyVisionStillReshaping,
+				DolbyVisionFelCurves,
 			);
 		};
 		A739796A018CAB65D31E4C99 /* XCRemoteSwiftPackageReference "swift-ass-renderer" */ = {
