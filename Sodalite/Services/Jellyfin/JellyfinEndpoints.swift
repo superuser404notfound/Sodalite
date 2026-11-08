@@ -572,7 +572,7 @@ enum JellyfinEndpoint: APIEndpoint {
     /// `ItemQuery` fell back to for any caller that left `fields` nil, which is how four grid queries
     /// ended up asking a large library for cast lists and chapter arrays no cell renders. There is no
     /// fallback any more: `ItemQuery.fields` has no default and every call site picks its set.
-    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,RemoteTrailers,Trickplay"
+    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,RemoteTrailers,Trickplay,PrimaryImageAspectRatio"
 
     /// Season bar: ChildCount (episode count per season) without defaultFields' heavy arrays. Name/index/watched are base/UserData fields.
     /// It must be `ChildCount`, NOT `ItemCounts`: Jellyfin's DtoService fills a Season's ChildCount only under `ItemFields.ChildCount`; `ItemCounts` sets it on the ItemsByName path (people/genres/studios) and leaves a Season's nil. With the wrong field every season read as zero episodes, which the catalog's Jellyfin ground-truth reconcile scores as "deleted".
@@ -594,7 +594,7 @@ enum JellyfinEndpoint: APIEndpoint {
     /// the same FilterCache keys and two writers of one key must not carry different field sets.
     /// `DateCreated`, `SortName` and `ProviderIds` are what a combined Home sorts and deduplicates by
     /// (Sodalite#85), small enough to ride on every card.
-    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height,DateCreated,SortName,ProviderIds"
+    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height,DateCreated,SortName,ProviderIds,PrimaryImageAspectRatio"
 
     /// Music browse rows: image tags + album/artist linkage; IndexNumber/ParentIndexNumber/RunTimeTicks/ProductionYear come back without an explicit Fields request.
     nonisolated static let musicListFields = "ImageTags,Artists,AlbumArtist,AlbumId,AlbumPrimaryImageTag"

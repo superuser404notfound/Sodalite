@@ -139,6 +139,9 @@ struct HomeRowConfig: Codable, Sendable, Identifiable, Equatable {
         if type == .libraryLatest, collectionType == "tvshows" {
             return "tv"
         }
+        if type == .libraryLatest, collectionType == "boxsets" {
+            return HomeRowType.collections.systemImage
+        }
         return type.systemImage
     }
 
@@ -162,14 +165,18 @@ struct HomeRowConfig: Codable, Sendable, Identifiable, Equatable {
 }
 
 extension HomeRowConfig {
-    /// Library types that get their own per-library "Latest" row.
-    static let perLibraryLatestTypes: Set<String> = ["movies", "tvshows"]
+    /// Library types that get their own per-library row. A `boxsets` library's row is not a Latest
+    /// row but the library's own folders in the server's order: a server that groups its collections
+    /// into several such libraries (one per shelf) means each to be a shelf of its own, and the
+    /// aggregated Collections row would pour all of them into one.
+    static let perLibraryLatestTypes: Set<String> = ["movies", "tvshows", "boxsets"]
 
     /// The aggregated row a per-library row splits its library out of.
     static func aggregatedLatestRow(forCollectionType collectionType: String?) -> HomeRowType? {
         switch collectionType {
         case "movies": .latestMovies
         case "tvshows": .latestShows
+        case "boxsets": .collections
         default: nil
         }
     }
@@ -200,6 +207,7 @@ extension HomeRowConfig {
         )
         let splitLibs = latestLibs.filter { splitTypes.contains($0.collectionType ?? "") }
         let splitIDs = Set(splitLibs.map(\.id))
+        let hadCollectionRows = stored.contains { $0.type == .libraryLatest && $0.collectionType == "boxsets" }
 
         var retiredEnabledTypes: Set<String> = []
         var result = stored.filter { config in
@@ -260,17 +268,26 @@ extension HomeRowConfig {
             result[index].isEnabled = true
         }
 
-        return isFreshInstall ? applyingSplitDefault(result) : result
+        if isFreshInstall { return applyingSplitDefault(result) }
+        // Collection shelves arrive split even on a saved layout, the first time they appear, while
+        // the user has Collections on: the one aggregated row is the layout the server did NOT ask
+        // for, and finding the fix behind Reset is not a reasonable ask. Latest rows stay opt-in.
+        let collectionsOn = result.contains { $0.type == .collections && $0.isEnabled }
+        if !hadCollectionRows, collectionsOn,
+           result.contains(where: { $0.type == .libraryLatest && $0.collectionType == "boxsets" }) {
+            return applyingSplitDefault(result, only: ["boxsets"])
+        }
+        return result
     }
 
     /// The default for a type with several libraries: each library gets its own "Latest in X" row,
     /// standing where the aggregated row stood, and the aggregated row goes off. Mixing a second
     /// library into one shelf is what hid a TMDB Trending library inside Latest Movies (Discord,
     /// 2026-10-16). Only a fresh install and Reset apply it; a saved layout keeps its rows.
-    static func applyingSplitDefault(_ configs: [HomeRowConfig]) -> [HomeRowConfig] {
+    static func applyingSplitDefault(_ configs: [HomeRowConfig], only types: Set<String>? = nil) -> [HomeRowConfig] {
         let perLibrary = configs.filter { $0.type == .libraryLatest }
         let splitTypes = Dictionary(grouping: perLibrary) { $0.collectionType ?? "" }
-            .filter { $0.value.count > 1 }
+            .filter { $0.value.count > 1 && (types?.contains($0.key) ?? true) }
             .keys
         guard !splitTypes.isEmpty else { return configs }
 

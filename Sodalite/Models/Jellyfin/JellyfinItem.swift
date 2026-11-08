@@ -63,6 +63,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     var serverID: String?
     /// Jellyfin `DateCreated` (card field set), the sort key a combined Home's Latest rows merge by.
     var dateCreated: String?
+    /// Jellyfin `PrimaryImageAspectRatio` (card field set): the shape of the item's primary image,
+    /// and so the card a server means it to be drawn as (see `ArtworkShape`).
+    var primaryImageAspectRatio: Double?
     let childCount: Int?
     /// Local trailer count (requires LocalTrailerCount in Fields); gates the detail Trailer button. nil if unrequested.
     let localTrailerCount: Int?
@@ -188,6 +191,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case mediaType = "MediaType"
         case serverID = "ServerId"
         case dateCreated = "DateCreated"
+        case primaryImageAspectRatio = "PrimaryImageAspectRatio"
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
         case specialFeatureCount = "SpecialFeatureCount"

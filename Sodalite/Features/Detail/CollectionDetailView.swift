@@ -29,6 +29,7 @@ struct CollectionDetailView: View {
     /// One shot: re-pushing focus on every appear would yank the viewer back to row one after
     /// every return from a film or a pushed detail page.
     @State private var didFocusFirstRow = false
+    @State private var memberFilter: CollectionMembers.Filter = .all
 
     let item: JellyfinItem
 
@@ -145,7 +146,7 @@ struct CollectionDetailView: View {
                 if !vm.collectionItems.isEmpty {
                     // With no overview above it the first row is what sits under the fold, and the
                     // page opens focused on it, so it carries the correction instead.
-                    collectionList(vm: vm, correctsUpMove: !hasOverview)
+                    collectionMembers(vm: vm, correctsUpMove: !hasOverview)
                 }
             }
         }
@@ -248,19 +249,75 @@ struct CollectionDetailView: View {
         )
     }
 
-    // MARK: - Collection Items (vertical list)
+    // MARK: - Collection Items
 
-    /// `correctsUpMove` sends the first row's up-move back to Play; only set when no overview box
-    /// sits between the row and the button row, which would otherwise become unreachable.
-    private func collectionList(vm: DetailViewModel, correctsUpMove: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+    /// Heading, the Movies / Shows filter where the collection mixes both, then the members as a
+    /// list or a grid (`CollectionMembers.usesGrid`).
+    private func collectionMembers(vm: DetailViewModel, correctsUpMove: Bool) -> some View {
+        let all = vm.collectionItems
+        let members = CollectionMembers.visible(all, filter: memberFilter)
+        let offersFilter = CollectionMembers.offersFilter(all)
+        return VStack(alignment: .leading, spacing: 16) {
             Text("detail.collection.items")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal, metrics.rowInset)
 
+            if offersFilter {
+                HStack(spacing: 12) {
+                    ForEach(CollectionMembers.Filter.allCases) { filter in
+                        FilterChip(
+                            title: filter.title,
+                            count: CollectionMembers.visible(all, filter: filter).count,
+                            isSelected: memberFilter == filter
+                        ) { memberFilter = filter }
+                    }
+                }
+                .padding(.horizontal, metrics.rowInset)
+            }
+
+            if CollectionMembers.usesGrid(all) {
+                collectionGrid(members, correctsUpMove: correctsUpMove && !offersFilter)
+            } else {
+                collectionList(members, correctsUpMove: correctsUpMove && !offersFilter)
+            }
+        }
+    }
+
+    private func collectionGrid(_ members: [JellyfinItem], correctsUpMove: Bool) -> some View {
+        let style = ArtworkShape.style(for: members, default: .poster)
+        let scale = dependencies.appearancePreferences.cardScale
+        return LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: metrics.gridColumnMinimum(for: style, cardScale: scale)),
+                               spacing: metrics.gridSpacing)],
+            spacing: metrics.gridSpacing
+        ) {
+            ForEach(Array(members.enumerated()), id: \.element.id) { index, member in
+                Button { selectedItem = member } label: {
+                    MediaCard(
+                        item: member,
+                        imageURL: dependencies.jellyfinImageService.posterURL(
+                            for: member, maxWidth: ArtworkShape.imageWidth(for: style)),
+                        style: style,
+                        isFocused: focusedItemID == member.id
+                    )
+                }
+                .buttonStyle(GridCardButtonStyle())
+                .focused($focusedItemID, equals: member.id)
+                .onFocusMoveUp(active: correctsUpMove && index == 0) {
+                    playButtonFocused = true
+                }
+            }
+        }
+        .padding(.horizontal, metrics.rowInset)
+    }
+
+    /// `correctsUpMove` sends the first row's up-move back to Play; only set when no overview box
+    /// sits between the row and the button row, which would otherwise become unreachable.
+    private func collectionList(_ members: [JellyfinItem], correctsUpMove: Bool) -> some View {
+        Group {
             VStack(spacing: 12) {
-                ForEach(Array(vm.collectionItems.enumerated()), id: \.element.id) { index, movie in
+                ForEach(Array(members.enumerated()), id: \.element.id) { index, movie in
                     CollectionItemRow(
                         item: movie,
                         imageURL: dependencies.jellyfinImageService.posterURL(for: movie, maxWidth: ImageWidth.thumbnail),
