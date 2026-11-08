@@ -73719,6 +73719,30 @@
         }
       }
     },
+    "changelog.1_1_0.wideAspect.body" : {
+      "comment" : "What's New 1.1.0: description of Apple TV playback using the selected system wide aspect ratio",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV playback now follows the wide aspect ratio selected in System Settings."
+          }
+        }
+      }
+    },
+    "changelog.1_1_0.wideAspect.title" : {
+      "comment" : "What's New 1.1.0: title for Apple TV playback using the selected system wide aspect ratio",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wide aspect playback"
+          }
+        }
+      }
+    },
     "changelog.modal.dismiss" : {
       "extractionState" : "manual",
       "localizations" : {
