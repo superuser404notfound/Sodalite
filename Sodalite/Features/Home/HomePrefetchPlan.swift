@@ -2,7 +2,7 @@ import Foundation
 
 /// Which of Home's artwork a prefetch warms (Sodalite#212).
 ///
-/// Every row in full was several times what `ImageCache` holds, and `NSCache` throws out the oldest
+/// Every row in full was several times what `ImageCache` holds, and the cache threw out the oldest
 /// entries first, which were the top rows: the prefetch of the bottom ones evicted the cards on
 /// screen, and scrolling back up loaded them from the server again. So only the head of each row,
 /// the cards a first look at it shows, and only top rows first until the limit. The rest loads as

@@ -33,8 +33,7 @@ struct CacheFootprint: Equatable, Sendable {
 ///   walks both, because the memory half of a URLCache belongs to its own instance. The discovery
 ///   client has no cache at all (`urlCache = nil`), so it is not in here and does not need to be.
 /// - Artwork, `sodalite-image-cache`. The decoded images in `ImageCache` ride along when clearing
-///   but carry no figure: they sit in an `NSCache`, which reports its limit and never its contents.
-///   A number that cannot be read is better left off the screen than guessed at.
+///   but carry no figure: they are memory the next launch never sees, not something the device keeps.
 /// - Subtitle fonts, `ASSFontCache` under `Library/Caches/ass-fonts`. Summed over its files.
 ///
 /// `CachedDataTests` walks the sources for every `URLCache(… diskPath:)` and fails if one is not

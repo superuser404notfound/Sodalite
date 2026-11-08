@@ -108,12 +108,32 @@ enum ImageFetch {
         case transientFailure
     }
 
-    /// The first pass reads the HTTP cache like any other request. Every later one bypasses it: the
-    /// only reason there IS a later one is that the last answer was half a file, and that is exactly
-    /// what the cache would hand back.
-    nonisolated static func cachePolicy(forAttempt attempt: Int) -> URLRequest.CachePolicy {
-        attempt == 0 ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
+    /// Every pass after the first bypasses the HTTP cache: the only reason there IS a later one is
+    /// that the last answer was half a file, and that is exactly what the cache would hand back.
+    ///
+    /// A first pass for a Jellyfin URL that names its image `tag` takes a stored copy as it is. The
+    /// tag is the image's content hash, so a new picture is a new URL and the stored one can never
+    /// be stale. The server's own headers say otherwise: `Cache-Control: public` with no `max-age`
+    /// and a `Last-Modified` from when the resize was written, so URLSession's heuristic gave a
+    /// fresh resize almost no lifetime, and every image evicted from `ImageCache` came back by a
+    /// round trip to the server rather than from the disk it was on (Sodalite#212). A payload that
+    /// stopped short is dropped from the cache when it is refused, so this cannot latch one.
+    nonisolated static func cachePolicy(forAttempt attempt: Int, url: URL?) -> URLRequest.CachePolicy {
+        guard attempt == 0 else { return .reloadIgnoringLocalCacheData }
+        return isContentAddressed(url) ? .returnCacheDataElseLoad : .useProtocolCachePolicy
     }
+
+    nonisolated static func isContentAddressed(_ url: URL?) -> Bool {
+        guard let url,
+              url.path.contains("/Images/"),
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        else { return false }
+        return items.contains { $0.name == "tag" && !($0.value ?? "").isEmpty }
+    }
+
+    /// Above URLSession's default of six, so the prefetch, which takes half of them, cannot hold
+    /// back the cards on screen (Sodalite#212).
+    nonisolated static let connectionsPerHost = 8
 
     /// Artwork's own session, because `URLSession.shared` cannot carry a delegate and this is where
     /// every image in the app is fetched. Its cache is its own for the same reason: `forget()` has to
@@ -126,6 +146,7 @@ enum ImageFetch {
     /// the server (Sodalite#212). `Library/Caches` is purgeable, and Settings > Cached Data shows it.
     nonisolated static let session: URLSession = {
         let config = URLSessionConfiguration.default
+        config.httpMaximumConnectionsPerHost = connectionsPerHost
         config.urlCache = URLCache(
             memoryCapacity: 8 * 1024 * 1024,
             diskCapacity: 200 * 1024 * 1024,
@@ -136,8 +157,8 @@ enum ImageFetch {
     }()
 
     /// Bytes of artwork on disk, and the way to drop them, for the Settings screen that shows what
-    /// Sodalite keeps on this device (Sodalite#117). The decoded images in `ImageCache` sit in an
-    /// `NSCache`, which reports no size at all, so they carry no figure and are only cleared.
+    /// Sodalite keeps on this device (Sodalite#117). The decoded images in `ImageCache` are memory,
+    /// not something the device keeps, so they carry no figure and are only cleared.
     nonisolated static var cacheDiskUsage: Int {
         session.configuration.urlCache?.currentDiskUsage ?? 0
     }
@@ -148,7 +169,7 @@ enum ImageFetch {
 
     nonisolated static func load(_ request: URLRequest, attempt: Int = 0) async -> Outcome {
         var request = request
-        request.cachePolicy = cachePolicy(forAttempt: attempt)
+        request.cachePolicy = cachePolicy(forAttempt: attempt, url: request.url)
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse,

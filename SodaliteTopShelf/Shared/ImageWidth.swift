@@ -27,7 +27,7 @@
 /// failures before: a width that moved with the setting would drop every cached image and re-resize
 /// the library on the server the moment someone flipped it, and a width that moved with a measured
 /// column re-fires the load and flashes the artwork out and back. Fewer images resident is the
-/// cheaper of the three, and `NSCache` evicts rather than fails.
+/// cheaper of the three, and the cache evicts rather than fails.
 ///
 /// One bucket per family, not one per surface, for the same reason. The 16:9 tiles (genre, library,
 /// provider, episode and program cards) are fixed at 360pt and can never draw past 720, so they

@@ -122,9 +122,27 @@ struct ImagePayloadTests {
         // back. Measured against a server built to that shape: the whole ladder and every later
         // visit read 73438 bytes of a 367194-byte PNG. The first pass may read the cache like any
         // other request; a later one exists only because the last answer was half a file.
-        #expect(ImageFetch.cachePolicy(forAttempt: 0) == .useProtocolCachePolicy)
+        let tagged = URL(string: "http://s:8096/Items/abc/Images/Primary?tag=f00d&maxWidth=640&quality=90")!
+        let untagged = URL(string: "http://s:8096/Items/abc/Images/Primary?maxWidth=640")!
+        #expect(ImageFetch.cachePolicy(forAttempt: 0, url: untagged) == .useProtocolCachePolicy)
         for attempt in 1...4 {
-            #expect(ImageFetch.cachePolicy(forAttempt: attempt) == .reloadIgnoringLocalCacheData)
+            #expect(ImageFetch.cachePolicy(forAttempt: attempt, url: untagged) == .reloadIgnoringLocalCacheData)
+            #expect(ImageFetch.cachePolicy(forAttempt: attempt, url: tagged) == .reloadIgnoringLocalCacheData)
         }
+    }
+
+    /// The tag is the image's content hash, so a stored copy is never stale and an image evicted
+    /// from memory comes back from disk instead of from a revalidation round trip (Sodalite#212).
+    @Test func aTaggedJellyfinImageIsReadFromTheCacheWithoutAskingTheServer() {
+        let tagged = URL(string: "http://s:8096/Items/abc/Images/Backdrop/0?tag=f00d&maxWidth=960")!
+        #expect(ImageFetch.cachePolicy(forAttempt: 0, url: tagged) == .returnCacheDataElseLoad)
+    }
+
+    @Test func onlyAJellyfinImageWithANonEmptyTagCountsAsContentAddressed() {
+        #expect(ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary?tag=1")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary?tag=")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "https://image.tmdb.org/t/p/w500/x.jpg?tag=1")!))
+        #expect(!ImageFetch.isContentAddressed(nil))
     }
 }

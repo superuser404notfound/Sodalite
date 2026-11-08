@@ -396,6 +396,7 @@ struct HomeView: View {
                 LogTap.shared.note(
                     "[ImageCache] home prefetch warmed \(warmed) of \(urls.count) (limit \(limit),"
                         + " budget \(ImageCache.shared.costLimit / 1_000_000) MB),"
+                        + " resident \(ImageCache.shared.residentBytes / 1_000_000) MB,"
                         + " evicted \(evicted) since last"
                 )
             }

@@ -287,22 +287,25 @@ final class ImageCache: @unchecked Sendable {
     // Plain `nonisolated` (not `(unsafe)`): Sendable constant reachable from background prefetch under the project's MainActor default isolation.
     nonisolated static let shared = ImageCache()
 
-    // `nonisolated(unsafe)`: NSCache is thread-safe, so prefetch can `store` from background tasks without a per-image MainActor hop.
-    nonisolated(unsafe) private let cache: NSCache<NSURL, PlatformImage>
-
-    nonisolated private let evictions = EvictionCounter()
+    /// Least recently USED goes first, so the rows just scrolled past outlive the ones far above
+    /// them (Sodalite#212, see `LRUCostCache`). Thread-safe, so prefetch stores from background tasks.
+    nonisolated private let cache: LRUCostCache<URL, PlatformImage>
 
     /// The decoded bytes the cache may hold, from `costLimit(physicalMemory:)`.
-    nonisolated let costLimit: Int
+    nonisolated var costLimit: Int { cache.costLimit }
 
-    /// Cost-based eviction by decoded byte size; the byte budget gates (countLimit stays generous), bounded so long sessions don't grow into hundreds of MB.
     nonisolated private init() {
-        let cache = NSCache<NSURL, PlatformImage>()
-        costLimit = Self.costLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
-        cache.totalCostLimit = costLimit
-        cache.countLimit = 1000
-        cache.delegate = evictions
-        self.cache = cache
+        cache = LRUCostCache(costLimit: Self.costLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory))
+        #if canImport(UIKit)
+        // Half, not all: the screen that is up keeps its newest cards.
+        let cache = cache
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: nil
+        ) { _ in
+            cache.trim(toFraction: 0.5)
+            LogTap.shared.note("[ImageCache] memory warning, trimmed to \(cache.totalCost / 1_000_000) MB")
+        }
+        #endif
     }
 
     /// 75 MB per GB of RAM, between 150 MB (Apple TV HD, 2 GB) and 300 MB (Apple TV 4K 2022, 4 GB).
@@ -311,8 +314,7 @@ final class ImageCache: @unchecked Sendable {
     /// 2.1 GB on a 4 GB Apple TV (AE#104), and Home stays alive under the player: a 4K session put the
     /// engine at some 900 MB on its own. A flat 150 MB held some 60 cards at the widths `ImageWidth`
     /// asks for, under what one Home screen draws, so prefetching the lower rows evicted the ones on
-    /// screen (Sodalite#212). `NSCache` also empties itself under memory pressure, which is the
-    /// second line behind this one.
+    /// screen (Sodalite#212). A memory warning trims the cache to half, the second line behind this one.
     nonisolated static func costLimit(physicalMemory: UInt64) -> Int {
         let gigabytes = (Double(physicalMemory) / Double(1 << 30)).rounded()
         let budget = Int(gigabytes) * 75_000_000
@@ -328,16 +330,19 @@ final class ImageCache: @unchecked Sendable {
 
     /// Evictions since the last call, for the diagnostic line a prefetch writes.
     nonisolated func takeEvictionCount() -> Int {
-        evictions.take()
+        cache.takeEvictionCount()
     }
 
-    // nonisolated so the prefetch hot path stores from off-actor tasks without a per-image MainActor hop (NSCache is thread-safe).
+    /// Decoded bytes held now, for the diagnostic line.
+    nonisolated var residentBytes: Int { cache.totalCost }
+
+    // nonisolated so the prefetch hot path stores from off-actor tasks without a per-image MainActor hop (the LRU is lock-protected).
     nonisolated func image(for url: URL) -> PlatformImage? {
-        cache.object(forKey: url as NSURL)
+        cache.value(for: url)
     }
 
     nonisolated func store(_ image: PlatformImage, for url: URL) {
-        cache.setObject(image, forKey: url as NSURL, cost: estimatedBytes(for: image))
+        cache.store(image, for: url, cost: estimatedBytes(for: image))
     }
 
     /// A trimmed image is a different image from the one at its URL, so it is cached under its own
@@ -351,32 +356,14 @@ final class ImageCache: @unchecked Sendable {
 
     /// Wipe on profile switches: a poster cached with user A's token may be unfetchable under user B's permissions.
     func clear() {
-        cache.removeAllObjects()
+        cache.removeAll()
     }
 
-    /// Decoded size estimate: width × height × scale² × 4 bytes (RGBA8). Ignores HDR/wide-gamut backing, fine as an NSCache cost signal.
+    /// Decoded size estimate: width × height × scale² × 4 bytes (RGBA8). Ignores HDR/wide-gamut backing, fine as a cost signal.
     nonisolated private func estimatedBytes(for image: PlatformImage) -> Int {
         let scale = image.pixelScale
         let pixels = image.size.width * scale * image.size.height * scale
         return Int(pixels) * 4
-    }
-}
-
-/// Counts what `NSCache` throws out. A cache that is too small for its screen shows up here first:
-/// in the log, a Home that evicts while it prefetches is Sodalite#212 coming back.
-nonisolated private final class EvictionCounter: NSObject, NSCacheDelegate, @unchecked Sendable {
-    private let lock = NSLock()
-    private var count = 0
-
-    func cache(_ cache: NSCache<AnyObject, AnyObject>, willEvictObject obj: Any) {
-        lock.withLock { count += 1 }
-    }
-
-    func take() -> Int {
-        lock.withLock {
-            defer { count = 0 }
-            return count
-        }
     }
 }
 
@@ -391,8 +378,9 @@ extension ImageCache {
         guard !pending.isEmpty else { return 0 }
 
         return await withTaskGroup(of: Bool.self) { group in
-            // 6 in flight: saturates a home LAN without crowding foreground fetches; matches URLSession's per-host default.
-            let maxConcurrent = 6
+            // Half of `ImageFetch.session`'s connections per host, so the cards on screen always find
+            // free ones: at six of six, a visible card queued behind the prefetch (Sodalite#212).
+            let maxConcurrent = ImageFetch.connectionsPerHost / 2
             var iter = pending.makeIterator()
 
             for _ in 0..<min(maxConcurrent, pending.count) {
