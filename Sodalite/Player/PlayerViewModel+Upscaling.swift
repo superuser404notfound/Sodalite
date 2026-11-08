@@ -5,7 +5,7 @@ import Foundation
 /// setting. The chip exists only while the engine upscales this session or the viewer turned it off.
 extension PlayerViewModel {
     enum UpscaleToggleState: Equatable {
-        case on, reduced, off
+        case on, off
     }
 
     var effectiveEnhancedUpscaling: Bool { upscalingOverride ?? preferences.enhancedUpscaling }
@@ -13,21 +13,21 @@ extension PlayerViewModel {
     var upscaleToggleState: UpscaleToggleState? {
         Self.upscaleToggleState(
             isUpscaling: upscaleStatus != nil,
-            degraded: upscaleStatus?.degraded ?? false,
             stageDisabled: upscaleStatus?.disabledReason != nil,
             override: upscalingOverride)
     }
 
     /// A stage that switched itself off is latched for the session by the engine, so it offers
     /// nothing to undo. `override == true` keeps the chip up across the rebuild, before the first
-    /// upscaled frame publishes a status again.
+    /// upscaled frame publishes a status again. A degraded stage still reads On: the viewer cannot
+    /// pick or undo it, and Stats for Nerds already shows it.
     static func upscaleToggleState(
-        isUpscaling: Bool, degraded: Bool, stageDisabled: Bool, override: Bool?
+        isUpscaling: Bool, stageDisabled: Bool, override: Bool?
     ) -> UpscaleToggleState? {
         if override == false { return .off }
         if stageDisabled { return nil }
-        if isUpscaling { return degraded ? .reduced : .on }
-        return override == true ? .on : nil
+        if isUpscaling || override == true { return .on }
+        return nil
     }
 
     /// Filled while the stage runs, outline once the viewer turned it off, as the setting's own glyph.
@@ -37,7 +37,6 @@ extension PlayerViewModel {
 
     var upscaleChipLabel: String {
         switch upscaleToggleState {
-        case .reduced: String(localized: "player.upscaling.reduced", defaultValue: "Upscaling Reduced")
         case .off: String(localized: "player.upscaling.off", defaultValue: "Upscaling Off")
         case .on, nil: String(localized: "player.upscaling.on", defaultValue: "Upscaling On")
         }

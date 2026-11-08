@@ -4,10 +4,10 @@ import Testing
 /// Sodalite#223: which state the per-video Enhanced Upscaling chip shows, if any.
 @Suite("Upscale toggle state")
 struct UpscaleToggleStateTests {
-    private func state(isUpscaling: Bool = false, degraded: Bool = false, stageDisabled: Bool = false,
+    private func state(isUpscaling: Bool = false, stageDisabled: Bool = false,
                        override: Bool? = nil) -> PlayerViewModel.UpscaleToggleState? {
         PlayerViewModel.upscaleToggleState(
-            isUpscaling: isUpscaling, degraded: degraded, stageDisabled: stageDisabled, override: override)
+            isUpscaling: isUpscaling, stageDisabled: stageDisabled, override: override)
     }
 
     @Test("no chip while the session was never upscaled")
@@ -15,10 +15,9 @@ struct UpscaleToggleStateTests {
         #expect(state() == nil)
     }
 
-    @Test("a running stage shows on, or reduced once it degraded")
+    @Test("a running stage shows on")
     func running() {
         #expect(state(isUpscaling: true) == .on)
-        #expect(state(isUpscaling: true, degraded: true) == .reduced)
     }
 
     @Test("the viewer's off wins over whatever the engine still publishes")
