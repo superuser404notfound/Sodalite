@@ -315,6 +315,12 @@ extension HomeViewModel {
             case .libraryLatest:
                 // Per-library Latest scoped by parentID alone. Deliberately NO IncludeItemTypes: it would filter before GroupItems grouping, collapsing an episodes-only library to one tile (Sodalite#12, DrHurt "latest in Series - French only loads 1 item"). ParentId already constrains the library, so the type hint the aggregate rows need (they drop ParentId) is the bug here.
                 guard let libraryID = config.libraryID else { return nil }
+                if config.collectionType == "boxsets" {
+                    items = try await source.libraryService.getItems(
+                        userID: source.userID, query: Self.collectionShelfQuery(libraryID: libraryID)
+                    ).items
+                    break
+                }
                 // Over-fetch + post-fold cap (latestShows rationale): the fold can dedupe a series against its own episodes, shrinking the row below 16.
                 let latest = try await source.libraryService.getLatestMedia(
                     userID: source.userID,
@@ -333,9 +339,18 @@ extension HomeViewModel {
                 items: items,
                 libraryID: config.libraryID,
                 libraryName: config.libraryName,
-                serverID: source.serverID
+                serverID: source.serverID,
+                collectionType: config.collectionType
             )
         }
+    }
+
+    /// A collection shelf: the library's own folders in the order the server gives them. No SortBy,
+    /// because a server that builds shelves curates that order. Recursive stays on: a box set's
+    /// members are linked, not nested, so the scope still answers with the folders alone, and a
+    /// non-recursive query is what marks a home-video folder walk to the grid.
+    static func collectionShelfQuery(libraryID: String, limit: Int = 30) -> ItemQuery {
+        ItemQuery(parentID: libraryID, limit: limit, fields: JellyfinEndpoint.homeRowFields)
     }
 
     func loadTagRow(type: HomeRowType) async -> HomeTagRowData? {

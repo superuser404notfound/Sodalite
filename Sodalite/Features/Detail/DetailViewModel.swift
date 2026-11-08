@@ -545,18 +545,28 @@ final class DetailViewModel {
 
         do {
             // Chronological oldest-first: franchise box-sets read in release order; SortName would put "Avengers" before "Iron Man". PremiereDate is Jellyfin's original theatrical/first-air date.
-            let query = ItemQuery(
+            var query = ItemQuery(
                 parentID: item.id,
                 sortBy: "PremiereDate,ProductionYear,SortName",
                 sortOrder: "Ascending",
-                limit: 50,
+                limit: CollectionMembers.pageSize,
                 // Full set on purpose: Play/Shuffle enqueue these members verbatim and the player
                 // reads chapters, trickplay, mediaStreams and mediaSources off the queue entry
                 // with no re-fetch (Sodalite#68).
                 fields: JellyfinEndpoint.detailFields
             )
-            let response = try await itemService.getCollectionItems(userID: userID, query: query)
-            collectionItems = response.items
+            // The first page paints at once; a long collection fills in behind it.
+            var members: [JellyfinItem] = []
+            var seen = Set<String>()
+            while true {
+                query.startIndex = members.count
+                let page = try await itemService.getCollectionItems(userID: userID, query: query).items
+                let fresh = page.filter { seen.insert($0.id).inserted }
+                members += fresh
+                collectionItems = members
+                // A page of nothing new is a server ignoring StartIndex: stop rather than spin.
+                if fresh.isEmpty || CollectionMembers.isLastPage(received: page.count, loaded: members.count) { break }
+            }
         } catch {
         }
     }

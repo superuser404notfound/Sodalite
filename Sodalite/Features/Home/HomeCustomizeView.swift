@@ -366,7 +366,9 @@ struct HomeCustomizeView: View {
 
     @ViewBuilder
     private func rowLabel(_ config: HomeRowConfig) -> some View {
-        if config.type == .libraryLatest {
+        if config.type == .libraryLatest, config.collectionType == "boxsets" {
+            Text(verbatim: config.libraryName ?? "")
+        } else if config.type == .libraryLatest {
             Text(
                 String(
                     format: String(localized: "home.libraryLatest.format", defaultValue: "Latest in %@"),

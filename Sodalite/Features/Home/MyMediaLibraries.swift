@@ -45,12 +45,23 @@ enum MyMediaLibraries {
         return query
     }
 
-    /// The grid a library opens into, from a My Media tile or its own tab.
-    static func gridQuery(for library: JellyfinLibrary, grouping: CollectionGrouping) -> ItemQuery {
+    /// A server that lists several collection libraries means each to hold its own folders, so
+    /// those are scoped by their id like a real library. Jellyfin's single Collections view is
+    /// the virtual one above.
+    static func scopesCollections(_ library: JellyfinLibrary, among libraries: [JellyfinLibrary]) -> Bool {
+        guard library.libraryType == .boxsets else { return false }
+        return libraries.filter { $0.libraryType == .boxsets && $0.serverID == library.serverID }.count > 1
+    }
+
+    /// The grid a library opens into, from a My Media tile or its own tab. `scopesCollections`
+    /// comes from `scopesCollections(_:among:)`, where the caller knows the server's library list.
+    static func gridQuery(
+        for library: JellyfinLibrary, grouping: CollectionGrouping, scopesCollections: Bool = false
+    ) -> ItemQuery {
         // parentID scopes the grid, the types match the library.
         let types = itemTypes(for: library.libraryType)
         // Collapsing box sets inside the box-set view is meaningless, and a virtual view takes no parentID.
-        let isVirtual = isVirtualView(library.libraryType)
+        let isVirtual = isVirtualView(library.libraryType) && !scopesCollections
         var query = ItemQuery(
             parentID: isVirtual ? nil : library.id,
             includeItemTypes: types,
@@ -64,7 +75,7 @@ enum MyMediaLibraries {
         )
         if browsesFolders(library.libraryType) {
             query = folderQuery(parentID: library.id)
-        } else if !isVirtual {
+        } else if !isVirtualView(library.libraryType) {
             // The only grids that defer to the server's "Group movies into collections" (Sodalite#44).
             // The server itself skips collapsing once the watch-status filter adds IsPlayed.
             query.collapseBoxSetItems = grouping.queryValue

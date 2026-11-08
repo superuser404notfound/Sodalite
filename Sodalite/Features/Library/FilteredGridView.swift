@@ -112,8 +112,20 @@ struct FilteredGridView: View {
     }
     /// One level of a folder tree (Sodalite#180): only `MyMediaLibraries.folderQuery` asks non-recursively.
     private var browsesFolders: Bool { !query.recursive }
-    /// Home videos are 16:9 stills, so a folder grid lays out wide cards.
-    private var cardStyle: MediaCardStyle { browsesFolders ? .landscape : .poster }
+    /// Home videos are 16:9 stills, so a folder grid lays out wide cards. Anything else takes the
+    /// shape the server reports for its covers (`ArtworkShape`), so a folder of landscape box sets
+    /// opens as a landscape grid.
+    private var cardStyle: MediaCardStyle {
+        if browsesFolders { return .landscape }
+        // The head decides: the shape is the folder's, not each cover's, and reading only the
+        // head keeps this off the length of a sparse library.
+        let head = usesSparseGrid ? (0..<60).compactMap(store.item(at:)) : Array(items.prefix(60))
+        return ArtworkShape.style(for: head, default: .poster)
+    }
+    private func gridImageURL(for item: JellyfinItem) -> URL? {
+        if browsesFolders { return dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item) }
+        return dependencies.jellyfinImageService.posterURL(for: item, maxWidth: ArtworkShape.imageWidth(for: cardStyle))
+    }
 
     init(
         title: String,
@@ -286,9 +298,7 @@ struct FilteredGridView: View {
                                 } label: {
                                     MediaCard(
                                         item: item,
-                                        imageURL: browsesFolders
-                                            ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
-                                            : dependencies.jellyfinImageService.posterURL(for: item),
+                                        imageURL: gridImageURL(for: item),
                                         style: cardStyle,
                                         isFocused: focusedItemID == item.originKey
                                     )
@@ -575,9 +585,7 @@ struct FilteredGridView: View {
             Button { open(item) } label: {
                 MediaCard(
                     item: item,
-                    imageURL: browsesFolders
-                        ? dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item)
-                        : dependencies.jellyfinImageService.posterURL(for: item),
+                    imageURL: gridImageURL(for: item),
                     style: cardStyle,
                     isFocused: focusedSlot == index
                 )

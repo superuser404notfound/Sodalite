@@ -353,7 +353,8 @@ final class HomeViewModel {
             )
             let merged = HomeRowData(
                 type: first.type, items: items, libraryID: first.libraryID,
-                libraryName: first.libraryName, serverID: rows.count == 1 ? first.serverID : nil
+                libraryName: first.libraryName, serverID: rows.count == 1 ? first.serverID : nil,
+                collectionType: first.collectionType
             )
             return merged.items.isEmpty ? .emptied(id: entry.id, isTag: false) : .media(merged)
         }
@@ -589,7 +590,8 @@ final class HomeViewModel {
             return imageService.seriesArtworkURL(for: item)
         }
         guard rowType.usesBackdrop else {
-            return imageService.posterURL(for: item)
+            let shape = ArtworkShape.style(forAspectRatio: item.primaryImageAspectRatio) ?? .poster
+            return imageService.posterURL(for: item, maxWidth: ArtworkShape.imageWidth(for: shape))
         }
         // Every chain here paints ONE landscape card, so every link asks for the same width,
         // the poster fallbacks included: a filled 2:3 image in a 16:9 slot is scaled by the

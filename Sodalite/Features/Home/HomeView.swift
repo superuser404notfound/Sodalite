@@ -443,9 +443,12 @@ struct HomeView: View {
                         let cwImage = row.type.usesBackdrop
                             ? dependencies.appearancePreferences.continueWatchingImage
                             : .still
+                        let rowStyle = ArtworkShape.style(for: row.items, default: row.type.cardStyle)
                         HorizontalMediaRow(
                             title: row.type.localizedTitle,
-                            verbatimTitle: row.type == .libraryLatest
+                            verbatimTitle: row.isCollectionShelf
+                                ? [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
+                                : row.type == .libraryLatest
                                 ? String(
                                     format: String(
                                         localized: "home.libraryLatest.format",
@@ -473,7 +476,7 @@ struct HomeView: View {
                                 }
                                 : nil,
                             onItemSelected: { selectedItem = $0 },
-                            cardStyle: row.type.cardStyle,
+                            cardStyle: rowStyle,
                             showsSeriesArtwork: cwImage != .still,
                             itemLabel: { vm.serverLabel(forItem: $0, in: row) },
                             onShowAll: showAllFilter(for: row).map { filter in { selectedFilter = filter } }
@@ -610,6 +613,7 @@ struct HomeView: View {
     /// The full list behind a capped "All Movies" / "All Series" row; nil while the row is not full,
     /// since it then already shows everything there is.
     private func showAllFilter(for row: HomeRowData) -> FilterDestination? {
+        if row.isCollectionShelf { return collectionShelfFilter(for: row) }
         let type: ItemType
         let title: String
         switch row.type {
@@ -630,6 +634,27 @@ struct HomeView: View {
             cacheScope: homeTileScope(FilterCacheKey.Home.row(row.type.rawValue)),
             sortScope: sortScopeID.map { LibrarySortScope.homeRow(row.type.rawValue, scope: $0) },
             sources: combinedSources
+        )
+    }
+
+    /// A shelf that filled its fetch has more folders behind it: the whole library, in the same
+    /// one-level, server-ordered shape the row asked for.
+    private func collectionShelfFilter(for row: HomeRowData) -> FilterDestination? {
+        guard let libraryID = row.libraryID,
+              row.items.count >= HomeViewModel.collectionShelfQuery(libraryID: libraryID).limit ?? 0
+        else { return nil }
+        let library = JellyfinLibrary(
+            id: libraryID, name: row.libraryName ?? "", collectionType: "boxsets", imageTags: nil, serverID: row.serverID
+        )
+        return FilterDestination(
+            title: library.name,
+            query: HomeViewModel.collectionShelfQuery(libraryID: libraryID, limit: 50),
+            cacheScope: FilterCacheScope(
+                key: FilterCacheKey.Home.row(row.id),
+                identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                    ?? CacheIdentity(serverID: "", userID: "")
+            ),
+            serverID: viewModel?.sources.first(where: { $0.serverID == row.serverID && !$0.isActive })?.serverID
         )
     }
 
@@ -654,7 +679,10 @@ struct HomeView: View {
 
     private func makeLibraryFilter(for library: JellyfinLibrary) -> FilterDestination {
         let grouping = HomeRowConfig.collectionGrouping(scope: appState.profileKey?.storageScope ?? "")
-        let query = MyMediaLibraries.gridQuery(for: library, grouping: grouping)
+        let query = MyMediaLibraries.gridQuery(
+            for: library, grouping: grouping,
+            scopesCollections: MyMediaLibraries.scopesCollections(library, among: viewModel?.myMediaLibraries ?? [])
+        )
         return FilterDestination(
             title: library.name,
             query: query,
