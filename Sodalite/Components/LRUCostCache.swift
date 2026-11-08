@@ -32,7 +32,8 @@ nonisolated final class LRUCostCache<Key: Hashable, Value>: @unchecked Sendable 
     private var evictions = 0
 
     let costLimit: Int
-    private(set) var totalCost = 0
+    private var heldCost = 0
+    var totalCost: Int { lock.withLock { heldCost } }
 
     init(costLimit: Int) {
         self.costLimit = costLimit
@@ -53,7 +54,7 @@ nonisolated final class LRUCostCache<Key: Hashable, Value>: @unchecked Sendable 
             // One entry larger than the whole budget would evict everything and then itself.
             guard cost <= costLimit else { return }
             if let node = nodes[key] {
-                totalCost += cost - node.cost
+                heldCost += cost - node.cost
                 node.value = value
                 node.cost = cost
                 moveToNewest(node)
@@ -61,7 +62,7 @@ nonisolated final class LRUCostCache<Key: Hashable, Value>: @unchecked Sendable 
                 let node = Node(key: key, value: value, cost: cost)
                 nodes[key] = node
                 append(node)
-                totalCost += cost
+                heldCost += cost
             }
             trim(to: costLimit)
         }
@@ -77,7 +78,7 @@ nonisolated final class LRUCostCache<Key: Hashable, Value>: @unchecked Sendable 
             nodes.removeAll()
             oldest = nil
             newest = nil
-            totalCost = 0
+            heldCost = 0
         }
     }
 
@@ -92,10 +93,10 @@ nonisolated final class LRUCostCache<Key: Hashable, Value>: @unchecked Sendable 
     // MARK: list, lock held
 
     private func trim(to limit: Int) {
-        while totalCost > limit, let victim = oldest {
+        while heldCost > limit, let victim = oldest {
             unlink(victim)
             nodes[victim.key] = nil
-            totalCost -= victim.cost
+            heldCost -= victim.cost
             evictions += 1
         }
     }
