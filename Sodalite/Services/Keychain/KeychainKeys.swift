@@ -78,6 +78,12 @@ nonisolated enum KeychainKeys {
         "profilePINThrottle_\(serverID)_\(userID)"
     }
 
+    /// JSON `TraktSession` for one profile on this device. Never synced: Trakt refresh tokens are
+    /// single use, so a pair shared between devices dies at the first refresh on either.
+    static func traktSession(serverID: String, userID: String) -> String {
+        "traktSession_\(serverID)_\(userID)"
+    }
+
     static func seerrSession(serverID: String) -> String {
         "seerrSession_\(serverID)"
     }

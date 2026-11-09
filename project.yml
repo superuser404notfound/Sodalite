@@ -34,6 +34,9 @@ settings:
     CLANG_CXX_LANGUAGE_STANDARD: "gnu++20"
     GCC_C_LANGUAGE_STANDARD: gnu17
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    # The Trakt app's client id (app.trakt.tv/settings/apps), written into Info.plist as
+    # TraktClientID. Public: Trakt's device sign-in needs no client secret. Empty hides Trakt.
+    TRAKT_CLIENT_ID: ""
   configs:
     Release:
       VALIDATE_PRODUCT: YES

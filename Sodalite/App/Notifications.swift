@@ -9,6 +9,9 @@ extension Notification.Name {
     static let librarySortDidChange = Notification.Name("librarySortDidChange")
     static let homeFavoritesDidChange = Notification.Name("homeFavoritesDidChange")
     static let homePlayedDidChange = Notification.Name("homePlayedDidChange")
+    /// Posted by `TraktService` when the Trakt watchlist or lists changed, so Home rebuilds its
+    /// Trakt rows and detail pages refresh their watchlist button.
+    static let traktListsDidChange = Notification.Name("traktListsDidChange")
     /// Posted by PlayerViewModel after a playback-stop report so HomeView/detail refresh Continue Watching / Next Up. Carries PlaybackProgressKey.itemID (the EPISODE for series) + positionTicks; detail views patch that item's in-memory userData directly (authoritative, race-free, vs re-fetch + stale ETag, issue #24).
     static let playbackProgressDidChange = Notification.Name("playbackProgressDidChange")
     /// Posted by detail views after a deletion so HomeView reloads and the item disappears immediately.

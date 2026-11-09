@@ -58,6 +58,11 @@ final class DependencyContainer {
     /// Sodalite#79. One store for the whole app so a title enriched in a Home row is already known
     /// when the same title shows up in a grid.
     let posterBadgeStore: PosterBadgeStore
+    /// The active profile's Trakt connection. Lazy because it needs the finished container as its
+    /// session store.
+    @ObservationIgnored @MainActor lazy var trakt = TraktService(
+        clientID: TraktConfig.clientID, store: self,
+        libraryService: jellyfinLibraryService, itemService: jellyfinItemService)
     /// AE#579. The detail page's HDR10+ answer, which no Jellyfin field carries.
     let hdr10PlusProbeStore: HDR10PlusProbeStore
     let authPreferences: AuthPreferences
@@ -983,6 +988,7 @@ final class DependencyContainer {
     /// so a removal that arrives from another device leaves no credentials behind either.
     func purgeUserCredentials(id: String, serverID: String) {
         forgetRememberedSeerr(forJellyfinUserID: id, jellyfinServerID: serverID)
+        purgeTraktSession(for: ProfileKey(serverID: serverID, userID: id))
         try? keychainService.delete(for: KeychainKeys.jellyfinPassword(serverID: serverID, userID: id))
         // Same reason: a remembered live upstream carries the IPTV provider's credentials in its path.
         liveDirectStreamMemory.forgetAll(userID: id)

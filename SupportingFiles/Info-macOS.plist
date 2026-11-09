@@ -12,6 +12,10 @@
 	<string>Sodalite reaches Jellyfin and AetherEngine media servers on your local network. Required for direct play of media from a server in your home.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Trakt app id, from the TRAKT_CLIENT_ID build setting in project.yml. Public by design (the
+	     device sign-in takes no client secret). Empty hides Trakt in the app. -->
+	<key>TraktClientID</key>
+	<string>$(TRAKT_CLIENT_ID)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
