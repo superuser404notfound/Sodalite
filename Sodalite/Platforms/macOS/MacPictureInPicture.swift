@@ -48,8 +48,14 @@ final class MacPictureInPicture: NSObject {
         let engine = viewModel.player
         // An open window keeps its controller across a reload (next episode, audio switch): the
         // engine hands the session over in place while `pictureInPictureActive` is set.
+        // A reload that changes the route (software to native or back) swaps the source under the
+        // open window rather than leaving it on a layer nothing draws into any more.
         if controller?.isPictureInPictureActive == true {
-            if let source = engine.softwarePiPSource, source.layer !== boundLayer {
+            if let layer = engine.nativePlayerLayer, layer !== boundLayer {
+                boundSoftwareSource = nil
+                boundLayer = layer
+                controller?.contentSource = .init(playerLayer: layer)
+            } else if let source = engine.softwarePiPSource, source.layer !== boundLayer {
                 boundSoftwareSource = source
                 boundLayer = source.layer
                 controller?.contentSource = .init(sampleBufferDisplayLayer: source.layer, playbackDelegate: self)

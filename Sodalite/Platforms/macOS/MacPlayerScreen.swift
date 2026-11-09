@@ -124,8 +124,9 @@ struct MacPlayerScreen: View {
         }
         // An open menu holds the chrome: hiding it under the pointer would take the menu's anchor
         // with it. NSMenu reports its tracking for the menus SwiftUI builds too.
-        .onReceive(NotificationCenter.default.publisher(for: NSMenu.didBeginTrackingNotification)) { _ in
-            guard hostWindow.window?.isKeyWindow == true else { return }
+        // The app's menu bar is not one of the transport's menus and has no anchor in the chrome.
+        .onReceive(NotificationCenter.default.publisher(for: NSMenu.didBeginTrackingNotification)) { note in
+            guard hostWindow.window?.isKeyWindow == true, note.object as? NSMenu !== NSApp.mainMenu else { return }
             menuOpen = true
             hideTask?.cancel()
         }
