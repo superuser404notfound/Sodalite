@@ -73402,157 +73402,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Stopy TrueHD a DTS si zachovají výškové kanály v mixu 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video."
+            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Stopy TrueHD a DTS (včetně DTS:X IMAX) si zachovají výškové kanály v mixu 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. TrueHD- og DTS-spor beholder deres højdekanaler i et 9.1.6-mix. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause."
+            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. TrueHD- og DTS-spor (også DTS:X IMAX) beholder deres højdekanaler i et 9.1.6-mix. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. TrueHD- und DTS-Spuren behalten ihre Höhenkanäle in einem 9.1.6-Mix. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video."
+            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. TrueHD- und DTS-Spuren (auch DTS:X IMAX) behalten ihre Höhenkanäle in einem 9.1.6-Mix. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Τα κομμάτια TrueHD και DTS κρατούν τα κανάλια ύψους τους σε μίξη 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο."
+            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Τα κομμάτια TrueHD και DTS (μαζί και DTS:X IMAX) κρατούν τα κανάλια ύψους τους σε μίξη 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. TrueHD and DTS tracks keep their height channels in a 9.1.6 mix. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video."
+            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. TrueHD and DTS tracks (DTS:X IMAX included) keep their height channels in a 9.1.6 mix. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Las pistas TrueHD y DTS conservan sus canales de altura en una mezcla 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo."
+            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Las pistas TrueHD y DTS (también DTS:X IMAX) conservan sus canales de altura en una mezcla 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. TrueHD- ja DTS-raidat säilyttävät korkeuskanavansa 9.1.6-miksauksessa. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon."
+            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. TrueHD- ja DTS-raidat (myös DTS:X IMAX) säilyttävät korkeuskanavansa 9.1.6-miksauksessa. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Les pistes TrueHD et DTS gardent leurs canaux de hauteur dans un mixage 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo."
+            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Les pistes TrueHD et DTS (DTS:X IMAX compris) gardent leurs canaux de hauteur dans un mixage 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. TrueHD i DTS zapisi zadržavaju visinske kanale u miksu 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis."
+            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. TrueHD i DTS zapisi (uključujući DTS:X IMAX) zadržavaju visinske kanale u miksu 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. A TrueHD- és DTS-sávok 9.1.6-os keverékben megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet."
+            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. A TrueHD- és DTS-sávok (a DTS:X IMAX is) 9.1.6-os keverékben megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Le tracce TrueHD e DTS mantengono i canali di altezza in un mix 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video."
+            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Le tracce TrueHD e DTS (DTS:X IMAX compreso) mantengono i canali di altezza in un mix 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。TrueHDとDTSのトラックは、ハイトチャンネルを9.1.6ミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。"
+            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。TrueHDとDTS（DTS:X IMAXを含む）のトラックは、ハイトチャンネルを9.1.6ミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. TrueHD 및 DTS 트랙은 9.1.6 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다."
+            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. TrueHD 및 DTS(DTS:X IMAX 포함) 트랙은 9.1.6 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. TrueHD- og DTS-spor beholder høydekanalene i en 9.1.6-miks. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer."
+            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. TrueHD- og DTS-spor (også DTS:X IMAX) beholder høydekanalene i en 9.1.6-miks. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. TrueHD- en DTS-sporen behouden hun hoogtekanalen in een 9.1.6-mix. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video."
+            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. TrueHD- en DTS-sporen (ook DTS:X IMAX) behouden hun hoogtekanalen in een 9.1.6-mix. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Ścieżki TrueHD i DTS zachowują kanały wysokości w miksie 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo."
+            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Ścieżki TrueHD i DTS (także DTS:X IMAX) zachowują kanały wysokości w miksie 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Faixas TrueHD e DTS mantêm os canais de altura em uma mixagem 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura em uma mixagem 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. As faixas TrueHD e DTS mantêm os canais de altura numa mistura 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. As faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura numa mistura 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Pistele TrueHD și DTS își păstrează canalele de înălțime într-un mix 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip."
+            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Pistele TrueHD și DTS (inclusiv DTS:X IMAX) își păstrează canalele de înălțime într-un mix 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Дорожки TrueHD и DTS сохраняют высотные каналы в миксе 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео."
+            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Дорожки TrueHD и DTS (включая DTS:X IMAX) сохраняют высотные каналы в миксе 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Stopy TrueHD a DTS si zachovajú výškové kanály v mixe 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video."
+            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Stopy TrueHD a DTS (vrátane DTS:X IMAX) si zachovajú výškové kanály v mixe 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. TrueHD- och DTS-spår behåller sina höjdkanaler i en 9.1.6-mix. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor."
+            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. TrueHD- och DTS-spår (även DTS:X IMAX) behåller sina höjdkanaler i en 9.1.6-mix. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. TrueHD ve DTS parçaları yükseklik kanallarını 9.1.6 miksinde korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır."
+            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. TrueHD ve DTS (DTS:X IMAX dahil) parçaları yükseklik kanallarını 9.1.6 miksinde korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Доріжки TrueHD і DTS зберігають висотні канали в міксі 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео."
+            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Доріжки TrueHD і DTS (включно з DTS:X IMAX) зберігають висотні канали в міксі 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。TrueHD 和 DTS 音轨会在 9.1.6 混音中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。"
+            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。TrueHD 和 DTS（包括 DTS:X IMAX）音轨会在 9.1.6 混音中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。TrueHD 與 DTS 音軌會在 9.1.6 混音中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。"
+            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。TrueHD 與 DTS（包括 DTS:X IMAX）音軌會在 9.1.6 混音中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。"
           }
         }
       }
