@@ -21,6 +21,7 @@ struct MacPlayerScreen: View {
     @State private var keyMonitor: Any?
     @State private var hostWindow = HostWindowReference()
     @State private var menuOpen = false
+    @State private var pictureInPicture = MacPictureInPicture()
 
     private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy) }
 
@@ -56,12 +57,61 @@ struct MacPlayerScreen: View {
                     .padding(.bottom, controlsVisible ? 110 : 32)
                     .animation(.easeInOut(duration: 0.2), value: controlsVisible)
             }
+
+            if viewModel.showStatsOverlay, viewModel.errorMessage == nil {
+                StatsOverlayView(
+                    player: viewModel.player,
+                    diagnostics: viewModel.player.diagnostics,
+                    facts: viewModel.statsSourceFacts,
+                    activeSubtitleIndex: viewModel.activeSubtitleIndex,
+                    scrollSectionIndex: viewModel.statsSectionIndex,
+                    availableSections: viewModel.statsSectionAvailability,
+                    isLiveSession: viewModel.isLiveSession,
+                    liveChannel: viewModel.liveChannel,
+                    liveRoute: viewModel.liveRoute,
+                    liveStreamID: viewModel.activeLiveStreamID,
+                    playMethod: viewModel.activePlayMethod,
+                    onClose: { viewModel.showStatsOverlay = false }
+                )
+            }
+
+            if viewModel.subtitleSearchVisible {
+                SubtitleSearchView(viewModel: viewModel, tint: theme.palette.control.color)
+                    .transition(.opacity)
+            }
         }
         .ignoresSafeArea()
         .background(HostWindowReader(reference: hostWindow))
         .frame(minWidth: 720, minHeight: 405)
         .frame(idealWidth: 1280, idealHeight: 720)
         .preferredColorScheme(.dark)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.showStatsOverlay)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.subtitleSearchVisible)
+        // The other platforms' delete prompt is a remote cursor; a pointer gets the system dialog.
+        .confirmationDialog(
+            Text("player.subtitle.delete.title"),
+            isPresented: Binding(
+                get: { if case .confirm = viewModel.subtitleDeleteState { true } else { false } },
+                set: { if !$0, case .confirm = viewModel.subtitleDeleteState { viewModel.subtitleDeletePromptDismiss() } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "player.subtitle.delete.confirm", defaultValue: "Delete"), role: .destructive) {
+                viewModel.subtitleDeletePromptConfirmDelete()
+            }
+            Button(String(localized: "common.cancel", defaultValue: "Cancel"), role: .cancel) {
+                viewModel.subtitleDeletePromptDismiss()
+            }
+        }
+        .alert(
+            deleteErrorText,
+            isPresented: Binding(
+                get: { if case .error = viewModel.subtitleDeleteState { true } else { false } },
+                set: { if !$0 { viewModel.subtitleDeletePromptDismiss() } }
+            )
+        ) {
+            Button(String(localized: "common.ok", defaultValue: "OK")) { viewModel.subtitleDeletePromptDismiss() }
+        }
         .tint(theme.palette.control.color)
         .onChange(of: viewModel.isLoading) { _, loading in
             if !loading { fitWindow(to: viewModel.videoSize) }
@@ -86,6 +136,7 @@ struct MacPlayerScreen: View {
         }
         .task {
             MacPlayerWindowSession.shared.startIfNeeded(viewModel)
+            pictureInPicture.attach(to: viewModel) { [hostWindow] in hostWindow.window }
             revealControls()
         }
         // A monitor on the window rather than `onKeyPress`: that needs a focused view, and a click
@@ -98,6 +149,7 @@ struct MacPlayerScreen: View {
             }
         }
         .onDisappear {
+            pictureInPicture.detach()
             hideTask?.cancel()
             if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
             keyMonitor = nil
@@ -147,17 +199,7 @@ struct MacPlayerScreen: View {
         VStack(spacing: 8) {
             // Bound to the view model's own scrub state, so a drag reads the position it is dragging
             // to while the committed one keeps arriving from the engine behind it.
-            Slider(
-                value: Binding(
-                    get: { Double(viewModel.displayedProgress) },
-                    set: { viewModel.scrub(toFraction: Float($0)) }
-                ),
-                in: 0...1,
-                onEditingChanged: { editing in
-                    if !editing { viewModel.commitScrub() }
-                    revealControls()
-                }
-            )
+            MacScrubBar(viewModel: viewModel, onInteraction: revealControls)
 
             HStack(spacing: 16) {
                 Text(viewModel.isScrubbing ? viewModel.scrubTime : viewModel.currentTime)
@@ -223,6 +265,11 @@ struct MacPlayerScreen: View {
         .padding(40)
     }
 
+    private var deleteErrorText: String {
+        if case .error(let message) = viewModel.subtitleDeleteState { return message }
+        return ""
+    }
+
     // MARK: - Input
 
     /// True when the key was the player's. Anything with Command, Control or Option held goes on
@@ -240,7 +287,11 @@ struct MacPlayerScreen: View {
             // A running next-episode countdown is the first thing Escape stops, as Back does on
             // the other platforms. Then full screen, the way QuickTime does: Escape in full screen
             // means "give me the window back", and only then "close the player".
-            if viewModel.isCountdownActive {
+            if viewModel.subtitleSearchVisible {
+                viewModel.dismissSubtitleSearch()
+            } else if viewModel.showStatsOverlay {
+                viewModel.showStatsOverlay = false
+            } else if viewModel.isCountdownActive {
                 viewModel.cancelNextEpisode()
             } else if isFullScreen {
                 toggleFullScreen()

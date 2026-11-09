@@ -2,6 +2,9 @@ import SwiftUI
 import Combine
 import AetherEngine
 import SwiftAssRenderer
+#if os(macOS)
+import AppKit
+#endif
 
 /// Renders subtitle cues at the current playback time. Text cues draw as
 /// a styled box; image cues (PGS/DVB/HDMV) draw as bitmaps at normalised
@@ -73,11 +76,6 @@ struct SubtitleOverlayView: View {
     }
 
     var body: some View {
-        #if os(macOS)
-        // No host for the libass frame stream on this platform, so a styled track draws through
-        // the plain overlay: the same fallback a secondary track already takes.
-        cueOverlay
-        #else
         // libass styling used ONLY without a secondary track; with one the primary
         // falls back to the plain-text overlay so both share one stack (issue #47).
         if let assRenderer, !hasSecondaryTrack {
@@ -103,7 +101,6 @@ struct SubtitleOverlayView: View {
         } else {
             cueOverlay
         }
-        #endif
     }
 
     private var cueOverlay: some View {
@@ -747,20 +744,39 @@ struct SubtitleOverlayView: View {
     }
 }
 
-// MARK: - Styled ASS host
+// MARK: - Styled ASS host (platform-split)
 
 /// Hosts the styled ASS frame stream. A clone of swift-ass-renderer's `AssSubtitlesView`
-/// (canvas sized in layoutSubviews, frames drawn at `ProcessedImage.imageRect`) with ONE
-/// difference: nil frames from the coordinator's `reloadTrack` are suppressed. The renderer
-/// publishes a transient nil before the identical re-render lands, which blinked every visible
-/// sub; the coordinator pre-announces reloads via `reloadSignal` so suppression is deterministic.
-/// A nil with no announced reload is a real cue end and hides instantly.
-#if !os(macOS)
+/// (canvas sized in layout, frames drawn at `ProcessedImage.imageRect`) with ONE difference:
+/// nil frames from the coordinator's `reloadTrack` are suppressed. The renderer publishes a
+/// transient nil before the identical re-render lands, which blinked every visible sub; the
+/// coordinator pre-announces reloads via `reloadSignal` so suppression is deterministic. A nil
+/// with no announced reload is a real cue end and hides instantly.
+///
+/// Frames are drawn into a `CALayer` (contents = `CGImage`) so the same host compiles on iOS
+/// (UIView) and macOS (NSView). See `ASSFrameHostView` for the macOS geometry handling.
+#if os(macOS)
+private struct ASSRenderedSubtitles: NSViewRepresentable {
+    let renderer: AssSubtitlesRenderer
+    let reloadSignal: PassthroughSubject<Void, Never>
+    /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
+    /// track-data queries since the renderer's own offset is not public here.
+    let currentOffset: Double
+
+    func makeNSView(context: Context) -> ASSFrameHostView {
+        ASSFrameHostView(renderer: renderer, reloadSignal: reloadSignal)
+    }
+
+    func updateNSView(_ view: ASSFrameHostView, context: Context) {
+        view.currentOffset = currentOffset
+    }
+}
+#else
 private struct ASSRenderedSubtitles: UIViewRepresentable {
     let renderer: AssSubtitlesRenderer
     let reloadSignal: PassthroughSubject<Void, Never>
     /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
-    /// track-data queries since the renderer's own offset is not public.
+    /// track-data queries since the renderer's own offset is not public here.
     let currentOffset: Double
 
     func makeUIView(context: Context) -> ASSFrameHostView {
@@ -771,13 +787,20 @@ private struct ASSRenderedSubtitles: UIViewRepresentable {
         view.currentOffset = currentOffset
     }
 }
+#endif
 
-final class ASSFrameHostView: UIView {
+#if os(macOS)
+typealias ASSHostBase = NSView
+#else
+typealias ASSHostBase = UIView
+#endif
+
+final class ASSFrameHostView: ASSHostBase {
     /// Playback offset fed by the representable on every SwiftUI update (~10 Hz).
     var currentOffset: Double = 0
     private let renderer: AssSubtitlesRenderer
-    private let canvasScale: CGFloat
-    private let imageView = UIImageView()
+    /// Frames are drawn as this layer's `contents` (a `CGImage`), positioned by `imageRect`.
+    private let imageLayer = CALayer()
     private var lastRenderBounds = CGRect.zero
     private var cancellables = Set<AnyCancellable>()
     /// Suppress nil frames until this deadline (armed per reload signal). `.distantPast` = off.
@@ -789,13 +812,24 @@ final class ASSFrameHostView: UIView {
 
     init(renderer: AssSubtitlesRenderer, reloadSignal: PassthroughSubject<Void, Never>) {
         self.renderer = renderer
-        self.canvasScale = UITraitCollection.current.displayScale
         super.init(frame: .zero)
+        imageLayer.contentsGravity = .resize
+        #if os(macOS)
+        // Layer-backed NSView. Flipping the backing layer's geometry (plus the matching
+        // `isFlipped` override below) establishes a top-left origin world like iOS, so libass'
+        // top-left `imageRect` applies directly to the sublayer and its CGImage contents render
+        // upright.
+        wantsLayer = true
+        layer?.isGeometryFlipped = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.addSublayer(imageLayer)
+        #else
         backgroundColor = .clear
         isUserInteractionEnabled = false
-        addSubview(imageView)
-        // No receive(on:): synchronous main-actor delivery arms suppression before the
-        // renderer's transient nil can arrive (coordinator sends right before reloadTrack).
+        layer.addSublayer(imageLayer)
+        #endif
+        // No receive(on:): synchronous main-actor delivery arms suppression before the renderer's
+        // transient nil can arrive (coordinator sends right before reloadTrack).
         reloadSignal
             .sink { [weak self] in
                 self?.suppressNilDeadline = Date().addingTimeInterval(Self.reloadSuppressWindow)
@@ -812,24 +846,71 @@ final class ASSFrameHostView: UIView {
         fatalError("init(coder:) not supported")
     }
 
+    /// Backing scale for the libass canvas. Read per layout so a window moved between displays
+    /// with different backing factors re-renders at the correct scale.
+    private var displayScale: CGFloat {
+        #if os(macOS)
+        return window?.backingScaleFactor ?? 2
+        #else
+        return UITraitCollection.current.displayScale
+        #endif
+    }
+
+    #if os(macOS)
+    override var isFlipped: Bool { true }
+    /// Never swallow mouse events meant for the video / chrome beneath (iOS uses isUserInteractionEnabled).
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func layout() {
+        super.layout()
+        handleLayout()
+    }
+    #else
     override func layoutSubviews() {
         super.layoutSubviews()
-        // A zero-bounds pass must never reach the renderer: a 0x0 canvas renders every
-        // event as nil, hiding the visible subtitle with no reload announced.
-        guard !bounds.isEmpty else {
-            return
-        }
-        if !lastRenderBounds.isEmpty, imageView.image != nil, lastRenderBounds != bounds {
+        handleLayout()
+    }
+    #endif
+
+    private func handleLayout() {
+        // A zero-bounds pass must never reach the renderer: a 0x0 canvas renders every event as
+        // nil, hiding the visible subtitle with no reload announced.
+        guard !bounds.isEmpty else { return }
+        if !lastRenderBounds.isEmpty, imageLayer.contents != nil, lastRenderBounds != bounds {
             let ratioX = bounds.width / lastRenderBounds.width
             let ratioY = bounds.height / lastRenderBounds.height
-            let f = imageView.frame
-            imageView.frame = CGRect(
+            let f = imageLayer.frame
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            imageLayer.frame = CGRect(
                 x: f.origin.x * ratioX, y: f.origin.y * ratioY,
                 width: f.width * ratioX, height: f.height * ratioY
             ).integral
+            CATransaction.commit()
         }
-        renderer.setCanvasSize(bounds.size, scale: canvasScale)
+        renderer.setCanvasSize(bounds.size, scale: displayScale)
     }
+
+    // MARK: Frame application
+
+    private func setFrame(_ image: ProcessedImage) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        imageLayer.frame = image.imageRect
+        imageLayer.contents = image.image   // CGImage, cross-platform
+        imageLayer.isHidden = false
+        CATransaction.commit()
+    }
+
+    private func hideNow() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        imageLayer.isHidden = true
+        imageLayer.contents = nil
+        CATransaction.commit()
+        suppressNilDeadline = .distantPast
+    }
+
+    // MARK: Nil-frame suppression
 
     private func handleFrameChanged(_ image: ProcessedImage?) {
         if let image {
@@ -837,9 +918,7 @@ final class ASSFrameHostView: UIView {
             hideWorkItem = nil
             suppressNilDeadline = .distantPast
             lastRenderBounds = bounds
-            imageView.frame = image.imageRect
-            imageView.image = UIImage(cgImage: image.image)
-            imageView.isHidden = false
+            setFrame(image)
         } else {
             let remaining = suppressNilDeadline.timeIntervalSinceNow
             guard remaining > 0 else {
@@ -849,8 +928,8 @@ final class ASSFrameHostView: UIView {
                 hideNow()
                 return
             }
-            // Reload in flight: keep the last image; arm a safety hide at the deadline
-            // in case no frame follows (reload coinciding with a real cue end).
+            // Reload in flight: keep the last image; arm a safety hide at the deadline in case no
+            // frame follows (reload coinciding with a real cue end).
             guard hideWorkItem == nil else { return }
             scheduleSafetyHide(after: remaining)
         }
@@ -872,9 +951,9 @@ final class ASSFrameHostView: UIView {
             let stillActive = !self.renderer.dialogues(at: self.currentOffset).isEmpty
             if stillActive {
                 self.suppressNilDeadline = .distantPast
-                // Frame subject is parked on nil, so the real cue end's nil-after-nil is
-                // swallowed by the duplicate filter and the frame would linger forever.
-                // Watch track data for the end ourselves until the next published frame.
+                // Frame subject is parked on nil, so the real cue end's nil-after-nil is swallowed
+                // by the duplicate filter and the frame would linger forever. Watch track data for
+                // the end ourselves until the next published frame.
                 self.scheduleEndWatch()
             } else {
                 self.hideNow()
@@ -899,11 +978,4 @@ final class ASSFrameHostView: UIView {
         hideWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
     }
-
-    private func hideNow() {
-        imageView.isHidden = true
-        imageView.image = nil
-        suppressNilDeadline = .distantPast
-    }
 }
-#endif

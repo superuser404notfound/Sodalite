@@ -1,7 +1,3 @@
-#if !os(macOS)
-// Player chrome for the UIKit host: it is display-only by construction, because
-// PlayerHostController owns every press and moves a cursor through it. macOS has its own
-// transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 
 /// Feature #4 overlay: search + pick a subtitle to download. DISPLAY-ONLY:
@@ -11,9 +7,14 @@ struct SubtitleSearchView: View {
     @Bindable var viewModel: PlayerViewModel
     var tint: Color
 
+    #if os(macOS)
+    /// A player window is iPad-sized at most, so the Mac takes the compact layout.
+    private var isCompact: Bool { true }
+    #else
     @Environment(\.horizontalSizeClass) private var hSizeClass
     /// iPhone (compact) shrinks the panel + fonts and adds a touch close button; tvOS/iPad full size.
     private var isCompact: Bool { hSizeClass == .compact }
+    #endif
 
     var body: some View {
         ZStack {
@@ -23,7 +24,7 @@ struct SubtitleSearchView: View {
                     Text("player.subtitle.search.title")
                         .font(isCompact ? .headline : .title2.weight(.semibold))
                     Spacer()
-                    #if os(iOS)
+                    #if os(iOS) || os(macOS)
                     Button { viewModel.dismissSubtitleSearch() } label: {
                         Image(systemName: "xmark")
                             .font(.headline.weight(.semibold))
@@ -39,7 +40,7 @@ struct SubtitleSearchView: View {
                 content
             }
             .padding(isCompact ? 18 : 48)
-            #if os(iOS)
+            #if os(iOS) || os(macOS)
             .frame(maxWidth: 760, maxHeight: .infinity)
             .padding(.vertical, 28)
             .padding(.horizontal, 24)
@@ -71,12 +72,15 @@ struct SubtitleSearchView: View {
                             )
                             .foregroundStyle(isFocused ? .black : .primary)
                             .id(idx)
-                            #if os(iOS)
+                            #if os(iOS) || os(macOS)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 viewModel.subtitleSearchFocus = .language(idx)
                                 viewModel.subtitleSearchConfirm()
                             }
+                            #if os(macOS)
+                            .onHover { if $0 { viewModel.subtitleSearchFocus = .language(idx) } }
+                            #endif
                             #endif
                     }
                 }
@@ -124,7 +128,7 @@ struct SubtitleSearchView: View {
                                 .fill(isFocused ? tint : Color.Theme.restFillStrong)
                         )
                         .foregroundStyle(isFocused ? .black : .primary)
-                        #if os(iOS)
+                        #if os(iOS) || os(macOS)
                         .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.subtitleSearchFocus = .retry
@@ -148,12 +152,15 @@ struct SubtitleSearchView: View {
                         ForEach(Array(results.enumerated()), id: \.offset) { idx, info in
                             resultRow(info, focused: viewModel.subtitleSearchFocus == .result(idx))
                                 .id(idx)
-                                #if os(iOS)
+                                #if os(iOS) || os(macOS)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     viewModel.subtitleSearchFocus = .result(idx)
                                     viewModel.subtitleSearchConfirm()
                                 }
+                                #if os(macOS)
+                                .onHover { if $0 { viewModel.subtitleSearchFocus = .result(idx) } }
+                                #endif
                                 #endif
                         }
                     }
@@ -214,4 +221,3 @@ struct SubtitleSearchView: View {
         )
     }
 }
-#endif

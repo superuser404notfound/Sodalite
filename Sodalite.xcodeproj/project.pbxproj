@@ -799,6 +799,7 @@
 		57A9A1D192DFD61243EE1AD8 /* PosterBadgeMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB05864EA1D0988DF5BF302 /* PosterBadgeMetrics.swift */; };
 		57BFD4311521443D0BD154B8 /* DiscoveryProbeRaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E3BF97D18324FFA9D4E64D /* DiscoveryProbeRaceTests.swift */; };
 		57CD91E8343ED5C28C6CD291 /* RedirectPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C5E3F51875B4DD3DE2B2AC /* RedirectPolicyTests.swift */; };
+		57FD433D42F60E3CA38EA377 /* MacPictureInPicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D670DE448FE1F3598C6DE4 /* MacPictureInPicture.swift */; };
 		57FF673743802E78AB3CBB72 /* ServerURLSlotRetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B942F0FB15F6423EDCD17B /* ServerURLSlotRetentionTests.swift */; };
 		5812238EB789E282D7AB9400 /* FormatBadgeRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A3733E54C8B83503AFBE52 /* FormatBadgeRow.swift */; };
 		584D99657FA9061D3837F252 /* EpisodeStateOrigin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8543AE708CF079C505AC6FD /* EpisodeStateOrigin.swift */; };
@@ -2430,6 +2431,7 @@
 		12545F883216CA35877B1B20 /* TopShelfCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfCache.swift; sourceTree = "<group>"; };
 		12C9EC049C02787E96058C21 /* PlayerActionPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerActionPill.swift; sourceTree = "<group>"; };
 		12D48C0E2F7E3BC442ECDDB4 /* LivePlayerLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlayerLauncher.swift; sourceTree = "<group>"; };
+		12D670DE448FE1F3598C6DE4 /* MacPictureInPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPictureInPicture.swift; sourceTree = "<group>"; };
 		1379D65D0C8EAC5CB5F97764 /* DependencyContainer+Caches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DependencyContainer+Caches.swift"; sourceTree = "<group>"; };
 		13CBA535F5E1308F6F2B4EE8 /* PersonRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonRouteTests.swift; sourceTree = "<group>"; };
 		13D4F586D7E43FDC42308F7F /* KeyboardTransportStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardTransportStateTests.swift; sourceTree = "<group>"; };
@@ -4613,6 +4615,7 @@
 				CAF1EF61657FF4B7F229BEB8 /* .gitkeep */,
 				2571665C0F9D8B80C4BC47E0 /* MacAboutWindow.swift */,
 				1FD513CBF136B97328D9D27D /* MacLivePlayerLauncher.swift */,
+				12D670DE448FE1F3598C6DE4 /* MacPictureInPicture.swift */,
 				99F40E8DE83EB0CBC3DF533B /* MacPlayerControls.swift */,
 				77FC6E0F5813064F32D9E30B /* MacPlayerLauncher.swift */,
 				494CF29E1CE31A2C2503C455 /* MacPlayerScreen.swift */,
@@ -5501,6 +5504,7 @@
 				26D2933D24DFCF9F278D9904 /* LoginViewModel.swift in Sources */,
 				B8C1C9D6F591FF07003DDBA5 /* MacAboutWindow.swift in Sources */,
 				6DD2AFA77E11E04A57A75A0F /* MacLivePlayerLauncher.swift in Sources */,
+				57FD433D42F60E3CA38EA377 /* MacPictureInPicture.swift in Sources */,
 				C2871385AA7300A815EC05C9 /* MacPlayerControls.swift in Sources */,
 				B158C1A6D84F7DDA5E42085C /* MacPlayerLauncher.swift in Sources */,
 				B23077673285C2F5765718B1 /* MacPlayerScreen.swift in Sources */,

@@ -70164,157 +70164,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite nyní běží nativně na Macu: s postranním panelem, přehrávačem ve vlastním okně s ovládáním klávesnicí a režimem celé obrazovky, nastavením pod Cmd-, a kontextovou nabídkou na každé kartě. Přehrávač zobrazuje titulky a nabízí nabídky pro zvuk, titulky s časováním, kapitoly, epizody, rychlost, kvalitu a obraz, k tomu Přeskočit úvod a další epizodu."
+            "value" : "Sodalite nyní běží nativně na Macu: s postranním panelem, přehrávačem ve vlastním okně s ovládáním klávesnicí a režimem celé obrazovky, nastavením pod Cmd-, a kontextovou nabídkou na každé kartě. Přehrávač zobrazuje titulky včetně stylovaných a nabízí nabídky pro zvuk, titulky s časováním a vyhledáváním online, kapitoly, epizody, rychlost, kvalitu a obraz, k tomu Přeskočit úvod, další epizodu, obraz v obraze, Stats for Nerds a náhledy na časové ose."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite kører nu direkte på Mac: med sidepanel, en afspiller i sit eget vindue med tastaturstyring og fuld skærm, indstillinger under Cmd-, og højreklikmenuer på hvert kort. Afspilleren viser undertekster og har menuer til lyd, undertekster med timing, kapitler, afsnit, hastighed, kvalitet og billede samt Spring intro over og næste afsnit."
+            "value" : "Sodalite kører nu direkte på Mac: med sidepanel, en afspiller i sit eget vindue med tastaturstyring og fuld skærm, indstillinger under Cmd-, og højreklikmenuer på hvert kort. Afspilleren viser undertekster, også formaterede, og har menuer til lyd, undertekster med timing og onlinesøgning, kapitler, afsnit, hastighed, kvalitet og billede samt Spring intro over, næste afsnit, billede-i-billede, Stats for Nerds og forhåndsvisninger på tidslinjen."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite läuft jetzt nativ auf dem Mac: mit Seitenleiste, einem Player im eigenen Fenster mit Tastatursteuerung und Vollbild, Einstellungen unter Cmd-, und Rechtsklick-Menüs auf jeder Karte. Der Player zeigt Untertitel und hat Menüs für Ton, Untertitel mit Timing, Kapitel, Folgen, Tempo, Qualität und Bild, dazu Intro überspringen und die nächste Folge."
+            "value" : "Sodalite läuft jetzt nativ auf dem Mac: mit Seitenleiste, einem Player im eigenen Fenster mit Tastatursteuerung und Vollbild, Einstellungen unter Cmd-, und Rechtsklick-Menüs auf jeder Karte. Der Player zeigt Untertitel, auch gestylte, und hat Menüs für Ton, Untertitel mit Timing und Online-Suche, Kapitel, Folgen, Tempo, Qualität und Bild, dazu Intro überspringen, die nächste Folge, Bild-in-Bild, Stats for Nerds und Vorschaubilder auf der Zeitleiste."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Το Sodalite τρέχει πλέον εγγενώς στο Mac: με πλαϊνή στήλη, πρόγραμμα αναπαραγωγής σε δικό του παράθυρο με έλεγχο από το πληκτρολόγιο και πλήρη οθόνη, ρυθμίσεις με Cmd-, και μενού δεξιού κλικ σε κάθε κάρτα. Το πρόγραμμα αναπαραγωγής εμφανίζει υπότιτλους και έχει μενού για ήχο, υπότιτλους με συγχρονισμό, κεφάλαια, επεισόδια, ταχύτητα, ποιότητα και εικόνα, καθώς και Παράλειψη εισαγωγής και το επόμενο επεισόδιο."
+            "value" : "Το Sodalite τρέχει πλέον εγγενώς στο Mac: με πλαϊνή στήλη, πρόγραμμα αναπαραγωγής σε δικό του παράθυρο με έλεγχο από το πληκτρολόγιο και πλήρη οθόνη, ρυθμίσεις με Cmd-, και μενού δεξιού κλικ σε κάθε κάρτα. Το πρόγραμμα αναπαραγωγής εμφανίζει υπότιτλους, και μορφοποιημένους, και έχει μενού για ήχο, υπότιτλους με συγχρονισμό και διαδικτυακή αναζήτηση, κεφάλαια, επεισόδια, ταχύτητα, ποιότητα και εικόνα, καθώς και Παράλειψη εισαγωγής, το επόμενο επεισόδιο, εικόνα σε εικόνα, Stats for Nerds και προεπισκοπήσεις στη γραμμή χρόνου."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite now runs natively on the Mac: a sidebar, a player in its own window with keyboard control and full screen, Settings under Cmd-, and right-click menus on every card. The player shows subtitles and has menus for audio, subtitles with timing, chapters, episodes, speed, quality and picture, plus Skip Intro and the next episode."
+            "value" : "Sodalite now runs natively on the Mac: a sidebar, a player in its own window with keyboard control and full screen, Settings under Cmd-, and right-click menus on every card. The player shows subtitles, styled ones included, and has menus for audio, subtitles with timing and online search, chapters, episodes, speed, quality and picture, plus Skip Intro, the next episode, Picture in Picture, Stats for Nerds and previews on the scrub bar."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite ahora funciona de forma nativa en el Mac: barra lateral, un reproductor en su propia ventana con control por teclado y pantalla completa, Ajustes con Cmd-, y menús de clic derecho en cada tarjeta. El reproductor muestra subtítulos y tiene menús de audio, subtítulos con sincronización, capítulos, episodios, velocidad, calidad e imagen, además de Saltar intro y el siguiente episodio."
+            "value" : "Sodalite ahora funciona de forma nativa en el Mac: barra lateral, un reproductor en su propia ventana con control por teclado y pantalla completa, Ajustes con Cmd-, y menús de clic derecho en cada tarjeta. El reproductor muestra subtítulos, también con estilo, y tiene menús de audio, subtítulos con sincronización y búsqueda en línea, capítulos, episodios, velocidad, calidad e imagen, además de Saltar intro, el siguiente episodio, imagen en imagen, Stats for Nerds y miniaturas en la barra de tiempo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite toimii nyt natiivisti Macilla: sivupalkki, oma ikkuna toistimelle näppäimistöohjauksella ja koko näytön tilalla, asetukset Cmd-, -näppäinyhdistelmällä ja oikean painikkeen valikot jokaisessa kortissa. Toistin näyttää tekstitykset, ja siinä on valikot äänelle, tekstityksille ajoituksineen, luvuille, jaksoille, nopeudelle, laadulle ja kuvalle sekä Ohita alkutunnus ja seuraava jakso."
+            "value" : "Sodalite toimii nyt natiivisti Macilla: sivupalkki, oma ikkuna toistimelle näppäimistöohjauksella ja koko näytön tilalla, asetukset Cmd-, -näppäinyhdistelmällä ja oikean painikkeen valikot jokaisessa kortissa. Toistin näyttää tekstitykset, myös muotoillut, ja siinä on valikot äänelle, tekstityksille ajoituksineen ja verkkohakuineen, luvuille, jaksoille, nopeudelle, laadulle ja kuvalle sekä Ohita alkutunnus, seuraava jakso, kuva kuvassa, Stats for Nerds ja esikatselukuvat aikajanalla."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite fonctionne désormais nativement sur Mac : une barre latérale, un lecteur dans sa propre fenêtre avec contrôle au clavier et plein écran, les Réglages via Cmd-, et des menus contextuels sur chaque vignette. Le lecteur affiche les sous-titres et propose des menus pour l’audio, les sous-titres avec leur synchronisation, les chapitres, les épisodes, la vitesse, la qualité et l’image, ainsi que Passer l’intro et l’épisode suivant."
+            "value" : "Sodalite fonctionne désormais nativement sur Mac : une barre latérale, un lecteur dans sa propre fenêtre avec contrôle au clavier et plein écran, les Réglages via Cmd-, et des menus contextuels sur chaque vignette. Le lecteur affiche les sous-titres, y compris stylisés, et propose des menus pour l’audio, les sous-titres avec synchronisation et recherche en ligne, les chapitres, les épisodes, la vitesse, la qualité et l’image, ainsi que Passer l’intro, l’épisode suivant, l’image dans l’image, Stats for Nerds et des aperçus sur la barre de lecture."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite sada radi izvorno na Macu: s bočnom trakom, playerom u vlastitom prozoru s upravljanjem tipkovnicom i prikazom preko cijelog zaslona, postavkama pod Cmd-, i izbornicima desnog klika na svakoj kartici. Player prikazuje titlove i ima izbornike za zvuk, titlove s usklađivanjem, poglavlja, epizode, brzinu, kvalitetu i sliku, uz Preskoči uvod i sljedeću epizodu."
+            "value" : "Sodalite sada radi izvorno na Macu: s bočnom trakom, playerom u vlastitom prozoru s upravljanjem tipkovnicom i prikazom preko cijelog zaslona, postavkama pod Cmd-, i izbornicima desnog klika na svakoj kartici. Player prikazuje titlove, uključujući stilizirane, i ima izbornike za zvuk, titlove s usklađivanjem i pretraživanjem na mreži, poglavlja, epizode, brzinu, kvalitetu i sliku, uz Preskoči uvod, sljedeću epizodu, sliku u slici, Stats for Nerds i preglede na vremenskoj traci."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Sodalite mostantól natívan fut Macen: oldalsávval, saját ablakban futó lejátszóval billentyűzetes vezérléssel és teljes képernyővel, Cmd-, alatt elérhető beállításokkal és jobb kattintásos menükkel minden kártyán. A lejátszó megjeleníti a feliratokat, és menüket kínál a hanghoz, a feliratokhoz időzítéssel, a fejezetekhez, epizódokhoz, sebességhez, minőséghez és képhez, valamint Bevezető átugrása és a következő epizód funkciót."
+            "value" : "A Sodalite mostantól natívan fut Macen: oldalsávval, saját ablakban futó lejátszóval billentyűzetes vezérléssel és teljes képernyővel, Cmd-, alatt elérhető beállításokkal és jobb kattintásos menükkel minden kártyán. A lejátszó megjeleníti a feliratokat, a formázottakat is, és menüket kínál a hanghoz, a feliratokhoz időzítéssel és online kereséssel, a fejezetekhez, epizódokhoz, sebességhez, minőséghez és képhez, valamint Bevezető átugrása, következő epizód, kép a képben, Stats for Nerds és előnézetek az idősávon."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite ora funziona in modo nativo su Mac: barra laterale, un player nella sua finestra con controllo da tastiera e schermo intero, Impostazioni con Cmd-, e menu contestuali su ogni scheda. Il player mostra i sottotitoli e ha menu per audio, sottotitoli con sincronizzazione, capitoli, episodi, velocità, qualità e immagine, oltre a Salta intro e all’episodio successivo."
+            "value" : "Sodalite ora funziona in modo nativo su Mac: barra laterale, un player nella sua finestra con controllo da tastiera e schermo intero, Impostazioni con Cmd-, e menu contestuali su ogni scheda. Il player mostra i sottotitoli, anche quelli con stile, e ha menu per audio, sottotitoli con sincronizzazione e ricerca online, capitoli, episodi, velocità, qualità e immagine, oltre a Salta intro, episodio successivo, Picture in Picture, Stats for Nerds e anteprime sulla barra di avanzamento."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SodaliteがMacでネイティブに動作するようになりました。サイドバー、キーボード操作とフルスクリーンに対応した専用ウインドウのプレーヤー、Cmd-,で開く設定、すべてのカードの右クリックメニューを備えています。プレーヤーは字幕を表示し、音声、タイミング調整付きの字幕、チャプター、エピソード、速度、画質、画面表示のメニューに加え、イントロのスキップと次のエピソードにも対応しています。"
+            "value" : "SodaliteがMacでネイティブに動作するようになりました。サイドバー、キーボード操作とフルスクリーンに対応した専用ウインドウのプレーヤー、Cmd-,で開く設定、すべてのカードの右クリックメニューを備えています。プレーヤーはスタイル付きを含む字幕を表示し、音声、タイミング調整とオンライン検索付きの字幕、チャプター、エピソード、速度、画質、画面表示のメニューに加え、イントロのスキップ、次のエピソード、ピクチャ・イン・ピクチャ、Stats for Nerds、シークバーのプレビューにも対応しています。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이제 Sodalite가 Mac에서 네이티브로 실행됩니다. 사이드바, 키보드 조작과 전체 화면을 지원하는 별도 창의 플레이어, Cmd-,로 여는 설정, 모든 카드의 오른쪽 클릭 메뉴를 제공합니다. 플레이어는 자막을 표시하며 오디오, 싱크 조절이 가능한 자막, 챕터, 에피소드, 속도, 화질, 화면 메뉴와 함께 인트로 건너뛰기 및 다음 에피소드를 제공합니다."
+            "value" : "이제 Sodalite가 Mac에서 네이티브로 실행됩니다. 사이드바, 키보드 조작과 전체 화면을 지원하는 별도 창의 플레이어, Cmd-,로 여는 설정, 모든 카드의 오른쪽 클릭 메뉴를 제공합니다. 플레이어는 스타일이 적용된 자막을 포함해 자막을 표시하며 오디오, 싱크 조절과 온라인 검색이 가능한 자막, 챕터, 에피소드, 속도, 화질, 화면 메뉴와 함께 인트로 건너뛰기, 다음 에피소드, PIP, Stats for Nerds, 탐색 막대 미리보기를 제공합니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite kjører nå direkte på Mac: med sidefelt, en avspiller i eget vindu med tastaturstyring og fullskjerm, innstillinger under Cmd-, og høyreklikkmenyer på hvert kort. Avspilleren viser undertekster og har menyer for lyd, undertekster med timing, kapitler, episoder, hastighet, kvalitet og bilde, pluss Hopp over intro og neste episode."
+            "value" : "Sodalite kjører nå direkte på Mac: med sidefelt, en avspiller i eget vindu med tastaturstyring og fullskjerm, innstillinger under Cmd-, og høyreklikkmenyer på hvert kort. Avspilleren viser undertekster, også formaterte, og har menyer for lyd, undertekster med timing og nettsøk, kapitler, episoder, hastighet, kvalitet og bilde, pluss Hopp over intro, neste episode, bilde-i-bilde, Stats for Nerds og forhåndsvisninger på tidslinjen."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite draait nu native op de Mac: met een zijbalk, een speler in een eigen venster met toetsenbordbediening en schermvullende weergave, instellingen onder Cmd-, en contextmenu's op elke kaart. De speler toont ondertitels en heeft menu’s voor audio, ondertitels met timing, hoofdstukken, afleveringen, snelheid, kwaliteit en beeld, plus Intro overslaan en de volgende aflevering."
+            "value" : "Sodalite draait nu native op de Mac: met een zijbalk, een speler in een eigen venster met toetsenbordbediening en schermvullende weergave, instellingen onder Cmd-, en contextmenu's op elke kaart. De speler toont ondertitels, ook opgemaakte, en heeft menu’s voor audio, ondertitels met timing en online zoeken, hoofdstukken, afleveringen, snelheid, kwaliteit en beeld, plus Intro overslaan, de volgende aflevering, beeld-in-beeld, Stats for Nerds en voorvertoningen op de tijdbalk."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite działa teraz natywnie na Macu: z paskiem bocznym, odtwarzaczem we własnym oknie ze sterowaniem z klawiatury i trybem pełnoekranowym, ustawieniami pod Cmd-, oraz menu prawego przycisku na każdej karcie. Odtwarzacz wyświetla napisy i ma menu dźwięku, napisów z synchronizacją, rozdziałów, odcinków, prędkości, jakości i obrazu, a także Pomiń intro i następny odcinek."
+            "value" : "Sodalite działa teraz natywnie na Macu: z paskiem bocznym, odtwarzaczem we własnym oknie ze sterowaniem z klawiatury i trybem pełnoekranowym, ustawieniami pod Cmd-, oraz menu prawego przycisku na każdej karcie. Odtwarzacz wyświetla napisy, także stylizowane, i ma menu dźwięku, napisów z synchronizacją i wyszukiwaniem online, rozdziałów, odcinków, prędkości, jakości i obrazu, a także Pomiń intro, następny odcinek, obraz w obrazie, Stats for Nerds i podglądy na osi czasu."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Sodalite agora roda nativamente no Mac: barra lateral, um player em janela própria com controle pelo teclado e tela cheia, Ajustes com Cmd-, e menus de clique direito em cada card. O player mostra legendas e tem menus de áudio, legendas com sincronia, capítulos, episódios, velocidade, qualidade e imagem, além de Pular abertura e o próximo episódio."
+            "value" : "O Sodalite agora roda nativamente no Mac: barra lateral, um player em janela própria com controle pelo teclado e tela cheia, Ajustes com Cmd-, e menus de clique direito em cada card. O player mostra legendas, inclusive estilizadas, e tem menus de áudio, legendas com sincronia e busca online, capítulos, episódios, velocidade, qualidade e imagem, além de Pular abertura, o próximo episódio, Picture in Picture, Stats for Nerds e prévias na barra de tempo."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Sodalite funciona agora nativamente no Mac: barra lateral, um leitor em janela própria com controlo por teclado e ecrã completo, Definições com Cmd-, e menus de clique direito em cada cartão. O leitor mostra legendas e tem menus de áudio, legendas com sincronização, capítulos, episódios, velocidade, qualidade e imagem, além de Saltar genérico e o episódio seguinte."
+            "value" : "O Sodalite funciona agora nativamente no Mac: barra lateral, um leitor em janela própria com controlo por teclado e ecrã completo, Definições com Cmd-, e menus de clique direito em cada cartão. O leitor mostra legendas, incluindo as estilizadas, e tem menus de áudio, legendas com sincronização e pesquisa online, capítulos, episódios, velocidade, qualidade e imagem, além de Saltar genérico, o episódio seguinte, imagem na imagem, Stats for Nerds e pré-visualizações na barra de tempo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite rulează acum nativ pe Mac: cu bară laterală, un player în fereastra proprie cu control de la tastatură și ecran complet, Setări cu Cmd-, și meniuri la clic dreapta pe fiecare card. Playerul afișează subtitrări și are meniuri pentru audio, subtitrări cu sincronizare, capitole, episoade, viteză, calitate și imagine, plus Omite introducerea și episodul următor."
+            "value" : "Sodalite rulează acum nativ pe Mac: cu bară laterală, un player în fereastra proprie cu control de la tastatură și ecran complet, Setări cu Cmd-, și meniuri la clic dreapta pe fiecare card. Playerul afișează subtitrări, inclusiv stilizate, și are meniuri pentru audio, subtitrări cu sincronizare și căutare online, capitole, episoade, viteză, calitate și imagine, plus Omite introducerea, episodul următor, imagine în imagine, Stats for Nerds și previzualizări pe bara de timp."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite теперь работает на Mac нативно: боковая панель, плеер в отдельном окне с управлением с клавиатуры и полноэкранным режимом, настройки по Cmd-, и контекстные меню на каждой карточке. Плеер показывает субтитры и предлагает меню звука, субтитров с настройкой синхронизации, глав, эпизодов, скорости, качества и изображения, а также Пропустить заставку и следующий эпизод."
+            "value" : "Sodalite теперь работает на Mac нативно: боковая панель, плеер в отдельном окне с управлением с клавиатуры и полноэкранным режимом, настройки по Cmd-, и контекстные меню на каждой карточке. Плеер показывает субтитры, в том числе стилизованные, и предлагает меню звука, субтитров с синхронизацией и онлайн-поиском, глав, эпизодов, скорости, качества и изображения, а также Пропустить заставку, следующий эпизод, «картинку в картинке», Stats for Nerds и превью на шкале времени."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite teraz beží natívne na Macu: s bočným panelom, prehrávačom vo vlastnom okne s ovládaním klávesnicou a režimom celej obrazovky, nastaveniami pod Cmd-, a ponukami pravého kliknutia na každej karte. Prehrávač zobrazuje titulky a ponúka ponuky pre zvuk, titulky s časovaním, kapitoly, epizódy, rýchlosť, kvalitu a obraz, k tomu Preskočiť úvod a ďalšiu epizódu."
+            "value" : "Sodalite teraz beží natívne na Macu: s bočným panelom, prehrávačom vo vlastnom okne s ovládaním klávesnicou a režimom celej obrazovky, nastaveniami pod Cmd-, a ponukami pravého kliknutia na každej karte. Prehrávač zobrazuje titulky vrátane štylizovaných a ponúka ponuky pre zvuk, titulky s časovaním a vyhľadávaním online, kapitoly, epizódy, rýchlosť, kvalitu a obraz, k tomu Preskočiť úvod, ďalšiu epizódu, obraz v obraze, Stats for Nerds a náhľady na časovej osi."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite körs nu direkt på Mac: med sidofält, en spelare i eget fönster med tangentbordsstyrning och helskärm, inställningar under Cmd-, och högerklicksmenyer på varje kort. Spelaren visar undertexter och har menyer för ljud, undertexter med timing, kapitel, avsnitt, hastighet, kvalitet och bild, plus Hoppa över intro och nästa avsnitt."
+            "value" : "Sodalite körs nu direkt på Mac: med sidofält, en spelare i eget fönster med tangentbordsstyrning och helskärm, inställningar under Cmd-, och högerklicksmenyer på varje kort. Spelaren visar undertexter, även formaterade, och har menyer för ljud, undertexter med timing och sökning online, kapitel, avsnitt, hastighet, kvalitet och bild, plus Hoppa över intro, nästa avsnitt, bild-i-bild, Stats for Nerds och förhandsvisningar på tidslinjen."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite artık Mac'te yerel olarak çalışıyor: kenar çubuğu, klavye kontrolü ve tam ekran destekli kendi penceresinde bir oynatıcı, Cmd-, ile açılan Ayarlar ve her kartta sağ tık menüleri. Oynatıcı altyazıları gösterir; ses, zamanlamalı altyazı, bölümler, kısımlar, hız, kalite ve görüntü menüleri ile Girişi Atla ve sonraki bölüm de vardır."
+            "value" : "Sodalite artık Mac'te yerel olarak çalışıyor: kenar çubuğu, klavye kontrolü ve tam ekran destekli kendi penceresinde bir oynatıcı, Cmd-, ile açılan Ayarlar ve her kartta sağ tık menüleri. Oynatıcı biçimli olanlar dahil altyazıları gösterir; ses, zamanlamalı ve çevrimiçi aramalı altyazı, bölümler, kısımlar, hız, kalite ve görüntü menüleri ile Girişi Atla, sonraki bölüm, resim içinde resim, Stats for Nerds ve zaman çubuğunda önizlemeler de vardır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite тепер працює на Mac нативно: бічна панель, плеєр в окремому вікні з керуванням із клавіатури та повноекранним режимом, налаштування через Cmd-, і контекстні меню на кожній картці. Плеєр показує субтитри й має меню звуку, субтитрів із налаштуванням синхронізації, розділів, епізодів, швидкості, якості та зображення, а також Пропустити заставку й наступний епізод."
+            "value" : "Sodalite тепер працює на Mac нативно: бічна панель, плеєр в окремому вікні з керуванням із клавіатури та повноекранним режимом, налаштування через Cmd-, і контекстні меню на кожній картці. Плеєр показує субтитри, зокрема стилізовані, і має меню звуку, субтитрів із синхронізацією та онлайн-пошуком, розділів, епізодів, швидкості, якості й зображення, а також Пропустити заставку, наступний епізод, «картинку в картинці», Stats for Nerds і прев’ю на шкалі часу."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite 现已原生运行于 Mac：提供边栏、支持键盘操作和全屏的独立播放器窗口、通过 Cmd-, 打开的设置，以及每张卡片上的右键菜单。播放器会显示字幕，并提供音频、可调时间的字幕、章节、剧集、速度、画质和画面菜单，还有跳过片头和下一集。"
+            "value" : "Sodalite 现已原生运行于 Mac：提供边栏、支持键盘操作和全屏的独立播放器窗口、通过 Cmd-, 打开的设置，以及每张卡片上的右键菜单。播放器会显示字幕（包括带样式的字幕），并提供音频、可调时间并支持在线搜索的字幕、章节、剧集、速度、画质和画面菜单，还有跳过片头、下一集、画中画、Stats for Nerds 以及进度条预览。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sodalite 現已原生執行於 Mac：提供側邊欄、支援鍵盤操作與全螢幕的獨立播放器視窗、透過 Cmd-, 開啟的設定，以及每張卡片上的右鍵選單。播放器會顯示字幕，並提供音訊、可調時間的字幕、章節、集數、速度、畫質和畫面選單，還有略過片頭和下一集。"
+            "value" : "Sodalite 現已原生執行於 Mac：提供側邊欄、支援鍵盤操作與全螢幕的獨立播放器視窗、透過 Cmd-, 開啟的設定，以及每張卡片上的右鍵選單。播放器會顯示字幕（包括帶樣式的字幕），並提供音訊、可調時間並支援線上搜尋的字幕、章節、集數、速度、畫質和畫面選單，還有略過片頭、下一集、子母畫面、Stats for Nerds 以及進度列預覽。"
           }
         }
       }

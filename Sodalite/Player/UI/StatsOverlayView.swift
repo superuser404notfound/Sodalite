@@ -1,7 +1,3 @@
-#if !os(macOS)
-// Player chrome for the UIKit host: it is display-only by construction, because
-// PlayerHostController owns every press and moves a cursor through it. macOS has its own
-// transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 import AetherEngine
 
@@ -43,7 +39,7 @@ struct StatsOverlayView: View {
     var onClose: (() -> Void)? = nil
 
     private var panelWidth: CGFloat {
-        #if os(iOS)
+        #if os(iOS) || os(macOS)
         return 380
         #else
         return 560
@@ -88,7 +84,7 @@ struct StatsOverlayView: View {
             HStack(spacing: 0) {
                 Spacer()
                 panel
-                    #if os(iOS)
+                    #if os(iOS) || os(macOS)
                     .padding(.trailing, 16)
                     .padding(.vertical, 16)
                     #else
@@ -108,7 +104,10 @@ struct StatsOverlayView: View {
     /// churns. iOS reads the key window (shared with `PlayerOverlayView`), tvOS the scene's screen, where
     /// the title-safe margin is this panel's own 40pt padding and the window carries no insets.
     private static func hostGeometry(fallback: CGSize) -> (CGSize, EdgeInsets) {
-        #if os(iOS)
+        #if os(macOS)
+        // The Mac mounts the panel straight over the window's content, which has no insets to undo.
+        return (fallback, EdgeInsets())
+        #elseif os(iOS)
         let (bounds, insets) = PlayerOverlayView.windowGeometry(fallback: fallback)
         return (
             bounds.size,
@@ -129,7 +128,7 @@ struct StatsOverlayView: View {
         ScrollViewReader { proxy in
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
-                    #if os(iOS)
+                    #if os(iOS) || os(macOS)
                     HStack {
                         Text("player.stats.title")
                             .font(.title3)
@@ -770,4 +769,3 @@ private struct StatsSectionHighlight: ViewModifier {
             .animation(.easeInOut(duration: 0.18), value: isCurrent)
     }
 }
-#endif

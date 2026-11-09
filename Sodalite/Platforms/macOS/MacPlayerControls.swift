@@ -14,11 +14,10 @@ struct MacPlayerMenus: View {
         return order.filter(Self.supported.contains)
     }
 
-    /// The prompts render as their own buttons (`MacPlayerPrompts`), and PiP, upscaling, Multiview
-    /// and Stats have no Mac implementation yet.
+    /// The prompts render as their own buttons (`MacPlayerPrompts`). Multiview is a tvOS grid.
     private static let supported: Set<PlayerViewModel.ControlsFocus> = [
         .restartButton, .episodeButton, .chapterButton, .audioButton, .subtitleButton,
-        .qualityButton, .speedButton, .pictureButton,
+        .qualityButton, .speedButton, .pictureButton, .upscaleButton, .pipButton, .infoButton,
     ]
 
     var body: some View {
@@ -34,6 +33,18 @@ struct MacPlayerMenus: View {
                 case .qualityButton: menu(.quality) { qualityItems }
                 case .speedButton: menu(.speed) { speedItems }
                 case .pictureButton: menu(.picture) { pictureItems }
+                case .upscaleButton:
+                    MacTransportIconButton(control: .upscaling, systemImage: viewModel.upscaleChipIcon,
+                                           help: viewModel.upscaleChipLabel) { viewModel.toggleUpscaling() }
+                case .pipButton:
+                    MacTransportIconButton(control: .pip, systemImage: "pip.enter") {
+                        viewModel.requestPictureInPicture()
+                    }
+                    .disabled(!viewModel.isPiPPossible)
+                case .infoButton:
+                    MacTransportIconButton(control: .stats, isOn: viewModel.showStatsOverlay) {
+                        viewModel.showStatsOverlay.toggle()
+                    }
                 default: EmptyView()
                 }
             }
@@ -103,6 +114,21 @@ struct MacPlayerMenus: View {
                         viewModel.selectSecondarySubtitleTrack(id: stream.index)
                     }
                 }
+            }
+        }
+        let external = viewModel.displaySubtitleStreams.filter { $0.isExternal == true }
+        if !external.isEmpty {
+            Menu(String(localized: "player.subtitle.delete.confirm", defaultValue: "Delete")) {
+                ForEach(external, id: \.index) { stream in
+                    Button(TrackDisplayFormatter.subtitleStreamDisplayName(for: stream)) {
+                        viewModel.requestSubtitleDeletion(streamIndex: stream.index)
+                    }
+                }
+            }
+        }
+        if viewModel.supportsSubtitleSearch {
+            Button(String(localized: "player.subtitle.searchOnline", defaultValue: "Search online...")) {
+                viewModel.presentSubtitleSearch()
             }
         }
         if viewModel.supportsSubtitleOffset {
@@ -199,17 +225,112 @@ struct MacPlayerMenus: View {
 /// A transport control that acts on click rather than opening a menu.
 struct MacTransportIconButton: View {
     let control: PlayerControl
+    var systemImage: String? = nil
+    var help: String? = nil
+    /// Drawn in the accent while on, for a control that toggles a panel.
+    var isOn = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: PlayerControlsSettingsView.symbol(for: control))
+            Image(systemName: systemImage ?? PlayerControlsSettingsView.symbol(for: control))
                 .font(.title3)
+                .foregroundStyle(isOn ? AnyShapeStyle(.tint) : AnyShapeStyle(.white))
                 .frame(width: 34, height: 32)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(PlayerControlsSettingsView.label(for: control))
+        .help(help ?? PlayerControlsSettingsView.label(for: control))
+    }
+}
+
+/// The Mac's scrub track: click or drag to seek, hover to preview, the way AetherPlayer's bar works.
+/// A drag goes through the view model's scrub state, so the timecode and the preview follow it and
+/// the seek commits once on release; hovering only drives the preview.
+struct MacScrubBar: View {
+    let viewModel: PlayerViewModel
+    let onInteraction: () -> Void
+
+    @State private var hoverFraction: Double?
+
+    private let previewWidth: CGFloat = 200
+
+    private var playedFraction: Double { Double(viewModel.displayedProgress) }
+
+    var body: some View {
+        GeometryReader { geo in
+            let width = max(1, geo.size.width)
+            let knobX = CGFloat(min(max(playedFraction, 0), 1)) * width
+            let emphasized = viewModel.isScrubbing || hoverFraction != nil
+            let knob: CGFloat = emphasized ? 14 : 10
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.Theme.restFill).frame(height: 4)
+                Capsule().fill(.tint).frame(width: knobX, height: 4)
+                Circle().fill(.white).frame(width: knob, height: knob).offset(x: knobX - knob / 2)
+            }
+            .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        viewModel.scrub(toFraction: Float(fraction(value.location.x, width)))
+                        onInteraction()
+                    }
+                    .onEnded { value in
+                        viewModel.scrub(toFraction: Float(fraction(value.location.x, width)))
+                        viewModel.commitScrub()
+                        onInteraction()
+                    }
+            )
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let point):
+                    if hoverFraction == nil { viewModel.scrubPreview.prewarm() }
+                    let f = fraction(point.x, width)
+                    hoverFraction = f
+                    // A live preview answers for the rail's own timeline, which only a scrub drives.
+                    if !viewModel.isScrubbing, !viewModel.isLiveSession {
+                        viewModel.scrubPreview.update(fraction: Float(f), durationSeconds: viewModel.scrubReferenceDuration)
+                    }
+                    onInteraction()
+                case .ended:
+                    hoverFraction = nil
+                    if !viewModel.isScrubbing { viewModel.scrubPreview.clear() }
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                if emphasized, let image = viewModel.scrubPreview.previewImage {
+                    let at = viewModel.isScrubbing ? Double(viewModel.scrubProgress) : (hoverFraction ?? 0)
+                    preview(image, seconds: at * viewModel.scrubReferenceDuration)
+                        .offset(x: min(max(CGFloat(at) * width - previewWidth / 2, 0), width - previewWidth),
+                                y: -24)
+                        .allowsHitTesting(false)
+                }
+            }
+        }
+        .frame(height: 20)
+    }
+
+    private func fraction(_ x: CGFloat, _ width: CGFloat) -> Double {
+        Double(min(max(x / width, 0), 1))
+    }
+
+    private func preview(_ image: CGImage, seconds: Double) -> some View {
+        let height = image.width > 0 ? previewWidth * CGFloat(image.height) / CGFloat(image.width) : previewWidth * 9 / 16
+        return VStack(spacing: 4) {
+            Image(decorative: image, scale: 1)
+                .resizable()
+                .frame(width: previewWidth, height: height)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.Theme.hairline))
+            Text(Duration.seconds(max(0, seconds)).formatted(.time(pattern: seconds >= 3600 ? .hourMinuteSecond : .minuteSecond)))
+                .font(.caption.monospacedDigit())
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.Theme.scrim, in: Capsule())
+        }
+        .frame(width: previewWidth)
+        .shadow(radius: 6)
     }
 }
 
