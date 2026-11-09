@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Shared metadata display row: year · runtime · rating badge · ★ score · optional extras
+/// Shared metadata display row: year · runtime · rating badge · TMDB / IMDb or ★ score · RT · optional extras
 ///
 /// Separators sit BETWEEN the segments that survived, not in front of each one. Written the other
 /// way the row grew a leading dot as soon as everything ahead of a segment dropped out, which the
@@ -20,6 +20,10 @@ struct ItemMetadataRow: View {
     /// Bordered segments, appended last. The format pills are the case: boxes with edges, which
     /// separate themselves. Inside the run `FormatBadgeRow` already separates by spacing.
     var badges: [AnyView] = []
+    /// Named scores from Jellyseerr; they replace the server's anonymous star when present.
+    var externalRatings: ExternalRatings? = nil
+    /// A Jellyseerr ratings fetch is still out, so the star waits for it.
+    var awaitingExternalRatings: Bool = false
 
     @Environment(\.dependencies) private var dependencies
 
@@ -74,31 +78,26 @@ struct ItemMetadataRow: View {
             ))
         }
 
-        if let score = item.communityRating,
-           dependencies.appearancePreferences.showCommunityRating {
-            out.append(Segment(view: AnyView(
-                HStack(spacing: 4) {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
-                        .font(.caption)
-                    Text(String(format: "%.1f", score))
-                }
-            )))
+        let ratings = RatingDisplay.resolve(
+            communityRating: item.communityRating,
+            criticRating: item.criticRating,
+            external: externalRatings,
+            awaitingExternal: awaitingExternalRatings
+        )
+        if dependencies.appearancePreferences.showCommunityRating {
+            if let tmdb = ratings.tmdb {
+                out.append(Segment(view: AnyView(NamedScoreLabel(source: "TMDB", score: tmdb))))
+            }
+            if let imdb = ratings.imdb {
+                out.append(Segment(view: AnyView(NamedScoreLabel(source: "IMDb", score: imdb))))
+            }
+            if let star = ratings.community {
+                out.append(Segment(view: AnyView(StarScoreLabel(score: star))))
+            }
         }
-
-        // RT critic score (needs a provider filling CriticRating, e.g. OMDb); fresh/rotten split at 60, jellyfin-web badge artwork.
-        if let critic = item.criticRating,
+        if let critic = ratings.rottenTomatoes,
            dependencies.appearancePreferences.showCriticRating {
-            out.append(Segment(view: AnyView(
-                HStack(spacing: 5) {
-                    Image(critic >= 60 ? "RTFresh" : "RTRotten")
-                        .resizable()
-                        .renderingMode(.original)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 20)
-                    Text(verbatim: "\(Int(critic)) %")
-                }
-            )))
+            out.append(Segment(view: AnyView(RottenTomatoesLabel(score: critic))))
         }
 
         out.append(contentsOf: extras.map { Segment(view: $0) })

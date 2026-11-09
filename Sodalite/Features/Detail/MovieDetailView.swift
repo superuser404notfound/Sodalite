@@ -79,6 +79,13 @@ struct MovieDetailView: View {
         dependencies.appearancePreferences.isTabHidden(.catalog) ? nil : dependencies.seerrMediaService
     }
 
+    /// Seerr service for the TMDB / IMDb / RT scores, nil without a Seerr connection or with both rating switches off.
+    private var ratingsService: SeerrMediaServiceProtocol? {
+        let prefs = dependencies.appearancePreferences
+        guard appState.isSeerrConnected, prefs.showCommunityRating || prefs.showCriticRating else { return nil }
+        return dependencies.seerrMediaService
+    }
+
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
     /// iPhone portrait: stacked, poster-hero detail with a full-width primary action over a collapsed secondary row.
     private var isPhonePortrait: Bool {
@@ -291,6 +298,7 @@ struct MovieDetailView: View {
                     libraryService: session.libraryService,
                     playbackService: session.playbackService,
                     seerrMediaService: catalogSimilarService,
+                    ratingsService: ratingsService,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
                 Task { await viewModel?.loadFullDetail() }
@@ -498,14 +506,19 @@ struct MovieDetailView: View {
                 // dragged the studios line out with it (measured on the iPhone, 2026-09-14).
                 if isPhonePortrait {
                     VStack(spacing: 8) {
-                        ItemMetadataRow(item: vm.item)
+                        ItemMetadataRow(item: vm.item, externalRatings: vm.externalRatings, awaitingExternalRatings: vm.isAwaitingExternalRatings)
                         let pills = formatBadgePills(vm: vm)
                         if !pills.isEmpty {
                             FormatBadgeRow(pills: pills)
                         }
                     }
                 } else {
-                    ItemMetadataRow(item: vm.item, badges: formatBadges(vm: vm))
+                    ItemMetadataRow(
+                        item: vm.item,
+                        badges: formatBadges(vm: vm),
+                        externalRatings: vm.externalRatings,
+                        awaitingExternalRatings: vm.isAwaitingExternalRatings
+                    )
                 }
             }
 

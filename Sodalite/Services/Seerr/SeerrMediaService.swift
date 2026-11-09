@@ -7,7 +7,8 @@ protocol SeerrMediaServiceProtocol: Sendable {
     func collection(collectionID: Int) async throws -> SeerrCollection
     func recommendations(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia]
     func similar(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia]
-    func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRTRating
+    /// Rotten Tomatoes for both kinds, IMDb for movies. Throws (404) when Seerr found neither.
+    func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRatings
     func personDetail(tmdbID: Int) async throws -> SeerrPersonDetail
     func personCredits(tmdbID: Int) async throws -> SeerrPersonCredits
 
@@ -82,18 +83,22 @@ final class SeerrMediaService: SeerrMediaServiceProtocol {
         return result.results.filter { $0.mediaType == .movie || $0.mediaType == .tv }
     }
 
-    func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRTRating {
-        let endpoint: SeerrEndpoint
+    func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRatings {
         switch mediaType {
-        case .movie: endpoint = .movieRatings(tmdbID: tmdbID)
-        case .tv: endpoint = .tvRatings(tmdbID: tmdbID)
+        case .movie:
+            return try await client.request(
+                endpoint: SeerrEndpoint.movieRatings(tmdbID: tmdbID),
+                responseType: SeerrRatings.self
+            )
+        case .tv:
+            let rt = try await client.request(
+                endpoint: SeerrEndpoint.tvRatings(tmdbID: tmdbID),
+                responseType: SeerrRTRating.self
+            )
+            return SeerrRatings(rt: rt, imdb: nil)
         case .person, .unknown:
-            return SeerrRTRating(criticsScore: nil)
+            return SeerrRatings(rt: nil, imdb: nil)
         }
-        return try await client.request(
-            endpoint: endpoint,
-            responseType: SeerrRTRating.self
-        )
     }
 
     func personDetail(tmdbID: Int) async throws -> SeerrPersonDetail {

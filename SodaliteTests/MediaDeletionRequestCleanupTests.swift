@@ -42,7 +42,7 @@ struct MediaDeletionRequestCleanupTests {
         func collection(collectionID: Int) async throws -> SeerrCollection { throw Boom() }
         func recommendations(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia] { [] }
         func similar(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia] { [] }
-        func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRTRating { throw Boom() }
+        func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRatings { throw Boom() }
         func personDetail(tmdbID: Int) async throws -> SeerrPersonDetail { throw Boom() }
         func personCredits(tmdbID: Int) async throws -> SeerrPersonCredits { throw Boom() }
         func removeMovieFromRadarr(tmdbID: Int) async throws -> Bool { removedFromArr.append(tmdbID); return true }

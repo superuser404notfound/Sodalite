@@ -83,6 +83,13 @@ struct SeriesDetailView: View {
         return appState.activeUser?.canDeleteContent == true
     }
 
+    /// Seerr service for the TMDB / IMDb / RT scores, nil without a Seerr connection or with both rating switches off.
+    private var ratingsService: SeerrMediaServiceProtocol? {
+        let prefs = dependencies.appearancePreferences
+        guard appState.isSeerrConnected, prefs.showCommunityRating || prefs.showCriticRating else { return nil }
+        return dependencies.seerrMediaService
+    }
+
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
     /// iPhone portrait: full-width primary action over a centered secondary row.
     private var isPhonePortrait: Bool {
@@ -456,6 +463,7 @@ struct SeriesDetailView: View {
                     libraryService: session.libraryService,
                     playbackService: session.playbackService,
                     seerrMediaService: catalogSimilarService,
+                    ratingsService: ratingsService,
                     initialEpisode: initialEpisode,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
@@ -811,7 +819,13 @@ struct SeriesDetailView: View {
                         }
                     }
                 } else {
-                    ItemMetadataRow(item: vm.item, showRuntime: false, extras: seasonCount(vm: vm))
+                    ItemMetadataRow(
+                        item: vm.item,
+                        showRuntime: false,
+                        extras: seasonCount(vm: vm),
+                        externalRatings: vm.externalRatings,
+                        awaitingExternalRatings: vm.isAwaitingExternalRatings
+                    )
                 }
             }
 

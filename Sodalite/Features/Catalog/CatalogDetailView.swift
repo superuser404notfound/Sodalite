@@ -40,6 +40,7 @@ struct CatalogDetailView: View {
     @State private var recommendations: [SeerrMedia] = []
     /// Rotten Tomatoes critics score, best-effort from Seerr's ratings endpoint; nil on older server / no RT data.
     @State private var rtCriticsScore: Int?
+    @State private var imdbRating: Double?
     @State private var navigateToMedia: SeerrMedia?
     @State private var selectedCastMember: CastMember?
     /// TMDB collection this movie belongs to; nil for standalone movies and for every series (Sodalite#52).
@@ -248,7 +249,8 @@ struct CatalogDetailView: View {
                 runtimeMinutes: metadataRuntime,
                 year: nil,
                 certification: metadataCertification,
-                rtCriticsScore: rtCriticsScore
+                rtCriticsScore: rtCriticsScore,
+                imdbRating: imdbRating
             )
             if !genres.isEmpty {
                 Text(genres.map(\.name).joined(separator: " · "))
@@ -868,14 +870,16 @@ struct CatalogDetailView: View {
     }
 
     private func loadRatings() async {
-        // Nothing to draw, nothing to ask for (Sodalite#127).
-        guard dependencies.appearancePreferences.showCriticRating else { return }
-        // Best-effort: the ratings endpoint 404s on older servers or when no
-        // RT data exists, leave the badge absent in that case.
-        guard let rt = try? await dependencies.seerrMediaService.ratings(
+        // Nothing to draw, nothing to ask for (Sodalite#127). IMDb counts as a community score.
+        let prefs = dependencies.appearancePreferences
+        let wantsIMDb = prefs.showCommunityRating && media.mediaType == .movie
+        guard prefs.showCriticRating || wantsIMDb else { return }
+        // Best-effort: the endpoint 404s when Seerr found neither score, leave the badges absent then.
+        guard let ratings = try? await dependencies.seerrMediaService.ratings(
             mediaType: media.mediaType, tmdbID: media.id
         ) else { return }
-        if let score = rt.criticsScore { rtCriticsScore = score }
+        if let score = ratings.rt?.criticsScore { rtCriticsScore = score }
+        if let score = ratings.imdb?.criticsScore { imdbRating = score }
     }
 
     /// Light refresh after a successful request: replaces only the mediaInfo-carrying detail (badges/chips pick up pending state); tab selection and episode lists stay untouched. NOT load(): that flips the full-screen loading state and re-runs config/recommendations.

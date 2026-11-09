@@ -33,8 +33,9 @@ enum SeerrEndpoint: APIEndpoint {
     case movieSimilar(tmdbID: Int, page: Int)
     case tvRecommendations(tmdbID: Int, page: Int)
     case tvSimilar(tmdbID: Int, page: Int)
-    /// GET /api/v1/movie|tv/{id}/ratings: Rotten Tomatoes scores.
+    /// GET /api/v1/movie/{id}/ratingscombined: Rotten Tomatoes and IMDb, keyed `rt` / `imdb`.
     case movieRatings(tmdbID: Int)
+    /// GET /api/v1/tv/{id}/ratings: Rotten Tomatoes only, the bare RT object.
     case tvRatings(tmdbID: Int)
     case discoverMoviesByWatchProvider(providerID: Int, region: String, page: Int)
     case discoverTVByWatchProvider(providerID: Int, region: String, page: Int)
@@ -93,7 +94,7 @@ enum SeerrEndpoint: APIEndpoint {
         case .movieSimilar(let id, _): "/api/v1/movie/\(id)/similar"
         case .tvRecommendations(let id, _): "/api/v1/tv/\(id)/recommendations"
         case .tvSimilar(let id, _): "/api/v1/tv/\(id)/similar"
-        case .movieRatings(let id): "/api/v1/movie/\(id)/ratings"
+        case .movieRatings(let id): "/api/v1/movie/\(id)/ratingscombined"
         case .tvRatings(let id): "/api/v1/tv/\(id)/ratings"
         case .discoverMoviesByWatchProvider: "/api/v1/discover/movies"
         case .discoverTVByWatchProvider: "/api/v1/discover/tv"

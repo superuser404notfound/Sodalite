@@ -33,6 +33,10 @@ final class DetailViewModel {
     var localTrailers: [JellyfinItem] = []
     /// Similar titles the server does NOT have, from Jellyseerr. Empty unless the catalog is connected and visible, the item carries a TMDB id, and something survives the dedupe.
     var catalogSimilar: [SeerrMedia] = []
+    /// TMDB, IMDb and RT scores from Jellyseerr for a movie or series; nil until they land or when there is no ratings service.
+    var externalRatings: ExternalRatings?
+    /// A ratings fetch is out, so the metadata line holds the server's star back. Capped by a deadline so a slow Seerr cannot keep it hidden.
+    var isAwaitingExternalRatings = false
     var selectedSeasonID: String?
     var isLoading = false
     /// True once full-detail settles (success or failure). isLoading can flip false at the snapshot deadline while the detail roundtrip is still in flight, so views key overview/secondary placeholders on this to reserve space (Sodalite#15).
@@ -81,6 +85,9 @@ final class DetailViewModel {
     private let imageService: JellyfinImageService
     /// nil when Seerr is not connected, or when the caller does not want a catalog row (collections, playlists).
     private let seerrMediaService: SeerrMediaServiceProtocol?
+    /// Jellyseerr for the named scores; nil without a connection or with both rating switches off. Separate from
+    /// `seerrMediaService` because hiding the Catalog tab removes catalog content, and a score is not catalog content.
+    private let ratingsService: SeerrMediaServiceProtocol?
     private let userID: String
     /// Episode the detail was opened from (vs the series tile); loadSeasons lands on its season instead of running next-up logic.
     private let initialEpisode: JellyfinItem?
@@ -108,6 +115,7 @@ final class DetailViewModel {
         libraryService: JellyfinLibraryServiceProtocol? = nil,
         playbackService: JellyfinPlaybackServiceProtocol? = nil,
         seerrMediaService: SeerrMediaServiceProtocol? = nil,
+        ratingsService: SeerrMediaServiceProtocol? = nil,
         initialEpisode: JellyfinItem? = nil,
         streamingQuality: @escaping @MainActor () -> StreamingQuality = { .original }
     ) {
@@ -121,6 +129,7 @@ final class DetailViewModel {
         self.playbackService = playbackService
         self.imageService = imageService
         self.seerrMediaService = seerrMediaService
+        self.ratingsService = ratingsService
         self.userID = userID
         self.initialEpisode = initialEpisode
     }
@@ -175,6 +184,19 @@ final class DetailViewModel {
             )
         }
 
+        if let mediaType = Self.seerrMediaType(for: itemType), ratingsService != nil {
+            isAwaitingExternalRatings = true
+            Task { [weak self] in
+                // Same reason as the catalog row: the TMDB id comes off the fetched detail.
+                let detail = await detailTask.value
+                await self?.loadExternalRatings(tmdbID: detail?.tmdbID ?? snapshotTmdbID, mediaType: mediaType)
+            }
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                self?.isAwaitingExternalRatings = false
+            }
+        }
+
         // Snapshot-paint deadline (500ms): if the fetches haven't settled, flip isLoading=false and paint from the navigating-row JellyfinItem snapshot. Fast servers complete first and keep the quiet single-render path; slow CDN libraries (10+ s, Sodalite#12) stop showing the 30 s spinner and fade content in as fetches settle. Tradeoff: a brief field-fill repaint vs the hard wall (Sodalite#15).
         Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(500))
@@ -225,6 +247,28 @@ final class DetailViewModel {
             let extras = (try? await itemService.getSpecialFeatures(userID: userID, itemID: itemID)) ?? []
             await MainActor.run { self.specialFeatures = extras }
         }
+    }
+
+    /// TMDB score from the title's Seerr detail, RT and IMDb from the ratings endpoint, both best-effort.
+    private func loadExternalRatings(tmdbID: Int?, mediaType: SeerrMediaType) async {
+        defer { isAwaitingExternalRatings = false }
+        guard let ratingsService, let tmdbID else { return }
+        let voteTask = Task { () -> Double? in
+            switch mediaType {
+            case .movie: try? await ratingsService.movieDetail(tmdbID: tmdbID).voteAverage
+            case .tv: try? await ratingsService.tvDetail(tmdbID: tmdbID).voteAverage
+            case .person, .unknown: nil
+            }
+        }
+        let ratingsTask = Task { try? await ratingsService.ratings(mediaType: mediaType, tmdbID: tmdbID) }
+        let vote = await voteTask.value
+        let ratings = await ratingsTask.value
+        let result = ExternalRatings(
+            tmdb: vote,
+            imdb: ratings?.imdb?.criticsScore,
+            rottenTomatoes: ratings?.rt?.criticsScore
+        )
+        if result != ExternalRatings() { externalRatings = result }
     }
 
     /// Catalog counterpart of the similar row: what Jellyseerr suggests and the server does not have.
