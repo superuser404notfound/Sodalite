@@ -1202,6 +1202,11 @@ struct SeriesDetailView: View {
                 .focused($focusedAction, equals: .rating)
             }
 
+            if !isShowingEpisode, vm.item.type == .series, dependencies.trakt.isConnected {
+                TraktWatchlistButton(item: vm.item)
+                    .focused($focusedAction, equals: .traktWatchlist)
+            }
+
             // Shows the EFFECTIVE state for this series, so a tap always reads as "do the other
             // thing"; the three explicit states live in the context menu.
             if !isShowingEpisode {

@@ -792,6 +792,11 @@ struct MovieDetailView: View {
             )
             .focused($focusedAction, equals: .rating)
 
+            if vm.item.type == .movie, dependencies.trakt.isConnected {
+                TraktWatchlistButton(item: vm.item)
+                    .focused($focusedAction, equals: .traktWatchlist)
+            }
+
             #if os(iOS)
             DownloadActionButton(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item), target: $downloadTarget)
             #endif
