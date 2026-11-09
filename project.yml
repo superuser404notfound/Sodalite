@@ -36,7 +36,7 @@ settings:
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
     # The Trakt app's client id (app.trakt.tv/settings/apps), written into Info.plist as
     # TraktClientID. Public: Trakt's device sign-in needs no client secret. Empty hides Trakt.
-    TRAKT_CLIENT_ID: ""
+    TRAKT_CLIENT_ID: "v7eNhcKqq-ZTJQee4EffHf1iDuWhD0jqLbw9oozmPS0"
   configs:
     Release:
       VALIDATE_PRODUCT: YES
