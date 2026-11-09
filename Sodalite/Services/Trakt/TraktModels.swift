@@ -169,15 +169,6 @@ nonisolated struct TraktShowProgress: Decodable, Sendable {
     }
 }
 
-/// One play in `/sync/history/episodes`.
-nonisolated struct TraktHistoryEntry: Decodable, Sendable {
-    let id: Int64
-    let watchedAt: Date
-    let action: String
-    let episode: TraktEpisode?
-    let show: TraktShow?
-}
-
 /// `/sync/history` answers with what it took and what it could not match.
 nonisolated struct TraktHistoryResult: Decodable, Sendable {
     struct Counts: Decodable, Sendable {

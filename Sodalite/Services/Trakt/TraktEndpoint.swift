@@ -22,7 +22,6 @@ enum TraktEndpoint: APIEndpoint {
     case watchedMovies
     case watchedShows
     case showProgress(traktID: Int)
-    case episodeHistory(page: Int)
     case addHistory(TraktSyncBody)
     case removeHistory(TraktSyncBody)
     case ratings(type: String)
@@ -58,7 +57,6 @@ enum TraktEndpoint: APIEndpoint {
         case .watchedMovies: "/users/me/watched/movies"
         case .watchedShows: "/users/me/watched/shows"
         case .showProgress(let id): "/shows/\(id)/progress/watched"
-        case .episodeHistory: "/sync/history/episodes"
         case .addHistory: "/sync/history"
         case .removeHistory: "/sync/history/remove"
         case .ratings(let type): "/sync/ratings/\(type)"
@@ -84,7 +82,7 @@ enum TraktEndpoint: APIEndpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .userSettings, .lastActivities, .watchedMovies, .watchedShows, .showProgress, .episodeHistory,
+        case .userSettings, .lastActivities, .watchedMovies, .watchedShows, .showProgress,
              .ratings, .watchlist,
              .lists, .listItems:
             .get
@@ -115,8 +113,6 @@ enum TraktEndpoint: APIEndpoint {
         case .showProgress:
             [URLQueryItem(name: "specials", value: "true"), URLQueryItem(name: "count_specials", value: "false"),
              URLQueryItem(name: "hidden", value: "true")]
-        case .episodeHistory(let page):
-            [URLQueryItem(name: "page", value: String(page)), URLQueryItem(name: "limit", value: "250")]
         default: nil
         }
     }

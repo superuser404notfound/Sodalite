@@ -251,11 +251,6 @@ final class TraktService {
             plan.push.shows = []
         }
 
-        if traktMoved, readFullHistory {
-            // DIAG(trakt-duplicates): read-only count of the plays the seasonless syncs duplicated.
-            await TraktDuplicateAudit.run(client: client, library: library)
-        }
-
         markedPlayed = await markPlayed(plan.markPlayed, userID: profile.userID, profile: profile)
         for batch in TraktSyncPlan.batches(plan.push) {
             guard profile == self.profile else { throw CancellationError() }
