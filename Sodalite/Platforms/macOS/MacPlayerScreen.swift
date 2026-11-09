@@ -20,6 +20,7 @@ struct MacPlayerScreen: View {
     @State private var hideTask: Task<Void, Never>?
     @State private var keyMonitor: Any?
     @State private var hostWindow = HostWindowReference()
+    @State private var menuOpen = false
 
     private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy) }
 
@@ -35,6 +36,8 @@ struct MacPlayerScreen: View {
                 .gesture(WindowDragGesture())
                 .allowsWindowActivationEvents(true)
 
+            MacSubtitleLayer(viewModel: viewModel, controlsVisible: controlsVisible)
+
             if viewModel.isLoading, viewModel.errorMessage == nil {
                 ProgressView()
                     .controlSize(.large)
@@ -46,6 +49,11 @@ struct MacPlayerScreen: View {
             } else {
                 chrome
                     .opacity(controlsVisible ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: controlsVisible)
+                MacPlayerPrompts(viewModel: viewModel)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 24)
+                    .padding(.bottom, controlsVisible ? 110 : 32)
                     .animation(.easeInOut(duration: 0.2), value: controlsVisible)
             }
         }
@@ -63,6 +71,18 @@ struct MacPlayerScreen: View {
         }
         .onContinuousHover { phase in
             if case .active = phase { revealControls() }
+        }
+        // An open menu holds the chrome: hiding it under the pointer would take the menu's anchor
+        // with it. NSMenu reports its tracking for the menus SwiftUI builds too.
+        .onReceive(NotificationCenter.default.publisher(for: NSMenu.didBeginTrackingNotification)) { _ in
+            guard hostWindow.window?.isKeyWindow == true else { return }
+            menuOpen = true
+            hideTask?.cancel()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSMenu.didEndTrackingNotification)) { _ in
+            guard menuOpen else { return }
+            menuOpen = false
+            revealControls()
         }
         .task {
             MacPlayerWindowSession.shared.startIfNeeded(viewModel)
@@ -153,6 +173,7 @@ struct MacPlayerScreen: View {
 
                 Spacer(minLength: 0)
 
+                MacPlayerMenus(viewModel: viewModel)
                 transportButton("arrow.up.left.and.arrow.down.right", size: .body, action: toggleFullScreen)
                 Text(viewModel.remainingTime)
                     .monospacedDigit()
@@ -216,9 +237,12 @@ struct MacPlayerScreen: View {
         case 124:
             skip(direction: 1)
         case 53:
-            // Leave full screen first, the way QuickTime does: Escape in full screen means "give me
-            // the window back", and only then "close the player".
-            if isFullScreen {
+            // A running next-episode countdown is the first thing Escape stops, as Back does on
+            // the other platforms. Then full screen, the way QuickTime does: Escape in full screen
+            // means "give me the window back", and only then "close the player".
+            if viewModel.isCountdownActive {
+                viewModel.cancelNextEpisode()
+            } else if isFullScreen {
                 toggleFullScreen()
             } else {
                 close()
@@ -227,6 +251,9 @@ struct MacPlayerScreen: View {
             switch event.charactersIgnoringModifiers?.lowercased() {
             case "f": toggleFullScreen()
             case "k": viewModel.togglePlayPause()
+            // VLC's keys for subtitle timing, a tenth of a second per press.
+            case "g" where viewModel.supportsSubtitleOffset: viewModel.stepSubtitleOffset(by: -1)
+            case "h" where viewModel.supportsSubtitleOffset: viewModel.stepSubtitleOffset(by: 1)
             default: return false
             }
         }
@@ -246,7 +273,7 @@ struct MacPlayerScreen: View {
         hideTask?.cancel()
         hideTask = Task {
             try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, !menuOpen else { return }
             controlsVisible = false
         }
     }
