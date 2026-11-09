@@ -28,6 +28,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_1_0.trakt.title",
+                    "changelog.1_1_0.trakt.body",
+                    icon: "arrow.triangle.2.circlepath"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_1_0.home.title",
                     "changelog.1_1_0.home.body",
                     icon: "rectangle.topthird.inset.filled"

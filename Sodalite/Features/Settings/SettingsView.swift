@@ -231,7 +231,7 @@ struct SettingsView: View {
 
             if dependencies.trakt.isAvailable {
                 GatedSettingsTile(
-                    icon: "checkmark.arrow.trianglehead.counterclockwise",
+                    icon: "arrow.triangle.2.circlepath",
                     title: "settings.trakt.title",
                     subtitle: traktSubtitle,
                     reason: .openParentalSettings,
