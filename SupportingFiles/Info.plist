@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AVSupportsExtendedAspectRatiosForContentPlayback</key>
+	<true/>
 	<!-- One key, and it has to stay alone. NSAllowsArbitraryLoads is IGNORED the moment any of
 	     NSAllowsLocalNetworking / NSAllowsArbitraryLoadsInWebContent / NSAllowsArbitraryLoadsInMedia
 	     sits beside it (iOS and tvOS 10 and later), and the plain default takes over instead:
