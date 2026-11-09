@@ -129,6 +129,11 @@ final class TraktClient {
             setTokens(tokens)
             onTokensChanged?(tokens)
             return tokens
+        } catch let error as APIError where Self.isTransient(error) {
+            // On iPhone the approval happens in Safari, and iOS suspends the app meanwhile: the
+            // poll in flight dies with a transport error while the code is still good. Measured
+            // on an iPhone 18 Pro Max (iOS 27), where it ended the whole sign-in.
+            return nil
         } catch APIError.httpError(let status, _) {
             switch status {
             case 400, 429: return nil
@@ -136,6 +141,13 @@ final class TraktClient {
             case 418: throw TraktError.deviceCodeDenied
             default: throw TraktError.http(status)
             }
+        }
+    }
+
+    nonisolated private static func isTransient(_ error: APIError) -> Bool {
+        switch error {
+        case .networkError, .timeout, .serverUnreachable: true
+        default: false
         }
     }
 
