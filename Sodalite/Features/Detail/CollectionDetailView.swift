@@ -277,35 +277,46 @@ struct CollectionDetailView: View {
             }
 
             if CollectionMembers.usesGrid(all) {
-                collectionGrid(members, correctsUpMove: correctsUpMove && !offersFilter)
+                collectionGrid(CollectionMembers.gridSections(all, filter: memberFilter),
+                               correctsUpMove: correctsUpMove && !offersFilter)
             } else {
                 collectionList(members, correctsUpMove: correctsUpMove && !offersFilter)
             }
         }
     }
 
-    private func collectionGrid(_ members: [JellyfinItem], correctsUpMove: Bool) -> some View {
-        let style = ArtworkShape.style(for: members, default: .poster)
+    private func collectionGrid(_ sections: [CollectionMembers.GridSection], correctsUpMove: Bool) -> some View {
         let scale = dependencies.appearancePreferences.cardScale
-        return LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: metrics.gridColumnMinimum(for: style, cardScale: scale)),
-                               spacing: metrics.gridSpacing)],
-            spacing: metrics.gridSpacing
-        ) {
-            ForEach(Array(members.enumerated()), id: \.element.id) { index, member in
-                Button { selectedItem = member } label: {
-                    MediaCard(
-                        item: member,
-                        imageURL: dependencies.jellyfinImageService.posterURL(
-                            for: member, maxWidth: ArtworkShape.imageWidth(for: style)),
-                        style: style,
-                        isFocused: focusedItemID == member.id
-                    )
-                }
-                .buttonStyle(GridCardButtonStyle())
-                .focused($focusedItemID, equals: member.id)
-                .onFocusMoveUp(active: correctsUpMove && index == 0) {
-                    playButtonFocused = true
+        return VStack(alignment: .leading, spacing: 32) {
+            ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
+                VStack(alignment: .leading, spacing: 16) {
+                    if let title = section.title {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                    }
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: metrics.gridColumnMinimum(for: section.style, cardScale: scale)),
+                                           spacing: metrics.gridSpacing)],
+                        spacing: metrics.gridSpacing
+                    ) {
+                        ForEach(Array(section.items.enumerated()), id: \.element.id) { index, member in
+                            Button { selectedItem = member } label: {
+                                MediaCard(
+                                    item: member,
+                                    imageURL: dependencies.jellyfinImageService.posterURL(
+                                        for: member, maxWidth: ArtworkShape.imageWidth(for: section.style)),
+                                    style: section.style,
+                                    isFocused: focusedItemID == member.id
+                                )
+                            }
+                            .buttonStyle(GridCardButtonStyle())
+                            .focused($focusedItemID, equals: member.id)
+                            .onFocusMoveUp(active: correctsUpMove && sectionIndex == 0 && index == 0) {
+                                playButtonFocused = true
+                            }
+                        }
+                    }
                 }
             }
         }

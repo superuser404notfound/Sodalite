@@ -134,4 +134,22 @@ struct ServerShapedCollectionsTests {
         #expect(CollectionMembers.isLastPage(received: 49, loaded: 99))
         #expect(CollectionMembers.isLastPage(received: 50, loaded: CollectionMembers.memberCap))
     }
+
+    /// Portrait films and landscape shows in one collection: "All" used to draw every card in the
+    /// shape of whichever kind had more members loaded, so it flipped once the shows' pages landed.
+    @Test func mixedShapesKeepEachKindsOwnShape() {
+        let movies = (0..<3).map { item("m\($0)", type: "Movie", ratio: 0.67) }
+        let shows = (0..<5).map { item("s\($0)", type: "Series", ratio: 1.78) }
+        let sections = CollectionMembers.gridSections(shows + movies, filter: .all)
+        #expect(sections.map(\.id) == ["movies", "shows"])
+        #expect(sections.map(\.style) == [.poster, .landscape])
+        #expect(CollectionMembers.gridSections(shows + movies, filter: .movies).map(\.style) == [.poster])
+    }
+
+    @Test func agreeingShapesStayOneBlockInServerOrder() {
+        let mixed = [item("s", type: "Series", ratio: 0.67), item("m", type: "Movie", ratio: 0.67)]
+        let sections = CollectionMembers.gridSections(mixed, filter: .all)
+        #expect(sections.count == 1)
+        #expect(sections[0].items.map(\.id) == ["s", "m"])
+    }
 }
