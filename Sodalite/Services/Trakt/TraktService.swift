@@ -149,14 +149,16 @@ final class TraktService {
         let generation = syncGeneration
         isSyncing = true
         syncTask = Task { [weak self] in
-            await self?.performSync()
+            await self?.performSync(readFullHistory: force)
             guard let self, self.syncGeneration == generation else { return }
             self.syncTask = nil
             self.isSyncing = false
         }
     }
 
-    private func performSync() async {
+    /// `readFullHistory` (Sync now, a fresh connection) re-reads Trakt's watched history even when
+    /// its stamps did not move, so a sync can always be made to look at everything again.
+    private func performSync(readFullHistory: Bool = false) async {
         guard let client, let profile, let start = session else { return }
         do {
             let activities = try await client.get(.lastActivities, as: TraktLastActivities.self)
@@ -165,7 +167,7 @@ final class TraktService {
             var pushedAny = false
 
             let full = try await syncWatchedIfEnabled(
-                client: client, profile: profile, activities: activities,
+                client: client, profile: profile, activities: activities, readFullHistory: readFullHistory,
                 cursors: &cursors, markedPlayed: &markedPlayed, pushedAny: &pushedAny)
 
             if session?.options.syncRatings == true,
@@ -206,13 +208,13 @@ final class TraktService {
 
     /// Returns the full library when this pass read it, so the rating pass can reuse it.
     private func syncWatchedIfEnabled(
-        client: TraktClient, profile: ProfileKey, activities: TraktLastActivities,
+        client: TraktClient, profile: ProfileKey, activities: TraktLastActivities, readFullHistory: Bool,
         cursors: inout TraktSyncCursors, markedPlayed: inout Int, pushedAny: inout Bool
     ) async throws -> TraktLibrary? {
         guard session?.options.syncWatched == true else { return nil }
         let cached = TraktCacheStore.load(TraktWatchedSnapshot.self, name: TraktCacheStore.watched, profile: profile)
         let isFirst = cached == nil || cursors.lastSyncAt == nil
-        let traktMoved = isFirst
+        let traktMoved = isFirst || readFullHistory
             || activities.movies?.watchedAt != cursors.moviesWatchedAt
             || activities.episodes?.watchedAt != cursors.episodesWatchedAt
 
