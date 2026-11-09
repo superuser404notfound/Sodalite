@@ -18,7 +18,7 @@ struct TraktWatchlistButton: View {
                     do {
                         try await trakt.setOnWatchlist(item, !onList)
                     } catch {
-                        errorText = error.localizedDescription
+                        errorText = ErrorText.user(for: error)
                     }
                 }
             }

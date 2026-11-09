@@ -169,7 +169,7 @@ struct TraktSettingsView: View {
                 try await trakt.completeDeviceSignIn(code)
             } catch is CancellationError {
             } catch {
-                errorText = error.localizedDescription
+                errorText = ErrorText.user(for: error)
             }
             deviceCode = nil
             signInTask = nil

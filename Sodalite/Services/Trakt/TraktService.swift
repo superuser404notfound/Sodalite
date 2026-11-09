@@ -194,7 +194,7 @@ final class TraktService {
         } catch is CancellationError {
         } catch {
             guard profile == self.profile else { return }
-            lastSyncError = error.localizedDescription
+            lastSyncError = ErrorText.user(for: error)
             LogTap.shared.note("[Trakt] sync failed: \(error)")
         }
     }
