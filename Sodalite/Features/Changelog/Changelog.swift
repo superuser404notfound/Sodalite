@@ -118,12 +118,6 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .improve,
-                    "changelog.1_1_0.wideAspect.title",
-                    "changelog.1_1_0.wideAspect.body",
-                    icon: "appletv"
-                ),
-                ChangelogHighlight(
-                    .improve,
                     "changelog.1_1_0.signIn.title",
                     "changelog.1_1_0.signIn.body",
                     icon: "person.badge.key"

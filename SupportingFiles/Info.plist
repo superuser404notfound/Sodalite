@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AVSupportsExtendedAspectRatiosForContentPlayback</key>
-	<true/>
 	<!-- One key, and it has to stay alone. NSAllowsArbitraryLoads is IGNORED the moment any of
 	     NSAllowsLocalNetworking / NSAllowsArbitraryLoadsInWebContent / NSAllowsArbitraryLoadsInMedia
 	     sits beside it (iOS and tvOS 10 and later), and the plain default takes over instead:
@@ -23,6 +21,11 @@
 	<string>Sodalite reaches Jellyfin and AetherEngine media servers on your local network. Required for direct play of media from a server in your home.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Sodalite#232: lets AVKit use the full wide area when the Apple TV is set to a wide
+	     system aspect ratio (constant-image-height / anamorphic projectors) instead of a centered
+	     16:9 region. Undocumented key, no API or entitlement behind it; no effect on iOS. -->
+	<key>AVSupportsExtendedAspectRatiosForContentPlayback</key>
+	<true/>
 	<!-- Shared by both app targets; this file wins over any INFOPLIST_KEY_UIBackgroundModes.
 	     audio: tvOS otherwise kills the audio session on backgrounding and pauses playback
 	     the moment the user leaves the app, even with a live PiP window.
