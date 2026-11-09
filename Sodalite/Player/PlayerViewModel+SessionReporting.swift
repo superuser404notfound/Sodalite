@@ -45,10 +45,23 @@ extension PlayerViewModel {
         )
     }
 
+    /// Trakt sees the same session the server does: start, pause and stop, never live TV.
+    func traktScrobble(_ action: TraktEndpoint.ScrobbleAction, positionTicks: Int64) {
+        guard !isLiveSession else { return }
+        if action == .stop {
+            guard traktScrobbleState?.itemID == item.id else { return }
+            traktScrobbleState = nil
+        } else {
+            traktScrobbleState = (item.id, action == .start)
+        }
+        DependencyContainer.shared.trakt.scrobble(action, item: item, positionTicks: positionTicks)
+    }
+
     func reportStart() async {
         guard !hasReportedStart else { return }
         hasReportedStart = true
         let ticks = currentPositionTicks
+        traktScrobble(.start, positionTicks: ticks)
         let report = PlaybackStartReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,
@@ -75,6 +88,9 @@ extension PlayerViewModel {
         let ticks = currentPositionTicks
         guard ticks > 0 else { return } // Don't report position 0
         recordLocalProgress(positionTicks: ticks, played: false)
+        if hasReportedStart, let state = traktScrobbleState, state.itemID == item.id, state.playing != isPlaying {
+            traktScrobble(isPlaying ? .start : .pause, positionTicks: ticks)
+        }
         let report = PlaybackProgressReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,
@@ -101,6 +117,7 @@ extension PlayerViewModel {
         // liveStreamID closes a dead tuner on retune (belt-and-braces with
         // the explicit closeLiveStream).
         let ticks = positionTicks ?? completionAwarePositionTicks
+        traktScrobble(.stop, positionTicks: ticks)
         let report = PlaybackStopReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,

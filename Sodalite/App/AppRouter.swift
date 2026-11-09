@@ -174,6 +174,7 @@ struct AppRouter: View {
                 #if os(iOS)
                 await recheckLocalNetworkAccess()
                 #endif
+                dependencies.trakt.sync()
                 await refreshPending()
                 await sweepOrphanedLiveStreams()
                 await dependencies.cloudSync?.fetchNow()
@@ -181,6 +182,11 @@ struct AppRouter: View {
                 dependencies.scheduleRouteResolve()
                 #endif
             }
+        }
+        // Trakt follows the active profile; a connected one syncs right away (rate-limited inside).
+        .task(id: appState.profileKey) {
+            dependencies.trakt.activate(profile: appState.profileKey)
+            dependencies.trakt.sync()
         }
         .task(id: appState.isSeerrConnected) {
             if appState.isSeerrConnected {

@@ -780,6 +780,8 @@ final class PlayerViewModel {
     /// a local download record, because what it would say may be older than what the server knows.
     var progressReportsHeldForSuspension = false
     var hasReportedStart = false
+    /// The last play/pause state sent to Trakt, keyed by item so an auto-advance starts clean.
+    var traktScrobbleState: (itemID: String, playing: Bool)?
     var hasStartedPlaying = false
     /// Resume position, used as minimum for progress reports so Jellyfin doesn't reset progress on early stop.
     var resumePositionTicks: Int64 = 0
@@ -1707,6 +1709,7 @@ final class PlayerViewModel {
         // No start went out (Back before PlaybackInfo answered, or a load that failed), so the server
         // has no session to close, and a stop here would write position 0 over the resume point.
         let sendsStopReport = hasReportedStart && reportsPosition
+        if sendsStopReport { traktScrobble(.stop, positionTicks: finalTicks) }
         let reportWork: @Sendable () async -> Void = {
             if sendsStopReport {
                 do {

@@ -107,6 +107,10 @@ final class DetailViewModel {
         playbackInfoPrefetchTask?.cancel()
     }
 
+    /// Set by the detail view when Trakt is connected, so watched and rating changes reach Trakt
+    /// the moment they are made.
+    @ObservationIgnored var trakt: TraktService?
+
     init(
         item: JellyfinItem,
         itemService: JellyfinItemServiceProtocol,
@@ -654,6 +658,7 @@ final class DetailViewModel {
         defer { isWritingRating = false }
         do {
             try await itemService.setRating(userID: userID, itemID: item.id, rating: newValue)
+            trakt?.ratingChanged(for: item, rating: newValue)
         } catch {
             rating = oldValue
         }
@@ -672,6 +677,7 @@ final class DetailViewModel {
         ratingOverrides[episode.id] = .some(newValue)
         do {
             try await itemService.setRating(userID: userID, itemID: episode.id, rating: newValue)
+            trakt?.ratingChanged(for: episode, rating: newValue)
         } catch {
             ratingOverrides[episode.id] = oldValue
         }
@@ -718,6 +724,7 @@ final class DetailViewModel {
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: isPlayed)
+            trakt?.playedChanged(for: item, played: isPlayed)
             NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
             // Marking watched drops the item out of Resume and advances Next Up, so both
             // shelf sections are stale.
@@ -735,6 +742,7 @@ final class DetailViewModel {
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: episode.id, isPlayed: isPlayed)
+            trakt?.playedChanged(for: episode, played: isPlayed)
             NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
             // Marking watched drops the item out of Resume and advances Next Up, so both
             // shelf sections are stale.
@@ -757,6 +765,9 @@ final class DetailViewModel {
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: seasonID, isPlayed: isPlayed)
+            if item.type == .series, let number = seasons.first(where: { $0.id == seasonID })?.indexNumber {
+                trakt?.playedChanged(for: item, played: isPlayed, seasonNumber: number)
+            }
             NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
             // Marking watched drops the item out of Resume and advances Next Up, so both
             // shelf sections are stale.

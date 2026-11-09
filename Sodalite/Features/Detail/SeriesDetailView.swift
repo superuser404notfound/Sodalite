@@ -482,6 +482,7 @@ struct SeriesDetailView: View {
                     initialEpisode: initialEpisode,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
+                viewModel?.trakt = dependencies.trakt
                 Task {
                     await viewModel?.loadFullDetail()
                     updateBackdropURL()

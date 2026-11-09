@@ -301,6 +301,7 @@ struct MovieDetailView: View {
                     ratingsService: ratingsService,
                     streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
+                viewModel?.trakt = dependencies.trakt
                 Task { await viewModel?.loadFullDetail() }
             }
             // Open the animation gate once the cover's present transition has settled.
