@@ -88,6 +88,7 @@
 		085AD01CB829F53AB5C4B22A /* ASSRenderCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0AF18F7475A04D2A6EF1A2 /* ASSRenderCoordinator.swift */; };
 		0874CE7220452EB1441192D0 /* CollectionPlaylistHomeRowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8717200624F1E078FA61D8F /* CollectionPlaylistHomeRowTests.swift */; };
 		088B3263C65332EE39D5EECB /* ServerDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FD1A34E31C2A28C00C1939 /* ServerDiscoveryViewModel.swift */; };
+		0903AB8DB5A330FBDAB9F16D /* TraktSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA1B2AA1C02BF1A0BBA1B1B /* TraktSettingsView.swift */; };
 		090B21D21CEAB28727CA1AD6 /* PlaybackPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57DC6498B2FB8855EAD8A759 /* PlaybackPreferences.swift */; };
 		092532C8CB08BDDCEC574C53 /* DeletedActiveProfileReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9369DC581B31CDF29ACEFE58 /* DeletedActiveProfileReconcileTests.swift */; };
 		0945B38B940B620593F6D76C /* BackgroundMotionPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77633DFD5621FD5A146A1671 /* BackgroundMotionPolicyTests.swift */; };
@@ -205,6 +206,7 @@
 		15C34E99D196187732782D01 /* PlayerLockProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A49C90E145510D9212683F8 /* PlayerLockProgress.swift */; };
 		15D1DA1FC18AFFBC76A9D860 /* LicenseText-LibTrueHD.txt in Resources */ = {isa = PBXBuildFile; fileRef = CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */; };
 		15DA534F27F4A0737375F772 /* TranscodeCodecProbeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEED00772BA6037D8EF6217F /* TranscodeCodecProbeTests.swift */; };
+		15F5272E395A6871F3F19857 /* TraktSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA1B2AA1C02BF1A0BBA1B1B /* TraktSettingsView.swift */; };
 		1608EF17D783B60904119316 /* StudioFilterCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040EDF3725D5CC852770F1CD /* StudioFilterCheck.swift */; };
 		16B4AAE7D361E42944720241 /* MultiviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42649A3E73297CE08ABDE533 /* MultiviewSession.swift */; };
 		16B55B3153857D934BF9E032 /* SeerrHorizontalMediaRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62519BD37E62A4F9FF64DFC /* SeerrHorizontalMediaRow.swift */; };
@@ -2014,6 +2016,7 @@
 		DE473F3C1A19890281B50D33 /* TopShelfMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E81B01036A45B8445216F6 /* TopShelfMerger.swift */; };
 		DE4F47C9BC7B2B2BE507CA00 /* VersionDistinguishingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C873364734DF9D2D7E3465B /* VersionDistinguishingLabel.swift */; };
 		DE89D7457DAB7E0544EB7E34 /* SystemCaptionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4882D1BC8E4F94975349FA /* SystemCaptionWindow.swift */; };
+		DE93068E6BBCC5A6AAEBD6EE /* TraktSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA1B2AA1C02BF1A0BBA1B1B /* TraktSettingsView.swift */; };
 		DECE0A208F5A0E446B4BDBAE /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0CF7D73882EA9DC56407E8 /* HomeViewModel.swift */; };
 		DED51D4C5FF74FB230108922 /* ParentalGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64582886C2B6ACD705C8EA6C /* ParentalGate.swift */; };
 		DEDBB9645EFF008DB4186C02 /* ProfileSyncPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6126C121E572C4D0C18004B /* ProfileSyncPayloads.swift */; };
@@ -2900,6 +2903,7 @@
 		7B2B1DAF1660B5B86BAF6387 /* ServerReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerReachabilityTests.swift; sourceTree = "<group>"; };
 		7B64F1EE31169C532CA8B766 /* TopShelfCachePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfCachePolicyTests.swift; sourceTree = "<group>"; };
 		7B9CC7718B334E4C3117958A /* SourceWarmupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceWarmupTests.swift; sourceTree = "<group>"; };
+		7BA1B2AA1C02BF1A0BBA1B1B /* TraktSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraktSettingsView.swift; sourceTree = "<group>"; };
 		7BC0FFB550FE99D21023289B /* PlayerThemeBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerThemeBoundaryTests.swift; sourceTree = "<group>"; };
 		7BDEC2C2F2CA5E9291CBB42D /* JellyfinServer+DualURLPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JellyfinServer+DualURLPrompt.swift"; sourceTree = "<group>"; };
 		7BEE370557AF1BA212E3AC52 /* CastMemberMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastMemberMergeTests.swift; sourceTree = "<group>"; };
@@ -4835,6 +4839,7 @@
 				A41CE6DB37083009351960A5 /* StreamingQuality.swift */,
 				43004940EBB07122F744C1E8 /* TabVisibilitySettingsView.swift */,
 				247F3F4BFD1A383FB168B6F6 /* TrackSelectionMemory.swift */,
+				7BA1B2AA1C02BF1A0BBA1B1B /* TraktSettingsView.swift */,
 				4C63B5B17D88C0CDAC53F678 /* TranscodeResolutionEstimate.swift */,
 			);
 			path = Settings;
@@ -5877,6 +5882,7 @@
 				30B5DC366599ED30F2CBECA9 /* TraktModels.swift in Sources */,
 				3E686433BEE69F25F2A28FD7 /* TraktService.swift in Sources */,
 				AFDEBE7962AEBD416C638B3B /* TraktSession.swift in Sources */,
+				DE93068E6BBCC5A6AAEBD6EE /* TraktSettingsView.swift in Sources */,
 				D845DF3DE7A9921634007446 /* TraktSyncPlan.swift in Sources */,
 				1BEA1B9A7AAB26FE9691AFCB /* TranscodeResolutionEstimate.swift in Sources */,
 				899FD5048BB5604DC04AC9E0 /* TransportAutoHide.swift in Sources */,
@@ -6491,6 +6497,7 @@
 				E54888BE3A9B52400AD5272A /* TraktModels.swift in Sources */,
 				A20A41BDAA138B0A8E749316 /* TraktService.swift in Sources */,
 				1F55BFE3E49471A9E784C923 /* TraktSession.swift in Sources */,
+				15F5272E395A6871F3F19857 /* TraktSettingsView.swift in Sources */,
 				202BEF4BAE2945CEC8267157 /* TraktSyncPlan.swift in Sources */,
 				3DD1F18E764ACB83F26EF355 /* TranscodeResolutionEstimate.swift in Sources */,
 				7873199DF79473ECE9760BAA /* TransportAutoHide.swift in Sources */,
@@ -7563,6 +7570,7 @@
 				C7C634243B7FDC0FA1811B7C /* TraktModels.swift in Sources */,
 				8413CCEC9AC0EC96BD7BEF02 /* TraktService.swift in Sources */,
 				63473D0C3B7060849FFF4938 /* TraktSession.swift in Sources */,
+				0903AB8DB5A330FBDAB9F16D /* TraktSettingsView.swift in Sources */,
 				B2051C4F25C4735B37B13879 /* TraktSyncPlan.swift in Sources */,
 				079F3D34FD199B47813E924E /* TranscodeResolutionEstimate.swift in Sources */,
 				CFBAC0A02EBED9874292A561 /* TransportAutoHide.swift in Sources */,

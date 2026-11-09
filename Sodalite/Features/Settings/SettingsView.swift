@@ -229,6 +229,18 @@ struct SettingsView: View {
                 SeerrSettingsView()
             }
 
+            if dependencies.trakt.isAvailable {
+                GatedSettingsTile(
+                    icon: "checkmark.arrow.trianglehead.counterclockwise",
+                    title: "settings.trakt.title",
+                    subtitle: traktSubtitle,
+                    reason: .openParentalSettings,
+                    requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+                ) {
+                    TraktSettingsView()
+                }
+            }
+
             GatedSettingsTile(
                 icon: "icloud",
                 title: "settings.cloudSync.title",
@@ -355,6 +367,10 @@ struct SettingsView: View {
                 CachedDataView()
             }
         }
+    }
+
+    private var traktSubtitle: LocalizedStringKey {
+        dependencies.trakt.isConnected ? "settings.trakt.subtitle.connected" : "settings.trakt.subtitle.notConnected"
     }
 
     private var seerrSubtitle: LocalizedStringKey {
