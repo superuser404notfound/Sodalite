@@ -85,6 +85,34 @@ struct TraktSyncPlanTests {
         #expect(second.push.isEmpty)
     }
 
+    @Test func aPushTraktDidNotTakeIsNotSentAgainAfterARebuild() throws {
+        var snapshot = TraktWatchedSnapshot()
+        let first = TraktSyncPlan.watched(movies: [movie("a", tmdb: 1, played: true, at: now)], series: [],
+                                          episodes: [], trakt: snapshot, pull: nil, pushSince: nil)
+        snapshot.record(first.push)
+        // The next sync rebuilds from Trakt, which never listed the movie, and carries `pushed` over.
+        var rebuilt = TraktWatchedSnapshot(movies: [], shows: [])
+        rebuilt.pushed = snapshot.pushed
+        let second = TraktSyncPlan.watched(movies: [movie("a", tmdb: 1, played: true, at: now)], series: [],
+                                           episodes: [], trakt: rebuilt, pull: nil, pushSince: nil)
+        #expect(second.push.isEmpty)
+    }
+
+    @Test func unwatchingForgetsThePush() {
+        var snapshot = TraktWatchedSnapshot()
+        var body = TraktSyncBody()
+        body.movies = [.init(ids: TraktIDs(tmdb: 1))]
+        snapshot.record(body)
+        snapshot.forget(body)
+        #expect(!snapshot.contains(movie: TraktIDs(tmdb: 1)))
+    }
+
+    @Test func aSnapshotCachedBeforePushedExistedStillLoads() throws {
+        let old = #"{"movies":["tmdb:1"],"episodes":[]}"#
+        let snapshot = try JSONDecoder().decode(TraktWatchedSnapshot.self, from: Data(old.utf8))
+        #expect(snapshot.contains(movie: TraktIDs(tmdb: 1)))
+    }
+
     @Test func ratingsFillOnlyTheEmptySide() throws {
         let rated = try decode([TraktRatedItem].self, #"""
         [{"rating":8,"movie":{"ids":{"tmdb":1}}},{"rating":3,"movie":{"ids":{"tmdb":2}}}]

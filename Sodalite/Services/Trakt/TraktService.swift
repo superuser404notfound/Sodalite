@@ -223,6 +223,7 @@ final class TraktService {
             async let shows = client.get(.watchedShows, as: [TraktWatchedShow].self)
             let (watchedMovies, watchedShows) = try await (movies, shows)
             snapshot = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows)
+            snapshot.pushed = cached?.pushed ?? []
             // First sync: everything. After that: what was watched on Trakt since the last one, with
             // a day of slack for clocks and late scrobbles.
             let since = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-24 * 60 * 60)
@@ -240,9 +241,10 @@ final class TraktService {
         markedPlayed = await markPlayed(plan.markPlayed, userID: profile.userID, profile: profile)
         for batch in TraktSyncPlan.batches(plan.push) {
             guard profile == self.profile else { throw CancellationError() }
-            try await client.send(.addHistory(batch))
+            let data = try await client.send(.addHistory(batch))
             snapshot.record(batch)
             pushedAny = true
+            Self.logHistoryResult(data, sent: batch)
         }
         TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
         cursors.moviesWatchedAt = activities.movies?.watchedAt
@@ -304,6 +306,23 @@ final class TraktService {
         self.lists = snapshot
         TraktCacheStore.save(snapshot, name: TraktCacheStore.lists, profile: profile)
         NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
+    }
+
+    private static func logHistoryResult(_ data: Data, sent: TraktSyncBody) {
+        let sentEpisodes = sent.shows.reduce(0) { $0 + ($1.seasons ?? []).reduce(0) { $0 + ($1.episodes?.count ?? 0) } }
+        guard let result = try? TraktClient.makeDecoder().decode(TraktHistoryResult.self, from: data) else {
+            LogTap.shared.note("[Trakt] history push: sent \(sent.movies.count) movies, \(sentEpisodes) episodes, answer unreadable")
+            return
+        }
+        let missingShows = (result.notFound?.shows ?? []).map { show in
+            [show.title, TraktKey.keys(show.ids).joined(separator: ",")].compactMap { $0 }.joined(separator: " ")
+        }
+        LogTap.shared.note(
+            "[Trakt] history push: sent \(sent.movies.count) movies, \(sentEpisodes) episodes; "
+            + "added \(result.added?.movies ?? 0) movies, \(result.added?.episodes ?? 0) episodes; "
+            + "not found \(result.notFound?.movies?.count ?? 0) movies, \(missingShows.count) shows "
+            + "\(missingShows.prefix(5)), \(result.notFound?.episodes?.count ?? 0) episodes"
+        )
     }
 
     nonisolated private static func latest(_ dates: Date?...) -> Date? {
@@ -368,9 +387,8 @@ final class TraktService {
             do {
                 try await client.send(played ? .addHistory(body) : .removeHistory(body))
                 if let profile, var snapshot = TraktCacheStore.load(TraktWatchedSnapshot.self,
-                                                                    name: TraktCacheStore.watched, profile: profile),
-                   played {
-                    snapshot.record(body)
+                                                                    name: TraktCacheStore.watched, profile: profile) {
+                    if played { snapshot.record(body) } else { snapshot.forget(body) }
                     TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
                 }
             } catch {

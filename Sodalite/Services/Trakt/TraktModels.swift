@@ -141,6 +141,21 @@ nonisolated struct TraktWatchedShow: Decodable, Sendable {
     let seasons: [Season]?
 }
 
+/// `/sync/history` answers with what it took and what it could not match.
+nonisolated struct TraktHistoryResult: Decodable, Sendable {
+    struct Counts: Decodable, Sendable {
+        let movies: Int?
+        let episodes: Int?
+    }
+    struct NotFound: Decodable, Sendable {
+        let movies: [TraktMovie]?
+        let shows: [TraktShow]?
+        let episodes: [TraktEpisode]?
+    }
+    let added: Counts?
+    let notFound: NotFound?
+}
+
 nonisolated struct TraktRatedItem: Decodable, Sendable {
     let rating: Int
     let movie: TraktMovie?

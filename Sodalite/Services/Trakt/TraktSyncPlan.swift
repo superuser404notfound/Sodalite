@@ -46,8 +46,20 @@ nonisolated enum TraktKey {
 nonisolated struct TraktWatchedSnapshot: Codable, Sendable, Equatable {
     var movies: Set<String> = []
     var episodes: Set<String> = []
+    /// Everything Sodalite sent to Trakt's history, kept across rebuilds. Trakt does not take every
+    /// entry (an episode its numbering does not have), and without this the sync would send the
+    /// same rejected entries again on every run. Measured on the first device test: every sync
+    /// reported a push.
+    var pushed: Set<String> = []
 
     init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        movies = try c.decodeIfPresent(Set<String>.self, forKey: .movies) ?? []
+        episodes = try c.decodeIfPresent(Set<String>.self, forKey: .episodes) ?? []
+        pushed = try c.decodeIfPresent(Set<String>.self, forKey: .pushed) ?? []
+    }
 
     /// `since` keeps only watches newer than it: the pull side uses that, so a title someone marked
     /// unwatched in Jellyfin is not marked watched again by an old Trakt entry on the next sync.
@@ -72,27 +84,47 @@ nonisolated struct TraktWatchedSnapshot: Codable, Sendable, Equatable {
     }
 
     func contains(movie ids: TraktIDs) -> Bool {
-        TraktKey.keys(ids).contains { movies.contains($0) }
+        TraktKey.keys(ids).contains { movies.contains($0) || pushed.contains("m|" + $0) }
     }
 
     func contains(episodeOf seriesIDs: TraktIDs, season: Int, number: Int) -> Bool {
         TraktKey.keys(seriesIDs).contains {
-            episodes.contains(TraktKey.episode(showKey: $0, season: season, number: number))
+            let key = TraktKey.episode(showKey: $0, season: season, number: number)
+            return episodes.contains(key) || pushed.contains("e|" + key)
         }
     }
 
-    mutating func record(_ body: TraktSyncBody) {
-        for movie in body.movies { movies.formUnion(TraktKey.keys(movie.ids)) }
+    /// The movie and episode keys a body addresses. A season or show without episodes addresses
+    /// nothing here: those are only ever removals.
+    private static func keys(of body: TraktSyncBody) -> (movies: [String], episodes: [String]) {
+        let movieKeys = body.movies.flatMap { TraktKey.keys($0.ids) }
+        var episodeKeys: [String] = []
         for show in body.shows {
             for showKey in TraktKey.keys(show.ids) {
                 for season in show.seasons ?? [] {
                     for episode in season.episodes ?? [] {
-                        episodes.insert(TraktKey.episode(showKey: showKey, season: season.number,
-                                                         number: episode.number))
+                        episodeKeys.append(TraktKey.episode(showKey: showKey, season: season.number,
+                                                            number: episode.number))
                     }
                 }
             }
         }
+        return (movieKeys, episodeKeys)
+    }
+
+    mutating func record(_ body: TraktSyncBody) {
+        let (movieKeys, episodeKeys) = Self.keys(of: body)
+        movies.formUnion(movieKeys)
+        episodes.formUnion(episodeKeys)
+        pushed.formUnion(movieKeys.map { "m|" + $0 } + episodeKeys.map { "e|" + $0 })
+    }
+
+    /// The viewer unwatched these in Sodalite, so a later watch must be sent again.
+    mutating func forget(_ body: TraktSyncBody) {
+        let (movieKeys, episodeKeys) = Self.keys(of: body)
+        movies.subtract(movieKeys)
+        episodes.subtract(episodeKeys)
+        pushed.subtract(movieKeys.map { "m|" + $0 } + episodeKeys.map { "e|" + $0 })
     }
 }
 
