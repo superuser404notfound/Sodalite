@@ -122,6 +122,12 @@ struct SeriesDetailView: View {
     @State private var pendingEpisodeFocus: String?
     /// The player return sets this alongside pendingEpisodeFocus: the row jumps instead of animating, because the focus write lands mid-animation and the focus engine's own scroll then stops it short of the card.
     @State private var pendingEpisodeFocusIsReturn = false
+    /// Sodalite#230: the finished episode and the one the page moved on to. The player return and the
+    /// advance arrive in either order, and whichever comes second aims the row at the successor.
+    @State private var episodeAdvance: (from: String, to: String)?
+    /// The card the last player return aimed focus at, so an advance that lands after it knows the
+    /// viewer came back through the row and not through Play.
+    @State private var returnFocusEpisodeID: String?
     /// Bridge episode→season synopsis. Plain @State for the same reason as pendingEpisodeFocus: the box owns its own @FocusState and defers the write itself.
     @State private var pendingSeasonOverviewFocus = false
     /// Which card the episode row aims at, so a return from above lands there instead of scrolling the row back to the start. Fed by the way OUT of the row and by the player's in-session item switches; see EpisodeRowAim for why it is never fed on the way in.
@@ -177,6 +183,8 @@ struct SeriesDetailView: View {
         // Ordinary play is never a shuffle queue; drop any queue a prior
         // shuffle launch left behind so the launcher reuses single-item play.
         playQueue = []
+        episodeAdvance = nil
+        returnFocusEpisodeID = nil
         playItem = episode
         playFromBeginning = fromBeginning
         playOriginatedFromPlayButton = fromPlayButton
@@ -345,6 +353,9 @@ struct SeriesDetailView: View {
                         playButtonFocused = true
                     }
                 } else if let ep = playItem {
+                    // Sodalite#230: the stop already moved the page past this episode, so the card
+                    // to come back to is the successor, the one Play now starts.
+                    let targetID = episodeAdvance.flatMap { $0.from == ep.id ? $0.to : nil } ?? ep.id
                     // Scroll back to the episode row first, else modal-dismiss restoration + the nil-flicker transition leave the outer ScrollView pinned at the top.
                     if let proxy = episodeRowScrollProxy {
                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -358,10 +369,11 @@ struct SeriesDetailView: View {
                     // The nil write first is the two-step that forces a real transition; its own
                     // effect on the aim is overwritten on the line below on purpose.
                     focusedEpisodeID = nil
-                    episodeAim.sessionMoved(to: ep.id)
+                    episodeAim.sessionMoved(to: targetID)
+                    returnFocusEpisodeID = targetID
                     pendingEpisodeFocusIsReturn = true
-                    pendingEpisodeFocus = ep.id
-                    let target = ep.id
+                    pendingEpisodeFocus = targetID
+                    let target = targetID
                     deferOnMain(by: 0.6) {
                         LogTap.shared.note("[EpisodeRow] player_return target=\(target) focused=\(focusedEpisodeID ?? "nil")")
                     }
@@ -432,6 +444,9 @@ struct SeriesDetailView: View {
                 // list back over the one loaded here.
                 if let seasonID = successor?.seasonId, viewModel?.selectedSeasonID != seasonID {
                     await viewModel?.loadEpisodes(seasonID: seasonID)
+                }
+                if let finished, let successor {
+                    focusSuccessorCard(finished: finished, successor: successor)
                 }
             }
         }
@@ -1322,7 +1337,23 @@ struct SeriesDetailView: View {
               selectedEpisode?.id == finished.id else { return nil }
         withAnimation(.easeInOut(duration: 0.3)) { selectedEpisode = next }
         episodeAim.sessionMoved(to: next.id)
+        episodeAdvance = (from: finished.id, to: next.id)
         return next
+    }
+
+    /// The player return already aimed focus at the finished episode's card before the stop moved the
+    /// page on, so the ring and Play named the successor while focus sat on the old card or, once the
+    /// row rebuilt under it, on nothing at all. Re-aim at the successor, after a season rollover has
+    /// loaded its row. A return through Play keeps Play, which now starts the successor anyway.
+    private func focusSuccessorCard(finished: JellyfinItem, successor: JellyfinItem) {
+        guard !showPlayer,
+              returnFocusEpisodeID == finished.id || returnFocusEpisodeID == successor.id,
+              focusedEpisodeID == nil || focusedEpisodeID == finished.id,
+              viewModel?.episodes.contains(where: { $0.id == successor.id }) == true else { return }
+        returnFocusEpisodeID = successor.id
+        LogTap.shared.note("[EpisodeRow] advance_refocus from=\(finished.id) to=\(successor.id)")
+        pendingEpisodeFocusIsReturn = true
+        pendingEpisodeFocus = successor.id
     }
 
     /// Single source of truth for which episode the play button acts on (playTitle/subtitle/progress + action all read this). Order: tapped selectedEpisode, currentEpisodeID match, getNextUp (lands before the full list), first loaded episode.
