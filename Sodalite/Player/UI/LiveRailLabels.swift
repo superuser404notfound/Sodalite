@@ -40,7 +40,8 @@ struct LiveRailLabels: View {
                 // beside it already says, and a clock sliding out from under its own knob reads worse
                 // than one that steps aside. The margin is a share of the width, so the phone hides it
                 // sooner than the television does, which is the right answer on a 350pt rail.
-                if let playheadClock, !clockCollides(width: width) {
+                if let playheadClock,
+                   Self.showsPlayheadClock(progress: viewModel.liveDisplayedProgress, width: width) {
                     HStack(spacing: 8) {
                         if let readout = viewModel.seekReadout, readout.direction == -1 {
                             SeekReadoutView(readout: readout, font: font)
@@ -63,13 +64,19 @@ struct LiveRailLabels: View {
     }
 
     private func knobX(_ width: CGFloat) -> CGFloat {
-        max(0, min(width, width * CGFloat(viewModel.liveDisplayedProgress)))
+        Self.knobX(progress: viewModel.liveDisplayedProgress, width: width)
     }
 
-    private func clockCollides(width: CGFloat) -> Bool {
+    private static func knobX(progress: Float, width: CGFloat) -> CGFloat {
+        max(0, min(width, width * CGFloat(progress)))
+    }
+
+    /// Whether the clock under the knob is drawn, or has stepped aside near either end of the rail.
+    /// The tvOS position slot reads this too (Sodalite#233), so the two never show the same time.
+    static func showsPlayheadClock(progress: Float, width: CGFloat) -> Bool {
         let margin = max(60, width * 0.22)
-        let x = knobX(width)
-        return x < margin || x > width - margin
+        let x = knobX(progress: progress, width: width)
+        return x >= margin && x <= width - margin
     }
 
     /// The wall clock of the frame on screen, or of the position a scrub is pointing at.

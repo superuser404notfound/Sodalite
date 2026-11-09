@@ -245,6 +245,19 @@ struct LiveTransportLabelTests {
             isAtLiveEdge: false, behindLiveSeconds: 30, playheadWallClock: at) == "-0:30")
     }
 
+    /// Sodalite#233: the tvOS slot leaves the time to the knob clock and takes it back where that
+    /// clock steps aside, so both must read one rule.
+    @Test("the knob clock steps aside within 22% of either end")
+    func theKnobClockStepsAsideNearTheEnds() {
+        let tv: CGFloat = 1680
+        #expect(LiveRailLabels.showsPlayheadClock(progress: 0.5, width: tv))
+        #expect(LiveRailLabels.showsPlayheadClock(progress: 0.25, width: tv))
+        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.1, width: tv))
+        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.9, width: tv))
+        // Before the rail has been measured, the slot keeps the time.
+        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.5, width: 0))
+    }
+
     @Test("both bars format a wall clock the same way")
     func oneClockFormat() {
         let at = Date(timeIntervalSinceReferenceDate: 800_000_000)

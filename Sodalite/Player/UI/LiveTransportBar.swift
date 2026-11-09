@@ -15,6 +15,7 @@ import SwiftUI
 /// the viewer holds still. What the session actually holds is drawn as the available region.
 struct LiveTransportBar: View {
     @Bindable var viewModel: PlayerViewModel
+    @State private var railWidth: CGFloat = 0
 
     private var returnToLiveFocused: Bool {
         viewModel.controlsFocus == .returnToLiveButton
@@ -122,11 +123,13 @@ struct LiveTransportBar: View {
                             .font(.callout)
                     }
 
-                    Text(positionLabel)
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.7))
+                    if let positionLabel {
+                        Text(positionLabel)
+                            .font(.callout)
+                            .fontWeight(.medium)
+                            .monospacedDigit()
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
                 }
                 .padding(.vertical, 8)
 
@@ -155,6 +158,7 @@ struct LiveTransportBar: View {
                 scrubber
                 VStack(spacing: 4) {
                     LiveRailLabels(viewModel: viewModel)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { railWidth = $0 }
                     LiveNextUpLine(viewModel: viewModel)
                 }
             }
@@ -371,8 +375,17 @@ struct LiveTransportBar: View {
         viewModel.liveRail
     }
 
-    private var positionLabel: String {
-        viewModel.livePositionLabel
+    /// Sodalite#233: at the edge the slot prints the time only while the clock under the knob has
+    /// stepped aside, otherwise the two say the same thing. tvOS only: here the slot leads a row that
+    /// continues with a spacer, so an empty one moves nothing, while the phone centres its play
+    /// button against it.
+    private var positionLabel: String? {
+        if viewModel.isAtLiveEdge, viewModel.liveRailBlock.seconds > 0,
+           LiveRailLabels.showsPlayheadClock(progress: viewModel.liveDisplayedProgress,
+                                             width: railWidth) {
+            return nil
+        }
+        return viewModel.livePositionLabel
     }
 
     private func clamp(_ fraction: CGFloat, _ width: CGFloat) -> CGFloat {
