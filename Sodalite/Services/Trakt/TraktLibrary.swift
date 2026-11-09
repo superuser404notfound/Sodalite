@@ -60,7 +60,8 @@ struct TraktLibrary {
             guard let ids = TraktIDs(item: item) else { return nil }
             return TraktLocalMovie(itemID: item.id, ids: ids, played: item.userData?.played == true,
                                    lastPlayed: item.userData?.lastPlayedDate.flatMap(TraktDate.parse),
-                                   rating: item.userData?.rating)
+                                   rating: item.userData?.rating, runTimeTicks: item.runTimeTicks,
+                                   positionTicks: item.userData?.playbackPositionTicks)
         }
         library.series = series.compactMap { item in
             guard let ids = TraktIDs(item: item) else { return nil }
@@ -72,7 +73,9 @@ struct TraktLibrary {
             else { return nil }
             return TraktLocalEpisode(itemID: item.id, seriesID: seriesID, season: season, number: number,
                                      played: item.userData?.played == true,
-                                     lastPlayed: item.userData?.lastPlayedDate.flatMap(TraktDate.parse))
+                                     lastPlayed: item.userData?.lastPlayedDate.flatMap(TraktDate.parse),
+                                     rating: item.userData?.rating, runTimeTicks: item.runTimeTicks,
+                                     positionTicks: item.userData?.playbackPositionTicks)
         }
         // The full movie list is only in hand when not filtered; the index wants every movie.
         let index = Index(items: series + (playedOnly ? [] : movies))

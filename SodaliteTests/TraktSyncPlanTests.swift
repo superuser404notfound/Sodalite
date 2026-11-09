@@ -125,6 +125,42 @@ struct TraktSyncPlanTests {
         #expect(plan.push.movies.map(\.rating) == [7])
     }
 
+    @Test func episodeRatingsFillTheEmptySide() throws {
+        let rated = try decode([TraktRatedItem].self, #"""
+        [{"rating":9,"show":{"ids":{"tvdb":77}},"episode":{"season":1,"number":1}}]
+        """#)
+        let series = [TraktLocalSeries(itemID: "s", ids: TraktIDs(tvdb: 77), rating: nil)]
+        let episodes = [
+            TraktLocalEpisode(itemID: "e1", seriesID: "s", season: 1, number: 1, played: true, lastPlayed: nil),
+            TraktLocalEpisode(itemID: "e2", seriesID: "s", season: 1, number: 2, played: true, lastPlayed: nil, rating: 4),
+        ]
+        let plan = TraktSyncPlan.ratings(movies: [], series: series, episodes: episodes, traktRatings: rated)
+        #expect(plan.setLocal == ["e1": 9])
+        #expect(plan.push.shows.first?.seasons?.first?.episodes?.map(\.rating) == [4])
+    }
+
+    @Test func aNewerPauseElsewhereBecomesTheResumePosition() throws {
+        let paused = try decode([TraktPlaybackItem].self, #"""
+        [{"progress":50,"paused_at":"2027-01-10T20:00:00.000Z","movie":{"ids":{"tmdb":1}}},
+         {"progress":50,"paused_at":"2027-01-10T20:00:00.000Z","movie":{"ids":{"tmdb":2}}},
+         {"progress":50,"paused_at":"2027-01-10T20:00:00.000Z","movie":{"ids":{"tmdb":3}}}]
+        """#)
+        let pausedAt = try #require(TraktDate.parse("2027-01-10T20:00:00.000Z"))
+        let hour: Int64 = 3600 * 10_000_000
+        let movies = [
+            TraktLocalMovie(itemID: "older", ids: TraktIDs(tmdb: 1), played: false,
+                            lastPlayed: pausedAt - day, rating: nil, runTimeTicks: 2 * hour),
+            // Jellyfin's own last play is the same moment: Sodalite sent that pause itself.
+            TraktLocalMovie(itemID: "own", ids: TraktIDs(tmdb: 2), played: false,
+                            lastPlayed: pausedAt, rating: nil, runTimeTicks: 2 * hour),
+            TraktLocalMovie(itemID: "done", ids: TraktIDs(tmdb: 3), played: true,
+                            lastPlayed: nil, rating: nil, runTimeTicks: 2 * hour),
+        ]
+        let result = TraktSyncPlan.playback(movies: movies, series: [], episodes: [], trakt: paused)
+        #expect(Array(result.keys) == ["older"])
+        #expect(result["older"]?.ticks == hour)
+    }
+
     @Test func ratingScaleMapsToTrakt() {
         #expect(TraktRating.trakt(fromJellyfin: nil) == nil)
         #expect(TraktRating.trakt(fromJellyfin: 0) == nil)

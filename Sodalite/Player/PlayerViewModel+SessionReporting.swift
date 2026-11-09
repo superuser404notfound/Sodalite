@@ -54,7 +54,9 @@ extension PlayerViewModel {
         } else {
             traktScrobbleState = (item.id, action == .start)
         }
-        DependencyContainer.shared.trakt.scrobble(action, item: item, positionTicks: positionTicks)
+        let trakt = DependencyContainer.shared.trakt
+        trakt.scrobble(action, item: item, positionTicks: positionTicks)
+        if action == .stop { trakt.syncAfterPlayback() }
     }
 
     func reportStart() async {

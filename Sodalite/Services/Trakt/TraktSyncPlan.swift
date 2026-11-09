@@ -7,6 +7,8 @@ nonisolated struct TraktLocalMovie: Sendable, Equatable {
     let played: Bool
     let lastPlayed: Date?
     let rating: Double?
+    var runTimeTicks: Int64? = nil
+    var positionTicks: Int64? = nil
 }
 
 nonisolated struct TraktLocalSeries: Sendable, Equatable {
@@ -22,6 +24,9 @@ nonisolated struct TraktLocalEpisode: Sendable, Equatable {
     let number: Int
     let played: Bool
     let lastPlayed: Date?
+    var rating: Double? = nil
+    var runTimeTicks: Int64? = nil
+    var positionTicks: Int64? = nil
 }
 
 /// Lookup keys for an id set, one per external id. Two records are the same title when any key
@@ -205,12 +210,19 @@ nonisolated enum TraktSyncPlan {
     static func ratings(
         movies: [TraktLocalMovie],
         series: [TraktLocalSeries],
+        episodes: [TraktLocalEpisode] = [],
         traktRatings: [TraktRatedItem]
     ) -> Ratings {
         var traktMovies: [String: Int] = [:]
         var traktShows: [String: Int] = [:]
+        var traktEpisodes: [String: Int] = [:]
         for rated in traktRatings {
-            if let movie = rated.movie {
+            if let episode = rated.episode, let show = rated.show,
+               let season = episode.season, let number = episode.number {
+                for key in TraktKey.keys(show.ids) {
+                    traktEpisodes[TraktKey.episode(showKey: key, season: season, number: number)] = rated.rating
+                }
+            } else if let movie = rated.movie {
                 for key in TraktKey.keys(movie.ids) { traktMovies[key] = rated.rating }
             } else if let show = rated.show {
                 for key in TraktKey.keys(show.ids) { traktShows[key] = rated.rating }
@@ -234,7 +246,85 @@ nonisolated enum TraktSyncPlan {
             default: break
             }
         }
+
+        let seriesByID = Dictionary(series.map { ($0.itemID, $0) }, uniquingKeysWith: { first, _ in first })
+        var pushBySeries: [String: [Int: [TraktSyncBody.Show.Season.Episode]]] = [:]
+        for episode in episodes {
+            guard let show = seriesByID[episode.seriesID], !show.ids.isEmpty else { continue }
+            let remote = TraktKey.keys(show.ids).lazy.compactMap {
+                traktEpisodes[TraktKey.episode(showKey: $0, season: episode.season, number: episode.number)]
+            }.first
+            switch (TraktRating.trakt(fromJellyfin: episode.rating), remote) {
+            case (nil, let remote?): plan.setLocal[episode.itemID] = Double(remote)
+            case (let local?, nil):
+                pushBySeries[show.itemID, default: [:]][episode.season, default: []]
+                    .append(.init(number: episode.number, rating: local))
+            default: break
+            }
+        }
+        for seriesID in pushBySeries.keys.sorted() {
+            guard let show = seriesByID[seriesID], let seasons = pushBySeries[seriesID] else { continue }
+            plan.push.shows.append(.init(
+                ids: show.ids.external,
+                seasons: seasons.keys.sorted().map { .init(number: $0, episodes: seasons[$0] ?? []) }
+            ))
+        }
         return plan
+    }
+
+    /// Resume positions paused elsewhere and newer than what Jellyfin knows: what another app
+    /// scrobbled as a pause becomes the Continue Watching position here. Only unfinished items, and
+    /// only a pause at least a minute newer than Jellyfin's own last play, so a pause Sodalite sent
+    /// itself never comes back to overwrite the position it came from.
+    static func playback(
+        movies: [TraktLocalMovie],
+        series: [TraktLocalSeries],
+        episodes: [TraktLocalEpisode],
+        trakt: [TraktPlaybackItem]
+    ) -> [String: (ticks: Int64, at: Date)] {
+        var movieByKey: [String: TraktLocalMovie] = [:]
+        for movie in movies { for key in TraktKey.keys(movie.ids) { movieByKey[key] = movie } }
+        let seriesByID = Dictionary(series.map { ($0.itemID, $0) }, uniquingKeysWith: { first, _ in first })
+        var episodeByKey: [String: TraktLocalEpisode] = [:]
+        for episode in episodes {
+            guard let show = seriesByID[episode.seriesID] else { continue }
+            for key in TraktKey.keys(show.ids) {
+                episodeByKey[TraktKey.episode(showKey: key, season: episode.season, number: episode.number)] = episode
+            }
+        }
+
+        func resume(itemID: String, played: Bool, lastPlayed: Date?, runtime: Int64?, position: Int64?,
+                    item: TraktPlaybackItem) -> (String, (ticks: Int64, at: Date))? {
+            guard !played, let runtime, runtime > 0, let pausedAt = item.pausedAt,
+                  (1...95).contains(item.progress),
+                  pausedAt > (lastPlayed ?? .distantPast).addingTimeInterval(60)
+            else { return nil }
+            let ticks = Int64(Double(runtime) * item.progress / 100)
+            // Within half a minute of what Jellyfin has is the same place.
+            guard abs(ticks - (position ?? 0)) > 30 * 10_000_000 else { return nil }
+            return (itemID, (ticks, pausedAt))
+        }
+
+        var result: [String: (ticks: Int64, at: Date)] = [:]
+        for item in trakt {
+            if let movie = item.movie {
+                guard let local = TraktKey.keys(movie.ids).lazy.compactMap({ movieByKey[$0] }).first,
+                      let hit = resume(itemID: local.itemID, played: local.played, lastPlayed: local.lastPlayed,
+                                       runtime: local.runTimeTicks, position: local.positionTicks, item: item)
+                else { continue }
+                result[hit.0] = hit.1
+            } else if let episode = item.episode, let show = item.show,
+                      let season = episode.season, let number = episode.number {
+                guard let local = TraktKey.keys(show.ids).lazy.compactMap({
+                          episodeByKey[TraktKey.episode(showKey: $0, season: season, number: number)]
+                      }).first,
+                      let hit = resume(itemID: local.itemID, played: local.played, lastPlayed: local.lastPlayed,
+                                       runtime: local.runTimeTicks, position: local.positionTicks, item: item)
+                else { continue }
+                result[hit.0] = hit.1
+            }
+        }
+        return result
     }
 
     /// Splits a body into chunks Trakt takes in one request without timing out.

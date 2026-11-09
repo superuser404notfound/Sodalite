@@ -63,6 +63,7 @@ nonisolated struct TraktSyncCursors: Codable, Sendable, Equatable {
     var moviesWatchedAt: Date?
     var episodesWatchedAt: Date?
     var ratedAt: Date?
+    var playbackAt: Date?
     var watchlistAt: Date?
     var listsAt: Date?
 }

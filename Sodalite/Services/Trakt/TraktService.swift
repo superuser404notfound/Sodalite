@@ -39,7 +39,7 @@ final class TraktService {
     @ObservationIgnored private var seriesIDsCache: [String: TraktIDs] = [:]
 
     /// A sync runs at most this often on its own; "Sync now" and a fresh connection skip the wait.
-    static let syncInterval: TimeInterval = 15 * 60
+    static let syncInterval: TimeInterval = 5 * 60
 
     init(clientID: String?, store: TraktSessionStoring,
          libraryService: JellyfinLibraryServiceProtocol, itemService: JellyfinItemServiceProtocol) {
@@ -142,9 +142,10 @@ final class TraktService {
     // MARK: - Sync
 
     /// Starts a sync unless one ran within `syncInterval` or one is running.
-    func sync(force: Bool = false) {
+    func sync(force: Bool = false, ignoringInterval: Bool = false) {
         guard client != nil, let session, syncTask == nil else { return }
-        if !force, let last = session.cursors.lastSyncAt, Date().timeIntervalSince(last) < Self.syncInterval { return }
+        if !force, !ignoringInterval, let last = session.cursors.lastSyncAt,
+           Date().timeIntervalSince(last) < Self.syncInterval { return }
         syncGeneration += 1
         let generation = syncGeneration
         isSyncing = true
@@ -166,14 +167,29 @@ final class TraktService {
             var markedPlayed = 0
             var pushedAny = false
 
-            let full = try await syncWatchedIfEnabled(
+            var full = try await syncWatchedIfEnabled(
                 client: client, profile: profile, activities: activities, readFullHistory: readFullHistory,
                 cursors: &cursors, markedPlayed: &markedPlayed, pushedAny: &pushedAny)
+            // The rating and position passes need every item, played or not; read it once per sync.
+            let libraryService = self.libraryService
+            func fullLibrary() async throws -> TraktLibrary {
+                if let full { return full }
+                let loaded = try await TraktLibrary.load(service: libraryService, userID: profile.userID, playedOnly: false).0
+                full = loaded
+                return loaded
+            }
 
-            if session?.options.syncRatings == true,
-               cursors.ratedAt == nil || Self.latest(activities.movies?.ratedAt, activities.shows?.ratedAt) != cursors.ratedAt {
-                try await syncRatings(client: client, profile: profile, library: full)
-                cursors.ratedAt = Self.latest(activities.movies?.ratedAt, activities.shows?.ratedAt)
+            let ratedStamp = Self.latest(activities.movies?.ratedAt, activities.shows?.ratedAt, activities.episodes?.ratedAt)
+            if session?.options.syncRatings == true, cursors.ratedAt == nil || ratedStamp != cursors.ratedAt {
+                try await syncRatings(client: client, profile: profile, library: try await fullLibrary())
+                cursors.ratedAt = ratedStamp
+            }
+
+            let pausedStamp = Self.latest(activities.movies?.pausedAt, activities.episodes?.pausedAt)
+            var resumed = 0
+            if session?.options.syncWatched == true, pausedStamp != nil, pausedStamp != cursors.playbackAt {
+                resumed = try await syncPlayback(client: client, profile: profile, library: try await fullLibrary())
+                cursors.playbackAt = pausedStamp
             }
 
             let listsStamp = Self.latest(activities.watchlist?.updatedAt, activities.movies?.watchlistedAt,
@@ -193,11 +209,11 @@ final class TraktService {
             self.session = session
             store?.saveTraktSession(session, for: profile)
             lastSyncError = nil
-            if markedPlayed > 0 {
+            if markedPlayed > 0 || resumed > 0 {
                 NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
                 TopShelfRefresher.invalidate()
             }
-            LogTap.shared.note("[Trakt] sync done: \(markedPlayed) marked played, pushed=\(pushedAny)")
+            LogTap.shared.note("[Trakt] sync done: \(markedPlayed) marked played, \(resumed) resume positions, pushed=\(pushedAny)")
         } catch is CancellationError {
         } catch {
             guard profile == self.profile else { return }
@@ -331,23 +347,48 @@ final class TraktService {
         }
     }
 
-    private func syncRatings(client: TraktClient, profile: ProfileKey, library: TraktLibrary?) async throws {
-        let local: TraktLibrary
-        if let library {
-            local = library
-        } else {
-            local = try await TraktLibrary.load(service: libraryService, userID: profile.userID, playedOnly: false).0
-        }
+    private func syncRatings(client: TraktClient, profile: ProfileKey, library local: TraktLibrary) async throws {
         async let movies = client.get(.ratings(type: "movies"), as: [TraktRatedItem].self)
         async let shows = client.get(.ratings(type: "shows"), as: [TraktRatedItem].self)
-        let rated = try await movies + shows
-        let plan = TraktSyncPlan.ratings(movies: local.movies, series: local.series, traktRatings: rated)
+        async let episodes = client.get(.ratings(type: "episodes"), as: [TraktRatedItem].self)
+        let rated = try await movies + shows + episodes
+        let plan = TraktSyncPlan.ratings(movies: local.movies, series: local.series, episodes: local.episodes,
+                                         traktRatings: rated)
+        LogTap.shared.note("[Trakt] ratings: \(rated.count) on Trakt, \(plan.setLocal.count) filled in, "
+            + "\(plan.push.movies.count + plan.push.shows.count) sent")
         for (itemID, rating) in plan.setLocal {
             guard profile == self.profile else { throw CancellationError() }
             try? await itemService.setRating(userID: profile.userID, itemID: itemID, rating: rating)
         }
         for batch in TraktSyncPlan.batches(plan.push) {
             try await client.send(.addRatings(batch))
+        }
+    }
+
+    /// Brings positions paused in other apps into Continue Watching. Returns how many moved.
+    private func syncPlayback(client: TraktClient, profile: ProfileKey, library: TraktLibrary) async throws -> Int {
+        guard let writer = itemService as? UserItemDataServing else { return 0 }
+        let paused = try await client.get(.playback, as: [TraktPlaybackItem].self)
+        let positions = TraktSyncPlan.playback(movies: library.movies, series: library.series,
+                                               episodes: library.episodes, trakt: paused)
+        var moved = 0
+        for (itemID, position) in positions {
+            guard profile == self.profile else { throw CancellationError() }
+            if (try? await writer.updateUserData(itemID: itemID, userID: profile.userID, positionTicks: position.ticks,
+                                                 played: false, lastPlayed: position.at)) != nil {
+                moved += 1
+            }
+        }
+        LogTap.shared.note("[Trakt] playback: \(paused.count) paused on Trakt, \(moved) positions taken over")
+        return moved
+    }
+
+    /// After a playback ends: Trakt has just been told, so a sync a few seconds later picks up what
+    /// the scrobble changed there without waiting for the interval.
+    func syncAfterPlayback() {
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(10))
+            self?.sync(ignoringInterval: true)
         }
     }
 

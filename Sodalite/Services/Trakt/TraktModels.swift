@@ -111,6 +111,7 @@ nonisolated struct TraktLastActivities: Decodable, Sendable {
         let watchedAt: Date?
         let ratedAt: Date?
         let watchlistedAt: Date?
+        let pausedAt: Date?
     }
     struct Updated: Decodable, Sendable {
         let updatedAt: Date?
@@ -188,6 +189,17 @@ nonisolated struct TraktRatedItem: Decodable, Sendable {
     let rating: Int
     let movie: TraktMovie?
     let show: TraktShow?
+    /// Set for an episode rating, which carries its show beside it.
+    let episode: TraktEpisode?
+}
+
+/// A paused position from `/sync/playback`, written by any app that scrobbles a pause.
+nonisolated struct TraktPlaybackItem: Decodable, Sendable {
+    let progress: Double
+    let pausedAt: Date?
+    let movie: TraktMovie?
+    let episode: TraktEpisode?
+    let show: TraktShow?
 }
 
 /// One entry of the watchlist or a personal list. Only movies and shows are kept: a season or an
@@ -222,7 +234,8 @@ nonisolated struct TraktSyncBody: Encodable, Sendable, Equatable {
             struct Episode: Encodable, Sendable, Equatable {
                 let number: Int
                 var watchedAt: String?
-                enum CodingKeys: String, CodingKey { case number, watchedAt = "watched_at" }
+                var rating: Int?
+                enum CodingKeys: String, CodingKey { case number, watchedAt = "watched_at", rating }
             }
             let number: Int
             /// nil addresses the whole season (a removal does that).
