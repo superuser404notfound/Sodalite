@@ -350,12 +350,20 @@ struct HomeCustomizeView: View {
         configs
             .filter(\.isEnabled)
             .filter { !(mergeCWNextUp && $0.type == .nextUp) }
-            .filter { !hidesWithItsLibrary($0) }
+            .filter { !hidesWithItsLibrary($0) && !hidesWithoutTrakt($0) }
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
     private var disabledRows: [HomeRowConfig] {
-        configs.filter { !$0.isEnabled && !(mergeCWNextUp && $0.type == .nextUp) && !hidesWithItsLibrary($0) }
+        configs.filter {
+            !$0.isEnabled && !(mergeCWNextUp && $0.type == .nextUp) && !hidesWithItsLibrary($0)
+                && !hidesWithoutTrakt($0)
+        }
+    }
+
+    /// A build without a Trakt app has no way to fill these rows, so they are not offered.
+    private func hidesWithoutTrakt(_ config: HomeRowConfig) -> Bool {
+        config.type.isTraktRow && !TraktConfig.isAvailable
     }
 
     /// A "Latest in X" row leaves the list while its library is hidden, and comes back as it was.

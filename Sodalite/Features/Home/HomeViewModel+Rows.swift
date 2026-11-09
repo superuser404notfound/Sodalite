@@ -330,7 +330,7 @@ extension HomeViewModel {
                 )
                 items = Array(await foldIntoSeries(latest, source: source).prefix(16))
 
-            case .myMedia, .genres, .discoverProviders:
+            case .myMedia, .genres, .discoverProviders, .traktWatchlist, .traktLists:
                 return nil
             }
 

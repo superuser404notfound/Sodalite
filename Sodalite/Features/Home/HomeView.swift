@@ -12,6 +12,8 @@ struct HomeView: View {
     @State private var heroPlayFromBeginning = false
     @Environment(\.shellLeadingSlot) private var shellLeadingSlot
     @State private var selectedFilter: FilterDestination?
+    /// A Trakt list entry the server does not have, opened on its Seerr page.
+    @State private var selectedCatalogMedia: SeerrMedia?
 
     /// Spinner accent: HomeView's NavigationStack resets the inherited TabView tint to white, so re-apply the effective tint to match the Live TV spinner.
     private var spinnerTint: Color {
@@ -44,7 +46,36 @@ struct HomeView: View {
 
     /// True while something is presented over Home: a detail page or a filtered grid. Home is not
     /// the screen then, which is what the two refresh observers below ask about.
-    private var isCovered: Bool { selectedItem != nil || selectedFilter != nil }
+    private var isCovered: Bool { selectedItem != nil || selectedFilter != nil || selectedCatalogMedia != nil }
+
+    private struct TraktRowsTrigger: Equatable {
+        let lists: TraktListsSnapshot
+        let connected: Bool
+        let includesCatalog: Bool
+        let hasViewModel: Bool
+    }
+
+    private var traktRowsTrigger: TraktRowsTrigger {
+        TraktRowsTrigger(
+            lists: dependencies.trakt.lists,
+            connected: dependencies.trakt.isConnected,
+            includesCatalog: SeerrSurfacePolicy.browsingEnabled(appState: appState,
+                                                                appearance: dependencies.appearancePreferences),
+            hasViewModel: viewModel != nil
+        )
+    }
+
+    private func refreshTraktRows(_ trigger: TraktRowsTrigger) async {
+        guard let vm = viewModel else { return }
+        let trakt = dependencies.trakt
+        guard trigger.connected, !(trigger.lists.watchlist.isEmpty && trigger.lists.lists.isEmpty) else {
+            vm.traktRows = []
+            return
+        }
+        guard let index = try? await trakt.libraryIndex() else { return }
+        vm.traktRows = TraktHomeRows.build(snapshot: trigger.lists, index: index,
+                                           includeCatalog: trigger.includesCatalog)
+    }
 
     var body: some View {
         ThemeNavigationStack {
@@ -87,6 +118,9 @@ struct HomeView: View {
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $selectedItem) { item in
                 DetailRouterView(item: item)
+            }
+            .detailCover(item: $selectedCatalogMedia) { media in
+                CatalogDetailView(media: media)
             }
             .detailCover(item: $heroPlayItem) { item in
                 DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: heroPlayFromBeginning)
@@ -140,6 +174,7 @@ struct HomeView: View {
             guard phase == .active else { return }
             Task { await viewModel?.refreshIfStale(trigger: .foreground, covered: isCovered) }
         }
+        .task(id: traktRowsTrigger) { await refreshTraktRows(traktRowsTrigger) }
         // Home becoming the screen again. A cover dismiss fires no `onAppear` either (measured,
         // iOS 26.5), so this is the other half of the same gate: what the user changed behind the
         // cover already arrives by notification, what passed in the meantime does not.
@@ -522,6 +557,15 @@ struct HomeView: View {
                             )
                             .focused($focusedRowIndex, equals: idx)
                         }
+
+                    case .trakt(let row):
+                        TraktHomeRow(
+                            row: row,
+                            imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
+                            onItemSelected: { selectedItem = $0 },
+                            onCatalogSelected: { selectedCatalogMedia = $0 }
+                        )
+                        .focused($focusedRowIndex, equals: idx)
 
                     case .libraries(let libraries):
                         LibraryRow(

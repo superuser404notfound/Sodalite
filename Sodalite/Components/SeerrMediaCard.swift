@@ -4,6 +4,8 @@ struct SeerrMediaCard: View {
     let media: SeerrMedia
     /// Passed by the caller (same pattern as `MediaCard`); drives the focus stroke.
     var isFocused: Bool = false
+    /// A poster from elsewhere (a Trakt list entry carries its own), used instead of the TMDB path.
+    var posterURL: URL? = nil
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -23,7 +25,7 @@ struct SeerrMediaCard: View {
 
     private var posterImage: some View {
         AsyncCachedImage(
-            url: SeerrImageURL.poster(path: media.posterPath, size: .covering(ImageWidth.card))
+            url: posterURL ?? SeerrImageURL.poster(path: media.posterPath, size: .covering(ImageWidth.card))
         ) { image in
             image
                 .resizable()

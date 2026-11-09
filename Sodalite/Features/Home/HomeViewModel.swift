@@ -4,6 +4,8 @@ import SwiftUI
 final class HomeViewModel {
     var rows: [HomeRowData] = []
     var tagRows: [HomeTagRowData] = []
+    /// Built from the Trakt snapshot by HomeView, outside the Jellyfin fan-out.
+    var traktRows: [TraktHomeRowData] = []
     /// The banner at the top of Home, in the profile's HomeHeroMode (see loadHero).
     var heroItems: [JellyfinItem] = []
     @ObservationIgnored var heroTask: Task<Void, Never>?
@@ -317,7 +319,7 @@ final class HomeViewModel {
             .filter(\.isEnabled)
             .sorted { $0.sortOrder < $1.sortOrder }
             .compactMap { config in
-                if config.type.isDiscoverProviderRow { return nil }
+                if config.type.isDiscoverProviderRow || config.type.isTraktRow { return nil }
                 if config.type == .myMedia { return nil }
                 if config.type == .libraryLatest, let id = config.libraryID,
                    libraryLayout.hidesLatestRow(libraryID: id) {
@@ -678,23 +680,24 @@ final class HomeViewModel {
             .filter(\.isEnabled)
             .sorted { $0.sortOrder < $1.sortOrder }
 
-        return enabledConfigs.compactMap { config in
-            if config.type.isDiscoverProviderRow {
-                return .discoverProviders
+        return enabledConfigs.flatMap { config -> [HomeSection] in
+            if config.type.isTraktRow {
+                return traktRows.filter { $0.type == config.type }.map(HomeSection.trakt)
             }
-            if config.type == .myMedia {
-                return myMediaLibraries.isEmpty ? nil : .libraries(myMediaLibraries)
-            }
-            if config.type.isTagRow {
-                if let tagRow = tagRows.first(where: { $0.type == config.type }) {
-                    return .tags(tagRow)
-                }
-            } else {
-                if let row = rows.first(where: { $0.id == config.id }) {
-                    return .media(row)
-                }
-            }
-            return nil
+            return section(for: config).map { [$0] } ?? []
         }
+    }
+
+    private func section(for config: HomeRowConfig) -> HomeSection? {
+        if config.type.isDiscoverProviderRow {
+            return .discoverProviders
+        }
+        if config.type == .myMedia {
+            return myMediaLibraries.isEmpty ? nil : .libraries(myMediaLibraries)
+        }
+        if config.type.isTagRow {
+            return tagRows.first(where: { $0.type == config.type }).map(HomeSection.tags)
+        }
+        return rows.first(where: { $0.id == config.id }).map(HomeSection.media)
     }
 }

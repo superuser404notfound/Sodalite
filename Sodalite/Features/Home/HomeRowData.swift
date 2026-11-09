@@ -5,6 +5,7 @@ enum HomeSection: Identifiable {
     case tags(HomeTagRowData)
     case discoverProviders
     case libraries([JellyfinLibrary])
+    case trakt(TraktHomeRowData)
 
     var id: String {
         switch self {
@@ -12,6 +13,7 @@ enum HomeSection: Identifiable {
         case .tags(let data): data.id
         case .discoverProviders: "discoverProviders"
         case .libraries: "myMedia"
+        case .trakt(let data): "trakt-\(data.id)"
         }
     }
 }

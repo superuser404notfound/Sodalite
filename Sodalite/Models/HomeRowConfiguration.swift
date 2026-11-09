@@ -15,6 +15,10 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Ordered by release/air date, unlike every Latest row above (those order by DateCreated).
     case recentlyReleasedMovies
     case recentlyReleasedShows
+    /// The connected Trakt account's watchlist. Renders nothing without a Trakt connection.
+    case traktWatchlist
+    /// One row per personal Trakt list.
+    case traktLists
     case discoverProviders
     case collections
     case playlists
@@ -35,7 +39,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         // drops empty rows), so the default costs users who have none exactly one query each and
         // saves the rest a trip through Customize Home (mikepaggi, Sodalite#73).
         case .continueWatching, .nextUp, .myMedia, .favorites, .favoriteEpisodes, .latestMovies,
-             .latestShows, .discoverProviders, .genres, .collections, .playlists:
+             .latestShows, .discoverProviders, .genres, .collections, .playlists,
+             .traktWatchlist, .traktLists:
             true
         default:
             false
@@ -73,6 +78,9 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Row not sourced from Jellyfin (today only Discover/Jellyseerr): hardcoded provider list, pushes a Seerr-backed grid, not FilteredGridView.
     var isDiscoverProviderRow: Bool { self == .discoverProviders }
 
+    /// Built from the Trakt snapshot by `TraktHomeRows`, never by the Jellyfin fan-out.
+    var isTraktRow: Bool { self == .traktWatchlist || self == .traktLists }
+
     var localizedTitle: LocalizedStringKey {
         switch self {
         case .continueWatching: "home.continueWatching"
@@ -93,6 +101,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         case .collections: "home.collections"
         case .playlists: "home.playlists"
         case .discoverProviders: "home.discoverProviders"
+        case .traktWatchlist: "home.traktWatchlist"
+        case .traktLists: "home.traktLists"
         case .myMedia: "home.myMedia"
         case .libraryLatest: "home.latestMovies"
         }
@@ -118,6 +128,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         case .collections: "rectangle.stack.fill"
         case .playlists: "list.and.film"
         case .discoverProviders: "tv.badge.wifi"
+        case .traktWatchlist: "bookmark"
+        case .traktLists: "list.bullet.rectangle"
         case .myMedia: "rectangle.grid.2x2"
         case .libraryLatest: "film"
         }

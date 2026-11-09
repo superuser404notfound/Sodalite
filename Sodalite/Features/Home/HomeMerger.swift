@@ -19,7 +19,7 @@ nonisolated enum HomeMerger {
         case .favoriteEpisodes: .episodeOrder
         // Folded rows carry the series' own dates, so a date sort would invent an order.
         case .nextUp, .latestShows, .recentlyReleasedShows, .libraryLatest,
-             .myMedia, .genres, .discoverProviders: .roundRobin
+             .myMedia, .genres, .discoverProviders, .traktWatchlist, .traktLists: .roundRobin
         }
     }
 
@@ -30,7 +30,7 @@ nonisolated enum HomeMerger {
         case .nextUp, .upcoming, .latestMovies, .latestShows, .recentlyReleasedShows, .libraryLatest: 16
         case .recentlyReleasedMovies, .recentlyAdded, .topRatedMovies, .topRatedShows: 20
         case .allMovies, .allSeries, .favorites, .favoriteEpisodes, .collections, .playlists: 30
-        case .myMedia, .genres, .discoverProviders: 30
+        case .myMedia, .genres, .discoverProviders, .traktWatchlist, .traktLists: 30
         }
     }
 
