@@ -165,10 +165,12 @@ struct TraktSettingsView: View {
         signInTask = Task {
             do {
                 let code = try await trakt.requestDeviceCode()
+                try Task.checkCancellation()
                 deviceCode = code
                 try await trakt.completeDeviceSignIn(code)
-            } catch is CancellationError {
             } catch {
+                // A cancelled attempt leaves the screen alone: a newer one may already own it.
+                if error is CancellationError || Task.isCancelled { return }
                 errorText = ErrorText.user(for: error)
             }
             deviceCode = nil
