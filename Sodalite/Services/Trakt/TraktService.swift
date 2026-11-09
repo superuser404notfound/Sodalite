@@ -222,6 +222,8 @@ final class TraktService {
             async let movies = client.get(.watchedMovies, as: [TraktWatchedMovie].self)
             async let shows = client.get(.watchedShows, as: [TraktWatchedShow].self)
             let (watchedMovies, watchedShows) = try await (movies, shows)
+            let watchedEpisodes = watchedShows.reduce(0) { $0 + ($1.seasons ?? []).reduce(0) { $0 + $1.episodes.count } }
+            LogTap.shared.note("[Trakt] watched on Trakt: \(watchedMovies.count) movies, \(watchedShows.count) shows, \(watchedEpisodes) episodes")
             snapshot = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows)
             snapshot.pushed = cached?.pushed ?? []
             // First sync: everything. After that: what was watched on Trakt since the last one, with

@@ -50,8 +50,11 @@ enum TraktEndpoint: APIEndpoint {
         case .revoke: "/oauth/revoke"
         case .userSettings: "/users/settings"
         case .lastActivities: "/sync/last_activities"
-        case .watchedMovies: "/sync/watched/movies"
-        case .watchedShows: "/sync/watched/shows"
+        // The /users route, not /sync/watched: the sync one is untyped in Trakt's contract and came
+        // back without `seasons` on the first device test (0 episode keys for a history of
+        // hundreds), so every watched episode looked unwatched and was pushed again each sync.
+        case .watchedMovies: "/users/me/watched/movies"
+        case .watchedShows: "/users/me/watched/shows"
         case .addHistory: "/sync/history"
         case .removeHistory: "/sync/history/remove"
         case .ratings(let type): "/sync/ratings/\(type)"

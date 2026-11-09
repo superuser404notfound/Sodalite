@@ -81,5 +81,7 @@ enum TraktCacheStore {
     }
 
     static let lists = "lists.json"
-    static let watched = "watched.json"
+    /// v2: a v1 snapshot was built from the seasonless /sync/watched answer and holds no Trakt
+    /// episodes, so it must not count as a previous sync. A new name makes the next sync a first one.
+    static let watched = "watched-v2.json"
 }
