@@ -220,8 +220,11 @@ final class TraktService {
         var pull: TraktWatchedSnapshot?
         if traktMoved {
             async let movies = client.get(.watchedMovies, as: [TraktWatchedMovie].self)
-            async let shows = client.get(.watchedShows, as: [TraktWatchedShow].self)
-            let (watchedMovies, watchedShows) = try await (movies, shows)
+            async let showsData = client.send(.watchedShows)
+            let (watchedMovies, rawShows) = try await (movies, showsData)
+            let watchedShows = try TraktClient.makeDecoder().decode([TraktWatchedShow].self, from: rawShows)
+            // DIAG(trakt-seasons): raw head of the answer while the episode count reads 0.
+            LogTap.shared.note("[Trakt] DIAG watched shows raw: \(String(decoding: rawShows.prefix(900), as: UTF8.self))")
             let watchedEpisodes = watchedShows.reduce(0) { $0 + ($1.seasons ?? []).reduce(0) { $0 + $1.episodes.count } }
             LogTap.shared.note("[Trakt] watched on Trakt: \(watchedMovies.count) movies, \(watchedShows.count) shows, \(watchedEpisodes) episodes")
             snapshot = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows)
@@ -244,6 +247,8 @@ final class TraktService {
         for batch in TraktSyncPlan.batches(plan.push) {
             guard profile == self.profile else { throw CancellationError() }
             let data = try await client.send(.addHistory(batch))
+            // DIAG(trakt-seasons): raw answer of the push.
+            LogTap.shared.note("[Trakt] DIAG history raw: \(String(decoding: data.prefix(600), as: UTF8.self))")
             snapshot.record(batch)
             pushedAny = true
             Self.logHistoryResult(data, sent: batch)
