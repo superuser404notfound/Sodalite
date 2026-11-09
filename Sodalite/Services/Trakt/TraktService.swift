@@ -31,6 +31,9 @@ final class TraktService {
     @ObservationIgnored private let libraryService: JellyfinLibraryServiceProtocol
     @ObservationIgnored private let itemService: JellyfinItemServiceProtocol
     @ObservationIgnored private var syncTask: Task<Void, Never>?
+    /// Bumped whenever a sync starts or the profile changes, so a cancelled sync unwinding late does
+    /// not clear the state of the one that replaced it.
+    @ObservationIgnored private var syncGeneration = 0
     @ObservationIgnored private var cachedIndex: (profile: ProfileKey, built: Date, index: TraktLibrary.Index)?
     /// Series ids for episodes the player scrobbles, so a binge looks each show up once.
     @ObservationIgnored private var seriesIDsCache: [String: TraktIDs] = [:]
@@ -52,6 +55,7 @@ final class TraktService {
     /// Loads the given profile's connection. Called whenever the active profile changes.
     func activate(profile: ProfileKey?) {
         guard profile != self.profile else { return }
+        syncGeneration += 1
         syncTask?.cancel()
         syncTask = nil
         isSyncing = false
@@ -114,6 +118,7 @@ final class TraktService {
     }
 
     private func disconnectLocally() {
+        syncGeneration += 1
         syncTask?.cancel()
         syncTask = nil
         isSyncing = false
@@ -140,16 +145,19 @@ final class TraktService {
     func sync(force: Bool = false) {
         guard client != nil, let session, syncTask == nil else { return }
         if !force, let last = session.cursors.lastSyncAt, Date().timeIntervalSince(last) < Self.syncInterval { return }
+        syncGeneration += 1
+        let generation = syncGeneration
+        isSyncing = true
         syncTask = Task { [weak self] in
             await self?.performSync()
-            self?.syncTask = nil
+            guard let self, self.syncGeneration == generation else { return }
+            self.syncTask = nil
+            self.isSyncing = false
         }
     }
 
     private func performSync() async {
         guard let client, let profile, let start = session else { return }
-        isSyncing = true
-        defer { isSyncing = false }
         do {
             let activities = try await client.get(.lastActivities, as: TraktLastActivities.self)
             var cursors = start.cursors
@@ -174,12 +182,9 @@ final class TraktService {
                 cursors.listsAt = listsStamp
             }
 
-            // Our own push moved Trakt's stamps; record the moved ones so the next sync does not
-            // fetch the whole history again only to find what it just sent.
-            if pushedAny, let after = try? await client.get(.lastActivities, as: TraktLastActivities.self) {
-                cursors.moviesWatchedAt = after.movies?.watchedAt
-                cursors.episodesWatchedAt = after.episodes?.watchedAt
-            }
+            // Our own push moves Trakt's watched stamps past the cursors stored here, so the next
+            // sync reads the history once more. Re-reading the stamps now would save that, but it
+            // would also swallow a watch another device scrobbled in between, which nothing pulls.
             cursors.lastSyncAt = Date()
             guard profile == self.profile, var session else { return }
             session.cursors = cursors
