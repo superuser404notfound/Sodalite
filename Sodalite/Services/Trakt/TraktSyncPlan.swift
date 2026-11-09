@@ -163,7 +163,7 @@ nonisolated enum TraktSyncPlan {
         for movie in movies where !movie.ids.isEmpty {
             if movie.played {
                 if !trakt.contains(movie: movie.ids), pushable(movie.lastPlayed) {
-                    plan.push.movies.append(.init(ids: movie.ids.external, watchedAt: movie.lastPlayed))
+                    plan.push.movies.append(.init(ids: movie.ids.external, watchedAt: TraktDate.wire(movie.lastPlayed)))
                 }
             } else if pull?.contains(movie: movie.ids) == true {
                 plan.markPlayed.append(movie.itemID)
@@ -178,7 +178,7 @@ nonisolated enum TraktSyncPlan {
                 let onTrakt = trakt.contains(episodeOf: show.ids, season: episode.season, number: episode.number)
                 if !onTrakt, pushable(episode.lastPlayed) {
                     pushBySeries[show.itemID, default: [:]][episode.season, default: []]
-                        .append(.init(number: episode.number, watchedAt: episode.lastPlayed))
+                        .append(.init(number: episode.number, watchedAt: TraktDate.wire(episode.lastPlayed)))
                 }
             } else if pull?.contains(episodeOf: show.ids, season: episode.season, number: episode.number) == true {
                 plan.markPlayed.append(episode.itemID)

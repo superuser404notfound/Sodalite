@@ -1291,6 +1291,7 @@
 		8BC25CEB74E26A6A67561C6D /* SeekReadoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54F502DD49E9398E1263DE5 /* SeekReadoutView.swift */; };
 		8BCE43E99F5542D201CD91B7 /* SeerrRequestAdminRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFA36C8B038D0E76AB2717B /* SeerrRequestAdminRow.swift */; };
 		8C532912E1A9FCAA3B302E05 /* DevicePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886AFE7FB51AE5DDA503C45C /* DevicePreferences.swift */; };
+		8C56DC76BE2B58CAAF49E08E /* TraktDuplicateAudit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A223198C4DB42554A047A65 /* TraktDuplicateAudit.swift */; };
 		8CF7A206CED5494878F58E9A /* LRUCostCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92353AB1EDBB02FB5A2AC000 /* LRUCostCache.swift */; };
 		8D6F590ACEA1E6608E4C0A0D /* NextEpisodePillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E2CA385A598B1BC58D04870 /* NextEpisodePillTests.swift */; };
 		8D8D5F5E6F5428C71332EE16 /* AuthPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00EFF9852627141E97BDC41 /* AuthPreferences.swift */; };
@@ -1599,6 +1600,7 @@
 		AFC64535A569B1DC367930CB /* SkipSegmentResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC71B2A5D50F33F3F8EC4D7 /* SkipSegmentResolver.swift */; };
 		AFDEBE7962AEBD416C638B3B /* TraktSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F4119855FF47A028E3EEB1 /* TraktSession.swift */; };
 		AFDEEA58646172D3DD7D18B6 /* ItemMetadataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F108CEF8820921CE2B80A2A /* ItemMetadataRow.swift */; };
+		B0042795AE6D97734C603EF0 /* TraktDuplicateAudit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A223198C4DB42554A047A65 /* TraktDuplicateAudit.swift */; };
 		B014219254B464AA71138C53 /* DependencyContainer+Caches.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1379D65D0C8EAC5CB5F97764 /* DependencyContainer+Caches.swift */; };
 		B05123DE370C77FD3264EAA7 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD612B8B5146AAF6925E6A3 /* StoreKitService.swift */; };
 		B08FD0488A680FB3ADE0777A /* MyMediaLibrariesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26ACDA3C53D401F750A2743 /* MyMediaLibrariesTests.swift */; };
@@ -2213,6 +2215,7 @@
 		F33DCFDC4747A1E4458E1F62 /* PlayerHostDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EDFDFA2984B41B4E3393217 /* PlayerHostDiagnostics.swift */; };
 		F3584E99C97BABBD34CEEE07 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A7B7D602013C25E4A2E2DB /* HomeView.swift */; };
 		F379FB58FADBED778F1CF1E6 /* ProfileRepromptPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFE58604D4DF8220F85FEE11 /* ProfileRepromptPolicy.swift */; };
+		F38FE362B8344806A48739DD /* TraktDuplicateAudit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A223198C4DB42554A047A65 /* TraktDuplicateAudit.swift */; };
 		F393A029D67A5B29F5F430B6 /* PersonDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4D951D87C80695C4546AF /* PersonDetailView.swift */; };
 		F399934177ABF45F4EF76F95 /* SubtitleOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B06ED4A787780BCF7302D1 /* SubtitleOffset.swift */; };
 		F3A66259381E12340F2A7758 /* MusicAlbumLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBB8A2288349CD1F679DE0 /* MusicAlbumLoadTests.swift */; };
@@ -2502,6 +2505,7 @@
 		194B5AEB74D5B8FE374A0C3E /* SubtitlePlacementGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitlePlacementGeometryTests.swift; sourceTree = "<group>"; };
 		197C056F3F41EFB53CDD2345 /* PlayerTouchControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTouchControls.swift; sourceTree = "<group>"; };
 		1A0FE73FC03DB46281475278 /* SeerrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequest.swift; sourceTree = "<group>"; };
+		1A223198C4DB42554A047A65 /* TraktDuplicateAudit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraktDuplicateAudit.swift; sourceTree = "<group>"; };
 		1A85474BA59DA6735C315C1B /* ServerSessionEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSessionEnvironment.swift; sourceTree = "<group>"; };
 		1A939025FF52393099530C53 /* SeerrImageURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrImageURLTests.swift; sourceTree = "<group>"; };
 		1AB8B7D07A1B990DF0036F63 /* SkipBackSubtitleWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipBackSubtitleWindow.swift; sourceTree = "<group>"; };
@@ -4886,6 +4890,7 @@
 			isa = PBXGroup;
 			children = (
 				D7736C44CE3355BA8A444673 /* TraktClient.swift */,
+				1A223198C4DB42554A047A65 /* TraktDuplicateAudit.swift */,
 				60136FF78F0285519B594E9E /* TraktEndpoint.swift */,
 				5C965FF12594C510DAB16D97 /* TraktLibrary.swift */,
 				5363F172127C55435124F55E /* TraktListsSnapshot.swift */,
@@ -5886,6 +5891,7 @@
 				12E8C0DB48305A1CDE6C728E /* TrackSelectionMemory.swift in Sources */,
 				07F567343C722094A6BDB242 /* TrailersAndExtrasRow.swift in Sources */,
 				847609A0DFD84D0C15062CEC /* TraktClient.swift in Sources */,
+				8C56DC76BE2B58CAAF49E08E /* TraktDuplicateAudit.swift in Sources */,
 				B968FB09A12519B2FE14D9B9 /* TraktEndpoint.swift in Sources */,
 				F2E844099460813AF9163D08 /* TraktHomeRows.swift in Sources */,
 				765E3D7B9DAD36512D4428C3 /* TraktLibrary.swift in Sources */,
@@ -6503,6 +6509,7 @@
 				20D938BFB6EA2CF34D36E066 /* TrackSelectionMemory.swift in Sources */,
 				095A551DDBE1F07254DECCF2 /* TrailersAndExtrasRow.swift in Sources */,
 				0303B7C983F48F76E41FD957 /* TraktClient.swift in Sources */,
+				F38FE362B8344806A48739DD /* TraktDuplicateAudit.swift in Sources */,
 				E9FAE84BC9288EF7B7274DFE /* TraktEndpoint.swift in Sources */,
 				60167E649F83E46DF5FD0063 /* TraktHomeRows.swift in Sources */,
 				2E4A478D34E18961452F3891 /* TraktLibrary.swift in Sources */,
@@ -7578,6 +7585,7 @@
 				5C69B7B41DBFB7EDACB6A5BD /* TrackSelectionMemory.swift in Sources */,
 				6771121A67EB2244130ECE57 /* TrailersAndExtrasRow.swift in Sources */,
 				ED259850DC16CD7E335FA0BE /* TraktClient.swift in Sources */,
+				B0042795AE6D97734C603EF0 /* TraktDuplicateAudit.swift in Sources */,
 				46212F562C3F98B183971208 /* TraktEndpoint.swift in Sources */,
 				F000D61B58B7FBBCE25B2E76 /* TraktHomeRows.swift in Sources */,
 				6B3ADF487C4C73A01ECE30D8 /* TraktLibrary.swift in Sources */,

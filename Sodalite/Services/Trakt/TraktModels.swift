@@ -128,17 +128,54 @@ nonisolated struct TraktWatchedMovie: Decodable, Sendable {
     let movie: TraktMovie
 }
 
+/// A show from `/users/me/watched/shows`. Trakt no longer sends `seasons` there (measured on the
+/// first device test: 18 shows, `"plays":38` and no seasons key), so the episodes come from each
+/// show's progress (`TraktShowProgress`) and are filled in by the sync.
 nonisolated struct TraktWatchedShow: Decodable, Sendable {
-    struct Season: Decodable, Sendable {
-        struct Episode: Decodable, Sendable {
+    struct Season: Codable, Sendable, Equatable {
+        struct Episode: Codable, Sendable, Equatable {
             let number: Int
             let lastWatchedAt: Date?
         }
         let number: Int
         let episodes: [Episode]
     }
+    var plays: Int?
+    var lastWatchedAt: Date?
     let show: TraktShow
-    let seasons: [Season]?
+    var seasons: [Season]?
+}
+
+/// `/shows/{id}/progress/watched`: every aired episode with whether the user completed it.
+nonisolated struct TraktShowProgress: Decodable, Sendable {
+    struct Season: Decodable, Sendable {
+        struct Episode: Decodable, Sendable {
+            let number: Int
+            let completed: Bool
+            let lastWatchedAt: Date?
+        }
+        let number: Int
+        let episodes: [Episode]
+    }
+    let seasons: [Season]
+
+    /// Only the watched episodes, in the shape the snapshot reads.
+    var watchedSeasons: [TraktWatchedShow.Season] {
+        seasons.compactMap { season in
+            let watched = season.episodes.filter(\.completed)
+                .map { TraktWatchedShow.Season.Episode(number: $0.number, lastWatchedAt: $0.lastWatchedAt) }
+            return watched.isEmpty ? nil : TraktWatchedShow.Season(number: season.number, episodes: watched)
+        }
+    }
+}
+
+/// One play in `/sync/history/episodes`.
+nonisolated struct TraktHistoryEntry: Decodable, Sendable {
+    let id: Int64
+    let watchedAt: Date
+    let action: String
+    let episode: TraktEpisode?
+    let show: TraktShow?
 }
 
 /// `/sync/history` answers with what it took and what it could not match.
@@ -183,7 +220,9 @@ nonisolated struct TraktList: Decodable, Sendable {
 nonisolated struct TraktSyncBody: Encodable, Sendable, Equatable {
     struct Movie: Encodable, Sendable, Equatable {
         let ids: TraktIDs
-        var watchedAt: Date?
+        /// An ISO date or "unknown" (`TraktDate.wire`). Never left out on an add: Trakt then
+        /// stamps the play with the current time, and it does not de-duplicate plays.
+        var watchedAt: String?
         var rating: Int?
         enum CodingKeys: String, CodingKey { case ids, watchedAt = "watched_at", rating }
     }
@@ -191,7 +230,7 @@ nonisolated struct TraktSyncBody: Encodable, Sendable, Equatable {
         struct Season: Encodable, Sendable, Equatable {
             struct Episode: Encodable, Sendable, Equatable {
                 let number: Int
-                var watchedAt: Date?
+                var watchedAt: String?
                 enum CodingKeys: String, CodingKey { case number, watchedAt = "watched_at" }
             }
             let number: Int

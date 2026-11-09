@@ -251,6 +251,13 @@ nonisolated enum TraktDate {
     }()
     nonisolated(unsafe) private static let plain = ISO8601DateFormatter()
 
+    /// The `watched_at` of a history add: the date, or "unknown" when there is none, which Trakt
+    /// files as watched without a date instead of as watched right now.
+    static func wire(_ date: Date?) -> String {
+        guard let date else { return "unknown" }
+        return fractional.string(from: date)
+    }
+
     /// Trakt writes `2014-09-01T09:10:11.000Z`; Jellyfin writes seven fractional digits. Both pass.
     static func parse(_ raw: String) -> Date? {
         if let date = fractional.date(from: raw) ?? plain.date(from: raw) { return date }

@@ -220,13 +220,13 @@ final class TraktService {
 
         var snapshot = cached ?? TraktWatchedSnapshot()
         var pull: TraktWatchedSnapshot?
+        var showsTrustworthy = true
         if traktMoved {
             async let movies = client.get(.watchedMovies, as: [TraktWatchedMovie].self)
-            async let showsData = client.send(.watchedShows)
-            let (watchedMovies, rawShows) = try await (movies, showsData)
-            let watchedShows = try TraktClient.makeDecoder().decode([TraktWatchedShow].self, from: rawShows)
-            // DIAG(trakt-seasons): raw head of the answer while the episode count reads 0.
-            LogTap.shared.note("[Trakt] DIAG watched shows raw: \(String(decoding: rawShows.prefix(900), as: UTF8.self))")
+            async let shows = client.get(.watchedShows, as: [TraktWatchedShow].self)
+            let (watchedMovies, showHeads) = try await (movies, shows)
+            let (watchedShows, episodesComplete) = try await withEpisodes(showHeads, client: client, profile: profile)
+            showsTrustworthy = episodesComplete
             let watchedEpisodes = watchedShows.reduce(0) { $0 + ($1.seasons ?? []).reduce(0) { $0 + $1.episodes.count } }
             LogTap.shared.note("[Trakt] watched on Trakt: \(watchedMovies.count) movies, \(watchedShows.count) shows, \(watchedEpisodes) episodes")
             snapshot = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows)
@@ -241,16 +241,25 @@ final class TraktService {
                                                            playedOnly: !traktMoved)
         if traktMoved { cachedIndex = (profile, Date(), index) }
         let pushSince = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-7 * 24 * 60 * 60)
-        let plan = TraktSyncPlan.watched(movies: library.movies, series: library.series,
+        var plan = TraktSyncPlan.watched(movies: library.movies, series: library.series,
                                          episodes: library.episodes, trakt: snapshot, pull: pull,
                                          pushSince: pushSince)
+        if !showsTrustworthy {
+            // A show Trakt counts plays for came back without episodes. Pushing now would send its
+            // whole history as new plays, the exact duplication this guard exists for.
+            LogTap.shared.note("[Trakt] episode push skipped: Trakt's episode list is incomplete")
+            plan.push.shows = []
+        }
+
+        if traktMoved, readFullHistory {
+            // DIAG(trakt-duplicates): read-only count of the plays the seasonless syncs duplicated.
+            await TraktDuplicateAudit.run(client: client, library: library)
+        }
 
         markedPlayed = await markPlayed(plan.markPlayed, userID: profile.userID, profile: profile)
         for batch in TraktSyncPlan.batches(plan.push) {
             guard profile == self.profile else { throw CancellationError() }
             let data = try await client.send(.addHistory(batch))
-            // DIAG(trakt-seasons): raw answer of the push.
-            LogTap.shared.note("[Trakt] DIAG history raw: \(String(decoding: data.prefix(600), as: UTF8.self))")
             snapshot.record(batch)
             pushedAny = true
             Self.logHistoryResult(data, sent: batch)
@@ -259,6 +268,51 @@ final class TraktService {
         cursors.moviesWatchedAt = activities.movies?.watchedAt
         cursors.episodesWatchedAt = activities.episodes?.watchedAt
         return traktMoved ? library : nil
+    }
+
+    /// Fills each watched show's seasons from its progress. A show whose last watch did not move
+    /// since the previous sync reuses the stored answer, so a long history costs one call per show
+    /// once, and one per show that changed after that. Throws rather than return a show without
+    /// its episodes: an empty show reads as "nothing watched" and every episode would be pushed.
+    private func withEpisodes(_ heads: [TraktWatchedShow], client: TraktClient,
+                              profile: ProfileKey) async throws -> ([TraktWatchedShow], complete: Bool) {
+        struct Stored: Codable { let stamp: Date?; let seasons: [TraktWatchedShow.Season] }
+        let stored = TraktCacheStore.load([String: Stored].self, name: TraktCacheStore.showProgress, profile: profile) ?? [:]
+        var next: [String: Stored] = [:]
+        var result: [TraktWatchedShow] = []
+        var toFetch: [(Int, TraktWatchedShow)] = []
+        for head in heads {
+            if let seasons = head.seasons, !seasons.isEmpty {
+                result.append(head)
+            } else if let id = head.show.ids.trakt {
+                if let hit = stored[String(id)], hit.stamp == head.lastWatchedAt {
+                    var show = head
+                    show.seasons = hit.seasons
+                    result.append(show)
+                    next[String(id)] = hit
+                } else {
+                    toFetch.append((id, head))
+                }
+            }
+        }
+        var fetched = 0
+        var complete = true
+        for (id, head) in toFetch {
+            guard profile == self.profile else { throw CancellationError() }
+            let progress = try await client.get(.showProgress(traktID: id), as: TraktShowProgress.self)
+            var show = head
+            show.seasons = progress.watchedSeasons
+            if (head.plays ?? 0) > 0, show.seasons?.isEmpty != false {
+                LogTap.shared.note("[Trakt] \(head.show.title ?? "?") has \(head.plays ?? 0) plays but no watched episode in its progress")
+                complete = false
+            }
+            result.append(show)
+            next[String(id)] = Stored(stamp: head.lastWatchedAt, seasons: show.seasons ?? [])
+            fetched += 1
+        }
+        TraktCacheStore.save(next, name: TraktCacheStore.showProgress, profile: profile)
+        LogTap.shared.note("[Trakt] show progress: \(fetched) read, \(result.count - fetched) reused")
+        return (result, complete)
     }
 
     private func markPlayed(_ itemIDs: [String], userID: String, profile: ProfileKey) async -> Int {
@@ -411,7 +465,7 @@ final class TraktService {
         switch item.type {
         case .movie:
             guard let ids = TraktIDs(item: item) else { return nil }
-            body.movies = [.init(ids: ids.external, watchedAt: watchedAt)]
+            body.movies = [.init(ids: ids.external, watchedAt: watchedAt.map(TraktDate.wire))]
         case .series:
             guard let ids = TraktIDs(item: item) else { return nil }
             let seasons = seasonNumber.map { [TraktSyncBody.Show.Season(number: $0, episodes: nil)] }
@@ -420,7 +474,7 @@ final class TraktService {
             guard let season = item.parentIndexNumber, let number = item.indexNumber,
                   let showIDs = await seriesIDs(for: item) else { return nil }
             body.shows = [.init(ids: showIDs.external, seasons: [
-                .init(number: season, episodes: [.init(number: number, watchedAt: watchedAt)])
+                .init(number: season, episodes: [.init(number: number, watchedAt: watchedAt.map(TraktDate.wire))])
             ])]
         default:
             return nil

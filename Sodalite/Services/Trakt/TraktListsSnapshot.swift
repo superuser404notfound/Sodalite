@@ -81,6 +81,8 @@ enum TraktCacheStore {
     }
 
     static let lists = "lists.json"
+    /// Per show: the `last_watched_at` the progress was read at, and its watched seasons.
+    static let showProgress = "show-progress.json"
     /// v2: a v1 snapshot was built from the seasonless /sync/watched answer and holds no Trakt
     /// episodes, so it must not count as a previous sync. A new name makes the next sync a first one.
     static let watched = "watched-v2.json"

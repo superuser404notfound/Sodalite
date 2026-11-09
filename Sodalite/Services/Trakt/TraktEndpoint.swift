@@ -21,6 +21,8 @@ enum TraktEndpoint: APIEndpoint {
     case lastActivities
     case watchedMovies
     case watchedShows
+    case showProgress(traktID: Int)
+    case episodeHistory(page: Int)
     case addHistory(TraktSyncBody)
     case removeHistory(TraktSyncBody)
     case ratings(type: String)
@@ -55,6 +57,8 @@ enum TraktEndpoint: APIEndpoint {
         // hundreds), so every watched episode looked unwatched and was pushed again each sync.
         case .watchedMovies: "/users/me/watched/movies"
         case .watchedShows: "/users/me/watched/shows"
+        case .showProgress(let id): "/shows/\(id)/progress/watched"
+        case .episodeHistory: "/sync/history/episodes"
         case .addHistory: "/sync/history"
         case .removeHistory: "/sync/history/remove"
         case .ratings(let type): "/sync/ratings/\(type)"
@@ -80,7 +84,8 @@ enum TraktEndpoint: APIEndpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .userSettings, .lastActivities, .watchedMovies, .watchedShows, .ratings, .watchlist,
+        case .userSettings, .lastActivities, .watchedMovies, .watchedShows, .showProgress, .episodeHistory,
+             .ratings, .watchlist,
              .lists, .listItems:
             .get
         default:
@@ -106,6 +111,12 @@ enum TraktEndpoint: APIEndpoint {
     var queryItems: [URLQueryItem]? {
         switch self {
         case .watchlist, .listItems: [URLQueryItem(name: "extended", value: "full")]
+        // Specials and hidden seasons in, so season 0 and hidden seasons match what Jellyfin holds.
+        case .showProgress:
+            [URLQueryItem(name: "specials", value: "true"), URLQueryItem(name: "count_specials", value: "false"),
+             URLQueryItem(name: "hidden", value: "true")]
+        case .episodeHistory(let page):
+            [URLQueryItem(name: "page", value: String(page)), URLQueryItem(name: "limit", value: "250")]
         default: nil
         }
     }
