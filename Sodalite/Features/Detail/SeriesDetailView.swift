@@ -1338,6 +1338,7 @@ struct SeriesDetailView: View {
         withAnimation(.easeInOut(duration: 0.3)) { selectedEpisode = next }
         episodeAim.sessionMoved(to: next.id)
         episodeAdvance = (from: finished.id, to: next.id)
+        LogTap.shared.note("[EpisodeRow] advance from=\(finished.id) to=\(next.id) playTarget=\(playTarget(vm: vm)?.id ?? "nil")")
         return next
     }
 
@@ -1807,6 +1808,10 @@ struct SeriesDetailView: View {
                                 focusedEpisodeID = target
                             }
                         }
+                    }
+                    // Sodalite#230: the ring was seen on the finished card while Play named the successor.
+                    .onChange(of: playTargetID) { old, new in
+                        LogTap.shared.note("[EpisodeRow] ring \(old ?? "nil") -> \(new ?? "nil") rows=\(vm.episodes.count)")
                     }
                     .onChange(of: pendingEpisodeFocus) { _, target in
                         guard let target else { return }
