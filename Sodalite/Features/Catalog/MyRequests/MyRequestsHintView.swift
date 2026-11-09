@@ -18,7 +18,11 @@ struct MyRequestsHintView: View {
                 }
                 .padding(.vertical, 8)
             }
+            #if os(tvOS)
+            // Room for the focus lift. Without a focus engine there is nothing to make room for, and
+            // the unclipped list ran on under the Done button.
             .scrollClipDisabled()
+            #endif
             Button(action: onDone) {
                 Text("catalog.notify.mine.panel.done")
                     .frame(maxWidth: .infinity)
