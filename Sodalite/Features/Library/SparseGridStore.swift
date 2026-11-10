@@ -159,7 +159,7 @@ final class SparseGridStore {
                 let response = try? await fetch(start + filled, pageSize - filled)
                 guard !Task.isCancelled, generation == self.generation else { return }
                 guard let response else { failed = true; break }
-                self.apply(response, at: start + filled, page: page, isFirstChunk: filled == 0)
+                self.apply(response, at: start + filled, requested: pageSize - filled, page: page, isFirstChunk: filled == 0)
                 filled += response.items.count
                 if response.items.isEmpty || start + filled >= response.totalRecordCount { break }
             }
@@ -172,14 +172,19 @@ final class SparseGridStore {
         }
     }
 
-    private func apply(_ response: JellyfinItemsResponse, at start: Int, page: Int, isFirstChunk: Bool) {
-        let total = response.totalRecordCount
+    private func apply(_ response: JellyfinItemsResponse, at start: Int, requested: Int, page: Int, isFirstChunk: Bool) {
+        let end = start + response.items.count
+        // A full answer whose total stops exactly at its last item may be a server that reports only
+        // what it served (AIOMetadata does this for a cross-library list). One pending slot past it
+        // asks for the next page once it scrolls into view; an empty answer there ends the grid.
+        let endsAtFullAnswer = end >= response.totalRecordCount && response.items.count >= requested
+        let total = endsAtFullAnswer ? end + 1 : response.totalRecordCount
         if slots.count < total {
             slots += Array(repeating: .pending, count: total - slots.count)
-        } else if slots.count > total, start + response.items.count >= total {
-            // Only a response that reaches the end of the list may shorten the grid. Before that its
-            // total can be a lower bound (AIOMetadata's lookahead), and a refetch of page 0 would cut
-            // every page already read behind it.
+        } else if slots.count > total, end >= total, !endsAtFullAnswer {
+            // Only a response that provably reaches the end of the list may shorten the grid. Before
+            // that its total can be a lower bound (AIOMetadata's lookahead), and a refetch of page 0
+            // would cut every page already read behind it.
             slots.removeLast(slots.count - total)
             loadedPages = loadedPages.filter { $0 * pageSize < total }
         }
