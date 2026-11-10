@@ -25,8 +25,18 @@ struct SubtitleOffsetTests {
         #expect(SubtitleOffset.stepped(-10, by: -1) == -10)
     }
 
-    @Test("the engine is told the full reach: the per-title offset plus the largest global delay")
-    func engineReachCoversBothControls() {
-        #expect(SubtitleOffset.engineReach == 15)
+    @Test("the largest shift is the per-title offset plus the largest global delay")
+    func maximumShiftCoversBothControls() {
+        #expect(SubtitleOffset.maximumShift == 15)
+    }
+
+    /// AetherEngine#1015: a reach above 0 runs the engine's forward prefetch, a second download.
+    @Test("only an advance gives the engine a reach, capped at the largest shift")
+    func engineReachFollowsTheAdvance() {
+        #expect(SubtitleOffset.engineReach(effectiveDelay: 0) == 0)
+        #expect(SubtitleOffset.engineReach(effectiveDelay: 2.5) == 0)
+        #expect(SubtitleOffset.engineReach(effectiveDelay: -1.5) == 1.5)
+        #expect(SubtitleOffset.engineReach(effectiveDelay: -40) == 15)
+        #expect(SubtitleOffset.engineReach(effectiveDelay: .nan) == 0)
     }
 }

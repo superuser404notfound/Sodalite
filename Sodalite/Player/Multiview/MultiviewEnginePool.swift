@@ -24,7 +24,7 @@ final class MultiviewEnginePool {
         let engine = try make()
         engine.deactivatesAudioSessionOnStop = true
         engine.logTag = "tile\(slot + 1)"
-        engine.maximumSubtitleOffsetSeconds = SubtitleOffset.engineReach
+        engine.maximumSubtitleOffsetSeconds = SubtitleOffset.maximumShift
         secondaries[slot] = engine
         return engine
     }

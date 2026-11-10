@@ -327,6 +327,14 @@ final class PlayerViewModel {
         LogTap.shared.note(String(format: "[Subtitles] per-title offset %.1fs (global %.2fs, ass=%@)",
                                   seconds, preferences.subtitleDelaySeconds, assRenderer != nil ? "yes" : "no"))
         assCoordinator.refreshTimeOffset()
+        applySubtitleOffsetReach()
+    }
+
+    /// AetherEngine#1015: tells the engine how far ahead of the playhead this title's subtitles can be
+    /// wanted. Above 0 the engine runs its forward subtitle prefetch, which on a remote MKV or MP4
+    /// downloads the video a second time, so a delay of zero or later keeps it off.
+    func applySubtitleOffsetReach() {
+        player.maximumSubtitleOffsetSeconds = SubtitleOffset.engineReach(effectiveDelay: effectiveSubtitleDelay)
     }
 
     /// In-player subtitle-search reachability; VOD-only (live has no searchable library item).
@@ -548,7 +556,9 @@ final class PlayerViewModel {
 
     // MARK: - Dependencies
 
-    var item: JellyfinItem
+    var item: JellyfinItem {
+        didSet { applySubtitleOffsetReach() }
+    }
     let player: AetherEngine
     /// Sodalite#175: the shared-output role every live load on this engine declares. A promoted tile flips it to `.primary`.
     var sharedOutputRole: SharedOutputRole
@@ -1188,6 +1198,7 @@ final class PlayerViewModel {
         guard !Task.isCancelled else { return }
         isTearingDown = false
         didStopPlayback = false
+        applySubtitleOffsetReach()
         // Everything a previous attempt on this view model armed (a retry, an item recovery): its sinks
         // would double every handler, and a carried-over start flag would swallow this session's start.
         cancellables.removeAll()
