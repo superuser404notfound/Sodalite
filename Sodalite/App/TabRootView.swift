@@ -38,6 +38,7 @@ struct TabRootView: View {
     @Environment(\.appState) private var appState
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var showSettings = false
     /// Sodalite#81: on a compact iPhone the downloads open from a button beside the gear instead of
     /// a tab. A sixth tab sends the bar into iOS's "More" list, which hid Search and crashed on Music.
@@ -240,6 +241,9 @@ struct TabRootView: View {
             } else {
                 ActiveUserBadge(rememberedCount: rememberedProfileCount,
                                 onTap: { appState.requestProfilePicker = true })
+                    // The badge's own -4 lift is tuned against iPad's status-bar inset. A Pro Max in
+                    // landscape is regular width with a top inset of 0, so it sat on the screen edge.
+                    .padding(.top, vSizeClass == .compact ? 12 : 0)
             }
             #elseif os(macOS)
             ActiveUserBadge(rememberedCount: rememberedProfileCount,

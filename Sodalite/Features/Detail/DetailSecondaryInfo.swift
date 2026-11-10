@@ -69,9 +69,20 @@ struct DetailActionRow<Content: View>: View {
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
+    /// Every iOS width wraps, not just compact: a Pro Max in landscape reports a REGULAR width, and
+    /// there an unwrapped HStack of a long resume label plus ten secondaries outgrew the screen,
+    /// widened the whole page and clipped it on both sides. FlowLayout keeps one line while it fits.
+    private var wraps: Bool {
+        #if os(iOS)
+        true
+        #else
+        hSizeClass == .compact
+        #endif
+    }
+
     var body: some View {
         Group {
-            if hSizeClass == .compact {
+            if wraps {
                 FlowLayout(alignment: alignment, spacing: spacing, balanced: balanced) {
                     content()
                 }
