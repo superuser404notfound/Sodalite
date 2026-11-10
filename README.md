@@ -96,7 +96,7 @@ Almost everything works on every device. A few things are specific to one platfo
 
 | | Apple TV | iPhone & iPad | Mac |
 |---|:---:|:---:|:---:|
-| Library, Direct Play, HDR, all subtitle formats | ✓ | ✓ | ✓ |
+| Library, Direct Play, HDR, subtitles | ✓ | ✓ | ✓ |
 | Seerr requests, Trakt, Live TV, music | ✓ | ✓ | ✓ |
 | Watch Stats, parental controls, 26 languages | ✓ | ✓ | ✓ |
 | Picture in Picture | ✓ | ✓ | ✓ |
