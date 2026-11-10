@@ -65,6 +65,7 @@ struct LaunchProfilePickerView: View {
             }
             #endif
             .screenContentInset()
+            .scrollsWhenTooTall()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $navigateToAddProfile) {
                 UserPickerView(server: server)
@@ -641,4 +642,25 @@ struct RememberedProfileCard: View {
             token: user.token
         )
     }
+}
+
+/// iOS: centred while it fits, scrollable once it does not. The picker is a fixed column, and in phone
+/// landscape it is taller than the screen, so it was clipped at the top and the bottom.
+private struct ScrollsWhenTooTall: ViewModifier {
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        GeometryReader { geo in
+            ScrollView(.vertical) {
+                content.frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        #else
+        content
+        #endif
+    }
+}
+
+private extension View {
+    func scrollsWhenTooTall() -> some View { modifier(ScrollsWhenTooTall()) }
 }

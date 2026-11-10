@@ -25,6 +25,15 @@ enum PINEntryMode: Equatable {
 /// 4-digit PIN pad. .unlock verifies through dependencies.verifyPIN(_:for:), which resolves the reason to its door; .setup collects+confirms and persists to the target, refusing a PIN that already opens another door. "Forgot PIN?" opens recovery, which either clears this profile's own PIN or flips the pad into collecting a new Guardian PIN.
 struct PINEntryView: View {
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.verticalSizeClass) private var vSizeClass
+
+    private var isPhoneLandscape: Bool {
+        #if os(iOS)
+        vSizeClass == .compact
+        #else
+        false
+        #endif
+    }
 
     let mode: PINEntryMode
     /// Called with true (unlocked / set) or false (cancelled).
@@ -59,42 +68,25 @@ struct PINEntryView: View {
         ZStack {
             Color.black.opacity(0.92).ignoresSafeArea()
 
-            VStack(spacing: 40) {
-                Text(title)
-                    .font(.title2).fontWeight(.semibold)
-
-                dots
-
-                if let message {
-                    Text(message)
-                        .font(.callout)
-                        .foregroundStyle(isError ? Color.red : Color.secondary)
-                        .multilineTextAlignment(.center)
-                }
-
-                if let remaining = lockoutRemaining {
-                    Text("parental.pin.lockedOut \(remaining)")
-                        .font(.callout)
-                        .foregroundStyle(.red)
-                }
-
-                digitPad
-                    .disabled(lockoutRemaining != nil)
-                    .opacity(lockoutRemaining != nil ? 0.4 : 1)
-
-                HStack(spacing: 24) {
-                    actionButton("common.cancel", systemImage: "xmark") {
-                        onComplete(false)
+            // Phone landscape is ~440 pt tall and the stacked layout needs ~560, so the pad moves
+            // beside the title and the actions there instead of below them.
+            if isPhoneLandscape {
+                HStack(spacing: 64) {
+                    VStack(spacing: 28) {
+                        header
+                        actions
                     }
-                    if case .unlock = mode, !collectingNewPIN {
-                        actionButton("parental.pin.forgot", systemImage: "questionmark.circle") {
-                            showRecovery = true
-                        }
-                    }
+                    pad
                 }
-                .focusSectionCompat()
+                .screenContentInset()
+            } else {
+                VStack(spacing: 40) {
+                    header
+                    pad
+                    actions
+                }
+                .screenContentInset()
             }
-            .screenContentInset()
         }
         .onAppear { lockoutUntil = currentDoorLockout }
         // Only advance `now` (and re-render) while a lockout countdown is actually running;
@@ -160,6 +152,46 @@ struct PINEntryView: View {
     }
 
     // MARK: Digit pad
+
+    @ViewBuilder private var header: some View {
+        Text(title)
+            .font(.title2).fontWeight(.semibold)
+
+        dots
+
+        if let message {
+            Text(message)
+                .font(.callout)
+                .foregroundStyle(isError ? Color.red : Color.secondary)
+                .multilineTextAlignment(.center)
+        }
+
+        if let remaining = lockoutRemaining {
+            Text("parental.pin.lockedOut \(remaining)")
+                .font(.callout)
+                .foregroundStyle(.red)
+        }
+    }
+
+    private var pad: some View {
+        digitPad
+            .disabled(lockoutRemaining != nil)
+            .opacity(lockoutRemaining != nil ? 0.4 : 1)
+    }
+
+    private var actions: some View {
+        HStack(spacing: 24) {
+            actionButton("common.cancel", systemImage: "xmark") {
+                onComplete(false)
+            }
+            if case .unlock = mode, !collectingNewPIN {
+                actionButton("parental.pin.forgot", systemImage: "questionmark.circle") {
+                    showRecovery = true
+                }
+            }
+        }
+        .focusSectionCompat()
+    }
 
     private var digitPad: some View {
         VStack(spacing: 20) {
