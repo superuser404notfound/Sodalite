@@ -60,6 +60,19 @@ struct SubtitleOverlayView: View {
     /// follow it there instead of staying on the aspect-fit band the video would occupy in
     /// `.original` (#120).
     var pictureMode: PlaybackPreferences.PictureMode = .original
+    /// Which share of the cues this instance draws. A folded iPhone Duo splits them over two
+    /// instances: everything bound to the picture stays on it, the plain text lines move below the fold.
+    var role: Role = .all
+
+    enum Role {
+        /// Every cue, on the picture.
+        case all
+        /// Bitmaps, styled ASS and text cues that carry their own placement; the shared text stack is
+        /// drawn by a `.textStackOnly` instance elsewhere.
+        case pictureBound
+        /// Only the shared bottom stack of plain text lines, centred in this view's frame.
+        case textStackOnly
+    }
 
     /// Fixed bottom inset for text cues while controls are visible, above the 300 pt gradient band.
     private static let controlsVisibleBottomInset: CGFloat = 280
@@ -78,7 +91,14 @@ struct SubtitleOverlayView: View {
     var body: some View {
         // libass styling used ONLY without a secondary track; with one the primary
         // falls back to the plain-text overlay so both share one stack (issue #47).
-        if let assRenderer, !hasSecondaryTrack {
+        if role == .textStackOnly {
+            if assRenderer == nil || hasSecondaryTrack {
+                GeometryReader { geo in
+                    textCues(in: geo.size, safeAreaInsets: EdgeInsets())
+                }
+                .allowsHitTesting(false)
+            }
+        } else if let assRenderer, !hasSecondaryTrack {
             // Same pin as the bitmap layer: AVKit's invisible chrome widens contentOverlayView's
             // safe-area insets around an audio-switch reload, and the libass canvas follows the
             // bounds, so every line was redrawn on a shorter canvas, mid-screen and resized.
@@ -179,7 +199,11 @@ struct SubtitleOverlayView: View {
                     let display = isASSSecondaryActive ? strippedASSText(raw) : raw
                     return display.isEmpty ? nil : display
                 }
-                if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
+                if role == .textStackOnly {
+                    if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
+                        centredStack(primary: primaryRenderLines, secondary: secondaryLines, in: size)
+                    }
+                } else if role == .all, !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
                     stackedText(
                         primary: primaryRenderLines,
                         secondary: secondaryLines,
@@ -187,8 +211,10 @@ struct SubtitleOverlayView: View {
                         safeAreaInsets: safeAreaInsets
                     )
                 }
-                ForEach(placedCues, id: \.id) { cue in
-                    placedText(cue, in: size)
+                if role != .textStackOnly {
+                    ForEach(placedCues, id: \.id) { cue in
+                        placedText(cue, in: size)
+                    }
                 }
             }
     }
@@ -280,6 +306,26 @@ struct SubtitleOverlayView: View {
         .padding(.bottom, placement.padding)
         .frame(width: size.width, height: size.height, alignment: .bottom)
         .offset(y: placement.offsetBelowSafeArea)
+        .transition(.opacity)
+    }
+
+    /// The stack as drawn below the fold of an iPhone Duo: the same lines and styling, centred in a
+    /// band of its own instead of anchored above the picture's bottom edge.
+    private func centredStack(primary: [RenderLine], secondary: [String], in size: CGSize) -> some View {
+        let (pointSize, _) = textMetrics(in: size)
+        return VStack(spacing: 6) {
+            ForEach(Array(secondary.enumerated()), id: \.offset) { _, line in
+                styledText(line, pointSize: pointSize)
+            }
+            ForEach(primary) { line in
+                switch line {
+                case .plain(_, let text): styledText(text, pointSize: pointSize)
+                case .rich(_, let runs): styledRuns(runs, pointSize: pointSize)
+                }
+            }
+        }
+        .frame(maxWidth: max(0, size.width - 40))
+        .frame(width: size.width, height: size.height)
         .transition(.opacity)
     }
 

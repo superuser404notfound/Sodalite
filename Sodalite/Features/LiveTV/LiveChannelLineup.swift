@@ -23,4 +23,16 @@ struct LiveChannelLineup: Equatable, Sendable {
         let remaining = LiveChannelLineup(channels: channels.filter { $0.id == channelID || !skipped.contains($0.id) })
         return remaining.neighbour(of: channelID, offset: offset)
     }
+
+    /// The step `neighbour(of:offset:skipping:)` takes from `channelID` to land on `targetID`, the
+    /// shorter way round. Nil when either is missing or skipped, or when they are the same channel.
+    func offset(from channelID: String, to targetID: String, skipping skipped: Set<String> = []) -> Int? {
+        let remaining = channels.filter { $0.id == channelID || !skipped.contains($0.id) }
+        guard channelID != targetID,
+              let from = remaining.firstIndex(where: { $0.id == channelID }),
+              let to = remaining.firstIndex(where: { $0.id == targetID }) else { return nil }
+        let count = remaining.count
+        let forward = ((to - from) % count + count) % count
+        return forward <= count / 2 ? forward : forward - count
+    }
 }
