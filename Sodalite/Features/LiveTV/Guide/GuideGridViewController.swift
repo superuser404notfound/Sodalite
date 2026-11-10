@@ -20,6 +20,11 @@ final class GuideGridViewController: UIViewController,
         /// The layout asks for this per cell, so deriving it from dates on every call would be the
         /// same walk repeated for every visible column.
         let spans: [(x: CGFloat, width: CGFloat)]
+
+        /// What airs now, never a gap placeholder: that one has no program to hand the player.
+        var airing: JellyfinProgram? {
+            programs.first { !$0.isSynthesized && $0.isAiring(at: Date()) }
+        }
     }
 
     let model: GuideViewModel
@@ -518,9 +523,22 @@ final class GuideGridViewController: UIViewController,
 
     private func rebuildRows() {
         rows = model.channels.map { channel in
-            let programs = model.programs(for: channel.id)
+            let programs = withGapPlaceholders(model.programs(for: channel.id), channel: channel)
             return Row(channel: channel, programs: programs,
                        spans: GuideRowMath.spans(programs.map(\.guideTimeRange), axis: model.axis))
+        }
+    }
+
+    /// The row's programs with placeholder entries where the EPG says nothing for half an hour or
+    /// more (`GuideRowMath.entriesFillingGaps`), so a vertical move always has a cell at the anchor.
+    private func withGapPlaceholders(_ programs: [JellyfinProgram],
+                                     channel: JellyfinChannel) -> [JellyfinProgram] {
+        GuideRowMath.entriesFillingGaps(programs.map(\.guideTimeRange), axis: model.axis,
+                                        segmentMinutes: Self.placeholderMinutes).map { entry in
+            switch entry {
+            case .program(let index): programs[index]
+            case .gap(let range): gapProgram(for: channel, range: range)
+            }
         }
     }
 
@@ -628,13 +646,14 @@ final class GuideGridViewController: UIViewController,
             let index = Int(minutes / Double(Self.placeholderMinutes))
             return min(max(0, index), placeholderCount - 1)
         }
-        return model.programIndex(coveringOrNearest: model.anchorTime, in: row.channel.id)
+        return GuideRowMath.index(coveringOrNearest: model.anchorTime,
+                                  in: row.programs.map(\.guideTimeRange))
     }
 
     private func configure(_ cell: GuideProgramCell, at indexPath: IndexPath) {
         guard indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
-        if row.programs.isEmpty {
+        if row.programs.isEmpty || isGap(row, item: indexPath.item) {
             cell.configure(title: NSLocalizedString("livetv.noProgramInfo", comment: ""),
                            isAiring: false, hasTimer: false, tint: tint,
                            dependencies: dependencies, theme: theme)
@@ -688,6 +707,22 @@ final class GuideGridViewController: UIViewController,
         return formatter
     }()
 
+    func isGap(_ row: Row, item: Int) -> Bool {
+        item < row.programs.count && row.programs[item].isSynthesized
+    }
+
+    /// Placeholder for a stretch of a row the EPG does not cover. The "live-" id prefix marks it
+    /// `isSynthesized`, so the hero and the program popover treat it like the one below.
+    private func gapProgram(for channel: JellyfinChannel, range: GuideTimeRange) -> JellyfinProgram {
+        JellyfinProgram(
+            id: "live-\(channel.id)-\(Int(range.start.timeIntervalSince1970))", channelId: channel.id,
+            channelName: channel.name, name: NSLocalizedString("livetv.noProgramInfo", comment: ""),
+            overview: nil, startDate: range.start, endDate: range.end, genres: nil, imageTags: nil,
+            isLive: nil, isNews: nil, isMovie: nil, isSeries: nil,
+            isKids: nil, isSports: nil, seriesName: nil, parentIndexNumber: nil,
+            indexNumber: nil, episodeTitle: nil, timerId: nil, seriesTimerId: nil)
+    }
+
     /// Placeholder program for a channel with no EPG data. The id does not exist server-side, so
     /// `isSynthesized` keeps the record affordances hidden.
     func synthesizedProgram(for channel: JellyfinChannel) -> JellyfinProgram {
@@ -712,7 +747,7 @@ final class GuideGridViewController: UIViewController,
             super.pressesBegan(presses, with: event)
             return
         }
-        onPlayChannel(row.channel, row.programs.first { $0.isAiring(at: Date()) })
+        onPlayChannel(row.channel, row.airing)
     }
     #endif
 }

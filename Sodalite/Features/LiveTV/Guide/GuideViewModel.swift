@@ -290,25 +290,6 @@ final class GuideViewModel {
         programsByChannel[channelID] ?? []
     }
 
-    /// Index of the program covering `time` on that channel, or the nearest one when the row has a
-    /// gap there. nil when the row has no programs at all.
-    func programIndex(coveringOrNearest time: Date, in channelID: String) -> Int? {
-        let programs = programs(for: channelID)
-        guard !programs.isEmpty else { return nil }
-        var best = 0
-        var bestDistance = TimeInterval.greatestFiniteMagnitude
-        for (index, program) in programs.enumerated() {
-            guard let start = program.startDate, let end = program.endDate else { continue }
-            if time >= start && time < end { return index }
-            let distance = time < start ? start.timeIntervalSince(time) : time.timeIntervalSince(end)
-            if distance < bestDistance {
-                bestDistance = distance
-                best = index
-            }
-        }
-        return best
-    }
-
     // MARK: - Anchor
 
     func anchorTime(at now: Date) -> Date {
@@ -359,8 +340,11 @@ enum GuideAnchor: Equatable {
     /// The anchor a horizontal move onto a cell spanning `start..<end` sets. Its start, not its
     /// midpoint, so a long block passed on the way does not drag the time hours ahead; clamped to
     /// the viewport so a block reaching in from the left aims where the user is looking.
+    ///
+    /// Rounded to the minute: both dates are read back from x positions, which lands a fraction of a
+    /// second either side of the minute the ruler shows (Sodalite#221).
     static func focused(start: Date, visibleStart: Date, now: Date) -> GuideAnchor {
-        start <= now ? .live : .at(max(start, visibleStart))
+        start <= now ? .live : .at(GuideRowMath.roundToMinute(max(start, visibleStart)))
     }
 }
 
