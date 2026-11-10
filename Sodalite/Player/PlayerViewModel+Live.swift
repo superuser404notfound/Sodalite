@@ -1230,6 +1230,9 @@ extension PlayerViewModel {
                 }
                 return
             }
+            // The retune raised the flag and only the error path used to lower it, so a recovered
+            // channel kept its spinner over a running picture (multiview tile, 2026-11-10).
+            hostLoadActive = false
             await reportStart()
             startProgressReporting()
         } catch is CancellationError {
