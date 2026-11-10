@@ -73,7 +73,16 @@ struct LiveRailLabels: View {
 
     /// Whether the clock under the knob is drawn, or has stepped aside near either end of the rail.
     /// The tvOS position slot reads this too (Sodalite#233), so the two never show the same time.
+    ///
+    /// An unmeasured rail (width 0) is judged by the share alone. The tvOS controls are rebuilt on
+    /// every appearance, so the slot's measurement starts at 0 each time, and answering "keep the
+    /// time" there flashed it in the slot and faded it out a frame later (Sodalite#233 round 2). The
+    /// 60pt floor only binds on a rail under 273pt, never on tvOS, so the share gives the same answer.
     static func showsPlayheadClock(progress: Float, width: CGFloat) -> Bool {
+        guard width > 0 else {
+            let share = max(0, min(1, progress))
+            return share >= 0.22 && share <= 0.78
+        }
         let margin = max(60, width * 0.22)
         let x = knobX(progress: progress, width: width)
         return x >= margin && x <= width - margin

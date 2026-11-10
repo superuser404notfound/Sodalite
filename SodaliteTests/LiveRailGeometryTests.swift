@@ -254,8 +254,12 @@ struct LiveTransportLabelTests {
         #expect(LiveRailLabels.showsPlayheadClock(progress: 0.25, width: tv))
         #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.1, width: tv))
         #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.9, width: tv))
-        // Before the rail has been measured, the slot keeps the time.
-        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.5, width: 0))
+        // Before the rail has been measured the share alone decides, so the slot does not flash the
+        // time on the first frame of every appearance (round 2) and agrees with the measured answer.
+        for progress: Float in [0.05, 0.21, 0.25, 0.5, 0.77, 0.9] {
+            #expect(LiveRailLabels.showsPlayheadClock(progress: progress, width: 0)
+                    == LiveRailLabels.showsPlayheadClock(progress: progress, width: tv))
+        }
     }
 
     @Test("both bars format a wall clock the same way")
