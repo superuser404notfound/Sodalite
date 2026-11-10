@@ -516,10 +516,7 @@ struct RememberedProfileCard: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @FocusState private var isFocused: Bool
 
-    @Environment(\.verticalSizeClass) private var vSizeClass
-    /// Phone landscape is compact HEIGHT (and a Pro Max regular width), where 160 pt cards plus the
-    /// header and the server row outgrow the 430 pt screen.
-    private var diameter: CGFloat { hSizeClass == .compact || vSizeClass == .compact ? 110 : 160 }
+    private var diameter: CGFloat { hSizeClass == .compact ? 110 : 160 }
 
     var body: some View {
         // The menu is attached or it is not; no branch inside it, so a card never swaps identity
