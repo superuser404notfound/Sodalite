@@ -145,6 +145,11 @@ extension GuideGridViewController {
         }
 
         if collectionView === columnView {
+            // Scrolling the column moves the rows under the grid's remembered cell, and that
+            // memory outranks every other answer, so Right jumped back to the row the user left
+            // the grid from. Off while the column holds focus, Right picks the cell beside the
+            // focused channel instead.
+            gridView.remembersLastFocusedIndexPath = false
             // The column is where the restore actually lands, so it releases the chrome as well.
             onGridFocused?()
             model.didEnterGrid = true
@@ -156,6 +161,7 @@ extension GuideGridViewController {
         }
 
         guard collectionView === gridView else { return }
+        gridView.remembersLastFocusedIndexPath = true
         onGridFocused?()
         model.didEnterGrid = true
         if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
