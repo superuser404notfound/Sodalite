@@ -128,6 +128,7 @@ final class PlayerHostController: AVPlayerViewController {
     private var externalScreenObservers: [NSObjectProtocol] = []
     /// Sodalite#189: the software path's picture on a wired external screen.
     private let externalSoftwareVideo = ExternalSoftwareVideoWindowController()
+    private let externalDisplayAccessory = ExternalDisplaySceneAccessory()
     #endif
 
     init(
@@ -535,6 +536,9 @@ final class PlayerHostController: AVPlayerViewController {
         aetherView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewModel.player.bind(view: aetherView)
         aetherViewMounted = true
+        #if os(iOS)
+        externalDisplayAccessory.setActive(true, on: self)
+        #endif
     }
 
     private func unmountAetherViewIfNeeded() {
@@ -543,6 +547,7 @@ final class PlayerHostController: AVPlayerViewController {
             externalSoftwareVideo.tearDown(engine: viewModel.player)
             syncExternalPlaybackDestination()
         }
+        externalDisplayAccessory.setActive(false, on: self)
         #endif
         guard aetherViewMounted else { return }
         viewModel.player.unbind(view: aetherView)
