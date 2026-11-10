@@ -176,20 +176,20 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// the backdrop + scrims stay full-bleed. Read from the window (the overlay is full-bleed, so the
     /// environment inset is gone). In landscape the island is on one side only, so only that side is
     /// inset and the island itself covers that margin; ~0 in portrait / iPad / tvOS (no change).
-    private var safeLeading: CGFloat {
+    ///
+    /// Held in state and re-read on every size change rather than computed in `body`: the body
+    /// re-runs on rotation because the size class flips, and at that moment the window still reports
+    /// the portrait insets (left 0). Nothing re-ran it afterwards, so the page sometimes stayed laid
+    /// out under the island until something else invalidated it.
+    @State private var safeLeading: CGFloat = 0
+    @State private var safeTrailing: CGFloat = 0
+
+    private func refreshWindowInsets() {
         #if os(iOS)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets.left ?? 0
-        #else
-        0
-        #endif
-    }
-    private var safeTrailing: CGFloat {
-        #if os(iOS)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets.right ?? 0
-        #else
-        0
+        let insets = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets ?? .zero
+        if safeLeading != insets.left { safeLeading = insets.left }
+        if safeTrailing != insets.right { safeTrailing = insets.right }
         #endif
     }
 
@@ -335,6 +335,15 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         } action: { _, height in
             containerHeight = height
         }
+        // The window's insets can lag the first layout pass of a rotation, so read once now and once
+        // more after the pass has settled.
+        .onGeometryChange(for: CGSize.self) { proxy in
+            proxy.size
+        } action: { _ in
+            refreshWindowInsets()
+            DispatchQueue.main.async { refreshWindowInsets() }
+        }
+        .onAppear { refreshWindowInsets() }
         // Hold the hint back through the cover's present transition, so a viewer who immediately
         // presses down never sees it appear.
         .task {
