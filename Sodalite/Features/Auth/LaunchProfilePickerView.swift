@@ -65,6 +65,7 @@ struct LaunchProfilePickerView: View {
             }
             #endif
             .screenContentInset()
+            .scrollsWhenTooTall()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $navigateToAddProfile) {
                 UserPickerView(server: server)
@@ -515,7 +516,10 @@ struct RememberedProfileCard: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @FocusState private var isFocused: Bool
 
-    private var diameter: CGFloat { hSizeClass == .compact ? 110 : 160 }
+    @Environment(\.verticalSizeClass) private var vSizeClass
+    /// Phone landscape is compact HEIGHT (and a Pro Max regular width), where 160 pt cards plus the
+    /// header and the server row outgrow the 430 pt screen.
+    private var diameter: CGFloat { hSizeClass == .compact || vSizeClass == .compact ? 110 : 160 }
 
     var body: some View {
         // The menu is attached or it is not; no branch inside it, so a card never swaps identity
@@ -641,4 +645,25 @@ struct RememberedProfileCard: View {
             token: user.token
         )
     }
+}
+
+/// iOS: centred while it fits, scrollable once it does not. The picker is a fixed column, and in phone
+/// landscape it is taller than the screen, so it was clipped at the top and the bottom.
+private struct ScrollsWhenTooTall: ViewModifier {
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        GeometryReader { geo in
+            ScrollView(.vertical) {
+                content.frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        #else
+        content
+        #endif
+    }
+}
+
+private extension View {
+    func scrollsWhenTooTall() -> some View { modifier(ScrollsWhenTooTall()) }
 }
