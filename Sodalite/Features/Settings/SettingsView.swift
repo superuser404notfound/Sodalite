@@ -305,7 +305,7 @@ struct SettingsView: View {
             GatedSettingsTile(
                 icon: "rectangle.3.group",
                 title: "settings.tabs.title",
-                subtitle: "settings.tabs.subtitle.short",
+                subtitle: "settings.tabs.subtitle.order",
                 reason: .openParentalSettings,
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {

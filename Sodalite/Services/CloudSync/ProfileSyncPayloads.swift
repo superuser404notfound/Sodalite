@@ -191,6 +191,8 @@ struct ProfileAppearancePayload: Codable, Equatable {
     var uprightArtwork: String? = nil
     /// nil from a build without the poster rating pill, unapplied for the same reason.
     var showPosterRating: Bool? = nil
+    /// nil from a build without tab reordering (Sodalite#235), unapplied for the same reason.
+    var tabOrder: [String]? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -221,7 +223,8 @@ extension ProfileAppearancePayload {
             spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
             pinnedLibraryTabs: a.pinnedLibraryTabs,
             uprightArtwork: a.uprightArtwork.rawValue,
-            showPosterRating: a.showPosterRating
+            showPosterRating: a.showPosterRating,
+            tabOrder: a.tabOrder
         )
     }
 
@@ -251,6 +254,7 @@ extension ProfileAppearancePayload {
             a.uprightArtwork = artwork
         }
         if let showPosterRating { a.showPosterRating = showPosterRating }
+        if let tabOrder { a.setTabOrder(tabOrder) }
     }
 }
 

@@ -94,6 +94,7 @@ final class AppearancePreferences {
         static let hiddenTabsFromNewerBuilds = "appearance.hiddenTabs.newerBuilds"
         static let navigationStyle = "appearance.navigationStyle"
         static let pinnedLibraryTabs = "appearance.pinnedLibraryTabs"
+        static let tabOrder = "appearance.tabOrder"
         static let showPosterBadges = "appearance.showPosterBadges"
         static let showDetailBadges = "appearance.showDetailBadges"
         static let showLibraryNames = "appearance.showLibraryNames"
@@ -252,6 +253,18 @@ final class AppearancePreferences {
         pinnedLibraryTabs = tabs
     }
 
+    /// Sodalite#235. The viewer's tab order as `TabOrder` keys, empty for the default order. Kept
+    /// verbatim, keys this build does not know included, so it syncs back unchanged.
+    var tabOrder: [String] {
+        didSet { store.set(tabOrder.isEmpty ? nil : tabOrder, forKey: Keys.tabOrder) }
+    }
+
+    /// Same rule as the pins: one assignment, none for an unchanged order.
+    func setTabOrder(_ order: [String]) {
+        guard order != tabOrder else { return }
+        tabOrder = order
+    }
+
     var cardScale: CGFloat {
         largeCards ? Self.largeCardScale : 1.0
     }
@@ -344,6 +357,7 @@ final class AppearancePreferences {
             .flatMap(NavigationStyle.init(rawValue:)) ?? .topBar
         self.pinnedLibraryTabs = (store.object(forKey: Keys.pinnedLibraryTabs) as? Data)
             .flatMap { try? JSONDecoder().decode([PinnedLibraryTab].self, from: $0) } ?? []
+        self.tabOrder = store.array(forKey: Keys.tabOrder) as? [String] ?? []
         let storedTabs = store.array(forKey: Keys.hiddenTabs) as? [String] ?? []
         // A tab a newer build hid that this build has since learned: it joins the known ones, or it
         // would show here while still being published as hidden. Written straight to the defaults,
