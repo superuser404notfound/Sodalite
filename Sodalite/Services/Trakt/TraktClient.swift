@@ -187,6 +187,7 @@ final class TraktClient {
         } catch APIError.httpError(let status, _) where status == 429 {
             // Retry-After is not exposed past HTTPClient; Trakt's windows are short.
             try await Task.sleep(for: .seconds(2))
+            if endpoint.isWrite { lastWriteAt = Date() }
             return try await raw(endpoint, bearer: token)
         } catch APIError.httpError(let status, _) where status == 420 {
             throw TraktError.accountLimit
