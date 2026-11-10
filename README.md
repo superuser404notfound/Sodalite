@@ -168,6 +168,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Dolby Vision on panels without it** (experimental, Settings → Playback): the Apple TV can apply the per-frame Dolby Vision data itself instead of sending the static HDR10 layer.
 - **Dolby Atmos**: Dolby Atmos from Dolby Digital Plus tracks lights up your receiver's Atmos sign over Apple TV, and plays as spatial audio on iPhone and iPad where supported.
 - **Lossless height channels from TrueHD and DTS:X**: Apple TV cannot pass TrueHD or DTS-HD to a receiver, so these tracks normally lose their height channels. Sodalite keeps them: the engine renders the track into a 9.1.6 mix and sends it over HDMI as 24-bit PCM, bit for bit (AirPods get Spatial Audio, AirPlay gets Apple Positional Audio). DTS:X IMAX tracks keep their heights too. A film that has such a track opens on it in your language. On by default; switch it off next to Prefer Lossless Audio in Settings → Playback. On a soundbar with legacy ARC, it plays as Dolby Digital Plus 5.1.
+- **Enhanced Upscaling**: sharpens SD and 720p video with on-device machine learning. A player button turns it off and on for the video that is playing.
 - **Surround**: 5.1 and 7.1 with the correct channel layout.
 - **Dialogue Boost, Night Mode and Speakers**: lift voices over music and effects, compress loud scenes (always, or between two hours you set), and fold surround down to stereo or 5.1. In Settings → Playback and in the player's audio menu, per device. While one is on, the track is no longer passed through as its original bitstream.
 
