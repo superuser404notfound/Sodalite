@@ -160,6 +160,7 @@ struct SodaliteApp: App {
         )
         WindowGroup {
             AppRouter()
+                .phoneLandscapeKeepsPhoneLayout()
                 .environment(\.appState, appState)
                 .environment(\.dependencies, dependencies)
                 .environment(\.appearanceTheme, theme)

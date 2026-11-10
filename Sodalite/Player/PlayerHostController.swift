@@ -440,6 +440,7 @@ final class PlayerHostController: AVPlayerViewController {
         )
             .tint(tint)
             .environment(\.appearanceTheme, theme)
+            .phoneLandscapeKeepsPhoneLayout()
         let hosting = UIHostingController(rootView: overlay)
         hosting.view.backgroundColor = .clear
         #if os(iOS)
