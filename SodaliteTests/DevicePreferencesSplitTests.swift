@@ -26,6 +26,21 @@ struct DevicePreferencesSplitTests {
         #expect(defaults.string(forKey: "playback.subtitleFontSize") == nil)
     }
 
+    /// AetherEngine#1018: on tvOS a panel in HDR10 ignores the RPU unless the Profile 5 route composes it,
+    /// so the route is on unless the viewer chose otherwise. A stored value always wins.
+    @Test func dolbyVisionOnHDR10DisplaysDefaultsOnForTVOnlyAndKeepsAChoice() {
+        let defaults = scratch("forceDV")
+        #if os(tvOS)
+        #expect(DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay)
+        #else
+        #expect(!DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay)
+        #endif
+        DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay = false
+        #expect(!DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay)
+        DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay = true
+        #expect(DevicePreferences(store: defaults).forceDolbyVisionOnNonDVDisplay)
+    }
+
     @Test func deviceValuesAreSharedAndKeepTheirOldKeys() {
         let defaults = scratch("shared")
         let device = DevicePreferences(store: defaults)

@@ -92,10 +92,24 @@ final class DevicePreferences {
         didSet { store.set(streamingQualityCellular.rawValue, forKey: Keys.streamingQualityCellular) }
     }
 
-    /// AetherEngine#455, experimental, default OFF. On a display that reports no Dolby Vision, serve a
-    /// Profile 8.1 source as a Profile 5 so AVPlayer composes the DV itself instead of the panel getting
-    /// the static HDR10 base layer. Inert on a display that does Dolby Vision, which is why the settings
-    /// row only appears on the displays it can act on.
+    /// AetherEngine#455. On a display that reports no Dolby Vision, serve a Profile 8.1 source as a
+    /// Profile 5 so AVPlayer composes the DV itself instead of the panel getting the static HDR10 base
+    /// layer. Inert on a display that does Dolby Vision, which is why the settings row only appears on the
+    /// displays it can act on.
+    ///
+    /// Default ON on tvOS since AetherEngine#1018: measured on an Apple TV 4K (tvOS 26.6 and 27.2) at an
+    /// HDR10 panel, tvOS hands such a panel the base layer bit for bit and ignores the RPU (and with it the
+    /// FEL curve fold), while this route applies it with unedited frames identical to the plain route. A
+    /// stored value, set by the viewer, wins. Off elsewhere: every Mac reports no Dolby Vision display and
+    /// already applies the RPU, so the masquerade buys nothing there.
+    static var forceDolbyVisionOnNonDVDisplayDefault: Bool {
+        #if os(tvOS)
+        true
+        #else
+        false
+        #endif
+    }
+
     var forceDolbyVisionOnNonDVDisplay: Bool {
         didSet { store.set(forceDolbyVisionOnNonDVDisplay, forKey: Keys.forceDolbyVisionOnNonDVDisplay) }
     }
@@ -169,7 +183,8 @@ final class DevicePreferences {
             .flatMap(StreamingQuality.init(rawValue:)) ?? .original
         self.streamingQualityCellular = store.string(forKey: Keys.streamingQualityCellular)
             .flatMap(StreamingQuality.init(rawValue:)) ?? .original
-        self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool ?? false
+        self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool
+            ?? Self.forceDolbyVisionOnNonDVDisplayDefault
         self.enhancedUpscaling = store.object(forKey: Keys.enhancedUpscaling) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
