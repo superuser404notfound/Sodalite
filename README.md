@@ -241,8 +241,8 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **Appearance**: artwork style, card size, title logos, badges, and whether ratings show at all. Three free accent colors and Graphite Glass or OLED Black backgrounds. The optional Supporter Pack adds Pastel, Bold, Electric and Cinematic palettes and animated Aurora and Noir backgrounds.
 - **Tab bar or sidebar** (Apple TV): navigate from the bar at the top or from a sidebar that carries your accent color.
-- **Tabs**: choose which tabs show. Turning off Catalog also hides Seerr results in Search, for a family setup.
-- **Libraries as tabs** (Apple TV, iPad): pin a library like Movies as its own tab.
+- **Tabs**: choose which tabs show and in what order. Turning off Catalog also hides Seerr results in Search, for a family setup.
+- **Libraries as tabs** (Apple TV, iPad): pin a library like Movies as its own tab, anywhere between Home and Settings.
 - **Profiles**: keep several sign-ins per server and switch without a password. The picker can come back after the app was in the background. Sign out on all devices revokes a sign-in on the server.
 - **Settings per profile**: each profile has its own playback and appearance settings, tabs, Home rows and sorts, synced through iCloud. Settings that describe the device (buffers, audio output, Dialogue Boost, Night Mode, Top Shelf) stay with the device, and the settings screens say which is which.
 - **Parental controls**: a Guardian PIN, and per profile: opens freely, needs a PIN to open, or needs the PIN to leave. A profile can have its own PIN. The Guardian PIN protects logging out, servers, tabs, Seerr, iCloud and the parental settings.

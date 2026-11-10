@@ -109,7 +109,7 @@ struct TabRootView: View {
             shellTabs.insert(contentsOf: libraries, at: shellTabs.firstIndex(of: .home).map { $0 + 1 } ?? 0)
         }
         #endif
-        return shellTabs
+        return TabOrder.arrange(shellTabs, by: appearance.tabOrder)
     }
 
     /// The iPad drops its pins where its bar turns into the iPhone's (Split View, Slide Over), the

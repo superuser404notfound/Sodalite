@@ -69192,157 +69192,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV a iPadu lze knihovnu připnout jako vlastní kartu a knihovna řazená podle názvu má na okraji lištu A až Z. Knihovny domácích videí se otevírají jako složky. Playlisty zachovávají pořadí z vašeho serveru, u každého dílu ukazují seriál a přehrávají dál od položky, kterou vyberete. Dlouhá kolekce nebo kolekce obsahující další kolekce se otevře jako mřížka, s filtrem Filmy a Seriály, pokud obsahuje obojí."
+            "value" : "Na Apple TV a iPadu lze knihovnu připnout jako vlastní kartu a knihovna řazená podle názvu má na okraji lištu A až Z. Knihovny domácích videí se otevírají jako složky. Playlisty zachovávají pořadí z vašeho serveru, u každého dílu ukazují seriál a přehrávají dál od položky, kterou vyberete. Dlouhá kolekce nebo kolekce obsahující další kolekce se otevře jako mřížka, s filtrem Filmy a Seriály, pokud obsahuje obojí. V Nastavení > Karty lze karty seřadit, jak chcete, včetně připnutých knihoven."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "På Apple TV og iPad kan et bibliotek fastgøres som sin egen fane, og et bibliotek sorteret efter titel har en A til Z-liste i kanten. Biblioteker med hjemmevideoer åbner som mapper. Playlister beholder rækkefølgen fra din server, viser serien for hvert afsnit og afspiller videre fra det punkt, du vælger. En lang samling, eller en der rummer flere samlinger, åbner som et gitter med et filter for film og serier, når den har begge dele."
+            "value" : "På Apple TV og iPad kan et bibliotek fastgøres som sin egen fane, og et bibliotek sorteret efter titel har en A til Z-liste i kanten. Biblioteker med hjemmevideoer åbner som mapper. Playlister beholder rækkefølgen fra din server, viser serien for hvert afsnit og afspiller videre fra det punkt, du vælger. En lang samling, eller en der rummer flere samlinger, åbner som et gitter med et filter for film og serier, når den har begge dele. Under Indstillinger > Faner kan fanerne stå i den rækkefølge, du vil, også fastgjorte biblioteker."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf Apple TV und iPad lässt sich eine Bibliothek als eigener Tab anheften, und eine nach Titel sortierte Bibliothek hat am Rand eine Leiste von A bis Z. Heimvideo-Bibliotheken öffnen sich als Ordner. Playlists behalten die Reihenfolge vom Server, zeigen bei jeder Folge die Serie und spielen ab dem Eintrag weiter, den du wählst. Eine lange Collection oder eine mit weiteren Collections darin öffnet sich als Raster, mit einem Filter für Filme und Serien, wenn sie beides enthält."
+            "value" : "Auf Apple TV und iPad lässt sich eine Bibliothek als eigener Tab anheften, und eine nach Titel sortierte Bibliothek hat am Rand eine Leiste von A bis Z. Heimvideo-Bibliotheken öffnen sich als Ordner. Playlists behalten die Reihenfolge vom Server, zeigen bei jeder Folge die Serie und spielen ab dem Eintrag weiter, den du wählst. Eine lange Collection oder eine mit weiteren Collections darin öffnet sich als Raster, mit einem Filter für Filme und Serien, wenn sie beides enthält. Unter Einstellungen > Tabs bringst du die Tabs in jede Reihenfolge, angeheftete Bibliotheken eingeschlossen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Στο Apple TV και στο iPad μια βιβλιοθήκη μπορεί να καρφιτσωθεί ως δική της καρτέλα, και μια βιβλιοθήκη ταξινομημένη κατά τίτλο έχει μια μπάρα Α έως Ω στην άκρη της. Οι βιβλιοθήκες οικιακών βίντεο ανοίγουν ως φάκελοι. Οι λίστες αναπαραγωγής διατηρούν την ταξινόμηση του διακομιστή σας, δείχνουν σε ποια σειρά ανήκει κάθε επεισόδιο και συνεχίζουν από όποιο στοιχείο επιλέξετε. Μια μεγάλη συλλογή, ή μια που περιέχει άλλες συλλογές, ανοίγει ως πλέγμα, με φίλτρο για ταινίες και σειρές όταν έχει και τα δύο."
+            "value" : "Στο Apple TV και στο iPad μια βιβλιοθήκη μπορεί να καρφιτσωθεί ως δική της καρτέλα, και μια βιβλιοθήκη ταξινομημένη κατά τίτλο έχει μια μπάρα Α έως Ω στην άκρη της. Οι βιβλιοθήκες οικιακών βίντεο ανοίγουν ως φάκελοι. Οι λίστες αναπαραγωγής διατηρούν την ταξινόμηση του διακομιστή σας, δείχνουν σε ποια σειρά ανήκει κάθε επεισόδιο και συνεχίζουν από όποιο στοιχείο επιλέξετε. Μια μεγάλη συλλογή, ή μια που περιέχει άλλες συλλογές, ανοίγει ως πλέγμα, με φίλτρο για ταινίες και σειρές όταν έχει και τα δύο. Στις Ρυθμίσεις > Καρτέλες βάζετε τις καρτέλες σε όποια σειρά θέλετε, μαζί με τις καρφιτσωμένες βιβλιοθήκες."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On Apple TV and iPad, a library can be pinned as its own tab, and a library sorted by title has an A to Z rail on its edge. Home video libraries open as folders. Playlists keep the order from your server, show each episode's series, and play on from whichever entry you pick. A long collection, or one holding further collections, opens as a grid, with a Movies and Shows filter when it has both."
+            "value" : "On Apple TV and iPad, a library can be pinned as its own tab, and a library sorted by title has an A to Z rail on its edge. Home video libraries open as folders. Playlists keep the order from your server, show each episode's series, and play on from whichever entry you pick. A long collection, or one holding further collections, opens as a grid, with a Movies and Shows filter when it has both. Settings > Tabs puts the tabs in any order you like, pinned libraries included."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En el Apple TV y el iPad, una biblioteca puede fijarse como pestaña propia, y una biblioteca ordenada por título tiene una barra de la A a la Z en el borde. Las bibliotecas de vídeos caseros se abren como carpetas. Las listas de reproducción mantienen el orden de tu servidor, muestran la serie de cada episodio y siguen desde el elemento que elijas. Una colección larga, o una que contiene otras colecciones, se abre como cuadrícula, con un filtro de películas y series cuando tiene ambas."
+            "value" : "En el Apple TV y el iPad, una biblioteca puede fijarse como pestaña propia, y una biblioteca ordenada por título tiene una barra de la A a la Z en el borde. Las bibliotecas de vídeos caseros se abren como carpetas. Las listas de reproducción mantienen el orden de tu servidor, muestran la serie de cada episodio y siguen desde el elemento que elijas. Una colección larga, o una que contiene otras colecciones, se abre como cuadrícula, con un filtro de películas y series cuando tiene ambas. En Ajustes > Pestañas puedes ordenar las pestañas como quieras, incluidas las bibliotecas fijadas."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple TV:ssä ja iPadissa kirjaston voi kiinnittää omaksi välilehdekseen, ja nimen mukaan lajitellun kirjaston reunassa on A–Ö-palkki. Kotivideokirjastot avautuvat kansioina. Soittolistat säilyttävät palvelimesi järjestyksen, näyttävät jokaisen jakson sarjan ja jatkavat toistoa valitsemastasi kohteesta. Pitkä kokoelma tai kokoelma, jossa on muita kokoelmia, avautuu ruudukkona, ja siinä on elokuvat- ja sarjat-suodatin, kun se sisältää molempia."
+            "value" : "Apple TV:ssä ja iPadissa kirjaston voi kiinnittää omaksi välilehdekseen, ja nimen mukaan lajitellun kirjaston reunassa on A–Ö-palkki. Kotivideokirjastot avautuvat kansioina. Soittolistat säilyttävät palvelimesi järjestyksen, näyttävät jokaisen jakson sarjan ja jatkavat toistoa valitsemastasi kohteesta. Pitkä kokoelma tai kokoelma, jossa on muita kokoelmia, avautuu ruudukkona, ja siinä on elokuvat- ja sarjat-suodatin, kun se sisältää molempia. Kohdassa Asetukset > Välilehdet välilehdet saa haluamaansa järjestykseen, kiinnitetyt kirjastot mukaan lukien."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sur l’Apple TV et l’iPad, une bibliothèque peut être épinglée en onglet, et une bibliothèque triée par titre a une barre de A à Z sur son bord. Les bibliothèques de vidéos personnelles s’ouvrent sous forme de dossiers. Les playlists gardent l’ordre de votre serveur, affichent la série de chaque épisode et continuent à partir de l’élément que vous choisissez. Une longue collection, ou une collection qui en contient d’autres, s’ouvre en grille, avec un filtre Films et Séries lorsqu’elle contient les deux."
+            "value" : "Sur l’Apple TV et l’iPad, une bibliothèque peut être épinglée en onglet, et une bibliothèque triée par titre a une barre de A à Z sur son bord. Les bibliothèques de vidéos personnelles s’ouvrent sous forme de dossiers. Les playlists gardent l’ordre de votre serveur, affichent la série de chaque épisode et continuent à partir de l’élément que vous choisissez. Une longue collection, ou une collection qui en contient d’autres, s’ouvre en grille, avec un filtre Films et Séries lorsqu’elle contient les deux. Réglages > Onglets permet de classer les onglets dans l’ordre de votre choix, bibliothèques épinglées comprises."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV-u i iPadu knjižnica se može prikvačiti kao vlastita kartica, a knjižnica poredana po naslovu ima uz rub traku od A do Z. Knjižnice kućnih videozapisa otvaraju se kao mape. Popisi za reprodukciju zadržavaju redoslijed s vašeg poslužitelja, uz svaku epizodu prikazuju seriju i nastavljaju od stavke koju odaberete. Duga kolekcija ili kolekcija s drugim kolekcijama otvara se kao mreža, s filtrom za filmove i serije kad sadrži oboje."
+            "value" : "Na Apple TV-u i iPadu knjižnica se može prikvačiti kao vlastita kartica, a knjižnica poredana po naslovu ima uz rub traku od A do Z. Knjižnice kućnih videozapisa otvaraju se kao mape. Popisi za reprodukciju zadržavaju redoslijed s vašeg poslužitelja, uz svaku epizodu prikazuju seriju i nastavljaju od stavke koju odaberete. Duga kolekcija ili kolekcija s drugim kolekcijama otvara se kao mreža, s filtrom za filmove i serije kad sadrži oboje. U Postavke > Kartice kartice možete posložiti kako želite, uključujući prikvačene biblioteke."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple TV-n és iPaden egy könyvtár saját lapként rögzíthető, a cím szerint rendezett könyvtár szélén pedig A–Z sáv található. A házi videós könyvtárak mappaként nyílnak meg. A lejátszási listák megtartják a szervered sorrendjét, minden epizódnál mutatják a sorozatot, és attól az elemtől játszanak tovább, amelyiket kiválasztod. Egy hosszú gyűjtemény, vagy amely további gyűjteményeket tartalmaz, rácsként nyílik meg, filmek és sorozatok szűrővel, ha mindkettő van benne."
+            "value" : "Apple TV-n és iPaden egy könyvtár saját lapként rögzíthető, a cím szerint rendezett könyvtár szélén pedig A–Z sáv található. A házi videós könyvtárak mappaként nyílnak meg. A lejátszási listák megtartják a szervered sorrendjét, minden epizódnál mutatják a sorozatot, és attól az elemtől játszanak tovább, amelyiket kiválasztod. Egy hosszú gyűjtemény, vagy amely további gyűjteményeket tartalmaz, rácsként nyílik meg, filmek és sorozatok szűrővel, ha mindkettő van benne. A Beállítások > Lapok alatt tetszőleges sorrendbe rendezheted a lapokat, a kitűzött könyvtárakat is."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Su Apple TV e iPad una libreria può essere fissata come scheda propria, e una libreria ordinata per titolo ha una barra dalla A alla Z sul bordo. Le librerie di video personali si aprono come cartelle. Le playlist mantengono l’ordine del server, mostrano la serie di ogni episodio e proseguono da qualunque elemento tu scelga. Una raccolta lunga, o che contiene altre raccolte, si apre come griglia, con un filtro Film e Serie quando le contiene entrambe."
+            "value" : "Su Apple TV e iPad una libreria può essere fissata come scheda propria, e una libreria ordinata per titolo ha una barra dalla A alla Z sul bordo. Le librerie di video personali si aprono come cartelle. Le playlist mantengono l’ordine del server, mostrano la serie di ogni episodio e proseguono da qualunque elemento tu scelga. Una raccolta lunga, o che contiene altre raccolte, si apre come griglia, con un filtro Film e Serie quando le contiene entrambe. In Impostazioni > Schede puoi disporre le schede nell’ordine che preferisci, librerie fissate comprese."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple TVとiPadでは、ライブラリを専用タブとして固定でき、タイトル順に並べたライブラリの端にはA〜Zのバーが表示されます。ホームビデオのライブラリはフォルダとして開きます。プレイリストはサーバーの順序を保ち、各エピソードのシリーズを表示し、選んだ項目から続けて再生します。長いコレクションや、ほかのコレクションを含むコレクションはグリッドで開き、映画と番組の両方がある場合はフィルタが表示されます。"
+            "value" : "Apple TVとiPadでは、ライブラリを専用タブとして固定でき、タイトル順に並べたライブラリの端にはA〜Zのバーが表示されます。ホームビデオのライブラリはフォルダとして開きます。プレイリストはサーバーの順序を保ち、各エピソードのシリーズを表示し、選んだ項目から続けて再生します。長いコレクションや、ほかのコレクションを含むコレクションはグリッドで開き、映画と番組の両方がある場合はフィルタが表示されます。「設定 > タブ」では、固定したライブラリも含めてタブを好きな順に並べられます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple TV와 iPad에서 라이브러리를 자체 탭으로 고정할 수 있고, 제목순으로 정렬된 라이브러리 가장자리에는 A부터 Z까지의 막대가 있습니다. 홈 비디오 라이브러리는 폴더로 열립니다. 재생목록은 서버의 순서를 유지하고, 각 에피소드의 시리즈를 표시하며, 선택한 항목부터 이어서 재생합니다. 긴 컬렉션이나 다른 컬렉션을 포함한 컬렉션은 그리드로 열리며, 영화와 프로그램이 모두 있으면 필터가 표시됩니다."
+            "value" : "Apple TV와 iPad에서 라이브러리를 자체 탭으로 고정할 수 있고, 제목순으로 정렬된 라이브러리 가장자리에는 A부터 Z까지의 막대가 있습니다. 홈 비디오 라이브러리는 폴더로 열립니다. 재생목록은 서버의 순서를 유지하고, 각 에피소드의 시리즈를 표시하며, 선택한 항목부터 이어서 재생합니다. 긴 컬렉션이나 다른 컬렉션을 포함한 컬렉션은 그리드로 열리며, 영화와 프로그램이 모두 있으면 필터가 표시됩니다. 설정 > 탭에서 고정한 라이브러리를 포함해 탭을 원하는 순서로 배치할 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "På Apple TV og iPad kan et bibliotek festes som egen fane, og et bibliotek sortert etter tittel har en A til Å-liste langs kanten. Biblioteker med hjemmevideoer åpnes som mapper. Spillelister beholder rekkefølgen fra serveren, viser serien for hver episode og spiller videre fra det punktet du velger. En lang samling, eller en som inneholder flere samlinger, åpnes som et rutenett, med et filter for filmer og serier når den har begge deler."
+            "value" : "På Apple TV og iPad kan et bibliotek festes som egen fane, og et bibliotek sortert etter tittel har en A til Å-liste langs kanten. Biblioteker med hjemmevideoer åpnes som mapper. Spillelister beholder rekkefølgen fra serveren, viser serien for hver episode og spiller videre fra det punktet du velger. En lang samling, eller en som inneholder flere samlinger, åpnes som et rutenett, med et filter for filmer og serier når den har begge deler. Under Innstillinger > Faner kan fanene stå i den rekkefølgen du vil, festede biblioteker inkludert."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Op Apple TV en iPad kan een bibliotheek als eigen tabblad worden vastgezet, en een bibliotheek gesorteerd op titel heeft een A-tot-Z-balk aan de rand. Bibliotheken met homevideo's openen als mappen. Afspeellijsten behouden de volgorde van je server, tonen bij elke aflevering de serie en spelen verder vanaf het item dat je kiest. Een lange collectie, of een die andere collecties bevat, opent als raster, met een filter voor films en series als ze beide heeft."
+            "value" : "Op Apple TV en iPad kan een bibliotheek als eigen tabblad worden vastgezet, en een bibliotheek gesorteerd op titel heeft een A-tot-Z-balk aan de rand. Bibliotheken met homevideo's openen als mappen. Afspeellijsten behouden de volgorde van je server, tonen bij elke aflevering de serie en spelen verder vanaf het item dat je kiest. Een lange collectie, of een die andere collecties bevat, opent als raster, met een filter voor films en series als ze beide heeft. Onder Instellingen > Tabbladen zet je de tabs in elke gewenste volgorde, vastgezette bibliotheken inbegrepen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV i iPadzie bibliotekę można przypiąć jako osobną kartę, a biblioteka sortowana według tytułu ma przy krawędzi pasek od A do Z. Biblioteki filmów domowych otwierają się jako foldery. Playlisty zachowują kolejność z serwera, pokazują serial każdego odcinka i grają dalej od wybranej pozycji. Długa kolekcja lub taka, która zawiera kolejne kolekcje, otwiera się jako siatka, z filtrem filmów i seriali, gdy zawiera jedno i drugie."
+            "value" : "Na Apple TV i iPadzie bibliotekę można przypiąć jako osobną kartę, a biblioteka sortowana według tytułu ma przy krawędzi pasek od A do Z. Biblioteki filmów domowych otwierają się jako foldery. Playlisty zachowują kolejność z serwera, pokazują serial każdego odcinka i grają dalej od wybranej pozycji. Długa kolekcja lub taka, która zawiera kolejne kolekcje, otwiera się jako siatka, z filtrem filmów i seriali, gdy zawiera jedno i drugie. W Ustawienia > Karty możesz ułożyć karty w dowolnej kolejności, łącznie z przypiętymi bibliotekami."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV e no iPad, uma biblioteca pode ser fixada como aba própria, e uma biblioteca ordenada por título tem uma barra de A a Z na borda. Bibliotecas de vídeos caseiros abrem como pastas. As playlists mantêm a ordem do seu servidor, mostram a série de cada episódio e continuam a partir do item que você escolher. Uma coleção longa, ou que contém outras coleções, abre como grade, com um filtro de filmes e séries quando tem os dois."
+            "value" : "Na Apple TV e no iPad, uma biblioteca pode ser fixada como aba própria, e uma biblioteca ordenada por título tem uma barra de A a Z na borda. Bibliotecas de vídeos caseiros abrem como pastas. As playlists mantêm a ordem do seu servidor, mostram a série de cada episódio e continuam a partir do item que você escolher. Uma coleção longa, ou que contém outras coleções, abre como grade, com um filtro de filmes e séries quando tem os dois. Em Configurações > Abas, você coloca as abas na ordem que quiser, incluindo as bibliotecas fixadas."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV e no iPad, uma biblioteca pode ser afixada como separador próprio, e uma biblioteca ordenada por título tem uma barra de A a Z na margem. As bibliotecas de vídeos caseiros abrem como pastas. As playlists mantêm a ordem do seu servidor, mostram a série de cada episódio e continuam a partir do item que escolher. Uma coleção longa, ou que contém outras coleções, abre como grelha, com um filtro de filmes e séries quando tem ambos."
+            "value" : "Na Apple TV e no iPad, uma biblioteca pode ser afixada como separador próprio, e uma biblioteca ordenada por título tem uma barra de A a Z na margem. As bibliotecas de vídeos caseiros abrem como pastas. As playlists mantêm a ordem do seu servidor, mostram a série de cada episódio e continuam a partir do item que escolher. Uma coleção longa, ou que contém outras coleções, abre como grelha, com um filtro de filmes e séries quando tem ambos. Em Definições > Separadores, pode colocar os separadores pela ordem que quiser, incluindo as bibliotecas afixadas."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pe Apple TV și iPad, o bibliotecă poate fi fixată ca filă proprie, iar o bibliotecă sortată după titlu are pe margine o bară de la A la Z. Bibliotecile de videoclipuri personale se deschid ca dosare. Playlisturile păstrează ordinea de pe server, afișează serialul fiecărui episod și continuă redarea de la elementul ales de tine. O colecție lungă sau una care conține alte colecții se deschide ca grilă, cu un filtru pentru filme și seriale când le are pe amândouă."
+            "value" : "Pe Apple TV și iPad, o bibliotecă poate fi fixată ca filă proprie, iar o bibliotecă sortată după titlu are pe margine o bară de la A la Z. Bibliotecile de videoclipuri personale se deschid ca dosare. Playlisturile păstrează ordinea de pe server, afișează serialul fiecărui episod și continuă redarea de la elementul ales de tine. O colecție lungă sau una care conține alte colecții se deschide ca grilă, cu un filtru pentru filme și seriale când le are pe amândouă. În Setări > File poți așeza filele în ce ordine vrei, inclusiv bibliotecile fixate."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "На Apple TV и iPad медиатеку можно закрепить отдельной вкладкой, а у медиатеки, отсортированной по названию, у края есть полоса от A до Z. Медиатеки домашнего видео открываются как папки. Плейлисты сохраняют порядок с сервера, показывают сериал каждого эпизода и продолжают воспроизведение с любого выбранного элемента. Длинная коллекция или коллекция с другими коллекциями внутри открывается сеткой, с фильтром фильмов и сериалов, если в ней есть и то и другое."
+            "value" : "На Apple TV и iPad медиатеку можно закрепить отдельной вкладкой, а у медиатеки, отсортированной по названию, у края есть полоса от A до Z. Медиатеки домашнего видео открываются как папки. Плейлисты сохраняют порядок с сервера, показывают сериал каждого эпизода и продолжают воспроизведение с любого выбранного элемента. Длинная коллекция или коллекция с другими коллекциями внутри открывается сеткой, с фильтром фильмов и сериалов, если в ней есть и то и другое. В разделе Настройки > Вкладки вкладки можно расставить в любом порядке, включая закреплённые медиатеки."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na Apple TV a iPade možno knižnicu pripnúť ako vlastnú kartu a knižnica zoradená podľa názvu má na okraji lištu A až Z. Knižnice domácich videí sa otvárajú ako priečinky. Playlisty si zachovajú poradie zo servera, pri každej epizóde ukazujú seriál a prehrávajú ďalej od položky, ktorú vyberiete. Dlhá kolekcia alebo kolekcia s ďalšími kolekciami sa otvorí ako mriežka, s filtrom Filmy a Seriály, ak obsahuje oboje."
+            "value" : "Na Apple TV a iPade možno knižnicu pripnúť ako vlastnú kartu a knižnica zoradená podľa názvu má na okraji lištu A až Z. Knižnice domácich videí sa otvárajú ako priečinky. Playlisty si zachovajú poradie zo servera, pri každej epizóde ukazujú seriál a prehrávajú ďalej od položky, ktorú vyberiete. Dlhá kolekcia alebo kolekcia s ďalšími kolekciami sa otvorí ako mriežka, s filtrom Filmy a Seriály, ak obsahuje oboje. V Nastavenia > Karty môžete karty zoradiť, ako chcete, vrátane pripnutých knižníc."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "På Apple TV och iPad kan ett bibliotek fästas som en egen flik, och ett bibliotek sorterat efter titel har en A till Ö-list längs kanten. Bibliotek med hemvideor öppnas som mappar. Spellistor behåller ordningen från servern, visar serien för varje avsnitt och spelar vidare från det objekt du väljer. En lång samling, eller en som rymmer fler samlingar, öppnas som ett rutnät, med ett filter för filmer och serier när den har båda."
+            "value" : "På Apple TV och iPad kan ett bibliotek fästas som en egen flik, och ett bibliotek sorterat efter titel har en A till Ö-list längs kanten. Bibliotek med hemvideor öppnas som mappar. Spellistor behåller ordningen från servern, visar serien för varje avsnitt och spelar vidare från det objekt du väljer. En lång samling, eller en som rymmer fler samlingar, öppnas som ett rutnät, med ett filter för filmer och serier när den har båda. Under Inställningar > Flikar kan flikarna stå i vilken ordning du vill, fästa bibliotek inräknade."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple TV ve iPad'de bir kitaplık kendi sekmesi olarak sabitlenebilir, başlığa göre sıralanan bir kitaplığın kenarında ise A'dan Z'ye bir çubuk bulunur. Ev videosu kitaplıkları klasör olarak açılır. Çalma listeleri sunucunuzdaki sırayı korur, her bölümün dizisini gösterir ve seçtiğiniz öğeden itibaren oynatmaya devam eder. Uzun bir koleksiyon ya da başka koleksiyonlar içeren bir koleksiyon ızgara olarak açılır; ikisini de içeriyorsa film ve dizi filtresi sunar."
+            "value" : "Apple TV ve iPad'de bir kitaplık kendi sekmesi olarak sabitlenebilir, başlığa göre sıralanan bir kitaplığın kenarında ise A'dan Z'ye bir çubuk bulunur. Ev videosu kitaplıkları klasör olarak açılır. Çalma listeleri sunucunuzdaki sırayı korur, her bölümün dizisini gösterir ve seçtiğiniz öğeden itibaren oynatmaya devam eder. Uzun bir koleksiyon ya da başka koleksiyonlar içeren bir koleksiyon ızgara olarak açılır; ikisini de içeriyorsa film ve dizi filtresi sunar. Ayarlar > Sekmeler bölümünde, sabitlenen kitaplıklar dahil sekmeleri istediğiniz sıraya koyabilirsiniz."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "На Apple TV та iPad медіатеку можна закріпити окремою вкладкою, а медіатека, відсортована за назвою, має біля краю смугу від A до Z. Медіатеки домашнього відео відкриваються як папки. Плейлисти зберігають порядок із сервера, показують серіал кожного епізоду й продовжують відтворення з будь-якого вибраного елемента. Довга колекція або колекція з іншими колекціями всередині відкривається сіткою, з фільтром фільмів і серіалів, якщо в ній є і те, і те."
+            "value" : "На Apple TV та iPad медіатеку можна закріпити окремою вкладкою, а медіатека, відсортована за назвою, має біля краю смугу від A до Z. Медіатеки домашнього відео відкриваються як папки. Плейлисти зберігають порядок із сервера, показують серіал кожного епізоду й продовжують відтворення з будь-якого вибраного елемента. Довга колекція або колекція з іншими колекціями всередині відкривається сіткою, з фільтром фільмів і серіалів, якщо в ній є і те, і те. У розділі Налаштування > Вкладки вкладки можна розташувати в будь-якому порядку, зокрема закріплені медіатеки."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 Apple TV 和 iPad 上，可将媒体库固定为独立标签，按标题排序的媒体库边缘有一条 A 到 Z 字母栏。家庭视频媒体库以文件夹形式打开。播放列表保持服务器上的顺序，显示每一集所属的剧集，并从你选择的任意条目继续播放。较长的合集或包含其他合集的合集会以网格打开，若同时包含电影和剧集，还会提供筛选。"
+            "value" : "在 Apple TV 和 iPad 上，可将媒体库固定为独立标签，按标题排序的媒体库边缘有一条 A 到 Z 字母栏。家庭视频媒体库以文件夹形式打开。播放列表保持服务器上的顺序，显示每一集所属的剧集，并从你选择的任意条目继续播放。较长的合集或包含其他合集的合集会以网格打开，若同时包含电影和剧集，还会提供筛选。在“设置 > 标签页”中，可以按你喜欢的顺序排列标签页，包括已固定的媒体库。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 Apple TV 和 iPad 上，可將媒體庫釘選為獨立標籤，依標題排序的媒體庫邊緣有一條 A 到 Z 字母列。家庭影片媒體庫會以資料夾形式開啟。播放清單保持伺服器上的順序，顯示每一集所屬的影集，並從你選擇的任意項目繼續播放。較長的合集或包含其他合集的合集會以網格開啟，若同時包含電影和影集，還會提供篩選。"
+            "value" : "在 Apple TV 和 iPad 上，可將媒體庫釘選為獨立標籤，依標題排序的媒體庫邊緣有一條 A 到 Z 字母列。家庭影片媒體庫會以資料夾形式開啟。播放清單保持伺服器上的順序，顯示每一集所屬的影集，並從你選擇的任意項目繼續播放。較長的合集或包含其他合集的合集會以網格開啟，若同時包含電影和影集，還會提供篩選。在「設定 > 標籤頁」中，可以依你喜歡的順序排列標籤頁，包括已釘選的媒體庫。"
           }
         }
       }
@@ -234156,324 +234156,164 @@
         }
       }
     },
-    "settings.tabs.libraries.caption" : {
+    "settings.tabs.library.opensGrid" : {
+      "comment" : "Sodalite#235 tab order screen",
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Připnutá knihovna dostane vlastní kartu hned za kartou Domů a otevírá se rovnou do své mřížky."
+            "value" : "Knihovna, otevře se rovnou v mřížce"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Et fastgjort bibliotek får sin egen fane lige efter Hjem og åbner direkte i sit gitter."
+            "value" : "Bibliotek, åbner direkte i sit gitter"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine angeheftete Bibliothek bekommt einen eigenen Tab direkt nach der Startseite und öffnet sich gleich mit ihrem Raster."
+            "value" : "Bibliothek, öffnet sich gleich mit ihrem Raster"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Μια καρφιτσωμένη βιβλιοθήκη αποκτά δική της καρτέλα αμέσως μετά την Αρχική και ανοίγει κατευθείαν στο πλέγμα της."
+            "value" : "Βιβλιοθήκη, ανοίγει απευθείας στο πλέγμα της"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A pinned library gets its own tab right after Home and opens straight into its grid."
+            "value" : "Library, opens straight into its grid"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una biblioteca fijada tiene su propia pestaña justo después de Inicio y se abre directamente en su cuadrícula."
+            "value" : "Biblioteca, se abre directamente en su cuadrícula"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kiinnitetty kirjasto saa oman välilehden heti Kodin jälkeen ja avautuu suoraan ruudukkoonsa."
+            "value" : "Kirjasto, avautuu suoraan ruudukkoonsa"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une bibliothèque épinglée obtient son propre onglet juste après Accueil et s'ouvre directement sur sa grille."
+            "value" : "Bibliothèque, s’ouvre directement sur sa grille"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prikvačena biblioteka dobiva vlastitu karticu odmah nakon Početne i otvara se izravno u svojoj mreži."
+            "value" : "Biblioteka, otvara se izravno u mreži"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A rögzített könyvtár saját lapot kap közvetlenül a Kezdőlap után, és egyenesen a rácsában nyílik meg."
+            "value" : "Könyvtár, rögtön a rácsnézetében nyílik meg"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una libreria fissata ha una scheda tutta sua subito dopo Home e si apre direttamente sulla sua griglia."
+            "value" : "Libreria, si apre direttamente sulla sua griglia"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "固定したライブラリはホームのすぐ後ろに専用のタブを持ち、そのままグリッドで開きます。"
+            "value" : "ライブラリ。グリッド表示で直接開きます"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "고정한 라이브러리는 홈 바로 뒤에 자체 탭이 생기고 바로 그리드로 열립니다."
+            "value" : "라이브러리, 바로 그리드로 열립니다"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Et festet bibliotek får sin egen fane rett etter Hjem og åpner rett i rutenettet sitt."
+            "value" : "Bibliotek, åpnes rett i rutenettet"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Een vastgezette bibliotheek krijgt een eigen tabblad direct na Home en opent meteen in haar raster."
+            "value" : "Bibliotheek, opent direct in het raster"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przypięta biblioteka dostaje własną kartę zaraz po karcie Główna i otwiera się od razu w swojej siatce."
+            "value" : "Biblioteka, otwiera się od razu w siatce"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uma biblioteca fixada ganha uma aba própria logo depois do Início e abre direto na sua grade."
+            "value" : "Biblioteca, abre direto na grade"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uma biblioteca afixada ganha um separador próprio logo a seguir ao Início e abre diretamente na sua grelha."
+            "value" : "Biblioteca, abre diretamente na grelha"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O bibliotecă fixată primește o filă proprie imediat după Acasă și se deschide direct în grila sa."
+            "value" : "Bibliotecă, se deschide direct în grila sa"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Закреплённая медиатека получает свою вкладку сразу после «Главной» и открывается прямо в виде сетки."
+            "value" : "Медиатека, открывается сразу в виде сетки"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pripnutá knižnica dostane vlastnú kartu hneď za Domovom a otvára sa rovno do svojej mriežky."
+            "value" : "Knižnica, otvorí sa rovno v mriežke"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ett fäst bibliotek får en egen flik direkt efter Hem och öppnas direkt i sitt rutnät."
+            "value" : "Bibliotek, öppnas direkt i sitt rutnät"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sabitlenen bir kütüphane, Ana Sayfa'nın hemen ardından kendi sekmesini alır ve doğrudan ızgarasıyla açılır."
+            "value" : "Kitaplık, doğrudan ızgara görünümünde açılır"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Закріплена медіатека отримує власну вкладку одразу після «Головної» і відкривається просто в сітці."
+            "value" : "Медіатека, відкривається одразу у вигляді сітки"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "固定的媒体库会在主页之后获得自己的标签，并直接以网格打开。"
+            "value" : "媒体库，直接以网格打开"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "釘選的媒體庫會在首頁之後擁有自己的標籤，並直接以網格開啟。"
-          }
-        }
-      }
-    },
-    "settings.tabs.library.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vlastní karta za kartou Domů"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egen fane efter Hjem"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eigener Tab nach der Startseite"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Δική της καρτέλα μετά την Αρχική"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Its own tab after Home"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pestaña propia después de Inicio"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oma välilehti Kodin jälkeen"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son propre onglet après Accueil"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vlastita kartica nakon Početne"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saját lap a Kezdőlap után"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scheda propria dopo Home"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ホームの後ろに専用タブ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "홈 뒤에 자체 탭"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egen fane etter Hjem"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eigen tabblad na Home"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Własna karta po karcie Główna"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aba própria depois do Início"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Separador próprio depois do Início"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Filă proprie după Acasă"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Своя вкладка после «Главной»"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vlastná karta za Domovom"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egen flik efter Hem"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ana Sayfa'dan sonra kendi sekmesi"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Власна вкладка після «Головної»"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "主页之后的独立标签"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "首頁之後的獨立標籤"
+            "value" : "媒體庫，直接以網格開啟"
           }
         }
       }
@@ -235450,6 +235290,168 @@
         }
       }
     },
+    "settings.tabs.order.description" : {
+      "comment" : "Sodalite#235 tab order screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutím kartu přesunete, přepínač vpravo ji zobrazí nebo skryje."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik på en fane for at flytte den, kontakten til højre viser eller skjuler den."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klick verschiebt einen Tab, der Schalter rechts blendet ihn ein oder aus."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάντε κλικ σε μια καρτέλα για να τη μετακινήσετε· ο διακόπτης δεξιά την εμφανίζει ή την αποκρύπτει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click a tab to move it; the switch on the right shows or hides it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz clic en una pestaña para moverla; el interruptor de la derecha la muestra u oculta."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napsauta välilehteä siirtääksesi sen, oikean reunan kytkin näyttää tai piilottaa sen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cliquez sur un onglet pour le déplacer ; l’interrupteur à droite l’affiche ou le masque."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klikom premještate karticu, prekidač desno je prikazuje ili skriva."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kattints egy lapra az áthelyezéshez, a jobb oldali kapcsoló megjeleníti vagy elrejti."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai clic su una scheda per spostarla; l’interruttore a destra la mostra o la nasconde."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブをクリックすると移動できます。右のスイッチで表示・非表示を切り替えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭을 클릭하면 이동하고, 오른쪽 스위치로 표시하거나 숨깁니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klikk på en fane for å flytte den, bryteren til høyre viser eller skjuler den."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik op een tab om hem te verplaatsen; de schakelaar rechts toont of verbergt hem."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknij kartę, aby ją przenieść; przełącznik po prawej ją pokazuje lub ukrywa."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clique em uma aba para movê-la; o botão à direita a mostra ou oculta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clique num separador para o mover; o interruptor à direita mostra-o ou oculta-o."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fă clic pe o filă pentru a o muta; comutatorul din dreapta o afișează sau o ascunde."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на вкладку, чтобы переместить её; переключатель справа показывает или скрывает её."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutím kartu presuniete, prepínač vpravo ju zobrazí alebo skryje."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicka på en flik för att flytta den; reglaget till höger visar eller döljer den."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taşımak için bir sekmeye tıklayın; sağdaki anahtar onu gösterir veya gizler."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть на вкладку, щоб перемістити її; перемикач праворуч показує або приховує її."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点按标签页即可移动，右侧开关用于显示或隐藏。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點按標籤頁即可移動，右側開關用於顯示或隱藏。"
+          }
+        }
+      }
+    },
     "settings.tabs.search.subtitle" : {
       "comment" : "Row subtitle for the Search tab toggle",
       "extractionState" : "manual",
@@ -235608,167 +235610,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜尋你的媒體庫；目錄開啟時也搜尋 Jellyseerr。"
-          }
-        }
-      }
-    },
-    "settings.tabs.section.libraries" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knihovny jako karty"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biblioteker som faner"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotheken als Tab"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Βιβλιοθήκες ως καρτέλες"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Libraries as tabs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotecas como pestañas"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kirjastot välilehtinä"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliothèques en onglets"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biblioteke kao kartice"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Könyvtárak lapként"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Librerie come schede"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライブラリをタブに"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이브러리를 탭으로"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biblioteker som faner"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotheken als tabblad"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biblioteki jako karty"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotecas como abas"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotecas como separadores"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biblioteci ca file"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Медиатеки как вкладки"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knižnice ako karty"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliotek som flikar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sekme olarak kütüphaneler"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Медіатеки як вкладки"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "将媒体库设为标签"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "將媒體庫設為標籤"
           }
         }
       }
@@ -236097,326 +235938,164 @@
         }
       }
     },
-    "settings.tabs.subtitle" : {
-      "comment" : "Tab visibility screen description",
+    "settings.tabs.subtitle.order" : {
+      "comment" : "Sodalite#235 tab order screen",
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vyber, které karty se zobrazí v navigační liště."
+            "value" : "Pořadí a viditelnost karet"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vælg, hvilke faner navigationslinjen viser."
+            "value" : "Fanernes rækkefølge og synlighed"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle, welche Tabs die Navigationsleiste zeigt."
+            "value" : "Reihenfolge und Sichtbarkeit der Tabs"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Επίλεξε ποιες καρτέλες εμφανίζει η γραμμή πλοήγησης."
+            "value" : "Σειρά και ορατότητα των καρτελών"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose which tabs the navigation bar shows."
+            "value" : "Order and visibility of the tabs"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige qué pestañas muestra la barra de navegación."
+            "value" : "Orden y visibilidad de las pestañas"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Valitse, mitkä välilehdet navigointipalkki näyttää."
+            "value" : "Välilehtien järjestys ja näkyvyys"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis les onglets affichés dans la barre de navigation."
+            "value" : "Ordre et visibilité des onglets"
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Odaberi koje kartice prikazuje navigacijska traka."
+            "value" : "Redoslijed i vidljivost kartica"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Válaszd ki, mely lapok jelenjenek meg a navigációs sávon."
+            "value" : "A lapok sorrendje és láthatósága"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scegli quali schede mostra la barra di navigazione."
+            "value" : "Ordine e visibilità delle schede"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ナビゲーションバーに表示するタブを選びます。"
+            "value" : "タブの順序と表示"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "탐색 막대에 표시할 탭을 선택합니다."
+            "value" : "탭 순서 및 표시 여부"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Velg hvilke faner navigasjonslinjen viser."
+            "value" : "Fanenes rekkefølge og synlighet"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kies welke tabbladen de navigatiebalk toont."
+            "value" : "Volgorde en zichtbaarheid van de tabs"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wybierz, które karty pokazuje pasek nawigacji."
+            "value" : "Kolejność i widoczność kart"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escolha quais abas a barra de navegação mostra."
+            "value" : "Ordem e visibilidade das abas"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Escolhe que separadores a barra de navegação mostra."
+            "value" : "Ordem e visibilidade dos separadores"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alege ce file afișează bara de navigare."
+            "value" : "Ordinea și vizibilitatea filelor"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Выберите, какие вкладки показывать в панели навигации."
+            "value" : "Порядок и видимость вкладок"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vyber, ktoré karty zobrazí navigačná lišta."
+            "value" : "Poradie a viditeľnosť kariet"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Välj vilka flikar navigeringsfältet visar."
+            "value" : "Flikarnas ordning och synlighet"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gezinme çubuğunda hangi sekmelerin görüneceğini seç."
+            "value" : "Sekmelerin sırası ve görünürlüğü"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Обери, які вкладки показує панель навігації."
+            "value" : "Порядок і видимість вкладок"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择导航栏显示哪些标签页。"
+            "value" : "标签页的顺序与显示"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選擇導覽列顯示哪些標籤頁。"
-          }
-        }
-      }
-    },
-    "settings.tabs.subtitle.short" : {
-      "comment" : "Subtitle for the tab visibility settings tile",
-      "extractionState" : "manual",
-      "localizations" : {
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vyber zobrazené karty"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vælg viste faner"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sichtbare Tabs wählen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Επιλογή ορατών καρτελών"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose which tabs are shown"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige las pestañas visibles"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valitse näkyvät välilehdet"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir les onglets affichés"
-          }
-        },
-        "hr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Odaberi prikazane kartice"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Megjelenő lapok kiválasztása"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scegli le schede visibili"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "表示するタブを選択"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "표시할 탭 선택"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg viste faner"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies zichtbare tabbladen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wybierz widoczne karty"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolha as abas visíveis"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolher separadores visíveis"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alege filele afișate"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбор видимых вкладок"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vyber zobrazené karty"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Välj visade flikar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Görünen sekmeleri seç"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вибір видимих вкладок"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择显示的标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選擇顯示的標籤頁"
+            "value" : "標籤頁的順序與顯示"
           }
         }
       }
