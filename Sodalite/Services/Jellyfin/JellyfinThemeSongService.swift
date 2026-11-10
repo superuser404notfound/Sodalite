@@ -40,8 +40,8 @@ final class JellyfinThemeSongService: JellyfinThemeSongServiceProtocol {
             URLQueryItem(name: "TranscodingProtocol", value: "hls"),
             URLQueryItem(name: "AudioCodec", value: "aac"),
             URLQueryItem(name: "MaxStreamingBitrate", value: "320000"),
-            // Not `api_key`: Jellyfin 12 answers that one with 401 on this route (the static stream route
-            // still takes it). `ApiKey` is the current name and older servers read it too.
+            // Not `api_key`: Jellyfin 12 ignores it on every route, this one answers 401 without a token.
+            // `ApiKey` is the current name and servers since 10.9 read it.
             URLQueryItem(name: "ApiKey", value: token),
         ]
         return components?.url

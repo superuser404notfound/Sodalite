@@ -38,7 +38,7 @@ struct SubtitleOverlayView: View {
     /// Non-nil exactly while an embedded ASS/SSA track is active AND swift-ass-renderer initialized.
     let assRenderer: AssSubtitlesRenderer?
     /// Reload pre-announcements from the ASS coordinator (see `ASSFrameHostView`'s nil suppression).
-    let assReloadSignal: PassthroughSubject<Void, Never>
+    let assReloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
     /// Lowercased active subtitle codec ("ass"/"ssa"/"subrip"/...); drives the raw-event-line
     /// stripper for the fallback where an ASS track is active but the styled renderer bailed.
     let activeSubtitleCodec: String?
@@ -93,6 +93,10 @@ struct SubtitleOverlayView: View {
                     reloadSignal: assReloadSignal,
                     currentOffset: currentTime - delaySeconds
                 )
+                // The host binds its renderer once, at creation. An audio switch or the next
+                // episode swaps the renderer without a nil in between, and the kept host went on
+                // drawing the freed one while the new one never got a canvas (#234).
+                .id(ObjectIdentifier(assRenderer))
                 .frame(width: rect.width, height: rect.height)
                 .position(x: rect.midX, y: rect.midY)
             }
@@ -750,15 +754,16 @@ struct SubtitleOverlayView: View {
 /// (canvas sized in layout, frames drawn at `ProcessedImage.imageRect`) with ONE difference:
 /// nil frames from the coordinator's `reloadTrack` are suppressed. The renderer publishes a
 /// transient nil before the identical re-render lands, which blinked every visible sub; the
-/// coordinator pre-announces reloads via `reloadSignal` so suppression is deterministic. A nil
-/// with no announced reload is a real cue end and hides instantly.
+/// coordinator announces each reload's start and its landing via `reloadSignal`, and a nil in
+/// between is held until the new track is parsed. A nil with no reload in flight is a real cue
+/// end and hides instantly.
 ///
 /// Frames are drawn into a `CALayer` (contents = `CGImage`) so the same host compiles on iOS
 /// (UIView) and macOS (NSView). See `ASSFrameHostView` for the macOS geometry handling.
 #if os(macOS)
 private struct ASSRenderedSubtitles: NSViewRepresentable {
     let renderer: AssSubtitlesRenderer
-    let reloadSignal: PassthroughSubject<Void, Never>
+    let reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
     /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
     /// track-data queries since the renderer's own offset is not public here.
     let currentOffset: Double
@@ -774,7 +779,7 @@ private struct ASSRenderedSubtitles: NSViewRepresentable {
 #else
 private struct ASSRenderedSubtitles: UIViewRepresentable {
     let renderer: AssSubtitlesRenderer
-    let reloadSignal: PassthroughSubject<Void, Never>
+    let reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
     /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
     /// track-data queries since the renderer's own offset is not public here.
     let currentOffset: Double
@@ -803,14 +808,18 @@ final class ASSFrameHostView: ASSHostBase {
     private let imageLayer = CALayer()
     private var lastRenderBounds = CGRect.zero
     private var cancellables = Set<AnyCancellable>()
-    /// Suppress nil frames until this deadline (armed per reload signal). `.distantPast` = off.
-    private var suppressNilDeadline = Date.distantPast
-    /// Deferred hide scheduled during suppression so a swallowed real cue end still hides.
+    /// Reloads announced and not yet landed. A nil frame while this is above zero is the
+    /// renderer's transient re-parse nil, not a cue end.
+    private var reloadsInFlight = 0
+    /// A nil arrived during a reload and the last image is being held for it.
+    private var holdingThroughReload = false
+    /// Hide check (end-watch poll or the stuck-reload fallback); cancelled by any published frame.
     private var hideWorkItem: DispatchWorkItem?
-    /// Generous upper bound for one reload round-trip (parse + font matching + render).
-    private static let reloadSuppressWindow: TimeInterval = 0.5
+    /// Fallback in case a landing never arrives (renderer torn down mid-parse).
+    private var reloadFallback: DispatchWorkItem?
+    private static let reloadFallbackDelay: TimeInterval = 5
 
-    init(renderer: AssSubtitlesRenderer, reloadSignal: PassthroughSubject<Void, Never>) {
+    init(renderer: AssSubtitlesRenderer, reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>) {
         self.renderer = renderer
         super.init(frame: .zero)
         imageLayer.contentsGravity = .resize
@@ -831,8 +840,11 @@ final class ASSFrameHostView: ASSHostBase {
         // No receive(on:): synchronous main-actor delivery arms suppression before the renderer's
         // transient nil can arrive (coordinator sends right before reloadTrack).
         reloadSignal
-            .sink { [weak self] in
-                self?.suppressNilDeadline = Date().addingTimeInterval(Self.reloadSuppressWindow)
+            .sink { [weak self] phase in
+                switch phase {
+                case .began: self?.reloadBegan()
+                case .landed: self?.reloadLanded()
+                }
             }
             .store(in: &cancellables)
         renderer
@@ -907,7 +919,6 @@ final class ASSFrameHostView: ASSHostBase {
         imageLayer.isHidden = true
         imageLayer.contents = nil
         CATransaction.commit()
-        suppressNilDeadline = .distantPast
     }
 
     // MARK: Nil-frame suppression
@@ -916,51 +927,55 @@ final class ASSFrameHostView: ASSHostBase {
         if let image {
             hideWorkItem?.cancel()
             hideWorkItem = nil
-            suppressNilDeadline = .distantPast
+            holdingThroughReload = false
             lastRenderBounds = bounds
             setFrame(image)
+        } else if reloadsInFlight > 0 {
+            // Reload in flight: keep the last image until the new track is parsed.
+            holdingThroughReload = true
         } else {
-            let remaining = suppressNilDeadline.timeIntervalSinceNow
-            guard remaining > 0 else {
-                // Real cue end (no reload announced): hide instantly.
-                hideWorkItem?.cancel()
-                hideWorkItem = nil
-                hideNow()
-                return
-            }
-            // Reload in flight: keep the last image; arm a safety hide at the deadline in case no
-            // frame follows (reload coinciding with a real cue end).
-            guard hideWorkItem == nil else { return }
-            scheduleSafetyHide(after: remaining)
+            // Real cue end (no reload in flight): hide instantly.
+            hideWorkItem?.cancel()
+            hideWorkItem = nil
+            holdingThroughReload = false
+            hideNow()
         }
     }
 
-    /// Resolve a suppression window that ended without a new frame (re-arms if a newer reload
-    /// extended the deadline). libass skips the publish when a reload's re-render is visually
-    /// identical (parked on the transient nil), so at the deadline query track data directly: an
-    /// active event means keep the image and end suppression; none means hide (reload hit a cue end).
-    private func scheduleSafetyHide(after delay: TimeInterval) {
+    private func reloadBegan() {
+        reloadsInFlight += 1
+        reloadFallback?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            self.hideWorkItem = nil
-            let remaining = self.suppressNilDeadline.timeIntervalSinceNow
-            if remaining > 0 {
-                self.scheduleSafetyHide(after: remaining)
-                return
-            }
-            let stillActive = !self.renderer.dialogues(at: self.currentOffset).isEmpty
-            if stillActive {
-                self.suppressNilDeadline = .distantPast
-                // Frame subject is parked on nil, so the real cue end's nil-after-nil is swallowed
-                // by the duplicate filter and the frame would linger forever. Watch track data for
-                // the end ourselves until the next published frame.
-                self.scheduleEndWatch()
-            } else {
-                self.hideNow()
-            }
+            self.reloadFallback = nil
+            self.reloadsInFlight = 0
+            self.resolveHeldFrame()
         }
-        hideWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+        reloadFallback = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.reloadFallbackDelay, execute: work)
+    }
+
+    private func reloadLanded() {
+        reloadsInFlight = max(0, reloadsInFlight - 1)
+        guard reloadsInFlight == 0 else { return }
+        reloadFallback?.cancel()
+        reloadFallback = nil
+        resolveHeldFrame()
+    }
+
+    /// The new track is in place and no frame followed the held nil. libass skips the publish
+    /// when the re-render is identical (the subject stays parked on nil), so ask the track data:
+    /// an active event means the held image is still right; none means the reload met a cue end.
+    private func resolveHeldFrame() {
+        guard holdingThroughReload else { return }
+        holdingThroughReload = false
+        if renderer.dialogues(at: currentOffset).isEmpty {
+            hideNow()
+        } else {
+            // The real cue end will be a nil-after-nil that the duplicate filter swallows, so
+            // watch the track data for it until the next published frame.
+            scheduleEndWatch()
+        }
     }
 
     /// Poll track data while holding a manually-kept frame; hide once no event is active.
@@ -969,7 +984,10 @@ final class ASSFrameHostView: ASSHostBase {
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
             self.hideWorkItem = nil
-            if self.renderer.dialogues(at: self.currentOffset).isEmpty {
+            // Mid-parse the track is empty, which would read as a cue end; hold it for the landing.
+            if self.reloadsInFlight > 0 {
+                self.holdingThroughReload = true
+            } else if self.renderer.dialogues(at: self.currentOffset).isEmpty {
                 self.hideNow()
             } else {
                 self.scheduleEndWatch()

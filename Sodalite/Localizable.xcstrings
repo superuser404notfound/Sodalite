@@ -71458,157 +71458,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači. Reklamní přestávky označené serverem lze přeskočit jedním stisknutím nebo automaticky. Titulky lze nově posunout i v jemných krocích těsně nad spodní okraj, aby zůstaly v černém pruhu."
+            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači. Reklamní přestávky označené serverem lze přeskočit jedním stisknutím nebo automaticky. Titulky lze nově posunout i v jemných krocích těsně nad spodní okraj, aby zůstaly v černém pruhu. Stylizované titulky ASS se zobrazí od prvního řádku, už nepřeskakují řádky a zůstanou i po změně zvukové stopy nebo další epizodě."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren. Reklamepauser, som serveren har markeret, kan springes over med ét tryk eller automatisk. Undertekster kan nu også ligge i fine trin lige over den nederste kant, så de bliver i den sorte bjælke."
+            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren. Reklamepauser, som serveren har markeret, kan springes over med ét tryk eller automatisk. Undertekster kan nu også ligge i fine trin lige over den nederste kant, så de bliver i den sorte bjælke. Stylede ASS-undertekster vises fra første linje, springer ikke længere linjer over og bliver efter et lydsporsskift eller næste afsnit."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player. Vom Server markierte Werbepausen lassen sich mit einem Klick oder automatisch überspringen. Untertitel lassen sich jetzt auch in feinen Stufen knapp über den unteren Rand setzen, damit sie im schwarzen Balken bleiben."
+            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player. Vom Server markierte Werbepausen lassen sich mit einem Klick oder automatisch überspringen. Untertitel lassen sich jetzt auch in feinen Stufen knapp über den unteren Rand setzen, damit sie im schwarzen Balken bleiben. Gestaltete ASS-Untertitel erscheinen ab der ersten Zeile, überspringen keine Zeilen mehr und bleiben nach einem Tonspurwechsel oder der nächsten Folge sichtbar."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player. Τα διαφημιστικά διαλείμματα που έχει σημειώσει ο διακομιστής παραλείπονται με ένα πάτημα ή αυτόματα. Οι υπότιτλοι μπορούν πλέον να τοποθετηθούν και σε μικρά βήματα λίγο πάνω από το κάτω άκρο, ώστε να μένουν στη μαύρη λωρίδα."
+            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player. Τα διαφημιστικά διαλείμματα που έχει σημειώσει ο διακομιστής παραλείπονται με ένα πάτημα ή αυτόματα. Οι υπότιτλοι μπορούν πλέον να τοποθετηθούν και σε μικρά βήματα λίγο πάνω από το κάτω άκρο, ώστε να μένουν στη μαύρη λωρίδα. Οι μορφοποιημένοι υπότιτλοι ASS εμφανίζονται από την πρώτη γραμμή, δεν παραλείπουν πλέον γραμμές και παραμένουν μετά από αλλαγή ήχου ή στο επόμενο επεισόδιο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player. Commercial breaks the server has marked can be skipped with one press or automatically. Subtitles can also sit in fine steps just above the bottom edge, to keep them in the black bar."
+            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player. Commercial breaks the server has marked can be skipped with one press or automatically. Subtitles can also sit in fine steps just above the bottom edge, to keep them in the black bar. Styled ASS subtitles show from the first line, no longer skip lines, and stay on after an audio switch or the next episode."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor. Las pausas publicitarias marcadas por el servidor se omiten con una pulsación o automáticamente. Los subtítulos también pueden colocarse en pasos finos justo por encima del borde inferior, para que queden en la franja negra."
+            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor. Las pausas publicitarias marcadas por el servidor se omiten con una pulsación o automáticamente. Los subtítulos también pueden colocarse en pasos finos justo por encima del borde inferior, para que queden en la franja negra. Los subtítulos ASS con estilo aparecen desde la primera línea, ya no se saltan líneas y siguen tras cambiar de audio o pasar al siguiente episodio."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta. Palvelimen merkitsemät mainoskatkot voi ohittaa yhdellä painalluksella tai automaattisesti. Tekstitykset voi nyt sijoittaa myös pienin askelin juuri alareunan yläpuolelle, jotta ne pysyvät mustalla palkilla."
+            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta. Palvelimen merkitsemät mainoskatkot voi ohittaa yhdellä painalluksella tai automaattisesti. Tekstitykset voi nyt sijoittaa myös pienin askelin juuri alareunan yläpuolelle, jotta ne pysyvät mustalla palkilla. Muotoillut ASS-tekstitykset näkyvät ensimmäisestä rivistä alkaen, eivät enää ohita rivejä ja pysyvät ääniraidan vaihdon tai seuraavan jakson jälkeen."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur. Les coupures pub marquées par le serveur se passent en une pression ou automatiquement. Les sous-titres peuvent aussi se placer par petits pas juste au-dessus du bord inférieur, pour rester dans la bande noire."
+            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur. Les coupures pub marquées par le serveur se passent en une pression ou automatiquement. Les sous-titres peuvent aussi se placer par petits pas juste au-dessus du bord inférieur, pour rester dans la bande noire. Les sous-titres ASS stylisés s'affichent dès la première ligne, ne sautent plus de lignes et restent après un changement de piste audio ou à l'épisode suivant."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera. Reklamne pauze koje je označio poslužitelj preskaču se jednim pritiskom ili automatski. Titlovi se sada mogu postaviti i u sitnim koracima tik iznad donjeg ruba, kako bi ostali u crnoj traci."
+            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera. Reklamne pauze koje je označio poslužitelj preskaču se jednim pritiskom ili automatski. Titlovi se sada mogu postaviti i u sitnim koracima tik iznad donjeg ruba, kako bi ostali u crnoj traci. Stilizirani ASS titlovi prikazuju se od prvog retka, više ne preskaču retke i ostaju nakon promjene zvuka ili sljedeće epizode."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el. A szerver által megjelölt reklámszünetek egy gombnyomással vagy automatikusan átugorhatók. A feliratok mostantól finom lépésekben közvetlenül az alsó szél fölé is helyezhetők, hogy a fekete sávban maradjanak."
+            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el. A szerver által megjelölt reklámszünetek egy gombnyomással vagy automatikusan átugorhatók. A feliratok mostantól finom lépésekben közvetlenül az alsó szél fölé is helyezhetők, hogy a fekete sávban maradjanak. A formázott ASS-feliratok az első sortól megjelennek, már nem hagynak ki sorokat, és hangsávváltás vagy a következő epizód után is megmaradnak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player. Le interruzioni pubblicitarie segnate dal server si saltano con un tocco o in automatico. I sottotitoli possono anche stare a piccoli passi appena sopra il bordo inferiore, per restare nella banda nera."
+            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player. Le interruzioni pubblicitarie segnate dal server si saltano con un tocco o in automatico. I sottotitoli possono anche stare a piccoli passi appena sopra il bordo inferiore, per restare nella banda nera. I sottotitoli ASS con stile compaiono dalla prima riga, non saltano più righe e restano dopo un cambio di traccia audio o all'episodio successivo."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。サーバーがマークしたCM区間は、ワンタップまたは自動でスキップできます。字幕は下端のすぐ上に細かい段階で配置することもでき、黒帯の中に収められます。"
+            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。サーバーがマークしたCM区間は、ワンタップまたは自動でスキップできます。字幕は下端のすぐ上に細かい段階で配置することもでき、黒帯の中に収められます。スタイル付きASS字幕が最初の行から表示され、行が飛ばされることもなくなり、音声切り替えや次のエピソードの後も表示されたままになります。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다. 서버가 표시한 광고 구간은 버튼 한 번으로 또는 자동으로 건너뛸 수 있습니다. 자막을 아래쪽 가장자리 바로 위에 세밀한 단계로 배치해 검은 띠 안에 둘 수도 있습니다."
+            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다. 서버가 표시한 광고 구간은 버튼 한 번으로 또는 자동으로 건너뛸 수 있습니다. 자막을 아래쪽 가장자리 바로 위에 세밀한 단계로 배치해 검은 띠 안에 둘 수도 있습니다. 스타일 ASS 자막이 첫 줄부터 표시되고, 더 이상 줄을 건너뛰지 않으며, 오디오 전환이나 다음 에피소드 후에도 유지됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren. Reklamepauser serveren har markert, kan hoppes over med ett trykk eller automatisk. Undertekster kan nå også plasseres i små trinn rett over nederste kant, slik at de blir i den svarte stripen."
+            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren. Reklamepauser serveren har markert, kan hoppes over med ett trykk eller automatisk. Undertekster kan nå også plasseres i små trinn rett over nederste kant, slik at de blir i den svarte stripen. Stilede ASS-undertekster vises fra første linje, hopper ikke lenger over linjer og blir værende etter lydsporbytte eller neste episode."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler. Door de server gemarkeerde reclameblokken sla je met één druk of automatisch over. Ondertitels kun je nu ook in kleine stappen net boven de onderrand zetten, zodat ze in de zwarte balk blijven."
+            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler. Door de server gemarkeerde reclameblokken sla je met één druk of automatisch over. Ondertitels kun je nu ook in kleine stappen net boven de onderrand zetten, zodat ze in de zwarte balk blijven. Opgemaakte ASS-ondertitels verschijnen vanaf de eerste regel, slaan geen regels meer over en blijven staan na een audiowissel of de volgende aflevering."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza. Przerwy reklamowe oznaczone przez serwer można pominąć jednym naciśnięciem lub automatycznie. Napisy można też ustawić w drobnych krokach tuż nad dolną krawędzią, aby zostały na czarnym pasku."
+            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza. Przerwy reklamowe oznaczone przez serwer można pominąć jednym naciśnięciem lub automatycznie. Napisy można też ustawić w drobnych krokach tuż nad dolną krawędzią, aby zostały na czarnym pasku. Stylizowane napisy ASS pojawiają się od pierwszej linii, nie pomijają już linii i zostają po zmianie ścieżki dźwiękowej lub w następnym odcinku."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player. Intervalos comerciais marcados pelo servidor podem ser pulados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima da borda inferior, para permanecer na faixa preta."
+            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player. Intervalos comerciais marcados pelo servidor podem ser pulados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima da borda inferior, para permanecer na faixa preta. Legendas ASS estilizadas aparecem desde a primeira linha, não pulam mais linhas e continuam após trocar o áudio ou no próximo episódio."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor. Os intervalos publicitários marcados pelo servidor podem ser saltados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima do limite inferior, para se manterem na barra preta."
+            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor. Os intervalos publicitários marcados pelo servidor podem ser saltados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima do limite inferior, para se manterem na barra preta. As legendas ASS estilizadas aparecem desde a primeira linha, já não saltam linhas e mantêm-se após mudar o áudio ou no episódio seguinte."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player. Pauzele publicitare marcate de server pot fi omise cu o apăsare sau automat. Subtitrările pot fi așezate acum și în pași fini chiar deasupra marginii de jos, ca să rămână în banda neagră."
+            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player. Pauzele publicitare marcate de server pot fi omise cu o apăsare sau automat. Subtitrările pot fi așezate acum și în pași fini chiar deasupra marginii de jos, ca să rămână în banda neagră. Subtitrările ASS stilizate apar de la primul rând, nu mai sar rânduri și rămân după schimbarea pistei audio sau la episodul următor."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере. Рекламные паузы, отмеченные сервером, можно пропустить одним нажатием или автоматически. Субтитры теперь можно также разместить мелкими шагами чуть выше нижнего края, чтобы они оставались в чёрной полосе."
+            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере. Рекламные паузы, отмеченные сервером, можно пропустить одним нажатием или автоматически. Субтитры теперь можно также разместить мелкими шагами чуть выше нижнего края, чтобы они оставались в чёрной полосе. Стилизованные субтитры ASS появляются с первой строки, больше не пропускают строки и остаются после смены аудиодорожки или в следующей серии."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači. Reklamné prestávky označené serverom preskočíte jedným stlačením alebo automaticky. Titulky sa dajú po novom posunúť aj v jemných krokoch tesne nad spodný okraj, aby zostali v čiernom pruhu."
+            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači. Reklamné prestávky označené serverom preskočíte jedným stlačením alebo automaticky. Titulky sa dajú po novom posunúť aj v jemných krokoch tesne nad spodný okraj, aby zostali v čiernom pruhu. Štylizované titulky ASS sa zobrazia od prvého riadku, už nepreskakujú riadky a zostanú aj po zmene zvukovej stopy alebo v ďalšej epizóde."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren. Reklampauser som servern har markerat kan hoppas över med ett tryck eller automatiskt. Undertexter kan nu också placeras i små steg strax ovanför nederkanten, så att de stannar i det svarta fältet."
+            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren. Reklampauser som servern har markerat kan hoppas över med ett tryck eller automatiskt. Undertexter kan nu också placeras i små steg strax ovanför nederkanten, så att de stannar i det svarta fältet. Formaterade ASS-undertexter visas från första raden, hoppar inte längre över rader och ligger kvar efter ett ljudspårsbyte eller nästa avsnitt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir. Sunucunun işaretlediği reklam araları tek dokunuşla veya otomatik olarak atlanabilir. Altyazılar artık siyah bantta kalmaları için alt kenarın hemen üstüne ince adımlarla da yerleştirilebilir."
+            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir. Sunucunun işaretlediği reklam araları tek dokunuşla veya otomatik olarak atlanabilir. Altyazılar artık siyah bantta kalmaları için alt kenarın hemen üstüne ince adımlarla da yerleştirilebilir. Biçimli ASS altyazıları ilk satırdan itibaren görünür, artık satır atlamaz ve ses parçası değişikliğinden veya sonraki bölümden sonra da kalır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі. Рекламні паузи, позначені сервером, можна пропустити одним натисканням або автоматично. Субтитри тепер можна також розмістити дрібними кроками трохи вище нижнього краю, щоб вони залишалися в чорній смузі."
+            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі. Рекламні паузи, позначені сервером, можна пропустити одним натисканням або автоматично. Субтитри тепер можна також розмістити дрібними кроками трохи вище нижнього краю, щоб вони залишалися в чорній смузі. Стилізовані субтитри ASS зʼявляються з першого рядка, більше не пропускають рядки й лишаються після зміни аудіодоріжки чи в наступній серії."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。服务器标记的广告时段可以一键跳过或自动跳过。字幕还可以按细小档位放在紧贴底边的上方，让它留在黑边里。"
+            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。服务器标记的广告时段可以一键跳过或自动跳过。字幕还可以按细小档位放在紧贴底边的上方，让它留在黑边里。带样式的 ASS 字幕从第一行就会显示，不再跳行，切换音轨或进入下一集后也会保留。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。伺服器標記的廣告時段可以一鍵跳過或自動跳過。字幕還可以按細小檔位放在緊貼底邊的上方，讓它留在黑邊裡。"
+            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。伺服器標記的廣告時段可以一鍵跳過或自動跳過。字幕還可以按細小檔位放在緊貼底邊的上方，讓它留在黑邊裡。帶樣式的 ASS 字幕從第一行就會顯示，不再跳行，切換音軌或進入下一集後也會保留。"
           }
         }
       }
@@ -72430,157 +72430,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržením vlevo nebo vpravo přetáčíte až rychlostí 128x a po puštění se pokračuje dál. Při pauze ukazuje náhled přesný snímek, tituly v Dolby Vision profilu 5 mají opět náhledy a starší Apple TV už nezadrhávají kvůli náhledům dekódovaným během přehrávání."
+            "value" : "Podržením vlevo nebo vpravo přetáčíte až rychlostí 128x a po puštění se pokračuje dál. Při pauze ukazuje náhled přesný snímek, tituly v Dolby Vision profilu 5 mají opět náhledy a starší Apple TV už nezadrhávají kvůli náhledům dekódovaným během přehrávání. Náhledy Trickplay ze serveru opět fungují s Jellyfin 12."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold venstre eller højre for at spole med op til 128x, og det fortsætter, når du slipper. På pause viser forhåndsvisningen den præcise ramme, titler i Dolby Vision profil 5 har forhåndsvisninger igen, og ældre Apple TV hakker ikke længere på grund af forhåndsvisninger, der afkodes under afspilning."
+            "value" : "Hold venstre eller højre for at spole med op til 128x, og det fortsætter, når du slipper. På pause viser forhåndsvisningen den præcise ramme, titler i Dolby Vision profil 5 har forhåndsvisninger igen, og ældre Apple TV hakker ikke længere på grund af forhåndsvisninger, der afkodes under afspilning. Trickplay-forhåndsvisninger fra serveren virker igen med Jellyfin 12."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Halte links oder rechts für bis zu 128-fachen Suchlauf, der auch nach dem Loslassen weiterläuft. Pausiert zeigt die Vorschau das exakte Bild, Dolby Vision Profile 5 hat wieder Vorschaubilder, und ältere Apple TVs ruckeln nicht mehr durch Vorschauen, die während der Wiedergabe dekodiert wurden."
+            "value" : "Halte links oder rechts für bis zu 128-fachen Suchlauf, der auch nach dem Loslassen weiterläuft. Pausiert zeigt die Vorschau das exakte Bild, Dolby Vision Profile 5 hat wieder Vorschaubilder, und ältere Apple TVs ruckeln nicht mehr durch Vorschauen, die während der Wiedergabe dekodiert wurden. Trickplay-Vorschaubilder vom Server funktionieren mit Jellyfin 12 wieder."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κρατήστε αριστερά ή δεξιά για σάρωση έως 128x, και συνεχίζει όταν αφήσετε το κουμπί. Σε παύση η προεπισκόπηση δείχνει το ακριβές καρέ, οι τίτλοι Dolby Vision προφίλ 5 έχουν ξανά προεπισκοπήσεις, και τα παλαιότερα Apple TV δεν κολλάνε πια από προεπισκοπήσεις που αποκωδικοποιούνται κατά την αναπαραγωγή."
+            "value" : "Κρατήστε αριστερά ή δεξιά για σάρωση έως 128x, και συνεχίζει όταν αφήσετε το κουμπί. Σε παύση η προεπισκόπηση δείχνει το ακριβές καρέ, οι τίτλοι Dolby Vision προφίλ 5 έχουν ξανά προεπισκοπήσεις, και τα παλαιότερα Apple TV δεν κολλάνε πια από προεπισκοπήσεις που αποκωδικοποιούνται κατά την αναπαραγωγή. Οι προεπισκοπήσεις Trickplay του διακομιστή λειτουργούν ξανά με το Jellyfin 12."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold left or right to scan at up to 128x, and it keeps going after you let go. While paused, the scrub preview shows the exact frame, Dolby Vision Profile 5 titles have previews again, and older Apple TVs no longer stutter from previews decoded during playback."
+            "value" : "Hold left or right to scan at up to 128x, and it keeps going after you let go. While paused, the scrub preview shows the exact frame, Dolby Vision Profile 5 titles have previews again, and older Apple TVs no longer stutter from previews decoded during playback. Server trickplay previews work again on Jellyfin 12."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantén pulsado izquierda o derecha para avanzar hasta 128x, y sigue avanzando al soltar. En pausa, la vista previa muestra el fotograma exacto, los títulos Dolby Vision perfil 5 vuelven a tener vistas previas y los Apple TV antiguos ya no dan tirones por vistas previas decodificadas durante la reproducción."
+            "value" : "Mantén pulsado izquierda o derecha para avanzar hasta 128x, y sigue avanzando al soltar. En pausa, la vista previa muestra el fotograma exacto, los títulos Dolby Vision perfil 5 vuelven a tener vistas previas y los Apple TV antiguos ya no dan tirones por vistas previas decodificadas durante la reproducción. Las vistas previas Trickplay del servidor vuelven a funcionar con Jellyfin 12."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pidä vasenta tai oikeaa painettuna kelataksesi jopa nopeudella 128x, ja kelaus jatkuu, kun päästät irti. Taukotilassa esikatselu näyttää tarkan ruudun, Dolby Vision -profiilin 5 nimikkeillä on taas esikatselut, eivätkä vanhemmat Apple TV:t enää nyi toiston aikana purettujen esikatselujen takia."
+            "value" : "Pidä vasenta tai oikeaa painettuna kelataksesi jopa nopeudella 128x, ja kelaus jatkuu, kun päästät irti. Taukotilassa esikatselu näyttää tarkan ruudun, Dolby Vision -profiilin 5 nimikkeillä on taas esikatselut, eivätkä vanhemmat Apple TV:t enää nyi toiston aikana purettujen esikatselujen takia. Palvelimen Trickplay-esikatselut toimivat taas Jellyfin 12:n kanssa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintenez gauche ou droite pour défiler jusqu’à 128x, et le défilement continue une fois relâché. En pause, l’aperçu affiche l’image exacte, les titres Dolby Vision profil 5 ont de nouveau des aperçus, et les Apple TV plus anciennes ne saccadent plus à cause d’aperçus décodés pendant la lecture."
+            "value" : "Maintenez gauche ou droite pour défiler jusqu’à 128x, et le défilement continue une fois relâché. En pause, l’aperçu affiche l’image exacte, les titres Dolby Vision profil 5 ont de nouveau des aperçus, et les Apple TV plus anciennes ne saccadent plus à cause d’aperçus décodés pendant la lecture. Les aperçus Trickplay du serveur fonctionnent à nouveau avec Jellyfin 12."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Držite lijevo ili desno za premotavanje do 128x, a ono se nastavlja i kad pustite. Tijekom pauze pregled prikazuje točan kadar, naslovi u Dolby Vision profilu 5 ponovno imaju preglede, a stariji Apple TV uređaji više ne trzaju zbog pregleda dekodiranih tijekom reprodukcije."
+            "value" : "Držite lijevo ili desno za premotavanje do 128x, a ono se nastavlja i kad pustite. Tijekom pauze pregled prikazuje točan kadar, naslovi u Dolby Vision profilu 5 ponovno imaju preglede, a stariji Apple TV uređaji više ne trzaju zbog pregleda dekodiranih tijekom reprodukcije. Trickplay pretpregledi s poslužitelja ponovno rade s Jellyfin 12."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tartsd nyomva a balra vagy jobbra gombot akár 128x-os tekeréshez, és elengedés után is folytatódik. Szüneteltetve az előnézet a pontos képkockát mutatja, a Dolby Vision 5-ös profilú címeknek ismét van előnézetük, a régebbi Apple TV-k pedig már nem akadoznak a lejátszás közben dekódolt előnézetek miatt."
+            "value" : "Tartsd nyomva a balra vagy jobbra gombot akár 128x-os tekeréshez, és elengedés után is folytatódik. Szüneteltetve az előnézet a pontos képkockát mutatja, a Dolby Vision 5-ös profilú címeknek ismét van előnézetük, a régebbi Apple TV-k pedig már nem akadoznak a lejátszás közben dekódolt előnézetek miatt. A szerver Trickplay-előnézetei újra működnek a Jellyfin 12-vel."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tieni premuto sinistra o destra per scorrere fino a 128x, e continua anche quando rilasci. In pausa l’anteprima di scorrimento mostra il fotogramma esatto, i titoli Dolby Vision profilo 5 hanno di nuovo le anteprime e le Apple TV meno recenti non scattano più per le anteprime decodificate durante la riproduzione."
+            "value" : "Tieni premuto sinistra o destra per scorrere fino a 128x, e continua anche quando rilasci. In pausa l’anteprima di scorrimento mostra il fotogramma esatto, i titoli Dolby Vision profilo 5 hanno di nuovo le anteprime e le Apple TV meno recenti non scattano più per le anteprime decodificate durante la riproduzione. Le anteprime Trickplay del server funzionano di nuovo con Jellyfin 12."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "左右を長押しすると最大128xで早送りでき、離しても続きます。一時停止中はスクラブプレビューに正確なフレームが表示され、Dolby Vision プロファイル5のタイトルでもプレビューが再び表示されます。旧型のApple TVで、再生中にデコードされるプレビューによってカクつくこともなくなりました。"
+            "value" : "左右を長押しすると最大128xで早送りでき、離しても続きます。一時停止中はスクラブプレビューに正確なフレームが表示され、Dolby Vision プロファイル5のタイトルでもプレビューが再び表示されます。旧型のApple TVで、再生中にデコードされるプレビューによってカクつくこともなくなりました。サーバーのTrickplayプレビューがJellyfin 12で再び表示されるようになりました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "왼쪽이나 오른쪽을 길게 누르면 최대 128x로 탐색하며, 손을 떼도 계속됩니다. 일시 정지 중에는 탐색 미리보기가 정확한 프레임을 보여 주고, Dolby Vision 프로필 5 타이틀에서도 미리보기가 다시 표시되며, 구형 Apple TV에서 재생 중 디코딩되는 미리보기 때문에 끊기는 일이 더 이상 없습니다."
+            "value" : "왼쪽이나 오른쪽을 길게 누르면 최대 128x로 탐색하며, 손을 떼도 계속됩니다. 일시 정지 중에는 탐색 미리보기가 정확한 프레임을 보여 주고, Dolby Vision 프로필 5 타이틀에서도 미리보기가 다시 표시되며, 구형 Apple TV에서 재생 중 디코딩되는 미리보기 때문에 끊기는 일이 더 이상 없습니다. 서버의 Trickplay 미리보기가 Jellyfin 12에서 다시 작동합니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold venstre eller høyre for å spole med opptil 128x, og det fortsetter når du slipper. Ved pause viser forhåndsvisningen den nøyaktige rammen, titler i Dolby Vision profil 5 har forhåndsvisninger igjen, og eldre Apple TV hakker ikke lenger av forhåndsvisninger som dekodes under avspilling."
+            "value" : "Hold venstre eller høyre for å spole med opptil 128x, og det fortsetter når du slipper. Ved pause viser forhåndsvisningen den nøyaktige rammen, titler i Dolby Vision profil 5 har forhåndsvisninger igjen, og eldre Apple TV hakker ikke lenger av forhåndsvisninger som dekodes under avspilling. Trickplay-forhåndsvisninger fra serveren virker igjen med Jellyfin 12."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd links of rechts ingedrukt om met tot 128x te spoelen, en het gaat door als je loslaat. Tijdens een pauze toont de scrubvoorvertoning het exacte beeld, titels in Dolby Vision profiel 5 hebben weer voorvertoningen en oudere Apple TV's haperen niet meer door voorvertoningen die tijdens het afspelen worden gedecodeerd."
+            "value" : "Houd links of rechts ingedrukt om met tot 128x te spoelen, en het gaat door als je loslaat. Tijdens een pauze toont de scrubvoorvertoning het exacte beeld, titels in Dolby Vision profiel 5 hebben weer voorvertoningen en oudere Apple TV's haperen niet meer door voorvertoningen die tijdens het afspelen worden gedecodeerd. Trickplay-voorbeelden van de server werken weer met Jellyfin 12."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przytrzymaj w lewo lub w prawo, aby przewijać z prędkością do 128x, a po puszczeniu przewijanie trwa dalej. Podczas pauzy podgląd przewijania pokazuje dokładną klatkę, tytuły w Dolby Vision profil 5 znów mają podgląd, a starsze Apple TV nie zacinają się już przez podglądy dekodowane w trakcie odtwarzania."
+            "value" : "Przytrzymaj w lewo lub w prawo, aby przewijać z prędkością do 128x, a po puszczeniu przewijanie trwa dalej. Podczas pauzy podgląd przewijania pokazuje dokładną klatkę, tytuły w Dolby Vision profil 5 znów mają podgląd, a starsze Apple TV nie zacinają się już przez podglądy dekodowane w trakcie odtwarzania. Podglądy Trickplay z serwera znów działają z Jellyfin 12."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Segure esquerda ou direita para avançar a até 128x, e o avanço continua depois que você solta. Com a reprodução pausada, a prévia de rolagem mostra o quadro exato, títulos em Dolby Vision perfil 5 voltam a ter prévias e Apple TVs mais antigas não engasgam mais com prévias decodificadas durante a reprodução."
+            "value" : "Segure esquerda ou direita para avançar a até 128x, e o avanço continua depois que você solta. Com a reprodução pausada, a prévia de rolagem mostra o quadro exato, títulos em Dolby Vision perfil 5 voltam a ter prévias e Apple TVs mais antigas não engasgam mais com prévias decodificadas durante a reprodução. As prévias Trickplay do servidor voltaram a funcionar com o Jellyfin 12."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantenha premido esquerda ou direita para avançar até 128x, e o avanço continua depois de largar. Em pausa, a pré-visualização de deslocação mostra a imagem exata, os títulos em Dolby Vision perfil 5 voltam a ter pré-visualizações e as Apple TV mais antigas já não engasgam com pré-visualizações descodificadas durante a reprodução."
+            "value" : "Mantenha premido esquerda ou direita para avançar até 128x, e o avanço continua depois de largar. Em pausa, a pré-visualização de deslocação mostra a imagem exata, os títulos em Dolby Vision perfil 5 voltam a ter pré-visualizações e as Apple TV mais antigas já não engasgam com pré-visualizações descodificadas durante a reprodução. As pré-visualizações Trickplay do servidor voltaram a funcionar com o Jellyfin 12."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ține apăsat stânga sau dreapta pentru a derula cu până la 128x, iar derularea continuă după ce eliberezi. În pauză, previzualizarea la derulare arată cadrul exact, titlurile în Dolby Vision profil 5 au din nou previzualizări, iar Apple TV-urile mai vechi nu mai sacadează din cauza previzualizărilor decodate în timpul redării."
+            "value" : "Ține apăsat stânga sau dreapta pentru a derula cu până la 128x, iar derularea continuă după ce eliberezi. În pauză, previzualizarea la derulare arată cadrul exact, titlurile în Dolby Vision profil 5 au din nou previzualizări, iar Apple TV-urile mai vechi nu mai sacadează din cauza previzualizărilor decodate în timpul redării. Previzualizările Trickplay de pe server funcționează din nou cu Jellyfin 12."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Удерживайте влево или вправо для перемотки со скоростью до 128x, и она продолжится, когда вы отпустите. На паузе предпросмотр перемотки показывает точный кадр, у фильмов в Dolby Vision профиль 5 снова есть превью, а старые Apple TV больше не подтормаживают из-за превью, декодируемых во время воспроизведения."
+            "value" : "Удерживайте влево или вправо для перемотки со скоростью до 128x, и она продолжится, когда вы отпустите. На паузе предпросмотр перемотки показывает точный кадр, у фильмов в Dolby Vision профиль 5 снова есть превью, а старые Apple TV больше не подтормаживают из-за превью, декодируемых во время воспроизведения. Превью Trickplay с сервера снова работают с Jellyfin 12."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržaním doľava alebo doprava spustíte pretáčanie až rýchlosťou 128x a po pustení pokračuje ďalej. Počas pauzy náhľad pri posúvaní ukazuje presnú snímku, tituly v Dolby Vision profile 5 majú opäť náhľady a staršie Apple TV sa už nezasekávajú pre náhľady dekódované počas prehrávania."
+            "value" : "Podržaním doľava alebo doprava spustíte pretáčanie až rýchlosťou 128x a po pustení pokračuje ďalej. Počas pauzy náhľad pri posúvaní ukazuje presnú snímku, tituly v Dolby Vision profile 5 majú opäť náhľady a staršie Apple TV sa už nezasekávajú pre náhľady dekódované počas prehrávania. Náhľady Trickplay zo servera opäť fungujú s Jellyfin 12."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Håll vänster eller höger för att spola med upp till 128x, och det fortsätter när du släpper. Vid paus visar spolförhandsvisningen exakt bildruta, titlar i Dolby Vision profil 5 har förhandsvisningar igen och äldre Apple TV hackar inte längre av förhandsvisningar som avkodas under uppspelning."
+            "value" : "Håll vänster eller höger för att spola med upp till 128x, och det fortsätter när du släpper. Vid paus visar spolförhandsvisningen exakt bildruta, titlar i Dolby Vision profil 5 har förhandsvisningar igen och äldre Apple TV hackar inte längre av förhandsvisningar som avkodas under uppspelning. Trickplay-förhandsvisningar från servern fungerar igen med Jellyfin 12."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "128x'e kadar sarmak için sola veya sağa basılı tutun, bıraktığınızda da sarma devam eder. Duraklatıldığında sarma önizlemesi tam kareyi gösterir, Dolby Vision profil 5 başlıklarında önizlemeler geri geldi ve eski Apple TV'ler oynatma sırasında çözülen önizlemeler yüzünden artık takılmıyor."
+            "value" : "128x'e kadar sarmak için sola veya sağa basılı tutun, bıraktığınızda da sarma devam eder. Duraklatıldığında sarma önizlemesi tam kareyi gösterir, Dolby Vision profil 5 başlıklarında önizlemeler geri geldi ve eski Apple TV'ler oynatma sırasında çözülen önizlemeler yüzünden artık takılmıyor. Sunucunun Trickplay önizlemeleri Jellyfin 12 ile yeniden çalışıyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Утримуйте вліво або вправо для перемотування зі швидкістю до 128x, і воно триватиме, коли ви відпустите. На паузі попередній перегляд показує точний кадр, фільми в Dolby Vision профіль 5 знову мають прев’ю, а старі Apple TV більше не підгальмовують через прев’ю, що декодуються під час відтворення."
+            "value" : "Утримуйте вліво або вправо для перемотування зі швидкістю до 128x, і воно триватиме, коли ви відпустите. На паузі попередній перегляд показує точний кадр, фільми в Dolby Vision профіль 5 знову мають прев’ю, а старі Apple TV більше не підгальмовують через прев’ю, що декодуються під час відтворення. Превʼю Trickplay із сервера знову працюють із Jellyfin 12."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住左或右键可最高以 128x 快进，松手后仍会继续。暂停时，拖动预览会显示精确画面，Dolby Vision 配置文件 5 的影片重新有了预览，旧款 Apple TV 也不再因播放期间解码预览而卡顿。"
+            "value" : "按住左或右键可最高以 128x 快进，松手后仍会继续。暂停时，拖动预览会显示精确画面，Dolby Vision 配置文件 5 的影片重新有了预览，旧款 Apple TV 也不再因播放期间解码预览而卡顿。服务器的 Trickplay 预览在 Jellyfin 12 上恢复正常。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住左或右鍵可最高以 128x 快轉，放開後仍會繼續。暫停時，拖曳預覽會顯示精確畫面，Dolby Vision 設定檔 5 的影片重新有了預覽，舊款 Apple TV 也不再因播放期間解碼預覽而卡頓。"
+            "value" : "按住左或右鍵可最高以 128x 快轉，放開後仍會繼續。暫停時，拖曳預覽會顯示精確畫面，Dolby Vision 設定檔 5 的影片重新有了預覽，舊款 Apple TV 也不再因播放期間解碼預覽而卡頓。伺服器的 Trickplay 預覽在 Jellyfin 12 上恢復正常。"
           }
         }
       }

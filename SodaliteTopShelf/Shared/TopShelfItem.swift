@@ -162,11 +162,12 @@ nonisolated extension TopShelfItem {
     /// the tight extension budget, and it costs nothing on a JPEG source, which Jellyfin passes
     /// through unconverted. The width is `ImageWidth.topShelfSource`, a cap rather than a request,
     /// and no `quality`: both exist to stop the server re-encoding a file it could hand over as it
-    /// is. enableImageEnhancers=false skips a downscaling server transform.
+    /// is. enableImageEnhancers=false skips a downscaling server transform. The token goes under
+    /// both names: Jellyfin 12 reads only `ApiKey`, servers before 10.9 only `api_key`.
     private func imageURL(baseURL: URL, itemID: String, kind: String, tag: String, token: String) -> URL? {
         var base = baseURL.absoluteString
         while base.hasSuffix("/") { base.removeLast() }
-        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfSource)&format=Jpg&enableImageEnhancers=false&api_key=\(token)"
+        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfSource)&format=Jpg&enableImageEnhancers=false&api_key=\(token)&ApiKey=\(token)"
         return URL(string: raw)
     }
 }

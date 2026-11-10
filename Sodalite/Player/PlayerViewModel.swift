@@ -892,7 +892,7 @@ final class PlayerViewModel {
     @ObservationIgnored var externalEngineTrackIDs: [Int: Int] = [:]
     /// Coordinator reload pre-announcements; the overlay's frame view subscribes so reload-induced
     /// transient nil frames never blank a visible subtitle. Stable for the VM lifetime.
-    var assReloadSignal: PassthroughSubject<Void, Never> { assCoordinator.reloadSignal }
+    var assReloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never> { assCoordinator.reloadSignal }
 
     // MARK: - Live TV
 

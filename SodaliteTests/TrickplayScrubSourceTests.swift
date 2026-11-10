@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import CoreGraphics
 @testable import Sodalite
@@ -23,6 +24,19 @@ struct TrickplayScrubSourceTests {
                                                          isDiscFolder: true) == true)
         #expect(PlayerViewModel.shouldUseServerTrickplay(preferServer: false, tileSet: nil,
                                                          isDiscFolder: true) == false)
+    }
+
+    @Test("the tile URL carries the token as ApiKey too, Jellyfin 12 ignores api_key (#234)")
+    @MainActor
+    func tileURLUsesApiKey() throws {
+        let client = JellyfinClient()
+        client.baseURL = URL(string: "https://jf.example/jellyfin")
+        client.accessToken = "tok"
+        let url = try #require(JellyfinPlaybackService(client: client)
+            .buildTrickplayTileURL(itemID: "abc", width: 320, tileIndex: 4))
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        #expect(url.path == "/jellyfin/Videos/abc/Trickplay/320/4.jpg")
+        #expect(items == [URLQueryItem(name: "api_key", value: "tok"), URLQueryItem(name: "ApiKey", value: "tok")])
     }
 }
 

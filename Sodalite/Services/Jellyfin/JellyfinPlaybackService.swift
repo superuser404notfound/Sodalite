@@ -286,8 +286,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         var components = URLComponents(url: baseURL.appendingPathComponent("/\(pathPrefix)/\(itemID)/stream.\(ext)"), resolvingAgainstBaseURL: true)
         var queryItems = [
             URLQueryItem(name: "MediaSourceId", value: mediaSourceID),
-            URLQueryItem(name: "api_key", value: token),
-        ]
+        ] + Self.tokenQueryItems(token)
         if isStatic {
             queryItems.append(URLQueryItem(name: "Static", value: "true"))
         }
@@ -295,12 +294,21 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         return components?.url
     }
 
+    /// The access token for a URL the player or an image loader fetches without our headers.
+    /// Jellyfin 12 no longer reads `api_key` on any route (`/Items/{id}/PlaybackInfo` answers 401
+    /// with it, 200 with `ApiKey`). Routes that seemed to accept it are anonymous on a default
+    /// server; trickplay tiles are not, so the scrub preview stayed empty (Sodalite#234).
+    /// `ApiKey` is read since 10.9; `api_key` stays for older servers.
+    nonisolated static func tokenQueryItems(_ token: String) -> [URLQueryItem] {
+        [URLQueryItem(name: "api_key", value: token), URLQueryItem(name: "ApiKey", value: token)]
+    }
+
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? {
         guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
         let fmt = Self.subtitleRouteFormat(forCodec: format)
         let path = "/Videos/\(itemID)/\(mediaSourceID)/Subtitles/\(streamIndex)/0/Stream.\(fmt)"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
-        components?.queryItems = [URLQueryItem(name: "api_key", value: token)]
+        components?.queryItems = Self.tokenQueryItems(token)
         return components?.url
     }
 
@@ -324,8 +332,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
             URLQueryItem(name: "tag", value: imageTag),
             URLQueryItem(name: "maxWidth", value: String(maxWidth)),
             URLQueryItem(name: "quality", value: "90"),
-            URLQueryItem(name: "api_key", value: token),
-        ]
+        ] + Self.tokenQueryItems(token)
         return components?.url
     }
 
@@ -333,7 +340,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
         let path = "/Videos/\(itemID)/Trickplay/\(width)/\(tileIndex).jpg"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
-        components?.queryItems = [URLQueryItem(name: "api_key", value: token)]
+        components?.queryItems = Self.tokenQueryItems(token)
         return components?.url
     }
 
@@ -367,12 +374,13 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// own bind address, so for a client reaching Jellyfin over WAN, a reverse proxy, HTTPS or a VPN
     /// hostname it resolves to nothing and fails as a connection timeout rather than an error. Keep the
     /// server-relative part only and re-anchor it on the URL we are actually connected on, subpath and
-    /// all. `api_key` rides along so the request correlates in server logs and survives the route
+    /// all. The token rides along so the request correlates in server logs and survives the route
     /// gaining an authorization policy later; the route ignores it today.
     func buildLiveStreamFileURL(sourcePath: String) -> URL? {
         guard var relative = Self.liveStreamFileRelativePath(fromSourcePath: sourcePath) else { return nil }
         if let token = client.accessToken {
-            relative += relative.contains("?") ? "&api_key=\(token)" : "?api_key=\(token)"
+            let query = Self.tokenQueryItems(token).map { "\($0.name)=\($0.value ?? "")" }.joined(separator: "&")
+            relative += (relative.contains("?") ? "&" : "?") + query
         }
         return buildTranscodeURL(relativePath: relative)
     }

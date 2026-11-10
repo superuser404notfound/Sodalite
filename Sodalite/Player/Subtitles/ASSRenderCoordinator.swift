@@ -19,10 +19,15 @@ final class ASSRenderCoordinator {
     /// overlay falls back to the text path.
     private(set) var renderer: AssSubtitlesRenderer?
 
-    /// Fires immediately BEFORE every `reloadTrack` so the overlay can suppress the renderer's
-    /// transient re-parse nil deterministically (a pure time-based window loses the race when
-    /// re-parse + font matching runs long and the sub blinks mid-line).
-    let reloadSignal = PassthroughSubject<Void, Never>()
+    enum ReloadPhase: Sendable { case began, landed }
+
+    /// `.began` fires immediately BEFORE every `reloadTrack` so the overlay can suppress the
+    /// renderer's transient re-parse nil; `.landed` fires once the renderer's work queue has parsed
+    /// the new script. The overlay holds the visible line until then instead of guessing with a
+    /// timer: a typeset script takes longer than any fixed window to parse on an Apple TV, and a
+    /// hide at a window's end while the track was still unloaded lost the line for good, because
+    /// libass then reports the identical re-render as unchanged and never republishes it (#234).
+    let reloadSignal = PassthroughSubject<ReloadPhase, Never>()
 
     private let player: AetherEngine
     private var builder: ASSScriptBuilder?
@@ -36,6 +41,11 @@ final class ASSRenderCoordinator {
     /// Batch window before reparsing the whole script. Per-cue reload (1-2/s) is pointless churn;
     /// in steady-state streaming the side demuxer runs ~90 s ahead so new events are far off.
     private let reloadInterval: TimeInterval = 5
+    /// Events starting further out than this wait in the builder. Every reload reparses the whole
+    /// growing script (and swift-ass-renderer 1.3.1 never frees the track it replaces), so a 5 s
+    /// cadence on a heavily typeset track meant a full parse every 5 s for lines a minute away.
+    /// The clock sink re-checks on every tick, so a waiting event still loads well before it shows.
+    private let reloadLeadSeconds: Double = 30
     /// Imminent-flush bypass: after a seek/mid-dialogue activation the catch-up burst delivers
     /// events within seconds of the playhead; holding them the full window drops a running
     /// dialogue's continuation lines (field repro: subs "ending too early" right after scrubs).
@@ -132,6 +142,8 @@ final class ASSRenderCoordinator {
         let config = FontConfig(fontsPath: fontsDir, fontProvider: .coreText)
         let renderer = AssSubtitlesRenderer(fontConfig: config)
         self.renderer = renderer
+        // Paused, the clock does not tick, so without this the new renderer would sit at 0.
+        renderer.setTimeOffset(scriptTime)
         onRendererChanged?(renderer)
         // Surface events that arrived in the builder while fonts were being written.
         flushPendingEventsIfDue()
@@ -183,21 +195,41 @@ final class ASSRenderCoordinator {
         flushPendingEventsIfDue()
     }
 
-    /// Reload the track when events are waiting and either the batch window elapsed or a pending
-    /// event is imminent (within `imminentLeadSeconds`). Called from the cue sink and clock sink.
+    /// Reload the track when a pending event comes within `reloadLeadSeconds` of the playhead and
+    /// the spacing for its distance has passed. Called from the cue sink and clock sink.
     /// `lastReloadAt` starts `.distantPast` so the first batch always passes the interval check.
     private func flushPendingEventsIfDue() {
         guard pendingEvents, let builder, let renderer else { return }
         let now = Date()
-        let elapsed = now.timeIntervalSince(lastReloadAt)
-        let imminent = earliestPendingStart <= lastOffset + imminentLeadSeconds
-        let due = imminent ? elapsed >= minImminentSpacing : elapsed >= reloadInterval
-        guard due else { return }
+        guard Self.reloadIsDue(earliestPendingStart: earliestPendingStart, playhead: lastOffset,
+                               sinceLastReload: now.timeIntervalSince(lastReloadAt),
+                               imminentLead: imminentLeadSeconds, reloadLead: reloadLeadSeconds,
+                               imminentSpacing: minImminentSpacing, batchSpacing: reloadInterval)
+        else { return }
         lastReloadAt = now
         pendingEvents = false
         earliestPendingStart = .infinity
-        reloadSignal.send()
+        reloadSignal.send(.began)
         renderer.reloadTrack(content: builder.script())
+        // Queued behind the parse on the renderer's serial work queue, so the completion marks
+        // the moment the new track is in place. Two main hops, like the frame publisher's.
+        renderer.loadFrame(offset: scriptTime) { [weak self] _ in
+            DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated { self?.reloadSignal.send(.landed) }
+                }
+            }
+        }
+    }
+
+    nonisolated static func reloadIsDue(earliestPendingStart: Double, playhead: Double,
+                                        sinceLastReload: TimeInterval, imminentLead: Double,
+                                        reloadLead: Double, imminentSpacing: TimeInterval,
+                                        batchSpacing: TimeInterval) -> Bool {
+        let lead = earliestPendingStart - playhead
+        if lead <= imminentLead { return sinceLastReload >= imminentSpacing }
+        if lead <= reloadLead { return sinceLastReload >= batchSpacing }
+        return false
     }
 
     // MARK: - Fonts

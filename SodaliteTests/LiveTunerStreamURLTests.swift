@@ -80,7 +80,7 @@ struct LiveTunerStreamURLTests {
             .buildLiveStreamFileURL(
                 sourcePath: "http://192.168.1.50:8096/LiveTv/LiveStreamFiles/8a26baf2/stream.ts")
         #expect(url?.absoluteString
-            == "https://jf.example.com/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok")
+            == "https://jf.example.com/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok&ApiKey=tok")
     }
 
     @Test("a reverse-proxy subpath on our base URL survives")
@@ -89,7 +89,7 @@ struct LiveTunerStreamURLTests {
             .buildLiveStreamFileURL(
                 sourcePath: "http://192.168.1.50:8096/LiveTv/LiveStreamFiles/8a26baf2/stream.ts")
         #expect(url?.absoluteString
-            == "https://jf.example.com/jellyfin/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok")
+            == "https://jf.example.com/jellyfin/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok&ApiKey=tok")
     }
 
     @Test("a non-standard port on our base URL survives")
@@ -98,7 +98,7 @@ struct LiveTunerStreamURLTests {
             .buildLiveStreamFileURL(
                 sourcePath: "http://192.168.1.50:8096/LiveTv/LiveStreamFiles/8a26baf2/stream.ts")
         #expect(url?.absoluteString
-            == "http://10.0.0.2:8920/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok")
+            == "http://10.0.0.2:8920/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?api_key=tok&ApiKey=tok")
     }
 
     @Test("an existing query gets the token appended, not replaced")
@@ -107,7 +107,7 @@ struct LiveTunerStreamURLTests {
             .buildLiveStreamFileURL(
                 sourcePath: "http://192.168.1.50:8096/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?x=1")
         #expect(url?.absoluteString
-            == "https://jf.example.com/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?x=1&api_key=tok")
+            == "https://jf.example.com/LiveTv/LiveStreamFiles/8a26baf2/stream.ts?x=1&api_key=tok&ApiKey=tok")
     }
 
     @Test("no session token still yields the URL: the route carries no authorization policy")
