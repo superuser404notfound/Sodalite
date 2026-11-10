@@ -93,3 +93,91 @@ extension JellyfinProgram {
         return GuideTimeRange(start: startDate, end: endDate)
     }
 }
+
+/// One cell of a guide row: a program from the EPG, or a stretch the EPG says nothing about.
+enum GuideRowEntry: Equatable {
+    case program(Int)
+    case gap(GuideTimeRange)
+}
+
+extension GuideRowMath {
+    /// Sodalite#221: the anchor is compared at minute resolution, the resolution the grid prints.
+    /// EPG times often carry seconds (an "11:00-11:30" program ending at 11:30:20), and a cell's
+    /// time read back from its x can land a fraction of a second either side of the minute. Both
+    /// made a program that visibly ENDS at the picked time beat the one that starts at it.
+    static func floorToMinute(_ date: Date) -> Date {
+        Date(timeIntervalSinceReferenceDate: (date.timeIntervalSinceReferenceDate / 60).rounded(.down) * 60)
+    }
+
+    static func roundToMinute(_ date: Date) -> Date {
+        Date(timeIntervalSinceReferenceDate: (date.timeIntervalSinceReferenceDate / 60).rounded() * 60)
+    }
+
+    /// Index of the entry whose airtime covers `time`, nil when none does.
+    static func index(covering time: Date, in ranges: [GuideTimeRange?]) -> Int? {
+        let minute = floorToMinute(time)
+        return ranges.firstIndex { range in
+            guard let range else { return false }
+            return floorToMinute(range.start) <= minute && minute < floorToMinute(range.end)
+        }
+    }
+
+    /// The covering entry, or the nearest one when the row has a gap at `time`. nil for no entries.
+    static func index(coveringOrNearest time: Date, in ranges: [GuideTimeRange?]) -> Int? {
+        if let covering = index(covering: time, in: ranges) { return covering }
+        var best: Int?
+        var bestDistance = TimeInterval.greatestFiniteMagnitude
+        for (index, range) in ranges.enumerated() {
+            guard let range else { continue }
+            let distance = time < range.start
+                ? range.start.timeIntervalSince(time)
+                : time.timeIntervalSince(range.end)
+            if distance < bestDistance {
+                bestDistance = distance
+                best = index
+            }
+        }
+        return best ?? (ranges.isEmpty ? nil : 0)
+    }
+
+    /// Sodalite#221: a channel whose EPG ends hours before the axis does left nothing focusable at a
+    /// picked time past that end, so the anchor fell back to the row's LAST program and a vertical
+    /// move landed hours early and scrolled the grid back to it. Stretches of at least
+    /// `minimumGapMinutes` without data become placeholder entries, cut on the same hourly lines as
+    /// a channel with no EPG at all, so there is always a cell at the anchor.
+    ///
+    /// Expects `ranges` sorted by start and filtered through `keptIndices`. A row with an entry
+    /// without airtimes is returned unchanged: that entry already spans the whole axis.
+    static func entriesFillingGaps(_ ranges: [GuideTimeRange?], axis: GuideAxis,
+                                   segmentMinutes: Int,
+                                   minimumGapMinutes: Int = GuideAxis.slotMinutes) -> [GuideRowEntry] {
+        let programs = ranges.indices.map { GuideRowEntry.program($0) }
+        guard !ranges.isEmpty, !ranges.contains(where: { $0 == nil }) else { return programs }
+        let minimumGap = TimeInterval(minimumGapMinutes) * 60
+        let segment = TimeInterval(segmentMinutes) * 60
+        var result: [GuideRowEntry] = []
+        var cursor = axis.start
+
+        func fill(to end: Date) {
+            guard end.timeIntervalSince(cursor) >= minimumGap else { return }
+            var start = cursor
+            while start < end {
+                // Next hourly line at least a minimum gap away, so no sliver cells.
+                let steps = ((start.timeIntervalSince(axis.start) + minimumGap) / segment).rounded(.up)
+                var stop = axis.start.addingTimeInterval(steps * segment)
+                if end.timeIntervalSince(stop) < minimumGap { stop = end }
+                result.append(.gap(GuideTimeRange(start: start, end: stop)))
+                start = stop
+            }
+        }
+
+        for (index, range) in ranges.enumerated() {
+            guard let range else { continue }
+            fill(to: min(range.start, axis.end))
+            result.append(.program(index))
+            cursor = max(cursor, range.end)
+        }
+        fill(to: axis.end)
+        return result
+    }
+}

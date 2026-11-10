@@ -35,6 +35,8 @@ extension GuideGridViewController {
             // The engine already picked the anchored cell; drop the stale redirect so the async
             // re-run cannot yank focus back to an older row.
             pendingFocusRedirect = nil
+            // Otherwise silent, which hid a landing hours off the anchor in a capture (Sodalite#221).
+            if !landedCoversAnchor(next) { focusLog("landed off anchor", previous: previous, next: next) }
             return true
         }
         if let last = lastVetoedMove, last.previous == previous, last.next == next {
@@ -53,6 +55,14 @@ extension GuideGridViewController {
         focusLog("veto", previous: previous, next: next, target: target)
         redirectFocus(to: target, from: previous)
         return false
+    }
+
+    private func landedCoversAnchor(_ path: IndexPath) -> Bool {
+        guard path.section < rows.count else { return true }
+        let row = rows[path.section]
+        guard !row.programs.isEmpty else { return true }
+        return GuideRowMath.index(covering: model.anchorTime,
+                                  in: row.programs.map(\.guideTimeRange)) == path.item
     }
 
     /// Serve `target` on the next turn of the run loop. Used for a vetoed vertical move and for a
@@ -209,13 +219,15 @@ extension GuideGridViewController {
     /// One line per veto, redirect and accepted engine pick, so a landing off the anchor can be
     /// read back from Settings > Diagnostic Log without a Mac (Sodalite#221).
     func focusLog(_ event: String, previous: IndexPath, next: IndexPath, target: IndexPath? = nil) {
-        let time = { (date: Date?) in date?.formatted(date: .omitted, time: .shortened) ?? "?" }
+        // With seconds: EPG times that carry them decide which of two programs covers a minute.
+        let time = { (date: Date?) in date?.formatted(date: .omitted, time: .standard) ?? "?" }
         func cell(_ path: IndexPath) -> String {
             guard path.section < rows.count else { return "r\(path.section)" }
             let programs = rows[path.section].programs
             guard path.item < programs.count else { return "r\(path.section) slot \(path.item)" }
             let program = programs[path.item]
-            return "r\(path.section) \(time(program.startDate))-\(time(program.endDate))"
+            let kind = program.isSynthesized ? " gap" : ""
+            return "r\(path.section)\(kind) \(time(program.startDate))-\(time(program.endDate))"
         }
         let anchor: String
         switch model.anchor {
@@ -294,8 +306,7 @@ extension GuideGridViewController {
         if let item, item < row.programs.count {
             model.setHero(program: row.programs[item], channel: row.channel)
         } else {
-            let airing = row.programs.first { $0.isAiring(at: Date()) }
-            model.setHero(program: airing ?? row.channel.currentProgram, channel: row.channel)
+            model.setHero(program: row.airing ?? row.channel.currentProgram, channel: row.channel)
         }
     }
 
@@ -305,13 +316,14 @@ extension GuideGridViewController {
         if collectionView === columnView {
             guard indexPath.item < rows.count else { return }
             let row = rows[indexPath.item]
-            onPlayChannel(row.channel, row.programs.first { $0.isAiring(at: Date()) })
+            onPlayChannel(row.channel, row.airing)
             return
         }
         guard collectionView === gridView, indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
-        guard !row.programs.isEmpty, indexPath.item < row.programs.count else {
-            // A channel with no EPG data: there is nothing to schedule, so select plays it.
+        guard !row.programs.isEmpty, indexPath.item < row.programs.count,
+              !isGap(row, item: indexPath.item) else {
+            // No EPG data here: there is nothing to schedule, so select plays the channel.
             onPlayChannel(row.channel, nil)
             return
         }
@@ -366,6 +378,7 @@ extension GuideGridViewController {
               indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
         let program = row.programs.isEmpty || indexPath.item >= row.programs.count
+            || isGap(row, item: indexPath.item)
             ? synthesizedProgram(for: row.channel)
             : row.programs[indexPath.item]
         onSelect(row.channel, program)
