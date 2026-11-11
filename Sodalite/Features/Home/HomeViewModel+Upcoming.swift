@@ -4,8 +4,9 @@ import Foundation
 
 extension HomeViewModel {
 
-    /// The library's schedule first, then Seerr for the caught-up shows it said nothing about. Seerr
-    /// belongs to the active session, so a combined Home's secondary gets the library pass only.
+    /// The library's schedule first, then the server's own Upcoming list, then Seerr for the
+    /// caught-up shows neither said anything about. Seerr belongs to the active session, so a
+    /// combined Home's secondary gets the server passes only.
     func loadUpcoming(source: HomeSource) async throws -> [JellyfinItem] {
         let now = Date()
         let calendar = Calendar.current
@@ -17,6 +18,9 @@ extension HomeViewModel {
         )
         async let scheduleResponse = source.libraryService.getItems(
             userID: source.userID, query: HomeUpcoming.scheduleQuery(now: now, limit: HomeUpcoming.scheduleLimit)
+        )
+        async let serverListResponse = source.libraryService.getUpcoming(
+            userID: source.userID, limit: HomeUpcoming.serverListLimit
         )
         // Next Up must answer: without it every watched show would read as caught up.
         let caughtUp = HomeUpcoming.caughtUpSeries(
@@ -32,6 +36,9 @@ extension HomeViewModel {
                 found = found.map { byID[$0.id] ?? $0 }
             }
         }
+
+        let serverList = (try? await serverListResponse) ?? []
+        found += HomeUpcoming.fromServerList(serverList, found: found, caughtUp: caughtUp, now: now, calendar: calendar)
 
         let missing = HomeUpcoming.needingLookup(caughtUp: caughtUp, found: found)
         if source.isActive, let lookup = nextAiringLookup, !missing.isEmpty {

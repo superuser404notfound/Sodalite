@@ -53,6 +53,28 @@ extension HomeViewModel {
         return folded
     }
 
+    /// One library's Latest list. An empty answer is read again as the library's first page, newest
+    /// first: a server that builds its libraries from remote catalogs can switch `/Items/Latest`
+    /// off and answer `[]` for every library while `/Items` still lists them. On Jellyfin an empty
+    /// Latest means an empty library, so the second read costs one request there and finds nothing.
+    func latestInLibrary(
+        source: HomeSource, libraryID: String, includeItemTypes: [ItemType]?, limit: Int
+    ) async throws -> [JellyfinItem] {
+        let latest = try await source.libraryService.getLatestMedia(
+            userID: source.userID, parentID: libraryID, includeItemTypes: includeItemTypes, limit: limit
+        )
+        guard latest.isEmpty else { return latest }
+        let query = ItemQuery(
+            parentID: libraryID,
+            includeItemTypes: includeItemTypes,
+            sortBy: "DateCreated",
+            sortOrder: "Descending",
+            limit: limit,
+            fields: JellyfinEndpoint.homeRowFields
+        )
+        return (try? await source.libraryService.getItems(userID: source.userID, query: query).items) ?? []
+    }
+
     /// The source's library list, awaited rather than read off `myMediaLibraries`: the fan-out
     /// fills that field from the same task group, so on the first load of a session it is empty.
     private func homeLibraries(source: HomeSource) async -> [JellyfinLibrary] {
@@ -129,11 +151,8 @@ extension HomeViewModel {
                 } else {
                     var lists: [[JellyfinItem]] = []
                     for library in movieLibraries {
-                        let list = (try? await source.libraryService.getLatestMedia(
-                            userID: source.userID,
-                            parentID: library.id,
-                            includeItemTypes: [.movie],
-                            limit: 16
+                        let list = (try? await latestInLibrary(
+                            source: source, libraryID: library.id, includeItemTypes: [.movie], limit: 16
                         )) ?? []
                         lists.append(list)
                     }
@@ -171,11 +190,8 @@ extension HomeViewModel {
                 } else {
                     var lists: [[JellyfinItem]] = []
                     for library in showLibraries {
-                        let list = (try? await source.libraryService.getLatestMedia(
-                            userID: source.userID,
-                            parentID: library.id,
-                            includeItemTypes: nil,
-                            limit: 16
+                        let list = (try? await latestInLibrary(
+                            source: source, libraryID: library.id, includeItemTypes: nil, limit: 16
                         )) ?? []
                         lists.append(list)
                     }
@@ -322,11 +338,8 @@ extension HomeViewModel {
                     break
                 }
                 // Over-fetch + post-fold cap (latestShows rationale): the fold can dedupe a series against its own episodes, shrinking the row below 16.
-                let latest = try await source.libraryService.getLatestMedia(
-                    userID: source.userID,
-                    parentID: libraryID,
-                    includeItemTypes: nil,
-                    limit: 24
+                let latest = try await latestInLibrary(
+                    source: source, libraryID: libraryID, includeItemTypes: nil, limit: 24
                 )
                 items = Array(await foldIntoSeries(latest, source: source).prefix(16))
 
