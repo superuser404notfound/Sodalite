@@ -475,7 +475,8 @@ struct HomeView: View {
                                 series.serverID = item.serverID
                                 selectedItem = series
                             },
-                            itemLabel: { vm.serverLabel(forItem: $0, in: row) }
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) },
+                            verbatimTitle: vm.customTitle(forRow: row.id)
                         )
                         .focused($focusedRowIndex, equals: idx)
 
@@ -486,7 +487,8 @@ struct HomeView: View {
                         let rowStyle = ArtworkShape.style(for: row.items, default: row.type.cardStyle)
                         HorizontalMediaRow(
                             title: row.type.localizedTitle,
-                            verbatimTitle: row.isCollectionShelf
+                            verbatimTitle: vm.customTitle(forRow: row.id)
+                                ?? (row.isCollectionShelf
                                 ? [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
                                 : row.type == .libraryLatest
                                 ? String(
@@ -496,7 +498,7 @@ struct HomeView: View {
                                     ),
                                     [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
                                 )
-                                : nil,
+                                : nil),
                             items: row.items,
                             imageURLProvider: {
                                 vm.imageURL(
@@ -535,6 +537,7 @@ struct HomeView: View {
                     case .tags(let tagRow):
                         TagRow(
                             title: tagRow.type.localizedTitle,
+                            verbatimTitle: vm.customTitle(forRow: tagRow.id),
                             tags: tagRow.tags,
                             onTagSelected: { tagData in
                                 selectedFilter = makeFilter(for: tagData, type: tagRow.type)
@@ -551,6 +554,7 @@ struct HomeView: View {
                         if !visibleProviders.isEmpty {
                             CatalogProviderRow(
                                 titleKey: HomeRowType.discoverProviders.localizedTitle,
+                                verbatimTitle: vm.customTitle(forRow: HomeRowType.discoverProviders.rawValue),
                                 providers: visibleProviders,
                                 onSelect: { provider in
                                     selectedFilter = makeJellyfinFilter(for: provider)
@@ -564,7 +568,14 @@ struct HomeView: View {
 
                     case .trakt(let row):
                         TraktHomeRow(
-                            row: row,
+                            row: row.type == .traktWatchlist
+                                ? TraktHomeRowData(
+                                    type: row.type,
+                                    id: row.id,
+                                    listName: vm.customTitle(forRow: row.type.rawValue),
+                                    entries: row.entries
+                                )
+                                : row,
                             imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
                             onItemSelected: { selectedItem = $0 },
                             onCatalogSelected: { selectedCatalogMedia = $0 }
@@ -574,6 +585,7 @@ struct HomeView: View {
                     case .libraries(let libraries):
                         LibraryRow(
                             titleKey: HomeRowType.myMedia.localizedTitle,
+                            verbatimTitle: vm.customTitle(forRow: HomeRowType.myMedia.rawValue),
                             libraries: libraries,
                             label: { vm.serverLabel(forLibrary: $0) },
                             onSelect: { library in

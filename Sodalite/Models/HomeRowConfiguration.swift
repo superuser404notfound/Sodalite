@@ -145,6 +145,19 @@ struct HomeRowConfig: Codable, Sendable, Identifiable, Equatable {
     var libraryName: String?
     /// `.libraryLatest` collectionType ("movies"/"tvshows"); drives which item type the Latest query asks for.
     var collectionType: String?
+    /// The user's own heading for the row, set in Customize Home. nil keeps the built-in title.
+    var customTitle: String? = nil
+
+    /// Every row but the Trakt lists, which are several rows that each carry their list's own name.
+    var isRenamable: Bool { type != .traktLists }
+
+    /// Trimmed and capped; an empty entry means "back to the built-in title".
+    static func sanitizedTitle(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : String(trimmed.prefix(maxCustomTitleLength))
+    }
+
+    static let maxCustomTitleLength = 60
 
     /// Customize-list icon; `.libraryLatest` derives from collectionType so TV libraries don't get the "film" fallback (Sodalite#15).
     var systemImage: String {

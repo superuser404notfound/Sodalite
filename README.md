@@ -117,7 +117,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Several servers**: keep more than one Jellyfin server and switch without logging out (Settings → Servers).
 - **One Home for all servers**: turn on Combine servers and Home merges up to five servers into one. Continue Watching becomes one timeline, a film on two servers shows once, and a server that does not answer drops out quietly. Search, genres, streaming services, Live TV, Music and the Apple TV Top Shelf work across all of them.
 - **Local and remote address**: give a server a local and a remote URL. Sodalite uses whichever one answers, so it also works over a VPN. Editable on iPhone and iPad for Jellyfin and Seerr, with a badge for the active route.
-- **Home rows**: Continue Watching, Next Up, Latest Movies, Latest Shows and My Media. Turn every row on or off, change the order, merge Continue Watching and Next Up, and add a Latest row per library.
+- **Home rows**: Continue Watching, Next Up, Latest Movies, Latest Shows and My Media. Turn every row on or off, change the order, merge Continue Watching and Next Up, add a Latest row per library, and give any row a name of your own.
 - **Recently Released**: two optional rows that sort by release date instead of by when a title reached your server.
 - **Upcoming**: an optional row with the next episode of every show you are caught up on, and when it airs. Needs a metadata plugin that lists unaired episodes; Seerr fills in the rest.
 - **Arrange My Media**: Customize Home sets the order of your libraries and hides the ones you do not need, also across combined servers.
