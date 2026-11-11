@@ -73402,157 +73402,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Stopy TrueHD a DTS (včetně DTS:X IMAX) si zachovají výškové kanály v mixu 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video."
+            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Stopy TrueHD a DTS (včetně DTS:X IMAX) si zachovají výškové kanály v mixu pro vaše rozložení reproduktorů, od 5.1.2 do 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. TrueHD- og DTS-spor (også DTS:X IMAX) beholder deres højdekanaler i et 9.1.6-mix. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause."
+            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. TrueHD- og DTS-spor (også DTS:X IMAX) beholder deres højdekanaler i et mix til din højttaleropstilling, fra 5.1.2 til 9.1.6. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. TrueHD- und DTS-Spuren (auch DTS:X IMAX) behalten ihre Höhenkanäle in einem 9.1.6-Mix. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video."
+            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. TrueHD- und DTS-Spuren (auch DTS:X IMAX) behalten ihre Höhenkanäle in einem Mix für deine Lautsprecheraufstellung, von 5.1.2 bis 9.1.6. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Τα κομμάτια TrueHD και DTS (μαζί και DTS:X IMAX) κρατούν τα κανάλια ύψους τους σε μίξη 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο."
+            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Τα κομμάτια TrueHD και DTS (μαζί και DTS:X IMAX) κρατούν τα κανάλια ύψους τους σε μίξη για τη διάταξη ηχείων σας, από 5.1.2 έως 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. TrueHD and DTS tracks (DTS:X IMAX included) keep their height channels in a 9.1.6 mix. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video."
+            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. TrueHD and DTS tracks (DTS:X IMAX included) keep their height channels in a mix for your speaker layout, from 5.1.2 to 9.1.6. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Las pistas TrueHD y DTS (también DTS:X IMAX) conservan sus canales de altura en una mezcla 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo."
+            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Las pistas TrueHD y DTS (también DTS:X IMAX) conservan sus canales de altura en una mezcla para tu configuración de altavoces, de 5.1.2 a 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. TrueHD- ja DTS-raidat (myös DTS:X IMAX) säilyttävät korkeuskanavansa 9.1.6-miksauksessa. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon."
+            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. TrueHD- ja DTS-raidat (myös DTS:X IMAX) säilyttävät korkeuskanavansa kaiutinasetteluusi sopivassa miksauksessa, 5.1.2:sta 9.1.6:een. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Les pistes TrueHD et DTS (DTS:X IMAX compris) gardent leurs canaux de hauteur dans un mixage 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo."
+            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Les pistes TrueHD et DTS (DTS:X IMAX compris) gardent leurs canaux de hauteur dans un mixage adapté à vos enceintes, de 5.1.2 à 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. TrueHD i DTS zapisi (uključujući DTS:X IMAX) zadržavaju visinske kanale u miksu 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis."
+            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. TrueHD i DTS zapisi (uključujući DTS:X IMAX) zadržavaju visinske kanale u miksu za vaš raspored zvučnika, od 5.1.2 do 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. A TrueHD- és DTS-sávok (a DTS:X IMAX is) 9.1.6-os keverékben megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet."
+            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. A TrueHD- és DTS-sávok (a DTS:X IMAX is) a hangszóró-elrendezésednek megfelelő keverékben (5.1.2-től 9.1.6-ig) megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Le tracce TrueHD e DTS (DTS:X IMAX compreso) mantengono i canali di altezza in un mix 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video."
+            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Le tracce TrueHD e DTS (DTS:X IMAX compreso) mantengono i canali di altezza in un mix per i tuoi altoparlanti, da 5.1.2 a 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。TrueHDとDTS（DTS:X IMAXを含む）のトラックは、ハイトチャンネルを9.1.6ミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。"
+            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。TrueHDとDTS（DTS:X IMAXを含む）のトラックは、ハイトチャンネルをスピーカー構成（5.1.2〜9.1.6）に合わせたミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. TrueHD 및 DTS(DTS:X IMAX 포함) 트랙은 9.1.6 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다."
+            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. TrueHD 및 DTS(DTS:X IMAX 포함) 트랙은 스피커 구성(5.1.2~9.1.6)에 맞는 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. TrueHD- og DTS-spor (også DTS:X IMAX) beholder høydekanalene i en 9.1.6-miks. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer."
+            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. TrueHD- og DTS-spor (også DTS:X IMAX) beholder høydekanalene i en miks for høyttaleroppsettet ditt, fra 5.1.2 til 9.1.6. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. TrueHD- en DTS-sporen (ook DTS:X IMAX) behouden hun hoogtekanalen in een 9.1.6-mix. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video."
+            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. TrueHD- en DTS-sporen (ook DTS:X IMAX) behouden hun hoogtekanalen in een mix voor jouw luidsprekeropstelling, van 5.1.2 tot 9.1.6. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Ścieżki TrueHD i DTS (także DTS:X IMAX) zachowują kanały wysokości w miksie 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo."
+            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Ścieżki TrueHD i DTS (także DTS:X IMAX) zachowują kanały wysokości w miksie dla Twojego układu głośników, od 5.1.2 do 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura em uma mixagem 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura em uma mixagem para seus alto-falantes, de 5.1.2 a 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. As faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura numa mistura 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. As faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura numa mistura para as suas colunas, de 5.1.2 a 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Pistele TrueHD și DTS (inclusiv DTS:X IMAX) își păstrează canalele de înălțime într-un mix 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip."
+            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Pistele TrueHD și DTS (inclusiv DTS:X IMAX) își păstrează canalele de înălțime într-un mix pentru boxele tale, de la 5.1.2 la 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Дорожки TrueHD и DTS (включая DTS:X IMAX) сохраняют высотные каналы в миксе 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео."
+            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Дорожки TrueHD и DTS (включая DTS:X IMAX) сохраняют высотные каналы в миксе под вашу расстановку колонок, от 5.1.2 до 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Stopy TrueHD a DTS (vrátane DTS:X IMAX) si zachovajú výškové kanály v mixe 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video."
+            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Stopy TrueHD a DTS (vrátane DTS:X IMAX) si zachovajú výškové kanály v mixe pre vaše rozloženie reproduktorov, od 5.1.2 po 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. TrueHD- och DTS-spår (även DTS:X IMAX) behåller sina höjdkanaler i en 9.1.6-mix. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor."
+            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. TrueHD- och DTS-spår (även DTS:X IMAX) behåller sina höjdkanaler i en mix för din högtalaruppställning, från 5.1.2 till 9.1.6. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. TrueHD ve DTS (DTS:X IMAX dahil) parçaları yükseklik kanallarını 9.1.6 miksinde korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır."
+            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. TrueHD ve DTS (DTS:X IMAX dahil) parçaları yükseklik kanallarını hoparlör düzeninize uygun bir mikste (5.1.2 ile 9.1.6 arası) korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Доріжки TrueHD і DTS (включно з DTS:X IMAX) зберігають висотні канали в міксі 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео."
+            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Доріжки TrueHD і DTS (включно з DTS:X IMAX) зберігають висотні канали в міксі під ваше розташування колонок, від 5.1.2 до 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。TrueHD 和 DTS（包括 DTS:X IMAX）音轨会在 9.1.6 混音中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。"
+            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。TrueHD 和 DTS（包括 DTS:X IMAX）音轨会在适合你扬声器布局的混音（5.1.2 至 9.1.6）中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。TrueHD 與 DTS（包括 DTS:X IMAX）音軌會在 9.1.6 混音中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。"
+            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。TrueHD 與 DTS（包括 DTS:X IMAX）音軌會在適合你揚聲器配置的混音（5.1.2 至 9.1.6）中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。"
           }
         }
       }
@@ -224291,157 +224291,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu 9.1.6 a zvolí takovou stopu ve vašem jazyce. Bezztrátové přes HDMI, ztrátové přes AirPlay. Vypnuto přehrává podle nastavení výše. Pro soundbar přes ARC vypněte obě."
+            "value" : "Vykreslí výškové kanály stop TrueHD a DTS s objektovým zvukem na tomto zařízení do mixu pro vaše rozložení reproduktorů a zvolí takovou stopu ve vašem jazyce. Bezztrátové přes HDMI, ztrátové přes AirPlay. Vypnuto přehrává podle nastavení výše. Pro soundbar přes ARC vypněte obě."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et 9.1.6-mix og vælger et sådant spor på dit sprog. Tabsfri via HDMI, tabsgivende via AirPlay. Fra afspiller dem efter indstillingen ovenfor. Til en soundbar via ARC skal begge slås fra."
+            "value" : "Renderer højdekanalerne i TrueHD- og DTS-spor med objektlyd på denne enhed til et mix til din højttaleropstilling og vælger et sådant spor på dit sprog. Tabsfri via HDMI, tabsgivende via AirPlay. Fra afspiller dem efter indstillingen ovenfor. Til en soundbar via ARC skal begge slås fra."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem 9.1.6-Mix und wählt eine solche Spur in deiner Sprache. Verlustfrei über HDMI, verlustbehaftet über AirPlay. Aus: Wiedergabe nach der Einstellung darüber. Für Soundbars an ARC beide ausschalten."
+            "value" : "Rendert die Höhenkanäle von TrueHD- und DTS-Spuren mit Objekt-Audio auf diesem Gerät zu einem Mix für deine Lautsprecheraufstellung und wählt eine solche Spur in deiner Sprache. Verlustfrei über HDMI, verlustbehaftet über AirPlay. Aus: Wiedergabe nach der Einstellung darüber. Für Soundbars an ARC beide ausschalten."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη 9.1.6 και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Χωρίς απώλειες μέσω HDMI, με απώλειες μέσω AirPlay. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση. Για soundbar μέσω ARC, απενεργοποιήστε και τα δύο."
+            "value" : "Αποδίδει τα κανάλια ύψους των κομματιών TrueHD και DTS με ήχο αντικειμένων σε αυτή τη συσκευή σε μίξη για τη διάταξη ηχείων σας και επιλέγει τέτοιο κομμάτι στη γλώσσα σας. Χωρίς απώλειες μέσω HDMI, με απώλειες μέσω AirPlay. Όταν είναι ανενεργό, αναπαράγονται σύμφωνα με την παραπάνω ρύθμιση. Για soundbar μέσω ARC, απενεργοποιήστε και τα δύο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a 9.1.6 mix, and picks such a track in your language. Lossless over HDMI, lossy over AirPlay. Off plays them through the setting above. For a soundbar on ARC, turn both off."
+            "value" : "Renders the height channels of TrueHD and DTS tracks with object audio on this device into a mix for your speaker layout, and picks such a track in your language. Lossless over HDMI, lossy over AirPlay. Off plays them through the setting above. For a soundbar on ARC, turn both off."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla 9.1.6 y elige una pista así en tu idioma. Sin pérdida por HDMI, con pérdida por AirPlay. Desactivado, se reproducen según el ajuste anterior. Para una barra de sonido por ARC, desactiva ambos."
+            "value" : "Renderiza en este dispositivo los canales de altura de las pistas TrueHD y DTS con audio de objetos en una mezcla para tu configuración de altavoces y elige una pista así en tu idioma. Sin pérdida por HDMI, con pérdida por AirPlay. Desactivado, se reproducen según el ajuste anterior. Para una barra de sonido por ARC, desactiva ambos."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella 9.1.6-miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviötön HDMI:n kautta, häviöllinen AirPlayn kautta. Pois päältä toistaa ne yllä olevan asetuksen mukaan. ARC-soundbarille kytke molemmat pois."
+            "value" : "Renderöi objektiääntä sisältävien TrueHD- ja DTS-raitojen korkeuskanavat tällä laitteella kaiutinasetteluusi sopivaksi miksaukseksi ja valitsee tällaisen raidan kielelläsi. Häviötön HDMI:n kautta, häviöllinen AirPlayn kautta. Pois päältä toistaa ne yllä olevan asetuksen mukaan. ARC-soundbarille kytke molemmat pois."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage 9.1.6 et choisit une telle piste dans votre langue. Sans perte en HDMI, avec perte en AirPlay. Désactivé, elles sont lues selon le réglage ci-dessus. Pour une barre de son en ARC, désactivez les deux."
+            "value" : "Calcule sur cet appareil les canaux de hauteur des pistes TrueHD et DTS à audio objet en un mixage adapté à votre disposition d’enceintes et choisit une telle piste dans votre langue. Sans perte en HDMI, avec perte en AirPlay. Désactivé, elles sont lues selon le réglage ci-dessus. Pour une barre de son en ARC, désactivez les deux."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks 9.1.6 i bira takav zapis na vašem jeziku. Bez gubitaka preko HDMI-ja, s gubicima preko AirPlaya. Isključeno reproducira ih prema postavci iznad. Za soundbar na ARC-u isključite oboje."
+            "value" : "Renderira visinske kanale TrueHD i DTS zapisa s objektnim zvukom na ovom uređaju u miks za vaš raspored zvučnika i bira takav zapis na vašem jeziku. Bez gubitaka preko HDMI-ja, s gubicima preko AirPlaya. Isključeno reproducira ih prema postavci iznad. Za soundbar na ARC-u isključite oboje."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ezen az eszközön 9.1.6-es keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. HDMI-n veszteségmentes, AirPlay-en veszteséges. Kikapcsolva a fenti beállítás szerint szólnak. ARC-os hangprojektorhoz kapcsolja ki mindkettőt."
+            "value" : "Ezen az eszközön a hangszóró-elrendezésének megfelelő keverékké rendereli az objektumalapú hangot tartalmazó TrueHD- és DTS-sávok magassági csatornáit, és ilyen sávot választ az Ön nyelvén. HDMI-n veszteségmentes, AirPlay-en veszteséges. Kikapcsolva a fenti beállítás szerint szólnak. ARC-os hangprojektorhoz kapcsolja ki mindkettőt."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix 9.1.6 e sceglie una traccia simile nella tua lingua. Senza perdita via HDMI, con perdita via AirPlay. Se disattivato, vengono riprodotte secondo l’impostazione sopra. Per una soundbar su ARC, disattiva entrambe."
+            "value" : "Esegue il rendering su questo dispositivo dei canali di altezza delle tracce TrueHD e DTS con audio a oggetti in un mix per la tua disposizione degli altoparlanti e sceglie una traccia simile nella tua lingua. Senza perdita via HDMI, con perdita via AirPlay. Se disattivato, vengono riprodotte secondo l’impostazione sopra. Per una soundbar su ARC, disattiva entrambe."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで 9.1.6 ミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。HDMI ではロスレス、AirPlay では非可逆。オフの場合は上の設定に従って再生します。ARC 接続のサウンドバーでは両方をオフにしてください。"
+            "value" : "オブジェクトオーディオを含む TrueHD と DTS トラックのハイトチャンネルをこのデバイスで スピーカー構成に合わせたミックスにレンダリングし、あなたの言語のそのようなトラックを選びます。HDMI ではロスレス、AirPlay では非可逆。オフの場合は上の設定に従って再生します。ARC 接続のサウンドバーでは両方をオフにしてください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 9.1.6 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. HDMI에서는 무손실, AirPlay에서는 손실 압축. 끄면 위 설정에 따라 재생됩니다. ARC 사운드바에서는 둘 다 끄세요."
+            "value" : "오브젝트 오디오가 포함된 TrueHD 및 DTS 트랙의 높이 채널을 이 기기에서 스피커 구성에 맞는 믹스로 렌더링하고 사용자 언어의 해당 트랙을 선택합니다. HDMI에서는 무손실, AirPlay에서는 손실 압축. 끄면 위 설정에 따라 재생됩니다. ARC 사운드바에서는 둘 다 끄세요."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en 9.1.6-miks og velger et slikt spor på ditt språk. Tapsfritt via HDMI, tapsbasert via AirPlay. Av spiller dem etter innstillingen over. For en soundbar via ARC, slå av begge."
+            "value" : "Rendrer høydekanalene i TrueHD- og DTS-spor med objektlyd på denne enheten til en miks for høyttaleroppsettet ditt og velger et slikt spor på ditt språk. Tapsfritt via HDMI, tapsbasert via AirPlay. Av spiller dem etter innstillingen over. For en soundbar via ARC, slå av begge."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een 9.1.6-mix en kiest zo’n spoor in jouw taal. Verliesvrij via HDMI, met verlies via AirPlay. Uit speelt ze af volgens de instelling hierboven. Zet voor een soundbar via ARC beide uit."
+            "value" : "Rendert de hoogtekanalen van TrueHD- en DTS-sporen met objectaudio op dit apparaat tot een mix voor jouw luidsprekeropstelling en kiest zo’n spoor in jouw taal. Verliesvrij via HDMI, met verlies via AirPlay. Uit speelt ze af volgens de instelling hierboven. Zet voor een soundbar via ARC beide uit."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu 9.1.6 i wybiera taką ścieżkę w Twoim języku. Bezstratne przez HDMI, stratne przez AirPlay. Wyłączone odtwarza je według ustawienia powyżej. Dla soundbaru przez ARC wyłącz oba."
+            "value" : "Renderuje na tym urządzeniu kanały wysokości ścieżek TrueHD i DTS z dźwiękiem obiektowym do miksu dla Twojego układu głośników i wybiera taką ścieżkę w Twoim języku. Bezstratne przez HDMI, stratne przez AirPlay. Wyłączone odtwarza je według ustawienia powyżej. Dla soundbaru przez ARC wyłącz oba."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, elas tocam conforme o ajuste acima. Para soundbar via ARC, desative os dois."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos em uma mixagem para a sua configuração de alto-falantes e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, elas tocam conforme o ajuste acima. Para soundbar via ARC, desative os dois."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura 9.1.6 e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, são reproduzidas conforme a definição acima. Para uma soundbar via ARC, desative ambos."
+            "value" : "Renderiza neste dispositivo os canais de altura das faixas TrueHD e DTS com áudio de objetos numa mistura para a sua configuração de colunas e escolhe uma faixa assim no seu idioma. Sem perdas via HDMI, com perdas via AirPlay. Desativado, são reproduzidas conforme a definição acima. Para uma soundbar via ARC, desative ambos."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix 9.1.6 și alege o astfel de pistă în limba ta. Fără pierderi prin HDMI, cu pierderi prin AirPlay. Dezactivat, sunt redate conform setării de mai sus. Pentru un soundbar prin ARC, dezactivează-le pe amândouă."
+            "value" : "Randează pe acest dispozitiv canalele de înălțime ale pistelor TrueHD și DTS cu audio pe obiecte într-un mix pentru configurația ta de boxe și alege o astfel de pistă în limba ta. Fără pierderi prin HDMI, cu pierderi prin AirPlay. Dezactivat, sunt redate conform setării de mai sus. Pentru un soundbar prin ARC, dezactivează-le pe amândouă."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс 9.1.6 и выбирает такую дорожку на вашем языке. Без потерь через HDMI, с потерями через AirPlay. Выключено: воспроизведение по настройке выше. Для саундбара через ARC выключите обе."
+            "value" : "Рендерит на этом устройстве высотные каналы дорожек TrueHD и DTS с объектным звуком в микс под вашу расстановку колонок и выбирает такую дорожку на вашем языке. Без потерь через HDMI, с потерями через AirPlay. Выключено: воспроизведение по настройке выше. Для саундбара через ARC выключите обе."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu 9.1.6 a zvolí takú stopu vo vašom jazyku. Bezstratové cez HDMI, stratové cez AirPlay. Vypnuté prehráva podľa nastavenia vyššie. Pre soundbar cez ARC vypnite obe."
+            "value" : "Vykreslí výškové kanály stôp TrueHD a DTS s objektovým zvukom na tomto zariadení do mixu pre vaše rozloženie reproduktorov a zvolí takú stopu vo vašom jazyku. Bezstratové cez HDMI, stratové cez AirPlay. Vypnuté prehráva podľa nastavenia vyššie. Pre soundbar cez ARC vypnite obe."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en 9.1.6-mix och väljer ett sådant spår på ditt språk. Förlustfritt via HDMI, förstörande via AirPlay. Av spelar dem enligt inställningen ovan. För en soundbar via ARC, stäng av båda."
+            "value" : "Renderar höjdkanalerna i TrueHD- och DTS-spår med objektljud på den här enheten till en mix för din högtalaruppställning och väljer ett sådant spår på ditt språk. Förlustfritt via HDMI, förstörande via AirPlay. Av spelar dem enligt inställningen ovan. För en soundbar via ARC, stäng av båda."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda 9.1.6 miksine dönüştürür ve dilinizde böyle bir parça seçer. HDMI'da kayıpsız, AirPlay'de kayıplı. Kapalıyken yukarıdaki ayara göre çalınır. ARC soundbar için ikisini de kapatın."
+            "value" : "Nesne tabanlı ses içeren TrueHD ve DTS parçalarının yükseklik kanallarını bu cihazda hoparlör düzeninize uygun bir mikse dönüştürür ve dilinizde böyle bir parça seçer. HDMI'da kayıpsız, AirPlay'de kayıplı. Kapalıyken yukarıdaki ayara göre çalınır. ARC soundbar için ikisini de kapatın."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс 9.1.6 і вибирає таку доріжку вашою мовою. Без втрат через HDMI, із втратами через AirPlay. Вимкнено: відтворення за налаштуванням вище. Для саундбара через ARC вимкніть обидва."
+            "value" : "Рендерить на цьому пристрої висотні канали доріжок TrueHD і DTS з об’єктним звуком у мікс під ваше розташування колонок і вибирає таку доріжку вашою мовою. Без втрат через HDMI, із втратами через AirPlay. Вимкнено: відтворення за налаштуванням вище. Для саундбара через ARC вимкніть обидва."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为 9.1.6 混音，并选择你所用语言的此类音轨。通过 HDMI 无损，通过 AirPlay 有损。关闭时按上方设置播放。通过 ARC 连接的条形音箱请同时关闭两项。"
+            "value" : "在本设备上将带对象音频的 TrueHD 和 DTS 音轨的高度声道渲染为适合你扬声器布局的混音，并选择你所用语言的此类音轨。通过 HDMI 无损，通过 AirPlay 有损。关闭时按上方设置播放。通过 ARC 连接的条形音箱请同时关闭两项。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為 9.1.6 混音，並選擇你所用語言的此類音軌。透過 HDMI 無損，透過 AirPlay 有損。關閉時依上方設定播放。透過 ARC 連接的 Soundbar 請同時關閉兩項。"
+            "value" : "在本裝置上將帶物件音訊的 TrueHD 與 DTS 音軌的高度聲道算繪為適合你揚聲器配置的混音，並選擇你所用語言的此類音軌。透過 HDMI 無損，透過 AirPlay 有損。關閉時依上方設定播放。透過 ARC 連接的 Soundbar 請同時關閉兩項。"
           }
         }
       }
