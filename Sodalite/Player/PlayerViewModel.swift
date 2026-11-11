@@ -54,6 +54,9 @@ final class PlayerViewModel {
     var errorTitle: String?
     var isPlaying = false
     var showControls = false
+    /// iPhone Duo standing half folded: the picture sits above the fold and the controls stay below it.
+    /// Set by the iOS host from the fold's reserved region; nil everywhere else.
+    var foldLayout: FoldLayout?
 
     var currentTime: String = "00:00"
     var totalTime: String = "00:00"

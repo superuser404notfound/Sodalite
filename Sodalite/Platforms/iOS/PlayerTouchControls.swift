@@ -11,6 +11,9 @@ struct PlayerTouchControls: View {
     let tintColor: Color
     var episodeImageURL: (JellyfinItem) -> URL? = { _ in nil }
     var chapterThumbnail: (Int) async -> CGImage? = { _ in nil }
+    /// Drawn between the top bar and the bottom block. Only the folded iPhone Duo panel fills it (with
+    /// the subtitle lines); over the picture that space stays empty so the picture shows through.
+    var centerContent: AnyView? = nil
 
     @State private var activePicker: PickerKind?
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -47,7 +50,12 @@ struct PlayerTouchControls: View {
         ZStack {
             VStack(spacing: 0) {
                 topBar
-                Spacer()
+                if let centerContent {
+                    centerContent
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    Spacer()
+                }
                 bottomBlock
             }
             // FIXED width instead of horizontal padding (Sodalite#15 portrait clip): inside AVKit,

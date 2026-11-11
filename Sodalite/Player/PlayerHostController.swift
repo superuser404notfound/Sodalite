@@ -85,7 +85,12 @@ final class PlayerHostController: AVPlayerViewController {
     #endif
 
     /// Weak ref to our overlay's hosting view so suppressAVKitChrome's class-name heuristic skips it (it sits among AVKit's chrome views).
-    private weak var overlayHostingView: UIView?
+    private(set) weak var overlayHostingView: UIView?
+    #if os(iOS)
+    /// AVKit's own frames from before the picture moved above an iPhone Duo's fold, put back when it
+    /// unfolds (`PlayerHostController+Fold`). Empty whenever the player is not split.
+    var foldSavedFrames: [ObjectIdentifier: (frame: CGRect, filledScreen: Bool)] = [:]
+    #endif
 
     /// Engine `$currentAVPlayer` (fires on every internal reload, e.g. selectAudioTrack rebuilds NativeAVPlayerHost; sink rebinds `.player`) + `$playbackBackend` (mounts aetherView for SW path).
     private var engineSubscriptions: Set<AnyCancellable> = []
@@ -456,6 +461,9 @@ final class PlayerHostController: AVPlayerViewController {
         hosting.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         hosting.didMove(toParent: self)
         overlayHostingView = hosting.view
+        #if os(iOS)
+        installFoldObservation()
+        #endif
 
         #if os(tvOS)
         // Siri Remote input. iOS touch transport is wired in Phase 3.
@@ -957,6 +965,9 @@ final class PlayerHostController: AVPlayerViewController {
         if let host = overlayHostingView, host.frame != view.bounds {
             host.frame = view.bounds
         }
+        #if os(iOS)
+        updateFoldLayout()
+        #endif
     }
 
     override func viewWillDisappear(_ animated: Bool) {

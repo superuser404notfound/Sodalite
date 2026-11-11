@@ -101,7 +101,17 @@ private struct NowPlayingContent: View {
             .ignoresSafeArea()
         #else
         GeometryReader { proxy in
-            screen(compact: usesStackedLayout(container: proxy.size))
+            Group {
+                #if os(iOS)
+                if let fold = Self.foldLayout(in: proxy) {
+                    foldedScreen(fold)
+                } else {
+                    screen(compact: usesStackedLayout(container: proxy.size))
+                }
+                #else
+                screen(compact: usesStackedLayout(container: proxy.size))
+                #endif
+            }
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 // tvOS dismisses via the Menu button; iOS needs a visible touch close so playing
                 // music (which suppresses the auto-dismiss-on-stop) is never a dead-end.
@@ -133,6 +143,58 @@ private struct NowPlayingContent: View {
         }
         #endif
     }
+
+    #if os(iOS)
+    /// iPhone Duo standing half folded (iOS 27.1): the fold splits the screen into an upright half and
+    /// one lying on the table. Nil in every other posture and on every other device.
+    private static func foldLayout(in proxy: GeometryProxy) -> FoldLayout? {
+        guard #available(iOS 27.1, *) else { return nil }
+        let bounds = CGRect(origin: .zero, size: proxy.size)
+        let divisions = FoldLayout.divisions(
+            system: proxy.reservedRegions(kind: .division).filter(\.isActive).map(\.frame),
+            bounds: bounds)
+        return FoldLayout.resolve(bounds: bounds, activeDivisions: divisions)
+    }
+
+    /// Cover and title on the upright half, where they are seen from across the table; the controls
+    /// and the queue on the half lying flat, where the hand is.
+    private func foldedScreen(_ fold: FoldLayout) -> some View {
+        let coverSide = max(0, min(fold.videoArea.height - 48, 280))
+        return ZStack(alignment: .topLeading) {
+            Color.black
+                .ignoresSafeArea()
+            backgroundArt
+
+            // Side by side where the half is wide enough to give the title room, stacked where it is not.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 32) {
+                    albumCover(side: coverSide)
+                    trackMetadata(centered: false)
+                        .frame(minWidth: 240, maxWidth: 420)
+                }
+                VStack(spacing: 16) {
+                    albumCover(side: max(0, min(fold.videoArea.height - 140, 220)))
+                    trackMetadata(centered: true)
+                }
+            }
+            .padding(.horizontal, 48)
+            .frame(width: fold.videoArea.width, height: fold.videoArea.height)
+            .position(x: fold.videoArea.midX, y: fold.videoArea.midY)
+
+            VStack(spacing: 18) {
+                progressRow
+                transportRow
+                ScrollView(.vertical, showsIndicators: false) {
+                    queueList
+                }
+            }
+            .padding(.horizontal, 32)
+            .padding(.top, 20)
+            .frame(width: fold.panelArea.width, height: fold.panelArea.height, alignment: .top)
+            .position(x: fold.panelArea.midX, y: fold.panelArea.midY)
+        }
+    }
+    #endif
 
     #if !os(tvOS)
     private var closeControl: some View {
@@ -338,6 +400,10 @@ private struct NowPlayingContent: View {
     // MARK: - Album cover
 
     private func albumCover(compact: Bool) -> some View {
+        albumCover(side: NowPlayingMetrics.coverSide(compact: compact))
+    }
+
+    private func albumCover(side: CGFloat) -> some View {
         let coverURL = coordinator.currentItem.flatMap {
             dependencies.jellyfinImageService.musicCoverURL(for: $0, maxWidth: ImageWidth.cover)
         }
@@ -355,7 +421,7 @@ private struct NowPlayingContent: View {
                         .foregroundStyle(.tertiary)
                 )
         }
-        .frame(width: NowPlayingMetrics.coverSide(compact: compact), height: NowPlayingMetrics.coverSide(compact: compact))
+        .frame(width: side, height: side)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .shadow(color: .black.opacity(0.55), radius: 40, y: 16)
     }

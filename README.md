@@ -158,6 +158,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Skip Intro and Skip Recap**: one tap, using the markers your server detected. Recap auto-skip has its own setting.
 - **Next episode**: plays automatically with a countdown of 5 to 30 seconds, or none. The countdown can sit on the credits or wait until the episode really ends. Without a countdown, credits and post-credit scenes play out first.
 - **Picture in Picture**: from a player button on Apple TV, automatically when you swipe home on iPhone and iPad. Also works there for titles the software decoder plays.
+- **iPhone Duo**: stand it half folded and the picture plays on the upper half, while the controls, the subtitles and, in live TV, the channel list stay on the lower half. Music shows the cover above and the queue below.
 - **Streaming quality**: limit the bitrate when the connection is slow (Original, or 40 down to 2 Mbit/s). Files that already fit keep playing directly. Set a default (on iPhone and iPad separately for Wi-Fi and cellular) or change it in the player; it reopens at the same second.
 - **Network buffer**: choose how far ahead Sodalite reads, from about 40 seconds up to Unlimited (as much as free space safely allows), so a flaky connection does not stop the picture.
 

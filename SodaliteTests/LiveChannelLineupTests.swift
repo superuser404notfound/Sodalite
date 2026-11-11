@@ -35,6 +35,29 @@ struct LiveChannelLineupTests {
         #expect(lineup(5).neighbour(of: "c0", offset: 2, skipping: ["c1", "c3"])?.id == "c4")
     }
 
+    @Test func aPickedChannelIsReachedTheShorterWayRound() throws {
+        let channels = lineup(10)
+        #expect(channels.offset(from: "c2", to: "c5") == 3)
+        #expect(channels.offset(from: "c2", to: "c0") == -2)
+        #expect(channels.offset(from: "c1", to: "c9") == -2)
+        #expect(channels.offset(from: "c9", to: "c1") == 2)
+        let offset = try #require(channels.offset(from: "c8", to: "c3"))
+        #expect(channels.neighbour(of: "c8", offset: offset)?.id == "c3")
+    }
+
+    @Test func aPickedChannelCountsOnlyTheChannelsNotSkipped() throws {
+        let channels = lineup(6)
+        let offset = try #require(channels.offset(from: "c0", to: "c4", skipping: ["c1", "c2"]))
+        #expect(offset == 2)
+        #expect(channels.neighbour(of: "c0", offset: offset, skipping: ["c1", "c2"])?.id == "c4")
+    }
+
+    @Test func pickingTheSameMissingOrSkippedChannelGoesNowhere() {
+        #expect(lineup(5).offset(from: "c1", to: "c1") == nil)
+        #expect(lineup(5).offset(from: "c1", to: "x") == nil)
+        #expect(lineup(5).offset(from: "c1", to: "c3", skipping: ["c3"]) == nil)
+    }
+
     @Test func everyOtherChannelSkippedMeansNoZap() {
         #expect(lineup(3).neighbour(of: "c0", offset: 1, skipping: ["c1", "c2"]) == nil)
     }

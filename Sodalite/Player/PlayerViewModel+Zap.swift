@@ -83,6 +83,28 @@ extension PlayerViewModel {
         }
     }
 
+    /// Tunes straight to a channel picked from the lineup (the folded iPhone Duo's channel strip), through
+    /// the same commit a run of presses ends in, so the two can never race each other.
+    func zap(toChannel channelID: String) {
+        guard isLiveSession, !isTearingDown, let current = liveChannel?.id else { return }
+        // The playing channel's chip while presses are still settling: stay here. A commit already
+        // under way has zeroed the offset and is left alone.
+        if channelID == current {
+            guard zapPendingOffset != 0 else { return }
+            zapSettleTask?.cancel()
+            zapPendingOffset = 0
+            zapBanner = LiveZapBanner(channel: liveChannel, direction: 0)
+            armZapBannerHide()
+            return
+        }
+        guard let offset = zapLineup?.offset(from: current, to: channelID, skipping: zapSkipsChannelIDs?() ?? [])
+        else { return }
+        zapSettleTask?.cancel()
+        zapPendingOffset = offset
+        refreshZapBanner(direction: offset.signum())
+        zapSettleTask = Task { [weak self] in await self?.commitZap() }
+    }
+
     /// The press that woke the remote: shows where the viewer is instead of moving.
     func showZapWakeBanner() {
         guard isLiveSession, !isTearingDown, zapPendingOffset == 0 else { return }
