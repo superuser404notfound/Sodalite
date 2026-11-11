@@ -106,6 +106,30 @@ struct DevicePreferencesSplitTests {
     }
 
     /// AetherEngine#731, 2026-10-17: object rendering is opt-in until the patent question is settled.
+    /// The heights row is one picker over two stored values: off keeps the chosen layout, so turning
+    /// heights back on returns to it, and the layout is a device value with its own key.
+    @Test func heightChannelLayoutDefaultsTo916AndSurvivesOff() {
+        let defaults = scratch("bedLayout")
+        let device = DevicePreferences(store: defaults)
+        let alice = PlaybackPreferences(store: defaults, scope: "s:alice", device: device)
+        #expect(alice.heightChannelLayout == .l916)
+        #expect(alice.objectAudioRendering == .render(.l916))
+
+        alice.heightChannelLayout = .l714
+        #expect(alice.objectAudioRendering == .render(.l714))
+        #expect(defaults.string(forKey: "playback.objectAudioLayout") == "7.1.4")
+        #expect(defaults.object(forKey: "s:alice/playback.objectAudioLayout") == nil)
+
+        alice.heightChannelLayout = nil
+        #expect(alice.objectAudioRendering == .off)
+        #expect(!device.trueHDAtmosHeights)
+        #expect(device.objectAudioLayout == .l714)
+
+        device.trueHDAtmosHeights = true
+        #expect(DevicePreferences(store: defaults).objectAudioLayout == .l714)
+        #expect(PlaybackPreferences(store: defaults, scope: "s:bob", device: device).heightChannelLayout == .l714)
+    }
+
     @Test func trueHDAtmosHeightsAreOnByDefaultAndADeviceValue() {
         let defaults = scratch("atmosHeights")
         let device = DevicePreferences(store: defaults)

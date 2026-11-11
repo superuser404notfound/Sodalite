@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import AetherEngine
 
 /// Values that describe this box, its display, its remote or its network, not the person watching.
 /// Shared by every profile on the device and stored under the keys they always had. Written into the
@@ -15,6 +16,7 @@ final class DevicePreferences {
         static let showEngineDiagnostics = "playback.showEngineDiagnostics"
         static let preferLosslessAudioBridge = "playback.preferLosslessAudioBridge"
         static let trueHDAtmosHeights = "playback.trueHDAtmosHeights"
+        static let objectAudioLayout = "playback.objectAudioLayout"
         static let playerRotationLocked = "playback.playerRotationLocked"
         static let networkBufferDepth = "playback.networkBufferDepth"
         static let liveBufferDepth = "playback.liveBufferDepth"
@@ -48,12 +50,20 @@ final class DevicePreferences {
     }
 
     /// AetherEngine#731 and #744, one switch for both formats, default ON. ON renders a TrueHD or DTS:X
-    /// track's objects and heights into a 9.1.6 bed, PCM over HDMI and APAC over AirPlay. A legacy-ARC sink
+    /// track's objects and heights into the `objectAudioLayout` bed, PCM over HDMI and APAC over AirPlay. A legacy-ARC sink
     /// takes only stereo PCM, so there it has to go OFF (with `preferLosslessAudioBridge`) to keep surround.
     /// OFF falls back to `preferLosslessAudioBridge`'s choice. A device value: it describes the speakers
     /// behind this box.
     var trueHDAtmosHeights: Bool {
         didSet { store.set(trueHDAtmosHeights, forKey: Keys.trueHDAtmosHeights) }
+    }
+
+    /// The bed `trueHDAtmosHeights` renders into, default 9.1.6. A 7.1.4 Denon fed the 9.1.6 bed through
+    /// tvOS MAT played the side surrounds along with every height and rear-surround channel while the
+    /// same file's DD+ Atmos track was clean (Discord, 2026-11-11), so the receiver's own layout is a
+    /// choice. Kept apart from the switch so turning heights off and on again keeps the layout.
+    var objectAudioLayout: SpatialSpeakerLayout {
+        didSet { store.set(objectAudioLayout.rawValue, forKey: Keys.objectAudioLayout) }
     }
 
     /// iPhone player orientation (the in-player lock icon's remembered state): true pins the session
@@ -170,6 +180,8 @@ final class DevicePreferences {
         self.showEngineDiagnostics = store.object(forKey: Keys.showEngineDiagnostics) as? Bool ?? false
         self.preferLosslessAudioBridge = store.object(forKey: Keys.preferLosslessAudioBridge) as? Bool ?? false
         self.trueHDAtmosHeights = store.object(forKey: Keys.trueHDAtmosHeights) as? Bool ?? true
+        self.objectAudioLayout = store.string(forKey: Keys.objectAudioLayout)
+            .flatMap(SpatialSpeakerLayout.init(rawValue:)) ?? .l916
         self.playerRotationLocked = store.object(forKey: Keys.playerRotationLocked) as? Bool ?? true
         self.networkBufferDepth = store.string(forKey: Keys.networkBufferDepth)
             .flatMap(PlaybackPreferences.NetworkBufferDepth.init(rawValue:)) ?? .system
@@ -208,6 +220,7 @@ final class DevicePreferences {
         update(\.showEngineDiagnostics)
         update(\.preferLosslessAudioBridge)
         update(\.trueHDAtmosHeights)
+        update(\.objectAudioLayout)
         update(\.playerRotationLocked)
         update(\.networkBufferDepth)
         update(\.liveBufferDepth)

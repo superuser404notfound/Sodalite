@@ -530,14 +530,16 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
-                boolRow(
+                ValuePickerRow(
                     icon: "hifispeaker.2",
                     title: "settings.playback.trueHDAtmos",
                     subtitle: "settings.playback.trueHDAtmos.subtitle",
-                    value: Binding(
-                        get: { prefs.trueHDAtmosHeights },
-                        set: { prefs.trueHDAtmosHeights = $0 }
-                    )
+                    options: [nil] + SpatialSpeakerLayout.allCases,
+                    selection: Binding(
+                        get: { prefs.heightChannelLayout },
+                        set: { prefs.heightChannelLayout = $0 }
+                    ),
+                    label: { $0?.rawValue ?? String(localized: "common.off") }
                 )
                 .settingsValueScope(.device)
 

@@ -516,6 +516,15 @@ final class PlaybackPreferences {
         set { device.trueHDAtmosHeights = newValue }
     }
 
+    /// The settings row's one value: nil is heights off, otherwise the bed they render into.
+    var heightChannelLayout: SpatialSpeakerLayout? {
+        get { device.trueHDAtmosHeights ? device.objectAudioLayout : nil }
+        set {
+            if let newValue { device.objectAudioLayout = newValue }
+            device.trueHDAtmosHeights = newValue != nil
+        }
+    }
+
     var playerRotationLocked: Bool {
         get { device.playerRotationLocked }
         set { device.playerRotationLocked = newValue }
@@ -608,11 +617,9 @@ final class PlaybackPreferences {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
     }
 
-    /// 9.1.6 whatever the room: the receiver renders the bed onto the speakers it really has, and on
-    /// HDMI and headphones the bed goes out as lossless PCM, so the larger bed costs nothing but
-    /// loopback bandwidth (AirPlay keeps APAC, the engine decides per route).
+    /// PCM over HDMI and to headphones, APAC over AirPlay (the engine decides per route).
     var objectAudioRendering: ObjectAudioRendering {
-        trueHDAtmosHeights ? .render(.l916) : .off
+        heightChannelLayout.map { .render($0) } ?? .off
     }
 
     // MARK: - Init
