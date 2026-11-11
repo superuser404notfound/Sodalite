@@ -2,6 +2,8 @@ import SwiftUI
 
 struct TagRow: View {
     let title: LocalizedStringKey
+    /// A heading the user typed, shown as is instead of `title`.
+    var verbatimTitle: String? = nil
     let tags: [TagCardData]
     var onTagSelected: ((TagCardData) -> Void)?
 
@@ -10,7 +12,7 @@ struct TagRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
+            (verbatimTitle.map { Text(verbatim: $0) } ?? Text(title))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal, metrics.rowInset)

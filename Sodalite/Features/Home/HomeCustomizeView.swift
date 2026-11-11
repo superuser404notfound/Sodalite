@@ -16,6 +16,7 @@ struct HomeCustomizeView: View {
     @State private var layout = LibraryLayout(entries: [])
     @State private var movingLibrary: String?
     @State private var droppedSeries: [DroppedSeries] = []
+    @State private var renaming: HomeRowRenameTarget?
 
     private var scope: String {
         appState.profileKey?.storageScope ?? ""
@@ -40,6 +41,16 @@ struct HomeCustomizeView: View {
         }
         .hidesNavigationBarChrome()
         .hidesShellTabBar()
+        .menuPresentation(item: $renaming) { target in
+            if let config = configs.first(where: { $0.id == target.id }) {
+                HomeRowRenameSheet(
+                    originalTitle: originalTitle(config),
+                    customTitle: config.customTitle
+                ) { title in
+                    rename(id: target.id, to: title)
+                }
+            }
+        }
         .onAppear {
             configs = HomeRowConfig.loadFromStorage(scope: scope)
             mergeCWNextUp = HomeRowConfig.mergeContinueWatchingNextUp(scope: scope)
@@ -269,6 +280,14 @@ struct HomeCustomizeView: View {
                 rowBody(config, isFocused: isFocused, isEnabled: true)
             }
 
+            if config.isRenamable {
+                RowRenameButton {
+                    movingID = nil
+                    movingLibrary = nil
+                    renaming = HomeRowRenameTarget(id: config.id)
+                }
+            }
+
             RowToggleButton(isOn: true) {
                 movingID = nil
                 movingLibrary = nil
@@ -372,19 +391,35 @@ struct HomeCustomizeView: View {
         return layout.hidesLatestRow(libraryID: id)
     }
 
+    /// The custom title leads; the built-in one stays beside it so the row is still recognisable.
     @ViewBuilder
     private func rowLabel(_ config: HomeRowConfig) -> some View {
+        if let customTitle = config.customTitle {
+            HStack(spacing: 12) {
+                Text(verbatim: customTitle)
+                    .lineLimit(1)
+                originalTitle(config)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        } else {
+            originalTitle(config)
+        }
+    }
+
+    private func originalTitle(_ config: HomeRowConfig) -> Text {
         if config.type == .libraryLatest, config.collectionType == "boxsets" {
-            Text(verbatim: config.libraryName ?? "")
+            return Text(verbatim: config.libraryName ?? "")
         } else if config.type == .libraryLatest {
-            Text(
+            return Text(
                 String(
                     format: String(localized: "home.libraryLatest.format", defaultValue: "Latest in %@"),
                     config.libraryName ?? ""
                 )
             )
         } else {
-            Text(config.type.localizedTitle)
+            return Text(config.type.localizedTitle)
         }
     }
 
@@ -432,6 +467,14 @@ struct HomeCustomizeView: View {
                 configs[index].sortOrder = maxOrder + 1
             }
         }
+        save()
+    }
+
+    private func rename(id: String, to title: String?) {
+        guard let index = configs.firstIndex(where: { $0.id == id }),
+              configs[index].customTitle != title
+        else { return }
+        configs[index].customTitle = title
         save()
     }
 
@@ -671,6 +714,32 @@ struct RowToggleButton: View {
     }
 }
 
+/// Opens the rename panel for its row. Icon only: it sits between the row and its On switch.
+struct RowRenameButton: View {
+    let action: () -> Void
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @FocusState private var focused: Bool
+
+    private var isCompact: Bool { hSizeClass == .compact }
+
+    var body: some View {
+        Image(systemName: "pencil")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(focused ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+            .frame(minWidth: isCompact ? 24 : 40)
+            .padding(.horizontal, isCompact ? 10 : 14)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(focused ? Color.Theme.focusFill : Color.Theme.restFill))
+            .focusStroke(Capsule(), isFocused: focused)
+            .focusResponse(.chip, isFocused: focused)
+            .accessibilityLabel(Text("home.customize.rename"))
+            .focusableSurface()
+            .focused($focused)
+            .stableTap(isFocused: focused) { action() }
+    }
+}
+
 // MARK: - Storage
 
 extension HomeRowConfig {
@@ -715,7 +784,8 @@ extension HomeRowConfig {
                     sortOrder: sortOrder,
                     libraryID: libraryID,
                     libraryName: item["libraryName"] as? String,
-                    collectionType: item["collectionType"] as? String
+                    collectionType: item["collectionType"] as? String,
+                    customTitle: (item["customTitle"] as? String).flatMap(sanitizedTitle)
                 )
             )
         }

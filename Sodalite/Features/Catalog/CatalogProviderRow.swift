@@ -3,6 +3,8 @@ import SwiftUI
 /// Horizontal scroller of network/studio tiles (TMDB logo on a dark card); tap pushes a CatalogFilteredGridView. Mirrors Jellyseerr web's CompanyCard slider.
 struct CatalogProviderRow: View {
     let titleKey: LocalizedStringKey
+    /// A heading the user typed, shown as is instead of `titleKey`.
+    var verbatimTitle: String? = nil
     let providers: [CatalogProvider]
     /// Destination chosen by caller: Catalog wraps in a `CatalogFilter`, Home translates to a Jellyfin Studios filter.
     let onSelect: (CatalogProvider) -> Void
@@ -16,7 +18,7 @@ struct CatalogProviderRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(titleKey)
+            (verbatimTitle.map { Text(verbatim: $0) } ?? Text(titleKey))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.leading, leadingInset)

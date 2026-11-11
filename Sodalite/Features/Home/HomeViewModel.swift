@@ -645,6 +645,11 @@ final class HomeViewModel {
             ?? imageService.posterURL(for: item, maxWidth: ImageWidth.wideCard)
     }
 
+    /// The heading the user gave a row in Customize Home; `id` is the row's config id.
+    func customTitle(forRow id: String) -> String? {
+        rowConfigs.first { $0.id == id }?.customTitle
+    }
+
     func reloadConfig() {
         rowConfigs = HomeRowConfig.loadFromStorage(scope: homeScope)
         libraryLayout = LibraryLayout.load(scope: homeScope)

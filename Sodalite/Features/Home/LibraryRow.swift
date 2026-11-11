@@ -3,6 +3,8 @@ import SwiftUI
 /// "My Media" row: one tile per video library, opening it in the shared FilteredGridView.
 struct LibraryRow: View {
     let titleKey: LocalizedStringKey
+    /// A heading the user typed, shown as is instead of `titleKey`.
+    var verbatimTitle: String? = nil
     let libraries: [JellyfinLibrary]
     /// A suffix for the tile name, the server's when two servers share a library name (Sodalite#85).
     var label: (JellyfinLibrary) -> String? = { _ in nil }
@@ -14,7 +16,7 @@ struct LibraryRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(titleKey)
+            (verbatimTitle.map { Text(verbatim: $0) } ?? Text(titleKey))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))

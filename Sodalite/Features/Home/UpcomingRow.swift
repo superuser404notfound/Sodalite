@@ -8,6 +8,8 @@ struct UpcomingRow: View {
     let imageURLProvider: (JellyfinItem) -> URL?
     let onItemSelected: (JellyfinItem) -> Void
     var itemLabel: ((JellyfinItem) -> String?)? = nil
+    /// A heading the user typed, shown as is instead of the row type's title.
+    var verbatimTitle: String? = nil
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
@@ -19,7 +21,7 @@ struct UpcomingRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(HomeRowType.upcoming.localizedTitle)
+            (verbatimTitle.map { Text(verbatim: $0) } ?? Text(HomeRowType.upcoming.localizedTitle))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.leading, leadingInset)
