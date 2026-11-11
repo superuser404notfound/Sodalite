@@ -465,6 +465,10 @@ struct HomeView: View {
                             items: row.items,
                             imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
                             onItemSelected: { item in
+                                if item.type == .movie {
+                                    selectedItem = item
+                                    return
+                                }
                                 // The episode has no page of its own yet, so the card opens its show.
                                 guard let seriesID = item.seriesId else { return }
                                 var series = JellyfinItem(seriesStub: seriesID, name: item.seriesName ?? "")

@@ -587,6 +587,9 @@ final class HomeViewModel {
         spoilerSafe: Bool = false
     ) -> URL? {
         if rowType == .upcoming {
+            if item.type == .movie {
+                return imageService.backdropURL(for: item, maxWidth: ImageWidth.wideCard)
+            }
             // Show art only: a Seerr entry has no image of its own, and a library one's still would
             // be the one picture of an unseen episode on the page.
             return imageService.seriesArtworkURL(for: item)

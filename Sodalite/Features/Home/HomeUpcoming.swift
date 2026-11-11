@@ -4,10 +4,12 @@ import Foundation
 /// up on. The selection rules live here, apart from `HomeViewModel`, so they are testable without a
 /// server.
 ///
-/// Two sources. The library's own schedule comes first: Jellyfin lists announced episodes as virtual
+/// Three sources. The library's own schedule comes first: Jellyfin lists announced episodes as virtual
 /// items, but only when a metadata plugin creates them (the TVDB plugin's missing-episode provider),
-/// so on most servers that list is empty. For a show it has nothing for, Seerr's TMDB data names the
-/// next episode instead.
+/// so on most servers that list is empty. Then the server's `/Shows/Upcoming`: on Jellyfin it is the
+/// same schedule and adds nothing, but a server that curates the list itself answers there and not
+/// to the schedule query, and may name films that are not out yet. For a show neither has anything
+/// for, Seerr's TMDB data names the next episode instead.
 nonisolated enum HomeUpcoming {
     static let limit = 16
     /// How many recently watched shows are considered. Also the ceiling on Seerr lookups per load.
@@ -15,6 +17,8 @@ nonisolated enum HomeUpcoming {
     /// The schedule is the whole library's, read before it is matched to the caught-up shows, so it
     /// is fetched wide and slim; the few episodes that make the row are fetched again with artwork.
     static let scheduleLimit = 1000
+    /// `/Shows/Upcoming` arrives with artwork fields, so it is read narrower than the schedule.
+    static let serverListLimit = 100
     /// How long a Seerr answer is reused. Air dates move rarely, and a Home refetch should not cost a
     /// round of lookups.
     static let lookupLifetime: TimeInterval = 6 * 60 * 60
@@ -95,6 +99,26 @@ nonisolated enum HomeUpcoming {
         }
     }
 
+    /// What the server's `/Shows/Upcoming` adds to `found`: an episode under the same rules as the
+    /// schedule, for a show `found` has nothing for yet, and a film that is not out yet. Films are
+    /// not filtered by watch history, there is none for an unreleased one; a stock Jellyfin never
+    /// lists films there.
+    static func fromServerList(
+        _ list: [JellyfinItem], found: [JellyfinItem], caughtUp: [String], now: Date, calendar: Calendar
+    ) -> [JellyfinItem] {
+        let covered = Set(found.compactMap(\.seriesId))
+        let episodes = fromLibrary(list, caughtUp: caughtUp.filter { !covered.contains($0) }, now: now, calendar: calendar)
+        var seen = Set(found.map(\.id))
+        let films = list.filter { item in
+            guard item.type == .movie,
+                  item.userData?.played != true,
+                  let days = daysUntil(item.premiereDate, now: now, calendar: calendar), days >= 0
+            else { return false }
+            return seen.insert(item.id).inserted
+        }
+        return episodes + films
+    }
+
     /// The caught-up shows the library had nothing for, which are the ones worth a Seerr lookup.
     static func needingLookup(caughtUp: [String], found: [JellyfinItem]) -> [String] {
         let covered = Set(found.compactMap(\.seriesId))
@@ -131,7 +155,7 @@ nonisolated enum HomeUpcoming {
             let l = lhs.premiereDate.map { String($0.prefix(10)) } ?? ""
             let r = rhs.premiereDate.map { String($0.prefix(10)) } ?? ""
             if l != r { return l < r }
-            return (lhs.seriesName ?? "").localizedStandardCompare(rhs.seriesName ?? "") == .orderedAscending
+            return (lhs.seriesName ?? lhs.name).localizedStandardCompare(rhs.seriesName ?? rhs.name) == .orderedAscending
         }
         return Array(sorted.prefix(limit))
     }

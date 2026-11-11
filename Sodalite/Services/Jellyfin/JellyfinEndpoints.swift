@@ -36,6 +36,7 @@ enum JellyfinEndpoint: APIEndpoint {
     case resumeItems(userID: String, mediaType: String, limit: Int)
     case nextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool)
     case latestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int)
+    case upcoming(userID: String, limit: Int)
     case seasons(seriesID: String, userID: String)
     case episodes(seriesID: String, seasonID: String, userID: String)
     case similarItems(itemID: String, userID: String, limit: Int)
@@ -145,6 +146,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Shows/NextUp"
         case .latestMedia(let userID, _, _, _):
             "/Users/\(userID)/Items/Latest"
+        case .upcoming:
+            "/Shows/Upcoming"
         case .seasons(let seriesID, _):
             "/Shows/\(seriesID)/Seasons"
         case .episodes(let seriesID, _, _):
@@ -334,6 +337,13 @@ enum JellyfinEndpoint: APIEndpoint {
                 items.append(URLQueryItem(name: "SeriesId", value: seriesID))
             }
             return items
+
+        case .upcoming(let userID, let limit):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "Limit", value: String(limit)),
+                URLQueryItem(name: "Fields", value: Self.homeRowFields),
+            ]
 
         case .latestMedia(_, let parentID, let includeItemTypes, let limit):
             var items = [

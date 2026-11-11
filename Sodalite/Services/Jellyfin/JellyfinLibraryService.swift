@@ -8,9 +8,13 @@ protocol JellyfinLibraryServiceProtocol: Sendable {
     func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem]
     func getGenres(userID: String) async throws -> [NamedItem]
     func getStudios(userID: String) async throws -> [NamedItem]
+    func getUpcoming(userID: String, limit: Int) async throws -> [JellyfinItem]
 }
 
 extension JellyfinLibraryServiceProtocol {
+    /// Test doubles that never exercise the Upcoming row answer with nothing.
+    func getUpcoming(userID: String, limit: Int) async throws -> [JellyfinItem] { [] }
+
     /// Ordinary Next Up (non-Home callers); rewatching is a Home-row-only opt-in, defaulted off here.
     func getNextUp(userID: String, seriesID: String?, limit: Int) async throws -> JellyfinItemsResponse {
         try await getNextUp(userID: userID, seriesID: seriesID, limit: limit, rewatching: false)
@@ -84,6 +88,13 @@ final class JellyfinLibraryService: JellyfinLibraryServiceProtocol {
             responseType: LossyJellyfinItems.self
         )
         return response.elements
+    }
+
+    func getUpcoming(userID: String, limit: Int) async throws -> [JellyfinItem] {
+        try await client.request(
+            endpoint: JellyfinEndpoint.upcoming(userID: userID, limit: limit),
+            responseType: JellyfinItemsResponse.self
+        ).items
     }
 
     func getGenres(userID: String) async throws -> [NamedItem] {
