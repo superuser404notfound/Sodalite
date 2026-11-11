@@ -514,12 +514,24 @@ struct MovieDetailView: View {
                         }
                     }
                 } else {
-                    ItemMetadataRow(
-                        item: vm.item,
-                        badges: formatBadges(vm: vm),
-                        externalRatings: vm.externalRatings,
-                        awaitingExternalRatings: vm.isAwaitingExternalRatings
-                    )
+                    // One line where it fits. Where it does not (the iPhone Duo's inner display
+                    // upright, 669 pt) the pills were squeezed to slivers with their letters stacked,
+                    // so they move to a line of their own, as in portrait.
+                    ViewThatFits(in: .horizontal) {
+                        ItemMetadataRow(
+                            item: vm.item,
+                            badges: formatBadges(vm: vm),
+                            externalRatings: vm.externalRatings,
+                            awaitingExternalRatings: vm.isAwaitingExternalRatings
+                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            ItemMetadataRow(item: vm.item, externalRatings: vm.externalRatings, awaitingExternalRatings: vm.isAwaitingExternalRatings)
+                            let pills = formatBadgePills(vm: vm)
+                            if !pills.isEmpty {
+                                FormatBadgeRow(pills: pills)
+                            }
+                        }
+                    }
                 }
             }
 

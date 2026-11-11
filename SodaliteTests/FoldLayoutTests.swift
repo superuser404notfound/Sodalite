@@ -14,6 +14,15 @@ struct FoldLayoutTests {
         #expect(layout.panelArea == CGRect(x: 0, y: 420, width: 1000, height: 380))
     }
 
+    @Test("A fold on a half point snaps outward to whole points")
+    func fractionalFoldSnapsToWholePoints() throws {
+        let fold = CGRect(x: 0, y: 455.5, width: 1000, height: 40)
+        let layout = try #require(FoldLayout.resolve(bounds: bounds, activeDivisions: [fold]))
+        #expect(layout.videoArea.maxY == 455)
+        #expect(layout.panelArea.minY == 496)
+        #expect(layout.panelArea.maxY == 800)
+    }
+
     @Test("A fold running top to bottom keeps the player full screen")
     func verticalFoldIsIgnored() {
         let fold = CGRect(x: 480, y: 0, width: 40, height: 800)

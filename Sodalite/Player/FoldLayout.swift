@@ -30,10 +30,14 @@ struct FoldLayout: Equatable, Sendable {
                 && region.midY < bounds.maxY
         }
         guard let fold else { return nil }
+        // Whole points, widening the fold: the system reports it on a half point (455.5 on the iPhone
+        // Duo's inner display), where the picture and the panel each half-covered one pixel row and the
+        // page under the player showed through as a hairline.
+        let foldTop = fold.minY.rounded(.down), foldBottom = fold.maxY.rounded(.up)
         let video = CGRect(x: bounds.minX, y: bounds.minY,
-                           width: bounds.width, height: fold.minY - bounds.minY)
-        let panel = CGRect(x: bounds.minX, y: fold.maxY,
-                           width: bounds.width, height: bounds.maxY - fold.maxY)
+                           width: bounds.width, height: foldTop - bounds.minY)
+        let panel = CGRect(x: bounds.minX, y: foldBottom,
+                           width: bounds.width, height: bounds.maxY - foldBottom)
         guard video.height >= minimumHalfHeight, panel.height >= minimumHalfHeight else { return nil }
         return FoldLayout(videoArea: video, panelArea: panel)
     }
