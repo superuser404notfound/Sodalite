@@ -506,14 +506,17 @@ struct PlaybackSettingsView: View {
                 .opacity(displayHasDolbyVision ? 0.4 : 1)
 
                 // AetherEngine#846: sub-1080p 8-bit SDR only, the engine leaves everything else alone.
-                boolRow(
+                // AetherEngine#1039: the third value adds the line-art scaler for animated titles.
+                ValuePickerRow(
                     icon: "wand.and.sparkles",
                     title: "settings.playback.enhancedUpscaling",
                     subtitle: "settings.playback.enhancedUpscaling.subtitle",
-                    value: Binding(
-                        get: { prefs.enhancedUpscaling },
-                        set: { prefs.enhancedUpscaling = $0 }
-                    )
+                    options: EnhancedUpscalingMode.allCases,
+                    selection: Binding(
+                        get: { prefs.upscalingMode },
+                        set: { prefs.upscalingMode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
                 .settingsValueScope(.device)
 

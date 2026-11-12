@@ -10,6 +10,48 @@ extension PlayerViewModel {
 
     var effectiveEnhancedUpscaling: Bool { upscalingOverride ?? preferences.enhancedUpscaling }
 
+    /// AetherEngine#1039: the scaler for this load. The line-art scaler only for drawn content, which the
+    /// genres say. A Jellyfin episode carries none of its own, so its series' are read, once per series.
+    func upscaleScalerForLoad() async -> UpscaleScaler {
+        guard effectiveEnhancedUpscaling, preferences.lineArtUpscaling else { return .automatic }
+        var genres = item.genres ?? []
+        if genres.isEmpty, let seriesID = item.seriesId {
+            if let cached = Self.seriesIsAnimation[seriesID] { return cached ? .lineArt : .automatic }
+            if let itemService, let series = try? await itemService.getItemDetail(userID: userID, itemID: seriesID) {
+                genres = series.genres ?? []
+                Self.seriesIsAnimation[seriesID] = Self.isAnimation(genres: genres)
+            }
+        }
+        let animated = Self.isAnimation(genres: genres)
+        LogTap.shared.note("[Upscale] scaler \(animated ? "line art" : "automatic") (genres: \(genres.joined(separator: ", ")))")
+        return animated ? .lineArt : .automatic
+    }
+
+    /// The live paths have no series to ask: a programme's own genres decide.
+    var liveUpscaleScaler: UpscaleScaler {
+        effectiveEnhancedUpscaling && preferences.lineArtUpscaling && Self.isAnimation(genres: item.genres ?? [])
+            ? .lineArt : .automatic
+    }
+
+    /// Server metadata names genres in the library's language, so the common translations of Animation and
+    /// Anime count. Compared case and diacritic insensitively.
+    static func isAnimation(genres: [String]) -> Bool {
+        genres.contains { genre in
+            let folded = genre.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+            return animationGenreNames.contains(folded)
+        }
+    }
+
+    static let animationGenreNames: Set<String> = [
+        "animation", "anime", "animacion", "animacao", "animazione", "animatie", "animacja", "animace",
+        "animacia", "animacio", "animasjon", "animering", "animaatio", "animasyon", "animasi", "animaatiot",
+        "анимация", "мультфильм", "анімація", "аниме", "κινουμενα σχεδια", "アニメ", "アニメーション", "动画", "動畫",
+        "动漫", "애니메이션", "애니", "אנימציה", "رسوم متحركة", "انیمیشن", "แอนิเมชัน", "hoạt hình",
+    ]
+
+    /// Per process: a series' genres do not change between its episodes.
+    @MainActor static var seriesIsAnimation: [String: Bool] = [:]
+
     var upscaleToggleState: UpscaleToggleState? {
         Self.upscaleToggleState(
             isUpscaling: upscaleStatus != nil,
