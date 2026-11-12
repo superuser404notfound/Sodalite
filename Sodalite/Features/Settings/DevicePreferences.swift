@@ -26,6 +26,7 @@ final class DevicePreferences {
         static let streamingQualityCellular = "playback.streamingQualityCellular"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
         static let enhancedUpscaling = "playback.enhancedUpscaling"
+        static let lineArtUpscaling = "playback.lineArtUpscaling"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
         static let speakerLayout = "playback.speakerLayout"
@@ -130,6 +131,12 @@ final class DevicePreferences {
         didSet { store.set(enhancedUpscaling, forKey: Keys.enhancedUpscaling) }
     }
 
+    /// AetherEngine#1039, default OFF, read only while `enhancedUpscaling` is on: animated titles get the
+    /// engine's line-art scaler, which also takes 1080p and 10-bit SDR. A device value like it.
+    var lineArtUpscaling: Bool {
+        didSet { store.set(lineArtUpscaling, forKey: Keys.lineArtUpscaling) }
+    }
+
     /// tvOS Top Shelf row. On by default; see TopShelfEnabled for why it can be turned off at all.
     var showTopShelfRow: Bool {
         didSet { store.set(showTopShelfRow, forKey: Keys.showTopShelfRow) }
@@ -198,6 +205,7 @@ final class DevicePreferences {
         self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool
             ?? Self.forceDolbyVisionOnNonDVDisplayDefault
         self.enhancedUpscaling = store.object(forKey: Keys.enhancedUpscaling) as? Bool ?? false
+        self.lineArtUpscaling = store.object(forKey: Keys.lineArtUpscaling) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
             .flatMap(AppearancePreferences.ContinueWatchingImage.init(rawValue:)) ?? .thumb
@@ -230,6 +238,7 @@ final class DevicePreferences {
         update(\.streamingQualityCellular)
         update(\.forceDolbyVisionOnNonDVDisplay)
         update(\.enhancedUpscaling)
+        update(\.lineArtUpscaling)
         update(\.showTopShelfRow)
         update(\.topShelfImage)
         update(\.speakerLayout)

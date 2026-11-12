@@ -1393,6 +1393,11 @@ final class PlayerViewModel {
                     streamIndex: stream.index, format: stream.codec ?? "srt")
             }
             externalEngineTrackIDs = externalSubs.mapping
+            let upscaleScaler = await upscaleScalerForLoad()
+            if Task.isCancelled || isTearingDown {
+                hostLoadActive = false
+                return
+            }
             try await player.load(
                 url: url,
                 startPosition: startPos,
@@ -1400,6 +1405,7 @@ final class PlayerViewModel {
                     suppressDisplayCriteria: false,
                     forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
                     upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
+                    upscaleScaler: upscaleScaler,
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,

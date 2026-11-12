@@ -583,6 +583,20 @@ final class PlaybackPreferences {
         set { device.enhancedUpscaling = newValue }
     }
 
+    var lineArtUpscaling: Bool {
+        get { device.lineArtUpscaling }
+        set { device.lineArtUpscaling = newValue }
+    }
+
+    /// The settings picker's view of the two switches.
+    var upscalingMode: EnhancedUpscalingMode {
+        get { EnhancedUpscalingMode(enhanced: enhancedUpscaling, lineArt: lineArtUpscaling) }
+        set {
+            enhancedUpscaling = newValue != .off
+            lineArtUpscaling = newValue == .withAnimation
+        }
+    }
+
     var speakerLayout: SpeakerLayout {
         get { device.speakerLayout }
         set { device.speakerLayout = newValue }
@@ -699,5 +713,17 @@ final class PlaybackPreferences {
             keyspace: PreferenceKeyspace(defaults: defaults, scope: scope),
             device: device ?? DevicePreferences(store: defaults)
         )
+    }
+}
+
+/// AetherEngine#846 / #1039: the Enhanced Upscaling picker. `withAnimation` keeps the automatic scaler for
+/// everything else and gives animated titles the engine's line-art scaler.
+enum EnhancedUpscalingMode: String, CaseIterable, Sendable, Identifiable {
+    case off, on, withAnimation
+    var id: String { rawValue }
+    var titleKey: String { "settings.playback.enhancedUpscaling.\(rawValue)" }
+
+    init(enhanced: Bool, lineArt: Bool) {
+        self = !enhanced ? .off : (lineArt ? .withAnimation : .on)
     }
 }
