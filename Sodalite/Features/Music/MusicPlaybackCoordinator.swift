@@ -13,8 +13,8 @@ import AetherEngine
 /// down the audio host; this coordinator watches `playbackBackend` leave `.audio` and clears its own
 /// state WITHOUT re-stopping the engine (it has already moved on).
 ///
-/// System Now-Playing is driven by the `+NowPlaying` extension via a per-player `MPNowPlayingSession`;
-/// applyNowPlayingInfo / clearNowPlayingInfo fire at every track-change / play-pause / seek.
+/// System Now-Playing is owned by the engine (`ownsAudioNowPlaying`); the `+NowPlaying` extension hands it
+/// the track's identity and cover and the queue's next/previous at every track change.
 @MainActor
 @Observable
 final class MusicPlaybackCoordinator {
@@ -74,17 +74,11 @@ final class MusicPlaybackCoordinator {
     /// before any teardown so the `$state` sink doesn't mistake the stop for end-of-track (`.ended`) and recursively advance.
     private var isStopping: Bool = false
     private var cancellables = Set<AnyCancellable>()
-    /// The 2 s now-playing refresh; non-nil only while a queue is live.
-    private var nowPlayingKeepAlive: AnyCancellable?
-
-    /// Now-Playing bookkeeping (see +NowPlaying). registeredCommandCenterID = the MPRemoteCommandCenter
-    /// the handlers are bound to; the resolved center flips per track between session (AVPlayer) and
-    /// shared default (FFmpeg). nowPlayingArtworkItemID = item id at artwork-load start, compared on completion to drop stale artwork.
-    var registeredCommandCenterID: ObjectIdentifier?
+    /// Now-Playing bookkeeping (see +NowPlaying). nowPlayingArtworkItemID = item id at artwork-load start,
+    /// compared on completion to drop stale artwork.
     var nowPlayingArtworkItemID: String?
-    /// Cached current-track artwork so a state/duration refresh keeps showing it instead of flashing
-    /// empty mid-load. Both paths use it: the AVPlayer path stages it into AVPlayerItem.nowPlayingInfo,
-    /// the FFmpeg fallback writes it to the shared center. Cleared on stop / track change.
+    /// Cached current-track artwork so a restage keeps showing it instead of flashing the placeholder.
+    /// Cleared on stop / track change.
     var cachedArtwork: MPMediaItemArtwork?
     var cachedArtworkItemID: String?
 
@@ -173,7 +167,6 @@ final class MusicPlaybackCoordinator {
                 await engine.seek(to: 0)
                 engine.play()
             }
-            applyNowPlayingInfo()
         } else {
             reportStopped()
             currentIndex -= 1
@@ -183,7 +176,6 @@ final class MusicPlaybackCoordinator {
 
     func seek(to seconds: Double) {
         Task { await engine.seek(to: seconds) }
-        applyNowPlayingInfo()
     }
 
     /// User-driven stop. Latches `isStopping` first so the engine's `.idle` (then `.none`) transition
@@ -202,7 +194,6 @@ final class MusicPlaybackCoordinator {
         duration = 0
         playSessionId = nil
         currentMediaSourceId = nil
-        stopNowPlayingKeepAlive()
         clearNowPlayingInfo()
         isStopping = false
     }
@@ -270,12 +261,12 @@ final class MusicPlaybackCoordinator {
             )
             guard generation == loadGeneration else { return }
 
-            // Publish now-playing + register remote commands BEFORE the first play(): tvOS only
-            // registers the app as the system Now-Playing source (and flips the Siri Remote to a play
-            // affordance) when the info center is populated and handlers bound ahead of playback (WWDC17 S251).
+            // Identity and track commands BEFORE the first play(): tvOS only registers the app as the
+            // system Now-Playing source (and flips the Siri Remote to a play affordance) when the card is
+            // populated and handlers bound ahead of playback (WWDC17 S251). The engine bound the transport
+            // commands during load.
             applyNowPlayingInfo()
             engine.play()
-            startNowPlayingKeepAlive()
 
             reportStart()
         } catch is CancellationError {
@@ -331,9 +322,6 @@ final class MusicPlaybackCoordinator {
                 guard let self else { return }
                 guard dur > 0, dur != self.duration else { return }
                 self.duration = dur
-                // AVPlayer publishes duration async after the item is ready, so the now-playing set
-                // at track load had duration 0; refresh so system UI shows the right length / progress.
-                self.applyNowPlayingInfo()
             }
             .store(in: &cancellables)
 
@@ -341,12 +329,7 @@ final class MusicPlaybackCoordinator {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard let self else { return }
-                let wasPlaying = self.isPlaying
                 self.isPlaying = (state == .playing)
-                // Refresh now-playing on a play/pause transition so native rate / elapsed match.
-                if self.isPlaying != wasPlaying {
-                    self.applyNowPlayingInfo()
-                }
 
                 // Natural end-of-track: the engine reaches `.ended` when the source runs out (#63;
                 // user-driven stop latches isStopping and drives `.idle`, so matching `.ended` is exact).
@@ -386,7 +369,6 @@ final class MusicPlaybackCoordinator {
                 self.duration = 0
                 self.playSessionId = nil
                 self.currentMediaSourceId = nil
-                self.stopNowPlayingKeepAlive()
                 self.clearNowPlayingInfo()
                 self.isStopping = false
             }
@@ -405,26 +387,6 @@ final class MusicPlaybackCoordinator {
             }
             .store(in: &cancellables)
 
-    }
-
-    /// Keep the system now-playing entry fresh while a track is loaded (playing OR paused). tvOS
-    /// renders the Home overlay from a recent entry and drops a stale one, so without this the badge
-    /// lags ~2s behind our last write and a pause drops the overlay + remote play route. Light 2s
-    /// elapsed/rate refresh; started on first load, cancelled with the session (the coordinator is
-    /// process-lifetime, and an always-on timer was a permanent 0.5 Hz wakeup even when idle).
-    private func startNowPlayingKeepAlive() {
-        guard nowPlayingKeepAlive == nil else { return }
-        nowPlayingKeepAlive = Timer.publish(every: 2, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, self.currentItem != nil else { return }
-                self.refreshNowPlayingElapsed()
-            }
-    }
-
-    private func stopNowPlayingKeepAlive() {
-        nowPlayingKeepAlive?.cancel()
-        nowPlayingKeepAlive = nil
     }
 
     // MARK: - Jellyfin session reporting

@@ -10,94 +10,32 @@ import AetherEngine
 
 /// Native system Now-Playing for the music path.
 ///
-/// On tvOS 14+ a bare AVPlayer must own an `MPNowPlayingSession` to stay the active Now-Playing app
-/// across a background pause: the SHARED info/command centers aren't reliably bound, so on pause
-/// (rate 0) the system drops the app and stops delivering the play button (Apple forums 658311 /
-/// 706656). The engine owns that session with `automaticallyPublishesNowPlayingInfo` ON (Apple's
-/// documented bare-AVPlayer path, WWDC22 110338): the AVPlayer path hands its staged dict
-/// (title/artist/album + a GUARANTEED-valid, @Sendable artwork) to the engine, which stamps it on
-/// AVPlayerItem.nowPlayingInfo, and the session auto-derives elapsed/rate/state/duration from the
-/// player. We always supply a valid artwork so the system never falls back to decoding the asset's
-/// OWN embedded cover, which crashes on a corrupt one. externalMetadata is NOT used here, it is an
-/// AVKit property the bare audio AVPlayer (no AVPlayerViewController) never surfaces.
+/// The engine owns it (`ownsAudioNowPlaying`, set in `DependencyContainer`): the card, the clock and the
+/// transport commands, on whichever audio host the track lands on (the AVPlayer host's own
+/// `MPNowPlayingSession`, or the shared centers for the FFmpeg host). This file only supplies what the
+/// engine cannot know: the track's identity and cover, and next/previous for the queue.
 ///
-/// The FFmpeg fallback has no AVPlayer/session, so infoCenter/commandCenter resolve to the shared defaults,
-/// and it writes that shared center directly (no auto-publisher there).
-/// MPRemoteCommandCenter does NOT guarantee main-thread delivery on tvOS (it dispatches on a background
-/// MediaPlayer queue), so each handler returns its status synchronously and hops the actual @MainActor work to
-/// the main actor via `Task { @MainActor }`. Assuming main (MainActor.assumeIsolated in the handler body)
-/// crashed with dispatch_assert_queue_fail when a command arrived off-main during playback.
+/// The cover slot is never empty: an empty one makes the session fall back to decoding the asset's OWN
+/// embedded cover, and a corrupt one crashes MediaPlayer.
 extension MusicPlaybackCoordinator {
 
-    /// Shared center for the FFmpeg fallback only. The AVPlayer/session path stamps AVPlayerItem.nowPlayingInfo
-    /// (via the engine) and auto-publishes, so every use of this shared default is gated on `audioNowPlayingSession == nil`.
-    private var infoCenter: MPNowPlayingInfoCenter {
-        MPNowPlayingInfoCenter.default()
-    }
-
-    /// Command center for transport handlers: the active session's own center, else the shared default.
-    private var commandCenter: MPRemoteCommandCenter {
-        #if os(tvOS) || os(iOS)
-        engine.audioNowPlayingSession?.remoteCommandCenter ?? MPRemoteCommandCenter.shared()
-        #else
-        MPRemoteCommandCenter.shared()
-        #endif
-    }
-
-    /// Whether the engine publishes a Now-Playing session of its own for the AVPlayer audio path.
-    ///
-    /// It does on tvOS and iOS, where a paused bare AVPlayer loses Now-Playing unless a session
-    /// holds it, and `MPNowPlayingSession` exists to hold it. macOS has neither the rule nor the
-    /// class, so every Mac session takes the route the FFmpeg fallback takes on the other
-    /// platforms: a direct write to the shared center.
-    private var engineOwnsNowPlayingSession: Bool {
-        #if os(tvOS) || os(iOS)
-        engine.audioNowPlayingSession != nil
-        #else
-        false
-        #endif
-    }
-
-    /// Stages the per-item dictionary on the engine's session path, and is a no-op where there is
-    /// no such session to stage it on.
-    private func stageEngineNowPlayingInfo(_ info: [String: Any]) {
-        #if os(tvOS) || os(iOS)
-        engine.setAudioNowPlayingInfo(info)
-        #endif
-    }
-
-    /// Build + publish the now-playing dictionary, register remote commands (once), kick an async
-    /// artwork load. Clears the surface when there is no current item.
+    /// Stage the identity of the current track and hand the queue's next/previous to the engine.
+    /// Clears the surface when there is no current item.
     func applyNowPlayingInfo() {
         guard let item = currentItem else {
             clearNowPlayingInfo()
             return
         }
-
-        // Register transport handlers once, on the session's command center (the binding tvOS needs).
-        registerRemoteCommandsIfNeeded()
-
-        // AVPlayer path: hand the staged dict (with a guaranteed-valid artwork) to the engine, which stamps it on
-        // AVPlayerItem.nowPlayingInfo; the auto-publishing session merges in elapsed/rate/duration. NO manual write
-        // to MPNowPlayingInfoCenter, and NO externalMetadata (an AVKit property the bare audio AVPlayer never surfaces).
-        if engineOwnsNowPlayingSession {
-            stageEngineNowPlayingInfo(baseNowPlayingDict(for: item))
-            loadArtwork(for: item)
-            return
-        }
-
-        // FFmpeg fallback (Opus/Vorbis: no AVPlayer/session): manual write to the shared center.
-        var info = baseNowPlayingDict(for: item)
-        if duration > 0 { info[MPMediaItemPropertyPlaybackDuration] = duration }
-        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
-        // NOTE: deliberately NOT setting playbackState (macOS-only; tvOS reads PlaybackRate for play/pause).
-        infoCenter.nowPlayingInfo = info
+        engine.setAudioNowPlayingInfo(baseNowPlayingDict(for: item))
+        // Both stay live for the whole queue, as before: next on the last track stops, previous on the
+        // first one restarts it. The engine calls them on the main actor.
+        engine.setNowPlayingTrackCommands(
+            next: { [weak self] in self?.next() },
+            previous: { [weak self] in self?.previous() })
         loadArtwork(for: item)
     }
 
-    /// Title/artist/album/mediaType + a GUARANTEED-valid artwork, shared by both paths. The session path (auto-publish)
-    /// leaves elapsed/rate/duration to the system; the FFmpeg path appends them before writing the shared center.
+    /// Title/artist/album/mediaType + a GUARANTEED-valid artwork. Elapsed, rate and duration come from the engine.
     private func baseNowPlayingDict(for item: JellyfinItem) -> [String: Any] {
         var info: [String: Any] = [:]
         info[MPMediaItemPropertyTitle] = item.name
@@ -142,31 +80,9 @@ extension MusicPlaybackCoordinator {
         return MPMediaItemArtwork(boundsSize: image.size) { @Sendable _ in image }
     }()
 
-    /// Refresh just elapsed + rate on the EXISTING entry (no rebuild / artwork reload / log), on the
-    /// timer so the system keeps a live entry: shows the Home overlay promptly (not lagging our last
-    /// write), keeps it alive across a pause (stale entries get dropped), and moves the scrubber.
-    func refreshNowPlayingElapsed() {
-        // On the session path the engine drives elapsed/rate from the player; only the FFmpeg fallback needs this.
-        guard !engineOwnsNowPlayingSession, currentItem != nil else { return }
-        let center = infoCenter
-        guard var info = center.nowPlayingInfo else {
-            // No entry yet (first publish): build the full one.
-            applyNowPlayingInfo()
-            return
-        }
-        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
-        if duration > 0 { info[MPMediaItemPropertyPlaybackDuration] = duration }
-        center.nowPlayingInfo = info
-    }
-
     func clearNowPlayingInfo() {
-        // Clear the AVPlayer path's staged per-item dictionary (no-op if no audio host).
-        stageEngineNowPlayingInfo([:])
-        // The session auto-clears on stop; only the FFmpeg fallback's shared-center entry needs an explicit nil.
-        if !engineOwnsNowPlayingSession {
-            infoCenter.nowPlayingInfo = nil
-        }
+        engine.setAudioNowPlayingInfo([:])
+        engine.setNowPlayingTrackCommands(next: nil, previous: nil)
         cachedArtwork = nil
         cachedArtworkItemID = nil
     }
@@ -204,102 +120,9 @@ extension MusicPlaybackCoordinator {
                 let artwork = MPMediaItemArtwork(boundsSize: decoded.size) { @Sendable _ in decoded }
                 self.cachedArtwork = artwork
                 self.cachedArtworkItemID = itemID
-                if self.engineOwnsNowPlayingSession {
-                    // AVPlayer path: re-stamp the dict with the real cover (replacing the placeholder) on the item.
-                    self.stageEngineNowPlayingInfo(self.baseNowPlayingDict(for: item))
-                } else {
-                    // FFmpeg fallback: merge artwork into the shared center.
-                    guard var info = self.infoCenter.nowPlayingInfo else { return }
-                    info[MPMediaItemPropertyArtwork] = artwork
-                    self.infoCenter.nowPlayingInfo = info
-                }
+                // Re-stage with the real cover in place of the placeholder.
+                self.engine.setAudioNowPlayingInfo(self.baseNowPlayingDict(for: item))
             }
         }
-    }
-
-    // MARK: - Remote commands
-
-    /// Bind transport handlers to the command center, re-binding whenever the RESOLVED center changes.
-    /// The engine routes per codec: AVPlayer-decodable audio -> session center, Opus/Vorbis -> FFmpeg
-    /// shared center. A once-only registration bound to whichever was live first, so in a mixed queue
-    /// the other path had a target-less center and Control Center / Siri Remote went dead.
-    /// Identity-tracked so same-center calls stay no-ops (session is persistent, per-track re-register is churn).
-    private func registerRemoteCommandsIfNeeded() {
-        let center = commandCenter
-        let centerID = ObjectIdentifier(center)
-        guard registeredCommandCenterID != centerID else { return }
-        registeredCommandCenterID = centerID
-
-        center.playCommand.removeTarget(nil)
-        center.playCommand.isEnabled = true
-        center.playCommand.addTarget { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] playCommand fired (isPlaying=\(self.isPlaying), hasItem=\(self.currentItem != nil))")
-                self.resume()
-            }
-            return .success
-        }
-
-        center.pauseCommand.removeTarget(nil)
-        center.pauseCommand.isEnabled = true
-        center.pauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] pauseCommand fired (isPlaying=\(self.isPlaying))")
-                self.engine.pause()
-            }
-            return .success
-        }
-
-        center.togglePlayPauseCommand.removeTarget(nil)
-        center.togglePlayPauseCommand.isEnabled = true
-        center.togglePlayPauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] togglePlayPauseCommand fired (isPlaying=\(self.isPlaying))")
-                self.togglePlayPause()
-            }
-            return .success
-        }
-
-        center.nextTrackCommand.removeTarget(nil)
-        center.nextTrackCommand.isEnabled = true
-        center.nextTrackCommand.addTarget { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] nextTrackCommand fired (hasNext=\(self.hasNext), index=\(self.currentIndex))")
-                self.next()
-            }
-            return .success
-        }
-
-        center.previousTrackCommand.removeTarget(nil)
-        center.previousTrackCommand.isEnabled = true
-        center.previousTrackCommand.addTarget { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] previousTrackCommand fired (hasPrevious=\(self.hasPrevious), index=\(self.currentIndex))")
-                self.previous()
-            }
-            return .success
-        }
-
-        center.changePlaybackPositionCommand.removeTarget(nil)
-        center.changePlaybackPositionCommand.isEnabled = true
-        center.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let positionEvent = event as? MPChangePlaybackPositionCommandEvent else {
-                return .commandFailed
-            }
-            let position = positionEvent.positionTime
-            Task { @MainActor in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] changePlaybackPositionCommand fired (pos=\(Int(position))s)")
-                self.seek(to: position)
-            }
-            return .success
-        }
-
-        LogTap.shared.note("[NowPlaying] shared remote command handlers registered")
     }
 }
