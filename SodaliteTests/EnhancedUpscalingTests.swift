@@ -51,10 +51,13 @@ struct EnhancedUpscalingTests {
     @Test func lineArtLabelNamesTheResampleOnlyWhenTwoTimesMisses() {
         #expect(StatsOverlayView.upscaleLabel(
             sourceSize: CGSize(width: 1920, height: 1080), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
-            degraded: false, disabledReason: nil, lineArt: true) == "1920×1080 → Line Art 2x → 3840×2160")
+            degraded: false, disabledReason: nil, lineArt: true) == "1920×1080 → Restore → Line Art 2x → 3840×2160")
+        #expect(StatsOverlayView.upscaleLabel(
+            sourceSize: CGSize(width: 1920, height: 1080), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
+            degraded: true, disabledReason: nil, lineArt: true) == "1920×1080 → Line Art 2x → 3840×2160")
         #expect(StatsOverlayView.upscaleLabel(
             sourceSize: CGSize(width: 1280, height: 720), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
-            degraded: false, disabledReason: nil, lineArt: true) == "1280×720 → Line Art 2x → Bilinear → 3840×2160")
+            degraded: false, disabledReason: nil, lineArt: true) == "1280×720 → Restore → Line Art 2x → Bilinear → 3840×2160")
     }
 
     /// AetherEngine#1039: the picker is two device switches, and the line-art one means nothing while
