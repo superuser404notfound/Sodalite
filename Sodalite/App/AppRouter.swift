@@ -214,18 +214,23 @@ struct AppRouter: View {
             }
             Task { await restoreSession() }
         }
-        #if !os(macOS)
-        // Synchronous on the way out, so the shield is in the snapshot the system takes next.
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
-            raisePrivacyShieldIfRepromptPossible()
+        // The lifecycle runs off UIApplication's notifications, not scenePhase: a player (or any UIKit
+        // fullScreen modal) over the router makes it disappear, and a disappeared view gets no
+        // .task(id: scenePhase) or .onChange(of: scenePhase) at all, while .onReceive still fires.
+        // Driven by scenePhase, the shield went up on the way out and never came down (Sodalite#237).
+        #if os(macOS)
+        .task(id: scenePhase) { handleLifecycle(scenePhase) }
+        #else
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            handleLifecycle(.inactive)
         }
-        #endif
-        #if os(iOS)
-        .onChange(of: scenePhase) { _, phase in
-            // Queue the next background poll when leaving the foreground, only while opted in.
-            if phase == .background, dependencies.seerrNotificationPreferences.notifyPendingRequests {
-                PendingRequestsBackgroundRefresh.schedule()
-            }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            // Synchronous on the way out, so the shield is in the snapshot the system takes next.
+            raisePrivacyShieldIfRepromptPossible()
+            handleLifecycle(.background)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            handleLifecycle(.active)
         }
         #endif
         .task {
@@ -279,30 +284,6 @@ struct AppRouter: View {
                 // of its own server sheet.
                 launchPickerServer = server
             }
-        }
-        .task(id: scenePhase) {
-            if scenePhase == .background {
-                #if os(tvOS)
-                if lastBackgroundedAt == nil { lastBackgroundedAt = ContinuousClock().now }
-                TopShelfRefresher.refreshBeforeSuspension()
-                #else
-                lastBackgroundedAt = ContinuousClock().now
-                #endif
-                tripReachedBackground = true
-            }
-            #if os(tvOS)
-            if scenePhase == .inactive, lastBackgroundedAt == nil {
-                lastBackgroundedAt = ContinuousClock().now
-                tripReachedBackground = false
-            }
-            #endif
-            guard scenePhase == .active else { return }
-            consumeBackgroundInstant()
-            #if !os(macOS)
-            // A due reprompt lowers it once the picker is up, see the profile cover. The late lower
-            // is the backstop for a cover that never lands, which would leave the app unseeable.
-            if !repromptHolds { PrivacyShield.lower() } else { PrivacyShield.lower(after: .seconds(3)) }
-            #endif
         }
         .task(id: appState.serverDidSwitch) {
             guard appState.serverDidSwitch > 0 else { return }
@@ -575,8 +556,38 @@ struct AppRouter: View {
         return item
     }
 
-    /// Consumed on every .active entry (a player dismissal re-fires the scenePhase task while still
-    /// .active, and must not re-prompt), and by a deep link that got here first: the URL and the
+    private func handleLifecycle(_ phase: ScenePhase) {
+        if phase == .background {
+            #if os(tvOS)
+            if lastBackgroundedAt == nil { lastBackgroundedAt = ContinuousClock().now }
+            TopShelfRefresher.refreshBeforeSuspension()
+            #else
+            lastBackgroundedAt = ContinuousClock().now
+            #endif
+            tripReachedBackground = true
+            #if os(iOS)
+            // Queue the next background poll when leaving the foreground, only while opted in.
+            if dependencies.seerrNotificationPreferences.notifyPendingRequests {
+                PendingRequestsBackgroundRefresh.schedule()
+            }
+            #endif
+        }
+        #if os(tvOS)
+        if phase == .inactive, lastBackgroundedAt == nil {
+            lastBackgroundedAt = ContinuousClock().now
+            tripReachedBackground = false
+        }
+        #endif
+        guard phase == .active else { return }
+        consumeBackgroundInstant()
+        #if !os(macOS)
+        // A due reprompt lowers it once the picker is up, see the profile cover. The late lower
+        // is the backstop for a cover that never lands, which would leave the app unseeable.
+        if !repromptHolds { PrivacyShield.lower() } else { PrivacyShield.lower(after: .seconds(3)) }
+        #endif
+    }
+
+    /// Consumed on every .active entry and by a deep link that got here first: the URL and the
     /// phase change arrive in either order, and the link must not be resolved ahead of the reprompt
     /// the same return to the app is due.
     private func consumeBackgroundInstant() {
