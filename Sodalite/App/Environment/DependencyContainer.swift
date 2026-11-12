@@ -17,6 +17,9 @@ final class DependencyContainer {
         // Sodalite#220: the software host has no AVPlayer, so AVKit publishes no Now Playing for it and
         // headphone or Control Center play/pause would land nowhere. The native path stays with AVKit.
         engine.ownsSoftwareNowPlaying = true
+        // AetherEngine#1041: music Now Playing (card, clock and transport commands) on both audio hosts.
+        // The music coordinator only stages the track's identity and the queue's next/previous.
+        engine.ownsAudioNowPlaying = true
         engine.maximumSubtitleOffsetSeconds = SubtitleOffset.maximumShift
         return engine
     }()
