@@ -1,4 +1,5 @@
 #if os(tvOS)
+import GameController
 import SwiftUI
 import UIKit
 
@@ -113,6 +114,12 @@ final class LoggingSearchController: UISearchController {
     private var failureLine: String?
     private var failureRun = 0
 
+    /// Told after every focus change whether focus now sits inside the search.
+    var onFocusInsideChange: ((Bool) -> Void)?
+    /// Whether the container's entry guide is armed, noted on every line: an armed guide sends any
+    /// move back to the first key, which is exactly what a stuck "a" would look like.
+    var guideState: () -> String = { "guide=?" }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         failureObserver = NotificationCenter.default.addObserver(
@@ -125,13 +132,30 @@ final class LoggingSearchController: UISearchController {
         }
     }
 
+    /// The remotes GameController sees when the search opens. Reports so far came from the
+    /// 1st-generation remote, which Info.plist keeps apart from the Control Center one (#115), and
+    /// "absolute" would mean a pad still left in the player's edge-click mode.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let remotes = GCController.controllers().map { controller in
+            let absolute = controller.microGamepad?.reportsAbsoluteDpadValues == true ? " absolute" : ""
+            return controller.productCategory + absolute
+        }
+        let list = remotes.isEmpty ? "none" : remotes.joined(separator: ", ")
+        LogTap.shared.note("[Search] open, remotes: \(list) \(guideState())")
+    }
+
     override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         super.didUpdateFocus(in: context, with: coordinator)
         let from = place(of: context.previouslyFocusedItem)
         let to = place(of: context.nextFocusedItem)
+        onFocusInsideChange?(to != "outside")
         guard from != "outside" || to != "outside" else { return }
         failureLine = nil
-        LogTap.shared.note("[Search] focus \(from) -> \(to) \(heading(context.focusHeading)) \(fieldState)")
+        LogTap.shared.note(
+            "[Search] focus \(from) -> \(to)\(key(context.nextFocusedItem)) "
+                + "\(heading(context.focusHeading)) \(fieldState) \(guideState())"
+        )
     }
 
     /// The linear keyboard moves between its keys by itself, so every press or swipe along the row
@@ -141,7 +165,8 @@ final class LoggingSearchController: UISearchController {
         guard let context, viewIfLoaded?.window != nil else { return }
         let from = place(of: context.previouslyFocusedItem)
         guard from != "outside" else { return }
-        let line = "[Search] move failed from \(from) \(heading(context.focusHeading)) \(fieldState)"
+        let line = "[Search] move failed from \(from)\(key(context.previouslyFocusedItem)) "
+            + "\(heading(context.focusHeading)) \(fieldState) \(guideState())"
         failureRun = line == failureLine ? failureRun + 1 : 1
         failureLine = line
         guard failureRun == 1 || failureRun.isMultiple(of: 10) else { return }
@@ -162,6 +187,18 @@ final class LoggingSearchController: UISearchController {
             return "results"
         }
         return itemView.isDescendant(of: searchBar) ? "field" : "keys"
+    }
+
+    /// The key's own label, so a log tells a keyboard that moves its keys from one that stays on "a".
+    private func key(_ item: UIFocusItem?) -> String {
+        guard let view = item as? UIView, let label = Self.label(in: view, depth: 3) else { return "" }
+        return " key=\"\(label)\""
+    }
+
+    private static func label(in view: UIView, depth: Int) -> String? {
+        if let label = view.accessibilityLabel, !label.isEmpty { return label }
+        guard depth > 0 else { return nil }
+        return view.subviews.lazy.compactMap { label(in: $0, depth: depth - 1) }.first
     }
 
     private static func view(of environment: UIFocusEnvironment) -> UIView? {
@@ -204,7 +241,18 @@ final class KeyboardEntrySearchContainer: UISearchContainerViewController {
     private var guideTop: NSLayoutConstraint?
 
     var catchesEntryFromBar = false {
-        didSet { entryGuide.isEnabled = catchesEntryFromBar }
+        didSet { updateGuide() }
+    }
+
+    /// Kept from the search's own focus updates rather than from SwiftUI: the guide sends every move
+    /// to the first key, so if the bar's focus state ever lagged behind, each swipe on the keyboard
+    /// would land on "a" again. Off whenever focus is already inside, whatever SwiftUI thinks.
+    private var focusIsInside = false {
+        didSet { updateGuide() }
+    }
+
+    private func updateGuide() {
+        entryGuide.isEnabled = catchesEntryFromBar && !focusIsInside
     }
 
     /// The page's room for the search, in window space, which the full-height search takes as safe
@@ -238,8 +286,16 @@ final class KeyboardEntrySearchContainer: UISearchContainerViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        entryGuide.isEnabled = catchesEntryFromBar
+        updateGuide()
         entryGuide.preferredFocusEnvironments = [searchController]
+        if let search = searchController as? LoggingSearchController {
+            search.onFocusInsideChange = { [weak self] inside in
+                if self?.focusIsInside != inside { self?.focusIsInside = inside }
+            }
+            search.guideState = { [weak self] in
+                "guide=\(self?.entryGuide.isEnabled == true ? "on" : "off")"
+            }
+        }
     }
 
     override func viewDidLayoutSubviews() {
