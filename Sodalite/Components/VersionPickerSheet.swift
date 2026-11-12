@@ -16,9 +16,9 @@ extension MediaSource {
         switch dim {
         case 3840...: return "4K"
         case 2560...: return "1440p"
-        case 1920...: return "1080p"
+        case 1920...: return v.isInterlaced == true ? "1080i" : "1080p"
         case 1280...: return "720p"
-        default: return h > 0 ? "\(h)p" : nil
+        default: return h > 0 ? "\(h)\(v.isInterlaced == true ? "i" : "p")" : nil
         }
     }
 

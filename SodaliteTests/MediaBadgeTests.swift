@@ -8,12 +8,13 @@ import Foundation
 struct MediaBadgeTests {
 
     private func video(width: Int?, height: Int? = nil, range: String? = nil,
-                       dvProfile: Int? = nil) -> MediaStream {
+                       dvProfile: Int? = nil, interlaced: Bool? = nil) -> MediaStream {
         MediaStream(index: 0, type: .video, codec: "hevc", language: nil,
                     displayTitle: nil, title: nil, isDefault: nil, isForced: nil,
                     isExternal: nil, height: height, width: width, channels: nil,
                     videoRange: nil, videoRangeType: range, averageFrameRate: nil,
-                    realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: dvProfile)
+                    realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: dvProfile,
+                    isInterlaced: interlaced)
     }
 
     private func audio(codec: String, profile: String? = nil, channels: Int? = 6) -> MediaStream {
@@ -39,6 +40,20 @@ struct MediaBadgeTests {
     @Test("1920x1080 reads as 1080p")
     func fullHD() {
         #expect(MediaBadgeResolver.badges(width: 1920, height: 1080, streams: nil).resolution == .fullHD)
+    }
+
+    @Test("an interlaced 1920x1080 broadcast capture reads as 1080i")
+    func fullHDInterlaced() {
+        let badges = MediaBadgeResolver.badges(width: 1920, height: 1080,
+                                               streams: [video(width: 1920, height: 1080, interlaced: true)])
+        #expect(badges.resolution == .fullHDInterlaced)
+        #expect(badges.pills.first == "1080i")
+    }
+
+    @Test("an interlaced SD capture stays SD")
+    func sdInterlaced() {
+        #expect(MediaBadgeResolver.badges(width: nil, height: nil,
+                                          streams: [video(width: 720, height: 576, interlaced: true)]).resolution == .sd)
     }
 
     @Test("1280x720 reads as 720p")

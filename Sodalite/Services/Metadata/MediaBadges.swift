@@ -14,6 +14,9 @@ struct MediaBadges: Equatable, Sendable {
     enum Resolution: String, Sendable {
         case uhd = "4K"
         case fullHD = "1080p"
+        /// Broadcast captures (DVB, ATSC recordings). The only interlaced class worth its own pill:
+        /// 4K and 720p have no interlaced form, and 576i/480i are already "SD".
+        case fullHDInterlaced = "1080i"
         case hd = "720p"
         case sd = "SD"
     }
@@ -96,7 +99,8 @@ enum MediaBadgeResolver {
             .max { area($0) < area($1) }
         let audio = bestAudio(streams)
         return MediaBadges(
-            resolution: resolution(width: video?.width ?? width, height: video?.height ?? height),
+            resolution: resolution(width: video?.width ?? width, height: video?.height ?? height,
+                                   interlaced: video?.isInterlaced == true),
             dynamicRange: dynamicRange(video),
             audio: spatial(audio),
             audioCodec: codecLabel(audio),
@@ -111,12 +115,15 @@ enum MediaBadgeResolver {
     /// Either edge can carry the class, because either one can be cropped away. A 3840x1600 scope
     /// master is 4K by its width; a 3240x2160 open-matte master is 4K by its 2160 lines, and judging
     /// it on width alone called it 1080p (found on device, 2026-08-24).
-    private static func resolution(width: Int?, height: Int?) -> MediaBadges.Resolution? {
+    ///
+    /// Item-level geometry carries no scan type, so a card reads "1080p" until its streams arrive and
+    /// the pill can say "1080i".
+    private static func resolution(width: Int?, height: Int?, interlaced: Bool) -> MediaBadges.Resolution? {
         let w = width ?? 0
         let h = height ?? 0
         guard w > 0 || h > 0 else { return nil }
         if w >= 3400 || h >= 1900 { return .uhd }
-        if w >= 1800 || h >= 1000 { return .fullHD }
+        if w >= 1800 || h >= 1000 { return interlaced ? .fullHDInterlaced : .fullHD }
         if w >= 1200 || h >= 680  { return .hd }
         return .sd
     }

@@ -129,7 +129,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Detail pages**: the first screen is artwork, with three lines of the plot, year, runtime, ratings and format badges. The info button shows the full plot plus every audio and subtitle track, and the bottom line names the file, size, codecs and bitrate. Further down: cast, director, writer, studios, and similar titles (what you have, and with Seerr what you could request).
 - **Named ratings**: with Seerr connected, the ratings say where they come from: TMDB for movies and shows, IMDb for movies, and Rotten Tomatoes where your server has no critic score.
 - **An honest Play button**: it names the episode it will start, shows the time left when you can resume, and says Play Again when you have finished.
-- **Format badges**: the detail page shows what your copy really is: 4K or 1080p, Dolby Vision, HDR10+, HDR10 or HLG, the audio codec, and Atmos or DTS:X. Optional badges on poster cards show the same at a glance (Settings → Appearance).
+- **Format badges**: the detail page shows what your copy really is: 4K, 1080p or 1080i for interlaced TV recordings, Dolby Vision, HDR10+, HDR10 or HLG, the audio codec, and Atmos or DTS:X. Optional badges on poster cards show the same at a glance (Settings → Appearance).
 - **Spoiler protection**: optionally blur episode images and descriptions until you have started them. Each series can override it.
 - **Title logos and full-bleed artwork**: title logos over the backdrop, full episode synopses, and a page that keeps text readable as you scroll. Both switchable in Appearance.
 - **Watched status**: mark movies, episodes, seasons or whole series as watched or unwatched. Part-watched cards show the time left.

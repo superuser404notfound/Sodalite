@@ -566,6 +566,9 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
     let profile: String?
     let bitRate: Int?
     let dvProfile: Int?
+    /// Jellyfin's ffprobe verdict on the field order. A `var` with a default so the memberwise
+    /// init in tests and previews keeps compiling without it.
+    var isInterlaced: Bool? = nil
 
     var id: Int { index }
 
@@ -589,6 +592,7 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
         case profile = "Profile"
         case bitRate = "BitRate"
         case dvProfile = "DvProfile"
+        case isInterlaced = "IsInterlaced"
     }
 }
 

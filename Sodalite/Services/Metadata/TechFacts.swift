@@ -91,7 +91,7 @@ struct TechFacts: Equatable {
         if let video {
             var rows: [Row] = []
             if let w = video.width, let h = video.height {
-                rows.append(Row(id: "resolution", label: .key("detail.tech.resolution"), value: "\(w)×\(h)"))
+                rows.append(Row(id: "resolution", label: .key("detail.tech.resolution"), value: "\(w)×\(h)\(video.isInterlaced == true ? "i" : "")"))
             }
             if let codec = video.codec?.uppercased() {
                 let profile = video.profile ?? ""
