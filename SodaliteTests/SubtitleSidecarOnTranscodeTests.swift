@@ -43,6 +43,26 @@ struct SubtitleSidecarOnTranscodeTests {
         #expect(result.descriptors.first?.isForced == true)
     }
 
+    /// The engine names the native rendition from `name`, so Jellyfin's DisplayTitle must not reach
+    /// it; the SDH flag rides along for the rendition's CHARACTERISTICS (AE#1050).
+    @Test func aSidecarCarriesOnlyTheStreamTitleAndTheSDHFlag() throws {
+        let titled = try JSONDecoder().decode(MediaStream.self, from: Data(
+            #"{"Index":5,"Type":"Subtitle","Codec":"srt","Language":"eng","IsExternal":true,"Title":"CC","DisplayTitle":"CC - English - SRT - External"}"#.utf8))
+        let untitled = try JSONDecoder().decode(MediaStream.self, from: Data(
+            #"{"Index":6,"Type":"Subtitle","Codec":"srt","Language":"eng","IsExternal":true,"IsHearingImpaired":true,"DisplayTitle":"English - SDH - SRT - External"}"#.utf8))
+        let result = PlayerViewModel.externalSubtitleDescriptors(streams: [titled, untitled], playMethod: .directPlay) {
+            URL(string: "https://jf.example/sub/\($0.index).srt")
+        }
+        #expect(result.descriptors.map(\.name) == ["CC", nil])
+        #expect(result.descriptors.map(\.isHearingImpaired) == [false, true])
+    }
+
+    @Test func aSidecarWithoutLanguageKeepsTheDisplayTitle() throws {
+        let bare = try JSONDecoder().decode(MediaStream.self, from: Data(
+            #"{"Index":7,"Type":"Subtitle","Codec":"srt","IsExternal":true,"DisplayTitle":"Movie.forced - SRT - External"}"#.utf8))
+        #expect(PlayerViewModel.sidecarName(bare) == "Movie.forced - SRT - External")
+    }
+
     @Test func directPlayDeclaresOnlyExternalTracks() throws {
         let streams = [try stream(3, codec: "subrip"), try stream(9, codec: "srt", external: true)]
         let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .directPlay) {
