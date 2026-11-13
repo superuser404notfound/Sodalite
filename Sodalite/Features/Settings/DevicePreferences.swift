@@ -34,6 +34,7 @@ final class DevicePreferences {
         static let nightMode = "playback.nightMode"
         static let nightModeStartHour = "playback.nightModeStartHour"
         static let nightModeEndHour = "playback.nightModeEndHour"
+        static let lfeInStereoDownmix = "playback.lfeInStereoDownmix"
     }
 
     /// Stats panel "i" button. Read-only, so it is App Store safe and needs no diagnostic-build gate.
@@ -174,9 +175,15 @@ final class DevicePreferences {
         didSet { store.set(nightModeEndHour, forKey: Keys.nightModeEndHour) }
     }
 
+    /// AetherEngine#1044: fold the LFE into the stereo downmix instead of dropping it.
+    var lfeInStereoDownmix: Bool {
+        didSet { store.set(lfeInStereoDownmix, forKey: Keys.lfeInStereoDownmix) }
+    }
+
     var audioShapingSettings: AudioShapingSettings {
         AudioShapingSettings(speakers: speakerLayout, dialogue: dialogueBoost, nightMode: nightMode,
-                             nightStartHour: nightModeStartHour, nightEndHour: nightModeEndHour)
+                             nightStartHour: nightModeStartHour, nightEndHour: nightModeEndHour,
+                             lfeInStereoDownmix: lfeInStereoDownmix)
     }
 
     private let store: PreferenceKeyspace
@@ -214,6 +221,7 @@ final class DevicePreferences {
         self.nightMode = store.string(forKey: Keys.nightMode).flatMap(NightMode.init(rawValue:)) ?? .off
         self.nightModeStartHour = (store.object(forKey: Keys.nightModeStartHour) as? Int).map { min(max($0, 0), 23) } ?? 22
         self.nightModeEndHour = (store.object(forKey: Keys.nightModeEndHour) as? Int).map { min(max($0, 0), 23) } ?? 7
+        self.lfeInStereoDownmix = store.object(forKey: Keys.lfeInStereoDownmix) as? Bool ?? false
     }
 
     /// Reads every value again, for a factory reset that wiped the store underneath this object:
@@ -246,6 +254,7 @@ final class DevicePreferences {
         update(\.nightMode)
         update(\.nightModeStartHour)
         update(\.nightModeEndHour)
+        update(\.lfeInStereoDownmix)
     }
 
     convenience init(store defaults: UserDefaults = .standard) {

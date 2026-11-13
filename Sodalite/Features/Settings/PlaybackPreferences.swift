@@ -622,6 +622,11 @@ final class PlaybackPreferences {
         set { device.nightModeEndHour = newValue }
     }
 
+    var lfeInStereoDownmix: Bool {
+        get { device.lfeInStereoDownmix }
+        set { device.lfeInStereoDownmix = newValue }
+    }
+
     /// AetherEngine#923, resolved against the clock: a scheduled night mode is on or off by the hour.
     func audioShaping(at date: Date = Date()) -> AudioShaping {
         device.audioShapingSettings.shaping(at: date)

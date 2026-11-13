@@ -1,7 +1,7 @@
 import Foundation
 import AetherEngine
 
-/// AetherEngine#923: the three audio shaping settings, as the viewer picks them. Device values: they
+/// AetherEngine#923 and #1044: the audio shaping settings, as the viewer picks them. Device values: they
 /// describe the room and the speakers behind this box, so every profile on it shares them.
 
 /// How many channels the box sends at most. Auto leaves the route to decide.
@@ -48,6 +48,9 @@ struct AudioShapingSettings: Equatable, Sendable {
     /// Hours of the day, 0...23. A start after the end runs across midnight (22 to 7).
     var nightStartHour: Int = 22
     var nightEndHour: Int = 7
+    /// AetherEngine#1044: for a 2.1 system behind a stereo route. Only does anything when the engine
+    /// folds, which here means the stereo cap; with Auto tvOS folds and drops the LFE on its own.
+    var lfeInStereoDownmix: Bool = false
 
     /// Whether night mode is in force at `date`. Start inclusive, end exclusive; equal hours mean the
     /// whole day, which is what someone who set both to the same hour most likely meant.
@@ -66,7 +69,9 @@ struct AudioShapingSettings: Equatable, Sendable {
     func shaping(at date: Date, calendar: Calendar = .current) -> AudioShaping {
         AudioShaping(maxChannels: speakers.maxChannels,
                      dialogueGainDB: dialogue.gainDB,
-                     compressor: nightModeActive(at: date, calendar: calendar) ? .night : nil)
+                     compressor: nightModeActive(at: date, calendar: calendar) ? .night : nil,
+                     // 0 dB is libswresample's lfe_mix_level, so each side gets the LFE 3 dB down.
+                     lfeMixDB: lfeInStereoDownmix ? 0 : nil)
     }
 
     /// "22:00" in the viewer's locale, for the schedule rows.

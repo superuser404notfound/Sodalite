@@ -33,6 +33,17 @@ struct AudioShapingSettingsTests {
         #expect(SpeakerLayout.auto.maxChannels == nil)
     }
 
+    @Test("the LFE switch asks for 0 dB, and stays out of isActive on its own (AetherEngine#1044)")
+    func lfeInStereoDownmix() {
+        #expect(AudioShapingSettings().shaping(at: at(hour: 12), calendar: calendar).lfeMixDB == nil)
+        let stereo = AudioShapingSettings(speakers: .stereo, lfeInStereoDownmix: true)
+            .shaping(at: at(hour: 12), calendar: calendar)
+        #expect(stereo.maxChannels == 2)
+        #expect(stereo.lfeMixDB == 0)
+        let alone = AudioShapingSettings(lfeInStereoDownmix: true).shaping(at: at(hour: 12), calendar: calendar)
+        #expect(!alone.isActive, "without the cap there is no fold, so passthrough must stay")
+    }
+
     @Test("a schedule across midnight is on late and early, off in the day")
     func scheduleAcrossMidnight() {
         let s = AudioShapingSettings(nightMode: .scheduled, nightStartHour: 22, nightEndHour: 7)
@@ -59,6 +70,7 @@ struct AudioShapingSettingsTests {
         prefs.dialogueBoost = .high
         prefs.nightMode = .scheduled
         prefs.nightModeStartHour = 21
+        prefs.lfeInStereoDownmix = true
         defaults.set(40, forKey: "playback.nightModeEndHour")
         let reread = DevicePreferences(store: defaults)
         #expect(reread.speakerLayout == .surround51)
@@ -66,5 +78,6 @@ struct AudioShapingSettingsTests {
         #expect(reread.nightMode == .scheduled)
         #expect(reread.nightModeStartHour == 21)
         #expect(reread.nightModeEndHour == 23)
+        #expect(reread.lfeInStereoDownmix)
     }
 }
