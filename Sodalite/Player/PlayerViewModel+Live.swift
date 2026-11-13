@@ -477,6 +477,7 @@ extension PlayerViewModel {
                 // post-load selectAudioTrack reload that misfired on single-track channels.
                 preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
                 teletextPage: preferences.liveTeletextPage.page,
+                audioDelaySeconds: preferences.audioDelaySeconds,
                 audioShaping: preferences.audioShaping(),
                 sharedOutputRole: sharedOutputRole,
                 hostRetriesExhaustedLiveReplay: true
@@ -617,6 +618,7 @@ extension PlayerViewModel {
             // post-load selectAudioTrack reload that misfired on single-track channels.
             preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
             teletextPage: preferences.liveTeletextPage.page,
+            audioDelaySeconds: preferences.audioDelaySeconds,
             audioShaping: preferences.audioShaping(),
             sharedOutputRole: sharedOutputRole,
             hostRetriesExhaustedLiveReplay: true

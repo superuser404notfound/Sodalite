@@ -566,7 +566,7 @@ struct PlayerTouchControls: View {
                                      isActive: id == viewModel.activeAudioIndex) {
                         viewModel.selectAudioTrack(id: id, userInitiated: true)
                     }
-                case .speakers, .dialogue, .nightMode:
+                case .speakers, .dialogue, .nightMode, .delay:
                     return PickerRow(label: viewModel.audioMenuLabel(for: row), isActive: false,
                                      stepper: { viewModel.stepAudioSetting(row, by: $0) }) {
                         viewModel.cycleAudioSetting(row)

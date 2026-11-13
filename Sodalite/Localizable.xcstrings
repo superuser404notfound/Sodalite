@@ -73402,157 +73402,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Při Reproduktorech na Stereo smíchá nový přepínač basový kanál .1 do levého a pravého, pro systémy 2.1. Stopy TrueHD a DTS (včetně DTS:X IMAX) si zachovají výškové kanály v mixu pro vaše rozložení reproduktorů, od 5.1.2 do 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video."
+            "value" : "Reproduktory, Zvýraznění dialogů a Noční režim přizpůsobí mix vaší místnosti, v Nastavení i ve zvukové nabídce přehrávače. Při Reproduktorech na Stereo smíchá nový přepínač basový kanál .1 do levého a pravého, pro systémy 2.1. Stopy TrueHD a DTS (včetně DTS:X IMAX) si zachovají výškové kanály v mixu pro vaše rozložení reproduktorů, od 5.1.2 do 9.1.6. Stopy se zvukovým popisem jsou označené a řídí se nastavením zpřístupnění v systému, přepnutí stopy ponechá obraz na obrazovce a AirPods spustí a pozastaví každé video. Zpoždění zvuku posouvá zvuk vůči obrazu po 25 ms, v Nastavení i ve zvukové nabídce, a zapamatovaná zvuková stopa teď hraje od první sekundy."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. Med Højttalere på Stereo blander en ny kontakt .1-baskanalen ind i venstre og højre, til 2.1-systemer. TrueHD- og DTS-spor (også DTS:X IMAX) beholder deres højdekanaler i et mix til din højttaleropstilling, fra 5.1.2 til 9.1.6. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause."
+            "value" : "Højttalere, Dialogforstærkning og Nattilstand tilpasser mixet til dit rum, under Indstillinger og i afspillerens lydmenu. Med Højttalere på Stereo blander en ny kontakt .1-baskanalen ind i venstre og højre, til 2.1-systemer. TrueHD- og DTS-spor (også DTS:X IMAX) beholder deres højdekanaler i et mix til din højttaleropstilling, fra 5.1.2 til 9.1.6. Spor med synstolkning er markeret og følger systemets tilgængelighedsindstilling, et sporskift beholder billedet på skærmen, og AirPods afspiller og sætter alle videoer på pause. Lydforsinkelse forskyder lyden mod billedet i trin på 25 ms, under Indstillinger og i lydmenuen, og et husket lydspor spiller nu fra første sekund."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. Steht Lautsprecher auf Stereo, mischt ein neuer Schalter den .1-Basskanal in links und rechts, für 2.1-Systeme. TrueHD- und DTS-Spuren (auch DTS:X IMAX) behalten ihre Höhenkanäle in einem Mix für deine Lautsprecheraufstellung, von 5.1.2 bis 9.1.6. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video."
+            "value" : "Lautsprecher, Dialog-Anhebung und Nachtmodus passen den Ton an deinen Raum an, in den Einstellungen und im Audiomenü des Players. Steht Lautsprecher auf Stereo, mischt ein neuer Schalter den .1-Basskanal in links und rechts, für 2.1-Systeme. TrueHD- und DTS-Spuren (auch DTS:X IMAX) behalten ihre Höhenkanäle in einem Mix für deine Lautsprecheraufstellung, von 5.1.2 bis 9.1.6. Spuren mit Audiodeskription sind markiert und folgen der Bedienungshilfe des Systems, ein Spurwechsel behält das Bild, und AirPods starten und pausieren jedes Video. Die Tonverzögerung verschiebt den Ton gegenüber dem Bild in 25-ms-Schritten, in den Einstellungen und im Audiomenü, und eine gemerkte Tonspur läuft jetzt ab der ersten Sekunde."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Με τα Ηχεία σε Στερεοφωνικό, ένας νέος διακόπτης αναμιγνύει το κανάλι μπάσων .1 στο αριστερό και το δεξί, για συστήματα 2.1. Τα κομμάτια TrueHD και DTS (μαζί και DTS:X IMAX) κρατούν τα κανάλια ύψους τους σε μίξη για τη διάταξη ηχείων σας, από 5.1.2 έως 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο."
+            "value" : "Τα Ηχεία, η Ενίσχυση διαλόγων και η Νυχτερινή λειτουργία προσαρμόζουν τη μίξη στον χώρο σας, στις Ρυθμίσεις και στο μενού ήχου του player. Με τα Ηχεία σε Στερεοφωνικό, ένας νέος διακόπτης αναμιγνύει το κανάλι μπάσων .1 στο αριστερό και το δεξί, για συστήματα 2.1. Τα κομμάτια TrueHD και DTS (μαζί και DTS:X IMAX) κρατούν τα κανάλια ύψους τους σε μίξη για τη διάταξη ηχείων σας, από 5.1.2 έως 9.1.6. Τα κομμάτια ηχητικής περιγραφής επισημαίνονται και ακολουθούν τη ρύθμιση προσβασιμότητας του συστήματος, η αλλαγή κομματιού κρατά την εικόνα στην οθόνη, και τα AirPods ξεκινούν και θέτουν σε παύση κάθε βίντεο. Η Καθυστέρηση ήχου μετατοπίζει τον ήχο σε σχέση με την εικόνα σε βήματα των 25 ms, στις Ρυθμίσεις και στο μενού ήχου, και ένα αποθηκευμένο κομμάτι ήχου παίζει πλέον από το πρώτο δευτερόλεπτο."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. With Speakers on Stereo, a new switch mixes the .1 bass channel into left and right for 2.1 systems. TrueHD and DTS tracks (DTS:X IMAX included) keep their height channels in a mix for your speaker layout, from 5.1.2 to 9.1.6. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video."
+            "value" : "Speakers, Dialogue Boost and Night Mode fit the mix to your room, in Settings and in the player's audio menu. With Speakers on Stereo, a new switch mixes the .1 bass channel into left and right for 2.1 systems. TrueHD and DTS tracks (DTS:X IMAX included) keep their height channels in a mix for your speaker layout, from 5.1.2 to 9.1.6. Audio description tracks are marked and follow the system's accessibility setting, switching tracks keeps the picture on screen, and AirPods play and pause every video. Audio Delay shifts the sound against the picture in 25 ms steps, in Settings and in the audio menu, and a remembered audio track now plays from the first second."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Con Altavoces en Estéreo, un nuevo interruptor mezcla el canal de graves .1 en izquierda y derecha, para sistemas 2.1. Las pistas TrueHD y DTS (también DTS:X IMAX) conservan sus canales de altura en una mezcla para tu configuración de altavoces, de 5.1.2 a 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo."
+            "value" : "Altavoces, Realce de diálogos y Modo nocturno adaptan la mezcla a tu sala, en Ajustes y en el menú de audio del reproductor. Con Altavoces en Estéreo, un nuevo interruptor mezcla el canal de graves .1 en izquierda y derecha, para sistemas 2.1. Las pistas TrueHD y DTS (también DTS:X IMAX) conservan sus canales de altura en una mezcla para tu configuración de altavoces, de 5.1.2 a 9.1.6. Las pistas de audiodescripción aparecen marcadas y siguen el ajuste de accesibilidad del sistema, cambiar de pista mantiene la imagen en pantalla y los AirPods reproducen y pausan cualquier vídeo. Retardo de audio desplaza el sonido respecto a la imagen en pasos de 25 ms, en Ajustes y en el menú de audio, y una pista de audio recordada ya suena desde el primer segundo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. Kun Kaiuttimet on Stereo, uusi kytkin miksaa .1-bassokanavan vasempaan ja oikeaan 2.1-järjestelmiä varten. TrueHD- ja DTS-raidat (myös DTS:X IMAX) säilyttävät korkeuskanavansa kaiutinasetteluusi sopivassa miksauksessa, 5.1.2:sta 9.1.6:een. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon."
+            "value" : "Kaiuttimet, Dialogin korostus ja Yötila sovittavat äänen huoneeseesi, Asetuksissa ja soittimen äänivalikossa. Kun Kaiuttimet on Stereo, uusi kytkin miksaa .1-bassokanavan vasempaan ja oikeaan 2.1-järjestelmiä varten. TrueHD- ja DTS-raidat (myös DTS:X IMAX) säilyttävät korkeuskanavansa kaiutinasetteluusi sopivassa miksauksessa, 5.1.2:sta 9.1.6:een. Kuvailutulkkausraidat on merkitty ja ne seuraavat järjestelmän käyttöapuasetusta, raidan vaihto pitää kuvan näytöllä, ja AirPods toistaa ja keskeyttää jokaisen videon. Äänen viive siirtää ääntä kuvaan nähden 25 ms:n askelin, Asetuksissa ja äänivalikossa, ja muistettu ääniraita soi nyt ensimmäisestä sekunnista."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Avec Haut-parleurs sur Stéréo, un nouvel interrupteur mélange le canal de basses .1 à gauche et à droite, pour les systèmes 2.1. Les pistes TrueHD et DTS (DTS:X IMAX compris) gardent leurs canaux de hauteur dans un mixage adapté à vos enceintes, de 5.1.2 à 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo."
+            "value" : "Haut-parleurs, Renforcement des dialogues et Mode nuit adaptent le mixage à votre pièce, dans les Réglages et dans le menu audio du lecteur. Avec Haut-parleurs sur Stéréo, un nouvel interrupteur mélange le canal de basses .1 à gauche et à droite, pour les systèmes 2.1. Les pistes TrueHD et DTS (DTS:X IMAX compris) gardent leurs canaux de hauteur dans un mixage adapté à vos enceintes, de 5.1.2 à 9.1.6. Les pistes d’audiodescription sont signalées et suivent le réglage d’accessibilité du système, changer de piste garde l’image à l’écran, et les AirPods lancent et mettent en pause chaque vidéo. Décalage audio décale le son par rapport à l’image par pas de 25 ms, dans les Réglages et dans le menu audio, et une piste audio mémorisée joue désormais dès la première seconde."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. Kad su Zvučnici na Stereo, novi prekidač miješa .1 bas kanal u lijevi i desni, za 2.1 sustave. TrueHD i DTS zapisi (uključujući DTS:X IMAX) zadržavaju visinske kanale u miksu za vaš raspored zvučnika, od 5.1.2 do 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis."
+            "value" : "Zvučnici, Pojačanje dijaloga i Noćni način prilagođuju miks vašoj prostoriji, u Postavkama i u izborniku zvuka playera. Kad su Zvučnici na Stereo, novi prekidač miješa .1 bas kanal u lijevi i desni, za 2.1 sustave. TrueHD i DTS zapisi (uključujući DTS:X IMAX) zadržavaju visinske kanale u miksu za vaš raspored zvučnika, od 5.1.2 do 9.1.6. Zapisi sa zvučnim opisom su označeni i prate postavku pristupačnosti sustava, promjena zapisa zadržava sliku na zaslonu, a AirPods pokreću i pauziraju svaki videozapis. Kašnjenje zvuka pomiče zvuk u odnosu na sliku u koracima od 25 ms, u Postavkama i u izborniku zvuka, a zapamćeni audiozapis sada svira od prve sekunde."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. Ha a Hangszórók Sztereó, egy új kapcsoló a .1 mélycsatornát a bal és jobb csatornába keveri 2.1-es rendszerekhez. A TrueHD- és DTS-sávok (a DTS:X IMAX is) a hangszóró-elrendezésednek megfelelő keverékben (5.1.2-től 9.1.6-ig) megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet."
+            "value" : "A Hangszórók, a Párbeszéd kiemelése és az Éjszakai mód a szobádhoz igazítja a keveréket, a Beállításokban és a lejátszó hangmenüjében. Ha a Hangszórók Sztereó, egy új kapcsoló a .1 mélycsatornát a bal és jobb csatornába keveri 2.1-es rendszerekhez. A TrueHD- és DTS-sávok (a DTS:X IMAX is) a hangszóró-elrendezésednek megfelelő keverékben (5.1.2-től 9.1.6-ig) megtartják magassági csatornáikat. A hangos leírást tartalmazó sávok jelölve vannak és követik a rendszer kisegítő beállítását, a sávváltás a képernyőn tartja a képet, az AirPods pedig minden videót elindít és szüneteltet. A Hangkésleltetés 25 ms-os lépésekben tolja el a hangot a képhez képest, a Beállításokban és a hangmenüben, és a megjegyzett hangsáv most már az első másodperctől szól."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Con Altoparlanti su Stereo, un nuovo interruttore mescola il canale dei bassi .1 in sinistro e destro, per i sistemi 2.1. Le tracce TrueHD e DTS (DTS:X IMAX compreso) mantengono i canali di altezza in un mix per i tuoi altoparlanti, da 5.1.2 a 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video."
+            "value" : "Altoparlanti, Esalta dialoghi e Modalità notte adattano il mix alla tua stanza, nelle Impostazioni e nel menu audio del player. Con Altoparlanti su Stereo, un nuovo interruttore mescola il canale dei bassi .1 in sinistro e destro, per i sistemi 2.1. Le tracce TrueHD e DTS (DTS:X IMAX compreso) mantengono i canali di altezza in un mix per i tuoi altoparlanti, da 5.1.2 a 9.1.6. Le tracce con audiodescrizione sono contrassegnate e seguono l’impostazione di accessibilità del sistema, cambiare traccia mantiene l’immagine sullo schermo e gli AirPods riproducono e mettono in pausa ogni video. Ritardo audio sposta l’audio rispetto all’immagine a passi di 25 ms, nelle Impostazioni e nel menu audio, e una traccia audio ricordata ora suona dal primo secondo."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。スピーカーがステレオのとき、新しいスイッチで.1の低音チャンネルを左右にミックスできます（2.1システム向け）。TrueHDとDTS（DTS:X IMAXを含む）のトラックは、ハイトチャンネルをスピーカー構成（5.1.2〜9.1.6）に合わせたミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。"
+            "value" : "スピーカー、ダイアログ強調、ナイトモードで、ミックスを部屋に合わせられます。設定とプレーヤーのオーディオメニューから使えます。スピーカーがステレオのとき、新しいスイッチで.1の低音チャンネルを左右にミックスできます（2.1システム向け）。TrueHDとDTS（DTS:X IMAXを含む）のトラックは、ハイトチャンネルをスピーカー構成（5.1.2〜9.1.6）に合わせたミックスで保持します。音声解説トラックは区別して表示され、システムのアクセシビリティ設定に従います。トラックを切り替えても映像は画面に残り、AirPodsですべてのビデオを再生・一時停止できます。音声の遅延で、設定とオーディオメニューから音を映像に対して25ミリ秒単位でずらせます。記憶したオーディオトラックは最初の1秒から再生されるようになりました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. 스피커가 스테레오일 때 새 스위치가 .1 저음 채널을 왼쪽과 오른쪽에 섞어 줍니다(2.1 시스템용). TrueHD 및 DTS(DTS:X IMAX 포함) 트랙은 스피커 구성(5.1.2~9.1.6)에 맞는 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다."
+            "value" : "스피커, 대화 강조, 야간 모드가 설정과 플레이어의 오디오 메뉴에서 믹스를 방에 맞춰 줍니다. 스피커가 스테레오일 때 새 스위치가 .1 저음 채널을 왼쪽과 오른쪽에 섞어 줍니다(2.1 시스템용). TrueHD 및 DTS(DTS:X IMAX 포함) 트랙은 스피커 구성(5.1.2~9.1.6)에 맞는 믹스에서 높이 채널을 유지합니다. 화면 해설 트랙은 따로 표시되며 시스템의 손쉬운 사용 설정을 따르고, 트랙을 바꿔도 화면이 유지되며, AirPods로 모든 동영상을 재생하고 일시 정지할 수 있습니다. 오디오 지연으로 설정과 오디오 메뉴에서 소리를 화면에 대해 25ms 단위로 옮길 수 있고, 기억된 오디오 트랙은 이제 첫 1초부터 재생됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. Med Høyttalere på Stereo blander en ny bryter .1-baskanalen inn i venstre og høyre, for 2.1-systemer. TrueHD- og DTS-spor (også DTS:X IMAX) beholder høydekanalene i en miks for høyttaleroppsettet ditt, fra 5.1.2 til 9.1.6. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer."
+            "value" : "Høyttalere, Dialogforsterkning og Nattmodus tilpasser miksen til rommet ditt, i Innstillinger og i avspillerens lydmeny. Med Høyttalere på Stereo blander en ny bryter .1-baskanalen inn i venstre og høyre, for 2.1-systemer. TrueHD- og DTS-spor (også DTS:X IMAX) beholder høydekanalene i en miks for høyttaleroppsettet ditt, fra 5.1.2 til 9.1.6. Spor med synstolking er merket og følger systemets innstilling for tilgjengelighet, bytte av spor beholder bildet på skjermen, og AirPods spiller av og pauser alle videoer. Lydforsinkelse forskyver lyden mot bildet i trinn på 25 ms, i Innstillinger og i lydmenyen, og et husket lydspor spilles nå fra første sekund."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. Met Luidsprekers op Stereo mengt een nieuwe schakelaar het .1-baskanaal in links en rechts, voor 2.1-systemen. TrueHD- en DTS-sporen (ook DTS:X IMAX) behouden hun hoogtekanalen in een mix voor jouw luidsprekeropstelling, van 5.1.2 tot 9.1.6. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video."
+            "value" : "Luidsprekers, Dialoogversterking en Nachtmodus stemmen de mix af op je kamer, in Instellingen en in het audiomenu van de speler. Met Luidsprekers op Stereo mengt een nieuwe schakelaar het .1-baskanaal in links en rechts, voor 2.1-systemen. TrueHD- en DTS-sporen (ook DTS:X IMAX) behouden hun hoogtekanalen in een mix voor jouw luidsprekeropstelling, van 5.1.2 tot 9.1.6. Audiodescriptiesporen zijn gemarkeerd en volgen de toegankelijkheidsinstelling van het systeem, wisselen van spoor houdt het beeld op het scherm, en AirPods spelen en pauzeren elke video. Audiovertraging verschuift het geluid ten opzichte van het beeld in stappen van 25 ms, in Instellingen en in het audiomenu, en een onthouden audiospoor speelt nu vanaf de eerste seconde."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Gdy Głośniki są ustawione na Stereo, nowy przełącznik miksuje kanał basowy .1 do lewego i prawego, dla systemów 2.1. Ścieżki TrueHD i DTS (także DTS:X IMAX) zachowują kanały wysokości w miksie dla Twojego układu głośników, od 5.1.2 do 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo."
+            "value" : "Głośniki, Wzmocnienie dialogów i Tryb nocny dopasowują miks do Twojego pokoju, w Ustawieniach i w menu dźwięku odtwarzacza. Gdy Głośniki są ustawione na Stereo, nowy przełącznik miksuje kanał basowy .1 do lewego i prawego, dla systemów 2.1. Ścieżki TrueHD i DTS (także DTS:X IMAX) zachowują kanały wysokości w miksie dla Twojego układu głośników, od 5.1.2 do 9.1.6. Ścieżki z audiodeskrypcją są oznaczone i stosują się do systemowego ustawienia dostępności, zmiana ścieżki zostawia obraz na ekranie, a AirPods odtwarzają i wstrzymują każde wideo. Opóźnienie dźwięku przesuwa dźwięk względem obrazu co 25 ms, w Ustawieniach i w menu dźwięku, a zapamiętana ścieżka dźwiękowa gra teraz od pierwszej sekundy."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Com Alto-falantes em Estéreo, um novo botão mistura o canal de graves .1 na esquerda e na direita, para sistemas 2.1. Faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura em uma mixagem para seus alto-falantes, de 5.1.2 a 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Alto-falantes, Realce de diálogos e Modo noturno ajustam a mixagem ao seu ambiente, nas Configurações e no menu de áudio do player. Com Alto-falantes em Estéreo, um novo botão mistura o canal de graves .1 na esquerda e na direita, para sistemas 2.1. Faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura em uma mixagem para seus alto-falantes, de 5.1.2 a 9.1.6. Faixas de audiodescrição aparecem marcadas e seguem o ajuste de acessibilidade do sistema, trocar de faixa mantém a imagem na tela e os AirPods reproduzem e pausam qualquer vídeo. Atraso de áudio desloca o som em relação à imagem em passos de 25 ms, nas Configurações e no menu de áudio, e uma faixa de áudio lembrada agora toca desde o primeiro segundo."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. Com Altifalantes em Estéreo, um novo interruptor mistura o canal de graves .1 na esquerda e na direita, para sistemas 2.1. As faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura numa mistura para as suas colunas, de 5.1.2 a 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo."
+            "value" : "Altifalantes, Realce de diálogos e Modo noturno ajustam a mistura à sua sala, nas Definições e no menu de áudio do leitor. Com Altifalantes em Estéreo, um novo interruptor mistura o canal de graves .1 na esquerda e na direita, para sistemas 2.1. As faixas TrueHD e DTS (incluindo DTS:X IMAX) mantêm os canais de altura numa mistura para as suas colunas, de 5.1.2 a 9.1.6. As faixas de audiodescrição aparecem assinaladas e seguem a definição de acessibilidade do sistema, mudar de faixa mantém a imagem no ecrã e os AirPods reproduzem e pausam qualquer vídeo. Atraso de áudio desloca o som em relação à imagem em passos de 25 ms, nas Definições e no menu de áudio, e uma faixa de áudio memorizada passa a tocar desde o primeiro segundo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Cu Difuzoare pe Stereo, un comutator nou amestecă canalul de bas .1 în stânga și dreapta, pentru sisteme 2.1. Pistele TrueHD și DTS (inclusiv DTS:X IMAX) își păstrează canalele de înălțime într-un mix pentru boxele tale, de la 5.1.2 la 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip."
+            "value" : "Difuzoare, Accentuare dialog și Mod nocturn adaptează mixajul la camera ta, în Setări și în meniul audio al playerului. Cu Difuzoare pe Stereo, un comutator nou amestecă canalul de bas .1 în stânga și dreapta, pentru sisteme 2.1. Pistele TrueHD și DTS (inclusiv DTS:X IMAX) își păstrează canalele de înălțime într-un mix pentru boxele tale, de la 5.1.2 la 9.1.6. Pistele cu audiodescriere sunt marcate și urmează setarea de accesibilitate a sistemului, schimbarea pistei păstrează imaginea pe ecran, iar AirPods redau și pun pe pauză orice videoclip. Întârziere audio decalează sunetul față de imagine în pași de 25 ms, în Setări și în meniul audio, iar o pistă audio memorată pornește acum din prima secundă."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Если «Динамики» стоят на «Стерео», новый переключатель подмешивает басовый канал .1 в левый и правый, для систем 2.1. Дорожки TrueHD и DTS (включая DTS:X IMAX) сохраняют высотные каналы в миксе под вашу расстановку колонок, от 5.1.2 до 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео."
+            "value" : "«Динамики», «Усиление диалогов» и «Ночной режим» подстраивают звук под вашу комнату, в Настройках и в аудиоменю плеера. Если «Динамики» стоят на «Стерео», новый переключатель подмешивает басовый канал .1 в левый и правый, для систем 2.1. Дорожки TrueHD и DTS (включая DTS:X IMAX) сохраняют высотные каналы в миксе под вашу расстановку колонок, от 5.1.2 до 9.1.6. Дорожки с тифлокомментарием отмечены и следуют системной настройке универсального доступа, смена дорожки не убирает картинку с экрана, а AirPods запускают и ставят на паузу любое видео. «Задержка звука» сдвигает звук относительно картинки с шагом 25 мс, в Настройках и в аудиоменю, а запомненная звуковая дорожка теперь играет с первой секунды."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Pri Reproduktoroch na Stereo zmieša nový prepínač basový kanál .1 do ľavého a pravého, pre systémy 2.1. Stopy TrueHD a DTS (vrátane DTS:X IMAX) si zachovajú výškové kanály v mixe pre vaše rozloženie reproduktorov, od 5.1.2 po 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video."
+            "value" : "Reproduktory, Zvýraznenie dialógov a Nočný režim prispôsobia zvuk vašej miestnosti, v Nastaveniach aj vo zvukovej ponuke prehrávača. Pri Reproduktoroch na Stereo zmieša nový prepínač basový kanál .1 do ľavého a pravého, pre systémy 2.1. Stopy TrueHD a DTS (vrátane DTS:X IMAX) si zachovajú výškové kanály v mixe pre vaše rozloženie reproduktorov, od 5.1.2 po 9.1.6. Stopy so zvukovým opisom sú označené a riadia sa nastavením prístupnosti systému, prepnutie stopy ponechá obraz na obrazovke a AirPods spustia a pozastavia každé video. Oneskorenie zvuku posúva zvuk voči obrazu po 25 ms, v Nastaveniach aj vo zvukovej ponuke, a zapamätaná zvuková stopa teraz hrá od prvej sekundy."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. Med Högtalare på Stereo blandar en ny brytare in .1-baskanalen i vänster och höger, för 2.1-system. TrueHD- och DTS-spår (även DTS:X IMAX) behåller sina höjdkanaler i en mix för din högtalaruppställning, från 5.1.2 till 9.1.6. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor."
+            "value" : "Högtalare, Dialogförstärkning och Nattläge anpassar mixen efter ditt rum, i Inställningar och i spelarens ljudmeny. Med Högtalare på Stereo blandar en ny brytare in .1-baskanalen i vänster och höger, för 2.1-system. TrueHD- och DTS-spår (även DTS:X IMAX) behåller sina höjdkanaler i en mix för din högtalaruppställning, från 5.1.2 till 9.1.6. Spår med syntolkning är markerade och följer systemets inställning för hjälpmedel, ett spårbyte behåller bilden på skärmen och AirPods spelar upp och pausar alla videor. Ljudfördröjning förskjuter ljudet mot bilden i steg om 25 ms, i Inställningar och i ljudmenyn, och ett ihågkommet ljudspår spelas nu från första sekunden."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. Hoparlörler Stereo'dayken yeni bir anahtar .1 bas kanalını sol ve sağa karıştırır, 2.1 sistemler için. TrueHD ve DTS (DTS:X IMAX dahil) parçaları yükseklik kanallarını hoparlör düzeninize uygun bir mikste (5.1.2 ile 9.1.6 arası) korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır."
+            "value" : "Hoparlörler, Diyalog güçlendirme ve Gece modu, Ayarlar'da ve oynatıcının ses menüsünde sesi odanıza göre ayarlar. Hoparlörler Stereo'dayken yeni bir anahtar .1 bas kanalını sol ve sağa karıştırır, 2.1 sistemler için. TrueHD ve DTS (DTS:X IMAX dahil) parçaları yükseklik kanallarını hoparlör düzeninize uygun bir mikste (5.1.2 ile 9.1.6 arası) korur. Sesli betimleme parçaları işaretlenir ve sistemin erişilebilirlik ayarını izler, parça değiştirmek görüntüyü ekranda tutar ve AirPods her videoyu oynatıp duraklatır. Ses gecikmesi, Ayarlar'da ve ses menüsünde sesi görüntüye göre 25 ms adımlarla kaydırır, hatırlanan ses parçası da artık ilk saniyeden çalar."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Якщо «Динаміки» стоять на «Стерео», новий перемикач підмішує басовий канал .1 у лівий і правий, для систем 2.1. Доріжки TrueHD і DTS (включно з DTS:X IMAX) зберігають висотні канали в міксі під ваше розташування колонок, від 5.1.2 до 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео."
+            "value" : "«Динаміки», «Посилення діалогів» і «Нічний режим» підлаштовують звук під вашу кімнату, у Налаштуваннях і в аудіоменю плеєра. Якщо «Динаміки» стоять на «Стерео», новий перемикач підмішує басовий канал .1 у лівий і правий, для систем 2.1. Доріжки TrueHD і DTS (включно з DTS:X IMAX) зберігають висотні канали в міксі під ваше розташування колонок, від 5.1.2 до 9.1.6. Доріжки з аудіоописом позначено, і вони враховують системне налаштування доступності, зміна доріжки не прибирає картинку з екрана, а AirPods запускають і ставлять на паузу будь-яке відео. «Затримка звуку» зсуває звук відносно картинки з кроком 25 мс, у Налаштуваннях і в аудіоменю, а запам’ятована звукова доріжка тепер грає з першої секунди."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。“扬声器”设为立体声时，新开关可将 .1 低音声道混入左右声道，适用于 2.1 系统。TrueHD 和 DTS（包括 DTS:X IMAX）音轨会在适合你扬声器布局的混音（5.1.2 至 9.1.6）中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。"
+            "value" : "“扬声器”“对白增强”和“夜间模式”可让混音适应你的房间，在设置和播放器音频菜单中均可调整。“扬声器”设为立体声时，新开关可将 .1 低音声道混入左右声道，适用于 2.1 系统。TrueHD 和 DTS（包括 DTS:X IMAX）音轨会在适合你扬声器布局的混音（5.1.2 至 9.1.6）中保留高度声道。口述影像音轨会被标注并遵循系统的辅助功能设置，切换音轨时画面保留在屏幕上，AirPods 可以播放和暂停所有视频。“音频延迟”可在设置和音频菜单中以 25 毫秒为步长相对画面移动声音，记住的音轨现在从第一秒起就会播放。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。「揚聲器」設為立體聲時，新開關可將 .1 低音聲道混入左右聲道，適用於 2.1 系統。TrueHD 與 DTS（包括 DTS:X IMAX）音軌會在適合你揚聲器配置的混音（5.1.2 至 9.1.6）中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。"
+            "value" : "「揚聲器」「對白增強」和「夜間模式」可讓混音配合你的房間，在設定與播放器音訊選單中皆可調整。「揚聲器」設為立體聲時，新開關可將 .1 低音聲道混入左右聲道，適用於 2.1 系統。TrueHD 與 DTS（包括 DTS:X IMAX）音軌會在適合你揚聲器配置的混音（5.1.2 至 9.1.6）中保留高度聲道。口述影像音軌會被標示並遵循系統的輔助使用設定，切換音軌時畫面保留在螢幕上，AirPods 可以播放和暫停所有影片。「音訊延遲」可在設定與音訊選單中以 25 毫秒為單位相對畫面移動聲音，記住的音軌現在從第一秒起就會播放。"
           }
         }
       }
@@ -140249,6 +140249,168 @@
         }
       }
     },
+    "player.audio.delay.value" : {
+      "comment" : "Player audio menu: audio delay row. %@ is the value, such as +150 ms.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zpoždění zvuku: %@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydforsinkelse: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tonverzögerung: %@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καθυστέρηση ήχου: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio delay: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retardo de audio: %@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Äänen viive: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décalage audio: %@"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kašnjenje zvuka: %@"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangkésleltetés: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritardo audio: %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声の遅延：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오디오 지연: %@"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydforsinkelse: %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiovertraging: %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opóźnienie dźwięku: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atraso de áudio: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atraso de áudio: %@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Întârziere audio: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задержка звука: %@"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oneskorenie zvuku: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ljudfördröjning: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses gecikmesi: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затримка звуку: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频延迟：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音訊延遲：%@"
+          }
+        }
+      }
+    },
     "player.audio.dialogue.value" : {
       "comment" : "Player audio menu: dialogue boost row. %@ is the value, such as Medium.",
       "extractionState" : "manual",
@@ -194283,6 +194445,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未評分的電影播放結束後詢問你的評分。評分儲存在 Jellyfin 中，Scrob 等工具也能使用。"
+          }
+        }
+      }
+    },
+    "settings.playback.audioDelay" : {
+      "comment" : "Playback settings: audio delay picker title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zpoždění zvuku"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydforsinkelse"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tonverzögerung"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καθυστέρηση ήχου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Delay"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retardo de audio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Äänen viive"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décalage audio"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kašnjenje zvuka"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangkésleltetés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritardo audio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声の遅延"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오디오 지연"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lydforsinkelse"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiovertraging"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opóźnienie dźwięku"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atraso de áudio"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atraso de áudio"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Întârziere audio"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задержка звука"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oneskorenie zvuku"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ljudfördröjning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses gecikmesi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затримка звуку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频延迟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音訊延遲"
+          }
+        }
+      }
+    },
+    "settings.playback.audioDelay.subtitle" : {
+      "comment" : "Playback settings: subtitle of the audio delay picker. Plus and minus are the signs of the value.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posune zvuk vůči obrazu na tomto zařízení, když ho televizor nebo receiver rozhodí. Plus = později, minus = dříve."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forskyder lyden i forhold til billedet på denne enhed, når tv eller receiver får dem ud af sync. Plus = senere, minus = tidligere."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschiebt den Ton gegenüber dem Bild auf diesem Gerät, wenn Fernseher oder Receiver beides versetzen. Plus = später, Minus = früher."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετατοπίζει τον ήχο σε σχέση με την εικόνα σε αυτή τη συσκευή, όταν η τηλεόραση ή ο ενισχυτής τα αποσυγχρονίζει. Συν = αργότερα, πλην = νωρίτερα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shifts the sound against the picture on this device, for a TV or receiver that puts them out of sync. Plus = later, minus = earlier."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desplaza el sonido respecto a la imagen en este dispositivo, cuando el televisor o el receptor los desincroniza. Más = después, menos = antes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siirtää ääntä kuvaan nähden tällä laitteella, kun televisio tai vahvistin vie ne epätahtiin. Plus = myöhemmin, miinus = aiemmin."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Décale le son par rapport à l’image sur cet appareil, quand le téléviseur ou l’amplificateur les désynchronise. Plus = plus tard, moins = plus tôt."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomiče zvuk u odnosu na sliku na ovom uređaju kad ih televizor ili receiver raskorakne. Plus = kasnije, minus = ranije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eltolja a hangot a képhez képest ezen az eszközön, ha a tévé vagy az erősítő elcsúsztatja őket. Plusz = később, mínusz = korábban."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sposta l’audio rispetto all’immagine su questo dispositivo, quando TV o ricevitore li desincronizzano. Più = dopo, meno = prima."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テレビやAVアンプで音と映像がずれるとき、このデバイスで音を映像に対してずらします。プラス＝遅く、マイナス＝早く。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV나 리시버 때문에 소리와 화면이 어긋날 때 이 기기에서 소리를 화면에 맞춰 옮깁니다. 플러스 = 늦게, 마이너스 = 빠르게."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forskyver lyden mot bildet på denne enheten når TV eller receiver får dem ut av synk. Pluss = senere, minus = tidligere."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschuift het geluid ten opzichte van het beeld op dit apparaat, als tv of receiver ze uit sync brengt. Plus = later, min = eerder."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przesuwa dźwięk względem obrazu na tym urządzeniu, gdy telewizor lub amplituner je rozsynchronizuje. Plus = później, minus = wcześniej."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desloca o som em relação à imagem neste dispositivo, quando a TV ou o receiver os dessincroniza. Mais = depois, menos = antes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desloca o som em relação à imagem neste dispositivo, quando a TV ou o recetor os dessincroniza. Mais = depois, menos = antes."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Decalează sunetul față de imagine pe acest dispozitiv, când televizorul sau receiverul le desincronizează. Plus = mai târziu, minus = mai devreme."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сдвигает звук относительно картинки на этом устройстве, если телевизор или ресивер их рассинхронизирует. Плюс = позже, минус = раньше."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posunie zvuk voči obrazu na tomto zariadení, keď ich televízor alebo receiver rozhodí. Plus = neskôr, mínus = skôr."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Förskjuter ljudet mot bilden på den här enheten när tv eller receiver får dem ur synk. Plus = senare, minus = tidigare."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV veya alıcı ses ile görüntüyü kaydırdığında bu cihazda sesi görüntüye göre kaydırır. Artı = daha geç, eksi = daha erken."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зсуває звук відносно картинки на цьому пристрої, якщо телевізор або ресивер їх розсинхронізує. Плюс = пізніше, мінус = раніше."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电视或功放导致声画不同步时，在此设备上将声音相对画面移动。正值 = 延后，负值 = 提前。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電視或擴大機導致聲畫不同步時，在此裝置上將聲音相對畫面移動。正值 = 延後，負值 = 提前。"
           }
         }
       }

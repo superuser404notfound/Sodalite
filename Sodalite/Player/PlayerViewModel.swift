@@ -1435,6 +1435,7 @@ final class PlayerViewModel {
                     preferredAudioLanguages: preferredAudio.map { [$0] } ?? [],
                     externalSubtitles: externalSubs.descriptors,
                     forwardBufferSegments: preferences.networkBufferDepth.forwardBufferSegments,
+                    audioDelaySeconds: preferences.audioDelaySeconds,
                     audioShaping: preferences.audioShaping()
                 ),
                 audioSourceStreamIndex: rememberedAudioIndex.map { Int32($0) }

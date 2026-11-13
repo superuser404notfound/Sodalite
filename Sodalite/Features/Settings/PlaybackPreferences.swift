@@ -602,6 +602,13 @@ final class PlaybackPreferences {
         set { device.speakerLayout = newValue }
     }
 
+    var audioDelayMilliseconds: Int {
+        get { device.audioDelayMilliseconds }
+        set { device.audioDelayMilliseconds = AudioDelay.clamped(newValue) }
+    }
+
+    var audioDelaySeconds: Double { AudioDelay.seconds(audioDelayMilliseconds) }
+
     var dialogueBoost: DialogueBoost {
         get { device.dialogueBoost }
         set { device.dialogueBoost = newValue }

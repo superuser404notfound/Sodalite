@@ -626,6 +626,20 @@ struct PlaybackSettingsView: View {
                     )
                     .settingsValueScope(.device)
                 }
+
+                // AetherEngine#464: the same device value the player's audio menu steps.
+                ValuePickerRow(
+                    icon: "metronome",
+                    title: "settings.playback.audioDelay",
+                    subtitle: "settings.playback.audioDelay.subtitle",
+                    options: AudioDelay.choices,
+                    selection: Binding(
+                        get: { AudioDelay.stepped(prefs.audioDelayMilliseconds, by: 0) },
+                        set: { prefs.audioDelayMilliseconds = $0 }
+                    ),
+                    label: AudioDelay.label
+                )
+                .settingsValueScope(.device)
             }
             .screenContentInset()
             .task { displayHasDolbyVision = AetherEngine.displayCapabilities.supportsDolbyVision }
