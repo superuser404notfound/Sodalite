@@ -57,6 +57,12 @@ struct SubtitleSidecarOnTranscodeTests {
         #expect(result.descriptors.map(\.isHearingImpaired) == [false, true])
     }
 
+    @Test func aSidecarWithoutLanguageKeepsTheDisplayTitle() throws {
+        let bare = try JSONDecoder().decode(MediaStream.self, from: Data(
+            #"{"Index":7,"Type":"Subtitle","Codec":"srt","IsExternal":true,"DisplayTitle":"Movie.forced - SRT - External"}"#.utf8))
+        #expect(PlayerViewModel.sidecarName(bare) == "Movie.forced - SRT - External")
+    }
+
     @Test func directPlayDeclaresOnlyExternalTracks() throws {
         let streams = [try stream(3, codec: "subrip"), try stream(9, codec: "srt", external: true)]
         let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .directPlay) {
