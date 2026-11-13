@@ -1383,6 +1383,8 @@ final class PlayerViewModel {
             let rememberedEntry = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
             let rememberedAudioLanguage = rememberedEntry?.audio?.language
             let preferredAudio = rememberedAudioLanguage ?? effectivePreferredAudioLanguage()
+            // subtitlePlayMethod, not activePlayMethod: a transcoded download loads as direct play
+            // but its streams are renumbered, and only the subtitle route knows the file's origin.
             let rememberedAudioIndex = subtitlePlayMethod == .directPlay
                 ? TrackSelectionMatcher.preloadAudioStreamIndex(
                     entry: rememberedEntry, mediaStreams: sourceMediaStreams)
