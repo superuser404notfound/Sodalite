@@ -25,12 +25,9 @@ screen: your recent searches, and a grid of genre tiles you can walk into. The g
 tiles Home already shows, pointing at the same grids Home has already loaded, so picking one lands
 on content instead of a spinner.
 
-Behind that sits an open question. Sodalite draws its own search field today, and tvOS has a real
-system search screen (the one the App Store and the Apple TV app use) that brings dictation, the
-system keyboard and system focus handling with it. Switching to it was measured as too slow once
-before, with a related but different API. It gets measured again on an actual Apple TV, and if
-opening the tab is still slower than it is today, the field stays as it is and the browse screen
-ships anyway.
+The search field itself is settled. On Apple TV the tab runs on the system search (the one the App
+Store and the Apple TV app use), with dictation, the system keyboard and system focus handling, so
+the browse screen goes into the empty space under its keyboard.
 
 ### Fill the screen on a wide film ([#118](https://github.com/superuser404notfound/Sodalite/issues/118))
 
