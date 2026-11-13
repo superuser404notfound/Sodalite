@@ -172,6 +172,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Enhanced Upscaling**: sharpens SD and 720p video with on-device machine learning. A player button turns it off and on for the video that is playing.
 - **Surround**: 5.1 and 7.1 with the correct channel layout.
 - **Dialogue Boost, Night Mode and Speakers**: lift voices over music and effects, compress loud scenes (always, or between two hours you set), and fold surround down to stereo or 5.1. In Settings → Playback and in the player's audio menu, per device. While one is on, the track is no longer passed through as its original bitstream.
+- **LFE in Stereo Downmix**: with Speakers on Stereo, the .1 bass channel (LFE) goes into left and right instead of being dropped. Meant for a 2.1 system whose subwoofer hangs off a stereo amp or streamer, behind a TV that only passes two channels on.
 
 ### Subtitles and tracks
 

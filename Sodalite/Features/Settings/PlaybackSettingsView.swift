@@ -560,6 +560,19 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
+                if prefs.speakerLayout == .stereo {
+                    boolRow(
+                        icon: "speaker.wave.2.bubble",
+                        title: "settings.playback.lfeInStereoDownmix",
+                        subtitle: "settings.playback.lfeInStereoDownmix.subtitle",
+                        value: Binding(
+                            get: { prefs.lfeInStereoDownmix },
+                            set: { prefs.lfeInStereoDownmix = $0 }
+                        )
+                    )
+                    .settingsValueScope(.device)
+                }
+
                 ValuePickerRow(
                     icon: "person.wave.2",
                     title: "settings.playback.dialogueBoost",

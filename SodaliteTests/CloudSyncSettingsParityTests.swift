@@ -69,13 +69,13 @@ struct CloudSyncSettingsParityTests {
     }
 
     /// Named exemptions: the two streaming-quality rungs (Sodalite#87), the TrueHD Atmos heights
-    /// switch (AetherEngine#731) and its bed layout, the live delay (AetherEngine 7.45.0) and the five audio shaping values
-    /// (AetherEngine#923) and the upscaling switches (AetherEngine#846, #1039) postdate the legacy records.
+    /// switch (AetherEngine#731) and its bed layout, the live delay (AetherEngine 7.45.0) and the six audio shaping values
+    /// (AetherEngine#923, #1044) and the upscaling switches (AetherEngine#846, #1039) postdate the legacy records.
     /// Those records exist only for builds that already read them, and no such build knows any of them.
     @Test func everyDeviceValueTravelsInOneLegacyRecord() {
         let device = storedSettingNames(of: DevicePreferences(store: scratchDefaults("device")))
             .subtracting(["streamingQualityWifi", "streamingQualityCellular", "trueHDAtmosHeights", "objectAudioLayout", "liveDelay",
-                          "speakerLayout", "dialogueBoost", "nightMode", "nightModeStartHour", "nightModeEndHour",
+                          "speakerLayout", "dialogueBoost", "nightMode", "nightModeStartHour", "nightModeEndHour", "lfeInStereoDownmix",
                           "enhancedUpscaling", "lineArtUpscaling"])
         let playback = device.intersection(payloadFieldNames(.playback))
         let appearance = device.intersection(payloadFieldNames(.appearance))
