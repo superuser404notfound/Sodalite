@@ -56,6 +56,7 @@
 		044449859518EA77EF8A5670 /* OpenSourceLicenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9FD615D950EA340BB597EF /* OpenSourceLicenses.swift */; };
 		04BDD97318076A1A32D83D5E /* SystemScrollIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF635CD096AECFD2B2CBA5D /* SystemScrollIndex.swift */; };
 		04BED79F2C33792EFAF3EAA8 /* ImageAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9903945CC1B8F03EC2462EE /* ImageAuth.swift */; };
+		04EC28A939349A0E015E09FA /* HomeHeroLibrariesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2D6C5000AF335A790CD7B43 /* HomeHeroLibrariesTests.swift */; };
 		051F809869E162FE71B1DED7 /* LogExportSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243BA5C3ED93C1EEB0FBDE8F /* LogExportSessionTests.swift */; };
 		058B43B17E7A9B5D4ADC420E /* DetailCoverStackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82681003CF5DC40285C9B41 /* DetailCoverStackTests.swift */; };
 		06011F00263ED9B532E9B077 /* LogTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3067AD4B58421D79DA921B6 /* LogTimestamp.swift */; };
@@ -1000,6 +1001,7 @@
 		6A20F152033B12480BFF7AFC /* LocalNetworkAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698E68F119A7E37585120CE2 /* LocalNetworkAccess.swift */; };
 		6A232B2FE8F3B12C35BA60FF /* PendingRequestsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E46636B059F74492348E235 /* PendingRequestsMonitor.swift */; };
 		6A25714547B7E15C8FF5D8EB /* ServerSignInRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7990387438FD9115549CB434 /* ServerSignInRouteTests.swift */; };
+		6A3F1B767BD75922E7B569FD /* HomeHeroLibraries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174CA83D6E3B6A9F9F6DF116 /* HomeHeroLibraries.swift */; };
 		6A4A44C93AEC341C8506D53D /* VideoShuffleQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C8226BDDE726CBC0126E55 /* VideoShuffleQueue.swift */; };
 		6A4F2414924226E776DB52B1 /* JellyfinPlaybackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D74E47C41C4EA878BFBB876 /* JellyfinPlaybackService.swift */; };
 		6A5DC936101BA80405DDA993 /* PlayerViewModel+Upscaling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CC692BEFDBF26E0D5DE7F2 /* PlayerViewModel+Upscaling.swift */; };
@@ -1135,6 +1137,7 @@
 		78F14504284F7278CD881869 /* JellyfinLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91DFD37F58661CA306D9A670 /* JellyfinLibraryService.swift */; };
 		7940AB7605F68545DBD2CD69 /* PlayerViewModel+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C3D4639FA7277264A7D858 /* PlayerViewModel+Live.swift */; };
 		795EBC6A763501F17530700D /* UpcomingRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCEB2CD2973FB5012B9BF71 /* UpcomingRow.swift */; };
+		7968920BFF092FA3F792BD23 /* HomeHeroLibraries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174CA83D6E3B6A9F9F6DF116 /* HomeHeroLibraries.swift */; };
 		79C74C5CEB70F684E76F204E /* SeerrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0FE73FC03DB46281475278 /* SeerrRequest.swift */; };
 		79F4DADC8DABCA22120E5D22 /* CatalogAllRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68B73CCC82D03EEB2EC008B /* CatalogAllRequestsView.swift */; };
 		7A0DD2A01D08B40F8FD8C68C /* MyMediaLibraries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10128BE08814F99440DF6ECA /* MyMediaLibraries.swift */; };
@@ -2008,6 +2011,7 @@
 		DACF32FFB7DE70DC73073A45 /* PlayerTrackDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A8630F13AD6A7B6C4F5C33E /* PlayerTrackDropdown.swift */; };
 		DAF8E5C0E78BFADFD26D25EF /* GenreTilePickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71969467EA10A75E7F5F87A3 /* GenreTilePickTests.swift */; };
 		DB06EF44311266C2137B48D1 /* ParentalControlsPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BBB8E5E9C80E873A883AAC3 /* ParentalControlsPreferences.swift */; };
+		DB0F4F73BE1AC3A201A62CC0 /* HomeHeroLibraries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174CA83D6E3B6A9F9F6DF116 /* HomeHeroLibraries.swift */; };
 		DB12515B54A480641673A999 /* DiagnosticLogLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF8C4DA1E1B7ED889DC57D4 /* DiagnosticLogLink.swift */; };
 		DB1B21B96A5C1F451E6D6A14 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DECF686D0D9F20908257C450 /* CatalogView.swift */; };
 		DB1FDEC1F344B74DA8D22B3A /* ServerAddressResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BEA274EA0022F3035946EF /* ServerAddressResolution.swift */; };
@@ -2512,6 +2516,7 @@
 		16D43AE728D48D1CF89B6950 /* CombinedHomeModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedHomeModelTests.swift; sourceTree = "<group>"; };
 		170BE20821DBB67619496713 /* DownloadPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadPaths.swift; sourceTree = "<group>"; };
 		173EC9A6C90ABC7CB4B1916C /* LogFileSinkEnvironmentLineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogFileSinkEnvironmentLineTests.swift; sourceTree = "<group>"; };
+		174CA83D6E3B6A9F9F6DF116 /* HomeHeroLibraries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeroLibraries.swift; sourceTree = "<group>"; };
 		1759D919A153F023DE993B7F /* MultiviewZoomTransitionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiviewZoomTransitionTests.swift; sourceTree = "<group>"; };
 		175E298AC582C20244F3BBDC /* JellyfinServerDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinServerDiscoveryTests.swift; sourceTree = "<group>"; };
 		17821D029EC7EA102611CED0 /* SeerrRequestEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequestEditSheet.swift; sourceTree = "<group>"; };
@@ -3285,6 +3290,7 @@
 		D260C52619403D730EF4F564 /* ErrorText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorText.swift; sourceTree = "<group>"; };
 		D28D94F0175692F91B4418E1 /* UpscaleToggleStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpscaleToggleStateTests.swift; sourceTree = "<group>"; };
 		D2B2BC92FD669158893FC018 /* GuideGridFocus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideGridFocus.swift; sourceTree = "<group>"; };
+		D2D6C5000AF335A790CD7B43 /* HomeHeroLibrariesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeroLibrariesTests.swift; sourceTree = "<group>"; };
 		D30C08C3C3A7FCD33C4C46A7 /* PlayerReachabilityFaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerReachabilityFaceTests.swift; sourceTree = "<group>"; };
 		D40D9293B1394983BF122589 /* CatalogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogViewModel.swift; sourceTree = "<group>"; };
 		D42A8DD9098B66267D05CF17 /* DualURLEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualURLEditSheet.swift; sourceTree = "<group>"; };
@@ -3953,6 +3959,7 @@
 				2A1FEC49C220A8CA94AFC056 /* HomeContinueWatchingConcurrencyTests.swift */,
 				F3F7E787108372B781F343BA /* HomeFeedPersistenceTests.swift */,
 				494F22D8E419C99A72A10EEB /* HomeForegroundRefreshTests.swift */,
+				D2D6C5000AF335A790CD7B43 /* HomeHeroLibrariesTests.swift */,
 				A287673663834C19141584BF /* HomeImageBudgetTests.swift */,
 				7CC9680C87F653587ECDD543 /* HomeLatestMoviesRowTests.swift */,
 				B524B35AEE52BF3FBC1903DF /* HomeLatestShowsRowTests.swift */,
@@ -4322,6 +4329,7 @@
 				7736F8CEE909A6AF92397149 /* GenreTilePick.swift */,
 				37F20293DC3BAA83586C3058 /* HomeCustomizeView.swift */,
 				5E160DDD4AFE45F1649D7277 /* HomeHeroCarousel.swift */,
+				174CA83D6E3B6A9F9F6DF116 /* HomeHeroLibraries.swift */,
 				0E2D96873044A15F5D7E289A /* HomeHeroMode.swift */,
 				6026A54BB12475741F988832 /* HomeMerger.swift */,
 				DA4BD383359007F6F8A51415 /* HomePrefetchPlan.swift */,
@@ -5540,6 +5548,7 @@
 				BD8E44768F0A17D289549E65 /* HTTPMethod.swift in Sources */,
 				C3A2FA04927730F502035070 /* HomeCustomizeView.swift in Sources */,
 				22DCF380D156F9C49E38D23E /* HomeHeroCarousel.swift in Sources */,
+				DB0F4F73BE1AC3A201A62CC0 /* HomeHeroLibraries.swift in Sources */,
 				2B9BB0000C3F52A1D5FC714D /* HomeHeroMode.swift in Sources */,
 				027286C33E0AB9E3FF97793C /* HomeMerger.swift in Sources */,
 				75BBAE6493624E87EA5734C7 /* HomePrefetchPlan.swift in Sources */,
@@ -6164,6 +6173,7 @@
 				6A83DA6BAD8B743E03EE477B /* HTTPMethod.swift in Sources */,
 				5C43EB831D086A82B65B7FE2 /* HomeCustomizeView.swift in Sources */,
 				CBF3468897657CEF223C8A60 /* HomeHeroCarousel.swift in Sources */,
+				7968920BFF092FA3F792BD23 /* HomeHeroLibraries.swift in Sources */,
 				BE70BEA756F5A44E5FD75028 /* HomeHeroMode.swift in Sources */,
 				10E87CBF5968D7C0B91B7018 /* HomeMerger.swift in Sources */,
 				354E1C9E31EAA208D9BC03B4 /* HomePrefetchPlan.swift in Sources */,
@@ -6791,6 +6801,7 @@
 				029330D33C1E1327C6283D44 /* HomeContinueWatchingConcurrencyTests.swift in Sources */,
 				FEA1886A8A36A2E206B7E5FD /* HomeFeedPersistenceTests.swift in Sources */,
 				241E09A64BD28206E699358B /* HomeForegroundRefreshTests.swift in Sources */,
+				04EC28A939349A0E015E09FA /* HomeHeroLibrariesTests.swift in Sources */,
 				475B40AD14E3E0A9AE7E6986 /* HomeImageBudgetTests.swift in Sources */,
 				E7427447E93B969237D3CE6B /* HomeLatestMoviesRowTests.swift in Sources */,
 				DA40204EE79D4194C45BC976 /* HomeLatestShowsRowTests.swift in Sources */,
@@ -7261,6 +7272,7 @@
 				8DB98A1101655637855F053E /* HTTPMethod.swift in Sources */,
 				4FD1D8F3A5C0224E3CB562E9 /* HomeCustomizeView.swift in Sources */,
 				81B3C407D662B643D5B66CB9 /* HomeHeroCarousel.swift in Sources */,
+				6A3F1B767BD75922E7B569FD /* HomeHeroLibraries.swift in Sources */,
 				2D391935D9613B8AE78E75CE /* HomeHeroMode.swift in Sources */,
 				D3049F1B3EACCB073C33DD7E /* HomeMerger.swift in Sources */,
 				33D9FA83BFF7C8F59F8A7081 /* HomePrefetchPlan.swift in Sources */,
