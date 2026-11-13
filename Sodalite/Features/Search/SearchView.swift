@@ -5,6 +5,8 @@ struct SearchView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
+    @Environment(\.shellBarInset) private var shellBarInset
+    @Environment(\.shellPageFocusRequest) private var pageFocusRequest
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
     /// The edge the section headings and their rows share with every other tab (Sodalite#140).
     private var leadingInset: CGFloat { metrics.rowLeading(shellPaysLeading: shellPaysLeading) }
@@ -44,16 +46,24 @@ struct SearchView: View {
         ThemeNavigationStack {
             VStack(spacing: 0) {
                 #if os(tvOS)
+                // SwiftUI's own search, not a UISearchContainerViewController in a representable: on
+                // tvOS 26 the system keyboard cannot move inside a SwiftUI host. Its keys move through
+                // focus guides of their own, and the host leaves layout guides out of what it hands
+                // the focus engine, so every press failed and focus stayed on the first key, with the
+                // linear and the grid layout alike (measured in the tvOS 26.5 simulator, also with a
+                // bare container in a UIHostingController; tvOS 27 fixed it). `.searchable` is not
+                // affected on either version.
                 if let vm = viewModel {
-                    InlineSearchContainer(
-                        text: Bindable(vm).query,
-                        placeholder: String(localized: "search.placeholder", defaultValue: "Search")
-                    ) {
-                        resultsArea(vm: vm)
-                    }
-                    .onChange(of: vm.query) { _, _ in
-                        vm.scheduleSearch()
-                    }
+                    resultsArea(vm: vm)
+                        .searchable(
+                            text: Bindable(vm).query,
+                            prompt: Text(String(localized: "search.placeholder", defaultValue: "Search"))
+                        )
+                        .autocorrectionDisabled()
+                        .focusSection()
+                        .onChange(of: vm.query) { _, _ in
+                            vm.scheduleSearch()
+                        }
                 } else {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -92,6 +102,13 @@ struct SearchView: View {
                 }
             }
         }
+        #if os(tvOS)
+        // The bar's room as real padding, so the search starts below it. A safe-area inset outside
+        // the stack never reaches the UIKit search, and the one ThemeNavigationStack gives its root
+        // would only push the results down, so it is zeroed here.
+        .environment(\.shellBarInset, 0)
+        .padding(.top, shellBarInset)
+        #endif
         .onAppear(perform: bootstrap)
         #if os(iOS)
         .onChange(of: appState.requestSearchFieldFocus) { _, _ in
@@ -159,8 +176,8 @@ struct SearchView: View {
     }
 
     #if !os(tvOS)
-    /// Inline UIKit UITextField bar for iOS. tvOS uses InlineSearchContainer, so its results stay
-    /// visible while typing.
+    /// Inline UIKit UITextField bar for iOS. tvOS uses `.searchable`, whose keyboard sits on the
+    /// page, so its results stay visible while typing.
     @ViewBuilder
     private var searchBar: some View {
         if let vm = viewModel {
@@ -236,6 +253,7 @@ struct SearchView: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .drivesShellBar()
+        .background(SearchKeyboardFocuser(request: pageFocusRequest))
         #else
         if isEmpty {
             emptyState(vm: vm)
@@ -439,3 +457,43 @@ struct SearchView: View {
         )
     }
 }
+
+#if os(tvOS)
+/// Hands focus to the search keyboard when a click on the top bar asks the page for it. SwiftUI has
+/// no way to do that on tvOS (`searchFocused` is unavailable there) and the shell's focus reset only
+/// reaches SwiftUI views, so a click on the Search tab left focus on the tab. This view sits in the
+/// results, which `.searchable` hosts inside its UISearchContainerViewController, so the container
+/// is up its responder chain.
+private struct SearchKeyboardFocuser: UIViewRepresentable {
+    let request: Int
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        guard context.coordinator.handled != request else { return }
+        context.coordinator.handled = request
+        DispatchQueue.main.async {
+            var responder: UIResponder? = view
+            while let current = responder, !(current is UISearchContainerViewController) {
+                responder = current.next
+            }
+            guard let container = responder as? UISearchContainerViewController,
+                  let system = UIFocusSystem.focusSystem(for: container) else { return }
+            system.requestFocusUpdate(to: container.searchController)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(handled: request)
+    }
+
+    final class Coordinator {
+        var handled: Int
+        init(handled: Int) { self.handled = handled }
+    }
+}
+#endif

@@ -1,5 +1,5 @@
 #if os(iOS)
-// The iOS search field. tvOS uses InlineSearchContainer, macOS SwiftUI's own field.
+// The iOS search field. tvOS uses SwiftUI's `.searchable`, macOS SwiftUI's own field.
 import SwiftUI
 import UIKit
 
