@@ -1,13 +1,15 @@
 import Foundation
 import AetherEngine
 
-/// One row of the in-player audio menu: a track, or one of the three shaping settings
-/// (AetherEngine#923) stepped with left/right like the subtitle timing row.
+/// One row of the in-player audio menu: a track, one of the three shaping settings
+/// (AetherEngine#923) or the audio delay (AetherEngine#464), the settings stepped with left/right
+/// like the subtitle timing row.
 enum AudioMenuRow: Equatable {
     case track(id: Int)
     case speakers
     case dialogue
     case nightMode
+    case delay
 }
 
 extension PlayerViewModel {
@@ -16,12 +18,12 @@ extension PlayerViewModel {
     /// highlight navigation and the Select commit.
     var audioMenuRows: [AudioMenuRow] {
         var rows = displayAudioTracks.map { AudioMenuRow.track(id: $0.id) }
-        if supportsAudioShaping { rows += [.speakers, .dialogue, .nightMode] }
+        if supportsAudioShaping { rows += [.speakers, .dialogue, .nightMode, .delay] }
         return rows
     }
 
     /// AVPlayer owns the audio of a server transcode (the remote-HLS route), so there is no PCM for
-    /// the engine to shape and the rows would do nothing.
+    /// the engine to shape and no timestamps for it to move, and the rows would do nothing.
     var supportsAudioShaping: Bool {
         player.videoRoute != .remoteBypass && !displayAudioTracks.isEmpty
     }
@@ -38,6 +40,8 @@ extension PlayerViewModel {
             let active = preferences.nightMode == .scheduled
                 ? preferences.device.audioShapingSettings.nightModeActive(at: Date()) : nil
             return Self.nightModeLabel(preferences.nightMode, scheduledActive: active)
+        case .delay:
+            return Self.delayLabel(preferences.audioDelayMilliseconds)
         }
     }
 
@@ -50,6 +54,7 @@ extension PlayerViewModel {
                 mode == .scheduled ? [true, false].map { nightModeLabel(mode, scheduledActive: $0) }
                                    : [nightModeLabel(mode, scheduledActive: nil)]
             }
+            + [delayLabel(-AudioDelay.limit)]
     }
 
     private static func localizedValue(_ key: String) -> String { String(localized: String.LocalizationValue(key)) }
@@ -62,6 +67,11 @@ extension PlayerViewModel {
     private static func dialogueLabel(_ value: DialogueBoost) -> String {
         String(format: String(localized: "player.audio.dialogue.value", defaultValue: "Dialogue boost: %@"),
                localizedValue(value.titleKey))
+    }
+
+    static func delayLabel(_ milliseconds: Int) -> String {
+        String(format: String(localized: "player.audio.delay.value", defaultValue: "Audio delay: %@"),
+               AudioDelay.label(milliseconds))
     }
 
     private static func nightModeLabel(_ value: NightMode, scheduledActive: Bool?) -> String {
@@ -84,6 +94,7 @@ extension PlayerViewModel {
     func applyAudioShapingAfterMenu() {
         guard !isAudioMenuOpen else { return }
         applyAudioShaping()
+        applyAudioDelay()
     }
 
     /// Left/right on a setting row. Clamped at both ends, the way the subtitle timing row is.
@@ -98,12 +109,17 @@ extension PlayerViewModel {
         case .speakers: preferences.speakerLayout = stepped(preferences.speakerLayout)
         case .dialogue: preferences.dialogueBoost = stepped(preferences.dialogueBoost)
         case .nightMode: preferences.nightMode = stepped(preferences.nightMode)
+        case .delay:
+            preferences.audioDelayMilliseconds = AudioDelay.stepped(preferences.audioDelayMilliseconds, by: steps)
+            applyAudioDelay()
+            return
         }
         applyAudioShaping()
     }
 
     /// Select on a setting row: the next value, wrapping, so a remote without left/right in the menu
-    /// (and a tap on iOS) still reaches every value.
+    /// (and a tap on iOS) still reaches every value. The delay has 41 values, so there Select resets
+    /// it to 0, the way it resets the subtitle timing.
     func cycleAudioSetting(_ row: AudioMenuRow) {
         func next<T: CaseIterable & Equatable>(_ value: T) -> T where T.AllCases == [T] {
             let all = T.allCases
@@ -114,6 +130,10 @@ extension PlayerViewModel {
         case .speakers: preferences.speakerLayout = next(preferences.speakerLayout)
         case .dialogue: preferences.dialogueBoost = next(preferences.dialogueBoost)
         case .nightMode: preferences.nightMode = next(preferences.nightMode)
+        case .delay:
+            preferences.audioDelayMilliseconds = 0
+            applyAudioDelay()
+            return
         }
         applyAudioShaping()
     }
@@ -127,6 +147,19 @@ extension PlayerViewModel {
         guard next != player.audioShaping else { return }
         LogTap.shared.note("[Audio] shaping \(next.summary) (was \(player.audioShaping.summary))")
         player.setAudioShaping(next)
+    }
+
+    /// The device's audio delay, handed to the engine when it differs from the session's. On the
+    /// loopback route a change replaces the player item (about 0.3 s of held picture), so it waits for
+    /// the audio menu to close like the shaping does. Run after `applyAudioShaping`: a shaping change
+    /// starts its rebuild first, and the engine delivers a delay set during a rebuild with that load.
+    func applyAudioDelay() {
+        guard !isTearingDown, !isAudioMenuOpen else { return }
+        let next = preferences.audioDelaySeconds
+        guard next != player.audioDelaySeconds else { return }
+        LogTap.shared.note("[Audio] delay \(AudioDelay.label(preferences.audioDelayMilliseconds)) "
+                           + "(was \(Int((player.audioDelaySeconds * 1000).rounded())) ms)")
+        player.setAudioDelay(next)
     }
 }
 
@@ -142,7 +175,7 @@ extension PlayerViewModel {
             case .track(let id):
                 return DropdownItem(title: audioMenuLabel(for: row), isActive: id == activeAudioIndex,
                                     isHighlighted: isHighlighted)
-            case .speakers, .dialogue, .nightMode:
+            case .speakers, .dialogue, .nightMode, .delay:
                 return DropdownItem(title: audioMenuLabel(for: row), isActive: false,
                                     isHighlighted: isHighlighted,
                                     hint: "\u{2039} \u{203A}",

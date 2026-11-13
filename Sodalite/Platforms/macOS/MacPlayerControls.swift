@@ -81,11 +81,28 @@ struct MacPlayerMenus: View {
                 }
             }
         }
-        let settings = rows.filter { if case .track = $0 { false } else { true } }
+        let settings = rows.filter {
+            switch $0 {
+            case .track, .delay: false
+            default: true
+            }
+        }
         if !settings.isEmpty {
             Divider()
             ForEach(Array(settings.enumerated()), id: \.offset) { _, row in
                 Button(viewModel.audioMenuLabel(for: row)) { viewModel.cycleAudioSetting(row) }
+            }
+        }
+        // 41 values: stepped like the subtitle timing instead of cycled.
+        if rows.contains(.delay) {
+            Divider()
+            Section(viewModel.audioMenuLabel(for: .delay)) {
+                ControlGroup {
+                    Button { viewModel.stepAudioSetting(.delay, by: -1) } label: { Image(systemName: "minus") }
+                    Button { viewModel.cycleAudioSetting(.delay) } label: { Image(systemName: "arrow.counterclockwise") }
+                    Button { viewModel.stepAudioSetting(.delay, by: 1) } label: { Image(systemName: "plus") }
+                }
+                .controlGroupStyle(.palette)
             }
         }
     }

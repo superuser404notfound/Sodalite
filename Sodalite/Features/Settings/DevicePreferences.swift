@@ -35,6 +35,7 @@ final class DevicePreferences {
         static let nightModeStartHour = "playback.nightModeStartHour"
         static let nightModeEndHour = "playback.nightModeEndHour"
         static let lfeInStereoDownmix = "playback.lfeInStereoDownmix"
+        static let audioDelayMilliseconds = "playback.audioDelayMilliseconds"
     }
 
     /// Stats panel "i" button. Read-only, so it is App Store safe and needs no diagnostic-build gate.
@@ -180,6 +181,12 @@ final class DevicePreferences {
         didSet { store.set(lfeInStereoDownmix, forKey: Keys.lfeInStereoDownmix) }
     }
 
+    /// AetherEngine#464: positive plays the sound later; see `AudioDelay`. A device value because a
+    /// lip-sync error belongs to the TV and receiver behind this box.
+    var audioDelayMilliseconds: Int {
+        didSet { store.set(audioDelayMilliseconds, forKey: Keys.audioDelayMilliseconds) }
+    }
+
     var audioShapingSettings: AudioShapingSettings {
         AudioShapingSettings(speakers: speakerLayout, dialogue: dialogueBoost, nightMode: nightMode,
                              nightStartHour: nightModeStartHour, nightEndHour: nightModeEndHour,
@@ -222,6 +229,8 @@ final class DevicePreferences {
         self.nightModeStartHour = (store.object(forKey: Keys.nightModeStartHour) as? Int).map { min(max($0, 0), 23) } ?? 22
         self.nightModeEndHour = (store.object(forKey: Keys.nightModeEndHour) as? Int).map { min(max($0, 0), 23) } ?? 7
         self.lfeInStereoDownmix = store.object(forKey: Keys.lfeInStereoDownmix) as? Bool ?? false
+        self.audioDelayMilliseconds = (store.object(forKey: Keys.audioDelayMilliseconds) as? Int)
+            .map(AudioDelay.clamped) ?? 0
     }
 
     /// Reads every value again, for a factory reset that wiped the store underneath this object:
@@ -255,6 +264,7 @@ final class DevicePreferences {
         update(\.nightModeStartHour)
         update(\.nightModeEndHour)
         update(\.lfeInStereoDownmix)
+        update(\.audioDelayMilliseconds)
     }
 
     convenience init(store defaults: UserDefaults = .standard) {

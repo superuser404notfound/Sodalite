@@ -172,6 +172,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Enhanced Upscaling**: sharpens SD and 720p video with on-device machine learning. A player button turns it off and on for the video that is playing.
 - **Surround**: 5.1 and 7.1 with the correct channel layout.
 - **Dialogue Boost, Night Mode and Speakers**: lift voices over music and effects, compress loud scenes (always, or between two hours you set), and fold surround down to stereo or 5.1. In Settings → Playback and in the player's audio menu, per device. While one is on, the track is no longer passed through as its original bitstream.
+- **Audio Delay**: shifts the sound against the picture in 25 ms steps, up to half a second either way. For a TV or receiver whose processing puts lips and voices out of sync. Plus plays the sound later, minus earlier. One value per device, set in Settings → Playback or in the player's audio menu (left and right step it, Select resets it). A change while playing holds the picture for a moment while the engine re-times the audio.
 - **LFE in Stereo Downmix**: with Speakers on Stereo, the .1 bass channel (LFE) goes into left and right instead of being dropped. Meant for a 2.1 system whose subwoofer hangs off a stereo amp or streamer, behind a TV that only passes two channels on.
 
 ### Subtitles and tracks
@@ -183,7 +184,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Search and download subtitles** in the player when your server has none. Matches by file hash get a badge.
 - **Dual subtitles**: show a second text track above the first, for example the original plus a translation.
 - **Audio track switcher**: change language or mix while you watch.
-- **Remembered tracks**: your audio and subtitle choice comes back for that movie, or for the whole series. Matched by language and type, not track number, and synced with your profile.
+- **Remembered tracks**: your audio and subtitle choice comes back for that movie, or for the whole series. Matched by language and type, not track number, and synced with your profile. A remembered track plays from the first second, even when the file has another track in the same language before it.
 
 ### Player controls
 
@@ -246,7 +247,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Tabs**: choose which tabs show and in what order. Turning off Catalog also hides Seerr results in Search, for a family setup.
 - **Libraries as tabs** (Apple TV, iPad): pin a library like Movies as its own tab, anywhere between Home and Settings.
 - **Profiles**: keep several sign-ins per server and switch without a password. The picker can come back after the app was in the background. Sign out on all devices revokes a sign-in on the server.
-- **Settings per profile**: each profile has its own playback and appearance settings, tabs, Home rows and sorts, synced through iCloud. Settings that describe the device (buffers, audio output, Dialogue Boost, Night Mode, Top Shelf) stay with the device, and the settings screens say which is which.
+- **Settings per profile**: each profile has its own playback and appearance settings, tabs, Home rows and sorts, synced through iCloud. Settings that describe the device (buffers, audio output, Dialogue Boost, Night Mode, Audio Delay, Top Shelf) stay with the device, and the settings screens say which is which.
 - **Parental controls**: a Guardian PIN, and per profile: opens freely, needs a PIN to open, or needs the PIN to leave. A profile can have its own PIN. The Guardian PIN protects logging out, servers, tabs, Seerr, iCloud and the parental settings.
 - **iCloud Sync**: servers, sign-ins and settings sync across your devices, end-to-end encrypted. Manage it in Settings → iCloud Sync, push or pull by hand, or delete your iCloud data.
 - **Watch Stats**: your totals, completion rate, hours, top genres and most-rewatched titles, worked out on the device.
