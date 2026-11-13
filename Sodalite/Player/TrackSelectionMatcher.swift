@@ -141,6 +141,31 @@ enum TrackSelectionMatcher {
                     score: { $0.channels == active.channels ? 1 : 0 })
     }
 
+    /// The remembered audio pick resolved against the source's own stream list before the engine
+    /// opens it, as the container index `load(audioSourceStreamIndex:)` takes. Handing the engine only
+    /// the language opens the first track of it, so a remembered second track of the same language
+    /// (DTS-HD MA behind TrueHD Atmos) cost a reload about three seconds into every start.
+    ///
+    /// Only valid where Jellyfin's indices describe the file the engine opens (direct play of the
+    /// original), and nil hands the pick back to the post-load `plan`: nothing remembered, no match,
+    /// or a remembered audio description, which Jellyfin's stream list does not mark.
+    static func preloadAudioStreamIndex(entry: TrackMemoryEntry?, mediaStreams: [MediaStream]) -> Int? {
+        guard let signature = entry?.audio, signature.descriptor != describedDescriptor else { return nil }
+        let tracks = mediaStreams
+            .filter { $0.type == .audio && $0.isExternal != true }
+            .map { stream in
+                TrackInfo(
+                    id: PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: stream.index, in: mediaStreams),
+                    name: stream.title ?? "",
+                    codec: stream.codec ?? "",
+                    language: stream.language,
+                    channels: stream.channels ?? 0,
+                    isDefault: stream.isDefault == true
+                )
+            }
+        return matchAudio(signature, in: tracks)?.id
+    }
+
     // MARK: - Plan
 
     static func plan(

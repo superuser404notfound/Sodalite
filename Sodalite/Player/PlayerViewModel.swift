@@ -1377,11 +1377,16 @@ final class PlayerViewModel {
                 ? (nil, nil) : Self.remoteDirectPlayProbeBudget(method: activePlayMethod, source: source)
             // Hand the language preference to the engine so it picks the audio track on the first frame
             // from its single probe (#72), instead of us reloading via selectAudioTrack after load.
-            // A remembered pick (Sodalite#46) outranks the global preference here; only a different
-            // track of the SAME language still needs the post-load reload in resolveInitialTracks.
-            let rememberedAudioLanguage = memoryScopeKey
-                .flatMap { trackMemory?.entry(for: $0) }?.audio?.language
+            // A remembered pick (Sodalite#46) outranks the global preference here. Where Jellyfin's
+            // indices are the file's own, the remembered track itself goes in too, so a second track
+            // of the same language opens on the first frame instead of reloading in resolveInitialTracks.
+            let rememberedEntry = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
+            let rememberedAudioLanguage = rememberedEntry?.audio?.language
             let preferredAudio = rememberedAudioLanguage ?? effectivePreferredAudioLanguage()
+            let rememberedAudioIndex = subtitlePlayMethod == .directPlay
+                ? TrackSelectionMatcher.preloadAudioStreamIndex(
+                    entry: rememberedEntry, mediaStreams: sourceMediaStreams)
+                : nil
             // AE#88: declare external Jellyfin subs at load so they list in engine.subtitleTracks
             // and join the native WebVTT renditions (PiP / external display); the map routes UI selections to engine ids.
             let local = localDownload
@@ -1431,7 +1436,8 @@ final class PlayerViewModel {
                     externalSubtitles: externalSubs.descriptors,
                     forwardBufferSegments: preferences.networkBufferDepth.forwardBufferSegments,
                     audioShaping: preferences.audioShaping()
-                )
+                ),
+                audioSourceStreamIndex: rememberedAudioIndex.map { Int32($0) }
             )
 
             // Teardown can land between load() returning and observation wiring (back-press just as the
