@@ -2894,11 +2894,15 @@ final class PlayerViewModel {
         for stream in streams where servedAsSidecar(stream, playMethod: playMethod) {
             guard let url = urlBuilder(stream) else { continue }
             mapping[stream.index] = AetherEngine.externalSubtitleTrackIDBase + descriptors.count
+            // Only the stream's own title: the engine names the native rendition (AVKit's menu in
+            // PiP and AirPlay) from it and falls back to the language. Jellyfin's DisplayTitle
+            // ("English - SRT - External") would land in that menu verbatim.
             descriptors.append(ExternalSubtitleTrack(
                 url: url,
-                name: stream.title ?? stream.displayTitle,
+                name: stream.title,
                 language: stream.language,
                 isForced: stream.isForced == true,
+                isHearingImpaired: stream.isHearingImpaired == true,
                 formatHint: stream.codec))
         }
         return (descriptors, mapping)
@@ -3703,8 +3707,9 @@ final class PlayerViewModel {
             itemID: item.id, mediaSourceID: mediaSourceID,
             streamIndex: id, format: stream?.codec ?? "srt") else { return nil }
         let info = player.addExternalSubtitleTrack(ExternalSubtitleTrack(
-            url: url, name: stream?.title ?? stream?.displayTitle,
+            url: url, name: stream?.title,
             language: stream?.language, isForced: stream?.isForced == true,
+            isHearingImpaired: stream?.isHearingImpaired == true,
             formatHint: stream?.codec))
         externalEngineTrackIDs[id] = info.id
         return info.id

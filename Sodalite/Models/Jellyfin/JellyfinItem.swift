@@ -569,6 +569,9 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
     /// Jellyfin's ffprobe verdict on the field order. A `var` with a default so the memberwise
     /// init in tests and previews keeps compiling without it.
     var isInterlaced: Bool? = nil
+    /// Jellyfin 10.9+: the SDH flag. Handed to the engine so a sidecar's native rendition is marked
+    /// SDH in AVKit's menu (PiP, AirPlay).
+    var isHearingImpaired: Bool? = nil
 
     var id: Int { index }
 
@@ -593,6 +596,7 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
         case bitRate = "BitRate"
         case dvProfile = "DvProfile"
         case isInterlaced = "IsInterlaced"
+        case isHearingImpaired = "IsHearingImpaired"
     }
 }
 
