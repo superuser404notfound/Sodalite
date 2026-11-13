@@ -10,6 +10,8 @@ struct HomeCustomizeView: View {
     @State private var rewatchNextUp = false
     @State private var collectionGrouping: CollectionGrouping = .system
     @State private var heroMode: HomeHeroMode = .default
+    /// Libraries left out of the banner, by `JellyfinLibrary.originKey` (Sodalite#238).
+    @State private var heroExcluded: Set<String> = []
     /// My Media's libraries across every combined server, and their order and hidden flags (Sodalite#85).
     @State private var libraries: [JellyfinLibrary] = []
     @State private var librarySources: [HomeSource] = []
@@ -30,6 +32,7 @@ struct HomeCustomizeView: View {
             VStack(spacing: 28) {
                 header
                 heroRow
+                heroLibrarySection
                 mergeRowToggle
                 rewatchRowToggle
                 collectionGroupingRow
@@ -57,6 +60,7 @@ struct HomeCustomizeView: View {
             rewatchNextUp = HomeRowConfig.enableRewatchingNextUp(scope: scope)
             collectionGrouping = HomeRowConfig.collectionGrouping(scope: scope)
             heroMode = HomeHeroMode.stored(scope: scope)
+            heroExcluded = HomeHeroLibraries.excluded(scope: scope)
             layout = LibraryLayout.load(scope: scope)
             droppedSeries = DroppedSeriesStore.load(scope: scope)
             // Per-library rows are otherwise discovered only on Home load, so Customize showed a stale list right after a server add/switch. Reconcile here too.
@@ -151,6 +155,74 @@ struct HomeCustomizeView: View {
             label: { $0.localizedLabel }
         )
         .padding(.horizontal, hInset)
+    }
+
+    private var heroLibraries: [JellyfinLibrary] {
+        HomeHeroLibraries.eligible(layout.ordered(libraries, fallbackServerID: activeServerID))
+    }
+
+    /// Which libraries feed the banner. Hidden while the banner is off, and while there is only one
+    /// library to pick, since leaving that out would just be Off with extra steps.
+    @ViewBuilder
+    private var heroLibrarySection: some View {
+        if heroMode != .off, heroLibraries.count > 1 {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("home.customize.heroLibraries.description")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, hInset)
+                    .padding(.bottom, 4)
+                ForEach(heroLibraries, id: \.originKey) { library in
+                    heroLibraryRow(library)
+                }
+            }
+        }
+    }
+
+    private func heroLibraryRow(_ library: JellyfinLibrary) -> some View {
+        let isOn = !heroExcluded.contains(libraryKey(library))
+        return HStack(spacing: 16) {
+            FocusableTile(action: { toggleHeroLibrary(library) }) { isFocused in
+                tileShell(isFocused: isFocused, isMoving: false, isEnabled: isOn) {
+                    Image(systemName: Self.libraryIcon(library.collectionType))
+                        .font(.title3)
+                        .frame(width: 44)
+                        .foregroundStyle(isOn ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
+                    Text(library.name)
+                        .font(.body)
+                        .foregroundStyle(isOn ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                        .lineLimit(1)
+                    if let label = CustomizeLibraryList.serverLabel(for: library, in: libraries, sources: librarySources) {
+                        Text(label)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(Color.Theme.restFill))
+                    }
+                }
+            }
+            RowToggleButton(isOn: isOn) { toggleHeroLibrary(library) }
+        }
+        .padding(.horizontal, hInset)
+    }
+
+    /// The last library left on stays on: a banner with nothing to draw from is what Off is for.
+    private func toggleHeroLibrary(_ library: JellyfinLibrary) {
+        movingID = nil
+        movingLibrary = nil
+        let key = libraryKey(library)
+        var next = heroExcluded
+        if next.contains(key) {
+            next.remove(key)
+        } else {
+            let remaining = heroLibraries.filter { !next.contains(libraryKey($0)) }
+            guard remaining.count > 1 else { return }
+            next.insert(key)
+        }
+        withAnimation(.easeInOut(duration: 0.2)) { heroExcluded = next }
+        HomeHeroLibraries.setExcluded(next, scope: scope)
+        NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
     }
 
     // MARK: - Merge toggle

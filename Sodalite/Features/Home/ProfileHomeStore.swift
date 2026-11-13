@@ -16,6 +16,7 @@ enum ProfileHomeStore {
             combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted(),
             libraryLayoutJSON: LibraryLayout.rawData(scope: scope),
             heroMode: HomeHeroMode.rawStored(scope: scope),
+            heroExcludedLibraries: HomeHeroLibraries.rawStored(scope: scope),
             droppedSeriesJSON: DroppedSeriesStore.rawData(scope: scope)
         )
     }
@@ -39,6 +40,7 @@ enum ProfileHomeStore {
         if let layout = payload.libraryLayoutJSON { LibraryLayout.setRawData(layout, scope: scope) }
         // An unknown mode is a newer build's: the local one stays.
         if let mode = payload.heroMode.flatMap(HomeHeroMode.init(rawValue:)) { HomeHeroMode.setStored(mode, scope: scope) }
+        if let excluded = payload.heroExcludedLibraries { HomeHeroLibraries.setExcluded(Set(excluded), scope: scope) }
         if let dropped = payload.droppedSeriesJSON { DroppedSeriesStore.setRawData(dropped, scope: scope) }
     }
 
