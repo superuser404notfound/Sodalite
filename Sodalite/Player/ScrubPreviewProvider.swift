@@ -39,6 +39,8 @@ final class ScrubPreviewProvider {
     /// Compositor preview: shows `seconds` in the view and answers whether it did. Asked before the
     /// still sources, so a session it does not apply to has to answer false at once.
     @ObservationIgnored private var viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)?
+    /// Closes the engine's still decoders when a scrub ends. A 4K one holds 100 to 160 MB (AE#1059).
+    @ObservationIgnored private var releaseDecoders: (() async -> Void)?
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var generation = 0
@@ -52,12 +54,14 @@ final class ScrubPreviewProvider {
                    cacheThumbnail: ((Double, Int) async -> CGImage?)? = nil,
                    refinedThumbnail: ((Double, Int, @escaping @Sendable () -> Bool) async -> CGImage?)? = nil,
                    viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)? = nil,
+                   releaseDecoders: (() async -> Void)? = nil,
                    enabled: Bool) {
         reset()
         self.extractor = extractor
         self.cacheThumbnail = cacheThumbnail
         self.refinedThumbnail = refinedThumbnail
         self.viewPreview = viewPreview
+        self.releaseDecoders = releaseDecoders
         self.enabled = enabled
     }
 
@@ -171,6 +175,7 @@ final class ScrubPreviewProvider {
     func clear() {
         loadTask?.cancel()
         loadTask = nil
+        if let releaseDecoders { Task { await releaseDecoders() } }
     }
 
     /// Full session teardown. Drops the extractor reference; PlayerViewModel
@@ -185,6 +190,7 @@ final class ScrubPreviewProvider {
         showsPreviewView = false
         previewView?.clear()
         viewPreview = nil
+        releaseDecoders = nil
         extractor = nil
         cacheThumbnail = nil
         refinedThumbnail = nil

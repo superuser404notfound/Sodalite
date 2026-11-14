@@ -1191,6 +1191,7 @@ final class PlayerViewModel {
                 cacheThumbnail: cacheThumbnail,
                 refinedThumbnail: refinedThumbnail,
                 viewPreview: viewPreview,
+                releaseDecoders: { [weak engine] in await engine?.releaseScrubPreviewDecoders() },
                 enabled: preferences.showScrubPreview
             )
         }
