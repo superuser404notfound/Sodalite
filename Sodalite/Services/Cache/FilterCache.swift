@@ -12,11 +12,24 @@ nonisolated struct FilterCacheScope: Hashable, Sendable {
     let identity: CacheIdentity
 }
 
-/// Persistent stale-while-revalidate cache for home + catalog filter-tile result sets plus Home's own row set (three slices: homeFilterItems, catalogPage, homeFeed), scoped per `CacheIdentity`. Backed by per-key JSON in `Library/Caches/FilterCache/`, NOT UserDefaults: tvOS caps CFPreferences at 1MB/domain and a populated provider tile (50+ JellyfinItem blobs) overflows it, SIGABRT inside `defaults.set` on first write. `nonisolated` + `@unchecked Sendable` (whole-file atomic IO, only the directory pointer is shared) so the trim can run off the main actor and precompute fan-outs can write without a hop; synchronous so views can hydrate `@State` from `init()` in one render pass.
+/// Persistent stale-while-revalidate cache for home + catalog filter-tile result sets plus Home's own row set (three slices: homeFilterItems, catalogPage, homeFeed), scoped per `CacheIdentity`. Backed by per-key JSON in `Library/Caches/FilterCache/`, NOT UserDefaults: tvOS caps CFPreferences at 1MB/domain and a populated provider tile (50+ JellyfinItem blobs) overflows it, SIGABRT inside `defaults.set` on first write. `nonisolated` + `@unchecked Sendable` (whole-file atomic IO, only the directory pointer is shared) so the trim can run off the main actor and precompute fan-outs can write without a hop; reads are synchronous so views can hydrate `@State` from `init()` in one render pass, while the shared instance queues its writes (see `writesAsynchronously`).
 nonisolated final class FilterCache: @unchecked Sendable {
     static let shared = FilterCache()
 
     private let directory: URL
+
+    /// Writes leave the caller's thread when set. Home and the library grids store their rows from
+    /// MainActor, and the encode plus the atomic rename cost tens of milliseconds there on the first
+    /// open of a tab (measured in a tvOS simulator trace). Off in tests that inspect the directory
+    /// right after a write.
+    private let writesAsynchronously: Bool
+    /// One serial queue, so two writes to one file land in the order they were made.
+    private let ioQueue = DispatchQueue(label: "de.superuser404.Sodalite.FilterCache", qos: .utility)
+    /// Values queued for disk but not written yet. A read checks here first, so a caller that writes
+    /// and reads back in one pass still sees its own value.
+    private let pendingLock = NSLock()
+    private var pending: [URL: (generation: Int, value: any Sendable)] = [:]
+    private var generation = 0
 
     /// Filename layout marker: `<format>.<slice>.<serverID>.<userID>.<encoded key>.json`. Bumping it makes every older file unparseable, which is what `migrateAndTrim` deletes, so a format change needs neither a migration flag nor a version inside the JSON.
     private static let format = "v2"
@@ -30,11 +43,11 @@ nonisolated final class FilterCache: @unchecked Sendable {
     static let identityLimit = 10
 
     // No timestamps (no expiry policy; refresh replaces wholesale); decode tolerates old files carrying a dropped `lastFetched`.
-    private struct HomeItemsEntry: Codable {
+    private struct HomeItemsEntry: Codable, Sendable {
         let items: [JellyfinItem]
     }
 
-    private struct HomeFeedEntry: Codable {
+    private struct HomeFeedEntry: Codable, Sendable {
         let rows: [HomeRowData]
         /// Optional because entries written before the library list joined the feed carry no such
         /// key, and a required one would throw the whole shelf away on the first launch after an
@@ -51,11 +64,15 @@ nonisolated final class FilterCache: @unchecked Sendable {
         let caches = FileManager.default.urls(
             for: .cachesDirectory, in: .userDomainMask
         ).first ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        self.init(directory: caches.appendingPathComponent("FilterCache", isDirectory: true))
+        self.init(
+            directory: caches.appendingPathComponent("FilterCache", isDirectory: true),
+            writesAsynchronously: true
+        )
     }
 
-    init(directory: URL) {
+    init(directory: URL, writesAsynchronously: Bool = false) {
         self.directory = directory
+        self.writesAsynchronously = writesAsynchronously
         try? FileManager.default.createDirectory(
             at: directory, withIntermediateDirectories: true
         )
@@ -87,15 +104,56 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     private func read<T: Decodable>(_ type: T.Type, slice: String, key: String, identity: CacheIdentity) -> T? {
         let url = fileURL(slice: slice, key: key, identity: identity)
+        if let queued = pendingValue(for: url) as? T { return queued }
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(T.self, from: data)
     }
 
-    private func write<T: Encodable>(_ value: T, slice: String, key: String, identity: CacheIdentity) {
+    private func write<T: Encodable & Sendable>(_ value: T, slice: String, key: String, identity: CacheIdentity) {
         let url = fileURL(slice: slice, key: key, identity: identity)
+        guard writesAsynchronously else {
+            Self.store(value, at: url)
+            return
+        }
+        pendingLock.lock()
+        generation += 1
+        let mine = generation
+        pending[url] = (mine, value)
+        pendingLock.unlock()
+        ioQueue.async { [self] in
+            Self.store(value, at: url)
+            pendingLock.lock()
+            if pending[url]?.generation == mine { pending[url] = nil }
+            pendingLock.unlock()
+        }
+    }
+
+    private static func store<T: Encodable>(_ value: T, at url: URL) {
         guard let data = try? JSONEncoder().encode(value) else { return }
         // Atomic so a crash mid-flush keeps the prior file instead of a truncated blob that fails the next decode.
         try? data.write(to: url, options: .atomic)
+    }
+
+    private func pendingValue(for url: URL) -> (any Sendable)? {
+        pendingLock.lock()
+        defer { pendingLock.unlock() }
+        return pending[url]?.value
+    }
+
+    /// Runs `body` after every queued write, and drops the queued values `dropping` matches so a
+    /// read cannot bring back an entry that was just deleted.
+    private func afterQueuedWrites<R>(dropping: (URL) -> Bool = { _ in false }, _ body: () -> R) -> R {
+        ioQueue.sync {
+            pendingLock.lock()
+            pending = pending.filter { !dropping($0.key) }
+            pendingLock.unlock()
+            return body()
+        }
+    }
+
+    /// Waits until every queued write is on disk.
+    func flush() {
+        ioQueue.sync {}
     }
 
     // MARK: - Home Smart Filter (resolved JellyfinItems)
@@ -168,6 +226,10 @@ nonisolated final class FilterCache: @unchecked Sendable {
     ///
     /// Synchronous file IO like everything else here, so call it off the main actor.
     func diskUsage() -> Int {
+        afterQueuedWrites { diskUsageNow() }
+    }
+
+    private func diskUsageNow() -> Int {
         guard let entries = try? FileManager.default.contentsOfDirectory(
             at: directory, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]
         ) else { return 0 }
@@ -178,6 +240,10 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     /// Clears every entry regardless of identity; the factory reset.
     func clearAll() {
+        afterQueuedWrites(dropping: { _ in true }) { clearAllNow() }
+    }
+
+    private func clearAllNow() {
         guard let entries = try? FileManager.default.contentsOfDirectory(
             at: directory, includingPropertiesForKeys: nil
         ) else { return }
@@ -187,6 +253,14 @@ nonisolated final class FilterCache: @unchecked Sendable {
     }
 
     private func removeEntries(matching predicate: (CacheIdentity) -> Bool) {
+        afterQueuedWrites(dropping: { url in
+            Self.identity(ofFileNamed: url.lastPathComponent).map(predicate) ?? false
+        }) {
+            removeEntriesNow(matching: predicate)
+        }
+    }
+
+    private func removeEntriesNow(matching predicate: (CacheIdentity) -> Bool) {
         guard let entries = try? FileManager.default.contentsOfDirectory(
             at: directory, includingPropertiesForKeys: nil
         ) else { return }
@@ -200,6 +274,10 @@ nonisolated final class FilterCache: @unchecked Sendable {
 
     /// Deletes files written before the current filename format, then keeps the `identityLimit` most recently written identities. `survivor` is the identity being switched TO: it is about to be read, and its files can be older than the ones the session is leaving behind, so it always ranks first. Synchronous file IO, so call it off the main actor.
     func migrateAndTrim(keeping survivor: CacheIdentity?) {
+        afterQueuedWrites { migrateAndTrimNow(keeping: survivor) }
+    }
+
+    private func migrateAndTrimNow(keeping survivor: CacheIdentity?) {
         guard let entries = try? FileManager.default.contentsOfDirectory(
             at: directory,
             includingPropertiesForKeys: [.contentModificationDateKey],
