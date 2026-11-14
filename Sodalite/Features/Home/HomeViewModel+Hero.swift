@@ -100,7 +100,12 @@ extension HomeViewModel {
         case .discover, .favorites: candidates.shuffled()
         case .off: []
         }
-        let fresh = Array(ordered.prefix(Self.heroLimit))
+        // A reload of a mode already on screen keeps its shuffled picks: Favorites runs this with
+        // every Home load, and each new order sent the banner back to its first page.
+        let keepsPicks = heroLoaded == selection && mode != .recentlyAdded
+        let fresh = keepsPicks
+            ? Self.keepingPicks(heroItems, from: ordered, limit: Self.heroLimit)
+            : Array(ordered.prefix(Self.heroLimit))
         // The same titles again leave the banner alone: a new array of the same pages would only
         // ask it to redraw what it already shows.
         if fresh.map(\.originKey) != heroItems.map(\.originKey) || heroLoaded != selection {
@@ -110,6 +115,19 @@ extension HomeViewModel {
         Self.heroMemory[heroMemoryKey(selection)] = fresh
         // On the main actor, like the precompute's writes: eight items of JSON.
         FilterCache.shared.setHomeFilterItems(fresh, filterKey: selection.cacheKey, identity: feedIdentity)
+    }
+
+    /// The titles already shown that are still candidates, in their order and with the fresh data,
+    /// then new candidates in their given order up to `limit`. A removed favourite drops out.
+    static func keepingPicks(_ shown: [JellyfinItem], from candidates: [JellyfinItem], limit: Int) -> [JellyfinItem] {
+        let fresh = Dictionary(candidates.map { ($0.originKey, $0) }, uniquingKeysWith: { first, _ in first })
+        var picks = shown.compactMap { fresh[$0.originKey] }
+        var taken = Set(picks.map(\.originKey))
+        for item in candidates where picks.count < limit && !taken.contains(item.originKey) {
+            picks.append(item)
+            taken.insert(item.originKey)
+        }
+        return Array(picks.prefix(limit))
     }
 
     /// One server's candidates. When its library list does not arrive, the server contributes

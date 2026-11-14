@@ -11,6 +11,11 @@ struct HomeHeroCarousel: View {
     let posterURL: (JellyfinItem) -> URL?
     let onOpen: (JellyfinItem) -> Void
     let onPlay: (JellyfinItem) -> Void
+    /// Home has a detail page or a player cover up. On tvOS the banner under a SwiftUI cover gets no
+    /// `onDisappear`, so without this it kept paging every 8 s behind an open detail page, and closing
+    /// the page came back to another title with focus thrown into the tab bar (measured on the Apple
+    /// TV, 2026-11-14).
+    let isCovered: Bool
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -26,8 +31,10 @@ struct HomeHeroCarousel: View {
         tallBackdropURL: @escaping (JellyfinItem) -> URL?,
         posterURL: @escaping (JellyfinItem) -> URL?,
         onOpen: @escaping (JellyfinItem) -> Void,
-        onPlay: @escaping (JellyfinItem) -> Void
+        onPlay: @escaping (JellyfinItem) -> Void,
+        isCovered: Bool = false
     ) {
+        self.isCovered = isCovered
         self.items = items
         self.backdropURL = backdropURL
         self.tallBackdropURL = tallBackdropURL
@@ -48,22 +55,32 @@ struct HomeHeroCarousel: View {
         items.map(\.originKey).joined(separator: ",")
     }
 
+    /// Where the title that was on page `index` of `old` sits in `new`, or the first page when it left.
+    static func pageKeepingTitle(onScreen index: Int, of old: [String], in new: [String]) -> Int {
+        guard old.indices.contains(index), let page = new.firstIndex(of: old[index]) else { return 0 }
+        return page
+    }
+
     /// The pointer is over the banner, or on tvOS focus is on its buttons; either way it holds still.
     @State private var isHovering = false
     #if os(tvOS)
     private enum HeroFocus: Hashable { case play, info, page(Int) }
     @FocusState private var focus: HeroFocus?
     @State private var claimedOpeningFocus = false
+    /// The info button opened the cover on screen. It stays reachable until focus is back in the
+    /// banner: closing the detail page restores focus to it, and a suppressed button sent that
+    /// restore into the tab bar instead (measured on the Apple TV, 2026-11-14).
+    @State private var infoOpenedCover = false
     #endif
     /// The sidebar shell's rail slot, which the art reaches back under so it fills the screen.
     @Environment(\.shellLeadingSlot) private var leadingSlot
     @Environment(\.shellPageIsShown) private var pageIsShown
-    /// Off while a cover (a detail page, the player) is over Home.
+    /// Off while the banner is out of the hierarchy (scrolled away, under the UIKit player).
     @State private var isOnScreen = false
 
     /// Paging and the dwell line stop while nobody can see them or someone is reading. Home stays
     /// mounted under the other tabs and under the player, and a running dwell line redraws every frame.
-    private var isHeld: Bool { isHovering || !pageIsShown || !isOnScreen }
+    private var isHeld: Bool { isHovering || isCovered || !pageIsShown || !isOnScreen }
     /// How far below the window's top edge the banner starts: the toolbar's inset plus the stack
     /// spacing above it, and more while the page is pulled past its top. The art grows upward by
     /// exactly that. Measured in window space because every scroll-relative reading falls short:
@@ -280,9 +297,13 @@ struct HomeHeroCarousel: View {
                     dwellSpent += Date.now.timeIntervalSince(since)
                     dwellRunningSince = nil
                 }
-                .onChange(of: items.map(\.originKey)) { _, _ in
+                // A refreshed list keeps the title on screen where it is, so coming back from a
+                // detail page does not land on another title with focus moved to its Play button.
+                .onChange(of: items.map(\.originKey)) { old, new in
                     layers = []
-                    show(0)
+                    let page = Self.pageKeepingTitle(onScreen: index, of: old, in: new)
+                    index = page
+                    show(page)
                 }
                 // Every page is made ready as soon as the banner knows its titles, the one on screen
                 // first, so paging never waits on the network or on a colour still being read.
@@ -583,13 +604,14 @@ struct HomeHeroCarousel: View {
                 }
                 .focused($focus, equals: .play)
                 GlassActionButton(title: "detail.episode.showDetails", systemImage: "info") {
+                    infoOpenedCover = true
                     onOpen(item)
                 }
                 .focused($focus, equals: .info)
                 // The detail page's trick (Sodalite#53): out of reach until focus is in the banner, so
                 // coming in from outside the engine lands on Play (from below on the dots), rather than on the
                 // nearer info button and being corrected afterwards, which twitched.
-                .focusSuppressed(focus == nil)
+                .focusSuppressed(focus == nil && !infoOpenedCover)
             }
             .collapsesActionButtonLabel(true)
             pager
@@ -608,6 +630,7 @@ struct HomeHeroCarousel: View {
         // Only the dots hold the banner: the viewer is choosing there. On Play it keeps moving, as
         // the TV app's does, and since Home opens with focus on Play it never moved at all otherwise.
         isHovering = isOnDots
+        if new != nil { infoOpenedCover = false }
         if case .page(let page)? = new, page != index { show(page) }
     }
 
