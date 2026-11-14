@@ -27,26 +27,48 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
     /// of a dictionary over a type of our own makes the runtime look up that conformance, and on the
     /// launch path that lookup cost about 500 ms in a tvOS simulator trace.
     nonisolated(unsafe) private static var cache: [String: Data?] = [:]
+    /// Bumped by every save and delete. A read only stores what it found if nothing changed while it
+    /// was talking to securityd, so it can never put an old value over one a write just stored.
+    nonisolated(unsafe) private static var changes = 0
 
     private func cacheKey(_ account: String) -> String {
         service + "\u{0}" + account
     }
 
-    private func cached(_ key: String) -> Data?? {
+    private func cached(_ key: String) -> (value: Data??, changes: Int) {
         Self.cacheLock.lock()
         defer { Self.cacheLock.unlock() }
-        return Self.cache[cacheKey(key)]
+        return (Self.cache[cacheKey(key)], Self.changes)
+    }
+
+    /// For a read: stored only if no write happened since `changes` was taken.
+    private func rememberRead(_ data: Data?, for key: String, changes: Int) {
+        Self.cacheLock.lock()
+        if Self.changes == changes { Self.cache[cacheKey(key)] = .some(data) }
+        Self.cacheLock.unlock()
     }
 
     private func remember(_ data: Data?, for key: String) {
         Self.cacheLock.lock()
+        Self.changes += 1
         Self.cache[cacheKey(key)] = .some(data)
         Self.cacheLock.unlock()
     }
 
     private func forget(_ key: String) {
         Self.cacheLock.lock()
+        Self.changes += 1
         Self.cache[cacheKey(key)] = nil
+        Self.cacheLock.unlock()
+    }
+
+    /// Drops this service's entries. Called on both sides of a `deleteAll`, so a read that ran
+    /// during the delete cannot leave a value behind.
+    private func forgetService() {
+        let prefix = service + "\u{0}"
+        Self.cacheLock.lock()
+        Self.changes += 1
+        Self.cache = Self.cache.filter { !$0.key.hasPrefix(prefix) }
         Self.cacheLock.unlock()
     }
 
@@ -99,7 +121,8 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
     }
 
     func loadData(for key: String) throws -> Data? {
-        if let known = cached(key) { return known }
+        let lookup = cached(key)
+        if let known = lookup.value { return known }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -114,10 +137,10 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         switch status {
         case errSecSuccess:
             let data = result as? Data
-            remember(data, for: key)
+            rememberRead(data, for: key, changes: lookup.changes)
             return data
         case errSecItemNotFound:
-            remember(nil, for: key)
+            rememberRead(nil, for: key, changes: lookup.changes)
             return nil
         default:
             throw KeychainError.loadFailed(status)
@@ -150,10 +173,8 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
             kSecAttrService as String: service,
         ]
 
-        Self.cacheLock.lock()
-        let prefix = service + "\u{0}"
-        Self.cache = Self.cache.filter { !$0.key.hasPrefix(prefix) }
-        Self.cacheLock.unlock()
+        forgetService()
+        defer { forgetService() }
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)
