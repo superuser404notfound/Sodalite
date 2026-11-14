@@ -112,7 +112,8 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
         let (data, response) = try await requestData(baseURL: baseURL, endpoint: endpoint, headers: headers)
 
         do {
-            return try decoder.decode(T.self, from: data)
+            let decoded: DecodedResponse<T> = try await Self.decode(from: data, using: decoder)
+            return decoded.value
         } catch {
             if let url = response.url {
                 LogTap.shared.note(
@@ -121,6 +122,16 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
             }
             throw APIError.decodingError(error)
         }
+    }
+
+    /// Off the main thread. This client is MainActor, so decoding in `request` put every Jellyfin
+    /// response on it: 15 ms for one 145 KB Home row on an Apple TV 4K (2022), about 30 ms for the
+    /// rows of one Home load, more for a library grid. The value comes back in `DecodedResponse` so
+    /// the response types need not all be Sendable.
+    @concurrent nonisolated private static func decode<T: Decodable>(
+        from data: Data, using decoder: JSONDecoder
+    ) async throws -> DecodedResponse<T> {
+        DecodedResponse(value: try decoder.decode(T.self, from: data))
     }
 
     func request(
@@ -385,4 +396,10 @@ private struct AnyEncodable: Encodable {
     func encode(to encoder: Encoder) throws {
         try _encode(encoder)
     }
+}
+
+/// Carries a freshly decoded response from the decode thread back to the caller. Unchecked because
+/// the value is created there, handed over once and never touched by the decode side again.
+private nonisolated struct DecodedResponse<T>: @unchecked Sendable {
+    let value: T
 }

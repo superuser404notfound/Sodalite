@@ -18,12 +18,13 @@ struct ImageDecodeOffMainTests {
         #expect(await !Self.concurrent())
     }
 
-    /// The functions that decode image bytes for a MainActor caller.
+    /// The functions that decode image bytes or JSON for a MainActor caller.
     @Test func theDecodePathsAreConcurrent() throws {
         let expected = [
             ("Sodalite/Components/AsyncCachedImage.swift", "@concurrent nonisolated private static func fetchAndDecode("),
             ("Sodalite/Player/PlayerViewModel.swift", "@concurrent nonisolated private static func loadServerChapterImage("),
             ("Sodalite/Player/PlayerViewModel.swift", "@concurrent nonisolated private static func fetchTrickplayCrop("),
+            ("Sodalite/Services/Networking/HTTPClient.swift", "@concurrent nonisolated private static func decode<T: Decodable>("),
         ]
         for (path, signature) in expected {
             #expect(try sourceFile(path).contains(signature), "\(path) lost @concurrent on its decode")
