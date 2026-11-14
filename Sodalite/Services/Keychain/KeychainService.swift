@@ -23,28 +23,30 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
     /// Shared by all instances, because the container and the certificate-pin store each build one
     /// and the container's `deleteAll` also clears the pins. A failed read is never stored.
     private static let cacheLock = NSLock()
-    nonisolated(unsafe) private static var cache: [CacheKey: Data?] = [:]
+    /// Keyed by `service` + NUL + `account`. A String key, not a small Hashable struct: the first use
+    /// of a dictionary over a type of our own makes the runtime look up that conformance, and on the
+    /// launch path that lookup cost about 500 ms in a tvOS simulator trace.
+    nonisolated(unsafe) private static var cache: [String: Data?] = [:]
 
-    private struct CacheKey: Hashable {
-        let service: String
-        let account: String
+    private func cacheKey(_ account: String) -> String {
+        service + "\u{0}" + account
     }
 
     private func cached(_ key: String) -> Data?? {
         Self.cacheLock.lock()
         defer { Self.cacheLock.unlock() }
-        return Self.cache[CacheKey(service: service, account: key)]
+        return Self.cache[cacheKey(key)]
     }
 
     private func remember(_ data: Data?, for key: String) {
         Self.cacheLock.lock()
-        Self.cache[CacheKey(service: service, account: key)] = .some(data)
+        Self.cache[cacheKey(key)] = .some(data)
         Self.cacheLock.unlock()
     }
 
     private func forget(_ key: String) {
         Self.cacheLock.lock()
-        Self.cache[CacheKey(service: service, account: key)] = nil
+        Self.cache[cacheKey(key)] = nil
         Self.cacheLock.unlock()
     }
 
@@ -149,7 +151,8 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         ]
 
         Self.cacheLock.lock()
-        Self.cache = Self.cache.filter { $0.key.service != service }
+        let prefix = service + "\u{0}"
+        Self.cache = Self.cache.filter { !$0.key.hasPrefix(prefix) }
         Self.cacheLock.unlock()
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
