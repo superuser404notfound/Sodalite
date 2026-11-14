@@ -115,6 +115,7 @@ struct TopBarShell<Content: View>: View {
             .environment(\.shellBarScroll, ShellBarScroll(ride: ride, tab: tab))
             .environment(\.shellBarScrollToTop, scrollToTopRequests[tab] ?? 0)
             .environment(\.shellPageFocusRequest, pageFocusRequests[tab] ?? 0)
+            .environment(\.shellPageIsShown, isShown)
             .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                 chromeHidden[tab] = hidden
             }
@@ -232,6 +233,11 @@ extension EnvironmentValues {
     /// the page's root, and zeroed for everything inside it, so a pushed screen, a sheet or a cover
     /// never inherits it.
     @Entry var shellBarInset: CGFloat = 0
+    /// False while a kept tab page sits hidden behind the one on screen. Kept pages stay mounted,
+    /// so anything that animates on a clock (the Home banner's dwell line) has to stop by itself:
+    /// it otherwise drew every frame under the other tabs, about 7% of the main thread while idle
+    /// on Settings in a tvOS simulator trace.
+    @Entry var shellPageIsShown = true
 }
 
 extension View {

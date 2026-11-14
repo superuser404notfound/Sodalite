@@ -177,6 +177,7 @@ struct SidebarShell<Content: View>: View {
                 // does not re-lay-out itself on the way in or out.
                 .environment(\.shellPaysLeadingInset, true)
                 .environment(\.shellLeadingSlot, isFullBleed ? slotWidth : 0)
+                .environment(\.shellPageIsShown, isShown)
                 .focusSectionCompat()
                 .onPreferenceChange(ShellChromeHiddenKey.self) { hidden in
                     chromeHidden[tab] = hidden
