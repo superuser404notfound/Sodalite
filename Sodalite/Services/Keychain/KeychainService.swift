@@ -16,6 +16,38 @@ nonisolated protocol KeychainServiceProtocol: Sendable {
 nonisolated final class KeychainService: KeychainServiceProtocol {
     private let service: String
 
+    /// What each item held when this process last read or wrote it, `.some(nil)` for "not there".
+    /// Every SecItem call is an IPC round trip to securityd, and `DependencyContainer.activeUserID`
+    /// alone makes three of them, from view bodies on the main thread. Nothing outside this class
+    /// writes these items (the Top Shelf mirror has its own), so every change passes through here.
+    /// Shared by all instances, because the container and the certificate-pin store each build one
+    /// and the container's `deleteAll` also clears the pins. A failed read is never stored.
+    private static let cacheLock = NSLock()
+    nonisolated(unsafe) private static var cache: [CacheKey: Data?] = [:]
+
+    private struct CacheKey: Hashable {
+        let service: String
+        let account: String
+    }
+
+    private func cached(_ key: String) -> Data?? {
+        Self.cacheLock.lock()
+        defer { Self.cacheLock.unlock() }
+        return Self.cache[CacheKey(service: service, account: key)]
+    }
+
+    private func remember(_ data: Data?, for key: String) {
+        Self.cacheLock.lock()
+        Self.cache[CacheKey(service: service, account: key)] = .some(data)
+        Self.cacheLock.unlock()
+    }
+
+    private func forget(_ key: String) {
+        Self.cacheLock.lock()
+        Self.cache[CacheKey(service: service, account: key)] = nil
+        Self.cacheLock.unlock()
+    }
+
     /// nonisolated so the certificate-pin store can be built before the main actor exists for it:
     /// `ServerTrustDelegate.shared` is read by the first `URLSession` this app makes, which is a
     /// default argument of `DependencyContainer.init`. Nothing here touches shared state.
@@ -35,8 +67,13 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         let update: [String: Any] = [
             kSecValueData as String: data,
         ]
+        // Unknown until the write has an outcome, so a failure cannot leave the old value cached.
+        forget(key)
         let updateStatus = SecItemUpdate(query as CFDictionary, update as CFDictionary)
-        if updateStatus == errSecSuccess { return }
+        if updateStatus == errSecSuccess {
+            remember(data, for: key)
+            return
+        }
         guard updateStatus == errSecItemNotFound else {
             throw KeychainError.saveFailed(updateStatus)
         }
@@ -49,6 +86,7 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         guard status == errSecSuccess else {
             throw KeychainError.saveFailed(status)
         }
+        remember(data, for: key)
     }
 
     func save(_ string: String, for key: String) throws {
@@ -59,6 +97,7 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
     }
 
     func loadData(for key: String) throws -> Data? {
+        if let known = cached(key) { return known }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -72,8 +111,11 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
 
         switch status {
         case errSecSuccess:
-            return result as? Data
+            let data = result as? Data
+            remember(data, for: key)
+            return data
         case errSecItemNotFound:
+            remember(nil, for: key)
             return nil
         default:
             throw KeychainError.loadFailed(status)
@@ -92,10 +134,12 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
             kSecAttrAccount as String: key,
         ]
 
+        forget(key)
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)
         }
+        remember(nil, for: key)
     }
 
     func deleteAll() throws {
@@ -104,6 +148,9 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
             kSecAttrService as String: service,
         ]
 
+        Self.cacheLock.lock()
+        Self.cache = Self.cache.filter { $0.key.service != service }
+        Self.cacheLock.unlock()
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)
