@@ -25,7 +25,7 @@ struct StatsScanDeinterlaceTests {
         let gpu = VideoDeinterlace(filter: "yadif_videotoolbox", isHardware: true, fieldRate: .field)
         let cpu = VideoDeinterlace(filter: "bwdif", isHardware: false, fieldRate: .frame)
         #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: 25) == "yadif_videotoolbox (GPU) → 50 fps")
-        #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: 29.97) == "yadif_videotoolbox (GPU) → 59.9 fps")
+        #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: 29.97) == "yadif_videotoolbox (GPU) → 59.94 fps")
         #expect(StatsOverlayView.deinterlaceLabel(cpu, sourceFrameRate: 25) == "bwdif (CPU) → 25 fps")
         #expect(StatsOverlayView.deinterlaceLabel(cpu, sourceFrameRate: nil) == "bwdif (CPU)")
     }

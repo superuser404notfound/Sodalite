@@ -123,6 +123,7 @@ struct StatsOverlayView: View {
 
     /// Latches once the slide-in settles, gating scrollTo so the mount-time `statsSectionIndex = 0` reset (fires the same render cycle) doesn't run a 0.2s scrollTo that fights the panel's 0.25s `.move(edge: .trailing)` transition (stuck-halfway-in for ~1s).
     @State private var didFinishAppearTransition = false
+    @StateObject private var refreshMonitor = DisplayRefreshMonitor()
 
     private var panel: some View {
         ScrollViewReader { proxy in
@@ -196,6 +197,9 @@ struct StatsOverlayView: View {
             try? await Task.sleep(for: .milliseconds(300))
             didFinishAppearTransition = true
         }
+        // The display link ticks at the panel's rate, so it runs only while the panel is open.
+        .onAppear { refreshMonitor.start() }
+        .onDisappear { refreshMonitor.stop() }
     }
 
     /// Draws a section only when the shared availability set lists it, under the anchor and highlight the
@@ -305,7 +309,11 @@ struct StatsOverlayView: View {
             }
             if let fps = player.sourceVideoFrameRate
                 ?? fileVideoStream?.realFrameRate ?? fileVideoStream?.averageFrameRate {
-                row("detail.tech.framerate", value: String(format: "%.3g fps", fps))
+                row("detail.tech.framerate", value: FrameRateFormat.fps(fps))
+            }
+            // Next to the frame rate on purpose: 23.976 fps over 23.976 Hz is a match, over 24 or 60 Hz it is not.
+            if let hz = refreshMonitor.refreshRate {
+                row("player.stats.displayRefresh", value: FrameRateFormat.hz(hz))
             }
             if let deinterlace = player.decodedVideoFormat?.deinterlace {
                 row("player.stats.deinterlacing", value: Self.deinterlaceLabel(
@@ -627,7 +635,7 @@ struct StatsOverlayView: View {
         let label = "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
         guard let rate = sourceFrameRate, rate > 0 else { return label }
         let output = rate * Double(deinterlace.outputFramesPerSourceFrame)
-        return label + " → " + String(format: "%.3g fps", output)
+        return label + " → " + FrameRateFormat.fps(output)
     }
 
     /// The engine's declared VIDEO bitrate when the container carries one; the source-wide figure from
