@@ -452,7 +452,8 @@ struct HomeView: View {
                     onPlay: {
                         heroPlayFromBeginning = false
                         heroPlayItem = $0
-                    }
+                    },
+                    isCovered: isCovered || heroPlayItem != nil
                 )
                 LazyVStack(alignment: .leading, spacing: 40) {
                     if !vm.unreachableServerNames.isEmpty {
