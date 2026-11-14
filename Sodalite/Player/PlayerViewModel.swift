@@ -684,8 +684,9 @@ final class PlayerViewModel {
     }
 
     /// Fetches + decodes a server chapter image via the shared `ImageCache` (memory-only). Auth rides
-    /// the URL's `api_key` query so no header needed; `nonisolated static` runs the decode off MainActor.
-    nonisolated private static func loadServerChapterImage(from url: URL) async -> CGImage? {
+    /// the URL's `api_key` query so no header needed. `@concurrent` runs the decode off MainActor; a
+    /// plain `nonisolated async` would run it on the calling actor (Sodalite#212).
+    @concurrent nonisolated private static func loadServerChapterImage(from url: URL) async -> CGImage? {
         if let cached = ImageCache.shared.image(for: url) { return cached.cgImage }
         var request = URLRequest(url: url)
         request.timeoutInterval = 15
@@ -703,7 +704,7 @@ final class PlayerViewModel {
     /// Off-MainActor (network + decode), mirroring loadServerChapterImage. The MainActor caller
     /// resolves the tile URL + crop rect from the TrickplayTileSet first. Nil on fetch failure or
     /// an out-of-bounds crop.
-    nonisolated private static func fetchTrickplayCrop(from url: URL, crop: CGRect) async -> CGImage? {
+    @concurrent nonisolated private static func fetchTrickplayCrop(from url: URL, crop: CGRect) async -> CGImage? {
         let tileImage: PlatformImage
         if let cached = ImageCache.shared.image(for: url) {
             tileImage = cached
