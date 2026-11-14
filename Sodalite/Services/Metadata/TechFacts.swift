@@ -100,7 +100,7 @@ struct TechFacts: Equatable {
             }
             if let fps = video.realFrameRate ?? video.averageFrameRate {
                 rows.append(Row(id: "framerate", label: .key("detail.tech.framerate"),
-                                value: String(format: "%.2g fps", fps)))
+                                value: FrameRateFormat.fps(fps)))
             }
             if let range = dynamicRangeLabel(video) {
                 rows.append(Row(id: "dynamicRange", label: .key("detail.tech.dynamicRange"), value: range))

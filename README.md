@@ -199,7 +199,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **From Start**: jump back to the beginning without leaving the player.
 - **Now Playing controls**: the skip buttons in Control Center and the Apple TV Now Playing panel work too.
 - **Your own button layout**: Settings → Player Controls lists every player button. Hide what you never use and set the order, separately for video and live TV. On iPhone and iPad this includes the top bar buttons and the brightness and volume swipes.
-- **Stats for Nerds**: an optional panel with everything about the stream: codecs, resolution, HDR format, audio format and channels, bitrate, buffer, network speed, dropped frames and A/V sync. A second switch adds engine diagnostics.
+- **Stats for Nerds**: an optional panel with everything about the stream: codecs, resolution, exact frame rate (23.976, not 24), HDR format, audio format and channels, bitrate, buffer, network speed, dropped frames and A/V sync. On Apple TV it also shows the refresh rate the TV is running at, so you can see whether Match Frame Rate landed on the right mode. A second switch adds engine diagnostics.
 
 ### iPhone and iPad
 
