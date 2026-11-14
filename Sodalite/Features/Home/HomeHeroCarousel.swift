@@ -57,6 +57,13 @@ struct HomeHeroCarousel: View {
     #endif
     /// The sidebar shell's rail slot, which the art reaches back under so it fills the screen.
     @Environment(\.shellLeadingSlot) private var leadingSlot
+    @Environment(\.shellPageIsShown) private var pageIsShown
+    /// Off while a cover (a detail page, the player) is over Home.
+    @State private var isOnScreen = false
+
+    /// Paging and the dwell line stop while nobody can see them or someone is reading. Home stays
+    /// mounted under the other tabs and under the player, and a running dwell line redraws every frame.
+    private var isHeld: Bool { isHovering || !pageIsShown || !isOnScreen }
     /// How far below the window's top edge the banner starts: the toolbar's inset plus the stack
     /// spacing above it, and more while the page is pulled past its top. The art grows upward by
     /// exactly that. Measured in window space because every scroll-relative reading falls short:
@@ -253,9 +260,10 @@ struct HomeHeroCarousel: View {
                 .animation(.easeInOut(duration: 0.6), value: index)
                 // Restarted by every page change, so a click on a dot gets a full dwell before the
                 // banner moves on by itself. Paused while the pointer is over it, so nothing slides
-                // away from under someone reading it, and resumed with what was left.
-                .task(id: "\(index)|\(isHovering)|\(items.count)") {
-                    guard !isHovering, items.count > 1 else {
+                // away from under someone reading it, and while Home is out of sight (`isHeld`),
+                // and resumed with what was left.
+                .task(id: "\(index)|\(isHeld)|\(items.count)") {
+                    guard !isHeld, items.count > 1 else {
                         dwellRunningSince = nil
                         return
                     }
@@ -267,7 +275,7 @@ struct HomeHeroCarousel: View {
                     guard !Task.isCancelled else { return }
                     step(1)
                 }
-                .onChange(of: isHovering) { _, paused in
+                .onChange(of: isHeld) { _, paused in
                     guard paused, let since = dwellRunningSince else { return }
                     dwellSpent += Date.now.timeIntervalSince(since)
                     dwellRunningSince = nil
@@ -278,7 +286,11 @@ struct HomeHeroCarousel: View {
                 }
                 // Every page is made ready as soon as the banner knows its titles, the one on screen
                 // first, so paging never waits on the network or on a colour still being read.
-                .task(id: "\(items.map(\.originKey))|\(isPortrait)|\(uprightArtwork)") {
+                .onAppear { isOnScreen = true }
+                .onDisappear { isOnScreen = false }
+                // A joined string, not the array interpolated: `"\(array)"` goes through
+                // `description` and the runtime's conformance lookups on every body pass.
+                .task(id: "\(Self.pageMemoryKey(items))|\(isPortrait)|\(uprightArtwork)") {
                     held = [:]
                     palettes = [:]
                     await prepare(current)
