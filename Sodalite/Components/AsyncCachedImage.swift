@@ -238,7 +238,12 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         return .image(prepared)
     }
 
-    /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop; static + `nonisolated` keeps it on the cooperative pool. Cancellation propagates from the enclosing `.task(id:)`.
+    /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop. Cancellation propagates from the enclosing `.task(id:)`.
+    ///
+    /// `@concurrent` is what puts it on the cooperative pool. Under approachable concurrency a plain
+    /// `nonisolated async` runs on the caller's actor, and the caller is MainActor, so every card on
+    /// Home decoded its JPEG on the main thread, one after the other, and scrolling stuttered while
+    /// they came in (Sodalite#212).
     ///
     /// `attempt` reaches `ImageFetch` rather than staying here: a 200 is not the same as a whole
     /// image, and the retry that follows one has to ask the SERVER, not the HTTP cache that just
@@ -247,7 +252,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     /// The trim runs here, after `ImageFetch` has refused a payload that stopped short, so a
     /// half-written logo is never measured (Sodalite#123), and before the cache, so a hit costs
     /// nothing (Sodalite#192).
-    nonisolated private static func fetchAndDecode(
+    @concurrent nonisolated private static func fetchAndDecode(
         request: URLRequest, attempt: Int, trimsTransparentMargin: Bool
     ) async -> ImageLoadOutcome {
         switch await ImageFetch.load(request, attempt: attempt) {
