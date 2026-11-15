@@ -79,6 +79,15 @@ struct ServerTwinsTests {
         #expect(own.searches.isEmpty)
     }
 
+    /// An item that came without a `ServerId` still never finds itself on its page's server.
+    @Test func anUnstampedItemSkipsThePagesServer() async throws {
+        var page = try movie("m", "The Matrix", server: "a", sources: ["a1"])
+        page.serverID = nil
+        let own = Spy()
+        _ = await ServerTwins.find(for: page, pageServerID: "a", on: [source("a", own)])
+        #expect(own.searches.isEmpty)
+    }
+
     /// Two servers in two metadata languages name the film differently; the original title is the
     /// one they share.
     @Test func aMissOnTheTitleRetriesWithTheOriginalTitle() async throws {

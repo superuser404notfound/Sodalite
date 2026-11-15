@@ -51,13 +51,16 @@ enum ServerTwins {
     /// Every other server's copy, in `sources` order. A server that does not answer within
     /// `deadline` or holds no copy is left out; a copy with no playable source is too, since there
     /// would be nothing to pick.
+    /// `pageServerID` is the server the page reads, for an item that came without a `ServerId`.
     static func find(
         for item: JellyfinItem,
+        pageServerID: String? = nil,
         on sources: [TwinSource],
         deadline: Duration = .seconds(4)
     ) async -> [ServerTwin] {
         guard isEligible(item) else { return [] }
-        let others = sources.filter { $0.serverID != item.serverID }
+        let own = item.serverID ?? pageServerID
+        let others = sources.filter { $0.serverID != own }
         guard !others.isEmpty else { return [] }
         let tmdb = item.tmdbID, tvdb = item.tvdbID, imdb = item.imdbID
         let type = item.type

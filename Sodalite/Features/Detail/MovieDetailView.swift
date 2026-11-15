@@ -196,7 +196,7 @@ struct MovieDetailView: View {
         #endif
         .task(id: twinLookupKey) {
             guard let item = viewModel?.item, viewModel?.hasFullDetail == true else { return }
-            twins = await ServerTwins.find(for: item, on: twinSources)
+            twins = await ServerTwins.find(for: item, pageServerID: session.server?.id, on: twinSources)
         }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(

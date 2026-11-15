@@ -61,7 +61,9 @@ struct DetailRouterView: View {
         .environment(\.serverSession, session)
         .environment(\.switchToServerTwin) { twin, source in
             // Back on the page's own copy: the route goes, so the page is the one it opened as.
-            twinRoute = twin.item.originKey == item.originKey ? nil : TwinRoute(item: twin.item, sourceID: source.id)
+            let ownServer = item.serverID ?? (inheritedSession ?? dependencies.sessionRegistry.active).server?.id
+            twinRoute = twin.serverID == ownServer && twin.item.id == item.id
+                ? nil : TwinRoute(item: twin.item, sourceID: source.id)
         }
         .modifier(ThemeSongClaim(itemID: themeSongItemID, session: session))
     }
