@@ -5,8 +5,6 @@ import Foundation
 enum AlphabetIndex {
     static let letters: [String] = ["#"] + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map(String.init)
 
-    static let minimumTitles = 60
-
     static func railLetters(descending: Bool) -> [String] {
         descending ? letters.reversed() : letters
     }
@@ -34,8 +32,23 @@ enum AlphabetIndex {
         return query
     }
 
-    static func showsRail(sortKey: LibrarySortKey, usesSparseGrid: Bool, total: Int) -> Bool {
-        sortKey == .title && usesSparseGrid && total >= minimumTitles
+    /// Every library sorted by title gets the rail, small or combined (Sodalite#240). It used to
+    /// need 60 titles and a single server, so the same kind of library had a rail on one server
+    /// and none on the other.
+    static func showsRail(sortKey: LibrarySortKey, total: Int) -> Bool {
+        sortKey == .title && total > 0
+    }
+
+    /// The first loaded title at or past `letter` in rail order, for grids that hold their items
+    /// in memory (combined servers, smart providers). Those cannot ask the server for a count:
+    /// a combined grid drops a film the second server also has, so a server's count is not a
+    /// position in it.
+    static func firstPosition(of letter: String, in sortNames: [String], descending: Bool) -> Int? {
+        guard let target = letters.firstIndex(of: letter) else { return nil }
+        return sortNames.firstIndex { name in
+            let rank = letters.firstIndex(of: self.letter(for: name)) ?? 0
+            return descending ? rank <= target : rank >= target
+        }
     }
 
     /// Descending puts a letter after every title at or past the NEXT letter; `{` follows `z`, and

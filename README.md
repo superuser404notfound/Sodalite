@@ -125,6 +125,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Arrange My Media**: Customize Home sets the order of your libraries and hides the ones you do not need, also across combined servers.
 - **All Movies and All Series tiles**: once you have two movie or two series libraries, on one server or across combined ones, My Media gets a tile that opens all of them in one grid. When two servers share a library name, each tile shows its server in the corner.
 - **Libraries**: Movies, Series and Collections as poster grids, with an All / Unwatched / Watched filter. Sort by title, release date, date added, rating or runtime; the sort is remembered per library and synced. Movies can be grouped into collections, following your server's setting or your own.
+- **A to Z rail**: every grid sorted by title has a letter rail on its edge, small libraries and combined servers included. Tap or drag a letter on iPhone and iPad, move onto it on Apple TV. The cards shrink a few points so the rail never costs a column.
 - **Home videos**: a Home Videos library opens as folders, and Shuffle plays everything below the folder you are in.
 - **Series**: season picker, episode list and Up Next highlight.
 - **Collections and playlists**: open on their list of films and play in order, starting at the first one you have not finished. Large collections open as a grid with a Movies / Shows filter. Each collection library and your playlists can get their own Home row.
