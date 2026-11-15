@@ -78,7 +78,7 @@ struct HomeCustomizeView: View {
               scope == self.scope
         else { return }
         librarySources = sources
-        libraries = MyMediaLibraries.browsable(result.libraries)
+        libraries = MyMediaLibraries.tiles(result.libraries)
         // A server missing from the list would retire its per-library rows for good.
         guard result.complete else { return }
         let reconciled = HomeRowConfig.reconciled(
@@ -184,7 +184,8 @@ struct HomeCustomizeView: View {
         return HStack(spacing: 16) {
             FocusableTile(action: { toggleHeroLibrary(library) }) { isFocused in
                 tileShell(isFocused: isFocused, isMoving: false, isEnabled: isOn) {
-                    Image(systemName: Self.libraryIcon(library.collectionType))
+                    Image(systemName: MyMediaLibraries.aggregateType(library).map { $0 == .movie ? HomeRowType.allMovies.systemImage : HomeRowType.allSeries.systemImage }
+                        ?? Self.libraryIcon(library.collectionType))
                         .font(.title3)
                         .frame(width: 44)
                         .foregroundStyle(isOn ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
@@ -604,7 +605,8 @@ struct HomeCustomizeView: View {
         return HStack(spacing: 16) {
             FocusableTile(isHighlighted: isMoving, action: onTap) { isFocused in
                 tileShell(isFocused: isFocused, isMoving: isMoving, isEnabled: isVisible) {
-                    Image(systemName: Self.libraryIcon(library.collectionType))
+                    Image(systemName: MyMediaLibraries.aggregateType(library).map { $0 == .movie ? HomeRowType.allMovies.systemImage : HomeRowType.allSeries.systemImage }
+                        ?? Self.libraryIcon(library.collectionType))
                         .font(.title3)
                         .frame(width: 44)
                         .foregroundStyle(isVisible ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))

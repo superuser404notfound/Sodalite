@@ -116,12 +116,14 @@ Every feature is free. Settings are named as they appear in the app.
 - **Finds your server**: Jellyfin on your network is found automatically, or you type the address.
 - **Several servers**: keep more than one Jellyfin server and switch without logging out (Settings → Servers).
 - **One Home for all servers**: turn on Combine servers and Home merges up to five servers into one. Continue Watching becomes one timeline, a film on two servers shows once, and a server that does not answer drops out quietly. Search, genres, streaming services, Live TV, Music and the Apple TV Top Shelf work across all of them.
+- **Versions from every server**: when a film is on two combined servers, its version menu lists both servers' copies under their names. Picking one from the other server moves the page to that copy, so progress and playback belong to that server.
 - **Local and remote address**: give a server a local and a remote URL. Sodalite uses whichever one answers, so it also works over a VPN. Editable on iPhone and iPad for Jellyfin and Seerr, with a badge for the active route.
 - **Home rows**: Continue Watching, Next Up, Latest Movies, Latest Shows and My Media. Turn every row on or off, change the order, merge Continue Watching and Next Up, add a Latest row per library, and give any row a name of your own.
 - **Home banner**: pages through Recently Added, Discover (unwatched titles picked at random) or Favorites, or stays off. Customize Home also sets which movie and show libraries it picks from.
 - **Recently Released**: two optional rows that sort by release date instead of by when a title reached your server.
 - **Upcoming**: an optional row with the next episode of every show you are caught up on, and when it airs. Needs a metadata plugin that lists unaired episodes; Seerr fills in the rest.
 - **Arrange My Media**: Customize Home sets the order of your libraries and hides the ones you do not need, also across combined servers.
+- **All Movies and All Series tiles**: once you have two movie or two series libraries, on one server or across combined ones, My Media gets a tile that opens all of them in one grid. When two servers share a library name, each tile shows its server in the corner.
 - **Libraries**: Movies, Series and Collections as poster grids, with an All / Unwatched / Watched filter. Sort by title, release date, date added, rating or runtime; the sort is remembered per library and synced. Movies can be grouped into collections, following your server's setting or your own.
 - **Home videos**: a Home Videos library opens as folders, and Shuffle plays everything below the folder you are in.
 - **Series**: season picker, episode list and Up Next highlight.

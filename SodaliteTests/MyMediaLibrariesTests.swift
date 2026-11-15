@@ -67,3 +67,52 @@ struct MyMediaLibrariesTests {
         #expect(!MyMediaLibraries.hidesAudioPlaylists(.movies))
     }
 }
+
+/// Sodalite#240: one tile for every movie and one for every series, once a viewer has more than one
+/// library of that kind, on one server or across combined ones.
+struct MyMediaAggregateTilesTests {
+    private func library(_ id: String, _ type: String?, server: String = "a") -> JellyfinLibrary {
+        JellyfinLibrary(id: id, name: id, collectionType: type, imageTags: nil, serverID: server)
+    }
+
+    @Test func oneLibraryOfAKindGetsNoAllTile() {
+        let tiles = MyMediaLibraries.tiles([library("m1", "movies"), library("t1", "tvshows")])
+        #expect(tiles.map(\.id) == ["m1", "t1"])
+    }
+
+    @Test func twoMovieLibrariesOnTwoServersGetAllMoviesFirst() {
+        let tiles = MyMediaLibraries.tiles([
+            library("m1", "movies", server: "a"), library("m1", "movies", server: "b"), library("t1", "tvshows"),
+        ])
+        #expect(tiles.map(\.id) == [MyMediaLibraries.allMoviesID, "m1", "m1", "t1"])
+        #expect(MyMediaLibraries.aggregateType(tiles[0]) == .movie)
+        #expect(MyMediaLibraries.aggregateType(tiles[1]) == nil)
+    }
+
+    /// A mixed library holds both kinds, so it counts towards both tiles.
+    @Test func aMixedLibraryCountsForBoth() {
+        let tiles = MyMediaLibraries.tiles([library("x1", "mixed"), library("m1", "movies"), library("t1", "tvshows")])
+        #expect(tiles.prefix(2).map(\.id) == [MyMediaLibraries.allMoviesID, MyMediaLibraries.allSeriesID])
+    }
+
+    /// Collections, playlists and music never make a viewer's movies span two places.
+    @Test func otherViewsDoNotCount() {
+        let tiles = MyMediaLibraries.tiles([library("m1", "movies"), library("c1", "boxsets"), library("a1", "music")])
+        #expect(!tiles.contains(where: MyMediaLibraries.isAggregate))
+    }
+
+    /// The tile hangs off an id no server mints, so the layout can hide and move it like a library
+    /// without ever matching a real one.
+    @Test func theLayoutHidesAnAllTileLikeALibrary() {
+        let libraries = [library("m1", "movies"), library("m2", "movies")]
+        let tiles = MyMediaLibraries.tiles(libraries)
+        let layout = LibraryLayout(entries: []).toggling(tiles[0], in: tiles, fallbackServerID: "a")
+        #expect(layout.visible(tiles, fallbackServerID: "a").map(\.id) == ["m1", "m2"])
+        #expect(!layout.isHidden(libraries[0], fallbackServerID: "a"))
+    }
+
+    @Test func theBannerNeverOffersAnAllTile() {
+        let tiles = MyMediaLibraries.tiles([library("m1", "movies"), library("m2", "movies")])
+        #expect(HomeHeroLibraries.eligible(tiles).map(\.id) == ["m1", "m2"])
+    }
+}

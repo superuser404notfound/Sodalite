@@ -9,7 +9,8 @@ nonisolated enum HomeHeroLibraries {
     static let eligibleCollectionTypes: Set<String> = ["movies", "tvshows", "mixed"]
 
     static func eligible(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
-        libraries.filter { eligibleCollectionTypes.contains($0.collectionType ?? "") }
+        // An "All" tile (Sodalite#240) is no library the banner could draw from.
+        libraries.filter { eligibleCollectionTypes.contains($0.collectionType ?? "") && !MyMediaLibraries.isAggregate($0) }
     }
 
     private static func key(scope: String) -> String { "homeHeroExcludedLibraries.\(scope)" }

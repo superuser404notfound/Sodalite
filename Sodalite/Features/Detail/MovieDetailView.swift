@@ -59,7 +59,13 @@ struct MovieDetailView: View {
     /// TopShelf playAction: fire the primary play action once, as soon as full detail has settled.
     var autoPlay: Bool = false
     var autoPlayFromBeginning: Bool = false
+    /// The version to stand on when the page opens: a version picked from another server's copy
+    /// moves the whole page here, and the pick comes along (Sodalite#240).
+    var initialSourceID: String? = nil
     @State private var didAutoPlay = false
+    /// The same film on the other combined servers, listed in the version menu (Sodalite#240).
+    @State private var twins: [ServerTwin] = []
+    @Environment(\.switchToServerTwin) private var switchToServerTwin
 
     /// Whether this page offers deletion at all, and the item's own `CanDelete` is the whole answer
     /// wherever the server sent it (Sodalite#146). Jellyfin computes that field for THIS user from
@@ -188,6 +194,10 @@ struct MovieDetailView: View {
         #if !os(tvOS)
         .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
         #endif
+        .task(id: twinLookupKey) {
+            guard let item = viewModel?.item, viewModel?.hasFullDetail == true else { return }
+            twins = await ServerTwins.find(for: item, pageServerID: session.server?.id, on: twinSources)
+        }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
@@ -195,7 +205,13 @@ struct MovieDetailView: View {
                     isSupporter: dependencies.storeKitService.isSupporter
                 ),
                 selectedID: choice.selectedID,
-                order: dependencies.playbackPreferences.versionOrder
+                order: dependencies.playbackPreferences.versionOrder,
+                serverName: choice.serverName,
+                twins: choice.twins,
+                onSelectTwin: { twin, source in
+                    versionChoice = nil
+                    switchToServerTwin?(twin, source)
+                }
             ) { source in
                 versionPick.choose(source, for: choice.item)
                 versionChoice = nil
@@ -289,6 +305,9 @@ struct MovieDetailView: View {
                 .detailCoverPush()
         }
         .onAppear {
+            if let initialSourceID, viewModel == nil {
+                versionPick.choose(sourceID: initialSourceID, forItemID: item.id)
+            }
             if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
@@ -588,6 +607,34 @@ struct MovieDetailView: View {
     /// because a page can render from a slim item that carries no media sources at all: the id only
     /// appears once the detail round trip has landed, and that is the moment there is something to
     /// ask about.
+    /// Once per fetched item, and only while servers are combined.
+    private var twinLookupKey: String {
+        guard viewModel?.hasFullDetail == true, let item = viewModel?.item else { return "" }
+        return "\(item.originKey)|\(dependencies.sessionRegistry.participantsRevision)"
+    }
+
+    /// Every combined server but this page's own, with the account that reads each one.
+    private var twinSources: [TwinSource] {
+        let participants = dependencies.sessionRegistry.participants
+        guard participants.count > 1 else { return [] }
+        return participants.compactMap { participant in
+            guard let server = participant.server,
+                  let userID = participant.isActive ? appState.activeUser?.id : participant.userID
+            else { return nil }
+            return TwinSource(serverID: server.id, serverName: server.name, userID: userID, itemService: participant.itemService)
+        }
+    }
+
+    /// The version in force, and its server once other servers' copies are on offer, since the
+    /// same "4K" can then mean either one.
+    private func versionButtonSubtitle(vm: DetailViewModel) -> String? {
+        let sources = vm.item.selectableMediaSources
+        let source = versionSelection.resolvedSource(for: vm.item)
+        let label = sources.count > 1 ? source.map(sources.distinguishingLabel) : source?.resolutionLabel
+        guard !twins.isEmpty, let name = session.server?.name else { return label }
+        return [name, label].compactMap { $0 }.joined(separator: " · ")
+    }
+
     private var hdr10PlusProbeKey: String {
         guard let item = viewModel?.item else { return "-" }
         let source = item.effectiveMediaSource(id: versionSelection.preferredSourceID(for: item))
@@ -712,18 +759,20 @@ struct MovieDetailView: View {
             // presence answers "does this have more than one version" before it is ever pressed
             // (Sodalite#139). Its label is the part of the version's name the others do not share,
             // since the shared start is what a truncation keeps (Sodalite#172).
-            if VersionSelection.isOffered(for: vm.item) {
+            if VersionSelection.isOffered(for: vm.item) || !twins.isEmpty {
                 let sources = vm.item.selectableMediaSources
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
-                    subtitle: versionSelection.resolvedSource(for: vm.item).map(sources.distinguishingLabel),
+                    subtitle: versionButtonSubtitle(vm: vm),
                     alwaysShowsLabel: VersionSelection.labelStaysOpen,
                     action: {
                         versionChoice = VersionPickerChoice(
                             item: vm.item,
                             sources: sources,
-                            selectedID: versionSelection.resolvedSource(for: vm.item)?.id
+                            selectedID: versionSelection.resolvedSource(for: vm.item)?.id,
+                            serverName: session.server?.name,
+                            twins: twins
                         )
                     }
                 )

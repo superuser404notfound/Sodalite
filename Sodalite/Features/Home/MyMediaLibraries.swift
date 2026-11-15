@@ -16,6 +16,54 @@ enum MyMediaLibraries {
         libraries.filter { browsableCollectionTypes.contains($0.collectionType ?? "") }
     }
 
+    // MARK: All Movies / All Series tiles (Sodalite#240)
+
+    /// Owner of the two "All" tiles. No Jellyfin server mints this id, so a tile never matches a
+    /// real library in the layout, the label lookup or a grid query.
+    nonisolated static let aggregateServerID = "sodalite.all"
+    static let allMoviesID = "all-movies"
+    static let allSeriesID = "all-series"
+
+    nonisolated static func isAggregate(_ library: JellyfinLibrary) -> Bool {
+        library.serverID == aggregateServerID
+    }
+
+    /// The item type an "All" tile opens, nil for a real library.
+    static func aggregateType(_ library: JellyfinLibrary) -> ItemType? {
+        guard isAggregate(library) else { return nil }
+        switch library.id {
+        case allMoviesID: return .movie
+        case allSeriesID: return .series
+        default: return nil
+        }
+    }
+
+    /// "All Movies" once two libraries can hold movies, "All Series" once two can hold shows, on
+    /// one server or across combined ones. With a single library the tile would open the same
+    /// titles as that library's own tile. Hidden libraries count: hiding both "Movies" copies and
+    /// keeping "Kids Movies" is exactly the setup the tile is for.
+    static func aggregates(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
+        let types = libraries.compactMap(\.collectionType)
+        var result: [JellyfinLibrary] = []
+        if types.filter({ $0 == "movies" || $0 == "mixed" }).count >= 2 {
+            result.append(aggregate(id: allMoviesID, name: String(localized: "home.allMovies"), collectionType: "movies"))
+        }
+        if types.filter({ $0 == "tvshows" || $0 == "mixed" }).count >= 2 {
+            result.append(aggregate(id: allSeriesID, name: String(localized: "home.allSeries"), collectionType: "tvshows"))
+        }
+        return result
+    }
+
+    private static func aggregate(id: String, name: String, collectionType: String) -> JellyfinLibrary {
+        JellyfinLibrary(id: id, name: name, collectionType: collectionType, imageTags: nil, serverID: aggregateServerID)
+    }
+
+    /// The tiles My Media lays out: the "All" tiles first, then the browsable libraries.
+    static func tiles(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
+        let browsable = browsable(libraries)
+        return aggregates(browsable) + browsable
+    }
+
     /// A view Jellyfin lists under /Users/{id}/Views without a folder id that scopes its items. Their
     /// contents answer to the type filter alone, which is how both Home rows fetch them; scoping one
     /// by parentID is what returns an empty grid.

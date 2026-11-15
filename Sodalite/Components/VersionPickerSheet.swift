@@ -105,17 +105,27 @@ struct VersionPickerChoice: Identifiable {
     let sources: [MediaSource]
     /// The version the page currently describes, so the sheet opens on it rather than on its own top row.
     let selectedID: String?
+    /// The page's own server, heading its versions once other servers' copies are listed below.
+    var serverName: String? = nil
+    /// The same title on the other combined servers (Sodalite#240).
+    var twins: [ServerTwin] = []
 }
 
 // MARK: - Version picker sheet
 
 /// Multi-source version picker (highest quality first, or the server's order by setting); `onSelect` gets the chosen source, dismissing without one leaves the page on the version it already showed.
+///
+/// With combined servers it also lists the copies other servers hold of the same title, one group
+/// per server, and a pick there goes to `onSelectTwin` instead (Sodalite#240).
 struct VersionPickerSheet: View {
     let sources: [MediaSource]
     let tintColor: Color
     /// The version in force, checked and focused on open. A picker that only offers is half an answer: it has to say where the page stands (Sodalite#139).
     var selectedID: String?
     var order: VersionOrder = .quality
+    var serverName: String? = nil
+    var twins: [ServerTwin] = []
+    var onSelectTwin: ((ServerTwin, MediaSource) -> Void)? = nil
     let onSelect: (MediaSource) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -124,9 +134,38 @@ struct VersionPickerSheet: View {
     /// iPhone (compact) shrinks the tvOS-scaled padding/fonts/row heights; tvOS/iPad keep full size.
     private var isCompact: Bool { hSizeClass == .compact }
 
-    private var sorted: [MediaSource] {
-        sources.ordered(order)
+    /// A row's key carries its server: two servers built from the same folder layout mint the same
+    /// item and source ids (Sodalite#85), and focus has to tell those rows apart.
+    struct Row: Identifiable {
+        let id: String
+        let source: MediaSource
+        let twin: ServerTwin?
     }
+
+    struct Group: Identifiable {
+        let id: String
+        let title: String?
+        let rows: [Row]
+    }
+
+    private static func ownKey(_ sourceID: String) -> String { "own|\(sourceID)" }
+
+    private var groups: [Group] {
+        let own = sources.ordered(order).map { Row(id: Self.ownKey($0.id), source: $0, twin: nil) }
+        guard !twins.isEmpty else { return [Group(id: "own", title: nil, rows: own)] }
+        return [Group(id: "own", title: serverName, rows: own)] + twins.map { twin in
+            Group(
+                id: twin.id,
+                title: twin.serverName,
+                rows: twin.item.selectableMediaSources.ordered(order).map {
+                    Row(id: "\(twin.id)|\($0.id)", source: $0, twin: twin)
+                }
+            )
+        }
+    }
+
+    private var rowCount: Int { groups.reduce(0) { $0 + $1.rows.count } }
+    private var selectedKey: String? { selectedID.map(Self.ownKey) }
 
     var body: some View {
         VStack(spacing: isCompact ? 20 : 36) {
@@ -135,15 +174,23 @@ struct VersionPickerSheet: View {
                 .fontWeight(.semibold)
 
             ScrollView {
-                VStack(spacing: isCompact ? 12 : 16) {
-                    ForEach(sorted) { source in
-                        row(source)
+                VStack(alignment: .leading, spacing: isCompact ? 12 : 16) {
+                    ForEach(groups) { group in
+                        if let title = group.title {
+                            Label(title, systemImage: "server.rack")
+                                .font(.callout)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+                                .padding(.top, group.id == "own" ? 0 : (isCompact ? 8 : 16))
+                                .padding(.horizontal, isCompact ? 18 : 32)
+                        }
+                        ForEach(group.rows) { row($0) }
                     }
                 }
                 .frame(
                     maxWidth: 760,
-                    minHeight: sorted.count > 1
-                        ? min(CGFloat(sorted.count) * (isCompact ? 64 : 140), isCompact ? 360 : 720)
+                    minHeight: rowCount > 1
+                        ? min(CGFloat(rowCount) * (isCompact ? 64 : 140), isCompact ? 360 : 720)
                         : nil
                 )
                 .padding(.vertical, 8)
@@ -155,17 +202,17 @@ struct VersionPickerSheet: View {
         #if os(iOS)
         .background(.thinMaterial)
         #endif
-        .onAppear { focusedID = selectedID ?? sorted.first?.id }
+        .onAppear { focusedID = selectedKey ?? groups.first?.rows.first?.id }
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
     }
 
-    private func row(_ source: MediaSource) -> some View {
-        let isFocused = focusedID == source.id
-        let isSelected = selectedID == source.id
+    private func row(_ row: Row) -> some View {
+        let isFocused = focusedID == row.id
+        let isSelected = selectedKey == row.id
         return HStack {
-            Text(source.versionLabel)
+            Text(row.source.versionLabel)
                 .font(.body)
                 .fontWeight(.medium)
                 .multilineTextAlignment(.leading)
@@ -188,9 +235,13 @@ struct VersionPickerSheet: View {
         )
         .foregroundStyle(isFocused ? Color.black : Color.primary)
         .focusableSurface(true)
-        .focused($focusedID, equals: source.id)
+        .focused($focusedID, equals: row.id)
         .stableTap(isFocused: isFocused) {
-            onSelect(source)
+            if let twin = row.twin {
+                onSelectTwin?(twin, row.source)
+            } else {
+                onSelect(row.source)
+            }
             dismiss()
         }
     }

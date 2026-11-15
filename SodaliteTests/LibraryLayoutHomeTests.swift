@@ -26,6 +26,15 @@ struct LibraryLayoutHomeTests {
         #expect(model.myMediaVisible(libs).map(\.id) == ["3", "1"])
     }
 
+    /// Sodalite#240: the "All" tiles reach the row and nothing else, since everything that reads
+    /// `myMediaLibraries` treats an entry as a real library on a real server.
+    @Test func allTilesReachTheRowOnly() {
+        let model = vm()
+        model.applyMyMedia([library("1", server: "a"), library("2", server: "b")])
+        #expect(model.myMediaLibraries.map(\.id) == ["1", "2"])
+        #expect(model.myMediaTiles.map(\.id) == [MyMediaLibraries.allMoviesID, "1", "2"])
+    }
+
     @Test func aHiddenLibrarysLatestRowIsNotPlanned() {
         let model = vm()
         model.libraryLayout = LibraryLayout(entries: [.init(serverID: "a", libraryID: "2", isHidden: true)])
