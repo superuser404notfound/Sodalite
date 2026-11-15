@@ -36,6 +36,8 @@ final class ScrubPreviewProvider {
     /// with the FrameExtractor source; reset() clears it. Mirrors `liveThumbnail`: a
     /// MainActor closure that does its placement/URL work, then hops off-actor to fetch.
     @ObservationIgnored private var serverThumbnail: ((Double) async -> CGImage?)?
+    /// The session's sprites behind `serverThumbnail` when the player wired them; closed on reset().
+    @ObservationIgnored private(set) var serverTiles: TrickplayTileStore?
     /// Compositor preview: shows `seconds` in the view and answers whether it did. Asked before the
     /// still sources, so a session it does not apply to has to answer false at once.
     @ObservationIgnored private var viewPreview: ((Double, AetherScrubPreviewView) async -> Bool)?
@@ -71,6 +73,12 @@ final class ScrubPreviewProvider {
         reset()
         self.serverThumbnail = serverThumbnail
         self.enabled = enabled
+    }
+
+    /// Server trickplay backed by the session's sprite store, which reset() closes.
+    func configure(serverTiles: TrickplayTileStore, enabled: Bool) {
+        configure(serverThumbnail: { seconds in await serverTiles.thumbnail(seconds: seconds) }, enabled: enabled)
+        self.serverTiles = serverTiles
     }
 
     /// Set up for a live session, mutually exclusive with
@@ -153,6 +161,8 @@ final class ScrubPreviewProvider {
 
     /// Drive the preview to a scrub position (`fraction` 0...1). Debounced so a
     /// fast swipe doesn't decode per frame; `generation` guard drops stale results.
+    /// Server trickplay is not debounced: a sprite in memory is a crop, and the debounce restarted
+    /// with every move of a swipe, so the preview stayed empty until the finger rested (Sodalite#212).
     func update(fraction: Float, durationSeconds: Double) {
         guard enabled, durationSeconds > 0 else { return }
         let seconds = Double(max(0, min(1, fraction))) * durationSeconds
@@ -161,9 +171,12 @@ final class ScrubPreviewProvider {
         generation += 1
         let gen = generation
         loadTask?.cancel()
+        let debounce = serverThumbnail == nil
         loadTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(60))
-            if Task.isCancelled { return }
+            if debounce {
+                try? await Task.sleep(for: .milliseconds(60))
+                if Task.isCancelled { return }
+            }
             guard let self else { return }
             await self.resolveAndPublish(seconds: seconds, gen: gen)
         }
@@ -196,6 +209,8 @@ final class ScrubPreviewProvider {
         refinedThumbnail = nil
         liveThumbnail = nil
         serverThumbnail = nil
+        serverTiles?.close()
+        serverTiles = nil
         enabled = false
     }
 }

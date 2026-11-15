@@ -23,7 +23,7 @@ struct ImageDecodeOffMainTests {
         let expected = [
             ("Sodalite/Components/AsyncCachedImage.swift", "@concurrent nonisolated private static func fetchAndDecode("),
             ("Sodalite/Player/PlayerViewModel.swift", "@concurrent nonisolated private static func loadServerChapterImage("),
-            ("Sodalite/Player/PlayerViewModel.swift", "@concurrent nonisolated private static func fetchTrickplayCrop("),
+            ("Sodalite/Player/TrickplayTileStore.swift", "@concurrent nonisolated private static func decode("),
             ("Sodalite/Services/Networking/HTTPClient.swift", "@concurrent nonisolated private static func decode<T: Decodable>("),
         ]
         for (path, signature) in expected {

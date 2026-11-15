@@ -700,29 +700,6 @@ final class PlayerViewModel {
         return prepared.cgImage
     }
 
-    /// Fetch a trickplay tile sprite (cached whole, keyed by tile URL) and crop `crop` out of it.
-    /// Off-MainActor (network + decode), mirroring loadServerChapterImage. The MainActor caller
-    /// resolves the tile URL + crop rect from the TrickplayTileSet first. Nil on fetch failure or
-    /// an out-of-bounds crop.
-    @concurrent nonisolated private static func fetchTrickplayCrop(from url: URL, crop: CGRect) async -> CGImage? {
-        let tileImage: PlatformImage
-        if let cached = ImageCache.shared.image(for: url) {
-            tileImage = cached
-        } else {
-            var request = URLRequest(url: url)
-            request.timeoutInterval = 15
-            guard case .whole(let data) = await ImageFetch.load(request),
-                  let image = PlatformImage(data: data) else { return nil }
-            let prepared = image.preparedForDisplay() ?? image
-            ImageCache.shared.store(prepared, for: url)
-            tileImage = prepared
-        }
-        guard let cg = tileImage.cgImage else { return nil }
-        guard crop.maxX <= CGFloat(cg.width), crop.maxY <= CGFloat(cg.height),
-              let cropped = cg.cropping(to: crop) else { return nil }
-        return cropped
-    }
-
     /// Use server trickplay only when the user opted in AND the item actually has tiles.
     /// A disc folder takes the tiles regardless of the preference: it has no extractor (Sodalite#185).
     nonisolated static func shouldUseServerTrickplay(preferServer: Bool, tileSet: TrickplayTileSet?,
@@ -1144,17 +1121,16 @@ final class PlayerViewModel {
            let tileSet = trickplayTileSet {
             let itemID = item.id
             let service = playbackService
-            scrubPreview.configure(
-                serverThumbnail: { seconds in
-                    // MainActor: resolve tile index + crop, then hop off-actor to fetch/decode.
-                    guard let placement = tileSet.tile(forSeconds: seconds),
-                          let url = service.buildTrickplayTileURL(
-                              itemID: itemID, width: tileSet.width, tileIndex: placement.tileIndex)
-                    else { return nil }
-                    return await Self.fetchTrickplayCrop(from: url, crop: placement.crop)
-                },
-                enabled: preferences.showScrubPreview
-            )
+            let tiles = TrickplayTileStore(tileSet: tileSet) { index in
+                service.buildTrickplayTileURL(itemID: itemID, width: tileSet.width, tileIndex: index)
+            }
+            scrubPreview.configure(serverTiles: tiles, enabled: preferences.showScrubPreview)
+            if preferences.showScrubPreview {
+                tiles.prefetch { [weak self] in
+                    guard let self else { return 0 }
+                    return Double(self.progress) * self.scrubReferenceDuration
+                }
+            }
         } else {
             // Cache-first: resident loopback segments (native) or the packet spool (software)
             // decode with no second connection; the extractor is the fallback for non-resident

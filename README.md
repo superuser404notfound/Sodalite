@@ -192,7 +192,7 @@ Every feature is free. Settings are named as they appear in the app.
 ### Player controls
 
 - **Custom player**: our own transport bar and info panel, with the gestures and feel of Apple's player.
-- **Scrub previews**: frame-exact thumbnails, generated on the device, so they work even without trickplay images on your server. Optionally use your server's trickplay images instead.
+- **Scrub previews**: frame-exact thumbnails, generated on the device, so they work even without trickplay images on your server. Optionally use your server's trickplay images instead. Those are fetched in the background a few seconds into playback, so a fast swipe has a picture at every step.
 - **Click to pause** (Apple TV): a click pauses and resumes right away. Up or Down shows the controls. Works well with TV remotes over HDMI-CEC.
 - **Instant skip**: left or right seeks at once; quick presses add up into one seek.
 - **Fast forward and rewind**: hold left or right on the Apple TV remote for 8x, press again for 32x and 128x (256x on long films). Select plays from there, Back cancels.

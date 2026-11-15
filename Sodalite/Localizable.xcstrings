@@ -72430,157 +72430,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržením vlevo nebo vpravo přetáčíte až rychlostí 128x a po puštění se pokračuje dál. Při pauze ukazuje náhled přesný snímek, tituly v Dolby Vision profilu 5 mají opět náhledy a starší Apple TV už nezadrhávají kvůli náhledům dekódovaným během přehrávání. Náhledy Trickplay ze serveru opět fungují s Jellyfin 12."
+            "value" : "Podržením vlevo nebo vpravo přetáčíte až rychlostí 128x a po puštění se pokračuje dál. Při pauze ukazuje náhled přesný snímek, tituly v Dolby Vision profilu 5 mají opět náhledy a starší Apple TV už nezadrhávají kvůli náhledům dekódovaným během přehrávání. Náhledy Trickplay ze serveru opět fungují s Jellyfin 12. Načítají se teď předem na pozadí, takže stačí i rychlému posunu."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold venstre eller højre for at spole med op til 128x, og det fortsætter, når du slipper. På pause viser forhåndsvisningen den præcise ramme, titler i Dolby Vision profil 5 har forhåndsvisninger igen, og ældre Apple TV hakker ikke længere på grund af forhåndsvisninger, der afkodes under afspilning. Trickplay-forhåndsvisninger fra serveren virker igen med Jellyfin 12."
+            "value" : "Hold venstre eller højre for at spole med op til 128x, og det fortsætter, når du slipper. På pause viser forhåndsvisningen den præcise ramme, titler i Dolby Vision profil 5 har forhåndsvisninger igen, og ældre Apple TV hakker ikke længere på grund af forhåndsvisninger, der afkodes under afspilning. Trickplay-forhåndsvisninger fra serveren virker igen med Jellyfin 12. De hentes nu på forhånd i baggrunden, så de kan følge med et hurtigt swipe."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Halte links oder rechts für bis zu 128-fachen Suchlauf, der auch nach dem Loslassen weiterläuft. Pausiert zeigt die Vorschau das exakte Bild, Dolby Vision Profile 5 hat wieder Vorschaubilder, und ältere Apple TVs ruckeln nicht mehr durch Vorschauen, die während der Wiedergabe dekodiert wurden. Trickplay-Vorschaubilder vom Server funktionieren mit Jellyfin 12 wieder."
+            "value" : "Halte links oder rechts für bis zu 128-fachen Suchlauf, der auch nach dem Loslassen weiterläuft. Pausiert zeigt die Vorschau das exakte Bild, Dolby Vision Profile 5 hat wieder Vorschaubilder, und ältere Apple TVs ruckeln nicht mehr durch Vorschauen, die während der Wiedergabe dekodiert wurden. Trickplay-Vorschaubilder vom Server funktionieren mit Jellyfin 12 wieder. Sie werden jetzt vorab im Hintergrund geladen und kommen auch bei schnellem Wischen mit."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κρατήστε αριστερά ή δεξιά για σάρωση έως 128x, και συνεχίζει όταν αφήσετε το κουμπί. Σε παύση η προεπισκόπηση δείχνει το ακριβές καρέ, οι τίτλοι Dolby Vision προφίλ 5 έχουν ξανά προεπισκοπήσεις, και τα παλαιότερα Apple TV δεν κολλάνε πια από προεπισκοπήσεις που αποκωδικοποιούνται κατά την αναπαραγωγή. Οι προεπισκοπήσεις Trickplay του διακομιστή λειτουργούν ξανά με το Jellyfin 12."
+            "value" : "Κρατήστε αριστερά ή δεξιά για σάρωση έως 128x, και συνεχίζει όταν αφήσετε το κουμπί. Σε παύση η προεπισκόπηση δείχνει το ακριβές καρέ, οι τίτλοι Dolby Vision προφίλ 5 έχουν ξανά προεπισκοπήσεις, και τα παλαιότερα Apple TV δεν κολλάνε πια από προεπισκοπήσεις που αποκωδικοποιούνται κατά την αναπαραγωγή. Οι προεπισκοπήσεις Trickplay του διακομιστή λειτουργούν ξανά με το Jellyfin 12. Φορτώνονται πλέον εκ των προτέρων στο παρασκήνιο, ώστε να προλαβαίνουν ένα γρήγορο σάρωμα."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold left or right to scan at up to 128x, and it keeps going after you let go. While paused, the scrub preview shows the exact frame, Dolby Vision Profile 5 titles have previews again, and older Apple TVs no longer stutter from previews decoded during playback. Server trickplay previews work again on Jellyfin 12."
+            "value" : "Hold left or right to scan at up to 128x, and it keeps going after you let go. While paused, the scrub preview shows the exact frame, Dolby Vision Profile 5 titles have previews again, and older Apple TVs no longer stutter from previews decoded during playback. Server trickplay previews work again on Jellyfin 12. They now load ahead in the background, so they keep up with a fast swipe."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantén pulsado izquierda o derecha para avanzar hasta 128x, y sigue avanzando al soltar. En pausa, la vista previa muestra el fotograma exacto, los títulos Dolby Vision perfil 5 vuelven a tener vistas previas y los Apple TV antiguos ya no dan tirones por vistas previas decodificadas durante la reproducción. Las vistas previas Trickplay del servidor vuelven a funcionar con Jellyfin 12."
+            "value" : "Mantén pulsado izquierda o derecha para avanzar hasta 128x, y sigue avanzando al soltar. En pausa, la vista previa muestra el fotograma exacto, los títulos Dolby Vision perfil 5 vuelven a tener vistas previas y los Apple TV antiguos ya no dan tirones por vistas previas decodificadas durante la reproducción. Las vistas previas Trickplay del servidor vuelven a funcionar con Jellyfin 12. Ahora se cargan por adelantado en segundo plano, así que siguen el ritmo de un deslizamiento rápido."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pidä vasenta tai oikeaa painettuna kelataksesi jopa nopeudella 128x, ja kelaus jatkuu, kun päästät irti. Taukotilassa esikatselu näyttää tarkan ruudun, Dolby Vision -profiilin 5 nimikkeillä on taas esikatselut, eivätkä vanhemmat Apple TV:t enää nyi toiston aikana purettujen esikatselujen takia. Palvelimen Trickplay-esikatselut toimivat taas Jellyfin 12:n kanssa."
+            "value" : "Pidä vasenta tai oikeaa painettuna kelataksesi jopa nopeudella 128x, ja kelaus jatkuu, kun päästät irti. Taukotilassa esikatselu näyttää tarkan ruudun, Dolby Vision -profiilin 5 nimikkeillä on taas esikatselut, eivätkä vanhemmat Apple TV:t enää nyi toiston aikana purettujen esikatselujen takia. Palvelimen Trickplay-esikatselut toimivat taas Jellyfin 12:n kanssa. Ne ladataan nyt etukäteen taustalla, joten ne pysyvät nopean pyyhkäisyn mukana."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintenez gauche ou droite pour défiler jusqu’à 128x, et le défilement continue une fois relâché. En pause, l’aperçu affiche l’image exacte, les titres Dolby Vision profil 5 ont de nouveau des aperçus, et les Apple TV plus anciennes ne saccadent plus à cause d’aperçus décodés pendant la lecture. Les aperçus Trickplay du serveur fonctionnent à nouveau avec Jellyfin 12."
+            "value" : "Maintenez gauche ou droite pour défiler jusqu’à 128x, et le défilement continue une fois relâché. En pause, l’aperçu affiche l’image exacte, les titres Dolby Vision profil 5 ont de nouveau des aperçus, et les Apple TV plus anciennes ne saccadent plus à cause d’aperçus décodés pendant la lecture. Les aperçus Trickplay du serveur fonctionnent à nouveau avec Jellyfin 12. Ils sont désormais chargés à l’avance en arrière-plan et suivent un balayage rapide."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Držite lijevo ili desno za premotavanje do 128x, a ono se nastavlja i kad pustite. Tijekom pauze pregled prikazuje točan kadar, naslovi u Dolby Vision profilu 5 ponovno imaju preglede, a stariji Apple TV uređaji više ne trzaju zbog pregleda dekodiranih tijekom reprodukcije. Trickplay pretpregledi s poslužitelja ponovno rade s Jellyfin 12."
+            "value" : "Držite lijevo ili desno za premotavanje do 128x, a ono se nastavlja i kad pustite. Tijekom pauze pregled prikazuje točan kadar, naslovi u Dolby Vision profilu 5 ponovno imaju preglede, a stariji Apple TV uređaji više ne trzaju zbog pregleda dekodiranih tijekom reprodukcije. Trickplay pretpregledi s poslužitelja ponovno rade s Jellyfin 12. Sada se unaprijed učitavaju u pozadini, pa prate i brzo povlačenje."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tartsd nyomva a balra vagy jobbra gombot akár 128x-os tekeréshez, és elengedés után is folytatódik. Szüneteltetve az előnézet a pontos képkockát mutatja, a Dolby Vision 5-ös profilú címeknek ismét van előnézetük, a régebbi Apple TV-k pedig már nem akadoznak a lejátszás közben dekódolt előnézetek miatt. A szerver Trickplay-előnézetei újra működnek a Jellyfin 12-vel."
+            "value" : "Tartsd nyomva a balra vagy jobbra gombot akár 128x-os tekeréshez, és elengedés után is folytatódik. Szüneteltetve az előnézet a pontos képkockát mutatja, a Dolby Vision 5-ös profilú címeknek ismét van előnézetük, a régebbi Apple TV-k pedig már nem akadoznak a lejátszás közben dekódolt előnézetek miatt. A szerver Trickplay-előnézetei újra működnek a Jellyfin 12-vel. Mostantól előre, a háttérben töltődnek be, így gyors húzásnál is lépést tartanak."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tieni premuto sinistra o destra per scorrere fino a 128x, e continua anche quando rilasci. In pausa l’anteprima di scorrimento mostra il fotogramma esatto, i titoli Dolby Vision profilo 5 hanno di nuovo le anteprime e le Apple TV meno recenti non scattano più per le anteprime decodificate durante la riproduzione. Le anteprime Trickplay del server funzionano di nuovo con Jellyfin 12."
+            "value" : "Tieni premuto sinistra o destra per scorrere fino a 128x, e continua anche quando rilasci. In pausa l’anteprima di scorrimento mostra il fotogramma esatto, i titoli Dolby Vision profilo 5 hanno di nuovo le anteprime e le Apple TV meno recenti non scattano più per le anteprime decodificate durante la riproduzione. Le anteprime Trickplay del server funzionano di nuovo con Jellyfin 12. Ora vengono caricate in anticipo in background, così tengono il passo anche con uno scorrimento rapido."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "左右を長押しすると最大128xで早送りでき、離しても続きます。一時停止中はスクラブプレビューに正確なフレームが表示され、Dolby Vision プロファイル5のタイトルでもプレビューが再び表示されます。旧型のApple TVで、再生中にデコードされるプレビューによってカクつくこともなくなりました。サーバーのTrickplayプレビューがJellyfin 12で再び表示されるようになりました。"
+            "value" : "左右を長押しすると最大128xで早送りでき、離しても続きます。一時停止中はスクラブプレビューに正確なフレームが表示され、Dolby Vision プロファイル5のタイトルでもプレビューが再び表示されます。旧型のApple TVで、再生中にデコードされるプレビューによってカクつくこともなくなりました。サーバーのTrickplayプレビューがJellyfin 12で再び表示されるようになりました。バックグラウンドで先読みされるようになり、素早くスワイプしても追従します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "왼쪽이나 오른쪽을 길게 누르면 최대 128x로 탐색하며, 손을 떼도 계속됩니다. 일시 정지 중에는 탐색 미리보기가 정확한 프레임을 보여 주고, Dolby Vision 프로필 5 타이틀에서도 미리보기가 다시 표시되며, 구형 Apple TV에서 재생 중 디코딩되는 미리보기 때문에 끊기는 일이 더 이상 없습니다. 서버의 Trickplay 미리보기가 Jellyfin 12에서 다시 작동합니다."
+            "value" : "왼쪽이나 오른쪽을 길게 누르면 최대 128x로 탐색하며, 손을 떼도 계속됩니다. 일시 정지 중에는 탐색 미리보기가 정확한 프레임을 보여 주고, Dolby Vision 프로필 5 타이틀에서도 미리보기가 다시 표시되며, 구형 Apple TV에서 재생 중 디코딩되는 미리보기 때문에 끊기는 일이 더 이상 없습니다. 서버의 Trickplay 미리보기가 Jellyfin 12에서 다시 작동합니다. 이제 백그라운드에서 미리 불러오므로 빠르게 스와이프해도 따라옵니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold venstre eller høyre for å spole med opptil 128x, og det fortsetter når du slipper. Ved pause viser forhåndsvisningen den nøyaktige rammen, titler i Dolby Vision profil 5 har forhåndsvisninger igjen, og eldre Apple TV hakker ikke lenger av forhåndsvisninger som dekodes under avspilling. Trickplay-forhåndsvisninger fra serveren virker igjen med Jellyfin 12."
+            "value" : "Hold venstre eller høyre for å spole med opptil 128x, og det fortsetter når du slipper. Ved pause viser forhåndsvisningen den nøyaktige rammen, titler i Dolby Vision profil 5 har forhåndsvisninger igjen, og eldre Apple TV hakker ikke lenger av forhåndsvisninger som dekodes under avspilling. Trickplay-forhåndsvisninger fra serveren virker igjen med Jellyfin 12. De lastes nå på forhånd i bakgrunnen, så de holder følge med et raskt sveip."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd links of rechts ingedrukt om met tot 128x te spoelen, en het gaat door als je loslaat. Tijdens een pauze toont de scrubvoorvertoning het exacte beeld, titels in Dolby Vision profiel 5 hebben weer voorvertoningen en oudere Apple TV's haperen niet meer door voorvertoningen die tijdens het afspelen worden gedecodeerd. Trickplay-voorbeelden van de server werken weer met Jellyfin 12."
+            "value" : "Houd links of rechts ingedrukt om met tot 128x te spoelen, en het gaat door als je loslaat. Tijdens een pauze toont de scrubvoorvertoning het exacte beeld, titels in Dolby Vision profiel 5 hebben weer voorvertoningen en oudere Apple TV's haperen niet meer door voorvertoningen die tijdens het afspelen worden gedecodeerd. Trickplay-voorbeelden van de server werken weer met Jellyfin 12. Ze worden nu vooraf op de achtergrond geladen, zodat ze een snelle veeg bijhouden."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przytrzymaj w lewo lub w prawo, aby przewijać z prędkością do 128x, a po puszczeniu przewijanie trwa dalej. Podczas pauzy podgląd przewijania pokazuje dokładną klatkę, tytuły w Dolby Vision profil 5 znów mają podgląd, a starsze Apple TV nie zacinają się już przez podglądy dekodowane w trakcie odtwarzania. Podglądy Trickplay z serwera znów działają z Jellyfin 12."
+            "value" : "Przytrzymaj w lewo lub w prawo, aby przewijać z prędkością do 128x, a po puszczeniu przewijanie trwa dalej. Podczas pauzy podgląd przewijania pokazuje dokładną klatkę, tytuły w Dolby Vision profil 5 znów mają podgląd, a starsze Apple TV nie zacinają się już przez podglądy dekodowane w trakcie odtwarzania. Podglądy Trickplay z serwera znów działają z Jellyfin 12. Są teraz wczytywane z wyprzedzeniem w tle, więc nadążają za szybkim przesunięciem."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Segure esquerda ou direita para avançar a até 128x, e o avanço continua depois que você solta. Com a reprodução pausada, a prévia de rolagem mostra o quadro exato, títulos em Dolby Vision perfil 5 voltam a ter prévias e Apple TVs mais antigas não engasgam mais com prévias decodificadas durante a reprodução. As prévias Trickplay do servidor voltaram a funcionar com o Jellyfin 12."
+            "value" : "Segure esquerda ou direita para avançar a até 128x, e o avanço continua depois que você solta. Com a reprodução pausada, a prévia de rolagem mostra o quadro exato, títulos em Dolby Vision perfil 5 voltam a ter prévias e Apple TVs mais antigas não engasgam mais com prévias decodificadas durante a reprodução. As prévias Trickplay do servidor voltaram a funcionar com o Jellyfin 12. Agora elas são carregadas antecipadamente em segundo plano e acompanham um deslize rápido."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantenha premido esquerda ou direita para avançar até 128x, e o avanço continua depois de largar. Em pausa, a pré-visualização de deslocação mostra a imagem exata, os títulos em Dolby Vision perfil 5 voltam a ter pré-visualizações e as Apple TV mais antigas já não engasgam com pré-visualizações descodificadas durante a reprodução. As pré-visualizações Trickplay do servidor voltaram a funcionar com o Jellyfin 12."
+            "value" : "Mantenha premido esquerda ou direita para avançar até 128x, e o avanço continua depois de largar. Em pausa, a pré-visualização de deslocação mostra a imagem exata, os títulos em Dolby Vision perfil 5 voltam a ter pré-visualizações e as Apple TV mais antigas já não engasgam com pré-visualizações descodificadas durante a reprodução. As pré-visualizações Trickplay do servidor voltaram a funcionar com o Jellyfin 12. Agora são carregadas antecipadamente em segundo plano e acompanham um deslize rápido."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ține apăsat stânga sau dreapta pentru a derula cu până la 128x, iar derularea continuă după ce eliberezi. În pauză, previzualizarea la derulare arată cadrul exact, titlurile în Dolby Vision profil 5 au din nou previzualizări, iar Apple TV-urile mai vechi nu mai sacadează din cauza previzualizărilor decodate în timpul redării. Previzualizările Trickplay de pe server funcționează din nou cu Jellyfin 12."
+            "value" : "Ține apăsat stânga sau dreapta pentru a derula cu până la 128x, iar derularea continuă după ce eliberezi. În pauză, previzualizarea la derulare arată cadrul exact, titlurile în Dolby Vision profil 5 au din nou previzualizări, iar Apple TV-urile mai vechi nu mai sacadează din cauza previzualizărilor decodate în timpul redării. Previzualizările Trickplay de pe server funcționează din nou cu Jellyfin 12. Acum se încarcă din timp în fundal, așa că țin pasul cu o glisare rapidă."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Удерживайте влево или вправо для перемотки со скоростью до 128x, и она продолжится, когда вы отпустите. На паузе предпросмотр перемотки показывает точный кадр, у фильмов в Dolby Vision профиль 5 снова есть превью, а старые Apple TV больше не подтормаживают из-за превью, декодируемых во время воспроизведения. Превью Trickplay с сервера снова работают с Jellyfin 12."
+            "value" : "Удерживайте влево или вправо для перемотки со скоростью до 128x, и она продолжится, когда вы отпустите. На паузе предпросмотр перемотки показывает точный кадр, у фильмов в Dolby Vision профиль 5 снова есть превью, а старые Apple TV больше не подтормаживают из-за превью, декодируемых во время воспроизведения. Превью Trickplay с сервера снова работают с Jellyfin 12. Теперь они заранее загружаются в фоне и успевают за быстрым свайпом."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podržaním doľava alebo doprava spustíte pretáčanie až rýchlosťou 128x a po pustení pokračuje ďalej. Počas pauzy náhľad pri posúvaní ukazuje presnú snímku, tituly v Dolby Vision profile 5 majú opäť náhľady a staršie Apple TV sa už nezasekávajú pre náhľady dekódované počas prehrávania. Náhľady Trickplay zo servera opäť fungujú s Jellyfin 12."
+            "value" : "Podržaním doľava alebo doprava spustíte pretáčanie až rýchlosťou 128x a po pustení pokračuje ďalej. Počas pauzy náhľad pri posúvaní ukazuje presnú snímku, tituly v Dolby Vision profile 5 majú opäť náhľady a staršie Apple TV sa už nezasekávajú pre náhľady dekódované počas prehrávania. Náhľady Trickplay zo servera opäť fungujú s Jellyfin 12. Teraz sa načítavajú vopred na pozadí, takže stačia aj rýchlemu posunu."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Håll vänster eller höger för att spola med upp till 128x, och det fortsätter när du släpper. Vid paus visar spolförhandsvisningen exakt bildruta, titlar i Dolby Vision profil 5 har förhandsvisningar igen och äldre Apple TV hackar inte längre av förhandsvisningar som avkodas under uppspelning. Trickplay-förhandsvisningar från servern fungerar igen med Jellyfin 12."
+            "value" : "Håll vänster eller höger för att spola med upp till 128x, och det fortsätter när du släpper. Vid paus visar spolförhandsvisningen exakt bildruta, titlar i Dolby Vision profil 5 har förhandsvisningar igen och äldre Apple TV hackar inte längre av förhandsvisningar som avkodas under uppspelning. Trickplay-förhandsvisningar från servern fungerar igen med Jellyfin 12. De hämtas nu i förväg i bakgrunden, så de hänger med i ett snabbt svep."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "128x'e kadar sarmak için sola veya sağa basılı tutun, bıraktığınızda da sarma devam eder. Duraklatıldığında sarma önizlemesi tam kareyi gösterir, Dolby Vision profil 5 başlıklarında önizlemeler geri geldi ve eski Apple TV'ler oynatma sırasında çözülen önizlemeler yüzünden artık takılmıyor. Sunucunun Trickplay önizlemeleri Jellyfin 12 ile yeniden çalışıyor."
+            "value" : "128x'e kadar sarmak için sola veya sağa basılı tutun, bıraktığınızda da sarma devam eder. Duraklatıldığında sarma önizlemesi tam kareyi gösterir, Dolby Vision profil 5 başlıklarında önizlemeler geri geldi ve eski Apple TV'ler oynatma sırasında çözülen önizlemeler yüzünden artık takılmıyor. Sunucunun Trickplay önizlemeleri Jellyfin 12 ile yeniden çalışıyor. Artık arka planda önceden yükleniyor, bu yüzden hızlı kaydırmaya yetişiyor."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Утримуйте вліво або вправо для перемотування зі швидкістю до 128x, і воно триватиме, коли ви відпустите. На паузі попередній перегляд показує точний кадр, фільми в Dolby Vision профіль 5 знову мають прев’ю, а старі Apple TV більше не підгальмовують через прев’ю, що декодуються під час відтворення. Превʼю Trickplay із сервера знову працюють із Jellyfin 12."
+            "value" : "Утримуйте вліво або вправо для перемотування зі швидкістю до 128x, і воно триватиме, коли ви відпустите. На паузі попередній перегляд показує точний кадр, фільми в Dolby Vision профіль 5 знову мають прев’ю, а старі Apple TV більше не підгальмовують через прев’ю, що декодуються під час відтворення. Превʼю Trickplay із сервера знову працюють із Jellyfin 12. Тепер вони заздалегідь завантажуються у фоні й встигають за швидким свайпом."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住左或右键可最高以 128x 快进，松手后仍会继续。暂停时，拖动预览会显示精确画面，Dolby Vision 配置文件 5 的影片重新有了预览，旧款 Apple TV 也不再因播放期间解码预览而卡顿。服务器的 Trickplay 预览在 Jellyfin 12 上恢复正常。"
+            "value" : "按住左或右键可最高以 128x 快进，松手后仍会继续。暂停时，拖动预览会显示精确画面，Dolby Vision 配置文件 5 的影片重新有了预览，旧款 Apple TV 也不再因播放期间解码预览而卡顿。服务器的 Trickplay 预览在 Jellyfin 12 上恢复正常。现在会在后台预先加载，快速滑动时也能跟上。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "按住左或右鍵可最高以 128x 快轉，放開後仍會繼續。暫停時，拖曳預覽會顯示精確畫面，Dolby Vision 設定檔 5 的影片重新有了預覽，舊款 Apple TV 也不再因播放期間解碼預覽而卡頓。伺服器的 Trickplay 預覽在 Jellyfin 12 上恢復正常。"
+            "value" : "按住左或右鍵可最高以 128x 快轉，放開後仍會繼續。暫停時，拖曳預覽會顯示精確畫面，Dolby Vision 設定檔 5 的影片重新有了預覽，舊款 Apple TV 也不再因播放期間解碼預覽而卡頓。伺服器的 Trickplay 預覽在 Jellyfin 12 上恢復正常。現在會在背景預先載入，快速滑動時也跟得上。"
           }
         }
       }

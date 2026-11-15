@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import CoreGraphics
+import ImageIO
 @testable import Sodalite
 
 struct TrickplayScrubSourceTests {
@@ -176,5 +177,110 @@ struct ScrubPreviewResolutionTests {
         provider.update(fraction: 0.25, durationSeconds: 100)
         #expect(await eventually { refined == [25] })
         #expect(provider.previewImage === coarse)
+    }
+}
+/// Sodalite#212 round 4: a fast swipe over server trickplay showed nothing until the finger rested.
+@MainActor
+struct TrickplayTileStoreTests {
+    private let info = TrickplayInfo(width: 2, height: 2, tileWidth: 2, tileHeight: 2,
+                                     thumbnailCount: 12, interval: 1000, bandwidth: nil)
+
+    /// A 4 x 4 JPEG, the sprite of a 2 x 2 grid of 2 px thumbnails.
+    private static let sprite: Data = {
+        let ctx = CGContext(data: nil, width: 4, height: 4, bitsPerComponent: 8, bytesPerRow: 16,
+                            space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
+        ctx.setFillColor(red: 1, green: 0, blue: 0, alpha: 1)
+        ctx.fill(CGRect(x: 0, y: 0, width: 4, height: 4))
+        let data = NSMutableData()
+        let dest = CGImageDestinationCreateWithData(data, "public.jpeg" as CFString, 1, nil)!
+        CGImageDestinationAddImage(dest, ctx.makeImage()!, nil)
+        CGImageDestinationFinalize(dest)
+        return data as Data
+    }()
+
+    nonisolated private final class Counter: @unchecked Sendable {
+        private let lock = NSLock()
+        private var value = 0
+        func bump() { lock.lock(); value += 1; lock.unlock() }
+        var count: Int { lock.lock(); defer { lock.unlock() }; return value }
+    }
+
+    private func store(fetches: Counter, delay: Duration = .zero) throws -> TrickplayTileStore {
+        let tiles = try #require(TrickplayTileSet(trickplay: ["s": ["2": info]], mediaSourceID: "s", targetWidth: 2))
+        let run = UUID().uuidString
+        let sprite = Self.sprite
+        return TrickplayTileStore(tileSet: tiles,
+                                  tileURL: { URL(string: "https://jf.test/\(run)/\($0).jpg") },
+                                  fetch: { _ in
+                                      fetches.bump()
+                                      if delay > .zero { try? await Task.sleep(for: delay) }
+                                      return sprite
+                                  })
+    }
+
+    @Test("a sprite is downloaded once however many positions ask for it")
+    func oneDownloadPerSprite() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches, delay: .milliseconds(50))
+        async let a = tiles.thumbnail(seconds: 0)
+        async let b = tiles.thumbnail(seconds: 1)
+        async let c = tiles.thumbnail(seconds: 3)
+        let images = await [a, b, c]
+        #expect(images.allSatisfy { $0?.width == 2 })
+        #expect(fetches.count == 1)
+    }
+
+    @Test("a scrub that moves on does not cancel the sprite's download")
+    func cancelledAskStillLands() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches, delay: .milliseconds(50))
+        let first = Task { await tiles.thumbnail(seconds: 0) }
+        try await Task.sleep(for: .milliseconds(10))
+        first.cancel()
+        _ = await first.value
+        #expect(await tiles.thumbnail(seconds: 2) != nil)
+        #expect(fetches.count == 1)
+    }
+
+    @Test("the prefetch fetches every sprite once and keeps the bytes")
+    func prefetchAll() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches)
+        tiles.prefetch(after: .zero) { 5 }
+        for _ in 0..<200 where tiles.storedTileCount < 3 { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(tiles.storedTileCount == 3)
+        #expect(fetches.count == 3)
+        _ = await tiles.thumbnail(seconds: 9)
+        #expect(fetches.count == 3)
+    }
+
+    @Test("close stops the prefetch and drops the bytes")
+    func closeStops() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches)
+        tiles.prefetch(after: .milliseconds(50)) { 0 }
+        tiles.close()
+        try await Task.sleep(for: .milliseconds(120))
+        #expect(fetches.count == 0)
+        #expect(tiles.storedTileCount == 0)
+    }
+
+    @Test("server trickplay publishes without waiting for the knob to rest")
+    func serverIsNotDebounced() async {
+        let provider = ScrubPreviewProvider()
+        let ctx = CGContext(data: nil, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                            space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let img = ctx.makeImage()!
+        var asked: [Double] = []
+        provider.configure(serverThumbnail: { seconds in asked.append(seconds); return img }, enabled: true)
+        // A swipe: a new position every 16 ms, faster than the 60 ms debounce the other sources keep.
+        for step in 0..<10 {
+            provider.update(fraction: Float(step) / 10, durationSeconds: 100)
+            try? await Task.sleep(for: .milliseconds(16))
+        }
+        #expect(asked.count >= 5)
+        #expect(provider.previewImage != nil)
     }
 }
