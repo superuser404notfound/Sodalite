@@ -17,17 +17,11 @@ struct DownloadRungOptionsTests {
     }
 
     /// Sodalite#202: the server would copy the video under every rung, so their sizes would be fiction.
-    @Test func aUserWithoutVideoTranscodingIsOfferedOnlyTheOriginal() throws {
+    @Test func aUserWithoutVideoTranscodingIsOfferedOnlyTheOriginal() {
         let options = DownloadRungOption.options(sourceBitrate: 29_000_000, sourceSize: 5_570_000_000,
                                                  runtimeTicks: 15_600_000_000, canTranscodeVideo: false)
         #expect(options.map(\.quality) == [.original])
         #expect(options.first?.estimatedBytes == 5_570_000_000)
-
-        let remux = try source("remux", name: "Remux", height: 1080, bitrate: 30_000_000, size: 30_000)
-        let uhd = try source("uhd", name: "UHD", height: 2160, bitrate: 20_000_000, size: 9_000)
-        let versions = DownloadRungOption.options(versions: [remux, uhd], selected: uhd,
-                                                  runtimeTicks: 36_000_000_000, canTranscodeVideo: false)
-        #expect(versions.map(\.quality) == [.original, .original])
     }
 
     private func source(_ id: String, name: String, height: Int, bitrate: Int, size: Int64) throws -> MediaSource {
@@ -37,14 +31,18 @@ struct DownloadRungOptionsTests {
             """#.utf8))
     }
 
-    @Test func everyVersionIsAnOriginalAndTheRungsFollowTheSelectedOne() throws {
-        let remux = try source("remux", name: "Remux", height: 1080, bitrate: 30_000_000, size: 30_000)
-        let uhd = try source("uhd", name: "UHD", height: 2160, bitrate: 3_000_000, size: 9_000)
-        let options = DownloadRungOption.options(versions: [remux, uhd], selected: uhd, runtimeTicks: 36_000_000_000)
-        #expect(options.map(\.quality) == [.original, .original, .mbps2])
-        #expect(options.map(\.source?.id) == ["uhd", "remux", nil])
-        #expect(options.map(\.estimatedBytes).prefix(2) == [9_000, 30_000])
-        #expect(Set(options.map(\.id)).count == options.count)
+    /// Sodalite#200 follow-up (AJPerez): the dialog offers the rungs of the version the page has
+    /// selected, sized from that version, not one Original per version with unnamed rungs below.
+    @Test func theRungsAreSizedFromTheSelectedVersion() throws {
+        let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(#"""
+            {"Id":"m","Name":"M","Type":"Movie","RunTimeTicks":36000000000,"MediaSources":[
+             {"Id":"remux","Name":"Remux","Size":30000,"Bitrate":30000000},
+             {"Id":"uhd","Name":"UHD","Size":9000,"Bitrate":3000000}]}
+            """#.utf8))
+        let facts = DownloadTarget.item(item, sourceID: "uhd").facts(order: .quality)
+        let options = DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size, runtimeTicks: facts.runtimeTicks)
+        #expect(options.map(\.quality) == [.original, .mbps2])
+        #expect(options.first?.estimatedBytes == 9_000)
     }
 
     @Test func versionLabelWithoutSizeDropsOnlyTheSize() throws {
