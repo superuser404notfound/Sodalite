@@ -175,6 +175,10 @@ final class HomeViewModel {
     /// Libraries the My Media row offers: the video ones plus Collections and Playlists, which
     /// Jellyfin serves as views of their own. Populated by loadContent().
     var myMediaLibraries: [JellyfinLibrary] = []
+    /// What the My Media row draws: `myMediaLibraries` plus the "All Movies" / "All Series" tiles
+    /// (Sodalite#240), in the profile's order. Kept apart so nothing that treats an entry as a real
+    /// library (Latest rows, labels, grid identity, the feed cache) ever meets an "All" tile.
+    var myMediaTiles: [JellyfinLibrary] = []
 
     init(
         libraryService: JellyfinLibraryServiceProtocol,
@@ -213,7 +217,7 @@ final class HomeViewModel {
         // (about a second behind the shelf, measured by classicjazz on the first build to carry the
         // cache). It is not evidence of anything: a list alone paints nothing, because Home is
         // still behind the spinner until a row lands.
-        myMediaLibraries = myMediaVisible(cached.libraries)
+        applyMyMedia(cached.libraries)
         guard !cached.rows.isEmpty else { return }
         rows = cached.rows
         isShowingCachedFeed = true
@@ -307,6 +311,11 @@ final class HomeViewModel {
     /// My Media's tiles: browsable libraries in the profile's order, hidden ones left out.
     func myMediaVisible(_ libraries: [JellyfinLibrary]) -> [JellyfinLibrary] {
         libraryLayout.visible(MyMediaLibraries.browsable(libraries), fallbackServerID: sources.first?.serverID ?? serverID)
+    }
+
+    func applyMyMedia(_ libraries: [JellyfinLibrary]) {
+        myMediaLibraries = myMediaVisible(libraries)
+        myMediaTiles = libraryLayout.visible(MyMediaLibraries.tiles(libraries), fallbackServerID: sources.first?.serverID ?? serverID)
     }
 
     /// The rows this config actually fetches, in display order.
@@ -471,7 +480,7 @@ final class HomeViewModel {
                         break
                     }
                     // Reconciliation is additive (keeps user toggles/order); persist only on success so a transient failure can't wipe the dynamic rows.
-                    myMediaLibraries = myMediaVisible(libraries)
+                    applyMyMedia(libraries)
                     // A server missing from the list would read as a server whose libraries are
                     // gone, and retire its per-library rows for good (Sodalite#85).
                     guard complete else { break }
@@ -669,7 +678,7 @@ final class HomeViewModel {
         // lives in memory only, so a switch that kept it would leave the outgoing server's
         // libraries on screen and tappable under the new session, which is the exact thing the
         // blanking was there to prevent.
-        myMediaLibraries = myMediaVisible(cached.libraries)
+        applyMyMedia(cached.libraries)
         isShowingCachedFeed = !cached.rows.isEmpty
         isLoading = cached.rows.isEmpty
         tagRows = []
@@ -701,7 +710,7 @@ final class HomeViewModel {
             return .discoverProviders
         }
         if config.type == .myMedia {
-            return myMediaLibraries.isEmpty ? nil : .libraries(myMediaLibraries)
+            return myMediaTiles.isEmpty ? nil : .libraries(myMediaTiles)
         }
         if config.type.isTagRow {
             return tagRows.first(where: { $0.type == config.type }).map(HomeSection.tags)

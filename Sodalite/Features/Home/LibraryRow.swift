@@ -45,7 +45,8 @@ private struct LibraryTile: View {
     let label: String?
     let action: () -> Void
 
-    private var name: String { [library.name, label].compactMap { $0 }.joined(separator: " · ") }
+    /// The server is in the corner badge, so the name stays the library's own.
+    private var name: String { library.name }
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -68,6 +69,7 @@ private struct LibraryTile: View {
             title: drawsNameOverArtwork ? name : nil,
             artworkURL: dependencies.jellyfinImageService.libraryArtworkURL(for: library),
             size: size,
+            serverBadge: label,
             action: action
         ) {
             ZStack {
@@ -75,7 +77,7 @@ private struct LibraryTile: View {
 
                 // The icon sits in the corner rather than above the name, which on a compact tile
                 // would overlap it.
-                Image(systemName: symbol(for: library.libraryType))
+                Image(systemName: symbol(for: library))
                     .font(.system(size: size.height * 0.22))
                     .foregroundStyle(.tint)
                     .padding(20)
@@ -88,11 +90,16 @@ private struct LibraryTile: View {
                 }
             }
         }
-        .accessibilityLabel(name)
+        .accessibilityLabel([library.name, label].compactMap { $0 }.joined(separator: ", "))
     }
 
-    private func symbol(for type: LibraryType) -> String {
-        switch type {
+    private func symbol(for library: JellyfinLibrary) -> String {
+        switch MyMediaLibraries.aggregateType(library) {
+        case .movie: return HomeRowType.allMovies.systemImage
+        case .series: return HomeRowType.allSeries.systemImage
+        default: break
+        }
+        return switch library.libraryType {
         case .movies: "film"
         case .tvshows: "tv"
         case .homevideos: "video"

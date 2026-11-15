@@ -676,16 +676,18 @@ struct HomeView: View {
     /// since it then already shows everything there is.
     private func showAllFilter(for row: HomeRowData) -> FilterDestination? {
         if row.isCollectionShelf { return collectionShelfFilter(for: row) }
-        let type: ItemType
-        let title: String
-        switch row.type {
-        case .allMovies: type = .movie; title = String(localized: "home.allMovies")
-        case .allSeries: type = .series; title = String(localized: "home.allSeries")
-        default: return nil
-        }
-        guard row.items.count >= HomeMerger.limit(for: row.type, mergedContinueWatching: false) else { return nil }
+        guard row.type == .allMovies || row.type == .allSeries,
+              row.items.count >= HomeMerger.limit(for: row.type, mergedContinueWatching: false) else { return nil }
+        return allItemsFilter(row.type == .allMovies ? .movie : .series)
+    }
+
+    /// Every movie or every series on every combined server, alphabetical. The grid behind both the
+    /// rows' Show All and My Media's "All" tiles (Sodalite#240), so the two share one cache slot and
+    /// one remembered sort.
+    private func allItemsFilter(_ type: ItemType) -> FilterDestination {
+        let rowType: HomeRowType = type == .movie ? .allMovies : .allSeries
         return FilterDestination(
-            title: title,
+            title: String(localized: type == .movie ? "home.allMovies" : "home.allSeries"),
             query: ItemQuery(
                 includeItemTypes: [type],
                 sortBy: "SortName",
@@ -693,8 +695,8 @@ struct HomeView: View {
                 limit: 50,
                 fields: JellyfinEndpoint.homeRowFields
             ),
-            cacheScope: homeTileScope(FilterCacheKey.Home.row(row.type.rawValue)),
-            sortScope: sortScopeID.map { LibrarySortScope.homeRow(row.type.rawValue, scope: $0) },
+            cacheScope: homeTileScope(FilterCacheKey.Home.row(rowType.rawValue)),
+            sortScope: sortScopeID.map { LibrarySortScope.homeRow(rowType.rawValue, scope: $0) },
             sources: combinedSources
         )
     }
@@ -740,6 +742,7 @@ struct HomeView: View {
     }
 
     private func makeLibraryFilter(for library: JellyfinLibrary) -> FilterDestination {
+        if let type = MyMediaLibraries.aggregateType(library) { return allItemsFilter(type) }
         let grouping = HomeRowConfig.collectionGrouping(scope: appState.profileKey?.storageScope ?? "")
         let query = MyMediaLibraries.gridQuery(
             for: library, grouping: grouping,
