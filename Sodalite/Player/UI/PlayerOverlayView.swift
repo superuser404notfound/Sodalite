@@ -92,6 +92,21 @@ struct PlayerOverlayView: View {
                 .transition(.opacity)
             }
 
+            #if os(iOS)
+            // AetherEngine#1070: AirPlay plays the sound, but this title's picture stays here. Shown whether
+            // the controls are up or not, because the viewer is looking at a black TV.
+            if viewModel.airPlayPictureStaysLocal, viewModel.errorMessage == nil {
+                VStack {
+                    AirPlayPictureBanner(canMove: viewModel.airPlayPictureCanMoveToReceiver) {
+                        viewModel.showPictureOnAirPlayReceiver()
+                    }
+                    .padding(.top, 40)
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
+            #endif
+
             // Sits above the spinner layer and above the running picture alike: the reader is fighting the
             // source either way, and a stall that leaves the picture running no longer raises a spinner at
             // all, so this is the only thing that explains the freeze the viewer is about to see.
@@ -1008,6 +1023,34 @@ private struct ConnectionNoticeChip: View {
         .background(.black.opacity(0.65), in: Capsule())
     }
 }
+
+#if os(iOS)
+/// The picture of this title cannot follow AirPlay (AetherEngine#1070). With `canMove` the engine can switch
+/// the title to a route the receiver plays itself, once the viewer says the device is a TV.
+private struct AirPlayPictureBanner: View {
+    let canMove: Bool
+    let onShowOnTV: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "airplayvideo")
+            Text("player.airplay.pictureStaysLocal")
+                .fixedSize(horizontal: false, vertical: true)
+            if canMove {
+                Button("player.airplay.showOnTV", action: onShowOnTV)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+        }
+        .font(.callout)
+        .foregroundStyle(.white)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(Color.Theme.scrimHeavy, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 20)
+    }
+}
+#endif
 
 /// One error-screen action.
 ///
