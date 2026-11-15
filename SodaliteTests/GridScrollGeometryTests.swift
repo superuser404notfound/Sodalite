@@ -26,4 +26,21 @@ struct GridScrollGeometryTests {
         let g = GridScrollGeometry(gridTop: 0, gridWidth: 0, cellHeight: 0, columnMinimum: 230, spacing: 50)
         #expect(g.rowTop(forPosition: 3) == nil)
     }
+
+    // Sodalite#240: iPhone 18 Pro, 402pt wide, 16pt insets, 24pt rail clearance, 108pt minimum.
+    @Test func railDoesNotCostAColumn() {
+        let width: CGFloat = 402 - 32 - 24
+        #expect(GridScrollGeometry.columns(width: width, minimum: 108, spacing: 16) == 2)
+        let minimum = GridScrollGeometry.columnMinimum(base: 108, width: width, reserved: 24, spacing: 16)
+        #expect(minimum < 108 && minimum > 100)
+        #expect(GridScrollGeometry.columns(width: width, minimum: minimum, spacing: 16) == 3)
+    }
+
+    @Test func minimumStaysWhenTheRailCostsNothing() {
+        #expect(GridScrollGeometry.columnMinimum(base: 108, width: 370, reserved: 0, spacing: 16) == 108)
+        // 1500 and 1548 both hold five 230pt columns.
+        #expect(GridScrollGeometry.columnMinimum(base: 230, width: 1500, reserved: 48, spacing: 50) == 230)
+        // Unmeasured grid keeps the base.
+        #expect(GridScrollGeometry.columnMinimum(base: 108, width: 0, reserved: 24, spacing: 16) == 108)
+    }
 }

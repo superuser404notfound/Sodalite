@@ -65,6 +65,8 @@ struct FilteredGridView: View {
     /// A committed jump's slot. Leaving the rail to the left also moves focus geometrically, and
     /// that move lands after ours, so for half a second any other arrival is sent back here.
     @State private var pendingFocusSlot: Int?
+    /// The same redirect for the in-memory grids, keyed by item.
+    @State private var pendingFocusKey: String?
     /// A letter resolved before the server total, landed once it arrives (Sodalite#203).
     @State private var heldLanding: (raw: Int, letter: String, commit: Bool)?
     @State private var scrollPosition = ScrollPosition()
@@ -276,9 +278,7 @@ struct FilteredGridView: View {
                     } else {
                         LazyVGrid(columns: [
                             GridItem(
-                                .adaptive(minimum: metrics.gridColumnMinimum(
-                                    for: cardStyle,
-                                    cardScale: dependencies.appearancePreferences.cardScale)),
+                                .adaptive(minimum: columnMinimum),
                                 spacing: metrics.gridSpacing
                             )
                         ], spacing: metrics.gridSpacing) {
@@ -306,6 +306,9 @@ struct FilteredGridView: View {
                                 .buttonStyle(GridCardButtonStyle())
                                 .focused($focusedItemID, equals: item.originKey)
                                 .mediaContextMenu(for: item) { open($0) }
+                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                                    if gridGeometry.cellHeight != height { gridGeometry.cellHeight = height }
+                                }
                                 .onAppear { loadMoreIfNeeded(after: item) }
                             }
                             }
@@ -313,8 +316,7 @@ struct FilteredGridView: View {
                         .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(Self.gridSpace)) } action: { frame in
                             gridGeometry.gridTop = frame.minY
                             gridGeometry.gridWidth = frame.width
-                            gridGeometry.columnMinimum = metrics.gridColumnMinimum(
-                                for: cardStyle, cardScale: dependencies.appearancePreferences.cardScale)
+                            gridGeometry.columnMinimum = columnMinimum
                             gridGeometry.spacing = metrics.gridSpacing
                         }
                         .padding(.horizontal, metrics.gridInset)
@@ -324,6 +326,11 @@ struct FilteredGridView: View {
                         .scrollTargetLayout()
                         .onScrollTargetVisibilityChange(idType: Int.self) { ids in
                             guard let top = ids.min(), let item = store.item(at: top) else { return }
+                            gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
+                        }
+                        .onScrollTargetVisibilityChange(idType: String.self) { ids in
+                            let visible = Set(ids)
+                            guard let item = items.first(where: { visible.contains($0.originKey) }) else { return }
                             gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
                         }
                         #endif
@@ -423,6 +430,7 @@ struct FilteredGridView: View {
             gridLetter = nil
             rejectedLetter = nil
             pendingFocusSlot = nil
+            pendingFocusKey = nil
             heldLanding = nil
         }
         .onChange(of: store.knowsTotal) { _, knows in
@@ -440,6 +448,14 @@ struct FilteredGridView: View {
                 }
             }
             guard let slot, let item = store.item(at: slot) else { return }
+            gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
+        }
+        .onChange(of: focusedItemID) { _, key in
+            if let target = pendingFocusKey, let key, key != target {
+                Task { focusedItemID = target }
+                return
+            }
+            guard let key, let item = items.first(where: { $0.originKey == key }) else { return }
             gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
         }
         .onChange(of: store.firstPage) { _, state in
@@ -483,7 +499,18 @@ struct FilteredGridView: View {
     /// Decided from the cached seed too, so a revisit draws the rail and its clearance from the
     /// first frame (Sodalite#203); `land` is what waits for the server total.
     private var showsRail: Bool {
-        AlphabetIndex.showsRail(sortKey: sort.key, usesSparseGrid: usesSparseGrid, total: store.slots.count)
+        AlphabetIndex.showsRail(sortKey: sort.key, total: usesSparseGrid ? store.slots.count : items.count)
+    }
+
+    /// Measured against the grid's own width, which already excludes the rail's clearance, so the
+    /// rail never costs a column.
+    private var columnMinimum: CGFloat {
+        GridScrollGeometry.columnMinimum(
+            base: metrics.gridColumnMinimum(for: cardStyle, cardScale: dependencies.appearancePreferences.cardScale),
+            width: gridGeometry.gridWidth,
+            reserved: showsRail ? Self.railClearance : 0,
+            spacing: metrics.gridSpacing
+        )
     }
 
     nonisolated private static let gridSpace = "FilteredGridView.content"
@@ -516,6 +543,10 @@ struct FilteredGridView: View {
     private func jump(to letter: String, commit: Bool) {
         jumpTask?.cancel()
         heldLanding = nil
+        guard usesSparseGrid else {
+            jumpInLoadedItems(to: letter, commit: commit)
+            return
+        }
         // A commit on a letter already resolved lands now, ahead of the focus engine's own move
         // off the rail; anything else waits for the count.
         if commit, let raw = resolver?.cachedSlot(for: letter, descending: sort.descending) {
@@ -537,6 +568,53 @@ struct FilteredGridView: View {
             guard !Task.isCancelled else { return }
             land(on: raw, letter: letter, commit: commit)
         }
+    }
+
+    /// The in-memory grids: find the letter among the loaded titles, and a combined grid pages on
+    /// until it shows up or the servers run dry. A jump to Z in a big combined library therefore
+    /// loads everything before it, once; the way back is instant.
+    private func jumpInLoadedItems(to letter: String, commit: Bool) {
+        jumpTask = Task {
+            if !commit {
+                try? await Task.sleep(for: .milliseconds(250))
+                guard !Task.isCancelled else { return }
+            }
+            var position = loadedPosition(of: letter)
+            while position == nil, canLoadMore, !Task.isCancelled {
+                guard !isLoadingMore else {
+                    try? await Task.sleep(for: .milliseconds(50))
+                    continue
+                }
+                let before = items.count
+                isLoadingMore = true
+                await loadMore()
+                guard items.count > before else { break }
+                position = loadedPosition(of: letter)
+            }
+            guard !Task.isCancelled else { return }
+            guard let position else {
+                rejectedLetter = (letter, (rejectedLetter?.attempt ?? 0) + 1)
+                return
+            }
+            gridLetter = letter
+            if let rowTop = gridGeometry.rowTop(forPosition: position) {
+                scrollPosition.scrollTo(y: max(0, rowTop - Self.jumpTopMargin))
+            }
+            guard commit else { return }
+            let key = items[position].originKey
+            #if os(tvOS)
+            pendingFocusKey = key
+            Task {
+                try? await Task.sleep(for: .milliseconds(500))
+                if pendingFocusKey == key { pendingFocusKey = nil }
+            }
+            #endif
+            focusedItemID = key
+        }
+    }
+
+    private func loadedPosition(of letter: String) -> Int? {
+        AlphabetIndex.firstPosition(of: letter, in: items.map { $0.sortName ?? $0.name }, descending: sort.descending)
     }
 
     private func land(on raw: Int, letter: String, commit: Bool) {

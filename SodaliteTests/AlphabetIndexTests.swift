@@ -53,10 +53,25 @@ struct AlphabetIndexTests {
         #expect(hash.nameStartsWithOrGreater == "a")
     }
 
-    @Test func railNeedsTitleSortSparsePathAndSixtyTitles() {
-        #expect(AlphabetIndex.showsRail(sortKey: .title, usesSparseGrid: true, total: 60))
-        #expect(!AlphabetIndex.showsRail(sortKey: .title, usesSparseGrid: true, total: 59))
-        #expect(!AlphabetIndex.showsRail(sortKey: .dateAdded, usesSparseGrid: true, total: 500))
-        #expect(!AlphabetIndex.showsRail(sortKey: .title, usesSparseGrid: false, total: 500))
+    @Test func railShowsForEveryTitleSortedGrid() {
+        #expect(AlphabetIndex.showsRail(sortKey: .title, total: 1))
+        #expect(!AlphabetIndex.showsRail(sortKey: .title, total: 0))
+        #expect(!AlphabetIndex.showsRail(sortKey: .dateAdded, total: 500))
+    }
+
+    @Test func firstPositionWalksLoadedTitles() {
+        let names = ["2 Fast", "Alien", "Batman", "Dune", "Élan", "Zodiac"]
+        #expect(AlphabetIndex.firstPosition(of: "#", in: names, descending: false) == 0)
+        #expect(AlphabetIndex.firstPosition(of: "B", in: names, descending: false) == 2)
+        // No C: lands on the next letter that has titles.
+        #expect(AlphabetIndex.firstPosition(of: "C", in: names, descending: false) == 3)
+        #expect(AlphabetIndex.firstPosition(of: "E", in: names, descending: false) == 4)
+        // Past the end of what is loaded.
+        #expect(AlphabetIndex.firstPosition(of: "Q", in: Array(names.prefix(4)), descending: false) == nil)
+
+        let reversed = Array(names.reversed())
+        #expect(AlphabetIndex.firstPosition(of: "Z", in: reversed, descending: true) == 0)
+        #expect(AlphabetIndex.firstPosition(of: "C", in: reversed, descending: true) == 3)
+        #expect(AlphabetIndex.firstPosition(of: "#", in: reversed, descending: true) == 5)
     }
 }
