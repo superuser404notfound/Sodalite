@@ -61,7 +61,8 @@ final class TrickplayTileStore {
             for index in self.tileSet.tileOrder(nearestTo: position()) {
                 guard !Task.isCancelled, !self.isClosed, self.storedBytes < Self.byteBudget else { return }
                 guard let url = self.tileURL(index) else { continue }
-                _ = await self.data(index, url: url)
+                // A sprite that came back but was not kept did not fit; the rest would not either.
+                if await self.data(index, url: url) != nil, self.bytes[index] == nil { return }
             }
         }
     }
