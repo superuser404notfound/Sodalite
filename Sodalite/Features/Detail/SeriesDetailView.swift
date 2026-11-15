@@ -1519,7 +1519,13 @@ struct SeriesDetailView: View {
             }
             if dependencies.downloadStore.item(episode.id) == nil {
                 Button {
-                    downloadTarget = .item(episode, sourceID: versionSelection.preferredSourceID(for: episode))
+                    // The row's episode is the slim list copy without MediaSources, so the dialog
+                    // could not name the version it downloads. Pull the detail first, as the
+                    // episode panel does.
+                    Task {
+                        let detailed = await viewModel?.enrichedEpisode(for: episode) ?? episode
+                        downloadTarget = .item(detailed, sourceID: versionSelection.preferredSourceID(for: detailed))
+                    }
                 } label: {
                     Label("downloads.action.download", systemImage: "arrow.down.circle")
                 }

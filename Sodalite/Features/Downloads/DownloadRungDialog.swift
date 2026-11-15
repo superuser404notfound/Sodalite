@@ -25,7 +25,7 @@ struct DownloadFacts: Equatable {
 }
 
 /// One movie or episode, or a whole season (Sodalite#81). `sourceID` is the version the page has
-/// selected, nil where there is no choice (Sodalite#200).
+/// selected, nil where there is no choice; the dialog downloads exactly that one (Sodalite#200).
 enum DownloadTarget: Identifiable {
     case item(JellyfinItem, sourceID: String?)
     /// `serverID` is the series' server in a combined Home (Sodalite#202).
@@ -85,9 +85,8 @@ private struct DownloadRungDialog: ViewModifier {
                 }
                 Button("common.cancel", role: .cancel) {}
             } message: { target in
-                if options(for: target).contains(where: { $0.quality != .original }) {
-                    Text("downloads.dialog.transcodeNote")
-                }
+                let message = message(for: target)
+                if !message.isEmpty { Text(message) }
             }
             .alert(errorMessage ?? "", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("common.ok") {}
@@ -95,24 +94,34 @@ private struct DownloadRungDialog: ViewModifier {
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
-        let canTranscodeVideo = appState.canTranscodeVideo(on: serverSession)
-        let order = dependencies.playbackPreferences.versionOrder
-        if case .item(let item, let sourceID) = target, item.selectableMediaSources.count > 1,
-           let selected = item.effectiveMediaSource(id: sourceID ?? VersionSelection(order: order).preferredSourceID(for: item)) {
-            return DownloadRungOption.options(versions: item.selectableMediaSources, selected: selected,
-                                              runtimeTicks: item.runTimeTicks, canTranscodeVideo: canTranscodeVideo,
-                                              order: order)
-        }
-        let facts = target.facts(order: order)
+        let facts = target.facts(order: dependencies.playbackPreferences.versionOrder)
         return DownloadRungOption.options(sourceBitrate: facts.bitrate, sourceSize: facts.size,
-                                          runtimeTicks: facts.runtimeTicks, canTranscodeVideo: canTranscodeVideo)
+                                          runtimeTicks: facts.runtimeTicks,
+                                          canTranscodeVideo: appState.canTranscodeVideo(on: serverSession))
+    }
+
+    /// The version the page has selected, the one Play would start. Listing every version here as
+    /// well left the smaller rungs without a version to read (Sodalite#200 follow-up, AJPerez).
+    private func selectedVersion(for target: DownloadTarget) -> MediaSource? {
+        guard case .item(let item, let sourceID) = target else { return nil }
+        let order = dependencies.playbackPreferences.versionOrder
+        return item.effectiveMediaSource(id: sourceID ?? VersionSelection(order: order).preferredSourceID(for: item))
+    }
+
+    private func message(for target: DownloadTarget) -> String {
+        var lines: [String] = []
+        if case .item(let item, _) = target, item.selectableMediaSources.count > 1,
+           let version = selectedVersion(for: target)?.versionLabel(includingSize: false), !version.isEmpty {
+            lines.append(String(localized: "downloads.dialog.version \(version)"))
+        }
+        if options(for: target).contains(where: { $0.quality != .original }) {
+            lines.append(String(localized: "downloads.dialog.transcodeNote"))
+        }
+        return lines.joined(separator: "\n\n")
     }
 
     private func label(for option: DownloadRungOption) -> String {
-        var title = String(localized: String.LocalizationValue(option.quality.titleKey))
-        if let version = option.source?.versionLabel(includingSize: false), !version.isEmpty {
-            title += " · \(version)"
-        }
+        let title = String(localized: String.LocalizationValue(option.quality.titleKey))
         let size = option.estimatedBytes.map { $0.formatted(.byteCount(style: .file)) }
             ?? String(localized: "downloads.dialog.sizeUnknown", defaultValue: "size unknown")
         return "\(title) · \(size)"
@@ -124,7 +133,8 @@ private struct DownloadRungDialog: ViewModifier {
             do {
                 switch target {
                 case .item(let item, let sourceID):
-                    try await manager.enqueue(item: item, quality: option.quality, mediaSourceID: option.source?.id ?? sourceID)
+                    try await manager.enqueue(item: item, quality: option.quality,
+                                              mediaSourceID: selectedVersion(for: target)?.id ?? sourceID)
                 case .season(let seriesID, let seasonID, _, let serverID):
                     try await manager.enqueueSeason(seriesID: seriesID, seasonID: seasonID, serverID: serverID, quality: option.quality)
                 }
