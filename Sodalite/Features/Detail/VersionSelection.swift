@@ -52,8 +52,13 @@ struct VersionSelection: Equatable {
     }
 
     mutating func choose(_ source: MediaSource, for item: JellyfinItem) {
-        targetID = item.id
-        chosenID = source.id
+        choose(sourceID: source.id, forItemID: item.id)
+    }
+
+    /// The pick by ids, for a page that opens on a version chosen elsewhere (Sodalite#240).
+    mutating func choose(sourceID: String, forItemID itemID: String) {
+        targetID = itemID
+        chosenID = sourceID
     }
 
     /// Whether the version pill keeps its label at rest. On tvOS it collapses with the rest of the

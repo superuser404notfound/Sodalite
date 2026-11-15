@@ -67248,157 +67248,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapni Kombinovat servery v Nastavení > Servery a domovská obrazovka spojí všechny servery, ke kterým jsi přihlášen: jedno Pokračovat ve sledování, jedno Moje média, stejný film jen jednou. Karta Živé TV se objeví, když má tuner kterýkoli ze serverů, a přepínač vybere, čí program vidíš. Hudba funguje stejně: karta se objeví, když má hudební knihovnu kterýkoli ze serverů, a má vlastní přepínač. Řádek na domovské obrazovce Apple TV ukazuje sloučené Pokračovat ve sledování a Další epizoda také a každý titul spustí ze serveru, na kterém je."
+            "value" : "Zapni Kombinovat servery v Nastavení > Servery a domovská obrazovka spojí všechny servery, ke kterým jsi přihlášen: jedno Pokračovat ve sledování, jedno Moje média, stejný film jen jednou. Karta Živé TV se objeví, když má tuner kterýkoli ze serverů, a přepínač vybere, čí program vidíš. Hudba funguje stejně: karta se objeví, když má hudební knihovnu kterýkoli ze serverů, a má vlastní přepínač. Řádek na domovské obrazovce Apple TV ukazuje sloučené Pokračovat ve sledování a Další epizoda také a každý titul spustí ze serveru, na kterém je. Film na dvou serverech nabízí na své stránce verze z obou serverů a Moje média dostanou dlaždice Všechny filmy a Všechny seriály."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå Kombiner servere til under Indstillinger > Servere, så samler startsiden alle servere, du er logget ind på: én Fortsæt med at se, ét Mine medier, den samme film kun én gang. Fanen Live TV vises, når en af serverne har en tuner, og en vælger bestemmer, hvis programoversigt du ser. Musik fungerer på samme måde: fanen vises, når en af serverne har et musikbibliotek, og har sin egen vælger. Rækken på Apple TV’s hjemmeskærm viser også den samlede Fortsæt med at se og Næste afsnit og starter hver titel fra den server, den ligger på."
+            "value" : "Slå Kombiner servere til under Indstillinger > Servere, så samler startsiden alle servere, du er logget ind på: én Fortsæt med at se, ét Mine medier, den samme film kun én gang. Fanen Live TV vises, når en af serverne har en tuner, og en vælger bestemmer, hvis programoversigt du ser. Musik fungerer på samme måde: fanen vises, når en af serverne har et musikbibliotek, og har sin egen vælger. Rækken på Apple TV’s hjemmeskærm viser også den samlede Fortsæt med at se og Næste afsnit og starter hver titel fra den server, den ligger på. En film på to servere viser begge serveres versioner på sin side, og Mine medier får felterne Alle film og Alle serier."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit \"Server kombinieren\" unter Einstellungen > Server führt Home alle Server zusammen, bei denen du angemeldet bist: Weiterschauen und Meine Medien gibt es nur noch einmal, und derselbe Film erscheint nur einmal. Der Live-TV-Tab erscheint, sobald einer der Server einen Tuner hat, und ein Umschalter wählt, wessen Programm du siehst. Musik funktioniert genauso: Der Tab erscheint, sobald einer der Server eine Musikbibliothek hat, mit eigenem Umschalter. Die Zeile auf dem Startbildschirm des Apple TV zeigt Weiterschauen und Als Nächstes ebenfalls zusammengeführt und startet jeden Titel von dem Server, auf dem er liegt."
+            "value" : "Mit \"Server kombinieren\" unter Einstellungen > Server führt Home alle Server zusammen, bei denen du angemeldet bist: Weiterschauen und Meine Medien gibt es nur noch einmal, und derselbe Film erscheint nur einmal. Der Live-TV-Tab erscheint, sobald einer der Server einen Tuner hat, und ein Umschalter wählt, wessen Programm du siehst. Musik funktioniert genauso: Der Tab erscheint, sobald einer der Server eine Musikbibliothek hat, mit eigenem Umschalter. Die Zeile auf dem Startbildschirm des Apple TV zeigt Weiterschauen und Als Nächstes ebenfalls zusammengeführt und startet jeden Titel von dem Server, auf dem er liegt. Ein Film auf zwei Servern zeigt auf seiner Seite die Versionen beider Server, und Meine Medien bekommt Kacheln für alle Filme und alle Serien."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ενεργοποίησε τον Συνδυασμό διακομιστών στις Ρυθμίσεις > Διακομιστές και η αρχική ενώνει όλους τους διακομιστές όπου έχεις συνδεθεί: μία Συνέχιση παρακολούθησης, ένα Τα πολυμέσα μου, η ίδια ταινία μόνο μία φορά. Η καρτέλα Live TV εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει δέκτη, και ένας επιλογέας διαλέγει ποιου τον οδηγό βλέπεις. Η Μουσική λειτουργεί με τον ίδιο τρόπο: η καρτέλα εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει βιβλιοθήκη μουσικής, με δικό της επιλογέα. Η γραμμή στην αρχική οθόνη του Apple TV δείχνει επίσης τη συνδυασμένη Συνέχεια παρακολούθησης και το Επόμενο επεισόδιο και ξεκινά κάθε τίτλο από τον διακομιστή όπου βρίσκεται."
+            "value" : "Ενεργοποίησε τον Συνδυασμό διακομιστών στις Ρυθμίσεις > Διακομιστές και η αρχική ενώνει όλους τους διακομιστές όπου έχεις συνδεθεί: μία Συνέχιση παρακολούθησης, ένα Τα πολυμέσα μου, η ίδια ταινία μόνο μία φορά. Η καρτέλα Live TV εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει δέκτη, και ένας επιλογέας διαλέγει ποιου τον οδηγό βλέπεις. Η Μουσική λειτουργεί με τον ίδιο τρόπο: η καρτέλα εμφανίζεται όταν οποιοσδήποτε διακομιστής έχει βιβλιοθήκη μουσικής, με δικό της επιλογέα. Η γραμμή στην αρχική οθόνη του Apple TV δείχνει επίσης τη συνδυασμένη Συνέχεια παρακολούθησης και το Επόμενο επεισόδιο και ξεκινά κάθε τίτλο από τον διακομιστή όπου βρίσκεται. Μια ταινία σε δύο διακομιστές δείχνει στη σελίδα της τις εκδόσεις και των δύο, και τα Πολυμέσα μου αποκτούν πλακίδια Όλες οι ταινίες και Όλες οι σειρές."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn on Combine servers in Settings > Servers and Home merges every server you are signed in to: one Continue Watching, one My Media, the same film only once. The Live TV tab appears when any of the servers has a tuner, and a switcher picks whose guide you see. Music works the same way: its tab appears when any of the servers has a music library, with a switcher of its own. The row on the Apple TV home screen shows the combined Continue Watching and Next Up too, and starts each title from the server it lives on."
+            "value" : "Turn on Combine servers in Settings > Servers and Home merges every server you are signed in to: one Continue Watching, one My Media, the same film only once. The Live TV tab appears when any of the servers has a tuner, and a switcher picks whose guide you see. Music works the same way: its tab appears when any of the servers has a music library, with a switcher of its own. The row on the Apple TV home screen shows the combined Continue Watching and Next Up too, and starts each title from the server it lives on. A film on two servers lists both servers' versions on its page, and My Media gets All Movies and All Series tiles."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activa Combinar servidores en Ajustes > Servidores e Inicio une todos los servidores en los que has iniciado sesión: un solo Seguir viendo, un solo Mi contenido, la misma película solo una vez. La pestaña TV en directo aparece cuando cualquiera de los servidores tiene un sintonizador, y un selector elige de cuál ves la guía. Música funciona igual: la pestaña aparece cuando cualquiera de los servidores tiene una biblioteca de música, con su propio selector. La fila de la pantalla de inicio del Apple TV también muestra Continuar viendo y A continuación combinados, y reproduce cada título desde el servidor en el que está."
+            "value" : "Activa Combinar servidores en Ajustes > Servidores e Inicio une todos los servidores en los que has iniciado sesión: un solo Seguir viendo, un solo Mi contenido, la misma película solo una vez. La pestaña TV en directo aparece cuando cualquiera de los servidores tiene un sintonizador, y un selector elige de cuál ves la guía. Música funciona igual: la pestaña aparece cuando cualquiera de los servidores tiene una biblioteca de música, con su propio selector. La fila de la pantalla de inicio del Apple TV también muestra Continuar viendo y A continuación combinados, y reproduce cada título desde el servidor en el que está. Una película en dos servidores muestra en su página las versiones de ambos, y Mi contenido suma los mosaicos Todas las películas y Todas las series."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ota Yhdistä palvelimet käyttöön kohdassa Asetukset > Palvelimet, niin koti yhdistää kaikki palvelimet, joille olet kirjautunut: yksi Jatka katselua, yksi Oma media, sama elokuva vain kerran. Suora TV -välilehti näkyy, kun millä tahansa palvelimella on viritin, ja valitsin määrää, kenen ohjelmaopasta katsot. Musiikki toimii samoin: välilehti näkyy, kun millä tahansa palvelimella on musiikkikirjasto, ja sillä on oma valitsin. Apple TV:n aloitusnäytön rivi näyttää myös yhdistetyn Jatka katsomista- ja Seuraavaksi-listan ja käynnistää jokaisen nimikkeen siltä palvelimelta, jolla se on."
+            "value" : "Ota Yhdistä palvelimet käyttöön kohdassa Asetukset > Palvelimet, niin koti yhdistää kaikki palvelimet, joille olet kirjautunut: yksi Jatka katselua, yksi Oma media, sama elokuva vain kerran. Suora TV -välilehti näkyy, kun millä tahansa palvelimella on viritin, ja valitsin määrää, kenen ohjelmaopasta katsot. Musiikki toimii samoin: välilehti näkyy, kun millä tahansa palvelimella on musiikkikirjasto, ja sillä on oma valitsin. Apple TV:n aloitusnäytön rivi näyttää myös yhdistetyn Jatka katsomista- ja Seuraavaksi-listan ja käynnistää jokaisen nimikkeen siltä palvelimelta, jolla se on. Kahdella palvelimella oleva elokuva näyttää sivullaan molempien palvelimien versiot, ja Oma media saa ruudut Kaikki elokuvat ja Kaikki sarjat."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active Combiner les serveurs dans Réglages > Serveurs et l'Accueil réunit tous les serveurs auxquels tu es connecté : un seul Continuer à regarder, une seule Ma médiathèque, le même film une seule fois. L'onglet TV en direct apparaît dès qu'un des serveurs a un tuner, et un sélecteur choisit le guide affiché. La Musique fonctionne de la même façon : l'onglet apparaît dès qu'un des serveurs a une bibliothèque musicale, avec son propre sélecteur. La rangée de l’écran d’accueil de l’Apple TV affiche aussi Continuer à regarder et À suivre combinés, et lance chaque titre depuis le serveur où il se trouve."
+            "value" : "Active Combiner les serveurs dans Réglages > Serveurs et l'Accueil réunit tous les serveurs auxquels tu es connecté : un seul Continuer à regarder, une seule Ma médiathèque, le même film une seule fois. L'onglet TV en direct apparaît dès qu'un des serveurs a un tuner, et un sélecteur choisit le guide affiché. La Musique fonctionne de la même façon : l'onglet apparaît dès qu'un des serveurs a une bibliothèque musicale, avec son propre sélecteur. La rangée de l’écran d’accueil de l’Apple TV affiche aussi Continuer à regarder et À suivre combinés, et lance chaque titre depuis le serveur où il se trouve. Un film présent sur deux serveurs propose sur sa page les versions des deux, et Ma médiathèque gagne les tuiles Tous les films et Toutes les séries."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uključi Kombiniraj poslužitelje u Postavke > Poslužitelji i početni zaslon spaja sve poslužitelje na koje si prijavljen: jedno Nastavi gledanje, jedni Moji mediji, isti film samo jednom. Kartica TV uživo pojavljuje se čim bilo koji poslužitelj ima tuner, a prekidač bira čiji vodič gledaš. Glazba radi jednako: kartica se pojavljuje čim bilo koji poslužitelj ima glazbenu biblioteku, s vlastitim prekidačem. Redak na početnom zaslonu Apple TV-a također prikazuje spojene Nastavi gledati i Sljedeća epizoda te svaki naslov pokreće s poslužitelja na kojem se nalazi."
+            "value" : "Uključi Kombiniraj poslužitelje u Postavke > Poslužitelji i početni zaslon spaja sve poslužitelje na koje si prijavljen: jedno Nastavi gledanje, jedni Moji mediji, isti film samo jednom. Kartica TV uživo pojavljuje se čim bilo koji poslužitelj ima tuner, a prekidač bira čiji vodič gledaš. Glazba radi jednako: kartica se pojavljuje čim bilo koji poslužitelj ima glazbenu biblioteku, s vlastitim prekidačem. Redak na početnom zaslonu Apple TV-a također prikazuje spojene Nastavi gledati i Sljedeća epizoda te svaki naslov pokreće s poslužitelja na kojem se nalazi. Film na dva poslužitelja na svojoj stranici nudi verzije s oba, a Moji mediji dobivaju pločice Svi filmovi i Sve serije."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kapcsold be a Szerverek egyesítését a Beállítások > Szerverek alatt, és a kezdőlap egyesíti az összes szervert, ahová be vagy jelentkezve: egy Folytatás, egy Saját média, ugyanaz a film csak egyszer. Az Élő TV lap megjelenik, ha bármelyik szerveren van tuner, és egy választóval eldöntheted, melyik műsorújságát látod. A Zene ugyanígy működik: a lap megjelenik, ha bármelyik szerveren van zenei könyvtár, saját választóval. Az Apple TV kezdőképernyőjének sora is az egyesített Megtekintés folytatása és Következő listát mutatja, és minden címet arról a szerverről indít, amelyiken van."
+            "value" : "Kapcsold be a Szerverek egyesítését a Beállítások > Szerverek alatt, és a kezdőlap egyesíti az összes szervert, ahová be vagy jelentkezve: egy Folytatás, egy Saját média, ugyanaz a film csak egyszer. Az Élő TV lap megjelenik, ha bármelyik szerveren van tuner, és egy választóval eldöntheted, melyik műsorújságát látod. A Zene ugyanígy működik: a lap megjelenik, ha bármelyik szerveren van zenei könyvtár, saját választóval. Az Apple TV kezdőképernyőjének sora is az egyesített Megtekintés folytatása és Következő listát mutatja, és minden címet arról a szerverről indít, amelyiken van. A két szerveren lévő film oldalán mindkét szerver verziói megjelennek, a Saját média pedig Összes film és Összes sorozat csempét kap."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Attiva Combina server in Impostazioni > Server e la Home unisce tutti i server a cui hai effettuato l'accesso: un solo Continua a guardare, un solo I miei contenuti, lo stesso film una sola volta. La scheda TV in diretta compare quando uno qualsiasi dei server ha un sintonizzatore, e un selettore sceglie di quale vedi la guida. La Musica funziona allo stesso modo: la scheda compare quando uno qualsiasi dei server ha una libreria musicale, con un proprio selettore. Anche la riga nella schermata Home di Apple TV mostra Continua a guardare e Prossimo episodio combinati, e avvia ogni titolo dal server su cui si trova."
+            "value" : "Attiva Combina server in Impostazioni > Server e la Home unisce tutti i server a cui hai effettuato l'accesso: un solo Continua a guardare, un solo I miei contenuti, lo stesso film una sola volta. La scheda TV in diretta compare quando uno qualsiasi dei server ha un sintonizzatore, e un selettore sceglie di quale vedi la guida. La Musica funziona allo stesso modo: la scheda compare quando uno qualsiasi dei server ha una libreria musicale, con un proprio selettore. Anche la riga nella schermata Home di Apple TV mostra Continua a guardare e Prossimo episodio combinati, e avvia ogni titolo dal server su cui si trova. Un film presente su due server mostra nella sua pagina le versioni di entrambi, e I miei contenuti aggiunge i riquadri Tutti i film e Tutte le serie."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定 > サーバーで「サーバーを統合」をオンにすると、サインインしているすべてのサーバーがホームにまとまります。視聴を続けるもマイメディアもひとつ、同じ映画は一度だけ。いずれかのサーバーにチューナーがあればライブTVタブが表示され、切り替えでどの番組表を見るか選べます。ミュージックも同様で、いずれかのサーバーに音楽ライブラリがあればタブが表示され、専用の切り替えがあります。Apple TVのホーム画面の列にも、まとめた視聴を再開と次のエピソードが表示され、各タイトルはそれがあるサーバーから再生されます。"
+            "value" : "設定 > サーバーで「サーバーを統合」をオンにすると、サインインしているすべてのサーバーがホームにまとまります。視聴を続けるもマイメディアもひとつ、同じ映画は一度だけ。いずれかのサーバーにチューナーがあればライブTVタブが表示され、切り替えでどの番組表を見るか選べます。ミュージックも同様で、いずれかのサーバーに音楽ライブラリがあればタブが表示され、専用の切り替えがあります。Apple TVのホーム画面の列にも、まとめた視聴を再開と次のエピソードが表示され、各タイトルはそれがあるサーバーから再生されます。2台のサーバーにある映画は、詳細ページで両方のサーバーのバージョンを選べます。マイメディアには「すべての映画」と「すべてのシリーズ」のタイルが加わります。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 > 서버에서 서버 통합을 켜면 로그인한 모든 서버가 홈에 합쳐집니다. 계속 시청도 내 미디어도 하나, 같은 영화는 한 번만. 서버 중 하나라도 튜너가 있으면 라이브 TV 탭이 나타나고, 전환기로 어느 서버의 편성표를 볼지 고릅니다. 음악도 같은 방식입니다. 서버 중 하나라도 음악 라이브러리가 있으면 탭이 나타나고, 별도의 전환기가 있습니다. Apple TV 홈 화면 행에도 합쳐진 계속 시청하기와 다음 회차가 표시되며, 각 작품은 해당 작품이 있는 서버에서 재생됩니다."
+            "value" : "설정 > 서버에서 서버 통합을 켜면 로그인한 모든 서버가 홈에 합쳐집니다. 계속 시청도 내 미디어도 하나, 같은 영화는 한 번만. 서버 중 하나라도 튜너가 있으면 라이브 TV 탭이 나타나고, 전환기로 어느 서버의 편성표를 볼지 고릅니다. 음악도 같은 방식입니다. 서버 중 하나라도 음악 라이브러리가 있으면 탭이 나타나고, 별도의 전환기가 있습니다. Apple TV 홈 화면 행에도 합쳐진 계속 시청하기와 다음 회차가 표시되며, 각 작품은 해당 작품이 있는 서버에서 재생됩니다. 두 서버에 있는 영화는 상세 페이지에서 두 서버의 버전을 모두 보여 주고, 내 미디어에는 모든 영화와 모든 시리즈 타일이 추가됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå på Kombiner servere under Innstillinger > Servere, så samler startsiden alle servere du er logget på: én Fortsett å se, ett Mine medier, den samme filmen bare én gang. Fanen Direkte-TV vises når en av serverne har en tuner, og en velger bestemmer hvilken programguide du ser. Musikk fungerer på samme måte: fanen vises når en av serverne har et musikkbibliotek, med sin egen velger. Raden på Apple TV-hjemmeskjermen viser også den samlede Fortsett å se og Neste episode, og starter hver tittel fra serveren den ligger på."
+            "value" : "Slå på Kombiner servere under Innstillinger > Servere, så samler startsiden alle servere du er logget på: én Fortsett å se, ett Mine medier, den samme filmen bare én gang. Fanen Direkte-TV vises når en av serverne har en tuner, og en velger bestemmer hvilken programguide du ser. Musikk fungerer på samme måte: fanen vises når en av serverne har et musikkbibliotek, med sin egen velger. Raden på Apple TV-hjemmeskjermen viser også den samlede Fortsett å se og Neste episode, og starter hver tittel fra serveren den ligger på. En film på to servere viser begge serveres versjoner på siden sin, og Mine medier får flisene Alle filmer og Alle serier."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zet Servers combineren aan in Instellingen > Servers en de startpagina voegt alle servers samen waarop je bent ingelogd: één Verder kijken, één Mijn media, dezelfde film maar één keer. Het tabblad Live tv verschijnt zodra een van de servers een tuner heeft, en een schakelaar kiest wiens gids je ziet. Muziek werkt net zo: het tabblad verschijnt zodra een van de servers een muziekbibliotheek heeft, met een eigen schakelaar. De rij op het beginscherm van de Apple TV toont ook het samengevoegde Verder kijken en Volgende, en start elke titel vanaf de server waarop die staat."
+            "value" : "Zet Servers combineren aan in Instellingen > Servers en de startpagina voegt alle servers samen waarop je bent ingelogd: één Verder kijken, één Mijn media, dezelfde film maar één keer. Het tabblad Live tv verschijnt zodra een van de servers een tuner heeft, en een schakelaar kiest wiens gids je ziet. Muziek werkt net zo: het tabblad verschijnt zodra een van de servers een muziekbibliotheek heeft, met een eigen schakelaar. De rij op het beginscherm van de Apple TV toont ook het samengevoegde Verder kijken en Volgende, en start elke titel vanaf de server waarop die staat. Een film op twee servers toont op zijn pagina de versies van beide servers, en Mijn media krijgt de tegels Alle films en Alle series."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Włącz Połącz serwery w Ustawienia > Serwery, a ekran główny połączy wszystkie serwery, na których jesteś zalogowany: jedno Kontynuuj oglądanie, jedne Moje multimedia, ten sam film tylko raz. Karta Telewizja na żywo pojawia się, gdy którykolwiek serwer ma tuner, a przełącznik wybiera, czyj program oglądasz. Muzyka działa tak samo: karta pojawia się, gdy którykolwiek serwer ma bibliotekę muzyczną, z własnym przełącznikiem. Wiersz na ekranie głównym Apple TV także pokazuje połączone Kontynuuj oglądanie i Następny odcinek, a każdy tytuł uruchamia z serwera, na którym się znajduje."
+            "value" : "Włącz Połącz serwery w Ustawienia > Serwery, a ekran główny połączy wszystkie serwery, na których jesteś zalogowany: jedno Kontynuuj oglądanie, jedne Moje multimedia, ten sam film tylko raz. Karta Telewizja na żywo pojawia się, gdy którykolwiek serwer ma tuner, a przełącznik wybiera, czyj program oglądasz. Muzyka działa tak samo: karta pojawia się, gdy którykolwiek serwer ma bibliotekę muzyczną, z własnym przełącznikiem. Wiersz na ekranie głównym Apple TV także pokazuje połączone Kontynuuj oglądanie i Następny odcinek, a każdy tytuł uruchamia z serwera, na którym się znajduje. Film na dwóch serwerach pokazuje na swojej stronie wersje z obu, a Moje multimedia dostają kafelki Wszystkie filmy i Wszystkie seriale."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ative Combinar servidores em Ajustes > Servidores e o Início junta todos os servidores em que você entrou: um só Continuar assistindo, um só Minha mídia, o mesmo filme só uma vez. A aba TV ao vivo aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual você vê o guia. Música funciona do mesmo jeito: a aba aparece quando qualquer um dos servidores tem uma biblioteca de música, com seu próprio seletor. A linha na tela de início da Apple TV também mostra Continuar assistindo e A seguir combinados, e reproduz cada título a partir do servidor em que ele está."
+            "value" : "Ative Combinar servidores em Ajustes > Servidores e o Início junta todos os servidores em que você entrou: um só Continuar assistindo, um só Minha mídia, o mesmo filme só uma vez. A aba TV ao vivo aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual você vê o guia. Música funciona do mesmo jeito: a aba aparece quando qualquer um dos servidores tem uma biblioteca de música, com seu próprio seletor. A linha na tela de início da Apple TV também mostra Continuar assistindo e A seguir combinados, e reproduz cada título a partir do servidor em que ele está. Um filme em dois servidores mostra na página as versões dos dois, e Minha mídia ganha os blocos Todos os filmes e Todas as séries."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ativa Combinar servidores em Definições > Servidores e o Início junta todos os servidores em que tens sessão iniciada: um só Continuar a ver, uma só A minha biblioteca, o mesmo filme só uma vez. O separador TV em direto aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual vês o guia. A Música funciona da mesma forma: o separador aparece quando qualquer um dos servidores tem uma biblioteca de música, com o seu próprio seletor. A linha no ecrã principal da Apple TV também mostra Continuar a ver e A seguir combinados, e reproduz cada título a partir do servidor onde está."
+            "value" : "Ativa Combinar servidores em Definições > Servidores e o Início junta todos os servidores em que tens sessão iniciada: um só Continuar a ver, uma só A minha biblioteca, o mesmo filme só uma vez. O separador TV em direto aparece quando qualquer um dos servidores tem um sintonizador, e um seletor escolhe de qual vês o guia. A Música funciona da mesma forma: o separador aparece quando qualquer um dos servidores tem uma biblioteca de música, com o seu próprio seletor. A linha no ecrã principal da Apple TV também mostra Continuar a ver e A seguir combinados, e reproduz cada título a partir do servidor onde está. Um filme em dois servidores mostra na sua página as versões de ambos, e A minha biblioteca ganha os mosaicos Todos os filmes e Todas as séries."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activează Combină serverele în Setări > Servere și ecranul principal reunește toate serverele la care ești conectat: un singur Continuă vizionarea, un singur Media mea, același film o singură dată. Fila TV live apare când oricare dintre servere are un tuner, iar un comutator alege al cui ghid vezi. Muzica funcționează la fel: fila apare când oricare dintre servere are o bibliotecă muzicală, cu propriul comutator. Rândul de pe ecranul principal al Apple TV arată și el Continuă vizionarea și Următorul combinate și pornește fiecare titlu de pe serverul pe care se află."
+            "value" : "Activează Combină serverele în Setări > Servere și ecranul principal reunește toate serverele la care ești conectat: un singur Continuă vizionarea, un singur Media mea, același film o singură dată. Fila TV live apare când oricare dintre servere are un tuner, iar un comutator alege al cui ghid vezi. Muzica funcționează la fel: fila apare când oricare dintre servere are o bibliotecă muzicală, cu propriul comutator. Rândul de pe ecranul principal al Apple TV arată și el Continuă vizionarea și Următorul combinate și pornește fiecare titlu de pe serverul pe care se află. Un film aflat pe două servere arată pe pagina sa versiunile de pe ambele, iar Media mea primește dalele Toate filmele și Toate serialele."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Включите «Объединить серверы» в Настройки > Серверы, и главная соберёт все серверы, на которых выполнен вход: одно «Продолжить просмотр», одна «Моя медиатека», один и тот же фильм только один раз. Вкладка «ТВ» появляется, если тюнер есть хотя бы на одном сервере, а переключатель выбирает, чью телепрограмму вы видите. «Музыка» работает так же: вкладка появляется, если музыкальная библиотека есть хотя бы на одном сервере, и у неё свой переключатель. Строка на главном экране Apple TV тоже показывает объединённые «Продолжить просмотр» и «Далее» и запускает каждое название с того сервера, где оно лежит."
+            "value" : "Включите «Объединить серверы» в Настройки > Серверы, и главная соберёт все серверы, на которых выполнен вход: одно «Продолжить просмотр», одна «Моя медиатека», один и тот же фильм только один раз. Вкладка «ТВ» появляется, если тюнер есть хотя бы на одном сервере, а переключатель выбирает, чью телепрограмму вы видите. «Музыка» работает так же: вкладка появляется, если музыкальная библиотека есть хотя бы на одном сервере, и у неё свой переключатель. Строка на главном экране Apple TV тоже показывает объединённые «Продолжить просмотр» и «Далее» и запускает каждое название с того сервера, где оно лежит. Фильм, который есть на двух серверах, показывает на своей странице версии с обоих, а в «Моей медиатеке» появляются плитки «Все фильмы» и «Все сериалы»."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapni Kombinovať servery v Nastavenia > Servery a domovská obrazovka spojí všetky servery, ku ktorým si prihlásený: jedno Pokračovať v sledovaní, jedno Moje médiá, rovnaký film len raz. Karta Živá TV sa zobrazí, keď má tuner ktorýkoľvek zo serverov, a prepínač vyberie, čí program vidíš. Hudba funguje rovnako: karta sa zobrazí, keď má hudobnú knižnicu ktorýkoľvek zo serverov, a má vlastný prepínač. Riadok na domovskej obrazovke Apple TV ukazuje zlúčené Pokračovať v sledovaní a Ďalšia epizóda tiež a každý titul spustí zo servera, na ktorom je."
+            "value" : "Zapni Kombinovať servery v Nastavenia > Servery a domovská obrazovka spojí všetky servery, ku ktorým si prihlásený: jedno Pokračovať v sledovaní, jedno Moje médiá, rovnaký film len raz. Karta Živá TV sa zobrazí, keď má tuner ktorýkoľvek zo serverov, a prepínač vyberie, čí program vidíš. Hudba funguje rovnako: karta sa zobrazí, keď má hudobnú knižnicu ktorýkoľvek zo serverov, a má vlastný prepínač. Riadok na domovskej obrazovke Apple TV ukazuje zlúčené Pokračovať v sledovaní a Ďalšia epizóda tiež a každý titul spustí zo servera, na ktorom je. Film na dvoch serveroch ponúka na svojej stránke verzie z oboch serverov a Moje médiá dostanú dlaždice Všetky filmy a Všetky seriály."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slå på Kombinera servrar under Inställningar > Servrar så samlar startsidan alla servrar du är inloggad på: en Fortsätt titta, ett Mina media, samma film bara en gång. Fliken Live-tv visas när någon av servrarna har en tuner, och en väljare avgör vems tv-guide du ser. Musik fungerar likadant: fliken visas när någon av servrarna har ett musikbibliotek, med en egen väljare. Raden på Apple TV:s hemskärm visar också den sammanslagna Fortsätt titta och Nästa avsnitt och startar varje titel från servern den ligger på."
+            "value" : "Slå på Kombinera servrar under Inställningar > Servrar så samlar startsidan alla servrar du är inloggad på: en Fortsätt titta, ett Mina media, samma film bara en gång. Fliken Live-tv visas när någon av servrarna har en tuner, och en väljare avgör vems tv-guide du ser. Musik fungerar likadant: fliken visas när någon av servrarna har ett musikbibliotek, med en egen väljare. Raden på Apple TV:s hemskärm visar också den sammanslagna Fortsätt titta och Nästa avsnitt och startar varje titel från servern den ligger på. En film på två servrar visar båda servrarnas versioner på sin sida, och Mina media får rutorna Alla filmer och Alla serier."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ayarlar > Sunucular'da Sunucuları birleştir'i aç, ana sayfa oturum açtığın tüm sunucuları birleştirsin: tek bir İzlemeye Devam Et, tek bir Medyam, aynı film yalnızca bir kez. Sunuculardan herhangi birinde tuner varsa Canlı TV sekmesi görünür ve bir seçici hangisinin rehberini göreceğini belirler. Müzik de aynı şekilde çalışır: sunuculardan herhangi birinde müzik kitaplığı varsa sekme görünür ve kendi seçicisi vardır. Apple TV ana ekranındaki satır da birleşik İzlemeye devam et ve Sırada listesini gösterir ve her içeriği bulunduğu sunucudan başlatır."
+            "value" : "Ayarlar > Sunucular'da Sunucuları birleştir'i aç, ana sayfa oturum açtığın tüm sunucuları birleştirsin: tek bir İzlemeye Devam Et, tek bir Medyam, aynı film yalnızca bir kez. Sunuculardan herhangi birinde tuner varsa Canlı TV sekmesi görünür ve bir seçici hangisinin rehberini göreceğini belirler. Müzik de aynı şekilde çalışır: sunuculardan herhangi birinde müzik kitaplığı varsa sekme görünür ve kendi seçicisi vardır. Apple TV ana ekranındaki satır da birleşik İzlemeye devam et ve Sırada listesini gösterir ve her içeriği bulunduğu sunucudan başlatır. İki sunucuda bulunan bir film, sayfasında iki sunucunun sürümlerini de gösterir; Medyam'a Tüm Filmler ve Tüm Diziler kutucukları eklenir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Увімкніть «Об'єднати сервери» в Налаштування > Сервери, і головна збере всі сервери, на яких виконано вхід: одне «Продовжити перегляд», одна «Моя медіатека», той самий фільм лише один раз. Вкладка «ТБ» з’являється, якщо тюнер є хоча б на одному сервері, а перемикач обирає, чию телепрограму ви бачите. «Музика» працює так само: вкладка з’являється, якщо музична бібліотека є хоча б на одному сервері, і має власний перемикач. Рядок на головному екрані Apple TV теж показує об’єднані «Продовжити перегляд» і «Далі» та запускає кожну назву з того сервера, де вона лежить."
+            "value" : "Увімкніть «Об'єднати сервери» в Налаштування > Сервери, і головна збере всі сервери, на яких виконано вхід: одне «Продовжити перегляд», одна «Моя медіатека», той самий фільм лише один раз. Вкладка «ТБ» з’являється, якщо тюнер є хоча б на одному сервері, а перемикач обирає, чию телепрограму ви бачите. «Музика» працює так само: вкладка з’являється, якщо музична бібліотека є хоча б на одному сервері, і має власний перемикач. Рядок на головному екрані Apple TV теж показує об’єднані «Продовжити перегляд» і «Далі» та запускає кожну назву з того сервера, де вона лежить. Фільм, що є на двох серверах, показує на своїй сторінці версії з обох, а в «Моїй медіатеці» з’являються плитки «Усі фільми» та «Усі серіали»."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在设置 > 服务器中打开“合并服务器”，主页会汇集你登录的所有服务器：一个继续观看，一个我的媒体，同一部电影只出现一次。只要任一服务器有调谐器，直播电视标签就会出现，切换器决定你看哪台服务器的节目指南。音乐也是如此：只要任一服务器有音乐资料库，音乐标签就会出现，并有自己的切换器。Apple TV 主屏幕行也会显示合并后的继续观看和接下来，并从各标题所在的服务器播放。"
+            "value" : "在设置 > 服务器中打开“合并服务器”，主页会汇集你登录的所有服务器：一个继续观看，一个我的媒体，同一部电影只出现一次。只要任一服务器有调谐器，直播电视标签就会出现，切换器决定你看哪台服务器的节目指南。音乐也是如此：只要任一服务器有音乐资料库，音乐标签就会出现，并有自己的切换器。Apple TV 主屏幕行也会显示合并后的继续观看和接下来，并从各标题所在的服务器播放。两台服务器上都有的电影会在详情页列出两台服务器的版本，我的媒体也新增了“所有电影”和“所有剧集”磁贴。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在設定 > 伺服器中開啟「合併伺服器」，首頁會匯集你登入的所有伺服器：一個繼續觀看，一個我的媒體，同一部電影只出現一次。只要任一伺服器有調諧器，直播電視分頁就會出現，切換器決定你看哪台伺服器的節目表。音樂也是如此：只要任一伺服器有音樂資料庫，音樂分頁就會出現，並有自己的切換器。Apple TV 主畫面列也會顯示合併後的繼續觀看和接下來，並從各標題所在的伺服器播放。"
+            "value" : "在設定 > 伺服器中開啟「合併伺服器」，首頁會匯集你登入的所有伺服器：一個繼續觀看，一個我的媒體，同一部電影只出現一次。只要任一伺服器有調諧器，直播電視分頁就會出現，切換器決定你看哪台伺服器的節目表。音樂也是如此：只要任一伺服器有音樂資料庫，音樂分頁就會出現，並有自己的切換器。Apple TV 主畫面列也會顯示合併後的繼續觀看和接下來，並從各標題所在的伺服器播放。兩台伺服器上都有的電影會在詳細頁列出兩台伺服器的版本，我的媒體也新增了「所有電影」和「所有影集」磚塊。"
           }
         }
       }
