@@ -24,6 +24,29 @@ struct TrickplayTileSet: Equatable, Sendable {
         self.info = pick.1
     }
 
+    /// Sprites the manifest spans; 0 when the manifest is unusable.
+    var tileCount: Int {
+        let perTile = info.tileWidth * info.tileHeight
+        guard perTile > 0, info.thumbnailCount > 0 else { return 0 }
+        return (info.thumbnailCount + perTile - 1) / perTile
+    }
+
+    /// Every sprite once, the one holding `seconds` first, then outward with the later one ahead
+    /// of the earlier at each distance: a scrub usually starts at the playhead and goes forward.
+    func tileOrder(nearestTo seconds: Double) -> [Int] {
+        let count = tileCount
+        guard count > 0 else { return [] }
+        let center = tile(forSeconds: seconds)?.tileIndex ?? 0
+        var order = [center]
+        var distance = 1
+        while order.count < count {
+            if center + distance < count { order.append(center + distance) }
+            if center - distance >= 0 { order.append(center - distance) }
+            distance += 1
+        }
+        return order
+    }
+
     /// (tileIndex, crop). Thumbnail index = floor(ms / interval), clamped to thumbnailCount-1.
     /// A tile holds tileWidth x tileHeight thumbnails laid out row-major.
     func tile(forSeconds seconds: Double) -> (tileIndex: Int, crop: CGRect)? {
