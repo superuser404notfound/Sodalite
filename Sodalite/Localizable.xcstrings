@@ -68868,157 +68868,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tituly a seznamy se otevírají jako stránky, takže přejetím od levého okraje se vrátíte zpět. Stránky filmů a seriálů začínají vysokým obrazem, popis otevře Další informace a dalším klepnutím na Hledat se zobrazí klávesnice. Banner na Domů a stránky seriálů jsou na iPhonu klidnější. Na napůl rozloženém iPhonu Duo se obraz přesune do horní poloviny a ovládání, titulky, kanály živé TV a fronta hudby do dolní."
+            "value" : "Tituly a seznamy se otevírají jako stránky, takže přejetím od levého okraje se vrátíte zpět. Stránky filmů a seriálů začínají vysokým obrazem, popis otevře Další informace a dalším klepnutím na Hledat se zobrazí klávesnice. Banner na Domů a stránky seriálů jsou na iPhonu klidnější. Na napůl rozloženém iPhonu Duo se obraz přesune do horní poloviny a ovládání, titulky, kanály živé TV a fronta hudby do dolní. Když AirPlay přenáší jen zvuk titulu, přehrávač to oznámí a u prokládaných TV nahrávek a kanálů přesune tlačítko Zobrazit na TV obraz na Apple TV."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titler og lister åbner som sider, så et stryg fra venstre kant går tilbage. Film- og seriesider åbner med et højt billede, beskrivelsen åbner Flere detaljer, og et nyt tryk på Søg henter tastaturet frem. Banneret på Hjem og seriesiderne er roligere på iPhone. Når iPhone Duo står halvt foldet, flytter billedet op i den øverste halvdel, og betjening, undertekster, live-tv-kanaler og musikkøen ned i den nederste."
+            "value" : "Titler og lister åbner som sider, så et stryg fra venstre kant går tilbage. Film- og seriesider åbner med et højt billede, beskrivelsen åbner Flere detaljer, og et nyt tryk på Søg henter tastaturet frem. Banneret på Hjem og seriesiderne er roligere på iPhone. Når iPhone Duo står halvt foldet, flytter billedet op i den øverste halvdel, og betjening, undertekster, live-tv-kanaler og musikkøen ned i den nederste. Når AirPlay kun kan sende lyden af en titel, siger afspilleren det, og ved interlacede tv-optagelser og kanaler flytter Vis på tv billedet over på Apple TV."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titel und Listen öffnen sich als Seiten, ein Wisch vom linken Rand führt also zurück. Film- und Serienseiten beginnen mit einem hohen Bild, die Inhaltsangabe öffnet Weitere Details, und ein erneuter Tipp auf Suchen holt die Tastatur. Banner und Serienseiten sind auf dem iPhone ruhiger. Halb aufgeklappt auf dem iPhone Duo wandert das Bild in die obere Hälfte, Steuerung, Untertitel, Live-TV-Sender und die Musik-Warteschlange in die untere."
+            "value" : "Titel und Listen öffnen sich als Seiten, ein Wisch vom linken Rand führt also zurück. Film- und Serienseiten beginnen mit einem hohen Bild, die Inhaltsangabe öffnet Weitere Details, und ein erneuter Tipp auf Suchen holt die Tastatur. Banner und Serienseiten sind auf dem iPhone ruhiger. Halb aufgeklappt auf dem iPhone Duo wandert das Bild in die obere Hälfte, Steuerung, Untertitel, Live-TV-Sender und die Musik-Warteschlange in die untere. Kann AirPlay bei einem Titel nur den Ton übertragen, sagt der Player das, und bei Interlaced-TV-Aufnahmen und -Sendern holt „Auf dem Fernseher zeigen“ das Bild aufs Apple TV."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Οι τίτλοι και οι λίστες ανοίγουν ως σελίδες, έτσι μια σάρωση από την αριστερή άκρη σας επιστρέφει. Οι σελίδες ταινιών και σειρών ανοίγουν με μια ψηλή εικόνα, η περίληψη ανοίγει τις Περισσότερες λεπτομέρειες, και ένα νέο πάτημα στην Αναζήτηση εμφανίζει το πληκτρολόγιο. Το banner της Αρχικής και οι σελίδες σειρών είναι πιο ήρεμα στο iPhone. Στο μισοδιπλωμένο iPhone Duo η εικόνα μετακινείται στο πάνω μισό, ενώ τα χειριστήρια, οι υπότιτλοι, τα κανάλια Live TV και η ουρά μουσικής στο κάτω."
+            "value" : "Οι τίτλοι και οι λίστες ανοίγουν ως σελίδες, έτσι μια σάρωση από την αριστερή άκρη σας επιστρέφει. Οι σελίδες ταινιών και σειρών ανοίγουν με μια ψηλή εικόνα, η περίληψη ανοίγει τις Περισσότερες λεπτομέρειες, και ένα νέο πάτημα στην Αναζήτηση εμφανίζει το πληκτρολόγιο. Το banner της Αρχικής και οι σελίδες σειρών είναι πιο ήρεμα στο iPhone. Στο μισοδιπλωμένο iPhone Duo η εικόνα μετακινείται στο πάνω μισό, ενώ τα χειριστήρια, οι υπότιτλοι, τα κανάλια Live TV και η ουρά μουσικής στο κάτω. Όταν το AirPlay μπορεί να μεταφέρει μόνο τον ήχο ενός τίτλου, η συσκευή αναπαραγωγής το λέει, και για πεπλεγμένες τηλεοπτικές εγγραφές και κανάλια το «Προβολή στην τηλεόραση» μεταφέρει την εικόνα στο Apple TV."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titles and lists open as pages, so a swipe from the left edge goes back. Film and series pages open on a tall picture, the synopsis opens More Details, and tapping Search again brings up the keyboard. The Home banner and series pages are calmer on iPhone. Half folded on iPhone Duo, the picture moves to the upper half and the controls, subtitles, Live TV channels and music queue to the lower one."
+            "value" : "Titles and lists open as pages, so a swipe from the left edge goes back. Film and series pages open on a tall picture, the synopsis opens More Details, and tapping Search again brings up the keyboard. The Home banner and series pages are calmer on iPhone. Half folded on iPhone Duo, the picture moves to the upper half and the controls, subtitles, Live TV channels and music queue to the lower one. When AirPlay can only carry a title's sound, the player says so, and for interlaced TV recordings and channels Show on TV moves the picture to the Apple TV."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los títulos y las listas se abren como páginas, así que deslizar desde el borde izquierdo vuelve atrás. Las páginas de películas y series se abren con una imagen alta, la sinopsis abre Más detalles y tocar Buscar otra vez muestra el teclado. El banner de Inicio y las páginas de series son más sobrios en iPhone. Con el iPhone Duo medio plegado, la imagen pasa a la mitad superior y los controles, los subtítulos, los canales de TV en directo y la cola de música, a la inferior."
+            "value" : "Los títulos y las listas se abren como páginas, así que deslizar desde el borde izquierdo vuelve atrás. Las páginas de películas y series se abren con una imagen alta, la sinopsis abre Más detalles y tocar Buscar otra vez muestra el teclado. El banner de Inicio y las páginas de series son más sobrios en iPhone. Con el iPhone Duo medio plegado, la imagen pasa a la mitad superior y los controles, los subtítulos, los canales de TV en directo y la cola de música, a la inferior. Cuando AirPlay solo puede llevar el sonido de un título, el reproductor lo indica, y en grabaciones y canales de TV entrelazados Ver en la TV pasa la imagen al Apple TV."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nimikkeet ja luettelot avautuvat sivuina, joten pyyhkäisy vasemmasta reunasta vie takaisin. Elokuvien ja sarjojen sivut alkavat korkealla kuvalla, juoniselostus avaa Lisätiedot, ja Haun napauttaminen uudelleen tuo näppäimistön esiin. Kodin banneri ja sarjojen sivut ovat iPhonessa rauhallisempia. Puoliksi taitetussa iPhone Duossa kuva siirtyy yläpuoliskoon ja säätimet, tekstitykset, suorien TV-lähetysten kanavat ja musiikkijono alapuoliskoon."
+            "value" : "Nimikkeet ja luettelot avautuvat sivuina, joten pyyhkäisy vasemmasta reunasta vie takaisin. Elokuvien ja sarjojen sivut alkavat korkealla kuvalla, juoniselostus avaa Lisätiedot, ja Haun napauttaminen uudelleen tuo näppäimistön esiin. Kodin banneri ja sarjojen sivut ovat iPhonessa rauhallisempia. Puoliksi taitetussa iPhone Duossa kuva siirtyy yläpuoliskoon ja säätimet, tekstitykset, suorien TV-lähetysten kanavat ja musiikkijono alapuoliskoon. Kun AirPlay voi välittää nimikkeestä vain äänen, soitin kertoo sen, ja lomitetuissa TV-tallenteissa ja -kanavissa Näytä televisiossa siirtää kuvan Apple TV:hen."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les titres et les listes s’ouvrent comme des pages, un balayage depuis le bord gauche permet donc de revenir en arrière. Les pages de films et de séries s’ouvrent sur une grande image en hauteur, le synopsis ouvre Plus de détails, et toucher de nouveau Recherche affiche le clavier. La bannière de l’accueil et les pages de séries sont plus épurées sur iPhone. Sur un iPhone Duo à moitié plié, l’image passe dans la moitié supérieure, et les commandes, les sous-titres, les chaînes TV en direct et la file d’attente musicale dans la moitié inférieure."
+            "value" : "Les titres et les listes s’ouvrent comme des pages, un balayage depuis le bord gauche permet donc de revenir en arrière. Les pages de films et de séries s’ouvrent sur une grande image en hauteur, le synopsis ouvre Plus de détails, et toucher de nouveau Recherche affiche le clavier. La bannière de l’accueil et les pages de séries sont plus épurées sur iPhone. Sur un iPhone Duo à moitié plié, l’image passe dans la moitié supérieure, et les commandes, les sous-titres, les chaînes TV en direct et la file d’attente musicale dans la moitié inférieure. Quand AirPlay ne peut transmettre que le son d’un titre, le lecteur l’indique, et pour les enregistrements et chaînes TV entrelacés, Afficher sur la TV envoie l’image vers l’Apple TV."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naslovi i popisi otvaraju se kao stranice, pa povlačenje od lijevog ruba vraća natrag. Stranice filmova i serija počinju visokom slikom, sažetak otvara Više detalja, a ponovni dodir Pretrage prikazuje tipkovnicu. Banner na Početnoj i stranice serija mirniji su na iPhoneu. Na napola presavijenom iPhoneu Duo slika prelazi u gornju polovicu, a kontrole, titlovi, TV kanali uživo i red za glazbu u donju."
+            "value" : "Naslovi i popisi otvaraju se kao stranice, pa povlačenje od lijevog ruba vraća natrag. Stranice filmova i serija počinju visokom slikom, sažetak otvara Više detalja, a ponovni dodir Pretrage prikazuje tipkovnicu. Banner na Početnoj i stranice serija mirniji su na iPhoneu. Na napola presavijenom iPhoneu Duo slika prelazi u gornju polovicu, a kontrole, titlovi, TV kanali uživo i red za glazbu u donju. Kad AirPlay može prenijeti samo zvuk naslova, player to kaže, a kod isprepletenih TV snimki i kanala Prikaži na TV-u prebacuje sliku na Apple TV."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A címek és listák oldalként nyílnak meg, így a bal szélről húzva visszaléphetsz. A film- és sorozatoldalak egy magas képpel nyílnak, a leírás megnyitja a További részleteket, a Keresésre újra koppintva pedig megjelenik a billentyűzet. A Kezdőlap bannere és a sorozatoldalak nyugodtabbak iPhone-on. Félig összehajtott iPhone Duón a kép a felső felére kerül, a vezérlők, a feliratok, az élő TV-csatornák és a zenei lejátszási sor pedig az alsóra."
+            "value" : "A címek és listák oldalként nyílnak meg, így a bal szélről húzva visszaléphetsz. A film- és sorozatoldalak egy magas képpel nyílnak, a leírás megnyitja a További részleteket, a Keresésre újra koppintva pedig megjelenik a billentyűzet. A Kezdőlap bannere és a sorozatoldalak nyugodtabbak iPhone-on. Félig összehajtott iPhone Duón a kép a felső felére kerül, a vezérlők, a feliratok, az élő TV-csatornák és a zenei lejátszási sor pedig az alsóra. Ha az AirPlay egy címnek csak a hangját tudja átvinni, a lejátszó jelzi ezt, váltott soros tévéfelvételeknél és csatornáknál pedig a Megjelenítés a tévén gomb az Apple TV-re küldi a képet."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titoli ed elenchi si aprono come pagine, quindi uno scorrimento dal bordo sinistro torna indietro. Le pagine di film e serie si aprono su un’immagine alta, la trama apre Altri dettagli e toccare di nuovo Cerca fa comparire la tastiera. Su iPhone il banner della Home e le pagine delle serie sono più ordinati. Con iPhone Duo piegato a metà, l’immagine passa nella metà superiore e i controlli, i sottotitoli, i canali della TV in diretta e la coda musicale in quella inferiore."
+            "value" : "Titoli ed elenchi si aprono come pagine, quindi uno scorrimento dal bordo sinistro torna indietro. Le pagine di film e serie si aprono su un’immagine alta, la trama apre Altri dettagli e toccare di nuovo Cerca fa comparire la tastiera. Su iPhone il banner della Home e le pagine delle serie sono più ordinati. Con iPhone Duo piegato a metà, l’immagine passa nella metà superiore e i controlli, i sottotitoli, i canali della TV in diretta e la coda musicale in quella inferiore. Quando AirPlay può trasmettere solo l’audio di un titolo, il player lo segnala, e per registrazioni e canali TV interlacciati Mostra sulla TV porta l’immagine sull’Apple TV."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "作品やリストがページとして開くので、左端からスワイプして戻れます。映画とシリーズのページは縦長の画像で始まり、あらすじをタップすると詳細情報が開き、検索をもう一度タップするとキーボードが表示されます。iPhoneではホームのバナーとシリーズのページがすっきりしました。iPhone Duoを半分折りたたむと、映像が上半分に移り、操作ボタン、字幕、ライブTVのチャンネル、音楽の再生キューが下半分に並びます。"
+            "value" : "作品やリストがページとして開くので、左端からスワイプして戻れます。映画とシリーズのページは縦長の画像で始まり、あらすじをタップすると詳細情報が開き、検索をもう一度タップするとキーボードが表示されます。iPhoneではホームのバナーとシリーズのページがすっきりしました。iPhone Duoを半分折りたたむと、映像が上半分に移り、操作ボタン、字幕、ライブTVのチャンネル、音楽の再生キューが下半分に並びます。 AirPlayでタイトルの音声しか送れない場合はプレーヤーがそれを知らせ、インターレースのテレビ録画やチャンネルでは「テレビに表示」で映像をApple TVに移せます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "작품과 목록이 페이지로 열리므로 왼쪽 가장자리에서 스와이프하면 뒤로 갑니다. 영화와 시리즈 페이지는 세로로 긴 이미지로 시작하고, 줄거리를 누르면 상세 정보가 열리며, 검색을 다시 탭하면 키보드가 나타납니다. iPhone에서는 홈 배너와 시리즈 페이지가 더 깔끔해졌습니다. iPhone Duo를 반쯤 접으면 화면이 위쪽 절반으로 이동하고, 컨트롤, 자막, 라이브 TV 채널, 음악 대기열은 아래쪽 절반에 표시됩니다."
+            "value" : "작품과 목록이 페이지로 열리므로 왼쪽 가장자리에서 스와이프하면 뒤로 갑니다. 영화와 시리즈 페이지는 세로로 긴 이미지로 시작하고, 줄거리를 누르면 상세 정보가 열리며, 검색을 다시 탭하면 키보드가 나타납니다. iPhone에서는 홈 배너와 시리즈 페이지가 더 깔끔해졌습니다. iPhone Duo를 반쯤 접으면 화면이 위쪽 절반으로 이동하고, 컨트롤, 자막, 라이브 TV 채널, 음악 대기열은 아래쪽 절반에 표시됩니다. AirPlay로 타이틀의 소리만 보낼 수 있을 때 플레이어가 이를 알려 주며, 인터레이스 TV 녹화와 채널에서는 TV에 표시를 눌러 화면을 Apple TV로 옮길 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titler og lister åpnes som sider, så et sveip fra venstre kant går tilbake. Film- og seriesider åpner med et høyt bilde, handlingen åpner Flere detaljer, og et nytt trykk på Søk henter frem tastaturet. Banneret på Hjem og seriesidene er roligere på iPhone. Når iPhone Duo står halvveis brettet, flyttes bildet til øvre halvdel, og kontroller, undertekster, direkte-TV-kanaler og musikkøen til nedre."
+            "value" : "Titler og lister åpnes som sider, så et sveip fra venstre kant går tilbake. Film- og seriesider åpner med et høyt bilde, handlingen åpner Flere detaljer, og et nytt trykk på Søk henter frem tastaturet. Banneret på Hjem og seriesidene er roligere på iPhone. Når iPhone Duo står halvveis brettet, flyttes bildet til øvre halvdel, og kontroller, undertekster, direkte-TV-kanaler og musikkøen til nedre. Når AirPlay bare kan sende lyden fra en tittel, sier avspilleren fra, og for linjeflettede TV-opptak og kanaler flytter Vis på TV bildet til Apple TV."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titels en lijsten openen als pagina's, dus vegen vanaf de linkerrand gaat terug. Film- en seriepagina's openen met een grote staande afbeelding, de samenvatting opent Meer details en nogmaals op Zoeken tikken haalt het toetsenbord tevoorschijn. De banner op Home en de seriepagina's zijn rustiger op iPhone. Op een half gevouwen iPhone Duo verhuist het beeld naar de bovenste helft en staan de bediening, ondertitels, live-tv-zenders en de muziekwachtrij op de onderste."
+            "value" : "Titels en lijsten openen als pagina's, dus vegen vanaf de linkerrand gaat terug. Film- en seriepagina's openen met een grote staande afbeelding, de samenvatting opent Meer details en nogmaals op Zoeken tikken haalt het toetsenbord tevoorschijn. De banner op Home en de seriepagina's zijn rustiger op iPhone. Op een half gevouwen iPhone Duo verhuist het beeld naar de bovenste helft en staan de bediening, ondertitels, live-tv-zenders en de muziekwachtrij op de onderste. Als AirPlay van een titel alleen het geluid kan doorgeven, meldt de speler dat, en bij interlaced tv-opnames en -zenders zet Toon op tv het beeld op de Apple TV."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tytuły i listy otwierają się jako strony, więc przesunięcie od lewej krawędzi wraca. Strony filmów i seriali otwierają się wysokim obrazem, opis otwiera Więcej szczegółów, a ponowne stuknięcie Szukaj wywołuje klawiaturę. Baner na ekranie głównym i strony seriali są na iPhonie spokojniejsze. Na częściowo złożonym iPhonie Duo obraz przenosi się na górną połowę, a sterowanie, napisy, kanały telewizji na żywo i kolejka muzyki na dolną."
+            "value" : "Tytuły i listy otwierają się jako strony, więc przesunięcie od lewej krawędzi wraca. Strony filmów i seriali otwierają się wysokim obrazem, opis otwiera Więcej szczegółów, a ponowne stuknięcie Szukaj wywołuje klawiaturę. Baner na ekranie głównym i strony seriali są na iPhonie spokojniejsze. Na częściowo złożonym iPhonie Duo obraz przenosi się na górną połowę, a sterowanie, napisy, kanały telewizji na żywo i kolejka muzyki na dolną. Gdy AirPlay może przesłać tylko dźwięk tytułu, odtwarzacz o tym informuje, a w przypadku nagrań i kanałów TV z przeplotem Pokaż na telewizorze przenosi obraz na Apple TV."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Títulos e listas abrem como páginas, então deslizar a partir da borda esquerda volta. As páginas de filmes e séries abrem com uma imagem alta, a sinopse abre Mais detalhes e tocar em Buscar de novo mostra o teclado. O banner do Início e as páginas de séries ficaram mais limpos no iPhone. Com o iPhone Duo meio dobrado, a imagem vai para a metade de cima, e os controles, as legendas, os canais de TV ao vivo e a fila de músicas, para a de baixo."
+            "value" : "Títulos e listas abrem como páginas, então deslizar a partir da borda esquerda volta. As páginas de filmes e séries abrem com uma imagem alta, a sinopse abre Mais detalhes e tocar em Buscar de novo mostra o teclado. O banner do Início e as páginas de séries ficaram mais limpos no iPhone. Com o iPhone Duo meio dobrado, a imagem vai para a metade de cima, e os controles, as legendas, os canais de TV ao vivo e a fila de músicas, para a de baixo. Quando o AirPlay só consegue levar o som de um título, o player avisa, e em gravações e canais de TV entrelaçados Mostrar na TV leva a imagem para a Apple TV."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Títulos e listas abrem como páginas, por isso deslizar a partir da margem esquerda volta atrás. As páginas de filmes e séries abrem com uma imagem alta, a sinopse abre Mais detalhes e tocar novamente em Pesquisar mostra o teclado. O banner do Início e as páginas de séries estão mais limpos no iPhone. Com o iPhone Duo meio dobrado, a imagem passa para a metade de cima e os controlos, as legendas, os canais de TV em direto e a fila de música para a de baixo."
+            "value" : "Títulos e listas abrem como páginas, por isso deslizar a partir da margem esquerda volta atrás. As páginas de filmes e séries abrem com uma imagem alta, a sinopse abre Mais detalhes e tocar novamente em Pesquisar mostra o teclado. O banner do Início e as páginas de séries estão mais limpos no iPhone. Com o iPhone Duo meio dobrado, a imagem passa para a metade de cima e os controlos, as legendas, os canais de TV em direto e a fila de música para a de baixo. Quando o AirPlay só consegue transmitir o som de um título, o leitor indica-o, e em gravações e canais de TV entrelaçados Mostrar na TV passa a imagem para a Apple TV."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titlurile și listele se deschid ca pagini, așa că o glisare de la marginea stângă te duce înapoi. Paginile filmelor și serialelor se deschid cu o imagine înaltă, rezumatul deschide Mai multe detalii, iar o nouă atingere pe Căutare aduce tastatura. Bannerul de pe Acasă și paginile serialelor sunt mai aerisite pe iPhone. Pe un iPhone Duo pliat pe jumătate, imaginea trece în jumătatea de sus, iar comenzile, subtitrările, canalele TV live și coada de muzică în cea de jos."
+            "value" : "Titlurile și listele se deschid ca pagini, așa că o glisare de la marginea stângă te duce înapoi. Paginile filmelor și serialelor se deschid cu o imagine înaltă, rezumatul deschide Mai multe detalii, iar o nouă atingere pe Căutare aduce tastatura. Bannerul de pe Acasă și paginile serialelor sunt mai aerisite pe iPhone. Pe un iPhone Duo pliat pe jumătate, imaginea trece în jumătatea de sus, iar comenzile, subtitrările, canalele TV live și coada de muzică în cea de jos. Când AirPlay poate transmite doar sunetul unui titlu, playerul spune asta, iar la înregistrările și canalele TV întrețesute Afișează pe TV mută imaginea pe Apple TV."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Тайтлы и списки открываются как страницы, поэтому свайп от левого края возвращает назад. Страницы фильмов и сериалов начинаются с высокого изображения, описание открывает «Подробнее», а повторное нажатие на «Поиск» вызывает клавиатуру. Баннер на главной и страницы сериалов на iPhone стали спокойнее. На наполовину сложенном iPhone Duo изображение переходит в верхнюю половину, а управление, субтитры, каналы прямого эфира и очередь музыки в нижнюю."
+            "value" : "Тайтлы и списки открываются как страницы, поэтому свайп от левого края возвращает назад. Страницы фильмов и сериалов начинаются с высокого изображения, описание открывает «Подробнее», а повторное нажатие на «Поиск» вызывает клавиатуру. Баннер на главной и страницы сериалов на iPhone стали спокойнее. На наполовину сложенном iPhone Duo изображение переходит в верхнюю половину, а управление, субтитры, каналы прямого эфира и очередь музыки в нижнюю. Если AirPlay может передать только звук, плеер об этом сообщает, а для чересстрочных телезаписей и каналов кнопка «Показать на телевизоре» переносит изображение на Apple TV."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tituly a zoznamy sa otvárajú ako stránky, takže potiahnutím od ľavého okraja sa vrátite späť. Stránky filmov a seriálov sa otvárajú vysokým obrazom, popis otvorí Ďalšie podrobnosti a opätovné ťuknutie na Hľadať zobrazí klávesnicu. Banner na Domov a stránky seriálov sú na iPhone pokojnejšie. Na napoly zloženom iPhone Duo sa obraz presunie do hornej polovice a ovládanie, titulky, kanály živej TV a front hudby do dolnej."
+            "value" : "Tituly a zoznamy sa otvárajú ako stránky, takže potiahnutím od ľavého okraja sa vrátite späť. Stránky filmov a seriálov sa otvárajú vysokým obrazom, popis otvorí Ďalšie podrobnosti a opätovné ťuknutie na Hľadať zobrazí klávesnicu. Banner na Domov a stránky seriálov sú na iPhone pokojnejšie. Na napoly zloženom iPhone Duo sa obraz presunie do hornej polovice a ovládanie, titulky, kanály živej TV a front hudby do dolnej. Keď AirPlay dokáže preniesť iba zvuk titulu, prehrávač to oznámi a pri prekladaných TV nahrávkach a kanáloch presunie Zobraziť na TV obraz na Apple TV."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Titlar och listor öppnas som sidor, så ett svep från vänsterkanten går tillbaka. Film- och seriesidor öppnas med en hög bild, handlingen öppnar Fler detaljer och ett nytt tryck på Sök tar fram tangentbordet. Bannern på Hem och seriesidorna är lugnare på iPhone. När iPhone Duo står halvvikt flyttar bilden till den övre halvan och reglagen, undertexterna, live-tv-kanalerna och musikkön till den nedre."
+            "value" : "Titlar och listor öppnas som sidor, så ett svep från vänsterkanten går tillbaka. Film- och seriesidor öppnas med en hög bild, handlingen öppnar Fler detaljer och ett nytt tryck på Sök tar fram tangentbordet. Bannern på Hem och seriesidorna är lugnare på iPhone. När iPhone Duo står halvvikt flyttar bilden till den övre halvan och reglagen, undertexterna, live-tv-kanalerna och musikkön till den nedre. När AirPlay bara kan föra över ljudet från en titel säger spelaren det, och för sammanflätade tv-inspelningar och kanaler flyttar Visa på tv bilden till Apple TV."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Başlıklar ve listeler sayfa olarak açılır, böylece sol kenardan kaydırmak geri götürür. Film ve dizi sayfaları uzun bir görselle açılır, özet Daha Fazla Ayrıntı'yı açar ve Ara'ya yeniden dokunmak klavyeyi getirir. Ana Sayfa afişi ve dizi sayfaları iPhone'da daha sade. Yarı katlanmış iPhone Duo'da görüntü üst yarıya, kontroller, altyazılar, canlı TV kanalları ve müzik kuyruğu ise alt yarıya geçer."
+            "value" : "Başlıklar ve listeler sayfa olarak açılır, böylece sol kenardan kaydırmak geri götürür. Film ve dizi sayfaları uzun bir görselle açılır, özet Daha Fazla Ayrıntı'yı açar ve Ara'ya yeniden dokunmak klavyeyi getirir. Ana Sayfa afişi ve dizi sayfaları iPhone'da daha sade. Yarı katlanmış iPhone Duo'da görüntü üst yarıya, kontroller, altyazılar, canlı TV kanalları ve müzik kuyruğu ise alt yarıya geçer. AirPlay bir içeriğin yalnızca sesini aktarabildiğinde oynatıcı bunu söyler; geçmeli TV kayıtlarında ve kanallarında TV’de göster görüntüyü Apple TV’ye taşır."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Тайтли та списки відкриваються як сторінки, тож свайп від лівого краю повертає назад. Сторінки фільмів і серіалів починаються з високого зображення, опис відкриває «Докладніше», а повторне натискання на «Пошук» викликає клавіатуру. Банер на головній і сторінки серіалів на iPhone стали спокійнішими. На напівскладеному iPhone Duo зображення переходить у верхню половину, а керування, субтитри, канали прямого ефіру та черга музики в нижню."
+            "value" : "Тайтли та списки відкриваються як сторінки, тож свайп від лівого краю повертає назад. Сторінки фільмів і серіалів починаються з високого зображення, опис відкриває «Докладніше», а повторне натискання на «Пошук» викликає клавіатуру. Банер на головній і сторінки серіалів на iPhone стали спокійнішими. На напівскладеному iPhone Duo зображення переходить у верхню половину, а керування, субтитри, канали прямого ефіру та черга музики в нижню. Якщо AirPlay може передати лише звук, плеєр про це повідомляє, а для черезрядкових телезаписів і каналів кнопка «Показати на телевізорі» переносить зображення на Apple TV."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "作品和列表以页面形式打开，因此从左边缘轻扫即可返回。电影和剧集页面以一张竖向大图开头，轻点简介可打开“更多详情”，再次轻点“搜索”会弹出键盘。在 iPhone 上，首页横幅和剧集页面更加清爽。iPhone Duo 半折叠时，画面移到上半部分，控制按钮、字幕、电视直播频道和音乐队列则位于下半部分。"
+            "value" : "作品和列表以页面形式打开，因此从左边缘轻扫即可返回。电影和剧集页面以一张竖向大图开头，轻点简介可打开“更多详情”，再次轻点“搜索”会弹出键盘。在 iPhone 上，首页横幅和剧集页面更加清爽。iPhone Duo 半折叠时，画面移到上半部分，控制按钮、字幕、电视直播频道和音乐队列则位于下半部分。如果 AirPlay 只能传送某个内容的声音，播放器会提示；对于隔行扫描的电视录像和频道，“在电视上显示”可将画面移到 Apple TV 上。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "作品與列表以頁面形式開啟，因此從左邊緣滑動即可返回。電影與影集頁面以一張直向大圖開頭，點一下簡介可開啟「更多詳細資訊」，再點一下「搜尋」會顯示鍵盤。在 iPhone 上，首頁橫幅與影集頁面更加清爽。iPhone Duo 半摺疊時，畫面移到上半部，控制按鈕、字幕、電視直播頻道和音樂佇列則位於下半部。"
+            "value" : "作品與列表以頁面形式開啟，因此從左邊緣滑動即可返回。電影與影集頁面以一張直向大圖開頭，點一下簡介可開啟「更多詳細資訊」，再點一下「搜尋」會顯示鍵盤。在 iPhone 上，首頁橫幅與影集頁面更加清爽。iPhone Duo 半摺疊時，畫面移到上半部，控制按鈕、字幕、電視直播頻道和音樂佇列則位於下半部。如果 AirPlay 只能傳送某個內容的聲音，播放器會提示；對於交錯掃描的電視錄影和頻道，「在電視上顯示」可將畫面移到 Apple TV 上。"
           }
         }
       }
@@ -140247,6 +140247,326 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seerr 未連接。請在「設定」中連接 Seerr 以檢視此頁面。"
+          }
+        }
+      }
+    },
+    "player.airplay.pictureStaysLocal" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay přehrává jen zvuk. Obraz zůstává na tomto zařízení."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay afspiller kun lyden. Billedet bliver på denne enhed."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay gibt nur den Ton wieder. Das Bild bleibt auf diesem Gerät."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το AirPlay αναπαράγει μόνο τον ήχο. Η εικόνα παραμένει σε αυτή τη συσκευή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay plays the sound only. The picture stays on this device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay solo reproduce el sonido. La imagen se queda en este dispositivo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay toistaa vain äänen. Kuva pysyy tällä laitteella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay ne diffuse que le son. L’image reste sur cet appareil."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay reproducira samo zvuk. Slika ostaje na ovom uređaju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az AirPlay csak a hangot játssza le. A kép ezen az eszközön marad."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay riproduce solo l’audio. L’immagine resta su questo dispositivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlayでは音声のみが再生されます。映像はこのデバイスに表示されたままです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay로는 소리만 재생됩니다. 화면은 이 기기에 그대로 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay spiller bare av lyden. Bildet blir værende på denne enheten."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay speelt alleen het geluid af. Het beeld blijft op dit apparaat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay odtwarza tylko dźwięk. Obraz pozostaje na tym urządzeniu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O AirPlay reproduz só o som. A imagem fica neste dispositivo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O AirPlay reproduz apenas o som. A imagem fica neste dispositivo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay redă doar sunetul. Imaginea rămâne pe acest dispozitiv."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay передаёт только звук. Изображение остаётся на этом устройстве."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay prehráva iba zvuk. Obraz zostáva na tomto zariadení."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay spelar bara upp ljudet. Bilden stannar på den här enheten."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay yalnızca sesi oynatıyor. Görüntü bu cihazda kalıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay передає лише звук. Зображення залишається на цьому пристрої."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay 仅播放声音，画面仍留在此设备上。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AirPlay 只播放聲音，畫面仍留在此裝置上。"
+          }
+        }
+      }
+    },
+    "player.airplay.showOnTV" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazit na TV"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis på tv"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Fernseher zeigen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προβολή στην τηλεόραση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show on TV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver en la TV"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näytä televisiossa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher sur la TV"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikaži na TV-u"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megjelenítés a tévén"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra sulla TV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テレビに表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV에 표시"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis på TV"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toon op tv"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaż na telewizorze"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar na TV"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar na TV"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează pe TV"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать на телевизоре"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobraziť na TV"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa på tv"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV’de göster"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показати на телевізорі"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在电视上显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在電視上顯示"
           }
         }
       }

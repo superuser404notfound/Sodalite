@@ -207,6 +207,7 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **Offline downloads**: movies, episodes or whole seasons, in the original or a smaller version, with your audio and subtitle choice. What you watch offline syncs back to your server later.
 - **AirPlay** to any AirPlay display, with HDR and surround preserved.
+- **AirPlay with software-decoded titles**: these draw on the phone itself, so an AirPlay device gets only the sound, and the player says so. For interlaced TV recordings and channels it offers Show on TV, which moves the title to a route the Apple TV plays itself, at the same position (fast motion can show some combing there, since the phone's deinterlacer is not in the chain). Screen Mirroring carries the picture anyway, so the hint stays away while the screen is mirrored.
 - **HDMI adapter**: plug in a USB-C to HDMI adapter and the video fills the TV, with HDR, Dolby Vision and frame rate matching. Subtitles and software-decoded titles move to the TV too, while the phone keeps the controls.
 - **Rotation lock**, **child lock** (blocks all touches, hold the pill to release) and a **format badge** showing what is playing.
 - **Made for touch**: swipe to scrub, tap to pause, controls that stay clear of the notch in portrait and landscape.

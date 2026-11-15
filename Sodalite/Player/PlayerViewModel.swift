@@ -1792,6 +1792,9 @@ final class PlayerViewModel {
     // MARK: - State Observation (Combine)
 
     private func startObserving() {
+        #if os(iOS)
+        observeAirPlayPicture()
+        #endif
         // Sodalite#87: a delivered transcode tells which codec this server encodes, which the quality
         // picker needs for its estimate and cannot read from the server's settings.
         player.$sourceVideoCodecName
@@ -3861,6 +3864,42 @@ final class PlayerViewModel {
     }
 
     #if os(iOS)
+    // MARK: - AirPlay without a picture (AetherEngine#1070)
+
+    /// AirPlay is carrying the sound, but this title's picture stays on the device: it plays on the
+    /// engine's software path, whose layer no receiver picks up. The overlay says so.
+    private(set) var airPlayPictureStaysLocal = false
+    /// The engine can move the picture to the receiver once the viewer says it is a TV.
+    private(set) var airPlayPictureCanMoveToReceiver = false
+
+    /// The viewer says the AirPlay device shows video. The engine reloads onto the native route at the
+    /// playhead, and the receiver gets the picture.
+    func showPictureOnAirPlayReceiver() {
+        player.setAirPlayReceiverShowsVideo(true)
+    }
+
+    /// The viewer's word holds for this AirPlay device only: once no AirPlay output is left, the next
+    /// one (a HomePod, say) starts out unknown again.
+    private func observeAirPlayPicture() {
+        player.$airPlayPictureStaysLocal
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.airPlayPictureStaysLocal = $0 }
+            .store(in: &cancellables)
+        player.$airPlayPictureCanMoveToReceiver
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.airPlayPictureCanMoveToReceiver = $0 }
+            .store(in: &cancellables)
+        NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+                if !outputs.contains(where: { $0.portType == .airPlay }) {
+                    self?.player.setAirPlayReceiverShowsVideo(false)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     /// The two skip cases carry their length, because the glyph is the length (Sodalite#144):
     /// once the two directions can differ, a fixed `goforward.10` would be telling the viewer
     /// about a jump that did not happen.

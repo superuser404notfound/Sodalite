@@ -170,6 +170,16 @@ final class PlayerHostController: AVPlayerViewController {
         }
         #endif
 
+        #if os(iOS)
+        // AetherEngine#1070: a screen mirror carries the software path's picture to the receiver, so the
+        // engine must not report it as staying on the device. A recording reads as captured too, and there
+        // is no telling the two apart here; a hint hidden by mistake is the cheaper error.
+        viewModel.player.setScreenMirrored(traitCollection.sceneCaptureState == .active)
+        registerForTraitChanges([UITraitSceneCaptureState.self]) { (self: Self, _: UITraitCollection) in
+            self.viewModel.player.setScreenMirrored(self.traitCollection.sceneCaptureState == .active)
+        }
+        #endif
+
         // REQUIRED on tvOS for AVKit's Now Playing session + AirPods + Atmos sync; visible chrome is suppressed separately.
         showsPlaybackControls = true
         // Kept ON so AVKit dispatches iPhone Control Center 10s skip events into our delegate (timeToSeekAfterUserNavigatedFrom / skipToNextItem); without it the press lands nowhere. Our overlay covers the visible bar.
