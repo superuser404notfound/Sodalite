@@ -44,11 +44,15 @@ picture already fills the screen, the setting is greyed out instead of pretendin
 Two things you give up on purpose: a 2.39:1 film loses about a quarter of its width, and any
 subtitles burned into the bar area go with it.
 
-### Emby servers ([#51](https://github.com/superuser404notfound/Sodalite/issues/51))
+### Emby, Plex and Silo servers ([#51](https://github.com/superuser404notfound/Sodalite/issues/51))
 
-Adding an Emby server already works today, because discovery and the system endpoints still look
-the way Jellyfin's do. It falls over one step later, at the profile login: Sodalite signs in the
-Jellyfin way, and Emby moved its authentication somewhere else after the fork.
+Sodalite gets a second kind of server next to Jellyfin: Emby first, then Plex, and Silo with its
+own features rather than through the Jellyfin side door.
+
+Emby is closest. Adding an Emby server already works today, because discovery and the system
+endpoints still look the way Jellyfin's do. It falls over one step later, at the profile login:
+Sodalite signs in the Jellyfin way, and Emby moved its authentication somewhere else after the
+fork.
 
 That one call is the small part. The moment a second backend exists, every screen that touches a
 library, plus playback reporting and the device profile, has two servers to be correct against,
@@ -56,7 +60,9 @@ and there is no Emby box here to test any of it on. That is why it sits here and
 is worth doing properly, and doing it properly is a good deal bigger than the request that fails
 today.
 
-Plex has been weighed next to it and would be larger again. Neither goes in front of 1.0.
+Plex is larger again, because its API shares nothing with Jellyfin's. Silo already works today
+through its Jellyfin compatibility layer, except subtitle search, which that layer does not answer
+yet. A native Silo path would be about the things the compatibility layer leaves out.
 
 ## Considering
 
