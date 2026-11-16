@@ -234,6 +234,7 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **Your music library**: browse by album and play with a Now Playing screen, cover art, scrubbing and background playback.
 - **Ambient Now Playing** (Apple TV): after a few seconds the controls step aside and leave the artwork, like Apple Music.
+- **Volume Normalization** (optional, Settings → Playback → Music): every track plays at the loudness Jellyfin measured, so an old quiet master no longer sits below a loud new one. Per Track evens out every song, Per Album keeps an album's own quiet and loud moments. Quiet tracks are raised too, with a limiter so they don't clip. It needs the LUFS scan on your music library (library settings in Jellyfin, then the Audio Normalization task).
 
 ### Request what's missing (Seerr)
 

@@ -82,6 +82,13 @@ final class MusicPlaybackCoordinator {
     var cachedArtwork: MPMediaItemArtwork?
     var cachedArtworkItemID: String?
 
+    /// Sodalite#242: the profile's normalization mode, read at every track load. Set by the container,
+    /// which resolves the active profile's preferences.
+    var normalizationModeProvider: () -> MusicNormalization = { .off }
+    /// What the playing track was asked to do, kept until it is replaced so its log line can carry the
+    /// engine's figures.
+    private var normalizationRecord: MusicNormalizationRecord?
+
     /// Minimum spacing between fire-and-forget progress reports.
     private static let progressReportInterval: TimeInterval = 10
 
@@ -186,6 +193,7 @@ final class MusicPlaybackCoordinator {
         loadTask = nil
         loadGeneration += 1
         reportStopped()
+        logFinishedNormalization()
         engine.stop()
         queue = []
         currentIndex = 0
@@ -254,10 +262,15 @@ final class MusicPlaybackCoordinator {
             // this track. Here (not earlier) so a load failure leaves the latch as-is.
             isStopping = false
 
+            logFinishedNormalization()
+            let mode = normalizationModeProvider()
+            let record = mode == .off ? nil : MusicNormalizationRecord(item: item, mode: mode)
+            normalizationRecord = record
+
             try await engine.load(
                 url: url,
                 startPosition: nil,
-                options: LoadOptions(audioOnly: true)
+                options: LoadOptions(audioOnly: true, normalizationGainDB: record?.pick?.gainDB)
             )
             guard generation == loadGeneration else { return }
 
@@ -297,6 +310,28 @@ final class MusicPlaybackCoordinator {
             LogTap.shared.note("[MusicCoordinator] audio session setup FAILED: \(error.localizedDescription)")
         }
         #endif
+    }
+
+    // MARK: - Normalization (Sodalite#242)
+
+    /// Writes the outgoing track's line. Call before the engine loads or stops anything else.
+    private func logFinishedNormalization() {
+        guard let record = normalizationRecord else { return }
+        normalizationRecord = nil
+        // Without a gain the engine ran no stage, and its report would be an older track's.
+        let report = record.pick?.gainDB == nil ? nil : engine.normalizationGainReport
+        LogTap.shared.note(record.logLine(report: report))
+    }
+
+    /// The setting changed: the playing track follows at once, the engine ramps to the new gain.
+    func normalizationSettingChanged() {
+        guard let item = currentItem, loadTask == nil, engine.playbackBackend == .audio else { return }
+        let mode = normalizationModeProvider()
+        guard mode != (normalizationRecord?.mode ?? .off) else { return }
+        logFinishedNormalization()
+        let record = mode == .off ? nil : MusicNormalizationRecord(item: item, mode: mode)
+        normalizationRecord = record
+        engine.setNormalizationGain(record?.pick?.gainDB)
     }
 
     // MARK: - Engine observation
@@ -362,6 +397,8 @@ final class MusicPlaybackCoordinator {
                 self.loadTask = nil
                 self.loadGeneration += 1
                 self.reportStopped()
+                // The engine has already torn the audio host down; its report holds that track's figures.
+                self.logFinishedNormalization()
                 self.queue = []
                 self.currentIndex = 0
                 self.isPlaying = false
