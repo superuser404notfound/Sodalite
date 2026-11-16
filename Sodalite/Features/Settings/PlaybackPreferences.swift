@@ -51,6 +51,7 @@ final class PlaybackPreferences {
         static let playerControls = "playback.playerControls"
         static let versionOrder = "playback.versionOrder"
         static let playThemeSongs = "playback.playThemeSongs"
+        static let musicNormalization = "playback.musicNormalization"
     }
 
     // MARK: - Allowed Values
@@ -320,6 +321,12 @@ final class PlaybackPreferences {
     /// Sodalite#219: detail pages play the server's theme song. Off by default, it is sound nobody asked for.
     var playThemeSongs: Bool {
         didSet { store.set(playThemeSongs, forKey: Keys.playThemeSongs) }
+    }
+
+    /// Sodalite#242: plays music at the loudness the server measured. Off by default, it needs the
+    /// library's LUFS scan and changes how a familiar album sounds.
+    var musicNormalization: MusicNormalization {
+        didSet { store.set(musicNormalization.rawValue, forKey: Keys.musicNormalization) }
     }
 
     /// Which version of a multi-version title is listed first and plays untouched: the largest frame,
@@ -679,6 +686,8 @@ final class PlaybackPreferences {
         self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
         self.playThemeSongs = store.object(forKey: Keys.playThemeSongs) as? Bool ?? false
         self.versionOrder = store.string(forKey: Keys.versionOrder).flatMap(VersionOrder.init(rawValue:)) ?? .quality
+        self.musicNormalization = store.string(forKey: Keys.musicNormalization)
+            .flatMap(MusicNormalization.init(rawValue:)) ?? .off
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false

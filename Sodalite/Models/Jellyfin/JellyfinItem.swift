@@ -86,6 +86,11 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     let artists: [String]?
     let albumId: String?
     let albumPrimaryImageTag: String?
+    /// Sodalite#242: gain in dB that brings this track, and its album, to the server's loudness
+    /// reference (-18 LUFS after Jellyfin's LUFS scan, or the file's own ReplayGain tags). nil when the
+    /// library was never scanned. Jellyfin sends both on every audio item without a `Fields` entry.
+    var normalizationGain: Double?
+    var albumNormalizationGain: Double?
 
     /// Display line for a track: the per-track artists if present,
     /// otherwise the album artist. nil when neither is set.
@@ -204,6 +209,8 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case artists = "Artists"
         case albumId = "AlbumId"
         case albumPrimaryImageTag = "AlbumPrimaryImageTag"
+        case normalizationGain = "NormalizationGain"
+        case albumNormalizationGain = "AlbumNormalizationGain"
     }
 
     init(seriesStub id: String, name: String) {

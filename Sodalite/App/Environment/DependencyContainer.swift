@@ -294,6 +294,9 @@ final class DependencyContainer {
         )
 
         let capturedSettings = profileSettings
+        musicPlaybackCoordinator.normalizationModeProvider = { [weak capturedSettings] in
+            capturedSettings?.current.playback.musicNormalization ?? .off
+        }
         self.themeSongPlayer = ThemeSongPlayer(
             output: AVThemeSongOutput(),
             isEnabled: { [weak capturedSettings] in capturedSettings?.current.playback.playThemeSongs ?? false },

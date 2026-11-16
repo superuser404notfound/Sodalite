@@ -640,6 +640,24 @@ struct PlaybackSettingsView: View {
                     label: AudioDelay.label
                 )
                 .settingsValueScope(.device)
+
+                sectionHeader("settings.playback.section.music")
+
+                // Sodalite#242: a track already playing follows the change at once.
+                ValuePickerRow(
+                    icon: "waveform.path",
+                    title: "settings.playback.musicNormalization",
+                    subtitle: "settings.playback.musicNormalization.subtitle",
+                    options: MusicNormalization.allCases,
+                    selection: Binding(
+                        get: { prefs.musicNormalization },
+                        set: {
+                            prefs.musicNormalization = $0
+                            dependencies.musicPlaybackCoordinator.normalizationSettingChanged()
+                        }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
             }
             .screenContentInset()
             .task { displayHasDolbyVision = AetherEngine.displayCapabilities.supportsDolbyVision }
