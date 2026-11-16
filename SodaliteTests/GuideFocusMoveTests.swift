@@ -36,5 +36,27 @@ struct GuideFocusMoveTests {
         #expect(!GuideGridViewController.moveSetsAnchor(heading: .right, servedRedirect: false,
                                                         cameFromGrid: false))
     }
+
+    @Test("tvOS putting focus back inside the grid is re-aimed at the anchor")
+    func headinglessLandingReaims() {
+        #expect(GuideGridViewController.headinglessLandingReaims(
+            heading: [], servedRedirect: false, cameFromGrid: true, awaitedReload: false))
+        #expect(GuideGridViewController.headinglessLandingReaims(
+            heading: [], servedRedirect: false, cameFromGrid: false, awaitedReload: true))
+        #expect(GuideGridViewController.headinglessLandingReaims(
+            heading: .next, servedRedirect: false, cameFromGrid: true, awaitedReload: false))
+    }
+
+    @Test("user moves, the served redirect and entries from outside are not re-aimed")
+    func otherLandingsStay() {
+        for heading: UIFocusHeading in [.up, .down, .left, .right] {
+            #expect(!GuideGridViewController.headinglessLandingReaims(
+                heading: heading, servedRedirect: false, cameFromGrid: true, awaitedReload: true))
+        }
+        #expect(!GuideGridViewController.headinglessLandingReaims(
+            heading: [], servedRedirect: true, cameFromGrid: true, awaitedReload: true))
+        #expect(!GuideGridViewController.headinglessLandingReaims(
+            heading: [], servedRedirect: false, cameFromGrid: false, awaitedReload: false))
+    }
 }
 #endif
