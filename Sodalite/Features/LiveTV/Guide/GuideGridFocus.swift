@@ -92,10 +92,14 @@ extension GuideGridViewController {
     /// Sodalite#221: a fast swipe lands on rows whose schedule is still loading, drawn as hourly
     /// placeholders. When the programs arrive the reload puts focus back on the same item NUMBER,
     /// which is now a different program, usually an earlier one. Aim it at the anchor again.
+    ///
+    /// The completion can run before tvOS has put focus back, and then there is no focused cell to
+    /// re-aim (classicjazz's build 11 capture had early landings and not one `reload re-aim`). So
+    /// the focused row is noted before the reload, and its landing is caught in didUpdateFocusIn.
     func refocusAfterReload(of sections: IndexSet) {
-        guard let focused = focusedGridIndexPath(), sections.contains(focused.section),
-              let desired = anchoredItemIndex(section: focused.section)
-        else { return }
+        guard let focused = focusedGridIndexPath(), sections.contains(focused.section) else { return }
+        awaitedReloadLanding = nil
+        guard let desired = anchoredItemIndex(section: focused.section) else { return }
         guard desired != focused.item else {
             // Same cell, new content: the hero still describes the placeholder.
             updateHero(section: focused.section, item: focused.item)
@@ -104,6 +108,11 @@ extension GuideGridViewController {
         let target = IndexPath(item: desired, section: focused.section)
         focusLog("reload re-aim", previous: focused, next: target)
         redirectFocus(to: target, from: focused)
+    }
+
+    func noteFocusedRowReloading(_ sections: IndexSet) {
+        guard let focused = focusedGridIndexPath(), sections.contains(focused.section) else { return }
+        awaitedReloadLanding = (focused.section, Date().addingTimeInterval(1))
     }
 
     private func focusedGridIndexPath() -> IndexPath? {
@@ -184,6 +193,9 @@ extension GuideGridViewController {
         pendingFocusRedirect = nil
         lastVetoedMove = nil
         guard indexPath.section < rows.count else { return }
+        if reaimHeadlessLanding(at: indexPath, context: context, servedRedirect: servedRedirect) {
+            return
+        }
         model.anchorChannelID = rows[indexPath.section].channel.id
         updateHero(section: indexPath.section, item: indexPath.item)
 
@@ -202,6 +214,41 @@ extension GuideGridViewController {
         model.anchor = .focused(start: model.axis.date(atX: x),
                                 visibleStart: model.axis.date(atX: gridView.contentOffset.x),
                                 now: Date())
+    }
+
+    /// Sodalite#221: a landing with no direction inside the grid is tvOS putting focus back, most
+    /// often after a row's schedule reloaded under it. It returns to the same item NUMBER, which is
+    /// now another program, and shouldUpdateFocusIn lets it through because only Up and Down are
+    /// checked there. Nothing is logged then either, which is how the early landings in the build 11
+    /// capture showed up with no line at all.
+    private func reaimHeadlessLanding(at indexPath: IndexPath,
+                                      context: UICollectionViewFocusUpdateContext,
+                                      servedRedirect: Bool) -> Bool {
+        let awaited = awaitedReloadLanding.map { $0.section == indexPath.section && Date() < $0.deadline }
+            ?? false
+        if awaited { awaitedReloadLanding = nil }
+        guard Self.headinglessLandingReaims(heading: context.focusHeading,
+                                            servedRedirect: servedRedirect,
+                                            cameFromGrid: context.previouslyFocusedIndexPath != nil,
+                                            awaitedReload: awaited),
+              let desired = anchoredItemIndex(section: indexPath.section),
+              desired != indexPath.item
+        else { return false }
+        let target = IndexPath(item: desired, section: indexPath.section)
+        focusLog("headingless re-aim", previous: indexPath, next: target)
+        redirectFocus(to: target, from: indexPath)
+        return true
+    }
+
+    /// Kept apart so the rule can be tested without a focus engine. Any direction is a user move and
+    /// is handled elsewhere; the served redirect is the re-aim itself. Coming in from outside the
+    /// grid (closing a sheet, the ruler, the column) is left alone unless it is the awaited reload.
+    static func headinglessLandingReaims(heading: UIFocusHeading, servedRedirect: Bool,
+                                         cameFromGrid: Bool, awaitedReload: Bool) -> Bool {
+        guard !servedRedirect else { return false }
+        let directions: UIFocusHeading = [.up, .down, .left, .right]
+        guard heading.intersection(directions).isEmpty else { return false }
+        return cameFromGrid || awaitedReload
     }
 
     /// Sodalite#221: only a Left or Right move picks a time. The served redirect of a vertical move

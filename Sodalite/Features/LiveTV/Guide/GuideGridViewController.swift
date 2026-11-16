@@ -78,6 +78,9 @@ final class GuideGridViewController: UIViewController,
     /// Between a veto and the run of its redirect. A repeat of the vetoed move inside that window
     /// is the engine asking twice, not the redirect failing, so the hatch above stays shut.
     var redirectInFlight = false
+    /// A focused row whose schedule reloaded while no cell held focus yet (tvOS puts it back a
+    /// moment after the batch completes). Its landing is re-aimed in didUpdateFocusIn instead.
+    var awaitedReloadLanding: (section: Int, deadline: Date)?
 
     private var nowLineTimer: Timer?
     /// Set when the window wanted to move while the guide held focus. Reloading out from under a
@@ -508,6 +511,7 @@ final class GuideGridViewController: UIViewController,
         }
         let appended = rows.count > old.count ? IndexSet(integersIn: old.count..<rows.count) : IndexSet()
         guard !changed.isEmpty || !appended.isEmpty else { return }
+        noteFocusedRowReloading(changed)
         UIView.performWithoutAnimation {
             gridView.performBatchUpdates {
                 if !changed.isEmpty { gridView.reloadSections(changed) }
