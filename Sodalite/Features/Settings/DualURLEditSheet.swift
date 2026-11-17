@@ -13,7 +13,7 @@ struct DualURLEditSheet: View {
     let externalPlaceholder: LocalizedStringKey
     let initialInternalURL: URL?
     let initialExternalURL: URL?
-    let resolve: @Sendable (String) async -> URL?
+    let resolve: ServerAddressResolution.Discover
     let onSave: (URL?, URL?) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -111,6 +111,9 @@ struct DualURLEditSheet: View {
             case .unresolved:
                 // Name the field that failed: with two of them, "that address" is a guess.
                 validationError = "multiServer.urls.invalid \(text.trimmingCharacters(in: .whitespacesAndNewlines))"
+                return
+            case .otherServer(let url):
+                validationError = "multiServer.urls.otherServer \(url.host() ?? url.absoluteString)"
                 return
             }
         }

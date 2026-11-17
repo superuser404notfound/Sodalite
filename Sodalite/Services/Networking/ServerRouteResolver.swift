@@ -183,7 +183,11 @@ enum ServerProbe {
         return normalizedServerID(id) == normalizedServerID(expectedServerID)
     }
 
-    private static func normalizedServerID(_ id: String) -> String {
+    nonisolated static func isSameServer(_ id: String, _ other: String) -> Bool {
+        normalizedServerID(id) == normalizedServerID(other)
+    }
+
+    nonisolated private static func normalizedServerID(_ id: String) -> String {
         id.replacingOccurrences(of: "-", with: "").lowercased()
     }
 
