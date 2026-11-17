@@ -87,6 +87,8 @@ nonisolated struct LogExportSession: Sendable {
             }
             #if os(tvOS)
             let systemName = "tvOS"
+            #elseif os(macOS)
+            let systemName = "macOS"
             #else
             let systemName = "iOS"
             #endif
