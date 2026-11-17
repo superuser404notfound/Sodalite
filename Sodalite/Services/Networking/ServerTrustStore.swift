@@ -233,11 +233,35 @@ nonisolated enum RedirectPolicy {
         "Authorization", "Cookie", "X-Emby-Token", "X-Emby-Authorization", "X-MediaBrowser-Token",
     ]
 
+    /// Query items Jellyfin reads a token from. Artwork, subtitles, trickplay and downloads carry
+    /// the token there instead of in a header.
+    static let credentialQueryItems: Set<String> = ["api_key", "apikey", "x-emby-token"]
+
+    /// Why a hop is refused, nil when it may be followed.
+    enum Refusal: Equatable {
+        case downgrade
+        /// The URL itself carries the token, so stripping headers protects nothing: a forward-auth
+        /// SSO page (`?rd=<the whole URL>`) or a moved domain would log it (audit NET-209).
+        case tokenInQuery
+    }
+
+    static func refusal(_ proposed: URLRequest, from previous: URLRequest?) -> Refusal? {
+        guard let from = previous?.url, let to = proposed.url else { return nil }
+        if from.scheme?.lowercased() == "https", to.scheme?.lowercased() == "http" { return .downgrade }
+        if !credentialsAllowed(from: from, to: to), carriesQueryCredential(from) { return .tokenInQuery }
+        return nil
+    }
+
+    static func carriesQueryCredential(_ url: URL) -> Bool {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains {
+            credentialQueryItems.contains($0.name.lowercased()) && !($0.value ?? "").isEmpty
+        } ?? false
+    }
+
     /// The request to follow, or nil to refuse the hop (the 3xx is then the response).
     static func redirect(_ proposed: URLRequest, from previous: URLRequest?) -> URLRequest? {
         guard let from = previous?.url, let to = proposed.url else { return proposed }
-        let fromScheme = from.scheme?.lowercased(), toScheme = to.scheme?.lowercased()
-        if fromScheme == "https", toScheme == "http" { return nil }
+        guard refusal(proposed, from: previous) == nil else { return nil }
 
         var request = proposed
         if credentialsAllowed(from: from, to: to) {
@@ -277,11 +301,16 @@ extension ServerTrustDelegate {
         newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
-        let followed = RedirectPolicy.redirect(request, from: task.currentRequest ?? task.originalRequest)
-        if followed == nil {
+        let previous = task.currentRequest ?? task.originalRequest
+        switch RedirectPolicy.refusal(request, from: previous) {
+        case .downgrade:
             LogTap.shared.note("[http] refused a redirect from https to http at \(request.url?.host() ?? "?")")
+        case .tokenInQuery:
+            LogTap.shared.note("[http] refused to carry a token in the URL from \(previous?.url?.host() ?? "?") to \(request.url?.host() ?? "?")")
+        case nil:
+            break
         }
-        completionHandler(followed)
+        completionHandler(RedirectPolicy.redirect(request, from: previous))
     }
 }
 
