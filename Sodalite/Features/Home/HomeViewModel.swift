@@ -128,7 +128,7 @@ final class HomeViewModel {
     enum RefreshTrigger: String {
         case tab = "back to the tab"
         case foreground = "app in the foreground"
-        case coverDismissed = "cover dismissed"
+        case coverDismissed = "home is the screen again"
     }
 
     enum RefreshDecision: Equatable {
@@ -160,7 +160,7 @@ final class HomeViewModel {
     }
 
     /// Bumped on every loadContent entry; the for-await loop checks it before publishing so a re-entrant run (profile switch, refresh-while-loading) supersedes the older one instead of both writing rows/tagRows.
-    private var loadGeneration: Int = 0
+    private(set) var loadGeneration: Int = 0
 
     // Internal (not private) so +Rows / +Precompute can reach the services + identity.
     let libraryService: JellyfinLibraryServiceProtocol
@@ -239,14 +239,27 @@ final class HomeViewModel {
 
     /// Reload after a config change, coalesced. Deliberately not a flag consumed by the view's onAppear: iOS presents Settings as a sheet over the tab bar, and a sheet dismiss fires no onAppear underneath, so a pending flag survived until relaunch (tvOS Settings is a tab, which did re-appear Home). Same reason the iCloud-sync poster needs this.
     func scheduleConfigReload() {
+        scheduleReload()
+    }
+
+    /// One coalesced reload for every cause that asks for a full load (config toggles, a burst of
+    /// progress notifications from the offline sync, audit BRW-207). Positions handed in are
+    /// re-applied after the load so a cached re-fetch cannot regress the bar (issue #24).
+    func scheduleReload(applying position: (itemID: String, ticks: Int64)? = nil) {
+        if let position { pendingPositions[position.itemID] = position.ticks }
         configReloadTask?.cancel()
         configReloadTask = Task { [weak self] in
             guard let debounce = self?.configReloadDebounce else { return }
             try? await Task.sleep(for: debounce)
             guard !Task.isCancelled else { return }
             await self?.loadContent()
+            guard !Task.isCancelled, let self else { return }
+            for (itemID, ticks) in pendingPositions { applyPlaybackPosition(itemID: itemID, ticks: ticks) }
+            pendingPositions = [:]
         }
     }
+
+    @ObservationIgnored private var pendingPositions: [String: Int64] = [:]
 
     isolated deinit {
         // Fan-outs hold self weakly, also while their network work runs (see +Precompute), so this deinit is reached mid-pass; cancel flips Task.isCancelled so the next checkpoint stops early.

@@ -37,6 +37,8 @@ struct HomeView: View {
     /// Presents the single-field sheet that fills the server's empty URL slot (iOS only; tvOS has
     /// no URL editor).
     @State private var showAddURLSheet = false
+    /// The running poster prefetch; each row that lands replaces it instead of stacking another (BRW-203).
+    @State private var prefetchTask: Task<Void, Never>?
 
     /// The card whose show a menu asked to wipe; the alert below confirms before anything is sent.
     @State private var historyRemovalItem: JellyfinItem?
@@ -44,9 +46,16 @@ struct HomeView: View {
     /// failure would read as done.
     @State private var historyRemovalError: String?
 
-    /// True while something is presented over Home: a detail page or a filtered grid. Home is not
-    /// the screen then, which is what the two refresh observers below ask about.
+    /// True while something is presented over Home: a detail page or a filtered grid.
     private var isCovered: Bool { selectedItem != nil || selectedFilter != nil || selectedCatalogMedia != nil }
+
+    @Environment(\.shellPageIsShown) private var pageIsShown
+
+    /// Home is not the screen: covered, playing from a card, or (tvOS) another tab page on top.
+    /// Every reload gate and the banner read this one value (audit BRW-201, BRW-R205).
+    private var homeIsHidden: Bool {
+        HomeVisibility.isHidden(covered: isCovered, heroPlayActive: heroPlayItem != nil, pageShown: pageIsShown)
+    }
 
     private struct TraktRowsTrigger: Equatable {
         let lists: TraktListsSnapshot
@@ -172,27 +181,32 @@ struct HomeView: View {
         // observer below picks it up when the cover goes.
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
-            Task { await viewModel?.refreshIfStale(trigger: .foreground, covered: isCovered) }
+            Task { await viewModel?.refreshIfStale(trigger: .foreground, covered: homeIsHidden) }
         }
         .task(id: traktRowsTrigger) { await refreshTraktRows(traktRowsTrigger) }
         // Home becoming the screen again. A cover dismiss fires no `onAppear` either (measured,
         // iOS 26.5), so this is the other half of the same gate: what the user changed behind the
         // cover already arrives by notification, what passed in the meantime does not.
-        .onChange(of: isCovered) { _, covered in
-            guard !covered else { return }
+        // Also the way back to a kept tvOS tab page, where `onAppear` never fires again (BRW-204).
+        .onChange(of: homeIsHidden) { _, hidden in
+            guard !hidden else { return }
             Task { await viewModel?.refreshIfStale(trigger: .coverDismissed) }
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeConfigDidChange)) { _ in
             viewModel?.reloadConfig()
-            viewModel?.scheduleConfigReload()
+            if homeIsHidden {
+                viewModel?.markDirty()
+            } else {
+                viewModel?.scheduleConfigReload()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeFavoritesDidChange)) { _ in
             // While something covers Home (detail/player), mark it stale instead of reloading now:
             // a fan-out landing on the shared limiter next to a player rebuilding its pipeline is the
             // class of burst that starves a stream (Sodalite#12, Audit 2026-09-25 BROWSE-1). The
-            // `isCovered` observer above does the one reload once Home is the screen again.
+            // `homeIsHidden` observer above does the one reload once Home is the screen again.
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -201,7 +215,7 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .homePlayedDidChange)) { _ in
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -227,25 +241,30 @@ struct HomeView: View {
                 if let itemID, let ticks {
                     viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
                 }
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                     return
                 }
-                await viewModel?.loadContent()
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
+                // Coalesced: the offline progress sync and a binge both post in bursts (BRW-207).
+                viewModel?.scheduleReload(applying: itemID.flatMap { id in ticks.map { (id, $0) } })
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .libraryItemDidReplace)) { _ in
             // Continue Watching is holding the id the library just replaced; reload so the row points at
-            // the new item instead of failing playback on the corpse.
-            Task { await viewModel?.loadContent() }
+            // the new item instead of failing playback on the corpse. Posted with the player up, so
+            // a reload waits for Home to be the screen again.
+            Task { @MainActor in
+                if homeIsHidden {
+                    viewModel?.markDirty()
+                } else {
+                    await viewModel?.loadContent()
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeItemDidDelete)) { _ in
             // Reload so the deleted item drops out immediately instead of lingering until the next stale refresh.
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -377,7 +396,7 @@ struct HomeView: View {
     private func attachCallbacks(to vm: HomeViewModel?) {
         vm?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
         vm?.nextAiringLookup = { @MainActor [appState, dependencies] tmdbID in
-            guard appState.isSeerrConnected else { return nil }
+            guard appState.isSeerrConnected else { throw SeerrLookupUnavailable() }
             return try await dependencies.seerrMediaService.tvDetail(tmdbID: tmdbID).nextEpisodeToAir
         }
     }
@@ -424,7 +443,8 @@ struct HomeView: View {
         let urls = HomePrefetchPlan.urls(rows: rows, limit: limit)
         guard !urls.isEmpty else { return }
         let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
-        Task.detached(priority: .utility) {
+        prefetchTask?.cancel()
+        prefetchTask = Task.detached(priority: .utility) {
             let warmed = await ImageCache.prefetch(urls, auth: auth)
             let evicted = ImageCache.shared.takeEvictionCount()
             if warmed > 0 || evicted > 0 {
@@ -453,7 +473,7 @@ struct HomeView: View {
                         heroPlayFromBeginning = false
                         heroPlayItem = $0
                     },
-                    isCovered: isCovered || heroPlayItem != nil
+                    isCovered: homeIsHidden
                 )
                 LazyVStack(alignment: .leading, spacing: 40) {
                     if !vm.unreachableServerNames.isEmpty {
@@ -793,22 +813,6 @@ struct FilterDestination: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-extension ItemQuery: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(parentID)
-        hasher.combine(sortBy)
-        hasher.combine(genres)
-        hasher.combine(studioNames)
-    }
-
-    static func == (lhs: ItemQuery, rhs: ItemQuery) -> Bool {
-        lhs.parentID == rhs.parentID &&
-        lhs.sortBy == rhs.sortBy &&
-        lhs.genres == rhs.genres &&
-        lhs.studioNames == rhs.studioNames &&
-        lhs.isFavorite == rhs.isFavorite
-    }
-}
 
 /// One quiet line above the shelf naming the servers that did not answer this round (Sodalite#85).
 private struct CombinedHomeNotice: View {

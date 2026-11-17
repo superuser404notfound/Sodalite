@@ -97,6 +97,20 @@ struct HomeConfigReloadTests {
         #expect(service.getLibrariesCalls == 2)
     }
 
+    /// BRW-207: the offline progress sync posts one notification per item; Home must answer a burst
+    /// with one load.
+    @Test func burstOfProgressNotificationsCoalescesIntoOneReload() async {
+        let service = MockLibraryService()
+        let vm = makeViewModel(service: service)
+
+        for index in 0..<5 {
+            vm.scheduleReload(applying: ("item-\(index)", Int64(index)))
+        }
+        await waitForReload()
+
+        #expect(service.getLibrariesCalls == 1)
+    }
+
     private func decodeResponse(_ json: String) throws -> JellyfinItemsResponse {
         try JSONDecoder().decode(JellyfinItemsResponse.self, from: Data(json.utf8))
     }
