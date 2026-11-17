@@ -40,7 +40,13 @@ struct CatalogAdminQueueTests {
     private final class Requests: SeerrRequestServiceProtocol, @unchecked Sendable {
         var queue: [SeerrRequestFilter: [SeerrRequest]] = [:]
         var failQueue = false
-        var approveDelay: Duration = .zero
+        /// A mutation parks here until `open` holds, so the test decides what happens meanwhile.
+        var open = false
+        var started: Set<String> = []
+        private func park(_ name: String) async {
+            started.insert(name)
+            for _ in 0..<500 where !open { try? await Task.sleep(for: .milliseconds(10)) }
+        }
         func createRequest(mediaType: SeerrMediaType, tmdbID: Int, seasons: [Int]?, serverID: Int?, profileID: Int?, rootFolder: String?, languageProfileID: Int?, tags: [Int]?) async throws -> SeerrRequest { throw Boom() }
         func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult { throw Boom() }
         func allRequests(filter: SeerrRequestFilter, take: Int, skip: Int) async throws -> SeerrRequestsResult {
@@ -50,12 +56,15 @@ struct CatalogAdminQueueTests {
             return SeerrRequestsResult(pageInfo: info, results: rows)
         }
         func approveRequest(requestID: Int) async throws -> SeerrRequest {
-            try? await Task.sleep(for: approveDelay)
+            await park("approve")
             throw Boom()
         }
         func retryRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func declineRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
-        func deleteRequest(requestID: Int) async throws {}
+        func deleteRequest(requestID: Int) async throws {
+            await park("delete")
+            throw Boom()
+        }
         func updateRequest(requestID: Int, body: SeerrRequestUpdateBody) async throws -> SeerrRequest { throw Boom() }
     }
 
@@ -82,20 +91,55 @@ struct CatalogAdminQueueTests {
         #expect(vm.allRequestsError == nil)
     }
 
-    /// Approve fails after the admin switched chips: the old rows must not come back under the new filter.
-    @Test func aFailedMutationDoesNotRestoreAListThatAReloadReplaced() async {
+    private func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0..<500 where !condition() { try? await Task.sleep(for: .milliseconds(10)) }
+    }
+
+    /// A failed approve changes nothing, so it must not put an older list back (CAT-207, R-CATALOG-6).
+    @Test func aFailedApproveLeavesTheCurrentListAlone() async {
         let requests = Requests()
         requests.queue[.pending] = [request(1), request(2)]
         requests.queue[.approved] = [request(3)]
-        requests.approveDelay = .milliseconds(200)
         let vm = model(requests)
         await vm.loadAllRequests()
-        #expect(vm.allRequests.map(\.id) == [1, 2])
 
         let approve = Task { await vm.approveRequest(vm.allRequests[0]) }
-        try? await Task.sleep(for: .milliseconds(30))
+        await waitUntil { requests.started.contains("approve") }
         await vm.setAllRequestsFilter(.approved)
+        requests.open = true
         await approve.value
+
+        #expect(vm.allRequests.map(\.id) == [3])
+    }
+
+    /// A failed delete puts back the one row it took out, not the whole older list.
+    @Test func aFailedDeleteReinsertsOnlyItsRowAndKeepsLaterChanges() async {
+        let requests = Requests()
+        requests.queue[.pending] = [request(1), request(2), request(3)]
+        let vm = model(requests)
+        await vm.loadAllRequests()
+
+        let delete = Task { await vm.deleteRequest(vm.allRequests[1]) }
+        await waitUntil { requests.started.contains("delete") }
+        #expect(vm.allRequests.map(\.id) == [1, 3])
+        requests.open = true
+        await delete.value
+
+        #expect(vm.allRequests.map(\.id) == [1, 2, 3])
+    }
+
+    @Test func aFailedDeleteDoesNotTouchAListAReloadReplaced() async {
+        let requests = Requests()
+        requests.queue[.pending] = [request(1), request(2)]
+        requests.queue[.approved] = [request(3)]
+        let vm = model(requests)
+        await vm.loadAllRequests()
+
+        let delete = Task { await vm.deleteRequest(vm.allRequests[0]) }
+        await waitUntil { requests.started.contains("delete") }
+        await vm.setAllRequestsFilter(.approved)
+        requests.open = true
+        await delete.value
 
         #expect(vm.allRequests.map(\.id) == [3])
     }

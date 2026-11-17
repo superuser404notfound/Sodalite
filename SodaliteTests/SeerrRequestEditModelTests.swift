@@ -12,12 +12,18 @@ struct SeerrRequestEditModelTests {
     private final class ConfigSpy: SeerrServiceConfigServiceProtocol, @unchecked Sendable {
         var servers: [SeerrServiceServer] = []
         var details: [Int: SeerrServiceDetails] = [:]
-        var delays: [Int: Duration] = [:]
+        /// Servers whose details answer only once `open` holds, and which of them were asked.
+        var gated: Set<Int> = []
+        var open = false
+        var asked: Set<Int> = []
         func radarrServers() async throws -> [SeerrServiceServer] { servers }
         func radarrDetails(serverID: Int) async throws -> SeerrServiceDetails { try detail(serverID) }
         func sonarrServers() async throws -> [SeerrServiceServer] { servers }
         func sonarrDetails(serverID: Int) async throws -> SeerrServiceDetails {
-            if let delay = delays[serverID] { try? await Task.sleep(for: delay) }
+            asked.insert(serverID)
+            if gated.contains(serverID) {
+                for _ in 0..<500 where !open { try? await Task.sleep(for: .milliseconds(10)) }
+            }
             return try detail(serverID)
         }
         private func detail(_ id: Int) throws -> SeerrServiceDetails {
@@ -158,14 +164,15 @@ struct SeerrRequestEditModelTests {
     /// CAT-208. Cycle to server 2 and straight back to 1: the slow answer for 2 must not replace the lists.
     @Test func aSlowAnswerForAnEarlierServerDoesNotReplaceTheCurrentOnesLists() async {
         let spy = config()
-        spy.delays[2] = .milliseconds(300)
+        spy.gated = [2]
         let req = request(#""serverId": 1, "profileId": 10, "rootFolder": "/tv""#)
         let model = SeerrRequestEditModel(request: req, configService: spy)
         await model.bootstrap()
 
         let slow = Task { await model.selectServer(2) }
-        try? await Task.sleep(for: .milliseconds(20))
+        for _ in 0..<500 where !spy.asked.contains(2) { try? await Task.sleep(for: .milliseconds(10)) }
         await model.selectServer(1)
+        spy.open = true
         await slow.value
 
         #expect(model.serverID == 1)
