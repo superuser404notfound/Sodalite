@@ -63,6 +63,8 @@ extension DependencyContainer {
         guard isCurrentRoutePass(generation) else { return }
         serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
         sessionRegistry.updateRoute(resolved.url, for: session)
+        await proveIfStillUnproved(resolved.url, serverID: server.id, gate: gate, epoch: epoch)
+        guard isCurrentRoutePass(generation) else { return }
         gate?.settle(epoch: epoch)
         await session.loadUserIfNeeded()
     }

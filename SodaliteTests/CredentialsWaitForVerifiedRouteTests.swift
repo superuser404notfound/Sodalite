@@ -143,12 +143,10 @@ struct CredentialsWaitForVerifiedRouteTests {
     /// the server's verdict: the stored password stays home and the profile stays on every device.
     @Test func aRefusalFromAnAddressThatIsNotTheServerKeepsTheProfile() async throws {
         let http = RecordingHTTPClient()
-        let probes = ProbeCounter()
         // Proves itself for the route pass, then a stranger answers there by the time of the 401.
-        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in
-            await probes.next() == 1
-        }
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
         await container.routeResolveTask?.value
+        container.jellyfinIdentity = { _, _ in .otherServer }
 
         let check = await container.checkActiveSession()
 
@@ -172,22 +170,95 @@ struct CredentialsWaitForVerifiedRouteTests {
         #expect(container.listRememberedUsers(serverID: serverID).isEmpty)
     }
 
-    /// Seerr cannot be asked who it is, so a refusal from its LAN slot counts only on the proved
-    /// home network.
-    @Test func aSeerrRefusalOffTheHomeNetworkKeepsTheSession() async throws {
-        let http = RecordingHTTPClient()
-        let container = try container(http: http, internalURL: nil, externalURL: externalURL) { _, _ in true }
-        await container.routeResolveTask?.value
+    private func lanSeerrSession(
+        _ container: DependencyContainer, auth: ProfileSwitchBoundaryTests.HookedSeerrAuth
+    ) throws {
         let seerr = SeerrServer(id: "seerr-1", internalURL: URL(string: "http://192.168.178.20:5055"), externalURL: nil)
         container.seerrClient.sessionCookie = "cookie-a"
         try container.saveSeerrSession(server: seerr, forJellyfinUserID: "user-a", jellyfinServerID: serverID)
-        container.seerrAuthService = ProfileSwitchBoundaryTests.HookedSeerrAuth(
-            result: .failure(APIError.unauthorized(message: nil)))
+        container.seerrAuthService = auth
+    }
+
+    /// Seerr cannot be asked who it is. Off the proved home network its LAN address gets no cookie
+    /// at all, and the session is kept for a later try (audit review R-ROUTE-8).
+    @Test func aLANSeerrOffTheHomeNetworkGetsNoCookie() async throws {
+        let http = RecordingHTTPClient()
+        let external = externalURL
+        let container = try container(http: http, internalURL: internalURL, externalURL: externalURL) { url, _ in
+            url == external
+        }
+        await container.routeResolveTask?.value
+        let auth = ProfileSwitchBoundaryTests.HookedSeerrAuth(result: .failure(APIError.unauthorized(message: nil)))
+        let asked = Flag()
+        auth.onCurrentUser = { asked.value = true }
+        try lanSeerrSession(container, auth: auth)
 
         let outcome = await container.syncSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID)
 
         if case .transientFailure = outcome {} else { Issue.record("expected transientFailure, got \(outcome)") }
+        #expect(!asked.value)
         #expect(container.restoreSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID) != nil)
+    }
+
+    /// With Jellyfin on a public name only there is no home network to prove, so a genuine Seerr
+    /// refusal still ends the session instead of being kept forever (audit review R-ROUTE-8).
+    @Test func withoutAJellyfinLANSlotASeerrRefusalStillCounts() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: nil, externalURL: externalURL) { _, _ in true }
+        await container.routeResolveTask?.value
+        try lanSeerrSession(container, auth: ProfileSwitchBoundaryTests.HookedSeerrAuth(
+            result: .failure(APIError.unauthorized(message: nil))))
+
+        let outcome = await container.syncSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID)
+
+        if case .invalidated = outcome {} else { Issue.record("expected invalidated, got \(outcome)") }
+    }
+
+    // MARK: Audit review R-ROUTE-1 and R-ROUTE-3
+
+    /// The route probe's cap missed, but the patient identity check answers: the session keeps
+    /// its LAN requests.
+    @Test func aSlowIdentityAnswerStillAdmits() async throws {
+        let http = RecordingHTTPClient()
+        http.responses["/Users/Me"] = meJSON
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in false }
+        container.jellyfinIdentity = { _, _ in
+            try? await Task.sleep(for: .milliseconds(50))
+            return .matches
+        }
+
+        _ = try await container.jellyfinAuthService.getCurrentUser()
+
+        #expect(http.sent.map(\.baseURL) == [internalURL])
+    }
+
+    /// A server whose readiness endpoint answers 5xx (booting, a proxy in front) is still this
+    /// server: the verdict may say so, but its requests go out (Sodalite#199).
+    @Test func readiness5xxWithTheRightIdentityAdmits() async throws {
+        let http = RecordingHTTPClient()
+        http.responses["/Users/Me"] = meJSON
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+        container.jellyfinAnswer = { _, _ in ServerProbe.Answer(identity: .matches, isReady: false) }
+        container.jellyfinIdentity = { _, _ in .noAnswer }
+
+        _ = try await container.jellyfinAuthService.getCurrentUser()
+
+        #expect(http.sent.map(\.baseURL) == [internalURL])
+    }
+
+    /// A path change takes the old network's proof back at once, before the debounced resolve.
+    @Test func aPathChangeTakesTheProofBackAtOnce() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+        await container.routeResolveTask?.value
+        let gate = try #require(container.jellyfinClient.routeGate)
+        #expect(gate.allows(internalURL))
+
+        NotificationCenter.default.post(name: .networkPathWillChange, object: nil)
+
+        #expect(!gate.allows(internalURL))
+        await container.routeResolveTask?.value
+        #expect(gate.allows(internalURL))
     }
 
     /// A two-slot Seerr starts on its public slot until Jellyfin's LAN address proves this is home.
@@ -208,17 +279,14 @@ struct CredentialsWaitForVerifiedRouteTests {
 }
 
 @MainActor
+final class Flag {
+    var value = false
+}
+
+@MainActor
 final class URLBox {
     var url: URL
     init(_ url: URL) { self.url = url }
-}
-
-actor ProbeCounter {
-    private var count = 0
-    func next() -> Int {
-        count += 1
-        return count
-    }
 }
 
 /// The gate on its own: which requests wait, which go, and which are refused.
@@ -241,7 +309,7 @@ struct RouteGateTests {
         let lan = lan
         let admitted = Task { try await gate.admit { lan } }
         await Task.yield()
-        gate.record(lan, answered: true, epoch: epoch)
+        gate.record(lan, identity: .matches, epoch: epoch)
         #expect(try await admitted.value == lan)
     }
 
@@ -260,7 +328,19 @@ struct RouteGateTests {
         gate.reset()
         let old = gate.epoch
         gate.reset()
-        gate.record(lan, answered: true, epoch: old)
+        gate.record(lan, identity: .matches, epoch: old)
+        #expect(!gate.allows(lan))
+    }
+
+    /// Audit review R-ROUTE-1: silence (a timeout, a busy server) keeps a proof; only an answer
+    /// naming another server takes it back.
+    @Test func onlyAnotherServerRevokesAProof() {
+        let gate = RouteGate(isEnforced: true)
+        gate.reset()
+        gate.record(lan, identity: .matches, epoch: gate.epoch)
+        gate.record(lan, identity: .noAnswer, epoch: gate.epoch)
+        #expect(gate.allows(lan))
+        gate.record(lan, identity: .otherServer, epoch: gate.epoch)
         #expect(!gate.allows(lan))
     }
 

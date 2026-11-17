@@ -137,10 +137,14 @@ final class DependencyContainer {
     /// When each server was last made active here, which orders a combined Home's secondaries.
     let serverActivation: ServerActivationStore
     let combinedServers: CombinedServersPreferences
-    /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
-    /// closure so the sign-in route can be tested without a network; the app never replaces it.
-    var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
-        await ServerProbe.jellyfin($0, expectedServerID: $1)
+    /// How a Jellyfin address is asked whether it answers AS the server with this id, and whether
+    /// it is ready. Stored closures so routes can be tested without a network; the app never
+    /// replaces them. `jellyfinIdentity` is the patient identity half alone (audit review R-ROUTE-1).
+    var jellyfinAnswer: @Sendable (URL, String) async -> ServerProbe.Answer = {
+        await ServerProbe.jellyfinAnswer($0, expectedServerID: $1)
+    }
+    var jellyfinIdentity: @Sendable (URL, String) async -> ServerProbe.Identity = {
+        await ServerProbe.identity($0, expectedServerID: $1)
     }
     var activeJellyfinRoute: ServerRoute?
     /// Jellyfin's internal address answered its identity probe in the last resolve, which is what
@@ -346,6 +350,8 @@ final class DependencyContainer {
         sessionRegistry.onSessionsChanged = { [weak sessionRegistry] in
             SharedSessionMirror.writeParticipants(sessionRegistry?.shelfParticipants)
         }
+
+        observeRouteProofInvalidations()
 
         // Last, because the closures capture self and the migration reads the keychain through it.
         profileSettings.activeKey = { [weak self] in self?.appState?.profileKey }
@@ -1825,6 +1831,9 @@ final class DependencyContainer {
             await jellyfinClient.routeGate?.waitUntilSettled()
             guard generation == seerrSyncGeneration, !Task.isCancelled else { return .transientFailure }
             seerrClient.baseURL = preferredSeerrURL(for: server)
+            // A LAN-only Seerr off the proved home network may be anybody's: the cookie stays here
+            // and the session is kept for a later try (audit review R-ROUTE-8).
+            guard seerrMayTrust(seerrClient.baseURL) else { return .transientFailure }
         }
         let askedURL = seerrClient.baseURL
 

@@ -44,6 +44,7 @@ final class NetworkPathObserver {
             didSeeInitialPath = true
             return
         }
+        NotificationCenter.default.post(name: .networkPathWillChange, object: nil)
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))

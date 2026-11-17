@@ -15,9 +15,14 @@ import Foundation
 /// milliseconds; away from home the optimistic LAN address would have failed anyway.
 ///
 /// One gate per client. `reset()` starts an epoch whenever who answers at an address may have
-/// changed (a session or network change); the route resolve then `record`s each probe as it lands
-/// and `settle`s the epoch when it is done. A request admitted after settling to an address that
-/// never proved itself is refused as unreachable, which is what the verdict says anyway.
+/// changed (a session or network change, a return from the background); the route resolve then
+/// `record`s each probe as it lands and `settle`s the epoch when it is done. A request to an address
+/// that never proved itself is refused once the epoch settled.
+///
+/// The proof is the identity answer alone, never readiness or the route probe's two second cap: a
+/// slow, booting or proxied-5xx server is still this server, and content that arrives outranks the
+/// verdict (Sodalite#199, audit review R-ROUTE-1). Only an answer naming another server takes a
+/// proof back; silence does not.
 @MainActor
 final class RouteGate {
     /// Off for clients over a test double: they reach no network, so there is nothing to prove.
@@ -31,6 +36,8 @@ final class RouteGate {
     /// waiting forever.
     private(set) var isSettled = true
     private var waiters: [UUID: CheckedContinuation<Void, Never>] = [:]
+    /// The error each refused address gets this epoch, asked once.
+    private var refusals: [URL: APIError] = [:]
 
     init(isEnforced: Bool) {
         self.isEnforced = isEnforced
@@ -57,18 +64,18 @@ final class RouteGate {
     func reset() {
         epoch &+= 1
         verified = []
+        refusals = [:]
         isSettled = false
         wakeAll()
     }
 
-    /// One probe's answer. A failed one also takes back an earlier proof: the same address now
-    /// answers as somebody else, or not at all.
-    func record(_ url: URL, answered: Bool, epoch: UInt64) {
+    /// One identity answer for `url`.
+    func record(_ url: URL, identity: ServerProbe.Identity, epoch: UInt64) {
         guard epoch == self.epoch else { return }
-        if answered {
-            verified.insert(url)
-        } else {
-            verified.remove(url)
+        switch identity {
+        case .matches: verified.insert(url)
+        case .otherServer: verified.remove(url)
+        case .noAnswer: return
         }
         wakeAll()
     }
@@ -87,9 +94,25 @@ final class RouteGate {
             try Task.checkCancellation()
             guard let url = currentURL() else { throw APIError.invalidURL }
             if allows(url) { return url }
-            if isSettled { throw APIError.serverUnreachable }
+            if isSettled { throw await refusal(for: url) }
             await waitForChange()
         }
+    }
+
+    /// The same sentence a request that reached the transport would have produced. On iOS a LAN
+    /// address the device withholds Local Network access from is the usual reason nothing proved
+    /// itself, and only this question raises the screen that says so (Sodalite#92, audit review
+    /// R-ROUTE-2). Asked once per address and epoch; tvOS has no such permission.
+    private func refusal(for url: URL) async -> APIError {
+        if let known = refusals[url] { return known }
+        let asked = epoch
+        #if os(iOS)
+        let error: APIError = await LocalNetworkAccess.isDenied(for: url) ? .localNetworkDenied : .serverUnreachable
+        #else
+        let error = APIError.serverUnreachable
+        #endif
+        if asked == epoch { refusals[url] = error }
+        return error
     }
 
     /// Returns once the current epoch's resolve has finished.
