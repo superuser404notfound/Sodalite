@@ -83,7 +83,7 @@ struct ServerDiscoveryURLTests {
     // MARK: Redirect adoption (audit NETWORK-4)
 
     private func upgraded(_ candidate: String, _ final: String?) -> String {
-        ServerDiscoveryService.upgradedBaseURL(
+        DiscoveryCandidates.upgradedBaseURL(
             candidate: URL(string: candidate)!,
             finalURL: final.flatMap(URL.init(string:)),
             endpointPath: "/System/Info/Public"
@@ -105,5 +105,66 @@ struct ServerDiscoveryURLTests {
             == "https://jf.example.com")
         #expect(upgraded("http://jf.example.com", "https://jf.example.com/login?next=/System/Info/Public")
             == "http://jf.example.com")
+    }
+
+    // MARK: Seerr shares the builder (audit NET-R201, NET-207)
+
+    private func seerrCandidates(_ input: String) -> [String] {
+        SeerrServerDiscoveryService().buildCandidateURLs(from: input).map(\.absoluteString)
+    }
+
+    @Test func seerrKeepsItsOwnDefaultPorts() {
+        #expect(seerrCandidates("192.168.1.10") == [
+            "http://192.168.1.10:5055", "https://192.168.1.10:5055",
+            "https://192.168.1.10", "http://192.168.1.10",
+        ])
+        #expect(seerrCandidates("requests.example.com") == [
+            "https://requests.example.com", "http://requests.example.com",
+            "http://requests.example.com:5055", "https://requests.example.com:5055",
+        ])
+        #expect(seerrCandidates("http://requests.example.com") == [
+            "http://requests.example.com", "http://requests.example.com:5055",
+        ])
+        #expect(seerrCandidates("https://requests.example.com") == ["https://requests.example.com"])
+        #expect(seerrCandidates("requests.example.com:5055") == [
+            "https://requests.example.com:5055", "http://requests.example.com:5055",
+        ])
+    }
+
+    /// The Seerr twin stored the typed http address behind an upgrading proxy, so the sign-in POST
+    /// turned into a GET on the 301 (audit NET-207).
+    @Test func seerrStoresTheHTTPSAddressItWasUpgradedTo() async throws {
+        let http = UpgradingStatusClient(finalURL: URL(string: "https://requests.example.com/api/v1/status")!)
+        let service = SeerrServerDiscoveryService(httpClient: http)
+
+        let result = await service.discoverServer(input: "http://requests.example.com")
+
+        guard case .success(let url, _) = result else {
+            Issue.record("expected success, got \(result)")
+            return
+        }
+        #expect(url.absoluteString == "https://requests.example.com")
+    }
+}
+
+/// Answers every status probe as if a proxy had upgraded it to `finalURL`.
+private final class UpgradingStatusClient: HTTPClientProtocol, @unchecked Sendable {
+    let finalURL: URL
+    init(finalURL: URL) { self.finalURL = finalURL }
+
+    func request<T: Decodable>(
+        baseURL: URL, endpoint: APIEndpoint, headers: [String: String], responseType: T.Type
+    ) async throws -> T {
+        throw APIError.invalidResponse
+    }
+
+    func request(baseURL: URL, endpoint: APIEndpoint, headers: [String: String]) async throws {}
+
+    func requestData(
+        baseURL: URL, endpoint: APIEndpoint, headers: [String: String]
+    ) async throws -> (Data, HTTPURLResponse) {
+        guard baseURL.port == nil else { throw APIError.serverUnreachable }
+        let body = Data(#"{"version":"2.7.0"}"#.utf8)
+        return (body, HTTPURLResponse(url: finalURL, statusCode: 200, httpVersion: nil, headerFields: nil)!)
     }
 }

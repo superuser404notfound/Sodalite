@@ -9,6 +9,11 @@ enum SeerrServerDiscoveryResult: Sendable {
     case failure(APIError)
 }
 
+private struct DiscoveredSeerr: Sendable {
+    let info: SeerrServerInfo
+    let url: URL
+}
+
 protocol SeerrServerDiscoveryServiceProtocol: Sendable {
     func discoverServer(input: String) async -> SeerrServerDiscoveryResult
 }
@@ -28,25 +33,34 @@ final class SeerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol {
         let candidates = buildCandidateURLs(from: input)
         let started = ContinuousClock.now
 
+        let statusPath = SeerrEndpoint.status.path
+
         let verdicts = await DiscoveryProbeRace.run(candidates: candidates) { [decoder, httpClient] url in
             await DiscoveryProbeRace.attempt(
                 label: "seerr",
                 url: url,
-                describe: { (info: SeerrServerInfo) in "v\(info.version)" }
+                describe: { (found: DiscoveredSeerr) in "v\(found.info.version)" }
             ) {
-                let (data, _) = try await httpClient.requestData(
+                let (data, response) = try await httpClient.requestData(
                     baseURL: url,
                     endpoint: SeerrEndpoint.status,
                     headers: ["Accept": "application/json"]
                 )
-                return try decoder.decode(SeerrServerInfo.self, from: data)
+                // An http address behind an upgrading proxy is stored as the https one, or the
+                // sign-in POST turns into a GET on the 301 and the cookie travels in clear text
+                // before every redirect (audit NET-207).
+                return DiscoveredSeerr(
+                    info: try decoder.decode(SeerrServerInfo.self, from: data),
+                    url: DiscoveryCandidates.upgradedBaseURL(
+                        candidate: url, finalURL: response.url, endpointPath: statusPath)
+                )
             }
         }
 
-        for (index, verdict) in verdicts.enumerated() {
-            guard case .success(let info) = verdict else { continue }
-            LogTap.shared.note("[discovery] seerr resolved \(candidates[index].absoluteString) in \(DiscoveryProbeRace.elapsedText(since: started))")
-            return .success(url: candidates[index], info: info)
+        for verdict in verdicts {
+            guard case .success(let found) = verdict else { continue }
+            LogTap.shared.note("[discovery] seerr resolved \(found.url.absoluteString) in \(DiscoveryProbeRace.elapsedText(since: started))")
+            return .success(url: found.url, info: found.info)
         }
 
         DiscoveryProbeRace.logUnanswered(
@@ -59,60 +73,7 @@ final class SeerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol {
         return .failure(DiscoveryProbeRace.aggregateError(verdicts))
     }
 
-    private func buildCandidateURLs(from input: String) -> [URL] {
-        var cleaned = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-
-        if cleaned.hasPrefix("https://") || cleaned.hasPrefix("http://") {
-            guard let url = URL(string: cleaned) else { return [] }
-            var candidates = [url]
-            // Port 5055 fallback only for plain-HTTP, no port, no path. Via URLComponents, NOT string append (":5055" on http://host/jellyseerr glues onto the path).
-            if url.port == nil, cleaned.hasPrefix("http://"),
-               url.path.isEmpty || url.path == "/",
-               var components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-                components.port = 5055
-                if let withPort = components.url {
-                    candidates.append(withPort)
-                }
-            }
-            return candidates
-        }
-
-        let isIPAddress = cleaned.range(
-            of: #"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"#,
-            options: .regularExpression
-        ) != nil
-        let hasPort = cleaned.contains(":")
-
-        var candidates: [URL] = []
-
-        if isIPAddress {
-            if hasPort {
-                if let https = URL(string: "https://\(cleaned)") { candidates.append(https) }
-                if let http = URL(string: "http://\(cleaned)") { candidates.append(http) }
-            } else {
-                // Port variants only without a path (":5055" on an IP+path glues onto the path).
-                if !cleaned.contains("/") {
-                    if let url = URL(string: "http://\(cleaned):5055") { candidates.append(url) }
-                    if let url = URL(string: "https://\(cleaned):5055") { candidates.append(url) }
-                }
-                if let url = URL(string: "https://\(cleaned)") { candidates.append(url) }
-                if let url = URL(string: "http://\(cleaned)") { candidates.append(url) }
-            }
-        } else if hasPort {
-            // Appending another port yields host:port:port, which URL(string:) rejects.
-            if let url = URL(string: "https://\(cleaned)") { candidates.append(url) }
-            if let url = URL(string: "http://\(cleaned)") { candidates.append(url) }
-        } else {
-            if let url = URL(string: "https://\(cleaned)") { candidates.append(url) }
-            if let url = URL(string: "http://\(cleaned)") { candidates.append(url) }
-            // Port variants only without a path (":5055" on "host/jellyseerr" glues onto the path).
-            if !cleaned.contains("/") {
-                if let url = URL(string: "http://\(cleaned):5055") { candidates.append(url) }
-                if let url = URL(string: "https://\(cleaned):5055") { candidates.append(url) }
-            }
-        }
-
-        return candidates
+    func buildCandidateURLs(from input: String) -> [URL] {
+        DiscoveryCandidates.build(from: input, ports: .seerr)
     }
 }
