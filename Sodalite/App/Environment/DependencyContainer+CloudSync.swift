@@ -135,7 +135,13 @@ extension DependencyContainer {
             // AppState holds through addServer, so leaving it on the pre-sync snapshot wrote the old
             // URL slots straight back out again (Sodalite#45). id-guarded inside AppState.
             appState?.updateActiveServer(incoming)
-            liveRouteDidChange()
+            // Every republish lands here (a re-login, a pin, a version refresh); only new addresses
+            // take back what the old ones proved (audit review R-ROUTE-7).
+            if local?.internalURL != incoming.internalURL || local?.externalURL != incoming.externalURL {
+                liveRouteDidChange()
+            } else {
+                scheduleRouteResolve()
+            }
         }
 
         // Remembered profiles union across devices (Sodalite#45). A payload is a statement about the
