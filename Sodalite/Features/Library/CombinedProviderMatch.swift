@@ -71,11 +71,7 @@ enum CombinedProviderMatch {
             if let library = answer.library {
                 let stamped = library.map(stamp)
                 allItems += stamped
-                var map: [String: JellyfinItem] = [:]
-                for item in stamped {
-                    if let id = item.tmdbID { map[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item }
-                }
-                maps.append(map)
+                maps.append(ProviderMatchMerging.tmdbMap(stamped))
             } else if source.isActive {
                 libraryFailed = true
             } else {

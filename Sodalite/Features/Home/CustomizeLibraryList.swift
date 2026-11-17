@@ -1,29 +1,26 @@
 import Foundation
 
-/// The library list Home anpassen orders: every participant's My Media libraries, active first
-/// (Sodalite#85). nil when the active server fails; `complete` false when a secondary did not
-/// answer in time, which must never reach `HomeRowConfig.reconciled`.
+/// The library list Home Customize orders and Home reconciles its rows against: every
+/// participant's My Media libraries, active first (Sodalite#85). nil when the active server
+/// fails; `complete` false when a secondary did not answer in time, which must never reach
+/// `HomeRowConfig.reconciled`. Both screens go through `fetch`, so they cannot disagree (BRW-R201).
 enum CustomizeLibraryList {
-    static func fetch(_ sources: [HomeSource], secondaryDeadline: Duration) async -> (libraries: [JellyfinLibrary], complete: Bool)? {
-        var lists: [[JellyfinLibrary]?] = Array(repeating: nil, count: sources.count)
-        await withTaskGroup(of: (Int, [JellyfinLibrary]?).self) { group in
-            for (index, source) in sources.enumerated() {
-                let service = source.libraryService
-                let user = source.userID
-                let isActive = source.isActive
-                group.addTask {
-                    let work: @Sendable () async -> [JellyfinLibrary]? = { try? await service.getLibraries(userID: user) }
-                    return (index, isActive ? await work() : await Deadline.race(secondaryDeadline, work) ?? nil)
-                }
-            }
-            for await (index, list) in group { lists[index] = list }
+    typealias Listing = (libraries: [JellyfinLibrary], complete: Bool, unreachable: [String])
+
+    static func fetch(
+        _ sources: [HomeSource],
+        secondaryDeadline: Duration,
+        load: @escaping @MainActor @Sendable (HomeSource) async -> [JellyfinLibrary]? = { source in
+            try? await source.libraryService.getLibraries(userID: source.userID)
         }
+    ) async -> Listing? {
+        let outcomes = await SourceFanOut.collect(sources, deadline: secondaryDeadline) { await load($0) }
         var combined: [JellyfinLibrary] = []
-        var complete = true
-        for (index, source) in sources.enumerated() {
-            guard let list = lists[index] else {
+        var unreachable: [String] = []
+        for (source, outcome) in zip(sources, outcomes) {
+            guard case .value(let list?) = outcome else {
                 if source.isActive { return nil }
-                complete = false
+                unreachable.append(source.serverName)
                 continue
             }
             combined += list.map { library in
@@ -32,7 +29,7 @@ enum CustomizeLibraryList {
                 return stamped
             }
         }
-        return (combined, complete)
+        return (combined, unreachable.isEmpty, unreachable)
     }
 
     static func serverLabel(for library: JellyfinLibrary, in libraries: [JellyfinLibrary], sources: [HomeSource]) -> String? {

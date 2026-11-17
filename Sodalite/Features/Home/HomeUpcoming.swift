@@ -22,6 +22,8 @@ nonisolated enum HomeUpcoming {
     /// How long a Seerr answer is reused. Air dates move rarely, and a Home refetch should not cost a
     /// round of lookups.
     static let lookupLifetime: TimeInterval = 6 * 60 * 60
+    /// How long a permanent per-show failure (404) is remembered.
+    static let failureLifetime: TimeInterval = 20 * 60
 
     struct CachedAiring: Sendable {
         let episode: SeerrEpisode?

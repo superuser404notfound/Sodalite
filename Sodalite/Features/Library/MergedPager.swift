@@ -18,6 +18,8 @@ final class MergedPager {
         var buffer: [JellyfinItem] = []
         var nextStart = 0
         var exhausted = false
+        /// A page of this cursor has arrived once, so a later failure is a hiccup and not a dead server.
+        var loaded = false
     }
 
     private var cursors: [Cursor]
@@ -39,7 +41,9 @@ final class MergedPager {
     func nextPage() async -> [JellyfinItem] {
         var page: [JellyfinItem] = []
         while page.count < pageSize {
-            await refill()
+            // The active server failing a later page ends this page early instead of letting the
+            // grid continue on the secondaries alone and lose the active server for good (BRW-208).
+            if await refill() { break }
             guard let index = headIndex() else { break }
             let item = cursors[index].buffer.removeFirst()
             if let key = HomeMerger.dedupeKey(item), !emittedKeys.insert(key).inserted { continue }
@@ -49,10 +53,10 @@ final class MergedPager {
     }
 
     /// Every cursor that ran dry and is not exhausted fetches its next page, all at once, so the
-    /// head comparison always sees one item from every server still in play.
-    private func refill() async {
+    /// head comparison always sees one item from every server still in play. Returns true when the active server failed a page after its first one; it stays in play for a retry.
+    private func refill() async -> Bool {
         let needy = cursors.indices.filter { cursors[$0].buffer.isEmpty && !cursors[$0].exhausted }
-        guard !needy.isEmpty else { return }
+        guard !needy.isEmpty else { return false }
         let limit = pageSize
         let deadline = deadline
         let results = await withTaskGroup(of: (Int, JellyfinItemsResponse?).self) { group in
@@ -68,8 +72,13 @@ final class MergedPager {
             for await (index, response) in group { collected[index] = response }
             return collected
         }
+        var activeStalled = false
         for index in needy {
             guard let response = results[index] ?? nil else {
+                if cursors[index].source.isActive, cursors[index].loaded {
+                    activeStalled = true
+                    continue
+                }
                 cursors[index].exhausted = true
                 if !failedServerIDs.contains(cursors[index].source.serverID) {
                     failedServerIDs.append(cursors[index].source.serverID)
@@ -82,11 +91,13 @@ final class MergedPager {
                 if stamped.serverID == nil { stamped.serverID = serverID }
                 return stamped
             }
+            cursors[index].loaded = true
             cursors[index].nextStart += response.items.count
             if response.items.count < limit || cursors[index].nextStart >= response.totalRecordCount {
                 cursors[index].exhausted = true
             }
         }
+        return activeStalled
     }
 
     private func headIndex() -> Int? {

@@ -49,6 +49,8 @@ final class SparseGridStore {
 
     @ObservationIgnored private var fetch: Fetch?
     @ObservationIgnored private var isHidden: (JellyfinItem) -> Bool = { _ in false }
+    /// Bumped whenever the slots change, so a view can key work on it without copying the items.
+    @ObservationIgnored private(set) var loadedRevision = 0
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var loadedPages: Set<Int> = []
     @ObservationIgnored private var inFlight: [Int: Task<Void, Never>] = [:]
@@ -94,6 +96,7 @@ final class SparseGridStore {
         loadedPages = []
         visibleSlotsPerPage = [:]
         slots = []
+        loadedRevision &+= 1
         visibleIndices = []
         firstPage = .loading
         knowsTotal = false
@@ -198,6 +201,7 @@ final class SparseGridStore {
     }
 
     private func rebuildVisibleIndices() {
+        loadedRevision &+= 1
         visibleIndices = slots.indices.filter { slots[$0] != .hidden }
     }
 }

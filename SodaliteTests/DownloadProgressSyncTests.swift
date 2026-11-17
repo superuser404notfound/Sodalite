@@ -77,6 +77,34 @@ struct DownloadProgressSyncTests {
         #expect(store.item("server")?.manifest.progress.lastSyncedAt == now)
     }
 
+    /// R-BROWSE-2: one post per pushed item, each with its payload (Home coalesces them).
+    @Test func aRunPostsOneProgressNotificationPerItemWithItsPayload() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("SyncTests-\(UUID().uuidString)")
+        let store = DownloadStore(paths: DownloadPaths(root: root))
+        store.activate(ProfileKey(serverID: "s", userID: "u"))
+        var answers: [String: UserItemData] = [:]
+        for id in ["a", "b", "c"] {
+            var m = DownloadManifest(itemID: id, seriesID: nil, seasonID: nil, quality: .original, route: .original,
+                                     mediaSourceID: "src", audioStreamIndex: nil, playSessionID: nil, state: .queued, createdAt: t0)
+            m.progress = DownloadLocalProgress(positionTicks: 900, played: false, lastPlayed: t0.addingTimeInterval(3600), lastSyncedAt: nil)
+            m.transition(to: .downloading)
+            m.transition(to: .complete)
+            let item = try JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"\#(id)","Name":"x","Type":"Movie"}"#.utf8))
+            let src = try JSONDecoder().decode(PlaybackMediaSource.self, from: Data(#"{"Id":"src"}"#.utf8))
+            try store.create(m, snapshot: DownloadSnapshot(item: item, series: nil, season: nil, source: src))
+            answers[id] = userData(100, played: false, last: "2027-01-15T08:00:00.0000000Z")
+        }
+        let counter = NotificationCounter()
+        let token = NotificationCenter.default.addObserver(forName: .playbackProgressDidChange, object: nil, queue: nil) { note in
+            counter.bump(note.userInfo?[PlaybackProgressKey.itemID] as? String)
+        }
+        defer { NotificationCenter.default.removeObserver(token) }
+        let sync = DownloadProgressSync(store: store, service: FakeUserDataService(answers: answers), userID: "u", now: { self.t0 })
+        await sync.run()
+        #expect(counter.count == 3)
+        #expect(counter.itemIDs.sorted() == ["a", "b", "c"])
+    }
+
     @Test func aFailingServerLeavesTheManifestAlone() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("SyncTests-\(UUID().uuidString)")
         let store = DownloadStore(paths: DownloadPaths(root: root))
@@ -113,4 +141,12 @@ final class FakeUserDataService: UserItemDataServing, @unchecked Sendable {
     func updateUserData(itemID: String, userID: String, positionTicks: Int64, played: Bool, lastPlayed: Date) async throws {
         lock.withLock { _updates.append(Update(itemID: itemID, positionTicks: positionTicks, played: played)) }
     }
+}
+
+nonisolated private final class NotificationCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var ids: [String] = []
+    func bump(_ id: String?) { lock.withLock { ids.append(id ?? "") } }
+    var count: Int { lock.withLock { ids.count } }
+    var itemIDs: [String] { lock.withLock { ids } }
 }

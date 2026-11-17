@@ -378,9 +378,16 @@ extension ImageCache {
     /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `auth` mirrors `load`: X-Emby-Token only for a participating Jellyfin server so external CDN URLs don't leak the token.
     /// Returns how many images it decoded into the cache, for the caller's diagnostic line.
     @discardableResult
-    static func prefetch(_ urls: [URL], auth: ImageAuth) async -> Int {
-        let pending = urls.filter { ImageCache.shared.image(for: $0) == nil }
+    static func prefetch(
+        _ urls: [URL],
+        auth: ImageAuth,
+        load: @escaping @Sendable (URL, ImageAuth) async -> Bool = { await prefetchOne(url: $0, auth: $1) }
+    ) async -> Int {
+        // Skip what another prefetch is already loading (audit BRW-203: three overlapping runs
+        // fetched and decoded every search poster three times).
+        let pending = PrefetchInFlight.claim(urls.filter { ImageCache.shared.image(for: $0) == nil })
         guard !pending.isEmpty else { return 0 }
+        defer { PrefetchInFlight.release(pending) }
 
         return await withTaskGroup(of: Bool.self) { group in
             // Half of `ImageFetch.session`'s connections per host, so the cards on screen always find
@@ -391,7 +398,7 @@ extension ImageCache {
             for _ in 0..<min(maxConcurrent, pending.count) {
                 guard let url = iter.next() else { break }
                 group.addTask {
-                    await prefetchOne(url: url, auth: auth)
+                    await load(url, auth)
                 }
             }
             var warmed = 0
@@ -399,7 +406,7 @@ extension ImageCache {
                 if stored { warmed += 1 }
                 if let url = iter.next() {
                     group.addTask {
-                        await prefetchOne(url: url, auth: auth)
+                        await load(url, auth)
                     }
                 }
             }
@@ -421,5 +428,20 @@ extension ImageCache {
         else { return false }
         ImageCache.shared.store(image.preparedForDisplay() ?? image, for: url)
         return true
+    }
+}
+
+/// URLs a running `ImageCache.prefetch` has taken, so a second run does not load them again.
+nonisolated enum PrefetchInFlight {
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var urls = Set<URL>()
+
+    /// The URLs nobody else holds, now held by the caller. Repeats within `urls` count once.
+    static func claim(_ candidates: [URL]) -> [URL] {
+        lock.withLock { candidates.filter { urls.insert($0).inserted } }
+    }
+
+    static func release(_ released: [URL]) {
+        lock.withLock { urls.subtract(released) }
     }
 }

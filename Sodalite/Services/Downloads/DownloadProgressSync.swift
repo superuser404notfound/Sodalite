@@ -80,6 +80,8 @@ final class DownloadProgressSync {
                       (try? await service.updateUserData(itemID: id, userID: userID, positionTicks: local.positionTicks,
                                                          played: local.played, lastPlayed: lastPlayed)) != nil else { continue }
                 stamp(id)
+                // One post per item keeps the detail pages' payload patch (issue #24); Home coalesces
+                // them into one reload (audit BRW-207, review R-BROWSE-2).
                 NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: [
                     PlaybackProgressKey.itemID: id, PlaybackProgressKey.positionTicks: local.positionTicks,
                 ])

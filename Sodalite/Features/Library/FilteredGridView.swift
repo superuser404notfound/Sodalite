@@ -124,9 +124,11 @@ struct FilteredGridView: View {
         let head = usesSparseGrid ? (0..<60).compactMap(store.item(at:)) : Array(items.prefix(60))
         return ArtworkShape.style(for: head, default: .poster)
     }
-    private func gridImageURL(for item: JellyfinItem) -> URL? {
+    /// `style` is read once per body by the caller: `cardStyle` walks 60 items, and calling it per
+    /// cell made every focus move cost a few thousand style lookups (BRW-209).
+    private func gridImageURL(for item: JellyfinItem, style: MediaCardStyle) -> URL? {
         if browsesFolders { return dependencies.jellyfinImageService.folderBrowseArtworkURL(for: item) }
-        return dependencies.jellyfinImageService.posterURL(for: item, maxWidth: ArtworkShape.imageWidth(for: cardStyle))
+        return dependencies.jellyfinImageService.posterURL(for: item, maxWidth: ArtworkShape.imageWidth(for: style))
     }
 
     init(
@@ -276,6 +278,7 @@ struct FilteredGridView: View {
                         }
                         .frame(maxWidth: .infinity, minHeight: 400)
                     } else {
+                        let style = cardStyle
                         LazyVGrid(columns: [
                             GridItem(
                                 .adaptive(minimum: columnMinimum),
@@ -284,7 +287,7 @@ struct FilteredGridView: View {
                         ], spacing: metrics.gridSpacing) {
                             if usesSparseGrid {
                                 ForEach(store.visibleIndices, id: \.self) { index in
-                                    sparseCell(index)
+                                    sparseCell(index, style: style)
                                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
                                             if gridGeometry.cellHeight != height { gridGeometry.cellHeight = height }
                                         }
@@ -298,8 +301,8 @@ struct FilteredGridView: View {
                                 } label: {
                                     MediaCard(
                                         item: item,
-                                        imageURL: gridImageURL(for: item),
-                                        style: cardStyle,
+                                        imageURL: gridImageURL(for: item, style: style),
+                                        style: style,
                                         isFocused: focusedItemID == item.originKey
                                     )
                                 }
@@ -334,7 +337,10 @@ struct FilteredGridView: View {
                             gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
                         }
                         #endif
-                        .enrichesPosterBadges(usesSparseGrid ? store.loadedItems : items)
+                        .modifier(GridBadgeEnrichment(
+                            sparse: usesSparseGrid, revision: store.loadedRevision,
+                            sparseItems: { store.loadedItems }, items: items
+                        ))
 
                         if isLoadingMore {
                             ProgressView()
@@ -658,13 +664,13 @@ struct FilteredGridView: View {
     /// A slot's card, or its placeholder until the page lands. Both focusable under the slot index,
     /// so focus survives the swap and a jump can land before the page has.
     @ViewBuilder
-    private func sparseCell(_ index: Int) -> some View {
+    private func sparseCell(_ index: Int, style: MediaCardStyle) -> some View {
         if let item = store.item(at: index) {
             Button { open(item) } label: {
                 MediaCard(
                     item: item,
-                    imageURL: gridImageURL(for: item),
-                    style: cardStyle,
+                    imageURL: gridImageURL(for: item, style: style),
+                    style: style,
                     isFocused: focusedSlot == index
                 )
             }
@@ -672,7 +678,7 @@ struct FilteredGridView: View {
             .focused($focusedSlot, equals: index)
             .mediaContextMenu(for: item) { open($0) }
         } else {
-            Button {} label: { PlaceholderCard(style: cardStyle, isFocused: focusedSlot == index) }
+            Button {} label: { PlaceholderCard(style: style, isFocused: focusedSlot == index) }
                 .buttonStyle(GridCardButtonStyle())
                 .focused($focusedSlot, equals: index)
         }
@@ -800,14 +806,7 @@ struct FilteredGridView: View {
         var combinedTmdbMap: [String: JellyfinItem]?
         if isMerged, let sources, smartProviderID != nil {
             // A combined Home's provider tile: both phases from every server (Sodalite#85).
-            var libraryQuery = ItemQuery(
-                includeItemTypes: [.movie, .series],
-                sortBy: "SortName",
-                sortOrder: "Ascending",
-                limit: 10000,
-                fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
-            )
-            if let filter = watchFilter.jellyfinFilter { libraryQuery.filters = [filter] }
+            let libraryQuery = ProviderMatchMerging.libraryScanQuery(watchFilter: watchFilter.jellyfinFilter)
             let combined = await CombinedProviderMatch.fetch(
                 sources: sources, studioQuery: effectiveQuery,
                 libraryQuery: reusePhase2 ? nil : libraryQuery,
@@ -827,19 +826,7 @@ struct FilteredGridView: View {
             async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
                 guard smartProviderID != nil, !reusePhase2 else { return [] }
                 // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
-                var allQuery = ItemQuery(
-                    includeItemTypes: [.movie, .series],
-                    sortBy: "SortName",
-                    sortOrder: "Ascending",
-                    limit: 10000,
-                    // Only tmdbID and the image tags are read off this scan. Same set as the identical
-                    // query in HomeViewModel+Precompute; detailFields over a whole library was the
-                    // single biggest request the app could issue (Sodalite#68).
-                    fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
-                )
-                if let filter = watchFilterValue {
-                    allQuery.filters = [filter]
-                }
+                let allQuery = ProviderMatchMerging.libraryScanQuery(watchFilter: watchFilterValue)
                 return try? await session.libraryService.getItems(
                     userID: userID, query: allQuery
                 ).items
@@ -863,11 +850,7 @@ struct FilteredGridView: View {
 
         var tmdbMap: [String: JellyfinItem] = combinedTmdbMap ?? [:]
         if combinedTmdbMap == nil {
-            for item in allItems ?? [] {
-                if let id = item.tmdbID {
-                    tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
-                }
-            }
+            tmdbMap = ProviderMatchMerging.tmdbMap(allItems ?? [])
         }
 
         // No cache yet: surface the studio match while the watch-provider phase runs.
@@ -996,5 +979,22 @@ struct GridCardButtonStyle: ButtonStyle {
         // Stroke drawn inside MediaCard (poster only), keeping the title below outside the outline.
         configuration.label
             .focusResponse(.card, isFocused: isFocused)
+    }
+}
+
+/// Picks the badge-enrichment form: a sparse grid keys on the store's revision and copies its items
+/// only when the task runs, a plain grid keeps the item ids (BRW-209).
+private struct GridBadgeEnrichment: ViewModifier {
+    let sparse: Bool
+    let revision: Int
+    let sparseItems: () -> [JellyfinItem]
+    let items: [JellyfinItem]
+
+    func body(content: Content) -> some View {
+        if sparse {
+            content.enrichesPosterBadges(revision: revision, items: sparseItems)
+        } else {
+            content.enrichesPosterBadges(items)
+        }
     }
 }

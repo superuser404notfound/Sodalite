@@ -71,6 +71,24 @@ struct MergedPagerTests {
         #expect(pager.failedServerIDs == ["b"])
     }
 
+    /// BRW-208: one failed page of the active server must not end its titles for good.
+    @Test func theActiveServerResumesAfterOneFailedPage() async throws {
+        let a = try (0..<90).map { try item("a\($0)", server: "a", sort: String(format: "a%03d", $0 * 2)) }
+        let b = try (0..<20).map { try item("b\($0)", server: "b", sort: String(format: "a%03d", $0 * 2 + 1)) }
+        let calls = Counter()
+        let flaky = MergedPager.Source(serverID: "a", isActive: true) { start, limit in
+            if calls.next() == 1 { throw URLError(.timedOut) }
+            return JellyfinItemsResponse(items: Array(a.dropFirst(start).prefix(limit)), totalRecordCount: a.count)
+        }
+        let pager = MergedPager(sources: [flaky, source("b", b)], sort: .default, pageSize: 30)
+        var all: [JellyfinItem] = []
+        var rounds = 0
+        repeat { all += await pager.nextPage(); rounds += 1 } while pager.hasMore && rounds < 20
+        #expect(all.filter { $0.serverID == "a" }.count == 90)
+        #expect(all.map { $0.sortName ?? "" } == all.map { $0.sortName ?? "" }.sorted())
+        #expect(!pager.failedServerIDs.contains("a"))
+    }
+
     @Test func missingKeysSortAsTheSmallestValue() throws {
         let rated = try item("r", server: "a", sort: "b", rating: 7)
         let unrated = try item("u", server: "a", sort: "a")

@@ -157,12 +157,14 @@ struct TabRootView: View {
                 if tab == .search {
                     Tab(value: tab, role: .search) {
                         tabContent(for: tab)
+                            .environment(\.shellPageIsShown, selectedTab == tab)
                     } label: {
                         tabLabel(tab)
                     }
                 } else {
                     Tab(value: tab) {
                         tabContent(for: tab)
+                            .environment(\.shellPageIsShown, selectedTab == tab)
                     } label: {
                         tabLabel(tab)
                     }
