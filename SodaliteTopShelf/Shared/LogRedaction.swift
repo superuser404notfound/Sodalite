@@ -13,9 +13,10 @@ import Foundation
 /// an engine pin that lags a redactor fix must not reopen the leak here. Running twice is harmless, the
 /// second pass skips a placeholder rather than redacting it again.
 ///
-/// The matchers below are the engine's (a4dcba8b, audit 2026-09-29 SUB-104, SUB-108, SUB-109) byte for
-/// byte in behaviour, so the two funnels cannot drift apart a third time; the additions on top of it are
-/// marked `Sodalite-only`. Keep a change to a shared matcher in both places.
+/// The matchers below are the engine's (0159a8b8 and e6bf6ae7, audit SUB-104 to SUB-109, SUB-205,
+/// SUB-206) in behaviour; the additions on top of it are marked `Sodalite-only`. The copies drifted once
+/// (PTD-201), so `SodaliteTests/RedactionCorpus.swift` holds inputs and expected outputs that the engine
+/// can run too. A change to a shared matcher goes into both places and into that corpus.
 ///
 /// Placed on the `LogTap.note(_:)` funnel rather than at each call site on purpose, so a line added
 /// tomorrow is covered without anyone remembering this file. Over-redaction is the safe failure here,
@@ -183,7 +184,7 @@ nonisolated enum LogRedaction {
     private static func matchedKey(in bytes: [UInt8], at index: Int) -> (length: Int, key: [UInt8])? {
         let first = logicalByte(in: bytes, at: index)
         guard keyInitials[Int(lowercased(first.byte))] else { return nil }
-        if precededByWordCharacter(bytes, at: index) { return nil }
+        if precededByWordCharacter(bytes, at: index), !startsCamelCaseWord(bytes, at: index) { return nil }
         for key in keys {
             var j = index
             var matched = true
@@ -197,6 +198,24 @@ nonisolated enum LogRedaction {
         }
         return nil
     }
+
+    /// Audit SUB-205: `apiToken`, `userToken`, `plexToken` start their key at a lower-to-upper step.
+    /// `hasToken` and `refreshTokenAt` stay literal because `valueRange` still wants an `=` or `:` after.
+    private static func startsCamelCaseWord(_ bytes: [UInt8], at index: Int) -> Bool {
+        guard index > 0 else { return false }
+        let here = bytes[index], before = bytes[index - 1]
+        guard here >= UInt8(ascii: "A") && here <= UInt8(ascii: "Z"),
+              before >= UInt8(ascii: "a") && before <= UInt8(ascii: "z") else { return false }
+        // The lowercase word in front: `hasToken` and `isSecret` are flags, not credentials.
+        var start = index
+        while start > 0, bytes[start - 1] >= UInt8(ascii: "a"), bytes[start - 1] <= UInt8(ascii: "z") { start -= 1 }
+        let word = String(decoding: bytes[start ..< index], as: UTF8.self)
+        return !camelCaseFlagPrefixes.contains(word)
+    }
+
+    private static let camelCaseFlagPrefixes: Set<String> = [
+        "has", "have", "had", "is", "was", "are", "needs", "need", "can", "should", "will", "does", "did",
+    ]
 
     /// A table rather than a `Set`: this is asked at every position of every line, and hashing the
     /// byte cost more than the rest of an escape-free line's pass put together (measured upstream).
@@ -219,9 +238,12 @@ nonisolated enum LogRedaction {
         var i = keyEnd
         // Sodalite-only: a JSON key closes its own quote before the colon, so that quote is skipped
         // when the same quote opened the key.
-        if keyStart > 0, bytes[keyStart - 1] == UInt8(ascii: "\"") || bytes[keyStart - 1] == UInt8(ascii: "'"),
-           i < bytes.count, bytes[i] == bytes[keyStart - 1] {
-            i += 1
+        // Audit PTD-203: the quote may sit further back when the key is the tail of a longer member
+        // name (`"refresh_token"`, `"clientSecret"`), so look back over the name's own characters.
+        if i < bytes.count, bytes[i] == UInt8(ascii: "\"") || bytes[i] == UInt8(ascii: "'") {
+            var open = keyStart
+            while open > 0, isMemberNameByte(bytes[open - 1]) { open -= 1 }
+            if open > 0, bytes[open - 1] == bytes[i] { i += 1 }
         }
         while i < bytes.count, case let char = logicalByte(in: bytes, at: i), isBlank(char.byte) {
             i += char.width
@@ -242,6 +264,12 @@ nonisolated enum LogRedaction {
         while afterSpaces < bytes.count, case let char = logicalByte(in: bytes, at: afterSpaces),
               isBlank(char.byte) {
             afterSpaces += char.width
+        }
+        // Audit SUB-205: `api_key: Optional("abc")` is how a Swift value prints.
+        let optionalPrefix = Array("Optional(".utf8)
+        if afterSpaces + optionalPrefix.count < bytes.count,
+           Array(bytes[afterSpaces ..< afterSpaces + optionalPrefix.count]) == optionalPrefix {
+            afterSpaces += optionalPrefix.count
         }
         var quote: UInt8?
         if afterSpaces < bytes.count, case let char = logicalByte(in: bytes, at: afterSpaces),
@@ -266,11 +294,24 @@ nonisolated enum LogRedaction {
             i += 2
         }
 
+        // Audit SUB-205: a request `Cookie:` header holds several pairs and every one is a credential,
+        // so its value runs to the end of the line. `Set-Cookie:` carries one cookie and then attributes.
+        let wholeLine = isHeaderSeparator && quote == nil
+            && isRequestCookieKey(bytes, keyStart: keyStart, keyEnd: keyEnd)
+
         while i < bytes.count {
             let char = logicalByte(in: bytes, at: i)
             if char.depth <= depth {
+                if quote != nil, char.byte == UInt8(ascii: "\\") {
+                    // An escaped quote (or backslash) belongs to the value.
+                    let next = i + char.width
+                    if next < bytes.count { i = next + logicalByte(in: bytes, at: next).width } else { i = next }
+                    continue
+                }
                 if let quote, char.byte == quote { break }
-                if quote == nil, isValueTerminator(char.byte),
+                if wholeLine {
+                    if char.byte == 0x0A || char.byte == 0x0D { break }
+                } else if quote == nil, isValueTerminator(char.byte),
                    endsValue(char, at: i, in: bytes, afterHeaderSeparator: isHeaderSeparator) {
                     break
                 }
@@ -278,6 +319,14 @@ nonisolated enum LogRedaction {
             i += char.width
         }
         return start < i ? start ..< i : nil
+    }
+
+    private static func isRequestCookieKey(_ bytes: [UInt8], keyStart: Int, keyEnd: Int) -> Bool {
+        guard keyEnd - keyStart == 6 else { return false }
+        let cookie = Array("cookie".utf8)
+        for (offset, byte) in cookie.enumerated() where lowercased(bytes[keyStart + offset]) != byte { return false }
+        if keyStart >= 4, Array(bytes[keyStart - 4 ..< keyStart]).map(lowercased) == Array("set-".utf8) { return false }
+        return true
     }
 
     /// Audit SUB-108: `: ; , ) >` are legal unescaped inside a query value, and a user-chosen
@@ -320,8 +369,27 @@ nonisolated enum LogRedaction {
             let start = i
             while i < bytes.count, isToken68(bytes[i]) { i += 1 }
             if i - start >= minimumSchemeCredentialLength { return start ..< i }
+            // Audit SUB-205: base64 of a short `user:pass` is under the floor, but after the
+            // `Authorization` name it is a credential, not prose.
+            if i - start >= minimumNamedSchemeCredentialLength, followsAuthorizationName(bytes, schemeStart: index) {
+                return start ..< i
+            }
         }
         return nil
+    }
+
+    private static let minimumNamedSchemeCredentialLength = 6
+
+    private static func followsAuthorizationName(_ bytes: [UInt8], schemeStart: Int) -> Bool {
+        var k = schemeStart
+        while k > 0, isBlank(bytes[k - 1]) || bytes[k - 1] == UInt8(ascii: ":") || bytes[k - 1] == UInt8(ascii: "=")
+                || bytes[k - 1] == UInt8(ascii: "\"") || bytes[k - 1] == UInt8(ascii: "'") { k -= 1 }
+        let name = Array("authorization".utf8)
+        guard k >= name.count else { return false }
+        for (offset, byte) in name.enumerated() where lowercased(bytes[k - name.count + offset]) != byte {
+            return false
+        }
+        return true
     }
 
     private static func isToken68(_ b: UInt8) -> Bool {
@@ -504,9 +572,15 @@ nonisolated enum LogRedaction {
         // glued to a version prefix (`/v1-eyJ…`) is still a blob (audit SUB-104).
         if index > 0, isLetterOrDigit(bytes[index - 1]) { return nil }
 
+        // Audit SUB-206: every `e` after a `-` is a start, so a run like `e-e-e-` would otherwise be scanned
+        // and decoded from each one to its end. Two bytes of JSON syntax reject almost all of them before
+        // anything is scanned, and a run past the cap is not a credential blob.
+        guard startsLikeJSON(bytes, at: index) else { return nil }
         var end = index
-        while end < bytes.count, isBase64URL(bytes[end]) { end += 1 }
-        guard end - index >= minimumEncodedLength, decodesToJSON(bytes[index ..< end]) else { return nil }
+        let scanLimit = min(bytes.count, index + maximumEncodedLength + 1)
+        while end < scanLimit, isBase64URL(bytes[end]) { end += 1 }
+        guard end - index >= minimumEncodedLength, end - index <= maximumEncodedLength,
+              decodesToJSON(bytes[index ..< end]) else { return nil }
 
         // A JSON web token is three of these joined by dots, and the signature at the end is the part
         // worth stealing, so the whole token goes rather than the header that happened to match.
@@ -518,6 +592,38 @@ nonisolated enum LogRedaction {
             extended = run
         }
         return index ..< extended
+    }
+
+    private static let maximumEncodedLength = 16 * 1024
+
+    /// Whether the first two decoded bytes of the run read as the opening of a JSON object or array.
+    static func startsLikeJSON(_ bytes: [UInt8], at index: Int) -> Bool {
+        func sextet(_ b: UInt8) -> UInt8? {
+            switch b {
+            case UInt8(ascii: "A")...UInt8(ascii: "Z"): return b - UInt8(ascii: "A")
+            case UInt8(ascii: "a")...UInt8(ascii: "z"): return b - UInt8(ascii: "a") + 26
+            case UInt8(ascii: "0")...UInt8(ascii: "9"): return b - UInt8(ascii: "0") + 52
+            case UInt8(ascii: "-"), UInt8(ascii: "+"): return 62
+            case UInt8(ascii: "_"), UInt8(ascii: "/"): return 63
+            default: return nil
+            }
+        }
+        guard index + 2 < bytes.count, let a = sextet(bytes[index]), let b = sextet(bytes[index + 1]),
+              let c = sextet(bytes[index + 2]) else { return false }
+        let first = a << 2 | b >> 4
+        let second = (b & 0x0f) << 4 | c >> 2
+        let whitespace = second == 0x20 || second == 0x09 || second == 0x0a || second == 0x0d
+        switch first {
+        case UInt8(ascii: "{"):
+            return whitespace || second == UInt8(ascii: "\"") || second == UInt8(ascii: "}")
+        case UInt8(ascii: "["):
+            return whitespace || second == UInt8(ascii: "\"") || second == UInt8(ascii: "[")
+                || second == UInt8(ascii: "{") || second == UInt8(ascii: "]") || second == UInt8(ascii: "-")
+                || (second >= UInt8(ascii: "0") && second <= UInt8(ascii: "9"))
+                || second == UInt8(ascii: "t") || second == UInt8(ascii: "f") || second == UInt8(ascii: "n")
+        default:
+            return false
+        }
     }
 
     /// Whether the run decodes as base64url into a JSON object or array. `JSONSerialization` without
@@ -631,6 +737,10 @@ nonisolated enum LogRedaction {
         default:
             return false
         }
+    }
+
+    private static func isMemberNameByte(_ b: UInt8) -> Bool {
+        isLetterOrDigit(b) || b == UInt8(ascii: "_") || b == UInt8(ascii: "-") || b == UInt8(ascii: ".")
     }
 
     private static func isLetterOrDigit(_ b: UInt8) -> Bool {
