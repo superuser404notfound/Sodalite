@@ -30,6 +30,8 @@ extension DependencyContainer {
         // Servers, tokens, profiles, passwords, Seerr, and cloud sync off on this device.
         try? clearSession()
         clearSessionResidue()
+        // Before the keychain wipe, which then takes the emptied item with it.
+        serverTrustStore.removeAll()
         // clearSession scrubs session state; a reset owes nothing to anything. The Guardian PIN, its
         // throttle, the remembered live routes and whatever a later key adds all sit in the same
         // keychain service, so take the service rather than a list that would fall behind.

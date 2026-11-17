@@ -98,6 +98,17 @@ nonisolated final class ServerTrustStore: @unchecked Sendable {
         storage.savePins(snapshot)
     }
 
+    /// A factory reset. The keychain item goes with the reset's wipe, but the pins in memory kept
+    /// every old certificate accepted until relaunch, and the next `pin` wrote them all back
+    /// (audit NET-205).
+    func removeAll() {
+        lock.lock()
+        pins = [:]
+        refusals = [:]
+        lock.unlock()
+        storage.savePins([:])
+    }
+
     func noteRefused(_ fingerprint: String, forHost host: String) {
         lock.lock()
         refusals[host] = fingerprint
