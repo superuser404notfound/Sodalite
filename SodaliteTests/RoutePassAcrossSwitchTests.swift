@@ -99,4 +99,27 @@ struct RoutePassAcrossSwitchTests {
         #expect(appState.serverReachability == .reachable)
         #expect(appState.requestContentReload == 1)
     }
+
+    /// Audit 2026-11-17 NET-208. Combine secondaries ride the active server's HTTP client, so a
+    /// friend's dead server re-measured the active route every ten seconds.
+    @Test func aSecondaryFailingDoesNotReMeasureTheActiveRoute() async throws {
+        let container = DependencyContainer(
+            keychainService: InMemoryKeychain(),
+            defaults: UserDefaults(suiteName: "route-unserved-\(UUID().uuidString)")!
+        )
+        // The container holds AppState weakly.
+        let appState = AppState()
+        container.appState = appState
+        container.jellyfinProbe = { _, _ in true }
+        try container.saveSession(server: serverA, user: try user("user-a", server: serverA.id), token: "token-a")
+        await container.routeResolveTask?.value
+
+        container.noteServerDidNotServe(baseURL: try #require(serverB.internalURL))
+        #expect(container.lastTransportRecheck == nil)
+
+        container.noteServerDidNotServe(baseURL: try #require(serverA.internalURL))
+        #expect(container.lastTransportRecheck != nil)
+        #expect(appState.serverReachability == .reachable)
+    }
 }
+

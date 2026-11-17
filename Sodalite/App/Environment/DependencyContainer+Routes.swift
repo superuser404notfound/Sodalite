@@ -260,7 +260,10 @@ extension DependencyContainer {
     /// verdict still says the server is fine, since past that the watch below owns the question;
     /// only one re-measure in flight; and not twice inside the cooldown, so a server that answers
     /// the probe while its API keeps failing cannot turn every request into another probe.
-    func noteServerDidNotServe() {
+    func noteServerDidNotServe(baseURL: URL) {
+        // Only the active server's address: a Combine secondary rides the same HTTP client, and
+        // its failures re-measured this route every cooldown (audit NET-208).
+        guard baseURL == jellyfinClient.baseURL else { return }
         guard let appState, activeServer != nil, !appState.serverReachability.isFailure else { return }
         guard transportRecheckTask == nil else { return }
         if let last = lastTransportRecheck, ContinuousClock.now - last < ReachabilityRecheck.cooldown {

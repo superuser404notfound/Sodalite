@@ -334,8 +334,8 @@ final class DependencyContainer {
         // Sodalite#126, and last because it captures self. The Jellyfin client alone: a Seerr
         // timeout says nothing about which Jellyfin address answers. Concrete client only, since
         // the hook is a real-transport concern and a mock has no verdict to keep honest.
-        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] in
-            Task { @MainActor in self?.noteServerDidNotServe() }
+        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] baseURL in
+            Task { @MainActor in self?.noteServerDidNotServe(baseURL: baseURL) }
         }
 
         // Every credential the session holds is named to both log redactors as it arrives, so a line
