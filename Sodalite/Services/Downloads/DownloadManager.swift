@@ -25,10 +25,17 @@ enum DownloadEvent: Sendable {
     case interrupted(DownloadTaskTag, resumeData: Data?)
 }
 
+extension DownloadBackend {
+    var hasServer: Bool { baseURL != nil }
+}
+
 /// Foreground API the manager needs; production is `JellyfinDownloadBackend`.
 @MainActor
 protocol DownloadBackend: AnyObject {
+    /// nil until credentials may go there (see `JellyfinClient.verifiedBaseURL`).
     var baseURL: URL? { get }
+    /// A server is configured at all, proved or not yet.
+    var hasServer: Bool { get }
     var authorization: String { get }
     var userID: String { get }
     var preferredAudioLanguage: String? { get }
@@ -89,7 +96,7 @@ final class DownloadManager {
         let origin = try homeBackend(serverID: item.serverID)
         let backend = origin?.backend ?? self.backend
         let quality = backend.canTranscodeVideo ? requested : .original
-        guard let profile = store.activeProfile, let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
+        guard let profile = store.activeProfile, backend.hasServer else { throw DownloadEnqueueError.noServer }
 
         let versionID = mediaSourceID ?? VersionSelection(order: backend.versionOrder).preferredSourceID(for: item)
         let probe = try await backend.playbackInfo(itemID: item.id, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: quality.maxStreamingBitrate), mediaSourceID: versionID, audioStreamIndex: nil)
@@ -104,6 +111,10 @@ final class DownloadManager {
         guard let source = info.mediaSources.first(where: { $0.id == first.id }) ?? info.mediaSources.first else { throw DownloadEnqueueError.noSource }
 
         let detail = (try? await backend.itemDetail(itemID: item.id)) ?? item
+        // Read after the PlaybackInfo round trip, which waited for a LAN address to prove itself;
+        // read before it, a download tapped in the first moments after launch had no server yet
+        // (audit review R-ROUTE-6).
+        guard let baseURL = backend.baseURL else { throw DownloadEnqueueError.noServer }
         let plan = DownloadPlanner.plan(itemID: item.id, source: source, quality: quality, runtimeTicks: detail.runTimeTicks,
                                         audioStreamIndex: audio, baseURL: baseURL)
         // What is queued or running has not landed yet, but it will: its bytes are spoken for.

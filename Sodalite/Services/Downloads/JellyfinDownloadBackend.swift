@@ -30,6 +30,7 @@ final class JellyfinDownloadBackend: DownloadBackend {
     /// nil until a LAN address has proved it is this server, so a queued download waits for the
     /// route resolve instead of sending its token ahead of it (audit NET-201).
     var baseURL: URL? { client?.verifiedBaseURL }
+    var hasServer: Bool { client?.baseURL != nil }
     var authorization: String { client?.buildAuthHeader() ?? "" }
     var userID: String { (serverID == nil ? container?.activeUserID : secondary?.userID) ?? "" }
     var preferredAudioLanguage: String? { container?.playbackPreferences.preferredAudioLanguage }
