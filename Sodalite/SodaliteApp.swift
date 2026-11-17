@@ -49,13 +49,7 @@ struct SodaliteApp: App {
         let watcherDeps = dependencies
         MyRequestsBackgroundRefresh.register {
             let watcher = watcherDeps.myRequestsWatcher
-            // A cold background launch restores the session (and the Seerr connection) on its own
-            // schedule; give it a bounded moment instead of ending the chain on the first look.
-            let deadline = ContinuousClock.now + .seconds(20)
-            while !watcher.isEnabled, ContinuousClock.now < deadline, !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(500))
-            }
-            if watcher.isEnabled {
+            if await BackgroundRefreshTask.waitFor({ watcher.isEnabled }) {
                 watcher.reloadForActiveProfile()
                 await watcher.refresh()
                 await watcherDeps.syncAppIconBadge()
@@ -73,6 +67,8 @@ struct SodaliteApp: App {
         PendingRequestsBackgroundRefresh.register {
             let prefs = deps.seerrNotificationPreferences
             guard prefs.notifyPendingRequests else { return false }
+            // Without the session the monitor has nothing to count, and the chain would reschedule blind (PTD-204).
+            _ = await BackgroundRefreshTask.waitFor { deps.pendingRequestsMonitor.isEligible() }
             await PendingRequestsSync.refreshAndSync(
                 monitor: deps.pendingRequestsMonitor,
                 preferences: prefs,
@@ -84,6 +80,10 @@ struct SodaliteApp: App {
         }
         // Show notifications as banners even while the app is foregrounded.
         PendingRequestsNotifier.configureForegroundPresentation()
+        #endif
+
+        #if os(macOS)
+        MacPlayerWindowSession.installTerminationHook()
         #endif
 
         // Hand the live AppState/DependencyContainer to the intent layer so AppIntent.perform() drives navigation without rebuilding its own DI graph.

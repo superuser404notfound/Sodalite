@@ -48,3 +48,22 @@ struct MyRequestsBackgroundPolicyTests {
         #expect(!MyRequestsBackgroundRefresh.keepScheduling(scope: "s_a", notifyEnabled: { _ in false }))
     }
 }
+
+#if !os(macOS)
+@MainActor
+struct BackgroundRefreshWaitTests {
+    /// PTD-204: a cold background launch has no Seerr session yet, so the handler waits for it.
+    @Test func waitsUntilTheConditionTurnsTrue() async {
+        var ready = false
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
+            ready = true
+        }
+        #expect(await BackgroundRefreshTask.waitFor(timeout: .seconds(3)) { ready })
+    }
+
+    @Test func givesUpAtTheDeadline() async {
+        #expect(!(await BackgroundRefreshTask.waitFor(timeout: .milliseconds(600)) { false }))
+    }
+}
+#endif
