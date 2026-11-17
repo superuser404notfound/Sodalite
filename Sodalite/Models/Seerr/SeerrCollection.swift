@@ -27,11 +27,6 @@ enum SeerrCollectionRequestPlan {
     /// `.available`/`.partiallyAvailable` are already on the server, so re-requesting either would only earn a 202
     /// from Seerr. `.deleted` and `.failed` are deliberately included: a removed or failed title has to stay re-requestable.
     static func missingParts(in parts: [SeerrMedia]) -> [SeerrMedia] {
-        parts.filter { part in
-            switch part.mediaInfo?.displayStatus {
-            case .none, .unknown, .deleted, .failed: true
-            case .pending, .processing, .partiallyAvailable, .available: false
-            }
-        }
+        parts.filter { SeerrRequestDraft.isWorthRequesting($0.mediaInfo?.displayStatus) }
     }
 }

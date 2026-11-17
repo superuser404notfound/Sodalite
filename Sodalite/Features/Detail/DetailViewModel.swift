@@ -284,12 +284,8 @@ final class DetailViewModel {
               let tmdbID,
               let mediaType = Self.seerrMediaType(for: itemType) else { return }
 
-        let recommended = (try? await seerrMediaService.recommendations(mediaType: mediaType, tmdbID: tmdbID)) ?? []
-        var candidates = SeerrLibraryDedupe.droppingAvailable(recommended)
-        if candidates.isEmpty {
-            let similar = (try? await seerrMediaService.similar(mediaType: mediaType, tmdbID: tmdbID)) ?? []
-            candidates = SeerrLibraryDedupe.droppingAvailable(similar)
-        }
+        let candidates = await SeerrLibraryDedupe.suggestions(
+            service: seerrMediaService, mediaType: mediaType, tmdbID: tmdbID)
         // Second net against the library row right above it: Jellyseerr's own sync can be stale or
         // unconfigured, and the same title in both rows is the thing this split was meant to end.
         let result = SeerrLibraryDedupe.removing(candidates, matching: libraryItems)
