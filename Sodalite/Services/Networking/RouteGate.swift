@@ -36,8 +36,9 @@ final class RouteGate {
     /// waiting forever.
     private(set) var isSettled = true
     private var waiters: [UUID: CheckedContinuation<Void, Never>] = [:]
-    /// The error each refused address gets this epoch, asked once.
-    private var refusals: [URL: APIError] = [:]
+    /// The error each refused address gets this epoch. One question per address, shared by every
+    /// request a settle releases at once (audit review R-ROUTE-26).
+    private var refusals: [URL: Task<APIError, Never>] = [:]
 
     init(isEnforced: Bool) {
         self.isEnforced = isEnforced
@@ -104,15 +105,16 @@ final class RouteGate {
     /// itself, and only this question raises the screen that says so (Sodalite#92, audit review
     /// R-ROUTE-2). Asked once per address and epoch; tvOS has no such permission.
     private func refusal(for url: URL) async -> APIError {
-        if let known = refusals[url] { return known }
-        let asked = epoch
-        #if os(iOS)
-        let error: APIError = await LocalNetworkAccess.isDenied(for: url) ? .localNetworkDenied : .serverUnreachable
-        #else
-        let error = APIError.serverUnreachable
-        #endif
-        if asked == epoch { refusals[url] = error }
-        return error
+        if let asked = refusals[url] { return await asked.value }
+        let asking = Task<APIError, Never> {
+            #if os(iOS)
+            return await LocalNetworkAccess.isDenied(for: url) ? .localNetworkDenied : .serverUnreachable
+            #else
+            return .serverUnreachable
+            #endif
+        }
+        refusals[url] = asking
+        return await asking.value
     }
 
     /// Returns once the current epoch's resolve has finished.
