@@ -107,6 +107,10 @@ final class HomeViewModel {
         )
         LogTap.shared.note("[HomeRefresh] \(trigger.rawValue): \(decision.logText)")
         guard case .refetch = decision else { return }
+        // Two signals can land together (a tab return fires onAppear and the visibility change).
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
         isDirty = false
         await loadContent()
     }
@@ -117,6 +121,7 @@ final class HomeViewModel {
     /// whatever is covering it (Sodalite#12). The next `refreshIfStale` forces a refetch regardless
     /// of age and clears it, so the one reload the cover's dismissal delivers carries the change.
     private var isDirty = false
+    @ObservationIgnored private var isRefreshing = false
 
     /// Record a change Home only patched in place while covered, for the next `refreshIfStale` to
     /// pick up as a forced refetch.
@@ -247,18 +252,38 @@ final class HomeViewModel {
     /// re-applied after the load so a cached re-fetch cannot regress the bar (issue #24).
     func scheduleReload(applying position: (itemID: String, ticks: Int64)? = nil) {
         if let position { pendingPositions[position.itemID] = position.ticks }
+        // A load that already started is not cancelled: a cancelled load still publishes, with
+        // rows that came back empty (review R-BROWSE-3). Another reload follows it instead.
+        if isScheduledLoadRunning {
+            reloadAgain = true
+            return
+        }
         configReloadTask?.cancel()
         configReloadTask = Task { [weak self] in
             guard let debounce = self?.configReloadDebounce else { return }
             try? await Task.sleep(for: debounce)
-            guard !Task.isCancelled else { return }
-            await self?.loadContent()
             guard !Task.isCancelled, let self else { return }
+            // Asked again now: Home may have been covered during the debounce (Sodalite#12).
+            guard !isHidden else {
+                markDirty()
+                return
+            }
+            isScheduledLoadRunning = true
+            await loadContent()
+            isScheduledLoadRunning = false
             for (itemID, ticks) in pendingPositions { applyPlaybackPosition(itemID: itemID, ticks: ticks) }
             pendingPositions = [:]
+            if reloadAgain {
+                reloadAgain = false
+                scheduleReload()
+            }
         }
     }
 
+    /// Kept current by HomeView (covered, playing from a card, another tab on top).
+    @ObservationIgnored var isHidden = false
+    @ObservationIgnored private var isScheduledLoadRunning = false
+    @ObservationIgnored private var reloadAgain = false
     @ObservationIgnored private var pendingPositions: [String: Int64] = [:]
 
     isolated deinit {

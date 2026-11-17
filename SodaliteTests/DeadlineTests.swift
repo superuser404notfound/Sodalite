@@ -46,7 +46,7 @@ struct DeadlineTests {
         let value = await task.value
         #expect(value == nil)
         #expect(clock.now - start < .seconds(3))
-        try? await Task.sleep(for: .milliseconds(200))
+        for _ in 0..<100 where !sawCancel.isSet { try? await Task.sleep(for: .milliseconds(20)) }
         #expect(sawCancel.isSet)
     }
 

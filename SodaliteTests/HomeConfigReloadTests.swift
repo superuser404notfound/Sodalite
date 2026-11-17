@@ -12,6 +12,8 @@ struct HomeConfigReloadTests {
     final class MockLibraryService: JellyfinLibraryServiceProtocol, @unchecked Sendable {
         /// loadContent() always starts with getLibraries, so this counts reloads.
         var getLibrariesCalls = 0
+        /// Held inside getLibraries, so a test can reschedule while a load is running.
+        var librariesDelay: Duration = .zero
 
         /// Decoded on the MainActor by the test and handed over, because the model's Decodable
         /// conformance is actor-isolated and these protocol methods are not. nil makes getItems throw.
@@ -22,6 +24,7 @@ struct HomeConfigReloadTests {
         /// Throws so loadContent skips reconciliation and leaves the test's rowConfigs alone.
         func getLibraries(userID: String) async throws -> [JellyfinLibrary] {
             getLibrariesCalls += 1
+            if librariesDelay > .zero { try? await Task.sleep(for: librariesDelay) }
             throw Unused()
         }
 
@@ -109,6 +112,39 @@ struct HomeConfigReloadTests {
         await waitForReload()
 
         #expect(service.getLibrariesCalls == 1)
+    }
+
+    /// R-BROWSE-7: the positions handed to scheduleReload are on screen after the load (issue #24).
+    @Test func positionsAreReappliedAfterTheDebouncedReload() async throws {
+        let service = MockLibraryService()
+        let vm = try await viewModelShowingOneFavoriteEpisode(service: service)
+        vm.scheduleReload(applying: ("e1", 12_345))
+        await waitForReload()
+        let item = try #require(vm.rows.first { $0.type == .favoriteEpisodes }?.items.first)
+        #expect(item.userData?.playbackPositionTicks == 12_345)
+    }
+
+    /// R-BROWSE-3: a request that lands while a scheduled load runs waits for it instead of cancelling it.
+    @Test func aReloadAskedDuringARunningLoadFollowsIt() async {
+        let service = MockLibraryService()
+        service.librariesDelay = .milliseconds(300)
+        let vm = makeViewModel(service: service)
+        vm.scheduleReload()
+        try? await Task.sleep(for: .milliseconds(150))
+        #expect(service.getLibrariesCalls == 1)
+        vm.scheduleReload()
+        try? await Task.sleep(for: .milliseconds(1200))
+        #expect(service.getLibrariesCalls == 2)
+    }
+
+    /// R-BROWSE-3: Home hidden when the debounce fires means no load, only a dirty mark.
+    @Test func aHiddenHomeDoesNotReloadWhenTheDebounceFires() async {
+        let service = MockLibraryService()
+        let vm = makeViewModel(service: service)
+        vm.isHidden = true
+        vm.scheduleReload()
+        await waitForReload()
+        #expect(service.getLibrariesCalls == 0)
     }
 
     private func decodeResponse(_ json: String) throws -> JellyfinItemsResponse {
