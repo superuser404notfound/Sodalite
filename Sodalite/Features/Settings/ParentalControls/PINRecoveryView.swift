@@ -107,11 +107,14 @@ struct PINRecoveryView: View {
         defer { isValidating = false }
         // login() is a pure REST call on a client of its own: the live one holds the active session's
         // token and must never point at the recovery server, not even for the length of this call.
+        // The client waits for its address to prove it is this server, and the answer has to be this
+        // very profile: any other 2xx is not the parent's password (audit review R-ROUTE-4).
         let client = dependencies.makeSignInClient(for: server)
         do {
-            _ = try await JellyfinAuthService(client: client).login(
+            let auth = try await JellyfinAuthService(client: client).login(
                 username: user.name, password: password
             )
+            guard auth.user.id == user.id else { throw APIError.unauthorized(message: nil) }
             onRecovered()
         } catch {
             self.error = "parental.pin.recovery.failed"

@@ -175,6 +175,15 @@ extension DependencyContainer {
         do {
             try await revoke(client)
         } catch APIError.unauthorized {
+            // Only this server's 401 means the token is already gone; from anybody else it means
+            // nothing was revoked, and removing the profile would leave a live token behind
+            // (audit review R-ROUTE-4).
+            if verifiesServerIdentity {
+                guard let url = client.baseURL, await jellyfinIdentity(url, server.id) == .matches else {
+                    sessionNote("a refusal of \(user.name)'s token came from an address that did not answer as \(server.name); nothing removed.")
+                    throw APIError.serverUnreachable
+                }
+            }
             sessionNote("\(server.name) had already dropped the token of \(user.name).")
         }
         sessionNote("revoked the token of \(user.name) on \(server.name), removing the profile on every device.")
