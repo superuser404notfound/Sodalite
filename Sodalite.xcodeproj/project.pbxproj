@@ -74,6 +74,7 @@
 		0700730550B7D858C4D3D56B /* ExternalSoftwareVideoDecisionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36363D94A54DC10726B1BAA /* ExternalSoftwareVideoDecisionTests.swift */; };
 		072E639ACDCE716FC8F6E881 /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418106DEDECD6A1D03537314 /* DetailViewModel.swift */; };
 		07414D01E7172625CE13BEB6 /* TraktListsSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5363F172127C55435124F55E /* TraktListsSnapshot.swift */; };
+		0745349EF27C4110B784FFEE /* BackgroundRefreshTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FC7770D5AF26B3C2D87F1B /* BackgroundRefreshTask.swift */; };
 		0746DF5BBEBBD14049150E8C /* ProfileHomeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE38687F98CAEC29C9E7E0B6 /* ProfileHomeStore.swift */; };
 		075BFA51EE3EF9670505ED09 /* DetailRouterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0BD9A994EB62F1AC2E7558 /* DetailRouterView.swift */; };
 		07660D87B39001F06A104FE2 /* MultiviewHostController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE600317E4CE08B98B64D44 /* MultiviewHostController.swift */; };
@@ -375,6 +376,7 @@
 		26B3C7F4157FCFECCC069AB7 /* CombinedSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27ED6A1BA0223AF1331E71A8 /* CombinedSearchTests.swift */; };
 		26B5D4E903FC69F5D686FEF7 /* LicenseText-dav1d.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FC57C0434B0E5A844A312 /* LicenseText-dav1d.txt */; };
 		26B9667EB72514B1BD400DFF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB64AA91C881200F98F790D /* SettingsView.swift */; };
+		26C1C57C6C11AF17FD1822F5 /* BackgroundRefreshTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FC7770D5AF26B3C2D87F1B /* BackgroundRefreshTask.swift */; };
 		26CA5A6223360376F1953DA0 /* PosterBadgePills.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41CC34A5033919CFB58E092 /* PosterBadgePills.swift */; };
 		26D2933D24DFCF9F278D9904 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0608D8ACFF463F8E0B6556B8 /* LoginViewModel.swift */; };
 		26E40A8AB1576E2509A228DB /* SeerrPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0D3AF30D46C46DE8DFA /* SeerrPermissions.swift */; };
@@ -572,6 +574,7 @@
 		3BDED48F510EB65A36C5A7E3 /* CloudSyncRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA46CA9FFF62E14F69958428 /* CloudSyncRecoveryTests.swift */; };
 		3BF0A5D13173CC122CC92525 /* NextEpisodePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3D6E3F0C977BFE6433ECE3F /* NextEpisodePolicy.swift */; };
 		3C025FF85682E1F4AB0FA2B4 /* ArtworkTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC726417573B591C1BAEFC70 /* ArtworkTile.swift */; };
+		3C29E15EA56C5D9C0E5B22D3 /* BackgroundRefreshTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FC7770D5AF26B3C2D87F1B /* BackgroundRefreshTask.swift */; };
 		3C3D0B611951A4F020CE7211 /* PosterBadgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81D94D4C977D63DA093C6E9 /* PosterBadgeStore.swift */; };
 		3C5FA5A904DA3156F83D375B /* PlayerViewModelEngineInjectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6E79E550FDC166CEE1F9C64 /* PlayerViewModelEngineInjectionTests.swift */; };
 		3C6E101361ED5F9E62FBEDD8 /* JellyfinItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D12A1E28286856D9BCD249 /* JellyfinItemTests.swift */; };
@@ -1407,6 +1410,7 @@
 		95EE31E4546088E126CFCB16 /* FolderBrowseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295FDAA87BA1F88D38652E78 /* FolderBrowseTests.swift */; };
 		95FAC5286E2786F5832BDBD7 /* SeerrServerDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D5797F7ED34779D8AACE30D /* SeerrServerDiscoveryService.swift */; };
 		961258362B2611952B42E0A8 /* StableTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D7377FE2EE2770A0460BA8 /* StableTap.swift */; };
+		962BB4B442E4F165EA5D8317 /* CloudArrivalRestorePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F9EEF413B9E29120B1755B /* CloudArrivalRestorePolicyTests.swift */; };
 		96720342DDEC4A60FDDA0ABB /* DependencyContainer+Downloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 238F4A8D6BE8EEF69C700C1C /* DependencyContainer+Downloads.swift */; };
 		9680CA5E54E6FF4FFD6A80AF /* ServerTwins.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE6C742E02EBBE1CB83F652 /* ServerTwins.swift */; };
 		96A3D146A758D14061FDF5F0 /* DetailSecondaryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AB0E8D4D9D9CE9852E8DF8 /* DetailSecondaryInfo.swift */; };
@@ -1533,6 +1537,7 @@
 		A39E798C4AE189DAB6AA3B25 /* TransportAutoHideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA5B367629F695E94CBA750 /* TransportAutoHideTests.swift */; };
 		A3D3187C5F2ABF827E5FE6A0 /* LaunchProfilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E81D87A395406880D1F11F /* LaunchProfilePickerView.swift */; };
 		A3EB33D8D4CFFE81B2952EEB /* PlayerControlsLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FF7B487577CB0BC4BB36C4 /* PlayerControlsLayout.swift */; };
+		A3FA3E5C1F80651322AA4329 /* CloudArrivalRestorePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C36FC7C331BCA622DBAD65 /* CloudArrivalRestorePolicy.swift */; };
 		A426A70A50131E5FBBE8B686 /* DisplayRefreshMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CCD58267DB4BEAF8970CDB /* DisplayRefreshMonitor.swift */; };
 		A449473D85E4C2331241FFAF /* ArtworkShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8F6C2558742C458B01621D /* ArtworkShape.swift */; };
 		A45D6665F86E2A3871D9E305 /* HomeRowRenameSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 380F0010A58E7BD5923B4ED9 /* HomeRowRenameSheet.swift */; };
@@ -1630,6 +1635,7 @@
 		AFC64535A569B1DC367930CB /* SkipSegmentResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC71B2A5D50F33F3F8EC4D7 /* SkipSegmentResolver.swift */; };
 		AFDEBE7962AEBD416C638B3B /* TraktSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F4119855FF47A028E3EEB1 /* TraktSession.swift */; };
 		AFDEEA58646172D3DD7D18B6 /* ItemMetadataRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F108CEF8820921CE2B80A2A /* ItemMetadataRow.swift */; };
+		B0126E30C2FC68A0F997AA20 /* CloudArrivalRestorePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C36FC7C331BCA622DBAD65 /* CloudArrivalRestorePolicy.swift */; };
 		B014219254B464AA71138C53 /* DependencyContainer+Caches.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1379D65D0C8EAC5CB5F97764 /* DependencyContainer+Caches.swift */; };
 		B05123DE370C77FD3264EAA7 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD612B8B5146AAF6925E6A3 /* StoreKitService.swift */; };
 		B08FD0488A680FB3ADE0777A /* MyMediaLibrariesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26ACDA3C53D401F750A2743 /* MyMediaLibrariesTests.swift */; };
@@ -1990,6 +1996,7 @@
 		D7515B499AD1C256FC43DBE1 /* SeerrHorizontalMediaRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62519BD37E62A4F9FF64DFC /* SeerrHorizontalMediaRow.swift */; };
 		D75975BCCFE9B17857A3847C /* SpoilerVeil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E78738385037844F707C771 /* SpoilerVeil.swift */; };
 		D7635B8DC590B3DBA8783FE7 /* FocusableCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C631A6EC153641E1CAF0F5A3 /* FocusableCard.swift */; };
+		D77A55E796D1CDFDD8734E34 /* CloudArrivalRestorePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C36FC7C331BCA622DBAD65 /* CloudArrivalRestorePolicy.swift */; };
 		D7887FCCEBCA1A51A8BB7290 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A4F6464C543DFF6027F96CB /* JSONValue.swift */; };
 		D7D1CB793DA1D3B733D664F1 /* SodaliteIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F52845EFD489AE02A52FF2 /* SodaliteIntents.swift */; };
 		D7E7187229B233A5F347AB0E /* LicenseText-LibTrueHD.txt in Resources */ = {isa = PBXBuildFile; fileRef = CFBB3A70D88CCDC9A9630AA6 /* LicenseText-LibTrueHD.txt */; };
@@ -2525,6 +2532,7 @@
 		13D4F586D7E43FDC42308F7F /* KeyboardTransportStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardTransportStateTests.swift; sourceTree = "<group>"; };
 		13EAF84BDC15DE641CED31FE /* CloudSyncProfileRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncProfileRecordTests.swift; sourceTree = "<group>"; };
 		13ECD69CBBA5997B7200B3AE /* SidebarShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarShell.swift; sourceTree = "<group>"; };
+		13F9EEF413B9E29120B1755B /* CloudArrivalRestorePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudArrivalRestorePolicyTests.swift; sourceTree = "<group>"; };
 		143748079A977513B9EDF771 /* ServerDualURLCodableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDualURLCodableTests.swift; sourceTree = "<group>"; };
 		148C309E36E03E45474228FB /* ContentLogoBudget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLogoBudget.swift; sourceTree = "<group>"; };
 		14BCB912099E52F189D68C89 /* PlayerHostController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerHostController.swift; sourceTree = "<group>"; };
@@ -2544,6 +2552,7 @@
 		1759D919A153F023DE993B7F /* MultiviewZoomTransitionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiviewZoomTransitionTests.swift; sourceTree = "<group>"; };
 		175E298AC582C20244F3BBDC /* JellyfinServerDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellyfinServerDiscoveryTests.swift; sourceTree = "<group>"; };
 		17821D029EC7EA102611CED0 /* SeerrRequestEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequestEditSheet.swift; sourceTree = "<group>"; };
+		17C36FC7C331BCA622DBAD65 /* CloudArrivalRestorePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudArrivalRestorePolicy.swift; sourceTree = "<group>"; };
 		17D451EAF650651C11B8E9E9 /* TraktSyncPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraktSyncPlan.swift; sourceTree = "<group>"; };
 		186423150D25793975716259 /* LogExportPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogExportPage.swift; sourceTree = "<group>"; };
 		1866253FFA373B3CD3E2C1BE /* ParticipantPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantPlanner.swift; sourceTree = "<group>"; };
@@ -3267,6 +3276,7 @@
 		C4C48991F0DF61EC9BFAC208 /* ServerAddressEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAddressEntryView.swift; sourceTree = "<group>"; };
 		C4D870347A5A37B3477481FB /* LibrarySort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySort.swift; sourceTree = "<group>"; };
 		C4FB40C07FFEE9A5267F2892 /* SeerrSeasonStatusResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrSeasonStatusResolver.swift; sourceTree = "<group>"; };
+		C4FC7770D5AF26B3C2D87F1B /* BackgroundRefreshTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshTask.swift; sourceTree = "<group>"; };
 		C5B88E8CE251D5B15713F56E /* SeerrAuthResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrAuthResponse.swift; sourceTree = "<group>"; };
 		C631A6EC153641E1CAF0F5A3 /* FocusableCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableCard.swift; sourceTree = "<group>"; };
 		C64A4591C61D8E396F471CC3 /* FavoriteEpisodesRowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteEpisodesRowTests.swift; sourceTree = "<group>"; };
@@ -3592,6 +3602,8 @@
 				8CEBCF0AA238DAB1924A48D3 /* AppRouter.swift */,
 				67C2B7AED1B1E7DFFFFFC4AA /* AppState.swift */,
 				B9A555200A5ACA574AF2055E /* AppTab.swift */,
+				C4FC7770D5AF26B3C2D87F1B /* BackgroundRefreshTask.swift */,
+				17C36FC7C331BCA622DBAD65 /* CloudArrivalRestorePolicy.swift */,
 				B358C258474B9350188F12C6 /* DeepLinkRoute.swift */,
 				7B1E8FDE55D8F67C402AE221 /* DetailCover.swift */,
 				6A178C6A20B34B4FF1A96EBF /* DetailCoverStack.swift */,
@@ -3870,6 +3882,7 @@
 				DFB899A50BF5D75B69C96FD3 /* CertificateErrorClassificationTests.swift */,
 				8E9945D8F314B35B5FCF63E8 /* CertificateTrustPromptTests.swift */,
 				1ABB54BA5E94C8A309B6849A /* ChannelListRowTests.swift */,
+				13F9EEF413B9E29120B1755B /* CloudArrivalRestorePolicyTests.swift */,
 				28FA16DDAB1D7CA2F328E986 /* CloudSyncAccountChangeTests.swift */,
 				5B5F43FFB34DC3C26180691D /* CloudSyncAccountTransitionTests.swift */,
 				3CEF15F18D201FFB609B9CE8 /* CloudSyncForwardCompatTests.swift */,
@@ -5452,6 +5465,7 @@
 				C722DB2F670CB77987EF6D07 /* BackCommand.swift in Sources */,
 				E89123312513DC196EC3728A /* BackgroundMotionPolicy.swift in Sources */,
 				89DC817944593738F3CC4280 /* BackgroundPickerView.swift in Sources */,
+				26C1C57C6C11AF17FD1822F5 /* BackgroundRefreshTask.swift in Sources */,
 				6AEB7745C8421CCFBC543044 /* BackgroundRenderPrimitives.swift in Sources */,
 				BD531D44E2F2911E15E707C0 /* CachedDataView.swift in Sources */,
 				79F4DADC8DABCA22120E5D22 /* CatalogAllRequestsView.swift in Sources */,
@@ -5477,6 +5491,7 @@
 				BB77C47330C1661F0DFEE06E /* ChannelListViewModel.swift in Sources */,
 				B0C89B7491F08F30420E387D /* CheckmarkAnimation.swift in Sources */,
 				B7B684B0460FCC60C485E6BB /* CinemaNoirBackground.swift in Sources */,
+				B0126E30C2FC68A0F997AA20 /* CloudArrivalRestorePolicy.swift in Sources */,
 				A8F51363FA173FC200D066DE /* CloudSyncAccountTransition.swift in Sources */,
 				59E984261A6E38B836328D01 /* CloudSyncForwardCompat.swift in Sources */,
 				40592A3AA9EB12064DCF3CA1 /* CloudSyncMerge.swift in Sources */,
@@ -6076,6 +6091,7 @@
 				2E14F0A2C763C89F1B16BE02 /* BackCommand.swift in Sources */,
 				CB816A3368A0F3FECEF84C84 /* BackgroundMotionPolicy.swift in Sources */,
 				6812A22EB3301759F0492FD7 /* BackgroundPickerView.swift in Sources */,
+				0745349EF27C4110B784FFEE /* BackgroundRefreshTask.swift in Sources */,
 				FD4638EEB25B6217E7E4F67B /* BackgroundRenderPrimitives.swift in Sources */,
 				1A8B70B42B48EA401BE598D6 /* CachedDataView.swift in Sources */,
 				0C8B22D41A8B1CBF7DC4B9F9 /* CatalogAllRequestsView.swift in Sources */,
@@ -6101,6 +6117,7 @@
 				954E55D2407B707D81C662A5 /* ChannelListViewModel.swift in Sources */,
 				3982B4B94872D1437AF93345 /* CheckmarkAnimation.swift in Sources */,
 				89395DB0D253FFC529867451 /* CinemaNoirBackground.swift in Sources */,
+				D77A55E796D1CDFDD8734E34 /* CloudArrivalRestorePolicy.swift in Sources */,
 				FA54DA4986722E640420129E /* CloudSyncAccountTransition.swift in Sources */,
 				D927FB5F27338A1AB6ED3D1D /* CloudSyncForwardCompat.swift in Sources */,
 				D8B12B81603F12CAAC620B56 /* CloudSyncMerge.swift in Sources */,
@@ -6732,6 +6749,7 @@
 				70388189FBF4CEDCC82248D9 /* CertificateErrorClassificationTests.swift in Sources */,
 				11E852706E2B76F8A508A45E /* CertificateTrustPromptTests.swift in Sources */,
 				F68119DB72333EA512C8C7D6 /* ChannelListRowTests.swift in Sources */,
+				962BB4B442E4F165EA5D8317 /* CloudArrivalRestorePolicyTests.swift in Sources */,
 				3503E9CE420E81837D9C2F6B /* CloudSyncAccountChangeTests.swift in Sources */,
 				C8ADFD5571A3FAAF284BCF9F /* CloudSyncAccountTransitionTests.swift in Sources */,
 				F74FDF2DD75F0066DA3F366D /* CloudSyncForwardCompatTests.swift in Sources */,
@@ -7193,6 +7211,7 @@
 				89802903A96259A11AD50437 /* BackCommand.swift in Sources */,
 				C7484CC6ECEF7365D4765AE4 /* BackgroundMotionPolicy.swift in Sources */,
 				32FAF2DA394EF114FB09A5A6 /* BackgroundPickerView.swift in Sources */,
+				3C29E15EA56C5D9C0E5B22D3 /* BackgroundRefreshTask.swift in Sources */,
 				43234C0D9410353C5529D4A5 /* BackgroundRenderPrimitives.swift in Sources */,
 				38DC7D4163AD587CA8F36204 /* CachedDataView.swift in Sources */,
 				6E900352ED20781B5C81B573 /* CatalogAllRequestsView.swift in Sources */,
@@ -7218,6 +7237,7 @@
 				EA4C89CF4AEF3A5C3F72D24A /* ChannelListViewModel.swift in Sources */,
 				127D4243ADD0CA6DB4B02BC5 /* CheckmarkAnimation.swift in Sources */,
 				B39AD37C060367C4F3F02A6C /* CinemaNoirBackground.swift in Sources */,
+				A3FA3E5C1F80651322AA4329 /* CloudArrivalRestorePolicy.swift in Sources */,
 				B6FC6E81C75F41A8DBF094FE /* CloudSyncAccountTransition.swift in Sources */,
 				177AEDCEA5A1F1EF9251FA97 /* CloudSyncForwardCompat.swift in Sources */,
 				8B1BC7345386B60F07AA5191 /* CloudSyncMerge.swift in Sources */,

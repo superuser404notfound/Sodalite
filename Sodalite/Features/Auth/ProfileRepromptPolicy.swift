@@ -40,4 +40,29 @@ enum ProfileRepromptPolicy {
     ) -> Bool {
         interval.threshold != nil && launchBehavior == .showPicker && isAuthenticated && rememberedCount > 1
     }
+
+    /// What a due reprompt does about the surfaces that are open when it comes due (SHELL-202).
+    enum CoverPlan: Equatable {
+        /// Something that cannot follow a background trip (What's New) or an earlier reprompt owns the host.
+        case skip
+        case armNow
+        /// Close these first, wait for the settle, then arm. Never skip: a deep-link cover or the music
+        /// player left open would hand the next viewer this profile's library behind the picker.
+        case closeThenArm(closePlayer: Bool, closeRouterCovers: Bool)
+    }
+
+    static func coverPlan(
+        playerUp: Bool,
+        panelUp: Bool,
+        deepLinkCoverUp: Bool,
+        musicPlayerUp: Bool,
+        whatsNewUp: Bool,
+        profileCoverUp: Bool,
+        awaitsDismissal: Bool
+    ) -> CoverPlan {
+        guard !whatsNewUp, !profileCoverUp, !awaitsDismissal else { return .skip }
+        let routerCovers = deepLinkCoverUp || musicPlayerUp
+        guard playerUp || panelUp || routerCovers else { return .armNow }
+        return .closeThenArm(closePlayer: playerUp, closeRouterCovers: routerCovers)
+    }
 }

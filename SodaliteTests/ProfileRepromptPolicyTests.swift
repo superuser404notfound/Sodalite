@@ -60,3 +60,43 @@ struct ProfileRepromptPolicyTests {
             interval: .immediately, launchBehavior: .showPicker, isAuthenticated: true, rememberedCount: 1))
     }
 }
+
+/// SHELL-202: a router cover left open must be closed for the reprompt, never skip it.
+struct ProfileRepromptCoverPlanTests {
+    private func plan(
+        playerUp: Bool = false, panelUp: Bool = false, deepLinkCoverUp: Bool = false,
+        musicPlayerUp: Bool = false, whatsNewUp: Bool = false, profileCoverUp: Bool = false,
+        awaitsDismissal: Bool = false
+    ) -> ProfileRepromptPolicy.CoverPlan {
+        ProfileRepromptPolicy.coverPlan(
+            playerUp: playerUp, panelUp: panelUp, deepLinkCoverUp: deepLinkCoverUp,
+            musicPlayerUp: musicPlayerUp, whatsNewUp: whatsNewUp, profileCoverUp: profileCoverUp,
+            awaitsDismissal: awaitsDismissal)
+    }
+
+    @Test func nothingOpenArmsAtOnce() { #expect(plan() == .armNow) }
+
+    @Test func deepLinkCoverClosesThenArms() {
+        #expect(plan(deepLinkCoverUp: true)
+                == .closeThenArm(closePlayer: false, closeRouterCovers: true))
+    }
+
+    @Test func musicPlayerClosesThenArms() {
+        #expect(plan(musicPlayerUp: true)
+                == .closeThenArm(closePlayer: false, closeRouterCovers: true))
+    }
+
+    @Test func playerAndDeepLinkCoverCloseTogether() {
+        #expect(plan(playerUp: true, deepLinkCoverUp: true)
+                == .closeThenArm(closePlayer: true, closeRouterCovers: true))
+    }
+
+    @Test func panelAloneKeepsItsShortSettle() {
+        #expect(plan(panelUp: true)
+                == .closeThenArm(closePlayer: false, closeRouterCovers: false))
+    }
+
+    @Test func whatsNewStillSkips() { #expect(plan(deepLinkCoverUp: true, whatsNewUp: true) == .skip) }
+    @Test func profileCoverStillSkips() { #expect(plan(deepLinkCoverUp: true, profileCoverUp: true) == .skip) }
+    @Test func pendingDismissalSkips() { #expect(plan(deepLinkCoverUp: true, awaitsDismissal: true) == .skip) }
+}

@@ -87,11 +87,24 @@ private struct MyRequestsPresentation: ViewModifier {
     let profileLocked: Bool
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    #if os(macOS)
     @Environment(\.scenePhase) private var scenePhase
+    #endif
+    /// Off UIApplication's notifications, not scenePhase: the player over the router makes this view
+    /// disappear, and a disappeared view sees no phase change (CAT-210, same cause as Sodalite#237).
+    @State private var isForeground = MyRequestsPresentation.appIsActiveNow()
     @State private var flow = MyRequestsPanelFlow()
     @State private var retryPending = false
 
     private var isPresented: Bool { appState.isMyRequestsPanelPresented }
+
+    private static func appIsActiveNow() -> Bool {
+        #if os(macOS)
+        true
+        #else
+        UIApplication.shared.applicationState == .active
+        #endif
+    }
 
     private var presentedBinding: Binding<Bool> {
         Binding(
@@ -107,11 +120,11 @@ private struct MyRequestsPresentation: ViewModifier {
             .task(id: MyRequestsTickKey(
                 scope: dependencies.myRequestsScope,
                 seerrUserID: dependencies.myRequestsSeerrUserID,
-                active: scenePhase == .active
+                active: isForeground
             )) {
                 watcher.reloadForActiveProfile()
                 await dependencies.syncAppIconBadge()
-                guard scenePhase == .active, dependencies.myRequestsSeerrUserID != nil else { return }
+                guard isForeground, dependencies.myRequestsSeerrUserID != nil else { return }
                 while !Task.isCancelled {
                     await watcher.refresh()
                     evaluate()
@@ -139,13 +152,23 @@ private struct MyRequestsPresentation: ViewModifier {
             .onChange(of: profileLocked) { _, locked in
                 if locked { perform(flow.closeUnread(panelPresented: isPresented)) } else { evaluate() }
             }
+            #if os(macOS)
             .onChange(of: scenePhase) { _, phase in
-                guard phase == .background else { return }
-                perform(flow.closeUnread(panelPresented: isPresented))
-                #if !os(macOS)
-                if watcher.isEnabled { MyRequestsBackgroundRefresh.schedule() }
-                #endif
+                isForeground = phase == .active
+                if phase == .background { perform(flow.closeUnread(panelPresented: isPresented)) }
             }
+            #else
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                isForeground = false
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                isForeground = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                perform(flow.closeUnread(panelPresented: isPresented))
+                if watcher.isEnabled { MyRequestsBackgroundRefresh.schedule() }
+            }
+            #endif
             .menuPresentation(isPresented: presentedBinding, onDismiss: {
                 let dismissal = flow.panelDidDismiss()
                 if dismissal.markSeen { clear() }
