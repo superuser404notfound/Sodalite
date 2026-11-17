@@ -119,3 +119,37 @@ struct LogFileSinkRotationTests {
         #expect(file.length == files.size(files.live))
     }
 }
+
+/// Audit PTD-207: the sink keeps one handle open and its queue is bounded.
+struct LogFileSinkBacklogTests {
+
+    @Test("a batch past the limit is refused and counted, then reported once")
+    func dropsAndCounts() {
+        let backlog = FileSinkBacklog(limit: 10)
+        #expect(backlog.admit(6))
+        #expect(!backlog.admit(6))
+        #expect(backlog.takeDropped() == 6)
+        #expect(backlog.takeDropped() == 0)
+        backlog.finish(6)
+        #expect(backlog.admit(6))
+    }
+
+    @Test("lines written one after another through the kept handle all land, and rotation still works")
+    func keptHandleWrites() throws {
+        let folder = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sink-handle-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let live = folder.appendingPathComponent("l.txt")
+        let rotated = folder.appendingPathComponent("l.1.txt")
+        FileManager.default.createFile(atPath: live.path, contents: nil)
+
+        for index in 0 ..< 20 {
+            LogTap.append("line \(index)", to: live, rotatingTo: rotated, segmentBytes: 60)
+        }
+        let all = ((try? String(contentsOf: rotated, encoding: .utf8)) ?? "")
+            + ((try? String(contentsOf: live, encoding: .utf8)) ?? "")
+        #expect(all.contains("line 19\n"))
+        #expect(FileManager.default.fileExists(atPath: rotated.path))
+    }
+}
