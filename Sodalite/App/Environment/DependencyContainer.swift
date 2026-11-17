@@ -148,6 +148,9 @@ final class DependencyContainer {
     var isOnVerifiedHomeNetwork = false
     var activeSeerrRoute: ServerRoute?
     var routeResolveTask: Task<Void, Never>?
+    /// Moves whenever the live client changes session, so a route pass that started for the
+    /// previous one writes nothing (audit SHELL-201).
+    var routeGeneration: UInt64 = 0
     /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
     var transportRecheckTask: Task<Void, Never>?
     var lastTransportRecheck: ContinuousClock.Instant?
@@ -492,7 +495,7 @@ final class DependencyContainer {
         }
         serverActivation.stamp(serverID: server.id)
         refreshSessionRegistry()
-        scheduleRouteResolve()
+        liveRouteDidChange()
         return true
     }
 
@@ -546,7 +549,7 @@ final class DependencyContainer {
         serverActivation.stamp(serverID: server.id)
         refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     // MARK: - Known Servers
@@ -624,7 +627,7 @@ final class DependencyContainer {
         appState?.updateActiveServer(updated)
         if activeServer?.id == serverID {
             jellyfinClient.baseURL = preferredURL(for: updated)
-            scheduleRouteResolve()
+            liveRouteDidChange()
         }
     }
 
@@ -843,7 +846,7 @@ final class DependencyContainer {
 
         serverActivation.stamp(serverID: serverID)
         refreshSessionRegistry()
-        scheduleRouteResolve()
+        liveRouteDidChange()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
         Task { @MainActor in
@@ -905,6 +908,7 @@ final class DependencyContainer {
                     jellyfinClient.baseURL = preferredURL(for: successor)
                     jellyfinClient.accessToken = nil
                     SharedSessionMirror.clear()
+                    liveRouteDidChange()
                 }
             } else {
                 sessionNote("removed the last server; no session left on this device.")
@@ -912,6 +916,7 @@ final class DependencyContainer {
                 jellyfinClient.baseURL = nil
                 jellyfinClient.accessToken = nil
                 SharedSessionMirror.clear()
+                liveRouteDidChange()
             }
         }
 
@@ -1098,7 +1103,7 @@ final class DependencyContainer {
 
         refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     /// Re-stamps the server's own name for a (server, user) onto both stores that cache it: the global activeUserName entry and the server's remembered profile. Called once /Users/Me has spoken, so a rename (or a name inherited from another server by an install predating the per-server name resolution) heals instead of surviving every launch.
@@ -1317,6 +1322,7 @@ final class DependencyContainer {
 
         jellyfinClient.baseURL = nil
         jellyfinClient.accessToken = nil
+        liveRouteDidChange()
 
         SharedSessionMirror.clearAll()
 

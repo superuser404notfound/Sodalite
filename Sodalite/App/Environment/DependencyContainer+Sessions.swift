@@ -30,7 +30,7 @@ extension DependencyContainer {
 
     /// Points each secondary at whichever of its addresses answers, as `resolveJellyfinRoute` does
     /// for the active one.
-    func resolveSecondaryRoutes() async {
+    func resolveSecondaryRoutes(generation: UInt64) async {
         for session in sessionRegistry.participants where !session.isActive {
             guard let server = session.server else { continue }
             guard let resolved = await ServerRouteResolver.resolve(
@@ -39,6 +39,7 @@ extension DependencyContainer {
                 lastKnown: serverRouteStore.lastRoute(serverID: server.id),
                 probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
             ) else { continue }
+            guard isCurrentRoutePass(generation) else { return }
             serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
             sessionRegistry.updateRoute(resolved.url, for: session)
             await session.loadUserIfNeeded()

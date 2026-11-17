@@ -5,18 +5,40 @@ import Foundation
 /// extension then probes and corrects asynchronously. A route change only
 /// affects new requests; active playback keeps its absolute stream URL.
 extension DependencyContainer {
-    /// Debounce/cancel seam for the iOS path-change and foreground triggers.
-    func scheduleRouteResolve() {
+    /// The one owner of a route re-measure (audit SHELL-R202). Every trigger, a launch, a switch, a
+    /// path change, a failed request, the recheck watch and Try Again, lands here, and a newer pass
+    /// cancels the one still running, so two passes never race each other's address and verdict
+    /// writes. Returns the pass so a caller that needs the answer can await it.
+    @discardableResult
+    func scheduleRouteResolve() -> Task<Void, Never> {
         routeResolveTask?.cancel()
-        routeResolveTask = Task { [weak self] in
-            await self?.resolveActiveRoutes()
+        let pass = Task { [weak self] in
+            guard let self else { return }
+            await self.resolveActiveRoutes()
         }
+        routeResolveTask = pass
+        return pass
+    }
+
+    /// The live client now belongs to another session (or to none), or its server's addresses were
+    /// edited. A pass that started before must not write its address, verdict or Top Shelf mirror
+    /// into what the client is now (audit SHELL-201), so the generation moves before the new pass.
+    func liveRouteDidChange() {
+        routeGeneration &+= 1
+        scheduleRouteResolve()
     }
 
     func resolveActiveRoutes() async {
-        await resolveJellyfinRoute()
-        await resolveSeerrRoute()
-        await resolveSecondaryRoutes()
+        let generation = routeGeneration
+        await resolveJellyfinRoute(generation: generation)
+        await resolveSeerrRoute(generation: generation)
+        await resolveSecondaryRoutes(generation: generation)
+    }
+
+    /// Still the pass the current session asked for: not replaced by a newer pass, and no session
+    /// change since it started.
+    func isCurrentRoutePass(_ generation: UInt64) -> Bool {
+        !Task.isCancelled && generation == routeGeneration
     }
 
     /// A client of its own for signing in to `server`: no token, and an address the live session
@@ -61,7 +83,7 @@ extension DependencyContainer {
         return resolved.url
     }
 
-    private func resolveJellyfinRoute() async {
+    private func resolveJellyfinRoute(generation: UInt64) async {
         guard let server = activeServer else {
             activeJellyfinRoute = nil
             isOnVerifiedHomeNetwork = false
@@ -76,7 +98,7 @@ extension DependencyContainer {
             lastKnown: serverRouteStore.lastRoute(serverID: server.id),
             probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
         ) else { return }
-        guard !Task.isCancelled else { return }
+        guard isCurrentRoutePass(generation) else { return }
 
         // One failed probe is a suspicion; two are a verdict. The probe's two second cap is tight
         // on a slow cellular link, and being wrong is no longer free: a failure now paints a screen
@@ -85,7 +107,7 @@ extension DependencyContainer {
         var isReachable = resolved.isReachable
         if !isReachable {
             isReachable = await jellyfinProbe(resolved.url, server.id)
-            guard !Task.isCancelled else { return }
+            guard isCurrentRoutePass(generation) else { return }
         }
         publishReachability(url: resolved.url, isReachable: isReachable, server: server)
         isOnVerifiedHomeNetwork = resolved.route == .internal && isReachable
@@ -99,7 +121,7 @@ extension DependencyContainer {
         NotificationCenter.default.post(name: .serverRouteDidChange, object: nil)
     }
 
-    private func resolveSeerrRoute() async {
+    private func resolveSeerrRoute(generation: UInt64) async {
         guard let server = appState?.activeSeerrServer, seerrClient.sessionCookie != nil else {
             activeSeerrRoute = nil
             return
@@ -115,7 +137,7 @@ extension DependencyContainer {
             lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)),
             probe: { await ServerProbe.seerr($0) }
         ) else { return }
-        guard !Task.isCancelled else { return }
+        guard isCurrentRoutePass(generation), appState?.activeSeerrServer?.id == server.id else { return }
 
         serverRouteStore.setLastRoute(resolved.route, serverID: seerrRouteKey(server.id))
         activeSeerrRoute = resolved.route
@@ -190,8 +212,9 @@ extension DependencyContainer {
         }
         lastTransportRecheck = .now
         LogTap.shared.note("[network] a request went unserved, re-measuring")
+        let pass = scheduleRouteResolve()
         transportRecheckTask = Task { [weak self] in
-            await self?.resolveActiveRoutes()
+            await pass.value
             self?.transportRecheckTask = nil
         }
     }
@@ -211,7 +234,7 @@ extension DependencyContainer {
     /// the server is still down costs one failed refresh round and no state: an identity refresh
     /// that cannot reach the server now keeps what it had.
     func retryAfterFailure() async {
-        await resolveActiveRoutes()
+        await scheduleRouteResolve().value
         appState?.requestContentReload += 1
     }
 
@@ -250,7 +273,7 @@ extension DependencyContainer {
                 } else if attempt == ReachabilityRecheck.attemptsBeforeCeiling {
                     LogTap.shared.note("[network] recheck settling to one attempt every \(delay), quietly")
                 }
-                await self.resolveActiveRoutes()
+                await self.scheduleRouteResolve().value
             }
             LogTap.shared.note("[network] recheck watch stopped")
             self?.reachabilityWatchTask = nil

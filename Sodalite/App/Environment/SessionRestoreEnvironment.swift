@@ -68,5 +68,6 @@ extension DependencyContainer: SessionRestoreEnvironment {
     }
     func setClientBaseURL(_ url: URL) {
         jellyfinClient.baseURL = url
+        liveRouteDidChange()
     }
 }
