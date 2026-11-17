@@ -365,29 +365,17 @@ struct MovieDetailView: View {
                         title: vm.item.name
                     ),
                     onConfirm: { request in
-                        do {
+                        await DetailDeletion.run(
+                            serverID: appState.activeServer?.id,
+                            cascadedToArrStack: request.cascadeToArrStack,
+                            popsWhenRemoved: true,
+                            pop: popDetail
+                        ) {
                             try await dependencies.mediaDeletionService.deleteMovie(
                                 itemID: vm.item.id,
                                 tmdbID: vm.item.tmdbID,
                                 cascadeToArrStack: request.cascadeToArrStack
                             )
-                            // Drop the on-disk filter cache so Library/Home rows don't keep showing the deleted movie until natural eviction. Every profile on this server, not just the active one: the file is gone for all of them.
-                            if let serverID = appState.activeServer?.id {
-                                FilterCache.shared.evict(serverID: serverID)
-                            }
-                            NotificationCenter.default.post(name: .homeItemDidDelete, object: nil)
-                            // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
-                            if request.cascadeToArrStack {
-                                NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
-                            }
-                            // Pop after the sheet's success-toast hold.
-                            Task { @MainActor in
-                                try? await Task.sleep(for: .milliseconds(1100))
-                                popDetail()
-                            }
-                            return .success
-                        } catch {
-                            return .from(error)
                         }
                     }
                 )

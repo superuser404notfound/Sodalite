@@ -567,64 +567,54 @@ struct SeriesDetailView: View {
             }
         }
         .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain) {
-            if let vm = viewModel {
-                let popDetail = dismiss
-                MediaDeletionSheet(
-                    mode: .series(
-                        itemID: vm.item.id,
-                        tmdbID: vm.item.tmdbID,
-                        title: vm.item.name,
-                        seasons: deletionSeasonOptions(from: vm.seasons)
-                    ),
-                    onConfirm: { request in
-                        do {
-                            if request.deleteEntireSeries {
-                                try await dependencies.mediaDeletionService.deleteSeries(
-                                    itemID: vm.item.id,
-                                    tmdbID: vm.item.tmdbID,
-                                    cascadeToArrStack: request.cascadeToArrStack
-                                )
-                            } else {
-                                try await dependencies.mediaDeletionService.deleteSeasons(
-                                    seasonItemIDs: request.seasonItemIDs,
-                                    cascadeToArrStack: false
-                                )
-                            }
-                            // Drop the on-disk filter cache so Library/Home rows don't keep showing deleted items until natural eviction. Every profile on this server, not just the active one: the file is gone for all of them.
-                            if let serverID = appState.activeServer?.id {
-                                FilterCache.shared.evict(serverID: serverID)
-                            }
-                            NotificationCenter.default.post(name: .homeItemDidDelete, object: nil)
-                            // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
-                            if request.cascadeToArrStack {
-                                NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
-                            }
-                            // Only pop the detail on whole-series delete; seasons-only leaves something worth viewing.
-                            if request.deleteEntireSeries {
-                                Task { @MainActor in
-                                    try? await Task.sleep(for: .milliseconds(1100))
-                                    popDetail()
-                                }
-                            } else {
-                                // Seasons-only: refresh so deleted season tabs drop out instead of lingering until reopen.
-                                await vm.refreshSeasons()
-                                // The open episode panel is the view's own state, decoupled from the
-                                // VM's next-up tracking refreshSeasons() just reconciled: if its
-                                // season just went, Play would otherwise still read from a deleted
-                                // episode (Audit 2026-09-25 BROWSE-7).
-                                if let seasonID = selectedEpisode?.seasonId,
-                                   !vm.seasons.contains(where: { $0.id == seasonID }) {
-                                    selectedEpisode = nil
-                                }
-                            }
-                            return .success
-                        } catch {
-                            return .from(error)
+            if let vm = viewModel { deletionSheet(vm: vm) }
+        }
+    }
+
+    private func deletionSheet(vm: DetailViewModel) -> some View {
+        let popDetail = dismiss
+        return MediaDeletionSheet(
+            mode: .series(
+                itemID: vm.item.id,
+                tmdbID: vm.item.tmdbID,
+                title: vm.item.name,
+                seasons: deletionSeasonOptions(from: vm.seasons)
+            ),
+            onConfirm: { request in
+                await DetailDeletion.run(
+                    serverID: appState.activeServer?.id,
+                    cascadedToArrStack: request.cascadeToArrStack && request.deleteEntireSeries,
+                    popsWhenRemoved: request.deleteEntireSeries,
+                    assumesPartialRemoval: !request.deleteEntireSeries,
+                    pop: popDetail,
+                    refreshAfterRemoval: {
+                        // Seasons-only: refresh so deleted season tabs drop out instead of lingering until reopen.
+                        await vm.refreshSeasons()
+                        // The open episode panel is the view's own state, decoupled from the
+                        // VM's next-up tracking refreshSeasons() just reconciled: if its
+                        // season just went, Play would otherwise still read from a deleted
+                        // episode (Audit 2026-09-25 BROWSE-7).
+                        if let seasonID = selectedEpisode?.seasonId,
+                           !vm.seasons.contains(where: { $0.id == seasonID }) {
+                            selectedEpisode = nil
                         }
                     }
-                )
+                ) {
+                    if request.deleteEntireSeries {
+                        try await dependencies.mediaDeletionService.deleteSeries(
+                            itemID: vm.item.id,
+                            tmdbID: vm.item.tmdbID,
+                            cascadeToArrStack: request.cascadeToArrStack
+                        )
+                    } else {
+                        try await dependencies.mediaDeletionService.deleteSeasons(
+                            seasonItemIDs: request.seasonItemIDs,
+                            cascadeToArrStack: false
+                        )
+                    }
+                }
             }
-        }
+        )
     }
 
     private func updateBackdropURL() {
