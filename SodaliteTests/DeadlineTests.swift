@@ -60,7 +60,7 @@ struct DeadlineTests {
     }
 }
 
-private final class Flag: @unchecked Sendable {
+nonisolated private final class Flag: @unchecked Sendable {
     private let lock = NSLock()
     private var value = false
     func set() { lock.withLock { value = true } }

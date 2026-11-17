@@ -140,7 +140,7 @@ final class FakeUserDataService: UserItemDataServing, @unchecked Sendable {
     }
 }
 
-private final class NotificationCounter: @unchecked Sendable {
+nonisolated private final class NotificationCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var value = 0
     func bump() { lock.withLock { value += 1 } }
