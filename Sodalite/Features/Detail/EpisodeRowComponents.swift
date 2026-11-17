@@ -166,8 +166,8 @@ struct EpisodeLandscapeCard: View {
     /// Same reason as isPlayed; also the only feedback the context-menu favorite toggle has.
     var isFavorite: Bool = false
 
-    /// The viewer's own mark-watched from this session, which is a different fact from `isPlayed`
-    /// and the only one that may hide the resume indicator (`DetailViewModel.wasMarkedPlayedInSession`).
+    /// The viewer's own watched or unwatched mark from this session, which is a different fact from
+    /// `isPlayed` and the only one that may hide the resume indicator (`DetailViewModel.wasMarkedPlayedInSession`).
     var justMarkedPlayed: Bool = false
 
     @Environment(\.appearanceTheme) private var appearanceTheme

@@ -5,8 +5,8 @@ struct MovieDetailView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.serverSession) private var serverSessionOverride
     /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
-    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
-    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -16,6 +16,7 @@ struct MovieDetailView: View {
     @State private var navigateToPerson: PersonRoute?
     /// Catalog similar row target; the series page has carried the same destination since the Seerr request button.
     @State private var navigateToSeerrRequest: SeerrMedia?
+    @State private var popAfterSheetDismiss = false
     @State private var showPlayer = false
     @State private var playFromBeginning = false
     /// Sodalite#81: the item whose download rung is being asked for.
@@ -135,8 +136,10 @@ struct MovieDetailView: View {
             if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
-                    item: showPlayer ? (viewModel?.item ?? item) : nil,
-                    startFromBeginning: playFromBeginning,
+                    item: showPlayer ? (viewModel.map { $0.resolvedForPlayback($0.item) } ?? item) : nil,
+                    // A session mark means the server dropped the position; a download's own progress
+                    // does not know that (audit review R-DET-2).
+                    startFromBeginning: playFromBeginning || (viewModel?.wasMarkedPlayedInSession(viewModel?.item ?? item) ?? false),
                     playbackService: session.playbackService,
                     itemService: session.itemService,
                     userID: userID,
@@ -256,14 +259,9 @@ struct MovieDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: .playbackProgressDidChange)) { note in
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            let seriesID = note.userInfo?[PlaybackProgressKey.seriesID] as? String
             Task { @MainActor in
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
-                await viewModel?.refreshResumePosition()
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
+                await viewModel?.handlePlaybackStop(itemID: itemID, ticks: ticks, seriesID: seriesID)
             }
         }
         // AppRouter bumps this on every deep-link arrival so a TopShelf tap on a different item tears down the active player session and surfaces the new detail sheet cleanly.
@@ -355,7 +353,12 @@ struct MovieDetailView: View {
                 )
             }
         }
-        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain) {
+        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain, onDismiss: {
+            if popAfterSheetDismiss {
+                popAfterSheetDismiss = false
+                dismiss()
+            }
+        }) {
             if let vm = viewModel {
                 let popDetail = dismiss
                 MediaDeletionSheet(
@@ -365,30 +368,21 @@ struct MovieDetailView: View {
                         title: vm.item.name
                     ),
                     onConfirm: { request in
-                        do {
+                        let outcome = await DetailDeletion.run(
+                            serverID: appState.activeServer?.id,
+                            cascadedToArrStack: request.cascadeToArrStack,
+                            popsWhenRemoved: true,
+                            pop: { popDetail() }
+                        ) {
                             try await dependencies.mediaDeletionService.deleteMovie(
                                 itemID: vm.item.id,
                                 tmdbID: vm.item.tmdbID,
                                 cascadeToArrStack: request.cascadeToArrStack
                             )
-                            // Drop the on-disk filter cache so Library/Home rows don't keep showing the deleted movie until natural eviction. Every profile on this server, not just the active one: the file is gone for all of them.
-                            if let serverID = appState.activeServer?.id {
-                                FilterCache.shared.evict(serverID: serverID)
-                            }
-                            NotificationCenter.default.post(name: .homeItemDidDelete, object: nil)
-                            // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
-                            if request.cascadeToArrStack {
-                                NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
-                            }
-                            // Pop after the sheet's success-toast hold.
-                            Task { @MainActor in
-                                try? await Task.sleep(for: .milliseconds(1100))
-                                popDetail()
-                            }
-                            return .success
-                        } catch {
-                            return .from(error)
                         }
+                        // Partial: the item is gone, the warning stays up, the page follows the sheet out.
+                        if case .partialSuccess = outcome { popAfterSheetDismiss = true }
+                        return outcome
                     }
                 )
             }
@@ -896,19 +890,18 @@ struct MovieDetailView: View {
     // MARK: - Helpers
 
     private func hasProgress(vm: DetailViewModel) -> Bool {
-        if let ticks = vm.item.userData?.playbackPositionTicks, ticks > 0 { return true }
-        return false
+        vm.effectiveState(of: vm.item).positionTicks > 0
     }
 
     /// Sodalite#146: the label is the state. A finished title used to read "Play", which is true and
     /// says nothing; naming the replay is what tells the viewer they have seen this without their
     /// having to find the watched check in the row below.
     private func playButtonTitle(vm: DetailViewModel) -> LocalizedStringKey {
-        switch PlayActionState.resolve(positionTicks: vm.item.userData?.playbackPositionTicks,
-                                       isPlayed: vm.isPlayed) {
-        case .fresh: "detail.play"
-        case .resume: "detail.resume"
-        case .again: "detail.playAgain"
+        let state = vm.effectiveState(of: vm.item)
+        switch PlayActionState.resolve(positionTicks: state.positionTicks, isPlayed: state.isPlayed) {
+        case .fresh: return "detail.play"
+        case .resume: return "detail.resume"
+        case .again: return "detail.playAgain"
         }
     }
 
@@ -917,13 +910,14 @@ struct MovieDetailView: View {
     /// Sodalite#99, so a timestamp here was the one place answering a different question. No "left"
     /// wrapper for the same reason the cards carry none: the bar says what the number counts.
     private func resumeRemaining(vm: DetailViewModel) -> String? {
-        vm.item.resumeRemainingTicks?.ticksToDurationDisplay
+        guard vm.effectiveState(of: vm.item).positionTicks > 0 else { return nil }
+        return vm.item.resumeRemainingTicks?.ticksToDurationDisplay
     }
 
     /// 0…1 progress for the play button's overlay; nil when fresh or no run-time metadata.
     private func playProgressFraction(vm: DetailViewModel) -> Double? {
-        guard let ticks = vm.item.userData?.playbackPositionTicks, ticks > 0,
-              let total = vm.item.runTimeTicks, total > 0 else {
+        let ticks = vm.effectiveState(of: vm.item).positionTicks
+        guard ticks > 0, let total = vm.item.runTimeTicks, total > 0 else {
             return nil
         }
         return min(1.0, max(0.0, Double(ticks) / Double(total)))

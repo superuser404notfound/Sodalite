@@ -10,6 +10,14 @@ final class DetailViewModel {
     var rating: Double?
     /// A rating write is in flight, so a detail refetch landing meanwhile must not put the old value back.
     private var isWritingRating = false
+    /// Bumped by every favourite / watched write. A detail response that started before the bump
+    /// describes the old state and must not overwrite the optimistic value (audit DET-207).
+    private var favoriteWrites = 0
+    private var playedWrites = 0
+    private var isWritingFavorite = false
+    private var queuedFavorite: Bool?
+    private var queuedPlayed: Bool?
+    private var isWritingPlayed = false
     /// Played overrides keyed by item/episode/season ID; live-updates the watched badge without mutating the immutable JellyfinItem (same "pass state to the card" pattern as isFocused/isCurrent).
     var playedOverrides: [String: Bool] = [:]
     /// Favorite overrides keyed by episode ID; same reason as playedOverrides, the heart badge has to update without mutating the item.
@@ -151,6 +159,8 @@ final class DetailViewModel {
 
         let itemID = item.id
         let itemType = item.type
+        let favoriteWritesAtStart = favoriteWrites
+        let playedWritesAtStart = playedWrites
 
         // Avoid `async let`: @MainActor service calls crossing back into this non-isolated @Observable crash the task-local allocator with swift_task_dealloc_specific SIGABRT "freed pointer was not the last allocation". Task{}.value keeps each call on its own allocator while staying parallel.
         let detailTask = Task { try? await itemService.getItemDetail(userID: userID, itemID: itemID) }
@@ -210,9 +220,7 @@ final class DetailViewModel {
 
         if let detail = await detailTask.value {
             item = detail
-            isFavorite = detail.userData?.isFavorite ?? false
-            isPlayed = detail.userData?.played ?? false
-            if !isWritingRating { rating = detail.userData?.rating }
+            applyFetchedUserState(detail, favoriteWrites: favoriteWritesAtStart, playedWrites: playedWritesAtStart)
             if (detail.localTrailerCount ?? 0) > 0 {
                 loadLocalTrailers(for: itemID)
             }
@@ -337,9 +345,13 @@ final class DetailViewModel {
                 guard let self,
                       let nextEp = await task.value?.items.first else { return }
                 self.nextUpEpisode = nextEp
-                if let seasonID = nextEp.seasonId {
+                // A season the viewer already picked while Next Up was out stays (audit DET-204).
+                // Play still targets Next Up either way, so its id and PlaybackInfo are set regardless.
+                if let seasonID = nextEp.seasonId, self.selectedSeasonID == nil {
                     self.selectedSeasonID = seasonID
                     await self.loadEpisodes(seasonID: seasonID)
+                }
+                if nextEp.seasonId != nil {
                     self.currentEpisodeID = nextEp.id
                     self.prefetchPlaybackInfo(for: nextEp.id)
                 }
@@ -424,19 +436,35 @@ final class DetailViewModel {
                 }
                 if let seasonEpisodes {
                     episodesCache[seasonEpisodes.seasonID] = seasonEpisodes.items
-                    episodes = seasonEpisodes.items
+                    // The viewer may have picked another season while the two requests ran (audit DET-203).
+                    if selectedSeasonID == seasonEpisodes.seasonID {
+                        episodes = seasonEpisodes.items
+                    }
                 }
             }
         default:
+            let favoriteWritesAtStart = favoriteWrites
+            let playedWritesAtStart = playedWrites
             if let detail = try? await itemService.getItemDetail(userID: userID, itemID: item.id) {
                 await MainActor.run {
                     item = detail
-                    isFavorite = detail.userData?.isFavorite ?? false
-                    isPlayed = detail.userData?.played ?? false
-                    if !isWritingRating { rating = detail.userData?.rating }
+                    applyFetchedUserState(detail, favoriteWrites: favoriteWritesAtStart, playedWrites: playedWritesAtStart)
                 }
             }
         }
+    }
+
+    /// Takes favourite, watched and rating from a fetched detail unless a write of ours overtook the
+    /// request. Fresh watched data also retires the mark this page made on the item itself.
+    private func applyFetchedUserState(_ detail: JellyfinItem, favoriteWrites favoriteStamp: Int, playedWrites playedStamp: Int) {
+        if !isWritingFavorite, favoriteStamp == favoriteWrites {
+            isFavorite = detail.userData?.isFavorite ?? false
+        }
+        if !isWritingPlayed, playedStamp == playedWrites {
+            isPlayed = detail.userData?.played ?? false
+            playedOverrides[detail.id] = nil
+        }
+        if !isWritingRating { rating = detail.userData?.rating }
     }
 
     /// The episode after `episode` in disc order, crossing into the next season (Sodalite#230). Reads
@@ -464,6 +492,10 @@ final class DetailViewModel {
             candidate.setResumePosition(ticks)
         }
         patch(&item)
+        if item.id == itemID { isPlayed = item.userData?.played ?? isPlayed }
+        // Playback writes the real state, so a mark made on this page no longer describes it
+        // (audit DET-206).
+        playedOverrides[itemID] = nil
         if var next = nextUpEpisode { patch(&next); nextUpEpisode = next }
         for index in episodes.indices { patch(&episodes[index]) }
         for index in collectionItems.indices { patch(&collectionItems[index]) }
@@ -475,6 +507,37 @@ final class DetailViewModel {
             patch(&cached)
             episodeDetailCache[itemID] = cached
         }
+    }
+
+    /// A playback stop for `itemID` arrived (`.playbackProgressDidChange`): patch from the payload,
+    /// reconcile with the server, patch again so a stale cached refetch cannot put the old position
+    /// back (issue #24). Every detail page goes through this (audit DET-R204). `beforeRefresh` is
+    /// the series page's advance past a finished episode; `patchView` re-applies the position to
+    /// copies the page holds itself.
+    @MainActor
+    func handlePlaybackStop<T>(
+        itemID: String?, ticks: Int64?, seriesID: String? = nil,
+        patchView: () -> Void = {},
+        beforeRefresh: () async -> T
+    ) async -> T {
+        // A stop for another show says nothing about this page.
+        if let seriesID, item.type == .series, seriesID != item.id {
+            return await beforeRefresh()
+        }
+        func patch() {
+            if let itemID, let ticks { applyPlaybackPosition(itemID: itemID, ticks: ticks) }
+            patchView()
+        }
+        patch()
+        let result = await beforeRefresh()
+        await refreshResumePosition()
+        patch()
+        return result
+    }
+
+    @MainActor
+    func handlePlaybackStop(itemID: String?, ticks: Int64?, seriesID: String? = nil) async {
+        await handlePlaybackStop(itemID: itemID, ticks: ticks, seriesID: seriesID, beforeRefresh: {})
     }
 
     /// A *arr upgrade rewrote the file behind an episode: Jellyfin ids items by path, so the library holds
@@ -490,6 +553,7 @@ final class DetailViewModel {
         swap(&item)
         if var next = nextUpEpisode { swap(&next); nextUpEpisode = next }
         for index in episodes.indices { swap(&episodes[index]) }
+        for index in collectionItems.indices { swap(&collectionItems[index]) }
         for (key, var list) in episodesCache {
             for index in list.indices { swap(&list[index]) }
             episodesCache[key] = list
@@ -638,14 +702,33 @@ final class DetailViewModel {
     }
 
     func toggleFavorite() async {
-        let oldValue = isFavorite
+        // A press while a write is out is not lost: the heart flips now and the last wanted value
+        // goes out when the running write ends (audit review R-DET-6).
+        if isWritingFavorite {
+            isFavorite.toggle()
+            queuedFavorite = isFavorite
+            return
+        }
+        var confirmed = isFavorite
         isFavorite.toggle()
-
-        do {
-            try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: isFavorite)
-            NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
-        } catch {
-            isFavorite = oldValue
+        var target = isFavorite
+        isWritingFavorite = true
+        defer { isWritingFavorite = false }
+        while true {
+            favoriteWrites += 1
+            do {
+                try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: target)
+                confirmed = target
+                NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
+            } catch {
+                queuedFavorite = nil
+                isFavorite = confirmed
+                return
+            }
+            guard let next = queuedFavorite else { return }
+            queuedFavorite = nil
+            if next == confirmed { return }
+            target = next
         }
     }
 
@@ -683,9 +766,48 @@ final class DetailViewModel {
         }
     }
 
+    /// What a page shows for an item: the server snapshot with this session's own writes on top.
+    /// The one place Play, Resume, the checkmarks and the hearts read, so the pages cannot drift
+    /// (audit DET-R203).
+    struct EffectiveState: Equatable {
+        var isPlayed: Bool
+        var positionTicks: Int64
+        var isFavorite: Bool
+    }
+
+    func effectiveState(of candidate: JellyfinItem) -> EffectiveState {
+        let isTop = candidate.id == item.id
+        let override = playedOverrides[candidate.id]
+        return EffectiveState(
+            isPlayed: override ?? (isTop ? isPlayed : (candidate.userData?.played ?? false)),
+            // Marking played or unplayed makes the server drop the resume position, so the old one
+            // is not part of the effective state (audit DET-205).
+            positionTicks: override != nil ? 0 : (candidate.userData?.playbackPositionTicks ?? 0),
+            isFavorite: favoriteOverrides[candidate.id] ?? (isTop ? isFavorite : (candidate.userData?.isFavorite ?? false))
+        )
+    }
+
+    /// The item with this session's played mark applied to its userData, for handing to the player,
+    /// which reads the resume position off the item (audit DET-205).
+    func resolvedForPlayback(_ candidate: JellyfinItem) -> JellyfinItem {
+        guard let override = playedOverrides[candidate.id] else { return candidate }
+        return Self.marked(candidate, played: override)
+    }
+
+    /// The item as the server holds it after a mark: played flag set, resume position gone.
+    private static func marked(_ candidate: JellyfinItem, played: Bool) -> JellyfinItem {
+        var copy = candidate
+        let base = copy.userData ?? UserItemData(
+            playbackPositionTicks: nil, playCount: nil, isFavorite: nil,
+            played: nil, unplayedItemCount: nil, playedPercentage: nil, lastPlayedDate: nil
+        )
+        copy.userData = base.with(playbackPositionTicks: 0, playedPercentage: played ? 100 : 0, played: played)
+        return copy
+    }
+
     /// Effective favorite state: in-session override wins over the server snapshot.
     func isFavorite(_ item: JellyfinItem) -> Bool {
-        favoriteOverrides[item.id] ?? (item.userData?.isFavorite ?? false)
+        effectiveState(of: item).isFavorite
     }
 
     /// Toggle a single episode. `isFavorite` is the desired new state.
@@ -704,34 +826,57 @@ final class DetailViewModel {
 
     /// Effective played state: in-session override wins over the server snapshot.
     func isPlayed(_ item: JellyfinItem) -> Bool {
-        playedOverrides[item.id] ?? (item.userData?.played ?? false)
+        effectiveState(of: item).isPlayed
     }
 
-    /// Did the viewer mark this watched in THIS session? A narrower question than ``isPlayed(_:)``,
-    /// and the only one the resume indicator may ask. An explicit mark-watched makes the server drop
-    /// the item's resume position (`MarkPlayed` resets it), so the capsule has to go before the
-    /// refetch; a `played` that arrived FROM the server alongside a position is a re-watch and keeps
-    /// its capsule.
+    /// Did the viewer mark this watched or unwatched in THIS session? A narrower question than
+    /// ``isPlayed(_:)``, and the only one the resume indicator may ask. Either mark makes the server
+    /// drop the item's resume position, so the capsule has to go before the refetch; a `played` that
+    /// arrived FROM the server alongside a position is a re-watch and keeps its capsule.
     func wasMarkedPlayedInSession(_ item: JellyfinItem) -> Bool {
-        playedOverrides[item.id] == true
+        playedOverrides[item.id] != nil
     }
 
     /// Toggle the top-level item (movie or whole series).
     func togglePlayed() async {
-        let oldValue = isPlayed
+        // Same last-press-wins rule as the favourite (audit review R-DET-6).
+        if isWritingPlayed {
+            isPlayed.toggle()
+            playedOverrides[item.id] = isPlayed
+            queuedPlayed = isPlayed
+            return
+        }
+        var confirmed = isPlayed
+        var confirmedOverride = playedOverrides[item.id]
         isPlayed.toggle()
         playedOverrides[item.id] = isPlayed
-
-        do {
-            try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: isPlayed)
-            trakt?.playedChanged(for: item, played: isPlayed)
-            NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
-            // Marking watched drops the item out of Resume and advances Next Up, so both
-            // shelf sections are stale.
-            TopShelfRefresher.invalidate()
-        } catch {
-            isPlayed = oldValue
-            playedOverrides[item.id] = oldValue
+        var target = isPlayed
+        isWritingPlayed = true
+        defer { isWritingPlayed = false }
+        while true {
+            playedWrites += 1
+            do {
+                try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: target)
+                // The item copy takes the mark too, so a later playback patch cannot flip isPlayed
+                // back to what the page opened with (audit review R-DET-4).
+                item = Self.marked(item, played: target)
+                confirmed = target
+                confirmedOverride = target
+                trakt?.playedChanged(for: item, played: target)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                // Marking watched drops the item out of Resume and advances Next Up, so both
+                // shelf sections are stale.
+                TopShelfRefresher.invalidate()
+            } catch {
+                queuedPlayed = nil
+                isPlayed = confirmed
+                playedOverrides[item.id] = confirmedOverride
+                return
+            }
+            guard let next = queuedPlayed else { return }
+            queuedPlayed = nil
+            if next == confirmed { return }
+            target = next
         }
     }
 
@@ -759,9 +904,10 @@ final class DetailViewModel {
             affected.formUnion(episodes.map(\.id))
         }
 
-        let previous = playedOverrides
-        playedOverrides[seasonID] = isPlayed
-        for id in affected { playedOverrides[id] = isPlayed }
+        // Roll back only the keys this call set, so a toggle made meanwhile survives (audit DET-207).
+        let touched = affected.union([seasonID])
+        let previous = Dictionary(uniqueKeysWithValues: touched.map { ($0, playedOverrides[$0]) })
+        for id in touched { playedOverrides[id] = isPlayed }
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: seasonID, isPlayed: isPlayed)
@@ -773,7 +919,7 @@ final class DetailViewModel {
             // shelf sections are stale.
             TopShelfRefresher.invalidate()
         } catch {
-            playedOverrides = previous
+            for (id, old) in previous where playedOverrides[id] == isPlayed { playedOverrides[id] = old }
         }
     }
 

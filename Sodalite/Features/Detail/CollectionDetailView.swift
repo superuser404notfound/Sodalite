@@ -5,8 +5,8 @@ struct CollectionDetailView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.serverSession) private var serverSessionOverride
     /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
-    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
-    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var viewModel: DetailViewModel?
@@ -74,6 +74,20 @@ struct CollectionDetailView: View {
         }
         .onChange(of: appState.requestPlayerDismissal) { _, _ in
             if showPlayer { showPlayer = false }
+        }
+        // A film watched from here (or a Radarr upgrade) changes the members; without these the
+        // checkmarks and Play's start index kept the state the page opened with (audit DET-202).
+        .onReceive(NotificationCenter.default.publisher(for: .playbackProgressDidChange)) { note in
+            let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
+            let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            Task { @MainActor in
+                await viewModel?.handlePlaybackStop(itemID: itemID, ticks: ticks)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .libraryItemDidReplace)) { note in
+            guard let staleID = note.userInfo?[LibraryItemReplacementKey.staleID] as? String,
+                  let replacement = note.userInfo?[LibraryItemReplacementKey.item] as? JellyfinItem else { return }
+            viewModel?.applyItemReplacement(staleID: staleID, newItem: replacement)
         }
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
@@ -201,7 +215,7 @@ struct CollectionDetailView: View {
     private func primaryActionButton(vm: DetailViewModel) -> some View {
         let queue = playableItems(vm: vm)
         let start = CollectionPlaybackQueue.startIndex(
-            playedFlags: queue.map { $0.userData?.played == true }
+            playedFlags: queue.map { vm.isPlayed($0) }
         )
         return GlassActionButton(
             title: "detail.play",
