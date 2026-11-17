@@ -124,12 +124,29 @@ nonisolated struct TraktWatchedSnapshot: Codable, Sendable, Equatable {
         pushed.formUnion(movieKeys.map { "m|" + $0 } + episodeKeys.map { "e|" + $0 })
     }
 
-    /// The viewer unwatched these in Sodalite, so a later watch must be sent again.
+    /// The viewer unwatched these in Sodalite, so a later watch must be sent again. A show or season
+    /// removal carries no episode numbers, so it drops every episode key under its prefix: without
+    /// that, `pushed` still said "sent" and a second mark-watched never reached Trakt (audit review
+    /// R-CATALOG-1).
     mutating func forget(_ body: TraktSyncBody) {
         let (movieKeys, episodeKeys) = Self.keys(of: body)
         movies.subtract(movieKeys)
         episodes.subtract(episodeKeys)
         pushed.subtract(movieKeys.map { "m|" + $0 } + episodeKeys.map { "e|" + $0 })
+        for show in body.shows {
+            for showKey in TraktKey.keys(show.ids) {
+                let prefixes: [String]
+                if let seasons = show.seasons {
+                    prefixes = seasons.filter { $0.episodes == nil }.map { "\(showKey)|\($0.number)|" }
+                } else {
+                    prefixes = ["\(showKey)|"]
+                }
+                for prefix in prefixes {
+                    episodes = episodes.filter { !$0.hasPrefix(prefix) }
+                    pushed = pushed.filter { !$0.hasPrefix("e|" + prefix) }
+                }
+            }
+        }
     }
 }
 
@@ -151,13 +168,17 @@ nonisolated enum TraktSyncPlan {
     ///     the caller fetched only played items, so there is nothing unplayed to pull into.
     ///   - pushSince: only local watches at or after this go to Trakt; nil pushes all of them (the
     ///     first sync). Keeps a watch someone deleted on Trakt from coming straight back.
+    ///   - markedSeriesIDs: series the viewer just marked watched. Their episodes are pushed whatever
+    ///     their date, because Jellyfin keeps an old part-watch date on an episode it marks played
+    ///     (audit review R-CATALOG-2).
     static func watched(
         movies: [TraktLocalMovie],
         series: [TraktLocalSeries],
         episodes: [TraktLocalEpisode],
         trakt: TraktWatchedSnapshot,
         pull: TraktWatchedSnapshot?,
-        pushSince: Date?
+        pushSince: Date?,
+        markedSeriesIDs: Set<String> = []
     ) -> Watched {
         var plan = Watched()
         func pushable(_ lastPlayed: Date?) -> Bool {
@@ -181,7 +202,7 @@ nonisolated enum TraktSyncPlan {
             guard let show = seriesByID[episode.seriesID], !show.ids.isEmpty else { continue }
             if episode.played {
                 let onTrakt = trakt.contains(episodeOf: show.ids, season: episode.season, number: episode.number)
-                if !onTrakt, pushable(episode.lastPlayed) {
+                if !onTrakt, pushable(episode.lastPlayed) || markedSeriesIDs.contains(episode.seriesID) {
                     pushBySeries[show.itemID, default: [:]][episode.season, default: []]
                         .append(.init(number: episode.number, watchedAt: TraktDate.wire(episode.lastPlayed)))
                 }

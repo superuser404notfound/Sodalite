@@ -32,6 +32,13 @@ final class TraktService {
     @ObservationIgnored private let clientID: String?
     @ObservationIgnored private let makeClient: (String) -> TraktClient
     @ObservationIgnored private var client: TraktClient?
+    /// One client per profile for the process. A refresh token is single use, so a profile switched
+    /// away from and back to inside one round trip has to find the SAME client, with its in-flight
+    /// refresh, and not a second one that spends the token again (audit review R-CATALOG-3).
+    @ObservationIgnored private var clients: [ProfileKey: TraktClient] = [:]
+    @ObservationIgnored private var unboundClient: TraktClient?
+    /// Series the viewer marked watched and the next sync has to push whatever their dates say.
+    @ObservationIgnored private var markedSeriesIDs: Set<String> = []
     @ObservationIgnored private weak var store: TraktSessionStoring?
     @ObservationIgnored private let libraryService: JellyfinLibraryServiceProtocol
     @ObservationIgnored private let itemService: JellyfinItemServiceProtocol
@@ -52,11 +59,15 @@ final class TraktService {
          libraryService: JellyfinLibraryServiceProtocol, itemService: JellyfinItemServiceProtocol,
          makeClient: ((String) -> TraktClient)? = nil) {
         self.clientID = clientID
-        self.makeClient = makeClient ?? { TraktClient(clientID: $0) }
+        // One URLSession for every client: it is cookie-less and cache-less and each request carries
+        // its own bearer, so sharing it leaks nothing and never leaves one behind (R-CATALOG-4).
+        let shared = TraktClient.makeHTTPClient()
+        self.makeClient = makeClient ?? { TraktClient(clientID: $0, http: shared) }
         self.store = store
         self.libraryService = libraryService
         self.itemService = itemService
-        client = buildClient(for: nil, tokens: nil)
+        unboundClient = buildClient(for: nil, tokens: nil)
+        client = unboundClient
     }
 
     /// A client whose token changes are saved to `profile`, whatever profile is active by then.
@@ -66,6 +77,19 @@ final class TraktService {
         client.setTokens(tokens)
         client.onTokensChanged = { [weak self] tokens in self?.tokensChanged(tokens, for: profile) }
         return client
+    }
+
+    /// The profile's client, built on first use. On reuse the tokens are only replaced when the stored
+    /// pair differs, so an in-flight refresh is not cancelled by switching back.
+    private func clientFor(_ profile: ProfileKey?, tokens: TraktTokens?) -> TraktClient? {
+        guard let profile else { return unboundClient }
+        if let existing = clients[profile] {
+            if existing.tokens != tokens { existing.setTokens(tokens) }
+            return existing
+        }
+        let built = buildClient(for: profile, tokens: tokens)
+        clients[profile] = built
+        return built
     }
 
     // MARK: - Profile
@@ -84,8 +108,9 @@ final class TraktService {
         session = profile.flatMap { store?.loadTraktSession(for: $0) }
         // The old client is left to finish: a refresh in flight has spent a single-use refresh token
         // and its answer still has to reach the profile it belongs to.
-        client = buildClient(for: profile, tokens: session?.tokens)
+        client = clientFor(profile, tokens: session?.tokens)
         syncAgain = false
+        markedSeriesIDs = []
         lists = profile.flatMap { TraktCacheStore.load(TraktListsSnapshot.self, name: TraktCacheStore.lists, profile: $0) }
             ?? TraktListsSnapshot()
         NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
@@ -150,6 +175,7 @@ final class TraktService {
         if let profile {
             store?.deleteTraktSession(for: profile)
             TraktCacheStore.removeAll(profile)
+            clients[profile]?.setTokens(nil)
         }
         guard profile == self.profile else { return }
         syncGeneration += 1
@@ -260,6 +286,15 @@ final class TraktService {
         }
     }
 
+    /// The sync windows, from the keychain cursor alone (CAT-209). First sync: no windows, everything
+    /// both ways. Later: Trakt watches newer than a day before the last sync come in, local watches
+    /// newer than a week before it go out. Pulled out so a test can pin that a lost cache file does
+    /// not turn into a first sync.
+    nonisolated static func watchedWindows(lastSyncAt: Date?) -> (isFirst: Bool, pullSince: Date?, pushSince: Date?) {
+        guard let lastSyncAt else { return (true, nil, nil) }
+        return (false, lastSyncAt.addingTimeInterval(-24 * 60 * 60), lastSyncAt.addingTimeInterval(-7 * 24 * 60 * 60))
+    }
+
     /// Returns the full library when this pass read it, so the rating pass can reuse it.
     private func syncWatchedIfEnabled(
         client: TraktClient, profile: ProfileKey, activities: TraktLastActivities, readFullHistory: Bool,
@@ -270,7 +305,8 @@ final class TraktService {
         // The cursors live in the keychain, the snapshot in Caches that the system may purge. A lost
         // snapshot means "read Trakt again", not "first sync": the windows below still apply, or
         // everything unwatched since would come back and every deleted play would be pushed (CAT-209).
-        let isFirst = cursors.lastSyncAt == nil
+        let windows = Self.watchedWindows(lastSyncAt: cursors.lastSyncAt)
+        let isFirst = windows.isFirst
         let traktMoved = isFirst || readFullHistory || cached == nil
             || activities.movies?.watchedAt != cursors.moviesWatchedAt
             || activities.episodes?.watchedAt != cursors.episodesWatchedAt
@@ -290,17 +326,16 @@ final class TraktService {
             snapshot.pushed = cached?.pushed ?? []
             // First sync: everything. After that: what was watched on Trakt since the last one, with
             // a day of slack for clocks and late scrobbles.
-            let since = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-24 * 60 * 60)
-            pull = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows, since: since)
+            pull = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows, since: windows.pullSince)
         }
 
         let (library, index) = try await TraktLibrary.load(service: libraryService, userID: profile.userID,
                                                            playedOnly: !traktMoved)
         if traktMoved { cachedIndex = (profile, Date(), index) }
-        let pushSince = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-7 * 24 * 60 * 60)
+        let marked = markedSeriesIDs
         var plan = TraktSyncPlan.watched(movies: library.movies, series: library.series,
                                          episodes: library.episodes, trakt: snapshot, pull: pull,
-                                         pushSince: pushSince)
+                                         pushSince: windows.pushSince, markedSeriesIDs: marked)
         if !showsTrustworthy {
             // A show Trakt counts plays for came back without episodes. Pushing now would send its
             // whole history as new plays, the exact duplication this guard exists for.
@@ -316,6 +351,7 @@ final class TraktService {
             pushedAny = true
             Self.logHistoryResult(data, sent: batch)
         }
+        markedSeriesIDs.subtract(marked)
         TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
         cursors.moviesWatchedAt = activities.movies?.watchedAt
         cursors.episodesWatchedAt = activities.episodes?.watchedAt
@@ -525,9 +561,11 @@ final class TraktService {
             // A show or season level add makes Trakt stamp a new play "now" on every aired episode,
             // watched before or not. The sync sends the episodes that are really missing, each with
             // its own date (CAT-202).
+            markedSeriesIDs.insert(item.id)
             sync(ignoringInterval: true)
             return
         }
+        if item.type == .series { markedSeriesIDs.remove(item.id) }
         let profile = self.profile
         Task {
             guard let body = await historyBody(for: item, seasonNumber: seasonNumber, watchedAt: played ? Date() : nil)
