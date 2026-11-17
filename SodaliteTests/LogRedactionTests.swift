@@ -518,6 +518,27 @@ struct LogRedactionCorpusTests {
         #expect(LogRedaction.redact(line) == line)
     }
 
+    /// R-REDACTION-2: `-eyJ` offers a start every four bytes and each one used to cost a full decode.
+    @Test("a run of -eyJ spends a bounded number of decodes and is redacted")
+    func eyJRunIsBounded() {
+        let line = "url=http://h/" + String(repeating: "-eyJ", count: 16384)
+        let result = LogRedaction.redactCountingDecodes(line)
+        #expect(result.decodes <= LogRedaction.maximumDecodeAttempts)
+        #expect(result.text.contains("<redacted>"))
+    }
+
+    /// R-REDACTION-3: past the cap a JSON-looking blob is redacted without decoding, not passed whole.
+    @Test("a base64url JSON blob over the length cap is redacted")
+    func hugeBlobIsRedacted() {
+        let json = #"{"debridKey":"SECRETDEBRID","pad":""# + String(repeating: "x", count: 20000) + #""}"#
+        let blob = Data(json.utf8).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let line = LogRedaction.redact("https://p.example/\(blob)/manifest.json")
+        #expect(!line.contains(String(blob.prefix(64))))
+        #expect(line.hasSuffix("/manifest.json"))
+    }
+
     @Test("a real base64url JSON blob is still redacted")
     func base64JSONStillRedacted() {
         let blob = Data(#"{"token":"abcdefghijklmnop","user":"someone"}"#.utf8).base64EncodedString()
