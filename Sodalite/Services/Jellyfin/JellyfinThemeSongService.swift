@@ -29,7 +29,7 @@ final class JellyfinThemeSongService: JellyfinThemeSongServiceProtocol {
     /// The universal route serves a file AVPlayer can open as it is and transcodes the rest (Ogg, Opus,
     /// WMA) to AAC over HLS, so the song plays whatever format the plugin downloaded.
     static func streamURL(songID: String, userID: String, client: JellyfinClient) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         var components = URLComponents(
             url: baseURL.appendingPathComponent("/Audio/\(songID)/universal"), resolvingAgainstBaseURL: true)
         components?.queryItems = [
