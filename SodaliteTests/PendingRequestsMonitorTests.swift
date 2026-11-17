@@ -46,4 +46,42 @@ struct PendingRequestsMonitorTests {
         monitor.reset()
         #expect(monitor.pendingApprovalCount == nil)
     }
+
+    /// CAT-204. The admin's count must not show under the profile switched to.
+    @Test func aCountDoesNotSurviveAnIdentityChange() async {
+        var who: String? = "admin"
+        let monitor = PendingRequestsMonitor()
+        monitor.identity = { who }
+        monitor.isEligible = { true }
+        monitor.fetchPendingCount = { 5 }
+        await monitor.refresh()
+        #expect(monitor.pendingApprovalCount == 5)
+
+        who = "child"
+        #expect(monitor.pendingApprovalCount == nil)
+        monitor.isEligible = { false }
+        await monitor.refresh()
+        who = "admin"
+        #expect(monitor.pendingApprovalCount == nil)
+    }
+
+    @Test func ineligibleRefreshClearsTheCount() async {
+        let monitor = PendingRequestsMonitor()
+        monitor.isEligible = { true }
+        monitor.fetchPendingCount = { 3 }
+        await monitor.refresh()
+        monitor.isEligible = { false }
+        await monitor.refresh()
+        #expect(monitor.pendingApprovalCount == nil)
+    }
+
+    @Test func anAnswerThatLandsAfterASwitchIsDropped() async {
+        var who: String? = "admin"
+        let monitor = PendingRequestsMonitor()
+        monitor.identity = { who }
+        monitor.isEligible = { true }
+        monitor.fetchPendingCount = { who = "other"; return 7 }
+        await monitor.refresh()
+        #expect(monitor.pendingApprovalCount == nil)
+    }
 }

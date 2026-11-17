@@ -66,6 +66,10 @@ final class DependencyContainer {
     @ObservationIgnored @MainActor lazy var trakt = TraktService(
         clientID: TraktConfig.clientID, store: self,
         libraryService: jellyfinLibraryService, itemService: jellyfinItemService)
+    /// Re-checks the Seerr session after any 401, started from `SodaliteApp.init` (CAT-205).
+    @ObservationIgnored @MainActor lazy var seerrRejectionHandler = SeerrSessionRejectionHandler(
+        isConnected: { [weak self] in self?.appState?.isSeerrConnected ?? false },
+        revalidate: { [weak self] in await self?.revalidateSeerrSessionAfterRejection() })
     /// AE#579. The detail page's HDR10+ answer, which no Jellyfin field carries.
     let hdr10PlusProbeStore: HDR10PlusProbeStore
     let authPreferences: AuthPreferences
@@ -370,6 +374,13 @@ final class DependencyContainer {
         pendingRequestsMonitor.isEligible = { [weak self] in
             guard let self, let user = self.appState?.activeSeerrUser else { return false }
             return (self.appState?.isSeerrConnected ?? false) && user.canManageRequests
+                && self.appState?.activeSeerrProfile == self.activeProfileRef()
+        }
+        pendingRequestsMonitor.identity = { [weak self] in
+            guard let self, let appState = self.appState, let user = appState.activeSeerrUser,
+                  let profile = appState.activeSeerrProfile, profile == self.activeProfileRef()
+            else { return nil }
+            return "\(profile.serverID):\(profile.userID):\(user.id)"
         }
         pendingRequestsMonitor.fetchPendingCount = { [weak self] in
             guard let self else { return 0 }

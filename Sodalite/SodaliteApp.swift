@@ -45,6 +45,7 @@ struct SodaliteApp: App {
         // Now that appState is wired, connect the pending-requests monitor (reads appState + Seerr service).
         dependencies.wirePendingRequestsMonitor()
         dependencies.wireMyRequestsWatcher()
+        dependencies.seerrRejectionHandler.start()
         #if !os(macOS)
         let watcherDeps = dependencies
         MyRequestsBackgroundRefresh.register {
