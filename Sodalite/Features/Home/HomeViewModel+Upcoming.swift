@@ -47,6 +47,10 @@ extension HomeViewModel {
         return HomeUpcoming.ordered(DroppedSeriesStore.filter(found, serverID: source.serverID, scope: homeScope))
     }
 
+    private nonisolated static func attempt<T: Sendable>(_ work: @Sendable () async throws -> T) async -> Result<T, Error> {
+        do { return .success(try await work()) } catch { return .failure(error) }
+    }
+
     private func seerrUpcoming(
         for seriesIDs: [String],
         source: HomeSource,
@@ -70,23 +74,25 @@ extension HomeViewModel {
             }
         }
 
-        // Bounded like the genre probes, so a long watch history cannot burst Seerr's limiter. The
-        // outer optional is the request: a failed one is neither shown nor remembered.
-        let fetched: [(Int, SeerrEpisode??)] = await withTaskGroup(of: (Int, SeerrEpisode??).self) { group in
+        // Bounded like the genre probes, so a long watch history cannot burst Seerr's limiter. A
+        // failed request is neither shown nor remembered. It stays a Result: `try?` on an optional
+        // result flattens, and a thrown error then cached "no next episode" for six hours (BRW-202).
+        typealias Answer = Result<SeerrEpisode?, Error>
+        let fetched: [(Int, Answer)] = await withTaskGroup(of: (Int, Answer).self) { group in
             var pending = stale.makeIterator()
             for _ in 0..<4 {
                 guard let id = pending.next() else { break }
-                group.addTask { (id, try? await lookup(id)) }
+                group.addTask { (id, await Self.attempt { try await lookup(id) }) }
             }
-            var results: [(Int, SeerrEpisode??)] = []
+            var results: [(Int, Answer)] = []
             for await result in group {
                 results.append(result)
-                if let id = pending.next() { group.addTask { (id, try? await lookup(id)) } }
+                if let id = pending.next() { group.addTask { (id, await Self.attempt { try await lookup(id) }) } }
             }
             return results
         }
         for (id, answer) in fetched {
-            guard let episode = answer else { continue }
+            guard case .success(let episode) = answer else { continue }
             answers[id] = episode
             nextAiringCache[id] = HomeUpcoming.CachedAiring(episode: episode, fetchedAt: now)
         }
@@ -97,3 +103,7 @@ extension HomeViewModel {
         }
     }
 }
+
+/// Thrown by the Upcoming lookup while there is no Seerr session, so "not asked yet" is not
+/// remembered as "nothing announced" (BRW-202).
+struct SeerrLookupUnavailable: Error {}
