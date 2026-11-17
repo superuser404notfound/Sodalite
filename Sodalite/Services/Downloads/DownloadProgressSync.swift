@@ -67,11 +67,6 @@ final class DownloadProgressSync {
         guard !isRunning else { return }
         isRunning = true
         defer { isRunning = false }
-        // One post per run: Home answers each post with a full reload (audit BRW-207).
-        var pushedAny = false
-        defer {
-            if pushedAny { NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil) }
-        }
         for item in store.items.values where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
             let id = item.manifest.itemID
             // A server now signed in as someone else would get this user's history pushed into theirs.
@@ -85,7 +80,11 @@ final class DownloadProgressSync {
                       (try? await service.updateUserData(itemID: id, userID: userID, positionTicks: local.positionTicks,
                                                          played: local.played, lastPlayed: lastPlayed)) != nil else { continue }
                 stamp(id)
-                pushedAny = true
+                // One post per item keeps the detail pages' payload patch (issue #24); Home coalesces
+                // them into one reload (audit BRW-207, review R-BROWSE-2).
+                NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: [
+                    PlaybackProgressKey.itemID: id, PlaybackProgressKey.positionTicks: local.positionTicks,
+                ])
             case .adopt:
                 try? store.update(itemID: id) {
                     $0.progress.positionTicks = server.playbackPositionTicks ?? 0

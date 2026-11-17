@@ -77,8 +77,8 @@ struct DownloadProgressSyncTests {
         #expect(store.item("server")?.manifest.progress.lastSyncedAt == now)
     }
 
-    /// BRW-207: three pushed items, one notification.
-    @Test func aRunPostsOneProgressNotification() async throws {
+    /// R-BROWSE-2: one post per pushed item, each with its payload (Home coalesces them).
+    @Test func aRunPostsOneProgressNotificationPerItemWithItsPayload() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("SyncTests-\(UUID().uuidString)")
         let store = DownloadStore(paths: DownloadPaths(root: root))
         store.activate(ProfileKey(serverID: "s", userID: "u"))
@@ -95,11 +95,14 @@ struct DownloadProgressSyncTests {
             answers[id] = userData(100, played: false, last: "2027-01-15T08:00:00.0000000Z")
         }
         let counter = NotificationCounter()
-        let token = NotificationCenter.default.addObserver(forName: .playbackProgressDidChange, object: nil, queue: nil) { _ in counter.bump() }
+        let token = NotificationCenter.default.addObserver(forName: .playbackProgressDidChange, object: nil, queue: nil) { note in
+            counter.bump(note.userInfo?[PlaybackProgressKey.itemID] as? String)
+        }
         defer { NotificationCenter.default.removeObserver(token) }
         let sync = DownloadProgressSync(store: store, service: FakeUserDataService(answers: answers), userID: "u", now: { self.t0 })
         await sync.run()
-        #expect(counter.count == 1)
+        #expect(counter.count == 3)
+        #expect(counter.itemIDs.sorted() == ["a", "b", "c"])
     }
 
     @Test func aFailingServerLeavesTheManifestAlone() async throws {
@@ -142,7 +145,8 @@ final class FakeUserDataService: UserItemDataServing, @unchecked Sendable {
 
 nonisolated private final class NotificationCounter: @unchecked Sendable {
     private let lock = NSLock()
-    private var value = 0
-    func bump() { lock.withLock { value += 1 } }
-    var count: Int { lock.withLock { value } }
+    private var ids: [String] = []
+    func bump(_ id: String?) { lock.withLock { ids.append(id ?? "") } }
+    var count: Int { lock.withLock { ids.count } }
+    var itemIDs: [String] { lock.withLock { ids } }
 }
