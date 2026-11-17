@@ -441,6 +441,39 @@ extension PlayerViewModel {
         directStreamMemory?.remember(upstream, userID: userID, channelID: item.id)
     }
 
+    /// The one `LoadOptions` both live routes load with (audit PHOST-R202). Zapping-first join
+    /// (AetherEngine#195): TARGETDURATION tracks the channel GOP, so short-GOP channels show a picture
+    /// in ~3-6s instead of 18s+; a bursty Jellyfin transcode fills the startup cushion at I/O speed
+    /// either way, and the observed-cadence floor keeps bursty ingest patient.
+    private func liveLoadOptions() -> LoadOptions {
+        LoadOptions(
+            suppressDisplayCriteria: false,
+            forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
+            upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
+            upscaleScaler: liveUpscaleScaler,
+            matchContentEnabled: Self.matchContentEnabled,
+            panelIsInHDRMode: Self.panelIsInHDRMode,
+            audioBridgeMode: preferences.audioBridgeMode,
+            // Live used to run on the engine default (.off), so a viewer's height-channel choice never
+            // reached the E-AC-3 JOC handling of a broadcast DD+ Atmos stream.
+            objectAudioRendering: preferences.objectAudioRendering,
+            isLive: true,
+            dvrWindowSeconds: preferences.liveBufferDepth.seconds,
+            liveJoinProfile: .fastZap,
+            liveEdgeCushionSeconds: preferences.liveDelay.seconds,
+            // Raw ASS event lines for the styled-subtitle path (ASSRenderCoordinator); only affects ASS/SSA content.
+            preserveASSMarkup: true,
+            // Engine picks the preferred-language audio on the first frame (#72), replacing the
+            // post-load selectAudioTrack reload that misfired on single-track channels.
+            preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
+            teletextPage: preferences.liveTeletextPage.page,
+            audioDelaySeconds: preferences.audioDelaySeconds,
+            audioShaping: preferences.audioShaping(),
+            sharedOutputRole: sharedOutputRole,
+            hostRetriesExhaustedLiveReplay: true
+        )
+    }
+
     /// Hand an upstream playlist to the engine's HLS ingest and wire the live session state around it.
     /// Shared by the negotiated direct path and the remembered-URL shortcut, which differ only in where
     /// the URL and the session ids come from.
@@ -449,6 +482,9 @@ extension PlayerViewModel {
         playSessionID: String?,
         mediaSourceID: String
     ) async throws {
+        // The renegotiation awaits above this can outlive a Back; the retune Task is not loadTask
+        // (audit PHOST-204).
+        if isTearingDown { throw CancellationError() }
         self.playSessionID = playSessionID
         self.mediaSourceID = mediaSourceID
         activeLiveStreamID = nil
@@ -457,31 +493,7 @@ extension PlayerViewModel {
         observeLiveEdge()
         try await player.load(
             source: .custom(reader, formatHint: "mpegts"),
-            options: LoadOptions(
-                suppressDisplayCriteria: false,
-                forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
-                upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
-                upscaleScaler: liveUpscaleScaler,
-                matchContentEnabled: Self.matchContentEnabled,
-                panelIsInHDRMode: Self.panelIsInHDRMode,
-                audioBridgeMode: preferences.audioBridgeMode,
-                isLive: true,
-                dvrWindowSeconds: preferences.liveBufferDepth.seconds,
-                // Zapping-first join (AetherEngine#195): TARGETDURATION tracks the channel GOP, so
-                // short-GOP channels show a picture in ~3-6s instead of 18s+; long-GOP channels
-                // quantize back to standard behavior automatically.
-                liveJoinProfile: .fastZap,
-                liveEdgeCushionSeconds: preferences.liveDelay.seconds,
-                preserveASSMarkup: true,
-                // Engine picks the preferred-language audio on the first frame (#72), replacing the
-                // post-load selectAudioTrack reload that misfired on single-track channels.
-                preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-                teletextPage: preferences.liveTeletextPage.page,
-                audioDelaySeconds: preferences.audioDelaySeconds,
-                audioShaping: preferences.audioShaping(),
-                sharedOutputRole: sharedOutputRole,
-                hostRetriesExhaustedLiveReplay: true
-            ),
+            options: liveLoadOptions(),
             // #64: the viewer's audio pick, named at load. It is the only way onto a track other than
             // the container default here, because the ingest is forward-only and the engine refuses
             // to re-point such a session in place (it logs the refusal).
@@ -597,36 +609,12 @@ extension PlayerViewModel {
 
         observeLiveEdge()
 
-        let options = LoadOptions(
-            suppressDisplayCriteria: false,
-            forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
-            upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
-            upscaleScaler: liveUpscaleScaler,
-            matchContentEnabled: Self.matchContentEnabled,
-            panelIsInHDRMode: Self.panelIsInHDRMode,
-            audioBridgeMode: preferences.audioBridgeMode,
-            isLive: true,
-            dvrWindowSeconds: preferences.liveBufferDepth.seconds,
-            // Zapping-first join (AetherEngine#195), same rationale as the direct path above. A
-            // bursty Jellyfin transcode fills the startup cushion at I/O speed either way; the
-            // observed-cadence floor keeps bursty ingest patient.
-            liveJoinProfile: .fastZap,
-            liveEdgeCushionSeconds: preferences.liveDelay.seconds,
-            // Raw ASS event lines for the styled-subtitle path (ASSRenderCoordinator); only affects ASS/SSA content.
-            preserveASSMarkup: true,
-            // Engine picks the preferred-language audio on the first frame (#72), replacing the
-            // post-load selectAudioTrack reload that misfired on single-track channels.
-            preferredAudioLanguages: effectivePreferredAudioLanguage().map { [$0] } ?? [],
-            teletextPage: preferences.liveTeletextPage.page,
-            audioDelaySeconds: preferences.audioDelaySeconds,
-            audioShaping: preferences.audioShaping(),
-            sharedOutputRole: sharedOutputRole,
-            hostRetriesExhaustedLiveReplay: true
-        )
+        let options = liveLoadOptions()
         // #64: same pick on the server route, where the engine could re-point in place but a
         // re-tune is what the viewer asked for either way. One spelling, one behaviour.
         let liveAudioIndex = pendingLiveAudioStreamIndex.map(Int32.init)
 
+        if isTearingDown { throw CancellationError() }
         do {
             try await player.load(url: tsURL, startPosition: nil, options: options,
                                   audioSourceStreamIndex: liveAudioIndex)
@@ -1180,8 +1168,12 @@ extension PlayerViewModel {
         }
     }
 
-    /// Close the session on the server: stop report with the tuner handle, the orphan-transcode kill, the tuner release. Shared by the recovery retune and the channel zap.
-    func closeLiveSessionServerSide() async {
+    /// Close the session on the server: stop report with the tuner handle, the orphan-transcode kill,
+    /// the tuner release. The one close for the recovery retune, the channel zap, the outage retry and
+    /// the suspension release (audit PHOST-R201). It names the handles it closes up front and acts only
+    /// on those, so a slow answer cannot reach into a session opened in the meantime (PHOST-205).
+    /// `awaitingEncodingKill` is for the suspension release, which must finish inside its background task.
+    func closeLiveSessionServerSide(awaitingEncodingKill: Bool = false) async {
         stopProgressReporting()
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
@@ -1191,10 +1183,24 @@ extension PlayerViewModel {
         }
         if let deadSession {
             let svc = playbackService
-            Task.detached { try? await svc.stopActiveEncodings(playSessionID: deadSession) }
+            if awaitingEncodingKill {
+                try? await svc.stopActiveEncodings(playSessionID: deadSession)
+            } else {
+                Task.detached { try? await svc.stopActiveEncodings(playSessionID: deadSession) }
+            }
+        }
+        guard playSessionID == deadSession else {
+            // A newer session opened while the awaits above ran. Its tuner id may be the same string
+            // (the id names the channel), so only a handle it does not hold is ours to close.
+            if let deadTuner, activeLiveStreamID != deadTuner {
+                releaseTuner(deadTuner, reason: "session superseded during close")
+            }
+            return
         }
         hasReportedStart = false
-        releaseLiveTunerIfNeeded()
+        guard let deadTuner else { return }
+        if activeLiveStreamID == deadTuner { activeLiveStreamID = nil }
+        releaseTuner(deadTuner, reason: "session teardown")
     }
 
     /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.
@@ -1283,7 +1289,8 @@ extension PlayerViewModel {
     }
 
     func releaseLiveSessionForSuspension(waitingForTeardownUpTo timeout: TimeInterval) async {
-        guard isLiveSession, activeLiveStreamID != nil else { return }
+        guard isLiveSession, let deadTuner = activeLiveStreamID else { return }
+        let deadSession = playSessionID
         let deadline = Date().addingTimeInterval(timeout)
         while player.playbackBackend != .none, Date() < deadline, !Task.isCancelled {
             try? await Task.sleep(nanoseconds: 250_000_000)
@@ -1298,20 +1305,15 @@ extension PlayerViewModel {
                 + "(PiP or background playback), leaving the tuner open")
             return
         }
+        // A retune or zap that ran during the wait already closed this tuner and opened its own.
+        guard activeLiveStreamID == deadTuner, playSessionID == deadSession else { return }
 
         liveTunerReleasedWhileSuspended = true
-        let deadTuner = activeLiveStreamID
-        let deadSession = playSessionID
         // Same three as a retune, and in the same order: the stop report carries the handle and is
         // also what clears the session the server still lists as playing, the encoding kill is
         // addressed to this device and this play session, and the explicit close is the belt to that
         // report's braces.
-        await reportStop(liveStreamID: deadTuner)
-        hasReportedStart = false
-        if let deadSession {
-            try? await playbackService.stopActiveEncodings(playSessionID: deadSession)
-        }
-        releaseLiveTunerIfNeeded()
+        await closeLiveSessionServerSide(awaitingEncodingKill: true)
         LogTap.shared.note(
             "[Live] #147 suspension: closed the live session server-side, key="
             + "\(Self.liveLogToken(deadTuner))")
@@ -1518,7 +1520,7 @@ extension PlayerViewModel {
     /// Ask the channel what is on air and adopt it. Returns what it found, so the caller schedules
     /// against the answer rather than against what it hoped for: a failed ask reports nothing and
     /// earns the blind interval instead of a retry every thirty seconds.
-    private func adoptCurrentLiveProgram(
+    func adoptCurrentLiveProgram(
         channel: JellyfinChannel, service: JellyfinLiveTvServiceProtocol
     ) async -> JellyfinProgram? {
         let now = Date()
@@ -1530,6 +1532,9 @@ extension PlayerViewModel {
             start: now.addingTimeInterval(-PlayerViewModel.liveProgramReachBehind),
             end: now.addingTimeInterval(PlayerViewModel.liveProgramReachAhead)))?
             .sorted { ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast) } ?? []
+        // A zap cancels the follower, but a response already decoded still arrives: it must not write
+        // the old channel over the new one (audit PHOST-206).
+        guard !Task.isCancelled, liveChannel?.id == channel.id else { return nil }
         liveProgramWindow = programs
         guard let airing = programs.first(where: { $0.isAiring(at: now) }) else {
             LogTap.shared.note("[LiveProgram] channel=\(channel.id) nothing on air")

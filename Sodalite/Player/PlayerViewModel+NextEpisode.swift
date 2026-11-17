@@ -213,32 +213,8 @@ extension PlayerViewModel {
         stopProgressReporting()
         cancellables.removeAll()
 
-        // Fire-and-forget stop report: reportStop's 30s URLRequest timeout would otherwise stall the transition behind a hidden, spinner-less overlay on a server hiccup.
-        let stopReport = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: completionAwarePositionTicks,
-            liveStreamId: nil
-        )
-        recordLocalProgress(positionTicks: stopReport.positionTicks, played: hasReachedEndOfContent)
-        let svc = playbackService
-        Task {
-            do {
-                try await svc.reportPlaybackStopped(stopReport)
-                NotificationCenter.default.post(
-                    name: .playbackProgressDidChange,
-                    object: nil,
-                    userInfo: [
-                        PlaybackProgressKey.itemID: stopReport.itemId,
-                        PlaybackProgressKey.positionTicks: stopReport.positionTicks
-                    ]
-                )
-                LogTap.shared.note("[NextEp] report_stop_done (background)")
-            } catch {
-                LogTap.shared.note("[NextEp] report_stop_failed (background): \(error.localizedDescription)")
-            }
-        }
+        // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks)()
 
         // Do NOT call player.stop(): a full stop tears down the native AVPlayer, and AVKit fails to re-register its Now-Playing session against a swapped player, blanking the CC widget (issue #15). engine.load(newURL) reloads in place, preserving the AVPlayer across the seam.
         LogTap.shared.note("[NextEp] reload_in_place (no engine stop)")
@@ -387,32 +363,8 @@ extension PlayerViewModel {
         stopProgressReporting()
         cancellables.removeAll()
 
-        // Fire-and-forget stop report (mirrors playNextEpisode): reportStop's 30s timeout would leave the picker row unresponsive on a slow CDN (DrHurt #12).
-        let stopReport = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: completionAwarePositionTicks,
-            liveStreamId: nil
-        )
-        recordLocalProgress(positionTicks: stopReport.positionTicks, played: hasReachedEndOfContent)
-        let svc = playbackService
-        Task {
-            do {
-                try await svc.reportPlaybackStopped(stopReport)
-                NotificationCenter.default.post(
-                    name: .playbackProgressDidChange,
-                    object: nil,
-                    userInfo: [
-                        PlaybackProgressKey.itemID: stopReport.itemId,
-                        PlaybackProgressKey.positionTicks: stopReport.positionTicks
-                    ]
-                )
-                LogTap.shared.note("[SeasonPicker] report_stop_done (background)")
-            } catch {
-                LogTap.shared.note("[SeasonPicker] report_stop_failed (background): \(error.localizedDescription)")
-            }
-        }
+        // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks)()
 
         // No player.stop() (mirrors playNextEpisode): engine.load(newURL) reloads in place so AVKit's Now-Playing session survives the seam (issue #15).
         resetSessionState(switchingTo: target)

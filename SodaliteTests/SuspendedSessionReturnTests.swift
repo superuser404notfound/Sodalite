@@ -71,4 +71,12 @@ struct SuspendedSessionReturnTests {
         let data = server(played: true, positionTicks: 0, lastPlayed: nil)
         #expect(!SuspendedSessionReturn.serverMovedOn(server: data, suspendedAt: suspendedAt, positionTicks: 20 * minute))
     }
+
+    @Test("PHOST-201: a held session sends its stop only if it played or ended since the hold began")
+    func stopWhileHeld() {
+        #expect(SuspendedSessionReturn.stopMayReport(held: false, isPlaying: false, playedSinceHold: false))
+        #expect(!SuspendedSessionReturn.stopMayReport(held: true, isPlaying: false, playedSinceHold: false))
+        #expect(SuspendedSessionReturn.stopMayReport(held: true, isPlaying: true, playedSinceHold: false))
+        #expect(SuspendedSessionReturn.stopMayReport(held: true, isPlaying: false, playedSinceHold: true))
+    }
 }

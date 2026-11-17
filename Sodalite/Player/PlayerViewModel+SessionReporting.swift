@@ -113,6 +113,8 @@ extension PlayerViewModel {
         }
     }
 
+    /// The awaited form of the stop report, for the live retune and the suspension release. The
+    /// payload and the aftermath are `deliverStop`'s, the same ones every VOD close goes through.
     func reportStop(positionTicks: Int64? = nil, liveStreamID: String? = nil) async {
         // positionTicks override lets stopPlayback() capture position BEFORE
         // killing the engine (stop audio first, no trailing buffer on dismiss).
@@ -127,16 +129,27 @@ extension PlayerViewModel {
             positionTicks: ticks,
             liveStreamId: liveStreamID
         )
+        await Self.deliverStop(report, seriesID: item.seriesId, serverID: item.serverID,
+                               service: playbackService)
+    }
+
+    /// Sends one stop report and tells the rest of the app about it. Every session close ends here
+    /// (audit PCORE-R201), so the notification shape and the shelf refresh cannot drift again.
+    @MainActor static func deliverStop(
+        _ report: PlaybackStopReport, seriesID: String?, serverID: String?,
+        service: JellyfinPlaybackServiceProtocol
+    ) async {
         do {
-            try await playbackService.reportPlaybackStopped(report)
+            try await service.reportPlaybackStopped(report)
             // Payload lets detail/Home patch this item's resume position in
-            // place, race-free, instead of re-fetching (issue #24).
+            // place, race-free, instead of re-fetching (issue #24). The series and server ids let Home
+            // bring a hidden show back and name the right server on a combined Home.
             var userInfo: [String: Any] = [
-                PlaybackProgressKey.itemID: item.id,
-                PlaybackProgressKey.positionTicks: ticks
+                PlaybackProgressKey.itemID: report.itemId,
+                PlaybackProgressKey.positionTicks: report.positionTicks
             ]
-            userInfo[PlaybackProgressKey.seriesID] = item.seriesId
-            userInfo[PlaybackProgressKey.serverID] = item.serverID
+            userInfo[PlaybackProgressKey.seriesID] = seriesID
+            userInfo[PlaybackProgressKey.serverID] = serverID
             NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: userInfo)
             // Inside the do: a failed report means the server never learned the new
             // position, so the shelf has nothing new to fetch.
