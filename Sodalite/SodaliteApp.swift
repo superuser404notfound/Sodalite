@@ -49,6 +49,7 @@ struct SodaliteApp: App {
         let watcherDeps = dependencies
         MyRequestsBackgroundRefresh.register {
             let watcher = watcherDeps.myRequestsWatcher
+            await watcherDeps.restoreSeerrSessionForBackgroundLaunch()
             if await BackgroundRefreshTask.waitFor({ watcher.isEnabled }) {
                 watcher.reloadForActiveProfile()
                 await watcher.refresh()
@@ -67,6 +68,7 @@ struct SodaliteApp: App {
         PendingRequestsBackgroundRefresh.register {
             let prefs = deps.seerrNotificationPreferences
             guard prefs.notifyPendingRequests else { return false }
+            await deps.restoreSeerrSessionForBackgroundLaunch()
             // Without the session the monitor has nothing to count, and the chain would reschedule blind (PTD-204).
             _ = await BackgroundRefreshTask.waitFor { deps.pendingRequestsMonitor.isEligible() }
             await PendingRequestsSync.refreshAndSync(

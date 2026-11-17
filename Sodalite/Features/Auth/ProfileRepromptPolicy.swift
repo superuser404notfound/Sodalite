@@ -43,26 +43,31 @@ enum ProfileRepromptPolicy {
 
     /// What a due reprompt does about the surfaces that are open when it comes due (SHELL-202).
     enum CoverPlan: Equatable {
-        /// Something that cannot follow a background trip (What's New) or an earlier reprompt owns the host.
+        /// What's New or an earlier reprompt owns the host. The caller keeps the trip for What's New
+        /// and re-arms once it closes, never spends it (R-LIFECYCLE-8).
         case skip
         case armNow
-        /// Close these first, wait for the settle, then arm. Never skip: a deep-link cover or the music
+        /// Close these first, wait for the settle, then arm. Never skip: a detail cover or the music
         /// player left open would hand the next viewer this profile's library behind the picker.
-        case closeThenArm(closePlayer: Bool, closeRouterCovers: Bool)
+        /// `closeDetailCovers` covers every presented detail cover (the router's deep link and the tab
+        /// pages' own), `closeProfileCover` a chooser or server-switch cover that can be swiped away.
+        case closeThenArm(closePlayer: Bool, closeRouterCovers: Bool, closeProfileCover: Bool)
     }
 
     static func coverPlan(
         playerUp: Bool,
         panelUp: Bool,
-        deepLinkCoverUp: Bool,
+        detailCoverUp: Bool,
         musicPlayerUp: Bool,
         whatsNewUp: Bool,
-        profileCoverUp: Bool,
+        repromptCoverUp: Bool,
+        otherProfileCoverUp: Bool,
         awaitsDismissal: Bool
     ) -> CoverPlan {
-        guard !whatsNewUp, !profileCoverUp, !awaitsDismissal else { return .skip }
-        let routerCovers = deepLinkCoverUp || musicPlayerUp
-        guard playerUp || panelUp || routerCovers else { return .armNow }
-        return .closeThenArm(closePlayer: playerUp, closeRouterCovers: routerCovers)
+        guard !whatsNewUp, !repromptCoverUp, !awaitsDismissal else { return .skip }
+        let routerCovers = detailCoverUp || musicPlayerUp
+        guard playerUp || panelUp || routerCovers || otherProfileCoverUp else { return .armNow }
+        return .closeThenArm(closePlayer: playerUp, closeRouterCovers: routerCovers,
+                             closeProfileCover: otherProfileCoverUp)
     }
 }

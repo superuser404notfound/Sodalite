@@ -131,6 +131,10 @@ private struct MyRequestsPresentation: ViewModifier {
                     try? await Task.sleep(for: .seconds(10 * 60))
                 }
             }
+            #if !os(macOS)
+            // The launch activation can come before this view subscribes, so read the state once more.
+            .onAppear { isForeground = Self.appIsActiveNow() }
+            #endif
             .onReceive(NotificationCenter.default.publisher(for: .seerrRequestsDidChange)) { _ in
                 Task {
                     await watcher.refresh()

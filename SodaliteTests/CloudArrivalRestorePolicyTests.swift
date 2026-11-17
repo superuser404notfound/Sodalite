@@ -18,4 +18,10 @@ struct CloudArrivalRestorePolicyTests {
         #expect(!CloudArrivalRestorePolicy.shouldRerunRestore(
             isAuthenticated: false, launchPickerShown: false, hasKnownServers: false))
     }
+
+    @Test func pickerWhoseServerWasDeletedIsRerouted() {
+        #expect(CloudArrivalRestorePolicy.shouldRerunRestore(
+            isAuthenticated: false, launchPickerShown: true, launchPickerServerStillKnown: false,
+            hasKnownServers: false))
+    }
 }
