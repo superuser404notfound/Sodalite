@@ -11,6 +11,7 @@ struct SearchView: View {
     /// The edge the section headings and their rows share with every other tab (Sodalite#140).
     private var leadingInset: CGFloat { metrics.rowLeading(shellPaysLeading: shellPaysLeading) }
     @State private var viewModel: SearchViewModel?
+    @State private var prefetchTask: Task<Void, Never>?
     @State private var destination: Destination?
     /// Drives the iOS bar's Cancel button: the keyboard covers the tab bar, so without it Return was
     /// the only way out of the field (Sodalite#208).
@@ -133,15 +134,16 @@ struct SearchView: View {
             bootstrap()
         }
         // Pre-warm the poster cache on results-change so first focus doesn't pay round-trip + decode. Bounded-concurrency prefetch so it doesn't starve foreground bandwidth.
-        .onChange(of: viewModel?.jellyfinResults) { _, _ in
+        // One handler on a combined key: a search sets all three lists in one pass, and three
+        // handlers started three prefetches of the same URLs (BRW-203).
+        .onChange(of: searchPosterKey) { _, _ in
             prefetchSearchPosters()
         }
-        .onChange(of: viewModel?.seerrResults) { _, _ in
-            prefetchSearchPosters()
-        }
-        .onChange(of: viewModel?.peopleResults) { _, _ in
-            prefetchSearchPosters()
-        }
+    }
+
+    private var searchPosterKey: [String] {
+        guard let vm = viewModel else { return [] }
+        return vm.jellyfinResults.map(\.originKey) + vm.seerrResults.map(\.stableKey) + vm.peopleResults.map { "p\($0.id)" }
     }
 
     /// Hand current result poster URLs to `ImageCache.prefetch`; cached URLs are skipped, so only new posters pay network on each results-change.
@@ -170,7 +172,8 @@ struct SearchView: View {
         }
         guard !urls.isEmpty else { return }
         let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
-        Task.detached(priority: .utility) {
+        prefetchTask?.cancel()
+        prefetchTask = Task.detached(priority: .utility) {
             await ImageCache.prefetch(urls, auth: auth)
         }
     }
