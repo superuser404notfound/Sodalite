@@ -34,9 +34,8 @@ extension HomeViewModel {
         )
     }
 
-    /// The banner's last titles per profile and mode, for this run of the app. Home is rebuilt from
-    /// scratch on every return to the tab in the sidebar layout (the shell swaps its content), and
-    /// sometimes with the top bar too; without this the banner then came back empty, refetched and
+    /// The banner's last titles per profile and mode, for this run of the app. Home is rebuilt
+    /// when the profile or server changes and when a shell drops a tab page; without this the banner then came back empty, refetched and
     /// faded its art in again, while the rows beside it repainted at once from their feed cache.
     private static var heroMemory: [String: [JellyfinItem]] = [:]
 
@@ -76,20 +75,15 @@ extension HomeViewModel {
         let mode = selection.mode
         let query = Self.heroQuery(mode)
         let excluded = selection.excludedLibraries
-        let perSource = await withTaskGroup(of: [JellyfinItem].self) { group in
-            for source in sources {
-                group.addTask {
-                    let items = await Self.heroItems(source: source, query: query, excluded: excluded)
-                    return items.map { item in
-                        var stamped = item
-                        if stamped.serverID == nil { stamped.serverID = source.serverID }
-                        return stamped
-                    }
-                }
-            }
-            var all: [[JellyfinItem]] = []
-            for await items in group { all.append(items) }
-            return all
+        // Secondaries are raced like every other fan-out, so a dead one cannot hold the banner for
+        // the full request timeout (BRW-R202).
+        let outcomes = await SourceFanOut.collect(sources, deadline: secondaryDeadline) { source in
+            await Self.heroItems(source: source, query: query, excluded: excluded)
+                .map { $0.stamped(serverID: source.serverID) }
+        }
+        let perSource: [[JellyfinItem]] = outcomes.compactMap {
+            if case .value(let items) = $0 { return items }
+            return nil
         }
         guard !Task.isCancelled else { return }
         let candidates = perSource.joined().filter { !($0.backdropImageTags ?? []).isEmpty }

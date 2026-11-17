@@ -12,10 +12,6 @@ extension HomeViewModel {
     // previous profile's FilterCache (Sodalite#169). The `owner` closure hands out the view model for
     // one statement at a time, so nothing holds it across an await.
 
-    func precomputeProviderCounts() async {
-        await Self.runProviderCounts { self }
-    }
-
     /// Resolves every CatalogProviders.networks tile against the local library + TMDB watch-providers in the background so the home filter can drop empty tiles, and writes each result list to FilterCache for a synchronous tap. Throttled to one run per session (re-running each Home appearance is ~110 Seerr calls for no perceptible gain).
     static func runProviderCounts(_ owner: () -> HomeViewModel?) async {
         // Latch set at the END, not here: latching up front meant a cancelled/failed run (loadContent re-entry during the multi-second runtime is common) left the latch set and the replacement bailed, ending the session with partial counts.
@@ -27,40 +23,26 @@ extension HomeViewModel {
         let uid = inputs.userID
 
         // Build the TMDB map on MainActor first (tmdbID + CatalogProviders.networks are MainActor-isolated under default isolation). Slim fields on this 10 000-item all-library scan: only tmdbID + image tags are read, so homeRowFields + ProviderIds is all we need; defaultFields would pull People/MediaStreams/Chapters for the whole library, by far the biggest Home download (Sodalite#12).
-        let allItemsQuery = ItemQuery(
-            includeItemTypes: [.movie, .series],
-            sortBy: "SortName",
-            sortOrder: "Ascending",
-            limit: 10000,
-            fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
-        )
+        let allItemsQuery = ProviderMatchMerging.libraryScanQuery()
         // A failed/cancelled scan must NOT proceed with an empty tmdbMap: the resolve pass would then find only studio matches and overwrite good FilterCache with shrunken lists (TMDB-augment-only providers like Paramount+ would count 0 and hide for the session).
         guard let allItems = try? await lib.getItems(
             userID: uid, query: allItemsQuery
         ).items, !Task.isCancelled else { return }
 
-        var tmdbMap: [String: JellyfinItem] = [:]
-        for item in allItems {
-            if let id = item.tmdbID {
-                tmdbMap[ProviderMatchMerging.tmdbKey(type: item.type, tmdbID: id)] = item
-            }
-        }
+        var tmdbMap = ProviderMatchMerging.tmdbMap(allItems)
         // A combined Home joins every server's library into the map, the active server winning an id.
         // Only secondaries whose scan answered take part further down: a dead one would otherwise
         // cost one deadline per provider.
         var secondaries: [HomeSource] = []
         var secondaryMaps: [[String: JellyfinItem]] = []
         for source in inputs.secondaries {
+            // Each scan is one of the app's biggest requests; a superseded pass must not start the next (BRW-206).
+            guard !Task.isCancelled else { return }
             let run: @MainActor @Sendable () async -> [JellyfinItem]? = {
                 try? await source.libraryService.getItems(userID: source.userID, query: allItemsQuery).items
             }
             guard let items = await Deadline.race(secondaryPassDeadline, { await run() }) ?? nil else { continue }
-            var map: [String: JellyfinItem] = [:]
-            for item in items {
-                var stamped = item
-                if stamped.serverID == nil { stamped.serverID = source.serverID }
-                if let id = stamped.tmdbID { map[ProviderMatchMerging.tmdbKey(type: stamped.type, tmdbID: id)] = stamped }
-            }
+            let map = ProviderMatchMerging.tmdbMap(items.map { $0.stamped(serverID: source.serverID) })
             secondaryMaps.append(map)
             secondaries.append(source)
         }
@@ -269,7 +251,7 @@ extension HomeViewModel {
                 return collected
             }
         }
-        // Mirrors precomputeProviderCounts: a detached task doesn't inherit cancellation on its own
+        // Mirrors runProviderCounts: a detached task doesn't inherit cancellation on its own
         // (Audit 2026-09-25 BROWSE-4).
         let resolved: [(String, [JellyfinItem])] = await withTaskCancellationHandler {
             await resolveTask.value
@@ -347,10 +329,6 @@ extension HomeViewModel {
         }
 
         return ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)
-    }
-
-    func loadProviderBackdrops() async {
-        await Self.runProviderBackdrops { self }
     }
 
     static func runProviderBackdrops(_ owner: () -> HomeViewModel?) async {
