@@ -135,7 +135,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         body: [String: Any],
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
-        guard let baseURL = client.baseURL else { throw APIError.invalidURL }
+        let baseURL = try await client.admittedBaseURL()
 
         // Caller picks the profile (DirectPlayProfile.current() touches UIScreen, must run on the main actor); empty fallback shouldn't happen in practice.
         let deviceProfile = profile ?? [:]

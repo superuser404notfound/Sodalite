@@ -239,11 +239,12 @@ struct AppRouter: View {
             await restoreSession()
         }
         .task {
-            // The change callback re-resolves the route on a Wi-Fi handoff, which is an iOS
-            // concern. The monitor itself runs on both: NetworkPathSnapshot is what tells an
+            // The change callback re-resolves the route on a Wi-Fi handoff, which a phone or a Mac
+            // has and an Apple TV does not, and takes back what the old network proved (audit
+            // NET-201). The monitor itself runs everywhere: NetworkPathSnapshot is what tells an
             // unreachable server apart from a device with no network at all (Sodalite#122).
-            #if os(iOS)
-            pathObserver.onPathChange = { dependencies.scheduleRouteResolve() }
+            #if os(iOS) || os(macOS)
+            pathObserver.onPathChange = { dependencies.networkPathDidChange() }
             #endif
             pathObserver.start()
         }

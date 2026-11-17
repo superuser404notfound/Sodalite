@@ -2,8 +2,10 @@ import Foundation
 
 /// Dual-URL route resolution. Synchronous session paths set an optimistic
 /// baseURL via preferredURL(lastKnown:) for first-frame correctness; this
-/// extension then probes and corrects asynchronously. A route change only
-/// affects new requests; active playback keeps its absolute stream URL.
+/// extension then probes and corrects asynchronously. A LAN address gets no
+/// credentials until its probe has named this server (`RouteGate`, audit
+/// NET-201). A route change only affects new requests; active playback keeps
+/// its absolute stream URL.
 extension DependencyContainer {
     /// The one owner of a route re-measure (audit SHELL-R202). Every trigger, a launch, a switch, a
     /// path change, a failed request, the recheck watch and Try Again, lands here, and a newer pass
@@ -25,14 +27,53 @@ extension DependencyContainer {
     /// into what the client is now (audit SHELL-201), so the generation moves before the new pass.
     func liveRouteDidChange() {
         routeGeneration &+= 1
+        forgetVerifiedRoutes(includingSecondaries: false)
         scheduleRouteResolve()
+    }
+
+    /// The device may be on another network now, where the home LAN addresses belong to somebody
+    /// else, so nothing proved before counts (audit NET-201).
+    func networkPathDidChange() {
+        forgetVerifiedRoutes(includingSecondaries: true)
+        scheduleRouteResolve()
+    }
+
+    private func forgetVerifiedRoutes(includingSecondaries: Bool) {
+        jellyfinClient.routeGate?.reset()
+        if includingSecondaries {
+            for session in sessionRegistry.participants where !session.isActive {
+                session.client.routeGate?.reset()
+            }
+        }
+        mirroredSessionURL = nil
+        isOnVerifiedHomeNetwork = false
+        // Seerr's LAN slot rides on that proof, so its cookie goes to the public slot until it is back.
+        if let seerr = appState?.activeSeerrServer, seerrClient.baseURL != nil {
+            seerrClient.baseURL = preferredSeerrURL(for: seerr)
+        }
     }
 
     func resolveActiveRoutes() async {
         let generation = routeGeneration
+        // Secondaries have their own addresses and gates, so they need not queue behind the
+        // active server's slower slot.
+        async let secondaries: Void = resolveSecondaryRoutes(generation: generation)
         await resolveJellyfinRoute(generation: generation)
         await resolveSeerrRoute(generation: generation)
-        await resolveSecondaryRoutes(generation: generation)
+        await secondaries
+    }
+
+    /// The identity probe, reporting each answer to `gate` as it lands, so a request held for one
+    /// address goes the moment that address proves itself rather than after the slower slot.
+    func verifyingProbe(
+        serverID: String, gate: RouteGate?, epoch: UInt64
+    ) -> @Sendable (URL) async -> Bool {
+        { [jellyfinProbe, weak gate] url in
+            let answered = await jellyfinProbe(url, serverID)
+            // Cancelled because the other slot won: that says nothing about this one.
+            if !Task.isCancelled { await gate?.record(url, answered: answered, epoch: epoch) }
+            return answered
+        }
     }
 
     /// Still the pass the current session asked for: not replaced by a newer pass, and no session
@@ -84,20 +125,27 @@ extension DependencyContainer {
     }
 
     private func resolveJellyfinRoute(generation: UInt64) async {
+        let gate = jellyfinClient.routeGate
+        let epoch = gate?.epoch ?? 0
         guard let server = activeServer else {
             activeJellyfinRoute = nil
             isOnVerifiedHomeNetwork = false
             // Nothing to be reachable or not: a signed-out session must not keep the last server's
             // verdict standing behind the login screen.
             appState?.serverReachability = .unknown
+            gate?.settle(epoch: epoch)
             return
         }
+        let probe = verifyingProbe(serverID: server.id, gate: gate, epoch: epoch)
         guard let resolved = await ServerRouteResolver.resolve(
             internalURL: server.internalURL,
             externalURL: server.externalURL,
             lastKnown: serverRouteStore.lastRoute(serverID: server.id),
-            probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
-        ) else { return }
+            probe: probe
+        ) else {
+            gate?.settle(epoch: epoch)
+            return
+        }
         guard isCurrentRoutePass(generation) else { return }
 
         // One failed probe is a suspicion; two are a verdict. The probe's two second cap is tight
@@ -106,7 +154,7 @@ extension DependencyContainer {
         // an error before its first row landed. Paid only on the failure path, and only once.
         var isReachable = resolved.isReachable
         if !isReachable {
-            isReachable = await jellyfinProbe(resolved.url, server.id)
+            isReachable = await probe(resolved.url)
             guard isCurrentRoutePass(generation) else { return }
         }
         publishReachability(url: resolved.url, isReachable: isReachable, server: server)
@@ -114,10 +162,18 @@ extension DependencyContainer {
 
         serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
         activeJellyfinRoute = resolved.route
-        guard jellyfinClient.baseURL != resolved.url else { return }
-
+        let moved = jellyfinClient.baseURL != resolved.url
         jellyfinClient.baseURL = resolved.url
-        rewriteSessionMirror(server: server, resolvedURL: resolved.url)
+        // After the move, so a held request reads the address it is released to.
+        gate?.settle(epoch: epoch)
+
+        // The Top Shelf extension sends the token wherever the mirror says, so the mirror is
+        // written here, for an address credentials may go to, and not by the session writes.
+        if jellyfinClient.verifiedBaseURL == resolved.url, mirroredSessionURL != resolved.url {
+            rewriteSessionMirror(server: server, resolvedURL: resolved.url)
+            mirroredSessionURL = resolved.url
+        }
+        guard moved else { return }
         NotificationCenter.default.post(name: .serverRouteDidChange, object: nil)
     }
 
@@ -287,8 +343,44 @@ extension DependencyContainer {
         server.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: server.id))
     }
 
+    /// Never the LAN slot of a two-slot Seerr before Jellyfin's internal address has proved this is
+    /// the home network: Seerr cannot be asked who it is, and the session cookie goes with the first
+    /// request (audit NET-201).
     func preferredSeerrURL(for server: SeerrServer) -> URL {
-        server.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)))
+        let slots = ServerRouteResolver.seerrSlots(
+            internalURL: server.internalURL,
+            externalURL: server.externalURL,
+            onVerifiedHomeNetwork: isOnVerifiedHomeNetwork
+        )
+        let allowed = SeerrServer(id: server.id, internalURL: slots.internalURL, externalURL: slots.externalURL)
+        return allowed.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)))
+    }
+
+    /// Whether a 401/403 from `url` speaks for the Seerr server (audit NET-202). A LAN address does
+    /// only on the proved home network; anywhere else it may be anybody's.
+    func seerrRefusalCounts(at url: URL?) -> Bool {
+        guard verifiesServerIdentity else { return true }
+        guard let url else { return false }
+        return !RouteGate.needsProof(url) || isOnVerifiedHomeNetwork
+    }
+
+    /// Whether a 401 from `url` speaks for `server` (audit NET-202): the address still the one the
+    /// session uses, and it answers `System/Info/Public` with this server's id right now. Asked only
+    /// on a refusal, so it costs nothing on the normal path, and it also catches a proxy in front
+    /// that answers 401 for everything.
+    func jellyfinRefusalCounts(at url: URL?, server: JellyfinServer) async -> Bool {
+        guard verifiesServerIdentity else { return true }
+        guard let url, url == jellyfinClient.baseURL else { return false }
+        return await jellyfinProbe(url, server.id)
+    }
+
+    /// Off for a container over a test double (see `RouteGate.isEnforced`). Tests switch it on.
+    var verifiesServerIdentity: Bool {
+        get { jellyfinClient.routeGate?.isEnforced ?? false }
+        set {
+            jellyfinClient.routeGate?.isEnforced = newValue
+            sessionRegistry.verifiesServerIdentity = newValue
+        }
     }
 
     /// TopShelf reads absolute image URLs from the mirror; keep it on the live route.

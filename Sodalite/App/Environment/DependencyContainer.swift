@@ -151,6 +151,9 @@ final class DependencyContainer {
     /// Moves whenever the live client changes session, so a route pass that started for the
     /// previous one writes nothing (audit SHELL-201).
     var routeGeneration: UInt64 = 0
+    /// The address the Top Shelf mirror was last written with for this session, so a pass that
+    /// changes nothing does not rewrite the shared keychain item.
+    var mirroredSessionURL: URL?
     /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
     var transportRecheckTask: Task<Void, Never>?
     var lastTransportRecheck: ContinuousClock.Instant?
@@ -187,7 +190,11 @@ final class DependencyContainer {
         self.combinedServers = CombinedServersPreferences(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
-        self.jellyfinClient = JellyfinClient(httpClient: httpClient)
+        // A test double reaches no network, so it has no address to prove (audit NET-201).
+        let verifiesServerIdentity = httpClient is HTTPClient
+        let liveClient = JellyfinClient(httpClient: httpClient)
+        liveClient.routeGate = RouteGate(isEnforced: verifiesServerIdentity)
+        self.jellyfinClient = liveClient
         // Both discovery services share ONE client of their own: a probe the user is watching a
         // spinner for must not queue behind Home's fan-out or Catalog's rows, and the transport
         // timing that says which phase ate a capped probe belongs on discovery only (Sodalite#82).
@@ -212,6 +219,7 @@ final class DependencyContainer {
             liveTvService: jellyfinLiveTvService,
             musicService: jellyfinMusicService
         )
+        sessionRegistry.verifiesServerIdentity = verifiesServerIdentity
         self.sessionRegistry = sessionRegistry
         self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
             sessionRegistry?.endpoint(forServerID: serverID)
@@ -481,18 +489,11 @@ final class DependencyContainer {
             return false
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
 
-        // Re-project SharedSessionMirror every cold launch so TopShelf stays in lockstep even if a prior version never wrote it or the shelf's bucket was wiped.
-        if let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        }
+        // The route pass re-projects SharedSessionMirror once the address has proved itself, which
+        // keeps TopShelf in lockstep even if a prior version never wrote it.
         serverActivation.stamp(serverID: server.id)
         refreshSessionRegistry()
         liveRouteDidChange()
@@ -525,15 +526,11 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: user.id,
-            accessToken: token
-        )
+        // The route pass writes the new session once its address has proved itself; until then the
+        // shelf must not keep showing the previous one.
+        SharedSessionMirror.clear()
 
         // Upsert into remembered-profiles so the user can later switch profiles without re-auth.
         try rememberUser(
@@ -802,8 +799,6 @@ final class DependencyContainer {
         sessionNote("switch \(previousServerID.map { String($0.prefix(8)) } ?? "none") -> \(label(for: server)) on this device's own token.")
         try keychainService.save(serverID, for: KeychainKeys.activeServerID)
 
-        let sessionURL = preferredURL(for: server)
-
         let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID))
 
         // No wipe here any more: FilterCache entries carry their own identity, so the target reads
@@ -831,18 +826,10 @@ final class DependencyContainer {
             try? keychainService.delete(for: KeychainKeys.activeUserImageTag)
         }
 
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
-
-        if let userID {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        } else {
-            SharedSessionMirror.clear()
-        }
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
         serverActivation.stamp(serverID: serverID)
         refreshSessionRegistry()
@@ -1088,16 +1075,11 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
         serverActivation.stamp(serverID: server.id)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = remembered.token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: remembered.id,
-            accessToken: remembered.token
-        )
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
         // Seerr left to the caller's restoreSeerrSession(forJellyfinUserID:jellyfinServerID:) so each profile picks up its own session, or lands on the empty state.
 
@@ -1836,6 +1818,16 @@ final class DependencyContainer {
             return .notConfigured
         }
 
+        // Which Seerr slot the cookie may go to depends on whether Jellyfin's LAN address proved
+        // this is the home network, and the launch pass is still finding out (audit NET-201). At
+        // home that takes tens of milliseconds.
+        if verifiesServerIdentity {
+            await jellyfinClient.routeGate?.waitUntilSettled()
+            guard generation == seerrSyncGeneration, !Task.isCancelled else { return .transientFailure }
+            seerrClient.baseURL = preferredSeerrURL(for: server)
+        }
+        let askedURL = seerrClient.baseURL
+
         do {
             let user = try await seerrAuthService.currentUser()
 
@@ -1854,6 +1846,12 @@ final class DependencyContainer {
             }
             return .connected(server: server, user: user)
         } catch let error as APIError where error.isUnauthorized {
+            // Whatever sits at a LAN address on somebody else's network is not this Seerr refusing
+            // the cookie (audit NET-202).
+            guard seerrRefusalCounts(at: askedURL) else {
+                sessionNote("Seerr refused the session at \(askedURL?.host() ?? "?"), an address not proved to be this Seerr here; keeping it.")
+                return .transientFailure
+            }
             // Cookie rejected: drop the entry (scoped copy only when that was probed, leaving other profiles untouched).
             if scopedServer != nil, let jellyfinUserID, let jellyfinServerID {
                 forgetRememberedSeerr(
