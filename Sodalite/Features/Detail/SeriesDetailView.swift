@@ -5,8 +5,8 @@ struct SeriesDetailView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.serverSession) private var serverSessionOverride
     /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
-    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
-    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -185,7 +185,7 @@ struct SeriesDetailView: View {
         playQueue = []
         episodeAdvance = nil
         returnFocusEpisodeID = nil
-        playItem = episode
+        playItem = viewModel?.resolvedForPlayback(episode) ?? episode
         playFromBeginning = fromBeginning
         playOriginatedFromPlayButton = fromPlayButton
         showPlayer = true
@@ -426,20 +426,17 @@ struct SeriesDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: .playbackProgressDidChange)) { note in
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            let seriesID = note.userInfo?[PlaybackProgressKey.seriesID] as? String
             Task { @MainActor in
+                guard let vm = viewModel else { return }
                 // Read before the patch, which turns a finish into "watched, no position", a state a
                 // page opened on a watched episode is also in.
                 let finished = finishedSelectedEpisode(itemID: itemID, ticks: ticks)
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
-                patchSelectedEpisodePosition(itemID: itemID, ticks: ticks)
-                let successor = await advancePastFinishedEpisode(finished)
-                await viewModel?.refreshResumePosition()
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
-                patchSelectedEpisodePosition(itemID: itemID, ticks: ticks)
+                let successor = await vm.handlePlaybackStop(
+                    itemID: itemID, ticks: ticks, seriesID: seriesID,
+                    patchView: { patchSelectedEpisodePosition(itemID: itemID, ticks: ticks) },
+                    beforeRefresh: { await advancePastFinishedEpisode(finished) }
+                )
                 // After the refresh, which re-fetches the season it started on and would put that
                 // list back over the one loaded here.
                 if let seasonID = successor?.seasonId, viewModel?.selectedSeasonID != seasonID {
@@ -586,7 +583,7 @@ struct SeriesDetailView: View {
                     cascadedToArrStack: request.cascadeToArrStack && request.deleteEntireSeries,
                     popsWhenRemoved: request.deleteEntireSeries,
                     assumesPartialRemoval: !request.deleteEntireSeries,
-                    pop: popDetail,
+                    pop: { popDetail() },
                     refreshAfterRemoval: {
                         // Seasons-only: refresh so deleted season tabs drop out instead of lingering until reopen.
                         await vm.refreshSeasons()
@@ -1107,8 +1104,7 @@ struct SeriesDetailView: View {
 
             // Restart-from-beginning when the play target carries progress (button reads "Resume"), mirroring MovieDetailView. playTarget covers both series root and episode panel.
             if let target = playTarget(vm: vm),
-               let ticks = target.userData?.playbackPositionTicks,
-               ticks > 0 {
+               vm.effectiveState(of: target).positionTicks > 0 {
                 GlassActionButton(
                     title: "detail.replay",
                     systemImage: "arrow.counterclockwise",
@@ -1369,7 +1365,7 @@ struct SeriesDetailView: View {
     /// has no shorthand to name, and then the plain label stands.
     private func playTitle(vm: DetailViewModel) -> LocalizedStringKey {
         guard let target = playTarget(vm: vm) else { return "detail.play" }
-        switch playState(for: target) {
+        switch playState(for: target, vm: vm) {
         case .resume: return "detail.resume"
         case .again: return "detail.playAgain"
         case .fresh:
@@ -1383,14 +1379,15 @@ struct SeriesDetailView: View {
     /// position reached, the same thing the bar above it and every card in the app say.
     private func playButtonSubtitle(vm: DetailViewModel) -> String? {
         guard let target = playTarget(vm: vm) else { return nil }
-        guard playState(for: target) != .fresh || episodeShorthand(for: target).isEmpty else { return nil }
+        guard playState(for: target, vm: vm) != .fresh || episodeShorthand(for: target).isEmpty else { return nil }
 
         var parts: [String] = []
         let episodeLabel = episodeShorthand(for: target)
         if !episodeLabel.isEmpty {
             parts.append(episodeLabel)
         }
-        if let remaining = target.resumeRemainingTicks?.ticksToDurationDisplay {
+        if vm.effectiveState(of: target).positionTicks > 0,
+           let remaining = target.resumeRemainingTicks?.ticksToDurationDisplay {
             parts.append(remaining)
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
@@ -1404,15 +1401,15 @@ struct SeriesDetailView: View {
         episodeOrigin.returnedToSeries()
     }
 
-    private func playState(for target: JellyfinItem) -> PlayActionState {
-        PlayActionState.resolve(positionTicks: target.userData?.playbackPositionTicks,
-                                isPlayed: target.userData?.played == true)
+    private func playState(for target: JellyfinItem, vm: DetailViewModel) -> PlayActionState {
+        let state = vm.effectiveState(of: target)
+        return PlayActionState.resolve(positionTicks: state.positionTicks, isPlayed: state.isPlayed)
     }
 
     /// 0…1 progress into the target episode; nil when fresh or no run-time metadata so the button suppresses the overlay instead of drawing an empty bar.
     private func playProgressFraction(vm: DetailViewModel) -> Double? {
         guard let target = playTarget(vm: vm),
-              let ticks = target.userData?.playbackPositionTicks, ticks > 0,
+              case let ticks = vm.effectiveState(of: target).positionTicks, ticks > 0,
               let total = target.runTimeTicks, total > 0 else {
             return nil
         }

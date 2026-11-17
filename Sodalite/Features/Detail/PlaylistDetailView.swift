@@ -5,8 +5,8 @@ struct PlaylistDetailView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.serverSession) private var serverSessionOverride
     /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
-    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
-    private var sessionUserID: String? { session.isActive ? appState.activeUser?.id : session.userID }
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var viewModel: DetailViewModel?
