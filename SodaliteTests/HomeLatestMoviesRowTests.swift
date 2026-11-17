@@ -51,7 +51,6 @@ struct HomeLatestMoviesRowTests {
             throw Unused()
         }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private static func movie(_ id: String, added: String) throws -> JellyfinItem {

@@ -492,3 +492,60 @@ struct LogRedactionEngineAuditTests {
         #expect(LogRedaction.redact(once) == once)
     }
 }
+
+@Suite("Redaction corpus")
+struct LogRedactionCorpusTests {
+
+    @Test("every corpus row comes out as expected (PTD-R201)", arguments: RedactionCorpus.cases)
+    func corpusRow(_ row: RedactionCorpusCase) {
+        #expect(LogRedaction.redact(row.input) == row.expected)
+    }
+
+    @Test("a second pass over a corpus row changes nothing")
+    func corpusIsStable() {
+        for row in RedactionCorpus.cases {
+            #expect(LogRedaction.redact(row.expected) == row.expected, "\(row.name)")
+        }
+    }
+
+    /// PTD-202 / SUB-206. Asked of the prefilter directly, so the test does not depend on a clock.
+    @Test("a run of e- starts no base64 JSON decode")
+    func eRunStartsNoDecode() {
+        let bytes = Array(String(repeating: "e-", count: 4096).utf8)
+        let starts = (0 ..< bytes.count).filter { LogRedaction.startsLikeJSON(bytes, at: $0) }
+        #expect(starts.isEmpty)
+        let line = "url=" + String(repeating: "e-", count: 32768)
+        #expect(LogRedaction.redact(line) == line)
+    }
+
+    /// R-REDACTION-2: `-eyJ` offers a start every four bytes and each one used to cost a full decode.
+    @Test("a run of -eyJ spends a bounded number of decodes and is redacted")
+    func eyJRunIsBounded() {
+        let line = "url=http://h/" + String(repeating: "-eyJ", count: 16384)
+        let result = LogRedaction.redactCountingDecodes(line)
+        #expect(result.decodes <= LogRedaction.maximumDecodeAttempts)
+        #expect(result.text.contains("<redacted>"))
+    }
+
+    /// R-REDACTION-3: past the cap a JSON-looking blob is redacted without decoding, not passed whole.
+    @Test("a base64url JSON blob over the length cap is redacted")
+    func hugeBlobIsRedacted() {
+        let json = #"{"debridKey":"SECRETDEBRID","pad":""# + String(repeating: "x", count: 20000) + #""}"#
+        let blob = Data(json.utf8).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let line = LogRedaction.redact("https://p.example/\(blob)/manifest.json")
+        #expect(!line.contains(String(blob.prefix(64))))
+        #expect(line.hasSuffix("/manifest.json"))
+    }
+
+    @Test("a real base64url JSON blob is still redacted")
+    func base64JSONStillRedacted() {
+        let blob = Data(#"{"token":"abcdefghijklmnop","user":"someone"}"#.utf8).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let line = LogRedaction.redact("https://proxy.example/\(blob)/manifest.json")
+        #expect(!line.contains(blob))
+        #expect(line.contains("manifest.json"))
+    }
+}

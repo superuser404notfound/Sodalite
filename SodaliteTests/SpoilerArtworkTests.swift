@@ -25,7 +25,6 @@ struct SpoilerArtworkTests {
             []
         }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private func makeViewModel() -> HomeViewModel {

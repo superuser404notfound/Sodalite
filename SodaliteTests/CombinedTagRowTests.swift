@@ -18,7 +18,6 @@ struct CombinedTagRowTests {
         func getResumeItems(userID: String, mediaType: String, limit: Int) async throws -> JellyfinItemsResponse { .init(items: [], totalRecordCount: 0) }
         func getNextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool) async throws -> JellyfinItemsResponse { .init(items: [], totalRecordCount: 0) }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private func named(_ id: String, _ name: String) throws -> NamedItem {

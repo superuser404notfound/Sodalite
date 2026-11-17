@@ -39,7 +39,6 @@ struct HomeConfigReloadTests {
             []
         }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private func makeViewModel(service: MockLibraryService) -> HomeViewModel {
