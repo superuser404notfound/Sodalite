@@ -92,9 +92,21 @@ extension HomeViewModel {
             return results
         }
         for (id, answer) in fetched {
-            guard case .success(let episode) = answer else { continue }
-            answers[id] = episode
-            nextAiringCache[id] = HomeUpcoming.CachedAiring(episode: episode, fetchedAt: now)
+            switch answer {
+            case .success(let episode):
+                answers[id] = episode
+                nextAiringCache[id] = HomeUpcoming.CachedAiring(episode: episode, fetchedAt: now)
+            case .failure(let error):
+                // A show Seerr answers 404 for stays that way, so it is remembered for a short while
+                // instead of being asked about on every load. Timeouts, 5xx and "not connected"
+                // are not remembered (audit review R-BROWSE-5).
+                if case APIError.httpError(statusCode: 404, _) = error {
+                    nextAiringCache[id] = HomeUpcoming.CachedAiring(
+                        episode: nil,
+                        fetchedAt: now.addingTimeInterval(HomeUpcoming.failureLifetime - HomeUpcoming.lookupLifetime)
+                    )
+                }
+            }
         }
 
         return candidates.compactMap { series in

@@ -52,4 +52,21 @@ struct UpcomingSeerrLookupTests {
         _ = try await vm.loadUpcoming(source: vm.sources[0])
         #expect(vm.nextAiringCache[42] != nil)
     }
+
+    /// R-BROWSE-5: a 404 is remembered briefly, so it is not asked again on every load.
+    @Test func aNotFoundIsRememberedBriefly() async throws {
+        let vm = try model()
+        vm.nextAiringLookup = { _ in throw APIError.httpError(statusCode: 404, data: nil) }
+        _ = try await vm.loadUpcoming(source: vm.sources[0])
+        let cached = try #require(vm.nextAiringCache[42])
+        let remaining = HomeUpcoming.lookupLifetime - Date().timeIntervalSince(cached.fetchedAt)
+        #expect(remaining > 0 && remaining <= HomeUpcoming.failureLifetime)
+    }
+
+    @Test func aServerErrorIsNotRemembered() async throws {
+        let vm = try model()
+        vm.nextAiringLookup = { _ in throw APIError.httpError(statusCode: 503, data: nil) }
+        _ = try await vm.loadUpcoming(source: vm.sources[0])
+        #expect(vm.nextAiringCache.isEmpty)
+    }
 }
