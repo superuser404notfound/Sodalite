@@ -27,7 +27,6 @@ struct WatchStatsCancelRecoveryTests {
         func getResumeItems(userID: String, mediaType: String, limit: Int) async throws -> JellyfinItemsResponse { throw Unused() }
         func getNextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool) async throws -> JellyfinItemsResponse { throw Unused() }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     @Test("a cancel mid-scan leaves stats and errorMessage nil, and a rerun on the same view model recovers")

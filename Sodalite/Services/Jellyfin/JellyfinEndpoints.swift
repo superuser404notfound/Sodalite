@@ -49,9 +49,8 @@ enum JellyfinEndpoint: APIEndpoint {
     /// DELETE /Items/{itemID}; Jellyfin cascades series→seasons→episodes server-side, called once per item.
     case deleteItem(itemID: String)
 
-    // Genres & Studios
+    // Genres
     case genres(userID: String)
-    case studios(userID: String)
 
     // PlaybackInfo body is the DeviceProfile dict (DirectPlayProfile [String: Any]) bridged through JSONValue for the Encodable body path.
     case playbackInfo(itemID: String, userID: String, payload: JSONValue)
@@ -73,9 +72,6 @@ enum JellyfinEndpoint: APIEndpoint {
     /// arrive with a value.
     case clearUserRating(itemID: String, userID: String)
     case unmarkPlayed(userID: String, itemID: String)
-
-    // Search
-    case searchHints(userID: String, query: String, limit: Int)
 
     // Intro/Outro markers (Jellyfin 10.10+ native, or intro-skipper plugin on older servers)
     case mediaSegments(itemID: String)
@@ -162,8 +158,6 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Items/\(itemID)"
         case .genres:
             "/Genres"
-        case .studios:
-            "/Studios"
         case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _, _):
             "/Items/\(itemID)/PlaybackInfo"
         case .sessionPlaying:
@@ -184,8 +178,6 @@ enum JellyfinEndpoint: APIEndpoint {
             "/UserItems/\(itemID)/Rating"
         case .unmarkPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
-        case .searchHints:
-            "/Search/Hints"
         case .mediaSegments(let itemID):
             "/MediaSegments/\(itemID)"
         case .remoteSearchSubtitles(let itemID, let language):
@@ -407,20 +399,6 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "UserId", value: userID),
                 URLQueryItem(name: "SortBy", value: "SortName"),
                 URLQueryItem(name: "SortOrder", value: "Ascending"),
-            ]
-
-        case .studios(let userID):
-            return [
-                URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "SortBy", value: "SortName"),
-                URLQueryItem(name: "SortOrder", value: "Ascending"),
-            ]
-
-        case .searchHints(let userID, let query, let limit):
-            return [
-                URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "SearchTerm", value: query),
-                URLQueryItem(name: "Limit", value: String(limit)),
             ]
 
         case .mediaSegments:
