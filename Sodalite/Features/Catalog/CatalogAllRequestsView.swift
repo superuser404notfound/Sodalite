@@ -129,6 +129,8 @@ struct CatalogAllRequestsView: View {
     private var content: some View {
         if viewModel.isLoadingAllRequests && viewModel.allRequests.isEmpty {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if viewModel.allRequests.isEmpty, let error = viewModel.allRequestsError {
+            errorState(message: error)
         } else if viewModel.allRequests.isEmpty {
             emptyState
         } else {
@@ -161,6 +163,25 @@ struct CatalogAllRequestsView: View {
                 .padding(.bottom, 40)
             }
         }
+    }
+
+    private func errorState(message: String) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 36))
+                .foregroundStyle(.tint)
+            Text(message)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 600)
+            GlassActionButton(
+                title: "home.retry",
+                systemImage: "arrow.clockwise",
+                action: { Task { await viewModel.loadAllRequests() } }
+            )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var emptyState: some View {

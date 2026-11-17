@@ -65,6 +65,9 @@ final class CatalogViewModel {
     var isLoadingDiscover = false
     var isLoadingRequests = false
     var errorMessage: String?
+    /// The admin queue's own load failure. It used to land in `errorMessage`, which this view never
+    /// reads, so a failed load looked like an empty queue (CAT-206).
+    var allRequestsError: String?
 
     private let discoverService: SeerrDiscoverServiceProtocol
     private let requestService: SeerrRequestServiceProtocol
@@ -487,6 +490,7 @@ final class CatalogViewModel {
         allRequestsSkip = 0
         allRequests = []
         allRequestsTotal = 0
+        allRequestsError = nil
         isLoadingAllRequests = true
         defer {
             if generation == allRequestsGeneration { isLoadingAllRequests = false }
@@ -514,7 +518,7 @@ final class CatalogViewModel {
             } while filter == .declined && allRequests.isEmpty && allRequestsSkip < allRequestsTotal
         } catch {
             guard generation == allRequestsGeneration else { return }
-            errorMessage = ErrorText.user(for: error)
+            allRequestsError = ErrorText.user(for: error)
         }
     }
 
@@ -596,13 +600,14 @@ final class CatalogViewModel {
     func deleteRequest(_ request: SeerrRequest) async {
         // Optimistic remove; restore on failure so the user can retry.
         let snapshot = allRequests
+        let generation = allRequestsGeneration
         allRequests.removeAll { $0.id == request.id }
         do {
             try await requestService.deleteRequest(requestID: request.id)
             lastAdminRequestOutcome = .deleted
             await refreshAllRequestsCounts()
         } catch let error as APIError where error.isUnauthorized {
-            allRequests = snapshot
+            restore(snapshot, ifGeneration: generation)
             lastAdminRequestOutcome = .permissionDenied
             // No local permission refresh: the 403 toast is the signal; next session restore reloads activeSeerrUser (AppRouter hides the tab if the revoke sticks).
         } catch let error as APIError where error.isNotFound {
@@ -610,9 +615,16 @@ final class CatalogViewModel {
             lastAdminRequestOutcome = .deleted
             await refreshAllRequestsCounts()
         } catch {
-            allRequests = snapshot
+            restore(snapshot, ifGeneration: generation)
             lastAdminRequestOutcome = .failed(message: ErrorText.user(for: error))
         }
+    }
+
+    /// Puts the list back after a failed mutation, unless a reload replaced it meanwhile: that list
+    /// is newer, and the old rows would sit under another filter's cursor (CAT-207).
+    private func restore(_ snapshot: [SeerrRequest], ifGeneration generation: Int) {
+        guard generation == allRequestsGeneration else { return }
+        allRequests = snapshot
     }
 
     func updateRequest(_ request: SeerrRequest, body: SeerrRequestUpdateBody) async -> SeerrRequest? {
@@ -644,6 +656,7 @@ final class CatalogViewModel {
         action: @escaping () async throws -> SeerrRequest
     ) async {
         let snapshot = allRequests
+        let generation = allRequestsGeneration
         do {
             let updated = try await action()
             replaceRequest(updated)
@@ -653,15 +666,15 @@ final class CatalogViewModel {
             lastAdminRequestOutcome = outcome
             await refreshAllRequestsCounts()
         } catch let error as APIError where error.isUnauthorized {
-            allRequests = snapshot
+            restore(snapshot, ifGeneration: generation)
             lastAdminRequestOutcome = .permissionDenied
             // No local permission refresh: the 403 toast is the signal; next session restore reloads activeSeerrUser (AppRouter hides the tab if the revoke sticks).
         } catch let error as APIError where error.isNotFound {
             // Stale row (another admin already changed it); silent reload of the current filter drops it.
-            allRequests = snapshot
+            restore(snapshot, ifGeneration: generation)
             await loadAllRequests()
         } catch {
-            allRequests = snapshot
+            restore(snapshot, ifGeneration: generation)
             lastAdminRequestOutcome = .failed(message: ErrorText.user(for: error))
         }
     }
