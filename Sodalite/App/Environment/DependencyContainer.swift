@@ -146,6 +146,13 @@ final class DependencyContainer {
     var jellyfinIdentity: @Sendable (URL, String) async -> ServerProbe.Identity = {
         await ServerProbe.identity($0, expectedServerID: $1)
     }
+    /// Where the device stands, a seam so the "is this the server's network" questions are testable.
+    var currentPathReading: @Sendable () -> NetworkPathSnapshot.Reading? = { NetworkPathSnapshot.shared.current }
+    /// The sign-in clients alive right now, so a network change takes back their proofs too.
+    var signInClients: [SignInClientEntry] = []
+    /// Passes started and not yet returned, so the recheck watch can wait for one instead of
+    /// cancelling it (audit review R-ROUTE-21).
+    var routePassesRunning = 0
     var activeJellyfinRoute: ServerRoute?
     /// Jellyfin's internal address answered its identity probe in the last resolve, which is what
     /// lets Seerr use its own internal address (`ServerRouteResolver.seerrSlots`).
@@ -352,6 +359,7 @@ final class DependencyContainer {
         }
 
         observeRouteProofInvalidations()
+        installSeerrRouteHold()
 
         // Last, because the closures capture self and the migration reads the keychain through it.
         profileSettings.activeKey = { [weak self] in self?.appState?.profileKey }
@@ -1651,6 +1659,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
         seerrClient.sessionCookie = cookie
         return server
     }
@@ -1685,6 +1694,7 @@ final class DependencyContainer {
             jellyfinServerID: jellyfinServerID
         ).map { rediscovered.fillingEmptyURLSlots(fromKnown: $0) } ?? rediscovered
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
 
         if let jellyfinUserID, let jellyfinServerID, let cookie = seerrClient.sessionCookie {
             // Profile-scoped persistence. The global (pre-0.3.0) entry is NOT refreshed here: rewriting it kept the legacy fallback live and let a scopeless profile inherit whoever last logged in. Global keys are read-only legacy now (see syncSeerrSession).
@@ -1746,6 +1756,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: updated)
+        seerrClient.serverID = updated.id
         appState?.updateActiveSeerrServer(updated)
         scheduleRouteResolve()
     }
@@ -1765,6 +1776,7 @@ final class DependencyContainer {
             return nil
         }
         seerrClient.baseURL = preferredSeerrURL(for: remembered.seerrServer)
+        seerrClient.serverID = remembered.seerrServer.id
         seerrClient.sessionCookie = remembered.cookie
         return remembered.seerrServer
     }
@@ -1785,6 +1797,7 @@ final class DependencyContainer {
     /// Drops the in-memory Seerr identity without touching keychain. Used on tvOS-user change: the previous user's persisted session must survive, but the live client must stop acting as them immediately.
     func detachSeerrClient() {
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1796,6 +1809,7 @@ final class DependencyContainer {
         try keychainService.delete(for: KeychainKeys.seerrServer)
 
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1833,12 +1847,17 @@ final class DependencyContainer {
             seerrClient.baseURL = preferredSeerrURL(for: server)
             // A LAN-only Seerr off the proved home network may be anybody's: the cookie stays here
             // and the session is kept for a later try (audit review R-ROUTE-8).
-            guard seerrMayTrust(seerrClient.baseURL) else { return .transientFailure }
+            guard seerrMayTrust(seerrClient.baseURL, seerrID: server.id) else { return .transientFailure }
         }
         let askedURL = seerrClient.baseURL
 
         do {
             let user = try await seerrAuthService.currentUser()
+            // Where a LAN Seerr answered is what lets it be trusted there later without a Jellyfin
+            // LAN slot to prove home with (audit review R-ROUTE-25).
+            if let askedURL, RouteGate.needsProof(askedURL), let subnets = currentPathReading()?.subnets {
+                ServerHomeNetworks.record(subnets, serverID: seerrRouteKey(server.id))
+            }
 
             // Legacy bridge: persist a globally-restored session as a scoped copy, then retire the global entry (else a DIFFERENT scopeless profile inherits this cookie at a later cold launch).
             if scopedServer == nil, let jellyfinUserID, let jellyfinServerID {
@@ -1857,7 +1876,7 @@ final class DependencyContainer {
         } catch let error as APIError where error.isUnauthorized {
             // Whatever sits at a LAN address on somebody else's network is not this Seerr refusing
             // the cookie (audit NET-202).
-            guard seerrRefusalCounts(at: askedURL) else {
+            guard seerrRefusalCounts(at: askedURL, seerrID: server.id) else {
                 sessionNote("Seerr refused the session at \(askedURL?.host() ?? "?"), an address not proved to be this Seerr here; keeping it.")
                 return .transientFailure
             }

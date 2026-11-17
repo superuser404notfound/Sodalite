@@ -16,6 +16,8 @@ final class JellyfinClient {
     /// Holds requests back from a LAN address that has not proved it is this session's server
     /// (audit NET-201). nil on a sign-in client, whose route is resolved before it sends anything.
     var routeGate: RouteGate?
+    /// A sign-in client's route probe while it runs, so the screens share one (audit review R-ROUTE-24).
+    var pendingRouteResolve: Task<URL, Never>?
 
     /// `accessToken` for a URL built on the spot (image `api_key`, a download's header), or nil
     /// while the address has not proved itself, so such a URL goes out without it.

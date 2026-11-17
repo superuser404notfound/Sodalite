@@ -72,6 +72,8 @@ struct CredentialsWaitForVerifiedRouteTests {
             defaults: UserDefaults(suiteName: "verified-route-\(UUID().uuidString)")!
         )
         container.verifiesServerIdentity = true
+        // No reading is not evidence; the tests that need one set it.
+        container.currentPathReading = { nil }
         container.jellyfinProbe = probe
         container.serverRouteStore.setLastRoute(lastRoute, serverID: serverID)
         try container.saveSession(
@@ -205,6 +207,8 @@ struct CredentialsWaitForVerifiedRouteTests {
     @Test func withoutAJellyfinLANSlotASeerrRefusalStillCounts() async throws {
         let http = RecordingHTTPClient()
         let container = try container(http: http, internalURL: nil, externalURL: externalURL) { _, _ in true }
+        let home = Self.reading(subnet: "192.168.178.40")
+        container.currentPathReading = { home }
         await container.routeResolveTask?.value
         try lanSeerrSession(container, auth: ProfileSwitchBoundaryTests.HookedSeerrAuth(
             result: .failure(APIError.unauthorized(message: nil))))
@@ -212,6 +216,103 @@ struct CredentialsWaitForVerifiedRouteTests {
         let outcome = await container.syncSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID)
 
         if case .invalidated = outcome {} else { Issue.record("expected invalidated, got \(outcome)") }
+    }
+
+    /// Audit review R-ROUTE-25: the same Seerr refusal on a network it never answered from (here
+    /// cellular) is anybody's, so the session stays and no cookie goes there.
+    @Test func withoutAJellyfinLANSlotAnOffNetworkSeerrRefusalKeepsTheSession() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: nil, externalURL: externalURL) { _, _ in true }
+        container.currentPathReading = { NetworkPathSnapshot.Reading(isSatisfied: true, usesLocalInterface: false, hasLocalInterface: false) }
+        await container.routeResolveTask?.value
+        try lanSeerrSession(container, auth: ProfileSwitchBoundaryTests.HookedSeerrAuth(
+            result: .failure(APIError.unauthorized(message: nil))))
+
+        let outcome = await container.syncSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID)
+
+        if case .transientFailure = outcome {} else { Issue.record("expected transientFailure, got \(outcome)") }
+        #expect(container.restoreSeerrSession(forJellyfinUserID: "user-a", jellyfinServerID: serverID) != nil)
+    }
+
+    /// Audit review R-ROUTE-23: Catalog's own requests are held the same way, not only the sync.
+    @Test func catalogRequestsToAnUntrustedLANSeerrAreRefused() async throws {
+        let http = RecordingHTTPClient()
+        let external = externalURL
+        let container = try container(http: http, internalURL: internalURL, externalURL: externalURL) { url, _ in
+            url == external
+        }
+        await container.routeResolveTask?.value
+        let seerrURL = try #require(URL(string: "http://192.168.178.20:5055"))
+        let hold = try #require(container.seerrClient.routeHold)
+
+        await #expect(throws: APIError.self) { _ = try await hold { seerrURL } }
+    }
+
+    static func reading(subnet ip: String) -> NetworkPathSnapshot.Reading {
+        NetworkPathSnapshot.Reading(
+            isSatisfied: true, usesLocalInterface: true, hasLocalInterface: true,
+            subnets: [LocalSubnet(address: LocalSubnet.parseIPv4(ip)!, mask: 0xFFFF_FF00)]
+        )
+    }
+
+    // MARK: Audit review R-ROUTE-21, R-ROUTE-22, R-ROUTE-24
+
+    /// Off the server's network the patient identity check is skipped, so a held request is
+    /// refused at the route cap instead of after eight more seconds.
+    @Test func offNetworkTheGateSettlesWithinTheRouteCap() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in false }
+        container.currentPathReading = { NetworkPathSnapshot.Reading(isSatisfied: true, usesLocalInterface: false, hasLocalInterface: false) }
+        let askedPatiently = Flag()
+        container.jellyfinIdentity = { _, _ in
+            await MainActor.run { askedPatiently.value = true }
+            try? await Task.sleep(for: .seconds(30))
+            return .noAnswer
+        }
+        let started = ContinuousClock.now
+
+        await #expect(throws: APIError.self) {
+            _ = try await container.jellyfinAuthService.getCurrentUser()
+        }
+
+        #expect(!askedPatiently.value)
+        #expect(ContinuousClock.now - started < .seconds(5))
+        #expect(http.sent.isEmpty)
+    }
+
+    /// A server that was down when the epoch settled and answers later gets its LAN back on the
+    /// next pass, without waiting for a network change.
+    @Test func aLaterPassCanStillProveTheAddress() async throws {
+        let http = RecordingHTTPClient()
+        http.responses["/Users/Me"] = meJSON
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in false }
+        await container.routeResolveTask?.value
+        await #expect(throws: APIError.self) {
+            _ = try await container.jellyfinAuthService.getCurrentUser()
+        }
+
+        container.jellyfinIdentity = { _, _ in .matches }
+        await container.scheduleRouteResolve().value
+
+        _ = try await container.jellyfinAuthService.getCurrentUser()
+        #expect(http.sent.map(\.baseURL) == [internalURL])
+    }
+
+    /// A login screen left open across a network change does not keep the old network's proof.
+    @Test func aSignInClientLosesItsProofOnAPathChange() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+        let server = try #require(container.listKnownServers().first)
+        let client = container.makeSignInClient(for: server)
+        _ = await container.resolveSignInRoute(for: server, client: client)
+        let gate = try #require(client.routeGate)
+        #expect(gate.allows(internalURL))
+
+        NotificationCenter.default.post(name: .networkPathWillChange, object: nil)
+
+        #expect(!gate.allows(internalURL))
+        _ = await container.resolveSignInRoute(for: server, client: client)
+        #expect(gate.allows(internalURL))
     }
 
     // MARK: Audit review R-ROUTE-1 and R-ROUTE-3
