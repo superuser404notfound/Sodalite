@@ -65,8 +65,8 @@ final class SeerrClient {
     }
 
     /// The one path every call takes. A 401 on the cookie this client still holds says Seerr no longer
-    /// knows the session, which no retry can fix, so it is announced for the Catalog to re-check the
-    /// session. A cookie swapped during the request (profile switch) belongs to someone else's verdict.
+    /// knows the session, which no retry can fix, so it is announced for the app-wide re-check
+    /// (`SeerrSessionRejectionHandler`). A cookie swapped during the request (profile switch) belongs to someone else's verdict.
     private func send(_ endpoint: APIEndpoint) async throws -> (Data, HTTPURLResponse) {
         guard let baseURL else { throw APIError.invalidURL }
         let sentCookie = endpoint.requiresAuth ? sessionCookie : nil
