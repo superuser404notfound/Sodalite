@@ -134,6 +134,8 @@ final class LogTap: ObservableObject {
         if enabled {
             startFileSink()
         } else {
+            // Audit R-REDACTION-6: no descriptor stays open on a file nobody writes to.
+            fileQueue.async { closeSinkHandle() }
             LogTap.shared.note("[LogTap] file sink off; the file on disk is left where it is")
         }
     }
@@ -144,9 +146,7 @@ final class LogTap: ObservableObject {
         fileSinkEnabled = false
         let urls = persistedLogURLs
         fileQueue.async {
-            sinkLock.lock()
-            sinkHandle.close()
-            sinkLock.unlock()
+            closeSinkHandle()
             for url in urls { try? FileManager.default.removeItem(at: url) }
         }
     }
@@ -219,6 +219,17 @@ final class LogTap: ObservableObject {
     /// The one open handle of the sink. Only touched on `fileQueue`.
     private nonisolated static let sinkHandle = SinkHandle()
     private nonisolated static let sinkLock = NSLock()
+
+    private nonisolated static func closeSinkHandle() {
+        sinkLock.lock()
+        sinkHandle.close()
+        sinkLock.unlock()
+    }
+
+    /// Returns once every line queued so far has been written. For tests.
+    nonisolated static func flushFileSink() {
+        fileQueue.sync {}
+    }
 
     /// Synchronous and static so the rotation can be tested against a small segment. Only ever called
     /// on `fileQueue`, which is what makes the check-then-rename below race free.
@@ -319,7 +330,8 @@ nonisolated final class FileSinkBacklog: @unchecked Sendable {
     func admit(_ count: Int) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        if pending + count > limit {
+        // A batch that alone exceeds the limit still goes through when nothing is queued.
+        if pending > 0, pending + count > limit {
             dropped += count
             return false
         }
@@ -344,27 +356,46 @@ nonisolated final class FileSinkBacklog: @unchecked Sendable {
 
 /// A write handle kept open for the sink, with the size it has reached. Not thread safe on its own,
 /// `LogTap.sinkLock` serialises every call.
-private nonisolated final class SinkHandle: @unchecked Sendable {
+nonisolated final class SinkHandle: @unchecked Sendable {
     private var handle: FileHandle?
     private var url: URL?
+    private var identity: (device: dev_t, inode: ino_t)?
     private(set) var size: UInt64 = 0
+    private(set) var opens = 0
     private var writesSinceCheck = 0
+    static let checkInterval = 64
 
-    /// True when a handle for `target` is ready. Reopens when the target changed, and when the file was
-    /// removed behind our back (the system may purge Caches), which is checked every 64 writes.
+    /// True when a handle for `target` is ready. Reopens when the target changed, and every
+    /// `checkInterval` writes checks that the path still names the file we hold: the system may purge
+    /// Caches, and a file removed and recreated at the same path is a different file (audit
+    /// R-REDACTION-6), which an existence check would not notice.
     func open(_ target: URL) -> Bool {
         if handle != nil, url == target {
             writesSinceCheck += 1
-            if writesSinceCheck < 64 { return true }
+            if writesSinceCheck < Self.checkInterval { return true }
             writesSinceCheck = 0
-            if FileManager.default.fileExists(atPath: target.path) { return true }
+            if pathStillNamesOpenFile(target) { return true }
         }
         close()
         guard let fresh = try? FileHandle(forWritingTo: target) else { return false }
         size = (try? fresh.seekToEnd()) ?? 0
         handle = fresh
         url = target
+        identity = Self.identity(ofDescriptor: fresh.fileDescriptor)
+        opens += 1
         return true
+    }
+
+    private func pathStillNamesOpenFile(_ target: URL) -> Bool {
+        var info = stat()
+        guard stat(target.path, &info) == 0, let identity else { return false }
+        return info.st_dev == identity.device && info.st_ino == identity.inode
+    }
+
+    private static func identity(ofDescriptor fd: Int32) -> (device: dev_t, inode: ino_t)? {
+        var info = stat()
+        guard fstat(fd, &info) == 0 else { return nil }
+        return (info.st_dev, info.st_ino)
     }
 
     func write(_ data: Data) {
@@ -380,6 +411,8 @@ private nonisolated final class SinkHandle: @unchecked Sendable {
         try? handle?.close()
         handle = nil
         url = nil
+        identity = nil
         size = 0
+        writesSinceCheck = 0
     }
 }

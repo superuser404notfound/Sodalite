@@ -120,8 +120,16 @@ struct LogFileSinkRotationTests {
     }
 }
 
-/// Audit PTD-207: the sink keeps one handle open and its queue is bounded.
+/// Audit PTD-207 and R-REDACTION-6/7: the sink keeps one handle open, notices a replaced file, and its
+/// queue is bounded but drains.
 struct LogFileSinkBacklogTests {
+
+    private func folder() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sink-handle-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
 
     @Test("a batch past the limit is refused and counted, then reported once")
     func dropsAndCounts() {
@@ -134,14 +142,60 @@ struct LogFileSinkBacklogTests {
         #expect(backlog.admit(6))
     }
 
-    @Test("lines written one after another through the kept handle all land, and rotation still works")
-    func keptHandleWrites() throws {
-        let folder = FileManager.default.temporaryDirectory
-            .appendingPathComponent("sink-handle-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: folder) }
-        let live = folder.appendingPathComponent("l.txt")
-        let rotated = folder.appendingPathComponent("l.1.txt")
+    @Test("an empty queue admits a batch bigger than the limit")
+    func oversizedBatchIntoEmptyQueue() {
+        let backlog = FileSinkBacklog(limit: 10)
+        #expect(backlog.admit(50))
+        #expect(!backlog.admit(1))
+        backlog.finish(50)
+        #expect(backlog.admit(1))
+    }
+
+    @Test("twenty writes open the file once")
+    func oneOpenForManyWrites() throws {
+        let dir = try folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let live = dir.appendingPathComponent("l.txt")
+        FileManager.default.createFile(atPath: live.path, contents: nil)
+        let sink = SinkHandle()
+        defer { sink.close() }
+        for index in 0 ..< 20 {
+            #expect(sink.open(live))
+            sink.write(Data("line \(index)\n".utf8))
+        }
+        #expect(sink.opens == 1)
+        let text = (try? String(contentsOf: live, encoding: .utf8)) ?? ""
+        #expect(text.hasSuffix("line 19\n"))
+    }
+
+    @Test("a file replaced at the same path is reopened at the next check")
+    func replacedFileIsReopened() throws {
+        let dir = try folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let live = dir.appendingPathComponent("l.txt")
+        FileManager.default.createFile(atPath: live.path, contents: nil)
+        let sink = SinkHandle()
+        defer { sink.close() }
+        #expect(sink.open(live))
+        sink.write(Data("old\n".utf8))
+
+        try FileManager.default.removeItem(at: live)
+        FileManager.default.createFile(atPath: live.path, contents: nil)
+
+        for _ in 0 ..< SinkHandle.checkInterval {
+            #expect(sink.open(live))
+        }
+        sink.write(Data("new\n".utf8))
+        #expect(sink.opens == 2)
+        #expect(((try? String(contentsOf: live, encoding: .utf8)) ?? "") == "new\n")
+    }
+
+    @Test("lines written through the kept handle all land, and rotation still works")
+    func keptHandleRotates() throws {
+        let dir = try folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let live = dir.appendingPathComponent("l.txt")
+        let rotated = dir.appendingPathComponent("l.1.txt")
         FileManager.default.createFile(atPath: live.path, contents: nil)
 
         for index in 0 ..< 20 {
@@ -151,5 +205,31 @@ struct LogFileSinkBacklogTests {
             + ((try? String(contentsOf: live, encoding: .utf8)) ?? "")
         #expect(all.contains("line 19\n"))
         #expect(FileManager.default.fileExists(atPath: rotated.path))
+    }
+}
+
+/// Real sink path, so serialized with the other suites that arm it.
+@Suite(.serialized)
+struct LogFileSinkBurstTests {
+
+    @Test("a burst bigger than the queue limit drains and the backlog returns to zero")
+    func burstDrains() throws {
+        LogTap.fileSinkEnabled = true
+        defer { LogTap.fileSinkEnabled = false }
+        LogTap.startFileSink()
+        LogTap.flushFileSink()
+
+        let burst = (0 ..< 20_000).map { "2026-01-01T00:00:00.000Z  [burst-test] line \($0)" }
+        LogTap.appendPreformattedLinesToFileSink(burst)
+        LogTap.flushFileSink()
+        // The backlog is empty again, so the next batch is admitted and lands.
+        LogTap.appendPreformattedLinesToFileSink(["2026-01-01T00:00:01.000Z  [burst-test] after"])
+        LogTap.flushFileSink()
+
+        let url = try #require(LogTap.fileSinkURL)
+        let text = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        #expect(text.contains("[burst-test] after"))
+        #expect(LogTap.fileBacklog.admit(1))
+        LogTap.fileBacklog.finish(1)
     }
 }
