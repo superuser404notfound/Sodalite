@@ -21,6 +21,7 @@ struct HomeLatestMoviesRowTests {
         var latestCalls: [LatestCall] { lock.withLock { calls } }
 
         var librariesDelay: Duration = .milliseconds(150)
+        var latestDelay: Duration = .zero
         var libraries: [JellyfinLibrary] = []
         /// What a ParentId-scoped query answers, per library id.
         var latestByLibrary: [String: [JellyfinItem]] = [:]
@@ -36,6 +37,7 @@ struct HomeLatestMoviesRowTests {
 
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] {
             lock.withLock { calls.append(LatestCall(parentID: parentID, includeItemTypes: includeItemTypes)) }
+            if latestDelay > .zero { try? await Task.sleep(for: latestDelay) }
             guard includeItemTypes == [.movie] else { return [] }
             guard let parentID else { return aggregate }
             return latestByLibrary[parentID] ?? []
@@ -134,5 +136,21 @@ struct HomeLatestMoviesRowTests {
 
         let row = vm.rows.first { $0.type == .latestMovies }
         #expect(row?.items.map(\.id) == ["agg"])
+    }
+
+    /// BRW-210: four libraries at 250 ms each answer in about one delay, in library order.
+    @Test("libraries are asked at once and keep their order")
+    func librariesAreAskedConcurrently() async throws {
+        let service = RecordingService()
+        service.latestDelay = .milliseconds(250)
+        for id in ["a", "b", "c", "d"] { service.latestByLibrary[id] = [try Self.movie(id, added: "2026-11-01T10:00:00Z")] }
+        let (vm, serverID) = makeViewModel(service: service)
+        defer { forget(serverID: serverID) }
+
+        let clock = ContinuousClock()
+        let start = clock.now
+        let lists = await vm.latestLists(source: vm.sources[0], libraryIDs: ["a", "b", "c", "d"], includeItemTypes: [.movie], limit: 16)
+        #expect(lists.map { $0.map(\.id) } == [["a"], ["b"], ["c"], ["d"]])
+        #expect(clock.now - start < .milliseconds(700))
     }
 }

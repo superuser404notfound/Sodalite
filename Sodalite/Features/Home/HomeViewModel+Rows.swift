@@ -75,6 +75,28 @@ extension HomeViewModel {
         return (try? await source.libraryService.getItems(userID: source.userID, query: query).items) ?? []
     }
 
+    /// Latest from several libraries at once, in library order (BRW-210: one after another cost a
+    /// round trip per library, or two for a library whose Latest answers empty). A failed library
+    /// contributes an empty list.
+    func latestLists(
+        source: HomeSource, libraryIDs: [String], includeItemTypes: [ItemType]?, limit: Int
+    ) async -> [[JellyfinItem]] {
+        let tasks = libraryIDs.map { id in
+            Task { @MainActor in
+                (try? await self.latestInLibrary(
+                    source: source, libraryID: id, includeItemTypes: includeItemTypes, limit: limit
+                )) ?? []
+            }
+        }
+        return await withTaskCancellationHandler {
+            var lists: [[JellyfinItem]] = []
+            for task in tasks { lists.append(await task.value) }
+            return lists
+        } onCancel: {
+            tasks.forEach { $0.cancel() }
+        }
+    }
+
     /// The source's library list, awaited rather than read off `myMediaLibraries`: the fan-out
     /// fills that field from the same task group, so on the first load of a session it is empty.
     private func homeLibraries(source: HomeSource) async -> [JellyfinLibrary] {
@@ -149,13 +171,9 @@ extension HomeViewModel {
                         limit: 16
                     )
                 } else {
-                    var lists: [[JellyfinItem]] = []
-                    for library in movieLibraries {
-                        let list = (try? await latestInLibrary(
-                            source: source, libraryID: library.id, includeItemTypes: [.movie], limit: 16
-                        )) ?? []
-                        lists.append(list)
-                    }
+                    let lists = await latestLists(
+                        source: source, libraryIDs: movieLibraries.map(\.id), includeItemTypes: [.movie], limit: 16
+                    )
                     items = Array(HomeMerger.merge(lists, type: .latestMovies, mergedContinueWatching: false).prefix(16))
                 }
 
@@ -188,13 +206,9 @@ extension HomeViewModel {
                     )
                     items = Array(await foldIntoSeries(latest, source: source).prefix(16))
                 } else {
-                    var lists: [[JellyfinItem]] = []
-                    for library in showLibraries {
-                        let list = (try? await latestInLibrary(
-                            source: source, libraryID: library.id, includeItemTypes: nil, limit: 16
-                        )) ?? []
-                        lists.append(list)
-                    }
+                    let lists = await latestLists(
+                        source: source, libraryIDs: showLibraries.map(\.id), includeItemTypes: nil, limit: 16
+                    )
                     var merged: [JellyfinItem] = []
                     let deepest = lists.map(\.count).max() ?? 0
                     for index in 0..<deepest {
