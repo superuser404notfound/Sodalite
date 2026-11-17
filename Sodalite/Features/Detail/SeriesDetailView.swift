@@ -10,6 +10,7 @@ struct SeriesDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
+    @State private var popAfterSheetDismiss = false
     @State private var viewModel: DetailViewModel?
     @State private var selectedEpisode: JellyfinItem?
     /// Episode IDs whose enrichedEpisode fetch settled; gates the episode-mode synopsis placeholder so an overview-less episode collapses the box instead of reserving it forever.
@@ -281,7 +282,7 @@ struct SeriesDetailView: View {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: playItem,
-                    startFromBeginning: playFromBeginning,
+                    startFromBeginning: playFromBeginning || (playItem.flatMap { viewModel?.wasMarkedPlayedInSession($0) } ?? false),
                     playbackService: session.playbackService,
                     itemService: session.itemService,
                     userID: userID,
@@ -563,7 +564,12 @@ struct SeriesDetailView: View {
                 )
             }
         }
-        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain) {
+        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain, onDismiss: {
+            if popAfterSheetDismiss {
+                popAfterSheetDismiss = false
+                dismiss()
+            }
+        }) {
             if let vm = viewModel { deletionSheet(vm: vm) }
         }
     }
@@ -578,7 +584,7 @@ struct SeriesDetailView: View {
                 seasons: deletionSeasonOptions(from: vm.seasons)
             ),
             onConfirm: { request in
-                await DetailDeletion.run(
+                let outcome = await DetailDeletion.run(
                     serverID: appState.activeServer?.id,
                     cascadedToArrStack: request.cascadeToArrStack && request.deleteEntireSeries,
                     popsWhenRemoved: request.deleteEntireSeries,
@@ -610,6 +616,9 @@ struct SeriesDetailView: View {
                         )
                     }
                 }
+                // Partial: the series is gone, the warning stays up, the page follows the sheet out.
+                if request.deleteEntireSeries, case .partialSuccess = outcome { popAfterSheetDismiss = true }
+                return outcome
             }
         )
     }

@@ -20,6 +20,9 @@ enum DetailDeletion {
 
     /// Runs `delete`, then the cleanup for what it removed, and returns the toast outcome.
     /// `popsWhenRemoved` is the whole-title delete; seasons stay on the page and refresh instead.
+    /// The page closes by itself only on full success. After a partial one the sheet keeps its
+    /// warning until Cancel, and the caller closes the page from the sheet's dismissal
+    /// (audit review R-DET-1).
     static func run(
         serverID: String?,
         cascadedToArrStack: Bool,
@@ -27,6 +30,7 @@ enum DetailDeletion {
         assumesPartialRemoval: Bool = false,
         evictFilterCache: (String) -> Void = { FilterCache.shared.evict(serverID: $0) },
         post: (Notification.Name) -> Void = { NotificationCenter.default.post(name: $0, object: nil) },
+        popDelay: Duration = .milliseconds(1100),
         pop: @escaping @MainActor () -> Void,
         refreshAfterRemoval: () async -> Void = {},
         delete: () async throws -> Void
@@ -41,10 +45,12 @@ enum DetailDeletion {
             // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
             if cascadedToArrStack { post(.seerrRequestsDidChange) }
             if popsWhenRemoved {
-                // Pop after the sheet's toast hold.
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(1100))
-                    pop()
+                if failure == nil {
+                    // Pop after the sheet's toast hold.
+                    Task { @MainActor in
+                        try? await Task.sleep(for: popDelay)
+                        pop()
+                    }
                 }
             } else {
                 await refreshAfterRemoval()

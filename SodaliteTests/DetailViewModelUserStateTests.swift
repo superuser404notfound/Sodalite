@@ -5,21 +5,38 @@ import Foundation
 /// Audit DET-202, 203, 204, 205, 206, 207: what a detail page shows for watched, resume position and
 /// favourite after the viewer's own writes, playback stops and slow responses.
 @MainActor
+@Suite(.timeLimit(.minutes(2)))
 struct DetailViewModelUserStateTests {
     struct Failure: Error {}
 
-    /// A gate a fake service parks on until the test lets it go.
+    /// Polls `condition` until it holds or `timeout` passes. Returns whether it held.
+    static func waitFor(timeout: Duration = .seconds(5), _ condition: () -> Bool) async -> Bool {
+        let deadline = ContinuousClock.now + timeout
+        while !condition() {
+            if ContinuousClock.now >= deadline { return false }
+            await Task.yield()
+        }
+        return true
+    }
+
+    /// A gate a fake service parks on until the test lets it go. Bounded, so a regression that never
+    /// reaches it fails the test instead of hanging the run.
     final class Gate: @unchecked Sendable {
         private let stream: AsyncStream<Void>
         private let continuation: AsyncStream<Void>.Continuation
-        private(set) var reached = false
+        private let lock = NSLock()
+        private var _reached = false
+        var reached: Bool { lock.withLock { _reached } }
         init() { (stream, continuation) = AsyncStream.makeStream() }
         func wait() async {
-            reached = true
+            lock.withLock { _reached = true }
             for await _ in stream { return }
         }
         func open() { continuation.yield() }
-        func waitUntilReached() async { while !reached { await Task.yield() } }
+        func waitUntilReached() async {
+            let ok = await DetailViewModelUserStateTests.waitFor { self.reached }
+            if !ok { Issue.record("gate was never reached") }
+        }
     }
 
     final class Service: JellyfinItemServiceProtocol, @unchecked Sendable {
@@ -28,6 +45,10 @@ struct DetailViewModelUserStateTests {
         var seasons: [JellyfinItem] = []
         var episodes: [String: [JellyfinItem]] = [:]
         var episodesGate: Gate?
+        var favoriteGate: Gate?
+        var playedGate: Gate?
+        var favoriteCalls: [Bool] = []
+        var playedCalls: [Bool] = []
 
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem {
             await detailGate?.wait()
@@ -46,8 +67,14 @@ struct DetailViewModelUserStateTests {
         func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse { throw Failure() }
         func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse { throw Failure() }
-        func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
-        func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
+        func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {
+            favoriteCalls.append(isFavorite)
+            await favoriteGate?.wait()
+        }
+        func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {
+            playedCalls.append(isPlayed)
+            await playedGate?.wait()
+        }
         func setRating(userID: String, itemID: String, rating: Double?) async throws {}
         func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse { throw Failure() }
@@ -257,5 +284,101 @@ struct DetailViewModelUserStateTests {
 
         #expect(vm.selectedSeasonID == "s4")
         #expect(vm.nextUpEpisode?.id == "s2e3")
+        #expect(vm.currentEpisodeID == "s2e3")
+    }
+
+    // MARK: Review follow-ups
+
+    @Test(.timeLimit(.minutes(1)))
+    func aDetailResponseThatStartedBeforeAWatchedToggleDoesNotUndoIt() async throws {
+        let service = Service()
+        let gate = Gate()
+        service.detailGate = gate
+        service.detail = try decode(#"{"Id":"m1","Name":"Film","Type":"Movie"}"#)
+        let vm = try makeVM(#"{"Id":"m1","Name":"Film","Type":"Movie"}"#, service: service)
+
+        let load = Task { await vm.loadFullDetail() }
+        await gate.waitUntilReached()
+        await vm.togglePlayed()
+        #expect(vm.isPlayed)
+        gate.open()
+        await load.value
+
+        #expect(vm.isPlayed)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func aPressDuringAFavouriteWriteIsAppliedLastPressWins() async throws {
+        let service = Service()
+        let gate = Gate()
+        service.favoriteGate = gate
+        let vm = try makeVM(#"{"Id":"m1","Name":"Film","Type":"Movie"}"#, service: service)
+
+        let first = Task { await vm.toggleFavorite() }
+        await gate.waitUntilReached()
+        await vm.toggleFavorite()
+        #expect(!vm.isFavorite, "the heart follows the second press at once")
+        gate.open()
+        service.favoriteGate = nil
+        await first.value
+
+        #expect(service.favoriteCalls == [true, false])
+        #expect(!vm.isFavorite)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func twoPressesThatCancelOutSendOnlyTheFirstWrite() async throws {
+        let service = Service()
+        let gate = Gate()
+        service.favoriteGate = gate
+        let vm = try makeVM(#"{"Id":"m1","Name":"Film","Type":"Movie"}"#, service: service)
+
+        let first = Task { await vm.toggleFavorite() }
+        await gate.waitUntilReached()
+        await vm.toggleFavorite()
+        await vm.toggleFavorite()
+        gate.open()
+        await first.value
+
+        #expect(service.favoriteCalls == [true])
+        #expect(vm.isFavorite)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func aPressDuringAWatchedWriteIsAppliedLastPressWins() async throws {
+        let service = Service()
+        let gate = Gate()
+        service.playedGate = gate
+        let vm = try makeVM(#"{"Id":"m1","Name":"Film","Type":"Movie"}"#, service: service)
+
+        let first = Task { await vm.togglePlayed() }
+        await gate.waitUntilReached()
+        await vm.togglePlayed()
+        #expect(!vm.isPlayed)
+        gate.open()
+        service.playedGate = nil
+        await first.value
+
+        #expect(service.playedCalls == [true, false])
+        #expect(!vm.isPlayed)
+        #expect(vm.item.userData?.played == false)
+    }
+
+    @Test func markingUnwatchedAlsoHidesTheResumeIndicator() async throws {
+        let vm = try makeVM(seriesJSON)
+        let ep = try episode("e1", season: "s1", position: 400)
+        await vm.setEpisodePlayed(ep, isPlayed: false)
+        #expect(vm.wasMarkedPlayedInSession(ep))
+        #expect(vm.effectiveState(of: ep).positionTicks == 0)
+    }
+
+    @Test func aPlaybackStopAfterUnwatchingDoesNotFlipTheMovieBackToWatched() async throws {
+        let vm = try makeVM(#"{"Id":"m1","Name":"Film","Type":"Movie","RunTimeTicks":1000,"UserData":{"Played":true}}"#)
+        await vm.togglePlayed()
+        #expect(!vm.isPlayed)
+
+        vm.applyPlaybackPosition(itemID: "m1", ticks: 300)
+
+        #expect(!vm.isPlayed)
     }
 }

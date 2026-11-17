@@ -15,6 +15,8 @@ final class DetailViewModel {
     private var favoriteWrites = 0
     private var playedWrites = 0
     private var isWritingFavorite = false
+    private var queuedFavorite: Bool?
+    private var queuedPlayed: Bool?
     private var isWritingPlayed = false
     /// Played overrides keyed by item/episode/season ID; live-updates the watched badge without mutating the immutable JellyfinItem (same "pass state to the card" pattern as isFocused/isCurrent).
     var playedOverrides: [String: Bool] = [:]
@@ -344,9 +346,12 @@ final class DetailViewModel {
                       let nextEp = await task.value?.items.first else { return }
                 self.nextUpEpisode = nextEp
                 // A season the viewer already picked while Next Up was out stays (audit DET-204).
+                // Play still targets Next Up either way, so its id and PlaybackInfo are set regardless.
                 if let seasonID = nextEp.seasonId, self.selectedSeasonID == nil {
                     self.selectedSeasonID = seasonID
                     await self.loadEpisodes(seasonID: seasonID)
+                }
+                if nextEp.seasonId != nil {
                     self.currentEpisodeID = nextEp.id
                     self.prefetchPlaybackInfo(for: nextEp.id)
                 }
@@ -697,18 +702,33 @@ final class DetailViewModel {
     }
 
     func toggleFavorite() async {
-        guard !isWritingFavorite else { return }
-        let oldValue = isFavorite
+        // A press while a write is out is not lost: the heart flips now and the last wanted value
+        // goes out when the running write ends (audit review R-DET-6).
+        if isWritingFavorite {
+            isFavorite.toggle()
+            queuedFavorite = isFavorite
+            return
+        }
+        var confirmed = isFavorite
         isFavorite.toggle()
-        favoriteWrites += 1
+        var target = isFavorite
         isWritingFavorite = true
         defer { isWritingFavorite = false }
-
-        do {
-            try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: isFavorite)
-            NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
-        } catch {
-            isFavorite = oldValue
+        while true {
+            favoriteWrites += 1
+            do {
+                try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: target)
+                confirmed = target
+                NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
+            } catch {
+                queuedFavorite = nil
+                isFavorite = confirmed
+                return
+            }
+            guard let next = queuedFavorite else { return }
+            queuedFavorite = nil
+            if next == confirmed { return }
+            target = next
         }
     }
 
@@ -771,12 +791,17 @@ final class DetailViewModel {
     /// which reads the resume position off the item (audit DET-205).
     func resolvedForPlayback(_ candidate: JellyfinItem) -> JellyfinItem {
         guard let override = playedOverrides[candidate.id] else { return candidate }
+        return Self.marked(candidate, played: override)
+    }
+
+    /// The item as the server holds it after a mark: played flag set, resume position gone.
+    private static func marked(_ candidate: JellyfinItem, played: Bool) -> JellyfinItem {
         var copy = candidate
         let base = copy.userData ?? UserItemData(
             playbackPositionTicks: nil, playCount: nil, isFavorite: nil,
             played: nil, unplayedItemCount: nil, playedPercentage: nil, lastPlayedDate: nil
         )
-        copy.userData = base.with(playbackPositionTicks: 0, playedPercentage: override ? 100 : 0, played: override)
+        copy.userData = base.with(playbackPositionTicks: 0, playedPercentage: played ? 100 : 0, played: played)
         return copy
     }
 
@@ -804,36 +829,54 @@ final class DetailViewModel {
         effectiveState(of: item).isPlayed
     }
 
-    /// Did the viewer mark this watched in THIS session? A narrower question than ``isPlayed(_:)``,
-    /// and the only one the resume indicator may ask. An explicit mark-watched makes the server drop
-    /// the item's resume position (`MarkPlayed` resets it), so the capsule has to go before the
-    /// refetch; a `played` that arrived FROM the server alongside a position is a re-watch and keeps
-    /// its capsule.
+    /// Did the viewer mark this watched or unwatched in THIS session? A narrower question than
+    /// ``isPlayed(_:)``, and the only one the resume indicator may ask. Either mark makes the server
+    /// drop the item's resume position, so the capsule has to go before the refetch; a `played` that
+    /// arrived FROM the server alongside a position is a re-watch and keeps its capsule.
     func wasMarkedPlayedInSession(_ item: JellyfinItem) -> Bool {
-        playedOverrides[item.id] == true
+        playedOverrides[item.id] != nil
     }
 
     /// Toggle the top-level item (movie or whole series).
     func togglePlayed() async {
-        guard !isWritingPlayed else { return }
-        let oldValue = isPlayed
-        let oldOverride = playedOverrides[item.id]
+        // Same last-press-wins rule as the favourite (audit review R-DET-6).
+        if isWritingPlayed {
+            isPlayed.toggle()
+            playedOverrides[item.id] = isPlayed
+            queuedPlayed = isPlayed
+            return
+        }
+        var confirmed = isPlayed
+        var confirmedOverride = playedOverrides[item.id]
         isPlayed.toggle()
         playedOverrides[item.id] = isPlayed
-        playedWrites += 1
+        var target = isPlayed
         isWritingPlayed = true
         defer { isWritingPlayed = false }
-
-        do {
-            try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: isPlayed)
-            trakt?.playedChanged(for: item, played: isPlayed)
-            NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
-            // Marking watched drops the item out of Resume and advances Next Up, so both
-            // shelf sections are stale.
-            TopShelfRefresher.invalidate()
-        } catch {
-            isPlayed = oldValue
-            playedOverrides[item.id] = oldOverride
+        while true {
+            playedWrites += 1
+            do {
+                try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: target)
+                // The item copy takes the mark too, so a later playback patch cannot flip isPlayed
+                // back to what the page opened with (audit review R-DET-4).
+                item = Self.marked(item, played: target)
+                confirmed = target
+                confirmedOverride = target
+                trakt?.playedChanged(for: item, played: target)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                // Marking watched drops the item out of Resume and advances Next Up, so both
+                // shelf sections are stale.
+                TopShelfRefresher.invalidate()
+            } catch {
+                queuedPlayed = nil
+                isPlayed = confirmed
+                playedOverrides[item.id] = confirmedOverride
+                return
+            }
+            guard let next = queuedPlayed else { return }
+            queuedPlayed = nil
+            if next == confirmed { return }
+            target = next
         }
     }
 

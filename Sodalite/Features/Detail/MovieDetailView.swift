@@ -16,6 +16,7 @@ struct MovieDetailView: View {
     @State private var navigateToPerson: PersonRoute?
     /// Catalog similar row target; the series page has carried the same destination since the Seerr request button.
     @State private var navigateToSeerrRequest: SeerrMedia?
+    @State private var popAfterSheetDismiss = false
     @State private var showPlayer = false
     @State private var playFromBeginning = false
     /// Sodalite#81: the item whose download rung is being asked for.
@@ -136,7 +137,9 @@ struct MovieDetailView: View {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? (viewModel.map { $0.resolvedForPlayback($0.item) } ?? item) : nil,
-                    startFromBeginning: playFromBeginning,
+                    // A session mark means the server dropped the position; a download's own progress
+                    // does not know that (audit review R-DET-2).
+                    startFromBeginning: playFromBeginning || (viewModel?.wasMarkedPlayedInSession(viewModel?.item ?? item) ?? false),
                     playbackService: session.playbackService,
                     itemService: session.itemService,
                     userID: userID,
@@ -350,7 +353,12 @@ struct MovieDetailView: View {
                 )
             }
         }
-        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain) {
+        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain, onDismiss: {
+            if popAfterSheetDismiss {
+                popAfterSheetDismiss = false
+                dismiss()
+            }
+        }) {
             if let vm = viewModel {
                 let popDetail = dismiss
                 MediaDeletionSheet(
@@ -360,7 +368,7 @@ struct MovieDetailView: View {
                         title: vm.item.name
                     ),
                     onConfirm: { request in
-                        await DetailDeletion.run(
+                        let outcome = await DetailDeletion.run(
                             serverID: appState.activeServer?.id,
                             cascadedToArrStack: request.cascadeToArrStack,
                             popsWhenRemoved: true,
@@ -372,6 +380,9 @@ struct MovieDetailView: View {
                                 cascadeToArrStack: request.cascadeToArrStack
                             )
                         }
+                        // Partial: the item is gone, the warning stays up, the page follows the sheet out.
+                        if case .partialSuccess = outcome { popAfterSheetDismiss = true }
+                        return outcome
                     }
                 )
             }
