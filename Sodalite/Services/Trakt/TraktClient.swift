@@ -210,7 +210,7 @@ final class TraktClient {
             }
         }
         refreshTask = task
-        defer { refreshTask = nil }
+        defer { if refreshTask == task { refreshTask = nil } }
         do {
             let fresh = try await task.value
             setTokens(fresh)
