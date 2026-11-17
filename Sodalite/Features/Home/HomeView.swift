@@ -162,6 +162,7 @@ struct HomeView: View {
                     sources: dependencies.homeSources(activeUserID: userID)
                 )
                 attachCallbacks(to: viewModel)
+                viewModel?.isHidden = homeIsHidden
                 Task { await viewModel?.loadContent() }
             } else {
                 // Pick up new server-side content on the way back to the tab; the view model owns
@@ -189,6 +190,7 @@ struct HomeView: View {
         // cover already arrives by notification, what passed in the meantime does not.
         // Also the way back to a kept tvOS tab page, where `onAppear` never fires again (BRW-204).
         .onChange(of: homeIsHidden) { _, hidden in
+            viewModel?.isHidden = hidden
             guard !hidden else { return }
             Task { await viewModel?.refreshIfStale(trigger: .coverDismissed) }
         }
@@ -286,6 +288,7 @@ struct HomeView: View {
                 sources: dependencies.homeSources(activeUserID: userID)
             )
             attachCallbacks(to: viewModel)
+            viewModel?.isHidden = homeIsHidden
             Task { await viewModel?.loadContent() }
         }
         // The participating servers changed (Combine servers switched, a server added or muted):
@@ -443,8 +446,12 @@ struct HomeView: View {
         let urls = HomePrefetchPlan.urls(rows: rows, limit: limit)
         guard !urls.isEmpty else { return }
         let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
-        prefetchTask?.cancel()
+        // The cancelled run releases its URL claims as it drains; waiting for it keeps the
+        // replacement from skipping them (audit review R-BROWSE-1).
+        let previous = prefetchTask
+        previous?.cancel()
         prefetchTask = Task.detached(priority: .utility) {
+            await previous?.value
             let warmed = await ImageCache.prefetch(urls, auth: auth)
             let evicted = ImageCache.shared.takeEvictionCount()
             if warmed > 0 || evicted > 0 {

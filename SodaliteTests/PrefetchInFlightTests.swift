@@ -21,4 +21,33 @@ struct PrefetchInFlightTests {
         #expect(claimed == [url])
         PrefetchInFlight.release(claimed)
     }
+
+    /// R-BROWSE-1: a run replaced after waiting for the cancelled one loads every URL, once.
+    @Test func aReplacedRunLoadsEveryUrlOnce() async throws {
+        let urls = try (0..<4).map { try #require(URL(string: "https://img.example/prefetch-replace-\($0).jpg")) }
+        let auth = ImageAuth(bases: [])
+        let started = LoadLog()
+        let first = Task {
+            await ImageCache.prefetch(urls, auth: auth) { url, _ in
+                started.add(url)
+                do { try await Task.sleep(for: .seconds(30)) } catch { return false }
+                return true
+            }
+        }
+        while started.count < min(urls.count, ImageFetch.connectionsPerHost / 2) { try await Task.sleep(for: .milliseconds(10)) }
+        first.cancel()
+        _ = await first.value
+        let second = LoadLog()
+        let warmed = await ImageCache.prefetch(urls, auth: auth) { url, _ in second.add(url); return true }
+        #expect(warmed == 4)
+        #expect(second.urls.sorted { $0.absoluteString < $1.absoluteString } == urls)
+    }
+}
+
+nonisolated private final class LoadLog: @unchecked Sendable {
+    private let lock = NSLock()
+    private var loaded: [URL] = []
+    func add(_ url: URL) { lock.withLock { loaded.append(url) } }
+    var count: Int { lock.withLock { loaded.count } }
+    var urls: [URL] { lock.withLock { loaded } }
 }

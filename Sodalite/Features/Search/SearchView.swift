@@ -172,8 +172,12 @@ struct SearchView: View {
         }
         guard !urls.isEmpty else { return }
         let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
-        prefetchTask?.cancel()
+        // The cancelled run releases its URL claims as it drains; waiting for it keeps the
+        // replacement from skipping them (audit review R-BROWSE-1).
+        let previous = prefetchTask
+        previous?.cancel()
         prefetchTask = Task.detached(priority: .utility) {
+            await previous?.value
             await ImageCache.prefetch(urls, auth: auth)
         }
     }

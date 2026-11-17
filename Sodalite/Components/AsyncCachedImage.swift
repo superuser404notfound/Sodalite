@@ -378,7 +378,11 @@ extension ImageCache {
     /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `auth` mirrors `load`: X-Emby-Token only for a participating Jellyfin server so external CDN URLs don't leak the token.
     /// Returns how many images it decoded into the cache, for the caller's diagnostic line.
     @discardableResult
-    static func prefetch(_ urls: [URL], auth: ImageAuth) async -> Int {
+    static func prefetch(
+        _ urls: [URL],
+        auth: ImageAuth,
+        load: @escaping @Sendable (URL, ImageAuth) async -> Bool = { await prefetchOne(url: $0, auth: $1) }
+    ) async -> Int {
         // Skip what another prefetch is already loading (audit BRW-203: three overlapping runs
         // fetched and decoded every search poster three times).
         let pending = PrefetchInFlight.claim(urls.filter { ImageCache.shared.image(for: $0) == nil })
@@ -394,7 +398,7 @@ extension ImageCache {
             for _ in 0..<min(maxConcurrent, pending.count) {
                 guard let url = iter.next() else { break }
                 group.addTask {
-                    await prefetchOne(url: url, auth: auth)
+                    await load(url, auth)
                 }
             }
             var warmed = 0
@@ -402,7 +406,7 @@ extension ImageCache {
                 if stored { warmed += 1 }
                 if let url = iter.next() {
                     group.addTask {
-                        await prefetchOne(url: url, auth: auth)
+                        await load(url, auth)
                     }
                 }
             }
