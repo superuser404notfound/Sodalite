@@ -337,7 +337,10 @@ struct FilteredGridView: View {
                             gridLetter = AlphabetIndex.letter(for: item.sortName ?? item.name)
                         }
                         #endif
-                        .enrichesPosterBadges(usesSparseGrid ? store.loadedItems : items)
+                        .modifier(GridBadgeEnrichment(
+                            sparse: usesSparseGrid, revision: store.loadedRevision,
+                            sparseItems: { store.loadedItems }, items: items
+                        ))
 
                         if isLoadingMore {
                             ProgressView()
@@ -976,5 +979,22 @@ struct GridCardButtonStyle: ButtonStyle {
         // Stroke drawn inside MediaCard (poster only), keeping the title below outside the outline.
         configuration.label
             .focusResponse(.card, isFocused: isFocused)
+    }
+}
+
+/// Picks the badge-enrichment form: a sparse grid keys on the store's revision and copies its items
+/// only when the task runs, a plain grid keeps the item ids (BRW-209).
+private struct GridBadgeEnrichment: ViewModifier {
+    let sparse: Bool
+    let revision: Int
+    let sparseItems: () -> [JellyfinItem]
+    let items: [JellyfinItem]
+
+    func body(content: Content) -> some View {
+        if sparse {
+            content.enrichesPosterBadges(revision: revision, items: sparseItems)
+        } else {
+            content.enrichesPosterBadges(items)
+        }
     }
 }
