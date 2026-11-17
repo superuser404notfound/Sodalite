@@ -12,10 +12,14 @@ struct SeerrRequestEditModelTests {
     private final class ConfigSpy: SeerrServiceConfigServiceProtocol, @unchecked Sendable {
         var servers: [SeerrServiceServer] = []
         var details: [Int: SeerrServiceDetails] = [:]
+        var delays: [Int: Duration] = [:]
         func radarrServers() async throws -> [SeerrServiceServer] { servers }
         func radarrDetails(serverID: Int) async throws -> SeerrServiceDetails { try detail(serverID) }
         func sonarrServers() async throws -> [SeerrServiceServer] { servers }
-        func sonarrDetails(serverID: Int) async throws -> SeerrServiceDetails { try detail(serverID) }
+        func sonarrDetails(serverID: Int) async throws -> SeerrServiceDetails {
+            if let delay = delays[serverID] { try? await Task.sleep(for: delay) }
+            return try detail(serverID)
+        }
         private func detail(_ id: Int) throws -> SeerrServiceDetails {
             guard let d = details[id] else { throw URLError(.badServerResponse) }
             return d
@@ -130,5 +134,44 @@ struct SeerrRequestEditModelTests {
         #expect(json["mediaType"] as? String == "movie")
         #expect(json["serverId"] as? Int == 1)
         #expect(json["seasons"] == nil)
+    }
+
+    /// CAT-203. With the server options failed to load, the pickers are empty and the body would clear the
+    /// request's profile, folder and tags; Save must stay off.
+    @Test func saveStaysOffWhenTheServerOptionsFailedToLoad() async {
+        let spy = config()
+        spy.details[1] = nil
+        let req = request(#""serverId": 1, "profileId": 11, "rootFolder": "/anime", "tags": [4]"#)
+        let model = SeerrRequestEditModel(request: req, configService: spy)
+        await model.bootstrap()
+        #expect(model.loadError != nil)
+        #expect(model.isReady == false)
+        #expect(model.updateBody == nil)
+
+        spy.details[1] = config().details[1]
+        await model.bootstrap()
+        #expect(model.isReady)
+        #expect(model.updateBody?.profileId == 11)
+        #expect(model.updateBody?.tags == [4])
+    }
+
+    /// CAT-208. Cycle to server 2 and straight back to 1: the slow answer for 2 must not replace the lists.
+    @Test func aSlowAnswerForAnEarlierServerDoesNotReplaceTheCurrentOnesLists() async {
+        let spy = config()
+        spy.delays[2] = .milliseconds(300)
+        let req = request(#""serverId": 1, "profileId": 10, "rootFolder": "/tv""#)
+        let model = SeerrRequestEditModel(request: req, configService: spy)
+        await model.bootstrap()
+
+        let slow = Task { await model.selectServer(2) }
+        try? await Task.sleep(for: .milliseconds(20))
+        await model.selectServer(1)
+        await slow.value
+
+        #expect(model.serverID == 1)
+        #expect(model.profiles.map(\.id) == [9, 10, 11])
+        #expect(model.profileID == 10)
+        #expect(model.rootFolder == "/tv")
+        #expect(model.isReady)
     }
 }
