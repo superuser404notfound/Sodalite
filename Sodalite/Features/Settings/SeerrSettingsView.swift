@@ -618,6 +618,12 @@ struct SeerrSettingsView: View {
                     settings: serverSettings
                 )
             guard dependencies.isActiveProfile(profile) else {
+                // The login response replaced the cookie the switch restored for the new profile.
+                // Put that profile's own session back instead of leaving it signed out (audit review R-W2-3).
+                if let userID = appState.activeUser?.id, let serverID = appState.activeServer?.id,
+                   dependencies.restoreSeerrSession(forJellyfinUserID: userID, jellyfinServerID: serverID) != nil {
+                    return
+                }
                 dependencies.seerrClient.sessionCookie = nil
                 return
             }
