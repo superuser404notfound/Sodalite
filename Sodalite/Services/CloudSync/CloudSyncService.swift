@@ -1169,9 +1169,9 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     }
 
     /// A server record can move the default-server pin, which lives in the auth store, so the auth
-    /// snapshot is re-baselined or the debounced observer reads the apply as a local edit two seconds
-    /// later and uploads it back. Only when nothing was pending, though: an auth edit still inside
-    /// its debounce is already in the store, and re-baselining over it meant it never went up.
+    /// snapshot is re-baselined or the observer reads the apply as a local edit and uploads it back.
+    /// Only when nothing was pending, though: an auth edit the observer has not seen yet is already
+    /// in the store, and re-baselining over it meant it never went up.
     private func preservingPendingAuthEdit(_ apply: () -> Void) {
         let before = dependencies.collectSettingsPayload(.auth, stamp: .distantPast)
         let nothingPending = lastSettingsSnapshot[.auth] == before
