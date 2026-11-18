@@ -3841,7 +3841,7 @@ final class PlayerViewModel {
                     try? await Task.sleep(for: .seconds(1))
                     continue
                 }
-                let cues = SRTParser.parse(content)
+                let cues = await SRTParser.parse(content)
                 if cues.isEmpty {
                     Self.subtitleLog.notice("→ attempt \(attempt, privacy: .public) parsed 0 cues from \(content.count, privacy: .public) bytes")
                     if attempt == 2 { return }
@@ -4281,12 +4281,7 @@ final class PlayerViewModel {
     }
 
     func formatSeconds(_ seconds: Double) -> String {
-        let total = Int(max(0, seconds))
-        let h = total / 3600
-        let m = (total % 3600) / 60
-        let s = total % 60
-        if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
-        return String(format: "%02d:%02d", m, s)
+        seconds.clockDisplay(padMinutes: true)
     }
 }
 

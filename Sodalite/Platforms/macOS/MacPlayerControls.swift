@@ -223,10 +223,7 @@ struct MacPlayerMenus: View {
     }
 
     static func chapterTitle(_ chapter: ChapterInfo, index: Int) -> String {
-        let total = Int(max(0, chapter.startSeconds))
-        let stamp = total >= 3600
-            ? String(format: "%d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60)
-            : String(format: "%d:%02d", total / 60, total % 60)
+        let stamp = chapter.startSeconds.clockDisplay()
         let name = chapter.name.flatMap { $0.isEmpty ? nil : $0 }
             ?? String(localized: "player.chapter.fallback", defaultValue: "Chapter \(index + 1)")
         return "\(stamp)  \(name)"
