@@ -92,5 +92,7 @@ struct SkipSegmentResolverTests {
         #expect(SkipSegmentKind.intro.buttonLabel != SkipSegmentKind.recap.buttonLabel)
         #expect(SkipSegmentKind.recap.buttonLabel.isEmpty == false)
         #expect(SkipSegmentKind.commercial.buttonLabel != SkipSegmentKind.intro.buttonLabel)
+        #expect(SkipSegmentKind.preroll.buttonLabel.isEmpty == false)
+        #expect(SkipSegmentKind.preroll.buttonLabel != SkipSegmentKind.intro.buttonLabel)
     }
 }

@@ -6,12 +6,15 @@ enum SkipSegmentKind: Sendable {
     case recap
     case intro
     case commercial
+    /// Sodalite#244: a whole pre-roll video before the movie, not a range inside it.
+    case preroll
 
     var buttonLabel: String {
         switch self {
         case .recap: String(localized: "player.skipRecap", defaultValue: "Skip Recap")
         case .intro: String(localized: "player.skipIntro", defaultValue: "Skip Intro")
         case .commercial: String(localized: "player.skipCommercial", defaultValue: "Skip Commercial")
+        case .preroll: String(localized: "player.skipPreroll", defaultValue: "Skip Pre-roll")
         }
     }
 }

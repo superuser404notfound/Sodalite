@@ -251,7 +251,7 @@ extension PlayerViewModel {
     /// model (both episode switches, the outage retry, the rung switch, the item recovery) calls it, so a
     /// field cannot be wiped by one path and forgotten by another (audit PCORE-R202). A new per-session
     /// field goes here, and into `SessionResetTests`. The item switch deliberately keeps the engine, the
-    /// play queue, `isInputLocked` and the picker's season list (issue #15).
+    /// play queue, `isInputLocked`, the picker's season list (issue #15) and `prerollsConsumed`.
     func resetSessionState(_ scope: SessionResetScope) {
         resetTrackState(clearsStreams: scope.isItemSwitch)
         // The engine comes back at 1.0x; the speed badge must match it instead of the prior session's rate.

@@ -53,7 +53,15 @@ final class PlayerViewModel {
     /// Localised error headline above `errorMessage` in the overlay.
     var errorTitle: String?
     var isPlaying = false
-    var showControls = false
+    var showControls = false {
+        // No transport over a pre-roll on tvOS (Sodalite#244), Menu leaves there and Select skips. On
+        // iPhone, iPad and Mac the close button lives in the controls, so they still open.
+        didSet {
+            #if os(tvOS)
+            if showControls && isPlayingPreroll { showControls = false }
+            #endif
+        }
+    }
     /// iPhone Duo standing half folded: the picture sits above the fold and the controls stay below it.
     /// Set by the iOS host from the fold's reserved region; nil everywhere else.
     var foldLayout: FoldLayout?
@@ -552,6 +560,13 @@ final class PlayerViewModel {
     /// The segment the player currently offers to skip (intro, recap or a break), nil when there is nothing to
     /// skip. Shows the skip pill even when controls are closed, and carries the seek target.
     var activeSkipSegment: ActiveSkipSegment?
+    /// Sodalite#244. Per LAUNCH, not per session: a retry, a rung switch or the next episode runs
+    /// `startPlayback()` again on this view model and must not replay the pre-rolls, so
+    /// `resetSessionState` leaves it alone.
+    var prerollsConsumed = false
+    var isPlayingPreroll = false
+    @ObservationIgnored var prerollCancellables = Set<AnyCancellable>()
+    @ObservationIgnored var prerollWait: CheckedContinuation<PrerollEnd, Never>?
     /// Set once per episode after auto-skip fires; keeps the time subscriber from re-triggering before
     /// the seek moves currentTime past the segment end. One latch per kind: a shared one would let the
     /// intro's auto-skip swallow a recap that follows it in the same episode.
@@ -1329,6 +1344,13 @@ final class PlayerViewModel {
                 return
             }
 
+            // Sodalite#244: the server's pre-rolls play first, on this engine; the movie load below
+            // then reloads it in place.
+            guard await playPrerollsIfDue() else {
+                hostLoadActive = false
+                return
+            }
+
             let source: PlaybackMediaSource
             let url: URL
             // Sodalite#81: a downloaded file needs no PlaybackInfo. Its subtitles map by the route the
@@ -1713,6 +1735,7 @@ final class PlayerViewModel {
         isTearingDown = true
         loadTask?.cancel()
         loadTask = nil
+        finishPrerollWait(.tornDown)
         stopProgressReporting()
         progressReportOnDemandTask?.cancel()
         progressReportOnDemandTask = nil
@@ -1835,7 +1858,7 @@ final class PlayerViewModel {
         rebuildKeepsPictureRequested = true
     }
 
-    private func recomputeLoadingIndicator() {
+    func recomputeLoadingIndicator() {
         let wantsSpinner = PlayerLoadingIndicator.showsSpinner(hostLoadActive: hostLoadActive,
                                                                phase: player.playbackPhase,
                                                                isBuffering: player.isBuffering)
@@ -2915,7 +2938,8 @@ final class PlayerViewModel {
     /// Jump to the start of the current item and play. Live is excluded: tvOS renders LiveTransportBar
     /// there and the iOS icon row hides the button, this guard is the second line of defence.
     func restartFromBeginning() {
-        guard !isLiveSession else { return }
+        // A pre-roll is not the movie: its restart would reset the movie's resume point (Sodalite#244).
+        guard !isLiveSession, !isPlayingPreroll else { return }
         // The session's resume point is 0 from here on: `currentPositionTicks` falls back to it while the
         // clock reads 0, and a Back during the restart's rebuffer must not store the old one (audit PCORE-205).
         resumePositionTicks = 0
@@ -3366,6 +3390,7 @@ final class PlayerViewModel {
         case .intro: preferences.autoSkipIntro && !didAutoSkipCurrentIntro
         case .recap: preferences.autoSkipRecap && !didAutoSkipCurrentRecap
         case .commercial: preferences.autoSkipCommercials && !autoSkippedCommercialStarts.contains(segment.startSeconds)
+        case .preroll: false
         }
     }
 
@@ -3374,11 +3399,12 @@ final class PlayerViewModel {
         case .intro: didAutoSkipCurrentIntro = true
         case .recap: didAutoSkipCurrentRecap = true
         case .commercial: autoSkippedCommercialStarts.insert(segment.startSeconds)
+        case .preroll: break
         }
     }
 
     /// Update the state and move focus off the skip button if it just vanished, else the user is stuck on it.
-    private func setActiveSkipSegment(_ newValue: ActiveSkipSegment?) {
+    func setActiveSkipSegment(_ newValue: ActiveSkipSegment?) {
         activeSkipSegment = newValue
         if newValue == nil && controlsFocus == .skipSegmentButton {
             // Read off the rendered order: the viewer may have hidden any fixed fallback (Sodalite#194).
@@ -3393,6 +3419,11 @@ final class PlayerViewModel {
     }
 
     private func skip(_ segment: ActiveSkipSegment) {
+        // A pre-roll is its own file: skipping it ends it, there is nothing to seek to.
+        if segment.kind == .preroll {
+            skipCurrentPreroll()
+            return
+        }
         setActiveSkipSegment(nil)
         didSkipCurrentSegment = segment
         Task { [weak self] in
