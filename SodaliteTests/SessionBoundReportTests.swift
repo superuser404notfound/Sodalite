@@ -79,7 +79,9 @@ struct SessionBoundReportTests {
         container.jellyfinClient.baseURL = URL(string: "http://a.lan:8096")
         container.jellyfinClient.accessToken = "tok-parent"
         let reporter = container.boundPlaybackReporter()
-        #expect((reporter().map { $0 as AnyObject }) === (container.jellyfinPlaybackService as AnyObject))
+        // Built per report from the session as it is then, never the live service (R-W2-1).
+        #expect((reporter().map { $0 as AnyObject }) !== (container.jellyfinPlaybackService as AnyObject))
+        #expect(reporter()?.baseURL == URL(string: "http://a.lan:8096"))
 
         container.jellyfinClient.baseURL = URL(string: "http://b.lan:8096")
         container.jellyfinClient.accessToken = "tok-child"
@@ -88,6 +90,34 @@ struct SessionBoundReportTests {
         #expect(service != nil)
         #expect((service.map { $0 as AnyObject }) !== (container.jellyfinPlaybackService as AnyObject))
         #expect(service?.baseURL == URL(string: "http://a.lan:8096"))
+    }
+
+    /// The app shape: one live client whose token changes underneath (audit review R-W2-1).
+    @Test func aTracksStopReachesTheOldAccountWhenTheSameClientIsSwitchedUnderneath() async throws {
+        let http = RecordingHTTPClient()
+        http.responses["/Items/A/PlaybackInfo"] = Data(#"{"MediaSources":[{"Id":"src"}],"PlaySessionId":"ps"}"#.utf8)
+        let container = DependencyContainer(
+            keychainService: InMemoryKeychain(),
+            httpClient: http,
+            defaults: UserDefaults(suiteName: "r-w2-1-\(UUID().uuidString)")!
+        )
+        container.verifiesServerIdentity = false
+        let serverA = JellyfinServer(id: "srv", name: "Home", internalURL: URL(string: "http://10.0.0.2:8096"), externalURL: nil)
+        let parent = try JSONDecoder().decode(JellyfinUser.self, from: Data(#"{"Id":"parent","Name":"P","ServerId":"srv"}"#.utf8))
+        try container.saveSession(server: serverA, user: parent, token: "tok-parent")
+        container.musicPlaybackCoordinator.play(queue: [try track("A")], startAt: 0)
+        await waitFor { http.sent.contains { $0.path == "/Items/A/PlaybackInfo" } }
+        try? await Task.sleep(for: .milliseconds(100))
+
+        try container.switchToUser(
+            RememberedUser(id: "child", serverID: "srv", name: "C", imageTag: nil, token: "tok-child"), server: serverA)
+        await waitFor { http.sent.contains { $0.path == "/Sessions/Playing/Stopped" } }
+
+        let stops = http.sent.filter { $0.path == "/Sessions/Playing/Stopped" }
+        #expect(stops.count == 1)
+        #expect(stops.first?.headers["Authorization"]?.contains("tok-parent") == true)
+        #expect(stops.first?.headers["Authorization"]?.contains("tok-child") == false)
+        #expect(stops.first?.baseURL == URL(string: "http://10.0.0.2:8096"))
     }
 
     @Test func switchingProfilesStopsTheMusicBeforeTheTokenSwaps() throws {

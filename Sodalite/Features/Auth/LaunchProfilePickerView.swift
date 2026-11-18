@@ -105,7 +105,9 @@ struct LaunchProfilePickerView: View {
                 dependencies.messageWithDownloadWarning(
                     "", scope: .profile(serverID: user.serverID, userID: user.id))
                     .trimmingCharacters(in: .whitespacesAndNewlines)
-            }, perform: commitForget)
+            }, perform: { user in
+                user.id == activeSessionUserID ? commitSignOutOfCurrentProfile() : commitForget(user)
+            })
             .onAppear {
                 reloadProfiles()
                 showRejectionNoticeIfAny()
@@ -452,6 +454,17 @@ struct LaunchProfilePickerView: View {
     }
 
     private func signOutOfCurrentProfile() {
+        guard dependencies.activeServer?.id == server.id else { return }
+        // Same question the forget paths ask when the profile has downloads (audit review R-W2-2).
+        if let current = rememberedUsers.first(where: { $0.id == activeSessionUserID }),
+           DownloadCleanup.usage(.profile(serverID: server.id, userID: current.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = current
+            return
+        }
+        commitSignOutOfCurrentProfile()
+    }
+
+    private func commitSignOutOfCurrentProfile() {
         guard dependencies.activeServer?.id == server.id else { return }
         Task {
             await dependencies.signOutOfActiveProfileAndPurgeDownloads()

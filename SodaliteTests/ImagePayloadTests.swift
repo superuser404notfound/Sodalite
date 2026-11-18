@@ -157,4 +157,13 @@ struct ImagePayloadTests {
         let whole = jpeg()
         #expect(ImagePayload.isComplete(cut(whole, to: 0.5) + Data(repeating: 0x20, count: 5_000)) == false)
     }
+
+    /// Audit review R-W2-5: a small original that stopped early still carries the end marker of its
+    /// EXIF thumbnail near the head.
+    @Test func aCutSmallJpegDoesNotPassOnItsThumbnailsEndMarker() {
+        var cutFile: [UInt8] = [0xFF, 0xD8, 0xFF, 0xE1] + Array(repeating: 0x11, count: 60)
+        cutFile += [0xFF, 0xD9] + Array(repeating: 0x22, count: 9_000)
+        #expect(ImagePayload.isComplete(Data(cutFile)) == false)
+        #expect(ImagePayload.isComplete(Data(cutFile + [0xFF, 0xD9])))
+    }
 }

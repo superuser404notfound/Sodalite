@@ -103,7 +103,9 @@ struct ProfileSettingsView: View {
             dependencies.messageWithDownloadWarning(
                 "", scope: .profile(serverID: user.serverID, userID: user.id))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-        }, perform: commitForget)
+        }, perform: { user in
+            user.id == appState.activeUser?.id ? commitSignOut() : commitForget(user)
+        })
         .onAppear(perform: refresh)
         // Hold the cards against the server's own user table, so a profile deleted on the server
         // stops being offered here (Sodalite#90).
@@ -173,7 +175,7 @@ struct ProfileSettingsView: View {
                                 },
                                 onLongPress: {
                                     if isCurrent {
-                                        Task { await dependencies.signOutOfActiveProfileAndPurgeDownloads() }
+                                        signOutCurrent(user)
                                     } else {
                                         forget(user)
                                     }
@@ -456,6 +458,19 @@ struct ProfileSettingsView: View {
                 ) + "\n\n" + ErrorText.user(for: error)
             }
         }
+    }
+
+    /// Asks first when the profile has downloads, like every other way of removing one (audit review R-W2-2).
+    private func signOutCurrent(_ user: RememberedUser) {
+        if DownloadCleanup.usage(.profile(serverID: user.serverID, userID: user.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = user
+            return
+        }
+        commitSignOut()
+    }
+
+    private func commitSignOut() {
+        Task { await dependencies.signOutOfActiveProfileAndPurgeDownloads() }
     }
 
     private func forget(_ user: RememberedUser) {

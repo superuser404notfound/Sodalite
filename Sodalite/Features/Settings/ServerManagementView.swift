@@ -235,8 +235,9 @@ struct ServerManagementView: View {
     }
 
     private func remove(_ server: JellyfinServer) {
+        // Purge only once the removal worked (audit review R-W2-6).
+        guard (try? dependencies.removeServer(id: server.id)) != nil else { load(); return }
         Task { await dependencies.purgeDownloads(.server(server.id)) }
-        try? dependencies.removeServer(id: server.id)
         load()
     }
 }
