@@ -1751,7 +1751,9 @@ final class PlayerViewModel {
         // Snapshot the payload + service and detach with a STRONG capture: a [weak self] task could be
         // deallocated by PlayerHostController's dismissal before the @MainActor hop ran, silently dropping
         // the position write.
-        let svc = playbackService
+        // The detached report builds its request later; a snapshot keeps it on this session when the
+        // profile changes in between (audit LTM-R201).
+        let svc = DependencyContainer.shared.sessionBoundReportService(for: playbackService)
         let stopReport = PlaybackStopReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,

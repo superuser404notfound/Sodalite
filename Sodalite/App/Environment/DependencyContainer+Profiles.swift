@@ -114,6 +114,8 @@ extension DependencyContainer {
     /// that were filled under its token. Deliberately does no routing, so the paths that are already
     /// inside AppRouter's switch probe do not re-key it out from under themselves.
     func dropActiveProfile(serverID: String, userID: String) {
+        // Background music is scoped to the session, and this one is over.
+        stopSessionScopedMusic()
         try? forgetUser(id: userID, serverID: serverID)
 
         try? keychainService.delete(for: KeychainKeys.accessToken(serverID: serverID))
@@ -129,11 +131,6 @@ extension DependencyContainer {
         // the profile is gone. Only its own entries: the other profiles on this server keep theirs.
         FilterCache.shared.evict(identity: CacheIdentity(serverID: serverID, userID: userID))
         ImageCache.shared.clear()
-
-        // Background music is scoped to the session, and this one is over.
-        if musicPlaybackCoordinator.currentItem != nil {
-            musicPlaybackCoordinator.stop()
-        }
     }
 
     /// Removes the profile the session is signed in as and re-routes.

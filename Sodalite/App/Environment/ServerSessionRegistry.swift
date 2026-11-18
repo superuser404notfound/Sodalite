@@ -96,6 +96,14 @@ final class ServerSessionRegistry {
         return secondaries[serverID]?.session ?? active
     }
 
+    /// The session of a server that takes part right now, nil for one that left a combined setup.
+    /// For a write that resolves its session late: `session(forServerID:)` would hand it to the
+    /// active account instead (audit LTM-201).
+    func resolve(serverID: String?) -> ServerSession? {
+        guard let serverID, serverID != active.server?.id else { return active }
+        return secondaries[serverID]?.session
+    }
+
     func session(for item: JellyfinItem) -> ServerSession { session(forServerID: item.serverID) }
 
     /// The secondary session of a server, nil for the active one and for a server not taking part,
