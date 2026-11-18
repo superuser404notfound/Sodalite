@@ -1678,26 +1678,11 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Step focus through transport buttons, built dynamically so a stream missing audio/subtitle tracks has no dead stops.
     private func stepTransportFocus(direction: Int) {
-        // Live has its own control row (LiveTransportBar); the VOD list below does not apply.
-        if viewModel.isLiveSession {
-            let order = viewModel.liveTransportFocusOrder
-            guard let current = order.firstIndex(of: viewModel.controlsFocus) else { return }
-            let next = current + direction
-            if next >= 0 && next < order.count { viewModel.controlsFocus = order[next] }
-            return
-        }
-        let order = viewModel.transportFocusOrder
-        guard let current = order.firstIndex(of: viewModel.controlsFocus) else {
-            // The focused button left the row under the user: the skip segment ended, or the
-            // next-episode prompt was taken (Sodalite#103). Both sit at the head of the row, so the
-            // row start is the nearest thing to where focus was; returning here left it stuck on a
-            // control that is not on screen, with only Menu or Down to get out.
-            if let first = order.first { viewModel.controlsFocus = first }
-            return
-        }
-        let next = current + direction
-        if next >= 0 && next < order.count {
-            viewModel.controlsFocus = order[next]
+        // Live has its own control row (LiveTransportBar); the VOD list does not apply.
+        let order = viewModel.isLiveSession ? viewModel.liveTransportFocusOrder : viewModel.transportFocusOrder
+        if let next = PlayerViewModel.steppedTransportFocus(
+            order: order, current: viewModel.controlsFocus, direction: direction) {
+            viewModel.controlsFocus = next
         }
     }
 

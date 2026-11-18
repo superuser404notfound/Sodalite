@@ -343,6 +343,8 @@ final class LiveMultiviewCoordinator {
                 theme: theme,
                 onPlayerDismiss: onPlayerDismiss
             )
+            // The launcher host tears down what it tracks, and this controller is the player now.
+            launcherHost.presentedPlayer = controller
             presenter.dismiss(animated: false) { [weak self] in
                 presenter.present(controller, animated: false) {
                     if launcherHost.multiview === self { launcherHost.multiview = nil }
@@ -388,7 +390,10 @@ final class LiveMultiviewCoordinator {
             guard let self else { return }
             self.lineupTask = nil
             // A failed fetch stays nil, so the picker's next appearance asks again.
-            if let loaded { self.lineup = loaded.channels }
+            if let loaded {
+                self.lineup = loaded.channels
+                self.session.sharedLineup = loaded
+            }
         }
     }
 

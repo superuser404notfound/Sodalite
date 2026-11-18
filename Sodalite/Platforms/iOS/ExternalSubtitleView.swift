@@ -9,12 +9,12 @@ struct ExternalSubtitleView: View {
     var body: some View {
         ZStack {
             Color.clear
-            if !viewModel.subtitleCues.isEmpty || !viewModel.secondarySubtitleCues.isEmpty {
+            if !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
                 SubtitleOverlayView(
                     cues: viewModel.subtitleCues,
                     currentTime: viewModel.subtitleTime,
                     maxCueDuration: viewModel.subtitleMaxCueDuration,
-                    secondaryCues: viewModel.secondarySubtitleCues,
+                    secondaryCues: viewModel.shownSecondarySubtitleCues,
                     secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                     fontSize: viewModel.preferences.subtitleFontSize,
                     textColor: viewModel.preferences.subtitleColor,

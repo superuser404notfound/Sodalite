@@ -29,7 +29,7 @@ struct MultiviewSessionTests {
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
         suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) },
-        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Bool = { await $0.parkHiddenLiveTile() }
     ) throws -> MultiviewSession {
         try makeSessionAndPool(audioFollowDelay: audioFollowDelay, retune: retune, suspend: suspend, park: park).session
     }
@@ -38,7 +38,7 @@ struct MultiviewSessionTests {
         audioFollowDelay: Duration = .milliseconds(300),
         retune: @escaping (PlayerViewModel) async -> Void = { await $0.retuneLiveStream() },
         suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18) },
-        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Bool = { await $0.parkHiddenLiveTile() }
     ) throws -> (session: MultiviewSession, pool: MultiviewEnginePool) {
         let pool = MultiviewEnginePool(primary: try AetherEngine(), make: { try AetherEngine() })
         let first = makeVM(channel("c1"), engine: pool.primary, role: .primary)
@@ -291,7 +291,7 @@ struct MultiviewSessionTests {
         let journal = Journal()
         let session = try makeSession(
             retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
-            park: { vm in journal.entries.append("park:\(vm.liveChannel?.id ?? "?")") })
+            park: { vm in journal.entries.append("park:\(vm.liveChannel?.id ?? "?")"); return true })
         try session.add(channel("c2"))
         try session.add(channel("c3"))
         let visible = session.tiles[1].id
@@ -310,7 +310,7 @@ struct MultiviewSessionTests {
         let journal = Journal()
         let session = try makeSession(
             retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
-            park: { _ in })
+            park: { _ in true })
         try session.add(channel("c2"))
         try session.add(channel("c3"))
         await session.parkHidden(except: session.tiles[0].id)
@@ -343,6 +343,48 @@ struct MultiviewSessionTests {
         try session.add(channel("c2"))
         session.tiles[1].viewModel.resetLiveSessionState(switchingTo: channel("c9"))
         #expect(session.channelsOnTiles() == ["c1", "c9"])
+    }
+    @Test("a tile that kept its stream is not parked, so the grid does not retune it")
+    func parkOnlyCountsTilesThatReleasedTheirTuner() async throws {
+        let journal = Journal()
+        let session = try makeSession(
+            retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
+            park: { vm in vm.liveChannel?.id == "c3" })
+        try session.add(channel("c2"))
+        try session.add(channel("c3"))
+        await session.parkHidden(except: session.tiles[1].id)
+        #expect(session.parkedTileIDs == [session.tiles[2].id])
+        await session.unparkAll()
+        #expect(journal.entries == ["retune:c3"])
+    }
+
+    @Test("ending on a survivor that was parked brings its tuner back")
+    func endRetunesAParkedSurvivor() async throws {
+        let journal = Journal()
+        let session = try makeSession(
+            retune: { vm in journal.entries.append("retune:\(vm.liveChannel?.id ?? "?")") },
+            park: { _ in true })
+        try session.add(channel("c2"))
+        await session.parkHidden(except: session.tiles[0].id)
+        session.setAudible(session.tiles[1].id)
+        let survivor = try #require(session.end())
+        for _ in 0..<100 where journal.entries.isEmpty { try? await Task.sleep(for: .milliseconds(10)) }
+        #expect(journal.entries == ["retune:c2"])
+        #expect(survivor.liveChannel?.id == "c2")
+        #expect(session.parkedTileIDs.isEmpty)
+    }
+
+    @Test("a tile added or replaced is seeded with the grid's lineup instead of paging its own")
+    func tilesShareTheLineup() throws {
+        let session = try makeSession()
+        let lineup = LiveChannelLineup(channels: [channel("c1"), channel("c2"), channel("c3")])
+        session.sharedLineup = lineup
+        try session.add(channel("c2"))
+        #expect(session.tiles[1].viewModel.zapLineup == lineup)
+        try session.replace(session.tiles[1].id, with: channel("c3"))
+        #expect(session.tiles[1].viewModel.zapLineup == lineup)
+        // The first tile had none of its own and takes the shared one.
+        #expect(session.tiles[0].viewModel.zapLineup == lineup)
     }
 }
 
@@ -394,4 +436,5 @@ struct LiveRetuneTileRefusalTests {
         #expect(vm.tileRefusal == nil)
         #expect(vm.lastTunerOpenError != nil)
     }
+
 }

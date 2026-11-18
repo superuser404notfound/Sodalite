@@ -172,6 +172,42 @@ struct MacPlayerWindowPresenter: ViewModifier {
     }
 }
 
+/// The launch logic both Mac launchers shared by copy (audit PTD-R202): build the session once when
+/// `isPresented` turns on and the thing to play is there, drop it when the binding turns off, and close
+/// the player on a deep-link dismissal. `launchKey` is the id of what is to be played; it re-runs the
+/// check when the item or context arrives after `isPresented` flipped, which the UIKit launchers
+/// already handle by re-evaluating on every update.
+struct MacPlayerSessionPresenter: ViewModifier {
+    @Binding var isPresented: Bool
+    @Binding var session: PlayerViewModel?
+    let theme: ResolvedAppearanceTheme
+    let launchKey: String?
+    let makeViewModel: () -> PlayerViewModel?
+
+    @Environment(\.appState) private var appState
+
+    func body(content: Content) -> some View {
+        content
+            .modifier(MacPlayerWindowPresenter(session: $session, theme: theme) {
+                isPresented = false
+            })
+            .onChange(of: isPresented, initial: true) { _, _ in sync() }
+            .onChange(of: launchKey) { _, _ in sync() }
+            // A deep link tears the player down before it resolves the item it is opening.
+            .onChange(of: appState.requestPlayerDismissal) { _, _ in
+                isPresented = false
+            }
+    }
+
+    private func sync() {
+        if isPresented, session == nil, let viewModel = makeViewModel() {
+            session = viewModel
+        } else if !isPresented {
+            session = nil
+        }
+    }
+}
+
 /// The window a view is in, read off the view itself rather than `NSApp.keyWindow`, which is the
 /// library window whenever that one was clicked last.
 final class HostWindowReference {

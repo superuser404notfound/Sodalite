@@ -6,6 +6,24 @@ import AetherEngine
 /// Audio: "Deutsch · Dolby Digital 5.1", subtitle: "Englisch".
 enum TrackDisplayFormatter {
 
+    /// Title words that mark a subtitle track as more than the plain full-dialogue one. The one list
+    /// behind the stream dedupe and both labels (audit PUI-R202).
+    static let subtitleDescriptorWords: Set<String> = [
+        "sdh", "commentary", "cc", "signs", "songs", "full", "hearing", "forced", "musik", "music",
+    ]
+
+    /// Whole-word match on a track title. A substring match put "cc" into "Occitan".
+    static func title(_ title: String?, hasAnyWordOf words: some Collection<String>) -> Bool {
+        guard let title, !title.isEmpty else { return false }
+        return title.lowercased()
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .contains { words.contains(String($0)) }
+    }
+
+    static func hasSubtitleDescriptor(_ title: String?) -> Bool {
+        Self.title(title, hasAnyWordOf: subtitleDescriptorWords)
+    }
+
     static func audioDisplayName(for track: TrackInfo) -> String {
         var parts: [String] = []
 
@@ -53,13 +71,9 @@ enum TrackDisplayFormatter {
 
         var descriptors: [String] = []
         if stream.isForced == true { descriptors.append("Forced") }
-        if let title = stream.title, !title.isEmpty {
-            let lower = title.lowercased()
-            let useful = ["sdh", "commentary", "cc", "signs", "songs", "full", "hearing", "forced", "musik", "music"]
-            if useful.contains(where: { lower.contains($0) }) {
-                if let lang { return "\(lang) (\(title))" }
-                return title
-            }
+        if let title = stream.title, hasSubtitleDescriptor(title) {
+            if let lang { return "\(lang) (\(title))" }
+            return title
         }
         if !descriptors.isEmpty, let lang {
             return "\(lang) (\(descriptors.joined(separator: ", ")))"
@@ -183,12 +197,7 @@ enum TrackDisplayFormatter {
                 return nil
             }
         }
-        let useful = ["forced", "sdh", "commentary", "cc", "signs", "songs", "full", "hearing"]
-        let lower = title.lowercased()
-        if useful.contains(where: { lower.contains($0) }) {
-            return title
-        }
-        return nil
+        return hasSubtitleDescriptor(title) ? title : nil
     }
 }
 

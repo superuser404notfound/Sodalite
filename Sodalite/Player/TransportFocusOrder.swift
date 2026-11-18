@@ -2,6 +2,15 @@ import AetherEngine
 import Foundation
 
 extension PlayerViewModel {
+    /// Where one left or right press moves focus along a transport row. A focus that is no longer in the
+    /// row (the skip segment ended, a chip vanished after a retune) re-seats on the row start; the
+    /// press that finds it so is spent on that (Sodalite#103, audit PUI-206). nil at either end.
+    static func steppedTransportFocus(order: [ControlsFocus], current: ControlsFocus, direction: Int) -> ControlsFocus? {
+        guard let index = order.firstIndex(of: current) else { return order.first }
+        let next = index + direction
+        return order.indices.contains(next) ? order[next] : nil
+    }
+
     /// Left-to-right order of the VOD transport buttons. Built from the same gates TransportBar
     /// renders with: the bar draws exactly this list, else left/right focus lands on an unrendered
     /// button. Live has its own row (LiveTransportBar) and does not use this.

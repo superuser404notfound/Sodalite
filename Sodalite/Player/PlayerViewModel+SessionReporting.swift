@@ -85,10 +85,11 @@ extension PlayerViewModel {
 
     /// `whileHeld` is for the one report that belongs to the suspension itself, the position sent on
     /// the way out (`progressReportsHeldForSuspension`).
-    func reportProgress(whileHeld: Bool = false) async {
+    /// `allowsZero` is for the restart, whose whole point is to move the resume point to 0.
+    func reportProgress(whileHeld: Bool = false, allowsZero: Bool = false) async {
         guard whileHeld || !progressReportsHeldForSuspension || isPlaying else { return }
         let ticks = currentPositionTicks
-        guard ticks > 0 else { return } // Don't report position 0
+        guard ticks > 0 || allowsZero else { return } // Don't report position 0
         recordLocalProgress(positionTicks: ticks, played: false)
         if hasReportedStart, let state = traktScrobbleState, state.itemID == item.id, state.playing != isPlaying {
             traktScrobble(isPlaying ? .start : .pause, positionTicks: ticks)
