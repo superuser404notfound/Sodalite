@@ -74,4 +74,37 @@ struct LiveTvLenientDecodeTests {
         #expect(JellyfinTokenQuery.items("abc").map(\.name) == ["api_key", "ApiKey"])
         #expect(JellyfinPlaybackService.tokenQueryItems("abc") == JellyfinTokenQuery.items("abc"))
     }
+
+    /// Audit review R-W2-4: a cursor that cannot step over a bad element must end the loop.
+    @Test("a list whose cursor never advances ends instead of spinning")
+    func lossyListEndsWhenSkippingThrows() throws {
+        let list = try LossyList<Int>(from: StuckDecoder())
+        #expect(list.elements.isEmpty)
+        #expect(list.dropped == 1)
+    }
+}
+
+private struct StuckDecoder: Decoder {
+    var codingPath: [CodingKey] { [] }
+    var userInfo: [CodingUserInfoKey: Any] { [:] }
+    func unkeyedContainer() throws -> UnkeyedDecodingContainer { StuckContainer() }
+    func container<Key: CodingKey>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> {
+        throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "stuck"))
+    }
+    func singleValueContainer() throws -> SingleValueDecodingContainer {
+        throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "stuck"))
+    }
+}
+
+private struct StuckContainer: UnkeyedDecodingContainer {
+    var codingPath: [CodingKey] { [] }
+    var count: Int? { nil }
+    var isAtEnd: Bool { false }
+    var currentIndex: Int { 0 }
+    private var stuck: DecodingError { .dataCorrupted(.init(codingPath: [], debugDescription: "stuck")) }
+    mutating func decodeNil() throws -> Bool { throw stuck }
+    mutating func decode<T: Decodable>(_ type: T.Type) throws -> T { throw stuck }
+    mutating func nestedContainer<NestedKey: CodingKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> { throw stuck }
+    mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer { throw stuck }
+    mutating func superDecoder() throws -> Decoder { throw stuck }
 }

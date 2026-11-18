@@ -351,8 +351,9 @@ struct LossyList<Element: Decodable>: Decodable {
                 kept.append(element)
             } else {
                 dropped += 1
-                // A failed decode leaves the cursor on the element; step over it.
-                _ = try? container.decode(DiscardedValue.self)
+                // A failed decode leaves the cursor on the element; step over it. If even that
+                // throws, the cursor cannot move and the loop would never end (audit review R-W2-4).
+                do { _ = try container.decode(DiscardedValue.self) } catch { break }
             }
         }
         elements = kept
