@@ -240,6 +240,20 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         return EpisodeSegments(items: [intro])
     }
     func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
+
+    /// Sodalite#244: canned pre-rolls by item id, an error to throw instead, and a gate the request waits at.
+    var introsByItem: [String: [JellyfinItem]] = [:]
+    var introsError: Error?
+    var introsGate: TestGate?
+    private var _introRequests: [String] = []
+    var introRequests: [String] { lock.withLock { _introRequests } }
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] {
+        lock.withLock { _introRequests.append(itemID) }
+        if let introsGate { await introsGate.pass() }
+        try Task.checkCancellation()
+        if let introsError { throw introsError }
+        return introsByItem[itemID] ?? []
+    }
     func buildAudioStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? { nil }
     func buildChapterImageURL(itemID: String, chapterIndex: Int, imageTag: String, maxWidth: Int) -> URL? { nil }
