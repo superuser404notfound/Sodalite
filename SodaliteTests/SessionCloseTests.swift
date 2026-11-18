@@ -75,6 +75,7 @@ struct SessionCloseTests {
         vm.playSessionID = "ps-1"
         vm.progressReportsHeldForSuspension = true
         vm.playedWhileReportsHeld = true
+        vm.pipelineRunningOverride = true
 
         vm.stopPlayback()
         await settle(service, kills: 1)
@@ -122,11 +123,27 @@ struct SessionCloseTests {
         vm.hasReportedStart = true
         vm.playSessionID = "ps-1"
         vm.holdReportsForSuspension(pictureInPictureActive: true, backgroundAudioPlaying: false)
+        vm.pipelineRunningOverride = true
 
         vm.stopPlayback()
         await settle(service, kills: 1)
 
         #expect(service.stoppedReports.count == 1)
+    }
+
+    /// R2-SESSION-CLOSE-2: seeded in PiP, then paused and torn down before a deep link closes the player.
+    @Test func aSeededLatchWithoutAPipelineSendsNoStop() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.holdReportsForSuspension(pictureInPictureActive: true, backgroundAudioPlaying: false)
+        vm.pipelineRunningOverride = false
+
+        vm.stopPlayback()
+        await settle(service, kills: 1)
+
+        #expect(service.stoppedReports.isEmpty)
     }
 
     @Test func changingTheHoldClearsThePlayedLatch() throws {
@@ -190,7 +207,7 @@ struct SessionCloseTests {
         let gate = TestGate()
         service.stopReportGate = gate
         let vm = makeLiveViewModel(service)
-        vm.liveTunerCloseSettle = 5
+        vm.liveTunerCloseSettle = 0.3
         vm.hasReportedStart = true
         vm.playSessionID = "ps-live"
         vm.activeLiveStreamID = "tuner-1"
@@ -198,8 +215,10 @@ struct SessionCloseTests {
 
         vm.retryAfterOutage()
         #expect(vm.activeLiveStreamID == nil)
+        #expect(vm.hostLoadActive)
         await gate.arrival(1)
-        try? await Task.sleep(for: .milliseconds(200))
+        // Well past the gate's settle window: the reopen still waits for the close.
+        try? await Task.sleep(for: .milliseconds(900))
         #expect(!service.events.contains("open:ch-1"))
 
         gate.open()

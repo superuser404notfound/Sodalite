@@ -780,6 +780,10 @@ final class PlayerViewModel {
     /// over anything the engine did meanwhile, a Play press included (R-SESSION-CLOSE-1).
     @ObservationIgnored var stopReportVetoed = false
 
+    /// Test seam for `player.playbackBackend`, which a test cannot set.
+    @ObservationIgnored var pipelineRunningOverride: Bool?
+    var pipelineRunning: Bool { pipelineRunningOverride ?? (player.playbackBackend != .none) }
+
     /// Raises the hold on the way into the background. A session already running in PiP (or on iOS
     /// background audio) is the newest writer from the start, and it emits no new `.playing` to say so
     /// (R-SESSION-CLOSE-2).
@@ -1726,8 +1730,9 @@ final class PlayerViewModel {
         let closeServerSession = makeServerSessionClose(positionTicks: finalTicks,
                                                         reportsPosition: !stopReportVetoed && SuspendedSessionReturn.stopMayReport(
                                                             held: progressReportsHeldForSuspension,
-                                                            isPlaying: isPlaying && player.playbackBackend != .none,
-                                                            playedSinceHold: playedWhileReportsHeld))
+                                                            isPlaying: isPlaying,
+                                                            playedSinceHold: playedWhileReportsHeld,
+                                                            backendRunning: pipelineRunning))
         // Engine does native teardown + HLS server shutdown + AVDisplayManager criteria reset in stopInternal().
         player.stop()
         // Tuner-release safety net: frees the server-side tuner even if the stop report fails to deliver. No-op for VOD.
@@ -2646,11 +2651,17 @@ final class PlayerViewModel {
             beginPlayback()
             return
         }
-        // The server never went away, so the old tuner and play session are still open there. The close
-        // is handed to LiveTunerGate before the reopen, which waits for it; nothing here blocks on a
-        // stop report that may take 90 s on a flaky network (audit PHOST-202, R-SESSION-CLOSE-4).
-        _ = beginLiveSessionClose()
-        beginPlayback()
+        // The server never went away, so the old tuner and play session are still open there. They are
+        // closed first, with the spinner up while that runs (audit PHOST-202, R-SESSION-CLOSE-4).
+        // The reopen waits for the whole close, not for the gate's settle window: on a shaky network the
+        // close could otherwise land on the new stream of the same channel id (#70, R2-SESSION-CLOSE-1).
+        hostLoadActive = true
+        let close = beginLiveSessionClose()
+        Task { @MainActor [weak self] in
+            await close?.finished.value
+            guard let self, !self.isTearingDown else { return }
+            self.beginPlayback()
+        }
     }
 
     /// Reload after the library answered a failed session: same shape as `retryAfterOutage`, different

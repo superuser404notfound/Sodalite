@@ -72,11 +72,18 @@ struct SuspendedSessionReturnTests {
         #expect(!SuspendedSessionReturn.serverMovedOn(server: data, suspendedAt: suspendedAt, positionTicks: 20 * minute))
     }
 
-    @Test("PHOST-201: a held session sends its stop only if it played or ended since the hold began")
+    @Test("PHOST-201: a held session sends its stop only if it played or ended since the hold began, with a pipeline")
     func stopWhileHeld() {
-        #expect(SuspendedSessionReturn.stopMayReport(held: false, isPlaying: false, playedSinceHold: false))
-        #expect(!SuspendedSessionReturn.stopMayReport(held: true, isPlaying: false, playedSinceHold: false))
-        #expect(SuspendedSessionReturn.stopMayReport(held: true, isPlaying: true, playedSinceHold: false))
-        #expect(SuspendedSessionReturn.stopMayReport(held: true, isPlaying: false, playedSinceHold: true))
+        func may(_ held: Bool, _ playing: Bool, _ latch: Bool, _ backend: Bool) -> Bool {
+            SuspendedSessionReturn.stopMayReport(held: held, isPlaying: playing, playedSinceHold: latch,
+                                                 backendRunning: backend)
+        }
+        #expect(may(false, false, false, false))
+        #expect(!may(true, false, false, true))
+        #expect(may(true, true, false, true))
+        #expect(may(true, false, true, true))
+        // R2-SESSION-CLOSE-2: a seeded latch does not outlive the pipeline.
+        #expect(!may(true, false, true, false))
+        #expect(!may(true, true, false, false))
     }
 }

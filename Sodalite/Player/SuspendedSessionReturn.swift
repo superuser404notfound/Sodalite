@@ -59,9 +59,11 @@ enum SuspendedSessionReturn: Equatable {
     /// Whether a stop report may go out while the hold is up (audit PHOST-201). The hold keeps a
     /// SUSPENDED session quiet, one that is not playing and may hold a stale position. A session that
     /// kept playing through the background (PiP, background audio), or played or ended after the hold
-    /// began, is the newest writer: without its stop a finished title is never marked watched.
-    static func stopMayReport(held: Bool, isPlaying: Bool, playedSinceHold: Bool) -> Bool {
-        !held || isPlaying || playedSinceHold
+    /// began, is the newest writer: without its stop a finished title is never marked watched. Both
+    /// terms need a live pipeline at stop time, so a session that was paused and torn down since stays
+    /// quiet (R2-SESSION-CLOSE-2).
+    static func stopMayReport(held: Bool, isPlaying: Bool, playedSinceHold: Bool, backendRunning: Bool) -> Bool {
+        !held || (backendRunning && (isPlaying || playedSinceHold))
     }
 
     /// Whether an engine state emission during the hold counts as "this session played". A torn-down
