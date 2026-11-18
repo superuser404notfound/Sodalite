@@ -87,24 +87,23 @@ struct SeerrSessionRejectionHandlerTests {
     }
 
     @Test func aRejectionTriggersOneRevalidationAtATime() async {
-        var runs = 0
-        var open = false
+        let state = RevalidationState()
         let handler = SeerrSessionRejectionHandler(
             isConnected: { true },
             revalidate: {
-                runs += 1
-                for _ in 0..<200 where !open { try? await Task.sleep(for: .milliseconds(10)) }
+                state.runs += 1
+                for _ in 0..<200 where !state.open { try? await Task.sleep(for: .milliseconds(10)) }
             })
 
         let first = Task { await handler.handleRejection() }
-        await waitUntil { runs == 1 }
+        await waitUntil { state.runs == 1 }
         await handler.handleRejection()
-        #expect(runs == 1)
+        #expect(state.runs == 1)
 
-        open = true
+        state.open = true
         await first.value
         await handler.handleRejection()
-        #expect(runs == 2)
+        #expect(state.runs == 2)
     }
 
     @Test func aRejectionWithoutASeerrConnectionDoesNothing() async {
@@ -122,4 +121,11 @@ struct SeerrSessionRejectionHandlerTests {
         await waitUntil { runs >= 1 }
         #expect(runs >= 1)
     }
+}
+
+/// Counts revalidations and holds the first one open, without captured mutable vars.
+@MainActor
+private final class RevalidationState {
+    var runs = 0
+    var open = false
 }

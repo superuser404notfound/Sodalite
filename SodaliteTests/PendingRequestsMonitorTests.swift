@@ -49,19 +49,19 @@ struct PendingRequestsMonitorTests {
 
     /// CAT-204. The admin's count must not show under the profile switched to.
     @Test func aCountDoesNotSurviveAnIdentityChange() async {
-        var who: String? = "admin"
+        let who = MonitorIdentityBox("admin")
         let monitor = PendingRequestsMonitor()
-        monitor.identity = { who }
+        monitor.identity = { who.value }
         monitor.isEligible = { true }
         monitor.fetchPendingCount = { 5 }
         await monitor.refresh()
         #expect(monitor.pendingApprovalCount == 5)
 
-        who = "child"
+        who.value = "child"
         #expect(monitor.pendingApprovalCount == nil)
         monitor.isEligible = { false }
         await monitor.refresh()
-        who = "admin"
+        who.value = "admin"
         #expect(monitor.pendingApprovalCount == nil)
     }
 
@@ -84,4 +84,11 @@ struct PendingRequestsMonitorTests {
         await monitor.refresh()
         #expect(monitor.pendingApprovalCount == nil)
     }
+}
+
+/// The identity the monitor reads, changed between refreshes without a captured mutable var.
+@MainActor
+private final class MonitorIdentityBox {
+    var value: String?
+    init(_ value: String?) { self.value = value }
 }

@@ -95,8 +95,9 @@ struct DownloadProgressSyncTests {
             answers[id] = userData(100, played: false, last: "2027-01-15T08:00:00.0000000Z")
         }
         let counter = NotificationCounter()
+        let itemIDKey = PlaybackProgressKey.itemID
         let token = NotificationCenter.default.addObserver(forName: .playbackProgressDidChange, object: nil, queue: nil) { note in
-            counter.bump(note.userInfo?[PlaybackProgressKey.itemID] as? String)
+            counter.bump(note.userInfo?[itemIDKey] as? String)
         }
         defer { NotificationCenter.default.removeObserver(token) }
         let sync = DownloadProgressSync(store: store, service: FakeUserDataService(answers: answers), userID: "u", now: { self.t0 })
