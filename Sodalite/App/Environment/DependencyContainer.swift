@@ -63,9 +63,15 @@ final class DependencyContainer {
     let posterBadgeStore: PosterBadgeStore
     /// The active profile's Trakt connection. Lazy because it needs the finished container as its
     /// session store.
-    @ObservationIgnored @MainActor lazy var trakt = TraktService(
-        clientID: TraktConfig.clientID, store: self,
-        libraryService: jellyfinLibraryService, itemService: jellyfinItemService)
+    @ObservationIgnored @MainActor lazy var trakt: TraktService = {
+        let service = TraktService(
+            clientID: TraktConfig.clientID, store: self,
+            libraryService: jellyfinLibraryService, itemService: jellyfinItemService)
+        service.secondaryLibrary = { [weak self] serverID in
+            self?.sessionRegistry.secondary(serverID: serverID).map { ($0.libraryService, $0.userID) }
+        }
+        return service
+    }()
     /// Re-checks the Seerr session after any 401, started from `SodaliteApp.init` (CAT-205).
     @ObservationIgnored @MainActor lazy var seerrRejectionHandler = SeerrSessionRejectionHandler(
         isConnected: { [weak self] in self?.appState?.isSeerrConnected ?? false },
