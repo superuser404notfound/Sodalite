@@ -62,8 +62,35 @@ private final class ForegroundPresentationDelegate: NSObject, UNUserNotification
 /// sync with the live count and fires a local notification when the count rose since the last-seen
 /// value. Foreground and background both funnel through here so the behavior is identical.
 enum PendingRequestsSync {
+    /// One refresh at a time: a background handler and the router both start one when Seerr connects,
+    /// and two racing on the same baseline notified twice (R-LIFECYCLE-5). A late caller waits for
+    /// the running one and leaves, since it has just done the same work.
+    @MainActor private static var running = false
+    @MainActor private static var waiters: [CheckedContinuation<Void, Never>] = []
+
     @MainActor
     static func refreshAndSync(
+        monitor: PendingRequestsMonitor,
+        preferences: SeerrNotificationPreferences,
+        jellyfinServerID: String?,
+        jellyfinUserID: String?,
+        syncBadge: @MainActor () async -> Void
+    ) async {
+        if running {
+            await withCheckedContinuation { waiters.append($0) }
+            return
+        }
+        running = true
+        await runRefresh(monitor: monitor, preferences: preferences, jellyfinServerID: jellyfinServerID,
+                         jellyfinUserID: jellyfinUserID, syncBadge: syncBadge)
+        running = false
+        let pending = waiters
+        waiters = []
+        pending.forEach { $0.resume() }
+    }
+
+    @MainActor
+    private static func runRefresh(
         monitor: PendingRequestsMonitor,
         preferences: SeerrNotificationPreferences,
         jellyfinServerID: String?,

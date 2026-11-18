@@ -54,6 +54,24 @@ final class MacPlayerWindowSession {
         ended.onClose()
     }
 
+    /// Cmd-Q skips the window's close path, so without this the server kept the last 10 s old progress
+    /// and listed the device as playing until its own timeout (PTD-205). `stopPlayback` hands the stop
+    /// report to a detached task, and the process is about to exit, so the main run loop is kept turning
+    /// for a short bounded moment to let that request leave. A very slow server can still outlast it.
+    func endForTermination() {
+        guard let ended = current else { return }
+        end(ended.viewModel)
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 1.5))
+    }
+
+    static func installTerminationHook() {
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { MacPlayerWindowSession.shared.endForTermination() }
+        }
+    }
+
     /// Playback ends with the session, never with a view: SwiftUI takes the window's content off
     /// screen and back while it moves the window into and out of its full screen space, and a
     /// player stopped from `onDisappear` closed itself every time it went full screen.

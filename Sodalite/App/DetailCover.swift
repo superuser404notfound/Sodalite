@@ -121,6 +121,9 @@ private struct DetailCoverPresenter<Item: Identifiable, CoverContent: View>: Vie
                 }
                 .nowPlayingCoverHost(nowPlayingHost)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .closeDetailCoversForReprompt)) { _ in
+                if item != nil { item = nil }
+            }
             .onChange(of: item == nil) { _, coverIsGone in
                 if coverIsGone {
                     dependencies.musicPlaybackCoordinator.nowPlayingPresentation.popHost(nowPlayingHost)

@@ -20,6 +20,9 @@ extension Notification.Name {
     static let loginDidComplete = Notification.Name("loginDidComplete")
     /// Posted whenever the set of Seerr requests changed (submitted, or removed from the catalog detail / by a cascading deletion) so CatalogView refreshes loaded request lists. Without it the list keeps its stale rows until an app restart.
     static let seerrRequestsDidChange = Notification.Name("seerrRequestsDidChange")
+    /// A due who's-watching reprompt closes every presented detail cover. `.onReceive`, not a state
+    /// flag, because the covers sit under the player when this fires (R-LIFECYCLE-1).
+    static let closeDetailCoversForReprompt = Notification.Name("closeDetailCoversForReprompt")
 
     /// Posted by SeerrClient when Seerr answers 401 to the session cookie it still holds. CatalogView
     /// re-probes the session and, if it is gone, drops to its "Set up Seerr" state.
