@@ -3366,6 +3366,7 @@ final class PlayerViewModel {
         case .intro: preferences.autoSkipIntro && !didAutoSkipCurrentIntro
         case .recap: preferences.autoSkipRecap && !didAutoSkipCurrentRecap
         case .commercial: preferences.autoSkipCommercials && !autoSkippedCommercialStarts.contains(segment.startSeconds)
+        case .preroll: false
         }
     }
 
@@ -3374,11 +3375,12 @@ final class PlayerViewModel {
         case .intro: didAutoSkipCurrentIntro = true
         case .recap: didAutoSkipCurrentRecap = true
         case .commercial: autoSkippedCommercialStarts.insert(segment.startSeconds)
+        case .preroll: break
         }
     }
 
     /// Update the state and move focus off the skip button if it just vanished, else the user is stuck on it.
-    private func setActiveSkipSegment(_ newValue: ActiveSkipSegment?) {
+    func setActiveSkipSegment(_ newValue: ActiveSkipSegment?) {
         activeSkipSegment = newValue
         if newValue == nil && controlsFocus == .skipSegmentButton {
             // Read off the rendered order: the viewer may have hidden any fixed fallback (Sodalite#194).
@@ -3393,6 +3395,11 @@ final class PlayerViewModel {
     }
 
     private func skip(_ segment: ActiveSkipSegment) {
+        // A pre-roll is its own file: skipping it ends it, there is nothing to seek to.
+        if segment.kind == .preroll {
+            skipCurrentPreroll()
+            return
+        }
         setActiveSkipSegment(nil)
         didSkipCurrentSegment = segment
         Task { [weak self] in
