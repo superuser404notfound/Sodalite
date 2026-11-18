@@ -81,7 +81,6 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     /// The in-flight (or last) engine start, so callers that need a live engine can
     /// await it instead of no-opping while it is still coming up.
     private var startTask: Task<Void, Never>?
-    private var debounceTasks: [CloudSyncStoreKey: Task<Void, Never>] = [:]
     /// Last snapshot uploaded or applied per store, to skip observation echoes.
     private var lastSettingsSnapshot: [CloudSyncStoreKey: SettingsSyncPayload] = [:]
     /// Last server payload queued or applied per server id. A session restore re-saves the server and
@@ -268,8 +267,6 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         engine = nil
         database = nil
         startInFlight = false
-        for task in debounceTasks.values { task.cancel() }
-        debounceTasks = [:]
         // A delete queued under one account must not block adoption of the same
         // record name under the next account.
         recentLocalDeletes = []
@@ -597,9 +594,17 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     }
 
     func markSettingsDirty(_ key: CloudSyncStoreKey) {
+        markSettingsDirty(key, profile: nil)
+    }
+
+    /// `profile` is the one an edit to a legacy playback/appearance record was made in. It is kept
+    /// with the pending save, because the record is built when the engine asks for it, possibly after
+    /// a profile switch (audit SYNC-203). nil builds from whichever profile is active at that time.
+    func markSettingsDirty(_ key: CloudSyncStoreKey, profile: ProfileKey?) {
         guard preferences.tracksLocalEdits else { return }
         let name = CloudSyncRecordName.settings(key)
         preferences.setLocalStamp(preferences.nextStamp(), for: name)
+        preferences.setLegacyRecordProfile(key.isProfileBacked ? profile : nil, for: name)
         addPendingSave(recordName: name)
     }
 
@@ -866,13 +871,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         }
     }
 
+    /// Stamps and queues at the edit, not after a delay: an app killed inside a debounce window made
+    /// the next launch seed its snapshot from the edited store, and the edit never went up (audit
+    /// SYNC-202). The profile records have worked this way since they were added.
     private func scheduleSettingsUpload(_ key: CloudSyncStoreKey, profile: ProfileKey? = nil) {
-        debounceTasks[key]?.cancel()
-        debounceTasks[key] = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            self?.uploadSettingsIfChanged(key, profile: profile)
-        }
+        uploadSettingsIfChanged(key, profile: profile)
     }
 
     /// Internal for tests.
@@ -883,7 +886,7 @@ final class CloudSyncService: CloudSyncServiceProtocol {
             : dependencies.collectSettingsPayload(key, stamp: .distantPast)
         if lastSettingsSnapshot[key] == snapshot { return }
         lastSettingsSnapshot[key] = snapshot
-        markSettingsDirty(key)
+        markSettingsDirty(key, profile: profile)
     }
 
     /// Internal for tests. Takes the profile the edit was made in, never the active one.
@@ -936,13 +939,28 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         return CloudSyncForwardCompat.merged(local: encoded, carrying: preferences.carriedFields(for: recordName))
     }
 
-    private func encodeLocalPayload(recordName: String, stamp: Date) -> Data? {
+    /// The legacy playback/appearance record is built from the profile its edit was made in, and
+    /// never from a copy that was not edited (nil drops the save).
+    private func settingsPayload(_ key: CloudSyncStoreKey, recordName: String, stamp: Date) -> SettingsSyncPayload? {
+        guard key.isProfileBacked, let profile = preferences.legacyRecordProfile(for: recordName) else {
+            return dependencies.collectSettingsPayload(key, stamp: stamp)
+        }
+        let kind: ProfileRecordKind = key == .playback ? .playback : .appearance
+        guard !dependencies.profileSettings.isProvisional(profile, kind) else {
+            LogTap.shared.note("[CloudSync] \(profile.fingerprint) \(kind.rawValue) is a local copy, legacy record not built")
+            return nil
+        }
+        return dependencies.collectSettingsPayload(key, stamp: stamp, profile: profile)
+    }
+
+    /// Internal for tests.
+    func encodeLocalPayload(recordName: String, stamp: Date) -> Data? {
         if let serverID = CloudSyncRecordName.serverID(fromRecordName: recordName) {
             guard let payload = dependencies.collectServerPayload(serverID: serverID, stamp: stamp) else { return nil }
             return try? JSONEncoder().encode(payload)
         }
         if let key = CloudSyncRecordName.storeKey(fromRecordName: recordName) {
-            return try? dependencies.collectSettingsPayload(key, stamp: stamp).encoded()
+            return try? settingsPayload(key, recordName: recordName, stamp: stamp)?.encoded()
         }
         if case let (kind, key)? = CloudSyncRecordName.profileRecord(fromRecordName: recordName) {
             return try? dependencies.collectProfilePayload(kind, key: key, stamp: stamp)?.encoded()
@@ -967,7 +985,8 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 .map(CloudSyncForwardCompat.storedPropertyNames(of:))
         }
         if let key = CloudSyncRecordName.storeKey(fromRecordName: recordName) {
-            return dependencies.collectSettingsPayload(key, stamp: .distantPast).knownFields
+            return (settingsPayload(key, recordName: recordName, stamp: .distantPast)
+                ?? dependencies.collectSettingsPayload(key, stamp: .distantPast)).knownFields
         }
         if case let (kind, key)? = CloudSyncRecordName.profileRecord(fromRecordName: recordName) {
             return dependencies.collectProfilePayload(kind, key: key, stamp: .distantPast)?.knownFields

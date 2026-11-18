@@ -144,11 +144,16 @@ enum CloudSyncMerge {
     /// Sodalite#46. Union by scope key, newest entry per key wins. Eviction deliberately
     /// does not propagate: an evicted entry coming back from the cloud is less harmful
     /// than a lost selection. The cap is re-applied so both devices converge on one set.
+    /// Field-wise on the subtitle offset: a 1.0 device rewrites a movie's entry without the field, and
+    /// the newer entry must not erase an offset set on a newer build (audit SYNC-205).
     static func unionTrackMemory(local: TrackMemoryPayload, cloud: TrackMemoryPayload) -> TrackMemoryPayload {
         var byKey = local.entries
         for (key, entry) in cloud.entries {
-            if let existing = byKey[key], existing.updatedAt >= entry.updatedAt { continue }
-            byKey[key] = entry
+            guard let existing = byKey[key] else { byKey[key] = entry; continue }
+            var winner = existing.updatedAt >= entry.updatedAt ? existing : entry
+            let loser = existing.updatedAt >= entry.updatedAt ? entry : existing
+            if winner.subtitleOffset == nil { winner.subtitleOffset = loser.subtitleOffset }
+            byKey[key] = winner
         }
         return TrackMemoryPayload(
             updatedAt: max(local.updatedAt, cloud.updatedAt),

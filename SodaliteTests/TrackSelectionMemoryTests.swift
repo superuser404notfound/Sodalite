@@ -77,12 +77,17 @@ struct TrackSelectionMemoryTests {
         #expect(entry?.updatedAt == Date(timeIntervalSince1970: 20))
     }
 
-    @Test("a zero offset is stored as no offset")
+    /// Stored as 0, not nil: the cloud merge fills a missing offset from the older entry (a 1.0 device
+    /// never writes the field), so a cleared one has to be a value that says so.
+    @Test("a zero offset clears a set one and stays distinguishable from never set")
     func zeroOffsetClears() {
         let memory = TrackSelectionMemory(store: defaults(#function))
         memory.recordSubtitleOffset(0.4, for: "k", now: Date(timeIntervalSince1970: 10))
         memory.recordSubtitleOffset(0, for: "k", now: Date(timeIntervalSince1970: 20))
-        #expect(memory.entry(for: "k")?.subtitleOffset == nil)
+        #expect(memory.entry(for: "k")?.subtitleOffset == 0)
+
+        memory.recordSubtitleOffset(0, for: "never", now: Date(timeIntervalSince1970: 30))
+        #expect(memory.entry(for: "never")?.subtitleOffset == nil)
     }
 
     /// The offset belongs to one file, so an episode keys it by itself, never by its series.

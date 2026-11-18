@@ -163,6 +163,77 @@ extension ProfilePlaybackPayload {
     }
 }
 
+extension ProfilePlaybackPayload {
+    /// A legacy `settings-playback` record in profile form, so the one apply below serves both
+    /// (audit SYNC-R202). Fields the legacy payload does not carry are nil (keep the local value) or
+    /// take `base`'s current value where this payload has no optional slot. Device fields stay out.
+    @MainActor
+    init(legacy p: PlaybackSettingsPayload, base: PlaybackPreferences) {
+        self.init(
+            updatedAt: p.updatedAt,
+            autoplayNextEpisode: p.autoplayNextEpisode,
+            autoplayCountdown: p.autoplayCountdown ?? base.autoplayCountdown,
+            autoSkipIntro: p.autoSkipIntro,
+            autoSkipRecap: p.autoSkipRecap ?? base.autoSkipRecap,
+            autoSkipOutro: p.autoSkipOutro,
+            nextEpisodeCountdownSeconds: p.nextEpisodeCountdownSeconds,
+            nextEpisodeCountdownAnchor: p.nextEpisodeCountdownAnchor ?? base.nextEpisodeCountdownAnchor.rawValue,
+            skipForwardSeconds: p.skipForwardSeconds ?? p.skipIntervalSeconds,
+            skipBackwardSeconds: p.skipBackwardSeconds ?? p.skipIntervalSeconds,
+            preferredAudioLanguage: p.preferredAudioLanguage,
+            preferredSubtitleLanguage: p.preferredSubtitleLanguage,
+            autoSubtitleForForeignAudio: p.autoSubtitleForForeignAudio,
+            autoForcedSubtitles: p.autoForcedSubtitles ?? base.autoForcedSubtitles,
+            styledASSSubtitles: p.styledASSSubtitles,
+            subtitleFontSize: p.subtitleFontSize,
+            subtitleColor: p.subtitleColor,
+            subtitleBackground: p.subtitleBackground,
+            subtitleDelaySeconds: p.subtitleDelaySeconds,
+            subtitleVerticalPosition: p.subtitleVerticalPosition,
+            subtitleFont: p.subtitleFont,
+            subtitleWeight: p.subtitleWeight,
+            pictureMode: p.pictureMode,
+            showScrubPreview: p.showScrubPreview,
+            preferServerTrickplay: p.preferServerTrickplay,
+            rememberTrackSelections: p.rememberTrackSelections ?? base.rememberTrackSelections,
+            subtitlesOnSkipBack: p.subtitlesOnSkipBack ?? base.subtitlesOnSkipBack,
+            touchpadScrubbing: p.touchpadScrubbing,
+            showNextEpisodeCard: p.showNextEpisodeCard,
+            askForRatingAfterMovie: p.askForRatingAfterMovie
+        )
+    }
+}
+
+extension ProfileAppearancePayload {
+    /// The appearance counterpart of `init(legacy:base:)` above.
+    @MainActor
+    init(legacy a: AppearanceSettingsPayload, base: AppearancePreferences) {
+        self.init(
+            updatedAt: a.updatedAt,
+            accentChoice: a.accentChoice,
+            backgroundStyle: a.backgroundStyle,
+            showContentLogos: a.showContentLogos,
+            continueWatchingImage: a.continueWatchingImage,
+            largeCards: a.largeCards,
+            nowPlayingUsesSeriesPoster: a.nowPlayingUsesSeriesPoster,
+            spoilerProtectionEnabled: a.spoilerProtectionEnabled,
+            spoilerHideEpisodes: a.spoilerHideEpisodes,
+            spoilerHideMovies: a.spoilerHideMovies,
+            // Absent means the sender has no opinion (Sodalite#62, #140): the current values go back in.
+            hiddenTabs: a.hiddenTabs ?? base.syncedHiddenTabs,
+            navigationStyle: a.navigationStyle ?? base.navigationStyle.rawValue,
+            showPosterBadges: a.showPosterBadges,
+            showDetailBadges: a.showDetailBadges,
+            showLibraryNames: a.showLibraryNames,
+            showPosterProgress: a.showPosterProgress,
+            showCommunityRating: a.showCommunityRating,
+            showCriticRating: a.showCriticRating,
+            showTagline: a.showTagline,
+            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles
+        )
+    }
+}
+
 /// One profile's appearance settings. Same Optional rule for later fields.
 struct ProfileAppearancePayload: Codable, Equatable {
     var schemaVersion: Int = 1
@@ -274,7 +345,8 @@ struct ProfileHomePayload: Codable, Equatable {
     var rewatchNextUp: Bool
     var collectionGrouping: String
     var librarySorts: [String: String]
-    /// Combine servers (Sodalite#85). Optional so a record from an older build decodes.
+    /// Combine servers (Sodalite#85). No longer written or applied (audit SYNC-201): who contributes
+    /// on a second server is per device. Kept so a record from a build that sent them still decodes.
     var combineServers: Bool?
     var combineServersExcluded: [String]?
     /// My Media order and hiding (Sodalite#85). Optional so a record from an older build decodes.

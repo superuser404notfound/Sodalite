@@ -19,6 +19,7 @@ final class CloudSyncPreferences {
         static let pendingSaves = "cloudSync.pendingSaves"
         static let pendingDeletes = "cloudSync.pendingDeletes"
         static let carriedFields = "cloudSync.carriedFields"
+        static let legacyRecordProfiles = "cloudSync.legacyRecordProfiles"
         static let skippedRecords = "cloudSync.skippedRecords"
         static let skippedRetries = "cloudSync.skippedRetries"
     }
@@ -60,6 +61,7 @@ final class CloudSyncPreferences {
     private var pendingSaveNames: [String]
     private var pendingDeleteNames: [String]
     private var carriedFieldsByRecord: [String: Data]
+    private var legacyRecordProfileScopes: [String: String]
     /// Records a fetch delivered but this device could not read. The change token has moved past
     /// them, so they are asked for by name on the next start.
     private(set) var skippedRecords: [String]
@@ -82,6 +84,7 @@ final class CloudSyncPreferences {
         self.pendingSaveNames = store.stringArray(forKey: Keys.pendingSaves) ?? []
         self.pendingDeleteNames = store.stringArray(forKey: Keys.pendingDeletes) ?? []
         self.carriedFieldsByRecord = (store.dictionary(forKey: Keys.carriedFields) as? [String: Data]) ?? [:]
+        self.legacyRecordProfileScopes = (store.dictionary(forKey: Keys.legacyRecordProfiles) as? [String: String]) ?? [:]
         self.skippedRecords = store.stringArray(forKey: Keys.skippedRecords) ?? []
         self.skippedRetries = (store.dictionary(forKey: Keys.skippedRetries) as? [String: Int]) ?? [:]
     }
@@ -125,6 +128,7 @@ final class CloudSyncPreferences {
     }
 
     func removeRecordCaches(for recordName: String) {
+        setLegacyRecordProfile(nil, for: recordName)
         localStamps.removeValue(forKey: recordName)
         systemFieldsByRecord.removeValue(forKey: recordName)
         carriedFieldsByRecord.removeValue(forKey: recordName)
@@ -146,6 +150,18 @@ final class CloudSyncPreferences {
     func forgetAllSystemFields() {
         systemFieldsByRecord = [:]
         store.removeObject(forKey: Keys.systemFields)
+    }
+
+    // MARK: Profile a legacy settings record was last edited in
+
+    func legacyRecordProfile(for recordName: String) -> ProfileKey? {
+        legacyRecordProfileScopes[recordName].flatMap(ProfileKey.init(storageScope:))
+    }
+
+    func setLegacyRecordProfile(_ key: ProfileKey?, for recordName: String) {
+        guard legacyRecordProfileScopes[recordName] != key?.storageScope else { return }
+        legacyRecordProfileScopes[recordName] = key?.storageScope
+        store.set(legacyRecordProfileScopes, forKey: Keys.legacyRecordProfiles)
     }
 
     // MARK: Fields from newer builds, carried through this one's uploads
@@ -244,6 +260,7 @@ final class CloudSyncPreferences {
         localStamps = [:]
         systemFieldsByRecord = [:]
         carriedFieldsByRecord = [:]
+        legacyRecordProfileScopes = [:]
         pendingSaveNames = []
         pendingDeleteNames = []
         skippedRecords = []
@@ -253,6 +270,7 @@ final class CloudSyncPreferences {
         store.removeObject(forKey: Keys.localStamps)
         store.removeObject(forKey: Keys.systemFields)
         store.removeObject(forKey: Keys.carriedFields)
+        store.removeObject(forKey: Keys.legacyRecordProfiles)
         store.removeObject(forKey: Keys.pendingSaves)
         store.removeObject(forKey: Keys.pendingDeletes)
     }

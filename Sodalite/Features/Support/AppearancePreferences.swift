@@ -273,17 +273,6 @@ final class AppearancePreferences {
         hiddenTabs.contains(tab)
     }
 
-    func setTab(_ tab: AppTab, hidden: Bool) {
-        guard tab.isHideable else { return }
-        var next = hiddenTabs
-        if hidden {
-            next.insert(tab)
-        } else {
-            next.remove(tab)
-        }
-        setHiddenTabs(next)
-    }
-
     /// Hidden tabs a synced record named that this build does not have. Kept and written back with
     /// the known ones, or this device's next upload would unhide them on every newer device. Computed
     /// over the keyspace rather than stored, because it is not a setting this build can change.

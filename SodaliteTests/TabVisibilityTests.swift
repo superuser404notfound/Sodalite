@@ -32,9 +32,8 @@ struct TabVisibilityTests {
     func writeThrough() {
         let store = defaults("persist")
         let prefs = AppearancePreferences(store: store)
-        prefs.setTab(.catalog, hidden: true)
-        prefs.setTab(.music, hidden: true)
-        prefs.setTab(.music, hidden: false)
+        prefs.setHiddenTabs([.catalog, .music])
+        prefs.setHiddenTabs([.catalog])
 
         let reloaded = AppearancePreferences(store: store)
         #expect(reloaded.isTabHidden(.catalog))
@@ -45,8 +44,7 @@ struct TabVisibilityTests {
     func nonHideableTabsStayVisible() {
         let store = defaults("nonHideable")
         let prefs = AppearancePreferences(store: store)
-        prefs.setTab(.home, hidden: true)
-        prefs.setTab(.settings, hidden: true)
+        prefs.setHiddenTabs([.home, .settings])
         #expect(prefs.hiddenTabs.isEmpty)
 
         // A payload from a future build (or a hand-edited defaults plist) must not lock the user out.
@@ -131,7 +129,7 @@ struct TabVisibilityTests {
         )
         #expect(SeerrSurfacePolicy.browsingEnabled(appState: appState, appearance: prefs))
 
-        prefs.setTab(.catalog, hidden: true)
+        prefs.setHiddenTabs([.catalog])
         #expect(SeerrSurfacePolicy.browsingEnabled(appState: appState, appearance: prefs) == false)
     }
 

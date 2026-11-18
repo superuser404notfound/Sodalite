@@ -42,7 +42,7 @@ final class ProfileSettingsRegistry {
     /// The unprefixed keys every store used before this change: the pre-login fallback when no
     /// profile was ever active, the migration source, and where a legacy `settings-*` record from an
     /// older build is applied.
-    let legacy: Settings
+    private(set) var legacy: Settings
 
     /// Wired by the container once it exists.
     var activeKey: () -> ProfileKey? = { nil }
@@ -61,10 +61,7 @@ final class ProfileSettingsRegistry {
         let deviceSpace = PreferenceKeyspace(defaults: defaults, scope: nil)
         let device = DevicePreferences(keyspace: deviceSpace)
         self.device = device
-        self.legacy = Settings(
-            playback: PlaybackPreferences(store: defaults, scope: nil, device: device),
-            appearance: AppearancePreferences(store: defaults, scope: nil, device: device)
-        )
+        self.legacy = Self.makeLegacy(defaults: defaults, device: device)
         deviceSpace.onWrite = { [weak self] name in self?.noteDeviceWrite(name) }
         observeHomeEdits()
     }
@@ -200,6 +197,16 @@ final class ProfileSettingsRegistry {
     func resetAll() {
         cache = [:]
         lastActiveMemo = nil
+        // Rebuilt over the wiped domain: the legacy stores parsed their values at launch too, and
+        // applying a payload onto them only reaches the fields it carries (audit SYNC-R202).
+        legacy = Self.makeLegacy(defaults: defaults, device: device)
+    }
+
+    private static func makeLegacy(defaults: UserDefaults, device: DevicePreferences) -> Settings {
+        Settings(
+            playback: PlaybackPreferences(store: defaults, scope: nil, device: device),
+            appearance: AppearancePreferences(store: defaults, scope: nil, device: device)
+        )
     }
 
     // MARK: Internals

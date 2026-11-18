@@ -2,7 +2,8 @@ import Foundation
 
 /// Collect, apply and copy one scope's home rows, the two Next Up switches, the collection grouping
 /// and the library sorts as a unit. The profile record carries exactly this, and seeding a profile
-/// copies exactly this.
+/// copies exactly this. Combine servers is not part of it: which account a second server contributes
+/// is decided per device, so the switch stays on the box that set it (audit SYNC-201).
 enum ProfileHomeStore {
     static func collect(scope: String, stamp: Date) -> ProfileHomePayload {
         ProfileHomePayload(
@@ -12,8 +13,6 @@ enum ProfileHomeStore {
             rewatchNextUp: HomeRowConfig.enableRewatchingNextUp(scope: scope),
             collectionGrouping: HomeRowConfig.collectionGrouping(scope: scope).rawValue,
             librarySorts: LibrarySortStore.allSorts(scope: scope),
-            combineServers: CombinedServersPreferences(defaults: .standard).isEnabled(scope: scope),
-            combineServersExcluded: CombinedServersPreferences(defaults: .standard).excludedServerIDs(scope: scope).sorted(),
             libraryLayoutJSON: LibraryLayout.rawData(scope: scope),
             heroMode: HomeHeroMode.rawStored(scope: scope),
             heroExcludedLibraries: HomeHeroLibraries.rawStored(scope: scope),
@@ -34,9 +33,6 @@ enum ProfileHomeStore {
             HomeRowConfig.setCollectionGrouping(grouping, scope: scope)
         }
         LibrarySortStore.applySorts(payload.librarySorts, scope: scope)
-        let combined = CombinedServersPreferences(defaults: .standard)
-        if let enabled = payload.combineServers { combined.setEnabled(enabled, scope: scope) }
-        if let excluded = payload.combineServersExcluded { combined.setExcluded(Set(excluded), scope: scope) }
         if let layout = payload.libraryLayoutJSON { LibraryLayout.setRawData(layout, scope: scope) }
         // An unknown mode is a newer build's: the local one stays.
         if let mode = payload.heroMode.flatMap(HomeHeroMode.init(rawValue:)) { HomeHeroMode.setStored(mode, scope: scope) }
@@ -44,13 +40,9 @@ enum ProfileHomeStore {
         if let dropped = payload.droppedSeriesJSON { DroppedSeriesStore.setRawData(dropped, scope: scope) }
     }
 
-    /// Combine servers stays behind: it names another profile's accounts on other servers, and a
-    /// profile used for the first time must not start showing them (Sodalite#85). Dropped shows stay
-    /// behind too: they are what one viewer gave up on, not a layout.
+    /// Dropped shows stay behind: they are what one viewer gave up on, not a layout.
     static func copy(fromScope source: String, toScope target: String) {
         var payload = collect(scope: source, stamp: .distantPast)
-        payload.combineServers = nil
-        payload.combineServersExcluded = nil
         payload.droppedSeriesJSON = nil
         apply(payload, scope: target)
     }

@@ -105,6 +105,54 @@ struct DevicePreferencesSplitTests {
         #expect(device.showStatsForNerds == virgin.showStatsForNerds)
     }
 
+    /// Audit 2026-11-17 SYNC-R201: `reloadFromStore` lists its fields by hand. Every stored value is
+    /// moved off its default here, so one that misses the list stays put after the wipe and fails,
+    /// and the name check fails first when a field is added without extending this test.
+    @Test func aReloadAfterAWipeCoversEveryDeviceField() {
+        let suite = "deviceSplit.reloadAll"
+        let defaults = scratch("reloadAll")
+        let device = DevicePreferences(store: defaults)
+        let virgin = DevicePreferences(store: scratch("reloadAllVirgin"))
+
+        func other<T: CaseIterable & Equatable>(_ value: T) -> T { Array(T.allCases).last { $0 != value } ?? value }
+        device.showStatsForNerds.toggle()
+        device.showEngineDiagnostics.toggle()
+        device.preferLosslessAudioBridge.toggle()
+        device.trueHDAtmosHeights.toggle()
+        device.objectAudioLayout = other(device.objectAudioLayout)
+        device.playerRotationLocked.toggle()
+        device.networkBufferDepth = other(device.networkBufferDepth)
+        device.liveBufferDepth = other(device.liveBufferDepth)
+        device.liveDelay = other(device.liveDelay)
+        device.liveTeletextPage = other(device.liveTeletextPage)
+        device.streamingQualityWifi = other(device.streamingQualityWifi)
+        device.streamingQualityCellular = other(device.streamingQualityCellular)
+        device.forceDolbyVisionOnNonDVDisplay.toggle()
+        device.enhancedUpscaling.toggle()
+        device.lineArtUpscaling.toggle()
+        device.showTopShelfRow.toggle()
+        device.topShelfImage = other(device.topShelfImage)
+        device.speakerLayout = other(device.speakerLayout)
+        device.dialogueBoost = other(device.dialogueBoost)
+        device.nightMode = other(device.nightMode)
+        device.nightModeStartHour = 3
+        device.nightModeEndHour = 11
+        device.lfeInStereoDownmix.toggle()
+        device.audioDelayMilliseconds = 120
+
+        let names = Set(Mirror(reflecting: device).children.compactMap(\.label)
+            .filter { $0.hasPrefix("_") && $0 != "_$observationRegistrar" }.map { String($0.dropFirst()) })
+        #expect(names.count == 24)
+
+        defaults.removePersistentDomain(forName: suite)
+        device.reloadFromStore()
+
+        for (mine, theirs) in zip(Mirror(reflecting: device).children, Mirror(reflecting: virgin).children)
+        where mine.label?.hasPrefix("_") == true && mine.label != "_$observationRegistrar" {
+            #expect("\(mine.value)" == "\(theirs.value)", "\(mine.label ?? "?") survived the reload")
+        }
+    }
+
     /// AetherEngine#731, 2026-10-17: object rendering is opt-in until the patent question is settled.
     /// The heights row is one picker over two stored values: off keeps the chosen layout, so turning
     /// heights back on returns to it, and the layout is a device value with its own key.
