@@ -25,7 +25,7 @@ enum ImagePayload {
 
         switch format(of: data) {
         case .png: return tail(of: data, window: pngTailWindow).contains(subsequence: Self.pngEndChunk)
-        case .jpeg: return tail(of: data, window: jpegTailWindow).contains(subsequence: Self.jpegEndOfImage)
+        case .jpeg: return tail(of: data, window: min(jpegTailWindow, data.count / 2)).contains(subsequence: Self.jpegEndOfImage)
         case .gif: return data.last == 0x3B
         case .webP: return riffLengthIsSatisfied(data)
         case .unknown: return true
@@ -63,7 +63,8 @@ enum ImagePayload {
     /// vendor block after it, and Jellyfin serves the original when no resize is needed, so 64 bytes
     /// refused whole images for good (audit CMP-205). A PNG chunk of twelve fixed bytes cannot turn up
     /// by chance, so its window is wide. A JPEG's `FF D9` also ends an embedded EXIF thumbnail near
-    /// the head, so its window stays short enough that a cut file does not reach one.
+    /// the head, so its window stays short enough that a cut file does not reach one, and for a small
+    /// file it is only the back half (audit review R-W2-5).
     nonisolated private static let pngTailWindow = 64 * 1024
     nonisolated private static let jpegTailWindow = 16 * 1024
 
