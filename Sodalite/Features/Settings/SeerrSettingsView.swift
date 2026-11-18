@@ -590,6 +590,11 @@ struct SeerrSettingsView: View {
 
     private func login() async {
         guard let server = discoveredServer else { return }
+        // The profile this sign-in is for, before any await: a switch while it runs must not move
+        // the cookie or the connected state to the next profile (audit SYNC-204).
+        let profile = dependencies.activeProfileRef()
+        let jellyfinUserID = appState.activeUser?.id
+        let jellyfinServerID = appState.activeServer?.id
 
         isLoggingIn = true
         loginError = nil
@@ -612,12 +617,16 @@ struct SeerrSettingsView: View {
                     password: password,
                     settings: serverSettings
                 )
+            guard dependencies.isActiveProfile(profile) else {
+                dependencies.seerrClient.sessionCookie = nil
+                return
+            }
             // Tie the Seerr session to the active Jellyfin profile (per-profile cookie) so switchToUser can restore it.
             // What comes back may carry the URL slot this sign-in did not know (Sodalite#45).
             let connected = try dependencies.saveSeerrSession(
                 server: server,
-                forJellyfinUserID: appState.activeUser?.id,
-                jellyfinServerID: appState.activeServer?.id
+                forJellyfinUserID: jellyfinUserID,
+                jellyfinServerID: jellyfinServerID
             )
 
             // The password just typed here is the Jellyfin one, so keep it: this screen is the only
@@ -631,7 +640,11 @@ struct SeerrSettingsView: View {
             showSuccess = true
 
             try? await Task.sleep(for: .seconds(1.5))
-            appState.setSeerrConnected(server: connected, user: user, for: dependencies.activeProfileRef())
+            guard dependencies.isActiveProfile(profile) else {
+                showSuccess = false
+                return
+            }
+            appState.setSeerrConnected(server: connected, user: user, for: profile)
             dependencies.scheduleRouteResolve()
             showSuccess = false
         } catch {

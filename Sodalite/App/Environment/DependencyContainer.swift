@@ -87,6 +87,7 @@ final class DependencyContainer {
     #endif
     /// The progress sync in flight, so a second trigger joins it instead of racing it.
     var downloadSyncTask: Task<Void, Never>?
+    var downloadSyncRunID = UUID()
 
     let seerrClient: SeerrClient
     let seerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol
@@ -314,8 +315,11 @@ final class DependencyContainer {
                 return try? capturedKeychain.loadString(for: KeychainKeys.userID(serverID: serverID))
             },
             secondaryRoute: { [weak sessionRegistry] item in
-                guard let session = sessionRegistry?.session(for: item), !session.isActive else { return nil }
+                guard let session = sessionRegistry?.resolve(serverID: item.serverID), !session.isActive else { return nil }
                 return (session.playbackService, session.userID)
+            },
+            isRoutable: { [weak sessionRegistry] item in
+                sessionRegistry?.resolve(serverID: item.serverID) != nil
             }
         )
 
@@ -357,6 +361,7 @@ final class DependencyContainer {
         // carrying it in an encoding no key matcher knows still loses it (audit DIAG-1).
         jellyfinClient.onAccessTokenSet = { LogSecrets.register($0) }
         seerrClient.onSessionCookieSet = { LogSecrets.registerCookie($0) }
+        musicPlaybackCoordinator.bindActiveReporter = { [weak self] in self?.boundPlaybackReporter() ?? { nil } }
 
         sessionRegistry.onSessionsChanged = { [weak sessionRegistry] in
             SharedSessionMirror.writeParticipants(sessionRegistry?.shelfParticipants)
@@ -387,6 +392,14 @@ final class DependencyContainer {
     /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),
     /// keeping the session being switched to. Doubles as the filename-format migration: it deletes
     /// what the previous format wrote wherever it runs.
+    /// Background music belongs to the session it started in. Every path that changes who is signed
+    /// in stops it first, synchronously, so no later hop can see the new identity (audit LTM-201).
+    func stopSessionScopedMusic() {
+        if musicPlaybackCoordinator.currentItem != nil {
+            musicPlaybackCoordinator.stop()
+        }
+    }
+
     private func trimFilterCache(keeping survivor: CacheIdentity?) {
         Task.detached(priority: .utility) {
             FilterCache.shared.migrateAndTrim(keeping: survivor)
@@ -531,6 +544,9 @@ final class DependencyContainer {
         token: String,
         password: String? = nil
     ) throws {
+        if activeSessionIdentity() != CacheIdentity(serverID: server.id, userID: user.id) {
+            stopSessionScopedMusic()
+        }
         try addServer(server)
         try keychainService.save(server.id, for: KeychainKeys.activeServerID)
         try keychainService.save(token, for: KeychainKeys.accessToken(serverID: server.id))
@@ -801,11 +817,9 @@ final class DependencyContainer {
         // activeSessionIdentity onChange only catches the completed setAuthenticated, which lags the async
         // probe on a server switch, so the previous server's track would keep playing. Covers removeServer's
         // active-server promotion (it calls this).
-        Task { @MainActor in
-            if self.musicPlaybackCoordinator.currentItem != nil {
-                self.musicPlaybackCoordinator.stop()
-            }
-        }
+        // Synchronous: the track's reports are bound to its own session, so nothing is lost by stopping
+        // first, and a deferred stop is one more window for the new session to be the one in charge.
+        stopSessionScopedMusic()
 
         if let resumable {
             sessionNote("switch to \(label(for: server)): no token slot here, resuming remembered profile \(resumable.name).")
@@ -912,11 +926,7 @@ final class DependencyContainer {
                     // The stop switchServer would have done on its way through: the picker route leaves
                     // appState.activeServer standing, so activeSessionIdentity never moves and the
                     // deleted server's track would play on under the successor's picker.
-                    Task { @MainActor in
-                        if self.musicPlaybackCoordinator.currentItem != nil {
-                            self.musicPlaybackCoordinator.stop()
-                        }
-                    }
+                    stopSessionScopedMusic()
                     jellyfinClient.baseURL = preferredURL(for: successor)
                     jellyfinClient.accessToken = nil
                     SharedSessionMirror.clear()
@@ -924,6 +934,7 @@ final class DependencyContainer {
                 }
             } else {
                 sessionNote("removed the last server; no session left on this device.")
+                stopSessionScopedMusic()
                 try? keychainService.delete(for: KeychainKeys.activeServerID)
                 jellyfinClient.baseURL = nil
                 jellyfinClient.accessToken = nil
@@ -1068,6 +1079,10 @@ final class DependencyContainer {
     func switchToUser(_ remembered: RememberedUser, server: JellyfinServer) throws {
         let previousIdentity = activeSessionIdentity()
         sessionNote("profile -> \(remembered.name) on \(label(for: server)).")
+        // Before the token swaps: AppRouter's identity onChange runs a render later (audit LTM-201).
+        if previousIdentity != CacheIdentity(serverID: server.id, userID: remembered.id) {
+            stopSessionScopedMusic()
+        }
         try addServer(server)
         try keychainService.save(server.id, for: KeychainKeys.activeServerID)
         try keychainService.save(
@@ -1240,7 +1255,8 @@ final class DependencyContainer {
                   for: KeychainKeys.jellyfinPassword(serverID: serverID, userID: userID)
               )) == nil,
               let auth = try? await jellyfinAuthService.login(username: username, password: password),
-              auth.user.id == userID
+              auth.user.id == userID,
+              isActiveProfile(ProfileRef(serverID: serverID, userID: userID))
         else { return false }
         try? saveSession(server: server, user: auth.user, token: auth.accessToken, password: password)
         return true
@@ -1303,6 +1319,7 @@ final class DependencyContainer {
     }
 
     func clearSession() throws {
+        stopSessionScopedMusic()
         // Full logout is local-only per spec; disabling cloud sync first means the
         // per-server deletes below never mark (else a device-local logout would
         // propagate as a server deletion to every other synced device).
@@ -1329,6 +1346,7 @@ final class DependencyContainer {
 
         jellyfinClient.baseURL = nil
         jellyfinClient.accessToken = nil
+        refreshSessionRegistry()
         liveRouteDidChange()
 
         SharedSessionMirror.clearAll()

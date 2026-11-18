@@ -149,7 +149,7 @@ final class DownloadManager {
         guard store.item(item.id) == nil, store.activeProfile == profile else { return }
         let created = try store.create(manifest, snapshot: DownloadSnapshot(item: detail, series: series, season: season, source: plan.localSource))
 
-        await fetchSidecars(plan: plan, item: created, backend: backend)
+        await fetchSidecars(plan: plan, item: created, profile: profile, backend: backend)
         await fetchArtwork(for: detail, into: created.directory, backend: backend)
         pumpQueue()
     }
@@ -415,7 +415,7 @@ final class DownloadManager {
         store.activeProfile?.serverID == tag.serverID && store.activeProfile?.userID == tag.userID
     }
 
-    private func fetchSidecars(plan: DownloadPlanner.Plan, item: DownloadedItem, backend: any DownloadBackend) async {
+    private func fetchSidecars(plan: DownloadPlanner.Plan, item: DownloadedItem, profile: ProfileKey, backend: any DownloadBackend) async {
         var files: [Int: String] = [:]
         for stream in plan.sidecarStreams {
             guard let url = backend.subtitleURL(itemID: item.id, mediaSourceID: item.manifest.mediaSourceID, stream: stream),
@@ -424,7 +424,8 @@ final class DownloadManager {
             guard (try? data.write(to: item.directory.appendingPathComponent(name), options: .atomic)) != nil else { continue }
             files[stream.index] = name
         }
-        try? store.update(itemID: item.id) { $0.subtitleFiles = files }
+        // By path: the active profile may be another one after the fetches (audit SHELL-203).
+        try? store.updateManifest(serverID: profile.serverID, userID: profile.userID, itemID: item.id) { $0.subtitleFiles = files }
     }
 
     private func fetchArtwork(for item: JellyfinItem, into directory: URL, backend: any DownloadBackend) async {

@@ -310,27 +310,8 @@ struct TabRootView: View {
                 }
             }
 
-            guard let userID = dependencies.activeUserID else { return }
-
             // Probe both optional tabs then publish the tab set in ONE assignment. Two separate insertions rebuilt the bar twice, stranding the earlier item (Live TV) on tvOS's gray icon template; one atomic rebuild tints every item uniformly.
-            let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
-            let hasLive = !liveIDs.isEmpty
-            guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
-
-            let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
-            let hasMusic = !musicIDs.isEmpty
-            guard !Task.isCancelled, signal == lastProbedServerSwitch else { return }
-
-            liveTVServerIDs = liveIDs
-            musicServerIDs = musicIDs
-            tabsProbedForServerID = appState.activeServer?.id
-            if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
-                onScreen: availableTabs,
-                hasLiveTV: hasLive,
-                hasMusic: hasMusic
-            ) {
-                availableTabs = tabs
-            }
+            await probeOptionalTabs { signal == lastProbedServerSwitch }
         }
         // Adding a server (or another profile) authenticates through LoginView -> setAuthenticated, which changes the active server WITHOUT bumping serverDidSwitch, so the probe above never re-fires for the new backend. Re-probe here, else the previous server's Live TV / Music tabs linger and tapping a Live TV tab on a server without Live TV crashes.
         .onReceive(NotificationCenter.default.publisher(for: .loginDidComplete)) { _ in
@@ -471,25 +452,7 @@ struct TabRootView: View {
                 selectedTab = .home
             }
         }
-        guard let userID = dependencies.activeUserID else { return }
-
-        let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
-        let hasLive = !liveIDs.isEmpty
-        if Task.isCancelled { return }
-        let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
-        let hasMusic = !musicIDs.isEmpty
-        if Task.isCancelled { return }
-
-        liveTVServerIDs = liveIDs
-        musicServerIDs = musicIDs
-        tabsProbedForServerID = appState.activeServer?.id
-        if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
-            onScreen: availableTabs,
-            hasLiveTV: hasLive,
-            hasMusic: hasMusic
-        ) {
-            availableTabs = tabs
-        }
+        await probeOptionalTabs()
     }
 
     /// Re-probes the optional tabs after an outage hid them, and publishes only if the answer changed.
@@ -501,22 +464,30 @@ struct TabRootView: View {
     /// unconditionally, because there the tabs on screen belong to a backend that is gone.
     @MainActor
     private func recoverOptionalTabs() async {
+        await probeOptionalTabs()
+    }
+
+    /// The one probe behind the optional Live TV and Music tabs: asks both, then publishes the tab
+    /// set in a single assignment. Drops its answer when the task was cancelled, `isCurrent` says a
+    /// newer probe took over, or the profile it asked for is no longer the active one (audit SHELL-R203).
+    @MainActor
+    private func probeOptionalTabs(isCurrent: @escaping () -> Bool = { true }) async {
         guard let userID = dependencies.activeUserID else { return }
+        let profile = dependencies.activeProfileRef()
+        let stillCurrent = { !Task.isCancelled && isCurrent() && dependencies.isActiveProfile(profile) }
 
         let liveIDs = await dependencies.liveTVServerIDs(activeUserID: userID, previouslyCapable: Set(liveTVServerIDs))
-        let hasLive = !liveIDs.isEmpty
-        if Task.isCancelled { return }
+        guard stillCurrent() else { return }
         let musicIDs = await dependencies.musicServerIDs(activeUserID: userID, previouslyCapable: Set(musicServerIDs))
-        let hasMusic = !musicIDs.isEmpty
-        if Task.isCancelled { return }
+        guard stillCurrent() else { return }
 
         liveTVServerIDs = liveIDs
         musicServerIDs = musicIDs
         tabsProbedForServerID = appState.activeServer?.id
         if let tabs = OptionalTabPolicy.setToPublishAfterProbe(
             onScreen: availableTabs,
-            hasLiveTV: hasLive,
-            hasMusic: hasMusic
+            hasLiveTV: !liveIDs.isEmpty,
+            hasMusic: !musicIDs.isEmpty
         ) {
             availableTabs = tabs
         }

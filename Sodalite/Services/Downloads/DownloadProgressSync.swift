@@ -63,43 +63,48 @@ final class DownloadProgressSync {
         return .nothing
     }
 
+    /// Runs for the profile that is active when it starts and stops the moment another one is. The
+    /// store's `items` and `update(itemID:)` follow the ACTIVE profile, so after a switch they would
+    /// write this profile's server state into the next one's manifests (audit SHELL-203).
     func run() async {
-        guard !isRunning else { return }
+        guard !isRunning, let profile = store.activeProfile else { return }
         isRunning = true
         defer { isRunning = false }
-        for item in store.items.values where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
+        for item in Array(store.items.values) where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
+            guard store.activeProfile == profile, !Task.isCancelled else { return }
             let id = item.manifest.itemID
             // A server now signed in as someone else would get this user's history pushed into theirs.
             guard let (service, userID) = route(item.manifest.originServerID),
                   item.manifest.originUserID == nil || item.manifest.originUserID == userID,
                   let server = try? await service.userData(itemID: id, userID: userID) else { continue }
+            guard store.activeProfile == profile, !Task.isCancelled else { return }
             let local = item.manifest.progress
             switch Self.decide(local: local, server: server) {
             case .push:
                 guard let lastPlayed = local.lastPlayed,
                       (try? await service.updateUserData(itemID: id, userID: userID, positionTicks: local.positionTicks,
                                                          played: local.played, lastPlayed: lastPlayed)) != nil else { continue }
-                stamp(id)
+                stamp(id, profile: profile)
                 // One post per item keeps the detail pages' payload patch (issue #24); Home coalesces
                 // them into one reload (audit BRW-207, review R-BROWSE-2).
                 NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: [
                     PlaybackProgressKey.itemID: id, PlaybackProgressKey.positionTicks: local.positionTicks,
                 ])
             case .adopt:
-                try? store.update(itemID: id) {
+                try? store.updateManifest(serverID: profile.serverID, userID: profile.userID, itemID: id) {
                     $0.progress.positionTicks = server.playbackPositionTicks ?? 0
                     $0.progress.played = server.played ?? false
                     $0.progress.lastPlayed = JellyfinDate.parse(server.lastPlayedDate)
                     $0.progress.lastSyncedAt = now()
                 }
             case .nothing:
-                stamp(id)
+                stamp(id, profile: profile)
             }
         }
     }
 
-    private func stamp(_ id: String) {
+    private func stamp(_ id: String, profile: ProfileKey) {
         let date = now()
-        try? store.update(itemID: id) { $0.progress.lastSyncedAt = date }
+        try? store.updateManifest(serverID: profile.serverID, userID: profile.userID, itemID: id) { $0.progress.lastSyncedAt = date }
     }
 }

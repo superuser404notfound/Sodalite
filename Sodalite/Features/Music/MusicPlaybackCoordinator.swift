@@ -26,6 +26,14 @@ final class MusicPlaybackCoordinator {
     /// A track from another server in a combined setup is streamed from, and reported to, its own
     /// server as that server's user (Sodalite#85). nil means the active server.
     private let secondaryRoute: (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)?
+    /// Whether an item's server still takes part. A track whose server left a combined setup has no
+    /// session to stream or report through, and must not fall back to the active account.
+    private let isRoutable: (JellyfinItem) -> Bool
+    /// Pins the active session for one track: the returned resolver answers with the service that
+    /// session reports through, even after a profile or server switch (audit LTM-201).
+    var bindActiveReporter: () -> () -> JellyfinPlaybackServiceProtocol?
+    /// The current track's own reporter, bound when its load started.
+    private var reportResolver: (() -> JellyfinPlaybackServiceProtocol?)?
 
     private(set) var queue: [JellyfinItem] = []
     private(set) var currentIndex: Int = 0
@@ -96,8 +104,12 @@ final class MusicPlaybackCoordinator {
          playbackService: JellyfinPlaybackServiceProtocol,
          imageService: JellyfinImageService,
          userIDProvider: @escaping () -> String?,
-         secondaryRoute: @escaping (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)? = { _ in nil }) {
+         secondaryRoute: @escaping (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)? = { _ in nil },
+         isRoutable: @escaping (JellyfinItem) -> Bool = { _ in true },
+         bindActiveReporter: (() -> () -> JellyfinPlaybackServiceProtocol?)? = nil) {
         self.engine = engine
+        self.isRoutable = isRoutable
+        self.bindActiveReporter = bindActiveReporter ?? { [playbackService] in { playbackService } }
         self.playbackService = playbackService
         self.imageService = imageService
         self.userIDProvider = userIDProvider
@@ -202,6 +214,7 @@ final class MusicPlaybackCoordinator {
         duration = 0
         playSessionId = nil
         currentMediaSourceId = nil
+        reportResolver = nil
         clearNowPlayingInfo()
         isStopping = false
     }
@@ -215,6 +228,7 @@ final class MusicPlaybackCoordinator {
         // window would pair the new item with the old session and the old playhead.
         currentMediaSourceId = nil
         playSessionId = nil
+        reportResolver = nil
         loadTask?.cancel()
         loadGeneration += 1
         let generation = loadGeneration
@@ -227,9 +241,19 @@ final class MusicPlaybackCoordinator {
 
     private func loadAndPlayCurrent(generation: Int) async {
         guard let item = currentItem else { return }
+        guard isRoutable(item) else {
+            LogTap.shared.note("[MusicCoordinator] \(item.name) belongs to a server that left the combined setup")
+            return
+        }
         let route = secondaryRoute(item)
         guard let userID = route?.userID ?? userIDProvider() else { return }
         let playbackService = route?.service ?? self.playbackService
+        // Bound before the first await: the reports of this track go out under the session it started in.
+        if let route {
+            reportResolver = { route.service }
+        } else {
+            reportResolver = bindActiveReporter()
+        }
 
         configureAudioSessionIfNeeded()
 
@@ -442,7 +466,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = secondaryRoute(item)?.service ?? playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackStart(report) }
     }
 
@@ -461,7 +485,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = secondaryRoute(item)?.service ?? playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackProgress(report) }
     }
 
@@ -474,7 +498,7 @@ final class MusicPlaybackCoordinator {
             positionTicks: positionTicks,
             liveStreamId: nil
         )
-        let svc = secondaryRoute(item)?.service ?? playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackStopped(report) }
     }
 }

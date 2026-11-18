@@ -211,4 +211,39 @@ extension DependencyContainer {
         let session = sessionRegistry.session(for: item)
         return session.isActive ? (jellyfinMusicService, activeUserID) : (session.musicService, session.userID)
     }
+
+    // MARK: - Session-bound reports (audit LTM-201, LTM-R201)
+
+    /// A playback service on a client of its own that carries the active session's address and
+    /// token as they are right now. The live client reads both when a request is SENT, so a report
+    /// that goes out after a profile or server switch would land in the new account. nil while the
+    /// address has not proved itself: such a session gets no token on a snapshot either.
+    func snapshotPlaybackService() -> JellyfinPlaybackServiceProtocol? {
+        guard let base = jellyfinClient.verifiedBaseURL, let token = jellyfinClient.verifiedAccessToken else { return nil }
+        let client = JellyfinClient(httpClient: httpClient)
+        client.onAccessTokenSet = { LogSecrets.register($0) }
+        client.baseURL = base
+        client.accessToken = token
+        return JellyfinPlaybackService(client: client)
+    }
+
+    /// The service for the session a long-lived piece of work starts under. Follows the live
+    /// service while that session is still the active one (so a route change reaches it), and
+    /// falls back to the snapshot the moment the token changed.
+    func boundPlaybackReporter() -> () -> JellyfinPlaybackServiceProtocol? {
+        let token = jellyfinClient.accessToken
+        let snapshot = snapshotPlaybackService()
+        return { [weak self] in
+            guard let self else { return snapshot }
+            return self.jellyfinClient.accessToken == token ? self.jellyfinPlaybackService : snapshot
+        }
+    }
+
+    /// `service` itself for a secondary session (its own client never switches), a snapshot of the
+    /// active session for the live one. For a report about to be sent from a task that outlives the
+    /// screen, such as a player's stop.
+    func sessionBoundReportService(for service: JellyfinPlaybackServiceProtocol) -> JellyfinPlaybackServiceProtocol {
+        guard (service as AnyObject) === (jellyfinPlaybackService as AnyObject) else { return service }
+        return snapshotPlaybackService() ?? service
+    }
 }
