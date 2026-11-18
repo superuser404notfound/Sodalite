@@ -75,6 +75,7 @@ struct SessionCloseTests {
         vm.playSessionID = "ps-1"
         vm.progressReportsHeldForSuspension = true
         vm.playedWhileReportsHeld = true
+        vm.pipelineRunningOverride = true
 
         vm.stopPlayback()
         await settle(service, kills: 1)
@@ -122,11 +123,27 @@ struct SessionCloseTests {
         vm.hasReportedStart = true
         vm.playSessionID = "ps-1"
         vm.holdReportsForSuspension(pictureInPictureActive: true, backgroundAudioPlaying: false)
+        vm.pipelineRunningOverride = true
 
         vm.stopPlayback()
         await settle(service, kills: 1)
 
         #expect(service.stoppedReports.count == 1)
+    }
+
+    /// R2-SESSION-CLOSE-2: seeded in PiP, then paused and torn down before a deep link closes the player.
+    @Test func aSeededLatchWithoutAPipelineSendsNoStop() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.holdReportsForSuspension(pictureInPictureActive: true, backgroundAudioPlaying: false)
+        vm.pipelineRunningOverride = false
+
+        vm.stopPlayback()
+        await settle(service, kills: 1)
+
+        #expect(service.stoppedReports.isEmpty)
     }
 
     @Test func changingTheHoldClearsThePlayedLatch() throws {
@@ -148,10 +165,12 @@ struct SessionCloseTests {
         vm.playSessionID = "ps-1"
         vm.traktScrobbleState = (item.id, true)
 
-        var seen: [AnyHashable: Any]?
+        let seen = SeenStop()
         let token = NotificationCenter.default.addObserver(
             forName: .playbackProgressDidChange, object: nil, queue: .main) { note in
-            seen = note.userInfo
+            seen.record(itemID: note.userInfo?["itemID"] as? String,
+                        seriesID: note.userInfo?["seriesID"] as? String,
+                        serverID: note.userInfo?["serverID"] as? String)
         }
         defer { NotificationCenter.default.removeObserver(token) }
 
@@ -159,9 +178,9 @@ struct SessionCloseTests {
         await settle(service, kills: 1)
 
         #expect(vm.traktScrobbleState == nil)
-        #expect(seen?[PlaybackProgressKey.itemID] as? String == "ep-1")
-        #expect(seen?[PlaybackProgressKey.seriesID] as? String == "show-1")
-        #expect(seen?[PlaybackProgressKey.serverID] as? String == "server-2")
+        #expect(seen.itemID == "ep-1")
+        #expect(seen.seriesID == "show-1")
+        #expect(seen.serverID == "server-2")
     }
 
     @Test func anItemSwitchClosesThroughTheSharedPath() async throws {
@@ -190,7 +209,7 @@ struct SessionCloseTests {
         let gate = TestGate()
         service.stopReportGate = gate
         let vm = makeLiveViewModel(service)
-        vm.liveTunerCloseSettle = 5
+        vm.liveTunerCloseSettle = 0.3
         vm.hasReportedStart = true
         vm.playSessionID = "ps-live"
         vm.activeLiveStreamID = "tuner-1"
@@ -198,8 +217,10 @@ struct SessionCloseTests {
 
         vm.retryAfterOutage()
         #expect(vm.activeLiveStreamID == nil)
+        #expect(vm.hostLoadActive)
         await gate.arrival(1)
-        try? await Task.sleep(for: .milliseconds(200))
+        // Well past the gate's settle window: the reopen still waits for the close.
+        try? await Task.sleep(for: .milliseconds(900))
         #expect(!service.events.contains("open:ch-1"))
 
         gate.open()
@@ -339,4 +360,17 @@ private final class GatedProgramsService: JellyfinLiveTvServiceProtocol, @unchec
     func cancelTimer(timerID: String) async throws {}
     func createSeriesTimer(programID: String) async throws {}
     func cancelSeriesTimer(timerID: String) async throws {}
+}
+
+/// Collects the strings of one `.playbackProgressDidChange` post without sharing a mutable var with the observer closure.
+private nonisolated final class SeenStop: @unchecked Sendable {
+    private let lock = NSLock()
+    private var ids: (item: String?, series: String?, server: String?) = (nil, nil, nil)
+
+    func record(itemID: String?, seriesID: String?, serverID: String?) {
+        lock.withLock { ids = (itemID, seriesID, serverID) }
+    }
+    var itemID: String? { lock.withLock { ids.item } }
+    var seriesID: String? { lock.withLock { ids.series } }
+    var serverID: String? { lock.withLock { ids.server } }
 }

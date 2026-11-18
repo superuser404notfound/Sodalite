@@ -1180,7 +1180,7 @@ extension PlayerViewModel {
     /// (PHOST-205, R-SESSION-CLOSE-3). Returns nil when there is nothing to close.
     /// `awaitingEncodingKill` is for the suspension release, which must finish inside its background task.
     @discardableResult
-    func beginLiveSessionClose(awaitingEncodingKill: Bool = false) -> Task<Void, Never>? {
+    func beginLiveSessionClose(awaitingEncodingKill: Bool = false) -> LiveSessionClose? {
         stopProgressReporting()
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
@@ -1199,10 +1199,14 @@ extension PlayerViewModel {
         let seriesID = item.seriesId
         let serverID = item.serverID
         let closeTuner = deadTuner.map { tunerCloseWork($0, reason: "session teardown") }
-        return LiveTunerGate.shared.close {
+        // Unstructured, so a zap cancelling the retune that awaits this cannot drop the report mid-flight.
+        let reported = Task {
             if let report {
                 await Self.deliverStop(report, seriesID: seriesID, serverID: serverID, service: svc)
             }
+        }
+        let finished = LiveTunerGate.shared.close {
+            await reported.value
             await closeTuner?()
             guard let deadSession else { return }
             if awaitingEncodingKill {
@@ -1211,10 +1215,18 @@ extension PlayerViewModel {
                 Task.detached { try? await svc.stopActiveEncodings(playSessionID: deadSession) }
             }
         }
+        return LiveSessionClose(reported: reported, finished: finished)
     }
 
+    /// Zap and retune wait for the stop report only; `LiveTunerGate` keeps every later open behind the
+    /// tuner close. The suspension release waits for all of it, inside its background task.
     func closeLiveSessionServerSide(awaitingEncodingKill: Bool = false) async {
-        await beginLiveSessionClose(awaitingEncodingKill: awaitingEncodingKill)?.value
+        guard let close = beginLiveSessionClose(awaitingEncodingKill: awaitingEncodingKill) else { return }
+        if awaitingEncodingKill {
+            await close.finished.value
+        } else {
+            await close.reported.value
+        }
     }
 
     /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.
@@ -1563,4 +1575,11 @@ extension PlayerViewModel {
         LogTap.shared.note("[LiveProgram] now \(airing.name)")
         return airing
     }
+}
+
+/// The two stages of a live session close: the stop report went out, and everything (tuner close,
+/// encode kill) is done.
+struct LiveSessionClose {
+    let reported: Task<Void, Never>
+    let finished: Task<Void, Never>
 }
