@@ -141,6 +141,8 @@ extension PlayerViewModel {
         zapBannerHideTask?.cancel()
         loadTask?.cancel()
         liveRetuneTask?.cancel()
+        liveRetryTask?.cancel()
+        liveRetryTask = nil
         let prior = zapCommitTask
         let retune = liveRetuneTask
         let commit = Task { [weak self] in

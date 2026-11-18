@@ -977,6 +977,8 @@ final class PlayerViewModel {
     /// The retune in flight (recovery, audio switch, foreground return). Zap commits and retunes wait
     /// for each other, so the two never close or open a tuner side by side.
     @ObservationIgnored var liveRetuneTask: Task<Void, Never>?
+    /// Try Again's deferred reopen on a live session, waiting for the old tuner's close.
+    @ObservationIgnored var liveRetryTask: Task<Void, Never>?
     /// Test seam: nil in production, which means `startPlayback()`.
     @ObservationIgnored var zapStartPlayback: (@MainActor () async -> Void)?
     /// How long a tuner open waits for our own unanswered closes. Test seam.
@@ -1725,6 +1727,8 @@ final class PlayerViewModel {
         // in flight would otherwise load into the engine the next session owns.
         liveRetuneTask?.cancel()
         liveRetuneTask = nil
+        liveRetryTask?.cancel()
+        liveRetryTask = nil
         zapCommitTask?.cancel()
         zapCommitTask = nil
         cancelLiveReplayRetry()
@@ -2677,9 +2681,11 @@ final class PlayerViewModel {
         clearError()
         if !isLiveSession {
             // The new session starts with nothing picked; the viewer's picks come back through the carry.
-            pendingSessionCarry = SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
-                                               secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
-                                               speedIndex: activeSpeedIndex)
+            // Keep one that a failed load left pending: the picks are cleared by now, a second carry
+            // would turn subtitles off (audit final review FR-PLR-2).
+            pendingSessionCarry = pendingSessionCarry ?? SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
+                                                                      secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
+                                                                      speedIndex: activeSpeedIndex)
         }
         resetSessionState(.sameItemReload)
         player.stop()
@@ -2693,9 +2699,16 @@ final class PlayerViewModel {
         // close could otherwise land on the new stream of the same channel id (#70, R2-SESSION-CLOSE-1).
         hostLoadActive = true
         let close = beginLiveSessionClose()
-        Task { @MainActor [weak self] in
+        // A zap made while the close runs opens its own channel; the reopen then belongs to nobody
+        // (audit final review FR-PLR-1, the #70 shape).
+        let channelID = liveChannel?.id
+        let generation = sessionGeneration
+        liveRetryTask?.cancel()
+        liveRetryTask = Task { @MainActor [weak self] in
             await close?.finished.value
-            guard let self, !self.isTearingDown else { return }
+            guard let self, !Task.isCancelled, !self.isTearingDown,
+                  self.liveChannel?.id == channelID, self.sessionGeneration == generation else { return }
+            self.liveRetryTask = nil
             self.beginPlayback()
         }
     }
@@ -2709,6 +2722,8 @@ final class PlayerViewModel {
         outageWatchdog?.reset()
         cachedPlaybackInfo = nil
         resumeOverrideSeconds = seconds
+        // The replacement is another file: the old file's subtitle index means nothing on it.
+        pendingSessionCarry = nil
         clearError()
         resetSessionState(.sameItemReload)
         player.stop()
@@ -2777,9 +2792,9 @@ final class PlayerViewModel {
         streamingQuality = quality
         cachedPlaybackInfo = nil
         resumeOverrideSeconds = resumeAt > 0 ? resumeAt : nil
-        pendingSessionCarry = SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
-                                           secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
-                                           speedIndex: activeSpeedIndex)
+        pendingSessionCarry = pendingSessionCarry ?? SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
+                                                                  secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
+                                                                  speedIndex: activeSpeedIndex)
         // A switch picked from the outage error is a new session: nothing of the outage carries.
         serverConfirmedUnreachable = false
         outageResumeSeconds = nil
