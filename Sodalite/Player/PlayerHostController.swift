@@ -109,6 +109,7 @@ final class PlayerHostController: AVPlayerViewController {
     /// suspension, and the assertion that keeps the app running long enough to send it.
     private var liveSuspensionRelease: Task<Void, Never>?
     private var liveSuspensionAssertion: UIBackgroundTaskIdentifier = .invalid
+    private var liveSuspensionToken = UUID()
     private var shelfRefreshAssertion: UIBackgroundTaskIdentifier = .invalid
     /// Set synchronously by the AVKit PiP delegate (willStart) BEFORE PiP dismisses this VC, so
     /// viewWillDisappear can tell a PiP handoff from a real dismiss and not stopPlayback (which would
@@ -1115,7 +1116,14 @@ final class PlayerHostController: AVPlayerViewController {
         // Sodalite#184: from here until the way back has asked the server, a session that is not
         // playing writes nothing. See `SuspendedSessionReturn`.
         if viewModel.hasStartedPlaying, !viewModel.isLiveSession {
-            viewModel.progressReportsHeldForSuspension = true
+            #if os(iOS)
+            let backgroundAudio = backgroundWasPlaying && viewModel.player.playbackBackend != .none
+            #else
+            let backgroundAudio = false
+            #endif
+            viewModel.holdReportsForSuspension(
+                pictureInPictureActive: viewModel.player.pictureInPictureActive,
+                backgroundAudioPlaying: backgroundAudio)
         }
         armLiveSuspensionRelease()
         refreshTopShelfForSuspension()
@@ -1167,6 +1175,11 @@ final class PlayerHostController: AVPlayerViewController {
         viewModel.liveTunerReleasedWhileSuspended = false
         guard viewModel.isLiveSession, viewModel.activeLiveStreamID != nil else { return }
         liveSuspensionRelease?.cancel()
+        // A second trip while the first release is still waiting: its assertion would be overwritten
+        // below and never ended (audit PHOST-205).
+        endLiveSuspensionAssertion()
+        let token = UUID()
+        liveSuspensionToken = token
         // Without the assertion the wait and the close both die at suspension, which is the same as
         // never having sent them. Both closures hold this controller strongly on purpose: an
         // assertion nobody ends is a termination, and a weak reference that has gone is exactly the
@@ -1180,6 +1193,8 @@ final class PlayerHostController: AVPlayerViewController {
         liveSuspensionRelease = Task { @MainActor in
             await self.viewModel.releaseLiveSessionForSuspension(
                 waitingForTeardownUpTo: Self.liveSuspensionTeardownWait)
+            // A newer arming owns the slot and the assertion by now.
+            guard self.liveSuspensionToken == token else { return }
             self.liveSuspensionRelease = nil
             self.endLiveSuspensionAssertion()
         }
@@ -1355,7 +1370,11 @@ final class PlayerHostController: AVPlayerViewController {
                 decision.logLabel))
             switch decision {
             case .close(let reportsStop):
-                if reportsStop { viewModel.progressReportsHeldForSuspension = false }
+                if reportsStop {
+                    viewModel.progressReportsHeldForSuspension = false
+                } else {
+                    viewModel.stopReportVetoed = true
+                }
                 dismissPlayer()
             case .reload:
                 viewModel.progressReportsHeldForSuspension = false

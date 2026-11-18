@@ -55,4 +55,19 @@ enum SuspendedSessionReturn: Equatable {
         if server.played == true { return true }
         return abs((server.playbackPositionTicks ?? 0) - positionTicks) > positionToleranceTicks
     }
+
+    /// Whether a stop report may go out while the hold is up (audit PHOST-201). The hold keeps a
+    /// SUSPENDED session quiet, one that is not playing and may hold a stale position. A session that
+    /// kept playing through the background (PiP, background audio), or played or ended after the hold
+    /// began, is the newest writer: without its stop a finished title is never marked watched.
+    static func stopMayReport(held: Bool, isPlaying: Bool, playedSinceHold: Bool) -> Bool {
+        !held || isPlaying || playedSinceHold
+    }
+
+    /// Whether an engine state emission during the hold counts as "this session played". A torn-down
+    /// session (no backend) or one still waiting for its background reload can flip to `.playing` on a
+    /// Play press without any pipeline behind it, and that must not lift the hold (R-SESSION-CLOSE-1).
+    static func latchesPlayed(held: Bool, backendRunning: Bool, awaitingReload: Bool) -> Bool {
+        held && backendRunning && !awaitingReload
+    }
 }

@@ -769,7 +769,34 @@ final class PlayerViewModel {
     /// Sodalite#184: set while the app is suspended and until the way back has asked the server. A
     /// session that is not playing says nothing in that time, neither progress nor a stop report, nor
     /// a local download record, because what it would say may be older than what the server knows.
-    var progressReportsHeldForSuspension = false
+    @ObservationIgnored var progressReportsHeldForSuspension = false {
+        didSet { playedWhileReportsHeld = false }
+    }
+    /// Set by the `$state` sink when the engine plays or ends while the hold above is up: a session that
+    /// kept going in PiP or on background audio is the newest writer, so its stop report may go out
+    /// (audit PHOST-201). Cleared whenever the hold changes.
+    @ObservationIgnored var playedWhileReportsHeld = false
+    /// Set when the return check closes the session without a stop report: the server's verdict wins
+    /// over anything the engine did meanwhile, a Play press included (R-SESSION-CLOSE-1).
+    @ObservationIgnored var stopReportVetoed = false
+
+    /// Raises the hold on the way into the background. A session already running in PiP (or on iOS
+    /// background audio) is the newest writer from the start, and it emits no new `.playing` to say so
+    /// (R-SESSION-CLOSE-2).
+    func holdReportsForSuspension(pictureInPictureActive: Bool, backgroundAudioPlaying: Bool) {
+        progressReportsHeldForSuspension = true
+        if pictureInPictureActive || backgroundAudioPlaying { playedWhileReportsHeld = true }
+    }
+
+    /// The `$state` sink's side of the hold: latch a state only a real pipeline can produce.
+    func noteEngineStateWhileHeld(_ state: PlaybackState) {
+        guard state == .playing || state == .ended,
+              SuspendedSessionReturn.latchesPlayed(
+                  held: progressReportsHeldForSuspension,
+                  backendRunning: player.playbackBackend != .none,
+                  awaitingReload: isAwaitingBackgroundReload) else { return }
+        playedWhileReportsHeld = true
+    }
     var hasReportedStart = false
     /// The last play/pause state sent to Trakt, keyed by item so an auto-advance starts clean.
     var traktScrobbleState: (itemID: String, playing: Bool)?
@@ -1186,6 +1213,14 @@ final class PlayerViewModel {
         hasLiveEdgeObservers = false
         stopProgressReporting()
         hasReportedStart = false
+        // An episode that auto-advances while the app sits in the background keeps the hold, or its
+        // stop could overwrite what another client did meanwhile (R-SESSION-CLOSE-5).
+        stopReportVetoed = false
+        #if os(iOS) || os(tvOS)
+        if UIApplication.shared.applicationState != .background { progressReportsHeldForSuspension = false }
+        #else
+        progressReportsHeldForSuspension = false
+        #endif
         if streamingQuality == nil, !isLiveSession {
             streamingQuality = canTranscodeVideo ? preferences.defaultStreamingQuality() : .original
         }
@@ -1655,6 +1690,13 @@ final class PlayerViewModel {
         nextEpisodeTimer = nil
         liveProgramFollow?.cancel()
         liveProgramFollow = nil
+        // Not loadTask, so the cancel above never reached them (audit PHOST-204): a retune or zap still
+        // in flight would otherwise load into the engine the next session owns.
+        liveRetuneTask?.cancel()
+        liveRetuneTask = nil
+        zapCommitTask?.cancel()
+        zapCommitTask = nil
+        cancelLiveReplayRetry()
         zapSettleTask?.cancel()
         zapSettleTask = nil
         zapLineupTask?.cancel()
@@ -1682,7 +1724,10 @@ final class PlayerViewModel {
         // the Continue Watching shelf with a nearly full bar.
         let finalTicks = completionAwarePositionTicks
         let closeServerSession = makeServerSessionClose(positionTicks: finalTicks,
-                                                        reportsPosition: !progressReportsHeldForSuspension)
+                                                        reportsPosition: !stopReportVetoed && SuspendedSessionReturn.stopMayReport(
+                                                            held: progressReportsHeldForSuspension,
+                                                            isPlaying: isPlaying && player.playbackBackend != .none,
+                                                            playedSinceHold: playedWhileReportsHeld))
         // Engine does native teardown + HLS server shutdown + AVDisplayManager criteria reset in stopInternal().
         player.stop()
         // Tuner-release safety net: frees the server-side tuner even if the stop report fails to deliver. No-op for VOD.
@@ -1693,7 +1738,8 @@ final class PlayerViewModel {
     /// The server half of ending a session: the stop report (only if a start went out) and the
     /// explicit encode kill. Captures every value now and dispatches when called, because
     /// `player.stop()` and the tuner release in between clear what the report needs.
-    func makeServerSessionClose(positionTicks finalTicks: Int64, reportsPosition: Bool = true) -> () -> Void {
+    func makeServerSessionClose(positionTicks finalTicks: Int64, reportsPosition: Bool = true,
+                                refreshesShelf: Bool = true) -> () -> Void {
         if hasStartedPlaying, reportsPosition {
             recordLocalProgress(positionTicks: finalTicks, played: hasReachedEndOfContent)
         }
@@ -1717,25 +1763,12 @@ final class PlayerViewModel {
         // has no session to close, and a stop here would write position 0 over the resume point.
         let sendsStopReport = hasReportedStart && reportsPosition
         if sendsStopReport { traktScrobble(.stop, positionTicks: finalTicks) }
+        let seriesID = item.seriesId
+        let serverID = item.serverID
         let reportWork: @Sendable () async -> Void = {
             if sendsStopReport {
-                do {
-                    try await svc.reportPlaybackStopped(stopReport)
-                    await MainActor.run {
-                        NotificationCenter.default.post(
-                            name: .playbackProgressDidChange,
-                            object: nil,
-                            userInfo: [
-                                PlaybackProgressKey.itemID: stopReport.itemId,
-                                PlaybackProgressKey.positionTicks: stopReport.positionTicks
-                            ]
-                        )
-                    }
-                } catch {
-                    #if DEBUG
-                    print("[SessionReport] Stop FAILED: \(error)")
-                    #endif
-                }
+                await Self.deliverStop(stopReport, seriesID: seriesID, serverID: serverID, service: svc,
+                                       refreshesShelf: refreshesShelf)
             }
             // Explicit transcode kill independent of the stop report: orphaned live transcodes write an
             // endlessly growing stream.ts and fill the server disk (DELETE /Videos/ActiveEncodings, no-op when idle).
@@ -1811,6 +1844,7 @@ final class PlayerViewModel {
                 guard let self else { return }
                 switch state {
                 case .playing:
+                    self.noteEngineStateWhileHeld(state)
                     let firstPlay = !self.hasStartedPlaying
                     self.hasStartedPlaying = true
                     self.isPlaying = true
@@ -1850,6 +1884,7 @@ final class PlayerViewModel {
                     // End-of-media on any backend: the engine surfaces .ended for native / software / audio
                     // alike (AetherEngine#63), so this fires uniformly without watching the AVPlayer directly.
                     self.isPlaying = false
+                    self.noteEngineStateWhileHeld(state)
                     // PiP: with a next episode the auto-advance path swaps the item in place (native
                     // backend, 5.12.0); real end-of-content, a cancelled advance, or a SW-backend
                     // session (Phase A, no layer-stable reload yet) closes the window and ends the
@@ -2607,6 +2642,14 @@ final class PlayerViewModel {
         cancelLiveReplayRetry()
         clearError()
         player.stop()
+        guard isLiveSession else {
+            beginPlayback()
+            return
+        }
+        // The server never went away, so the old tuner and play session are still open there. The close
+        // is handed to LiveTunerGate before the reopen, which waits for it; nothing here blocks on a
+        // stop report that may take 90 s on a flaky network (audit PHOST-202, R-SESSION-CLOSE-4).
+        _ = beginLiveSessionClose()
         beginPlayback()
     }
 
