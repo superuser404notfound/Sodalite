@@ -200,7 +200,10 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
                 from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)"\#(path)}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
             )
         }
-        lock.withLock { _livePlaybackInfoRequests.append(itemID) }
+        lock.withLock {
+            _livePlaybackInfoRequests.append(itemID)
+            _events.append("open:\(itemID)")
+        }
         guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
         // Ignores cancellation, like a request Jellyfin is already probing the tuner for.
         let gate = lock.withLock { () -> TestGate? in

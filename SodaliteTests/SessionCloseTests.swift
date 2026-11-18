@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import AetherEngine
 @testable import Sodalite
 
 /// One session-close path (audit PCORE-R201, PHOST-R201) and the findings that fell out of it:
@@ -42,10 +43,14 @@ struct SessionCloseTests {
     }
 
     private func settle(_ service: RecordingPlaybackService, kills: Int) async {
-        for _ in 0..<200 where service.killedEncodings.count < kills {
+        await waitUntil { service.killedEncodings.count >= kills }
+        try? await Task.sleep(for: .milliseconds(100))
+    }
+
+    private func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0..<500 where !condition() {
             try? await Task.sleep(for: .milliseconds(10))
         }
-        try? await Task.sleep(for: .milliseconds(100))
     }
 
     // MARK: - PHOST-201
@@ -77,13 +82,46 @@ struct SessionCloseTests {
         #expect(service.stoppedReports.count == 1)
     }
 
-    @Test func aHeldSessionThatIsStillPlayingSendsItsStop() async throws {
+    /// R-SESSION-CLOSE-1: a Play press on a torn-down session flips the engine state with no pipeline
+    /// behind it. The sink's latch ignores it, and the return check's veto beats anything else.
+    @Test func aStateWithoutAPipelineDoesNotLatch() throws {
+        let vm = try makeViewModel(RecordingPlaybackService())
+        vm.progressReportsHeldForSuspension = true
+        vm.noteEngineStateWhileHeld(.playing)
+        vm.noteEngineStateWhileHeld(.ended)
+        #expect(vm.playedWhileReportsHeld == false)
+    }
+
+    @Test func theLatchNeedsAPipelineAndNoPendingReload() {
+        #expect(SuspendedSessionReturn.latchesPlayed(held: true, backendRunning: true, awaitingReload: false))
+        #expect(!SuspendedSessionReturn.latchesPlayed(held: true, backendRunning: false, awaitingReload: false))
+        #expect(!SuspendedSessionReturn.latchesPlayed(held: true, backendRunning: true, awaitingReload: true))
+        #expect(!SuspendedSessionReturn.latchesPlayed(held: false, backendRunning: true, awaitingReload: false))
+    }
+
+    @Test func aVetoedCloseSendsNoStopWhateverTheLatchSays() async throws {
         let service = RecordingPlaybackService()
         let vm = try makeViewModel(service)
         vm.hasReportedStart = true
         vm.playSessionID = "ps-1"
         vm.progressReportsHeldForSuspension = true
+        vm.playedWhileReportsHeld = true
         vm.isPlaying = true
+        vm.stopReportVetoed = true
+
+        vm.stopPlayback()
+        await settle(service, kills: 1)
+
+        #expect(service.stoppedReports.isEmpty)
+    }
+
+    /// R-SESSION-CLOSE-2: a film already playing in PiP emits no new state after the hold goes up.
+    @Test func aSessionInPictureInPictureWhenHeldKeepsItsStop() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.holdReportsForSuspension(pictureInPictureActive: true, backgroundAudioPlaying: false)
 
         vm.stopPlayback()
         await settle(service, kills: 1)
@@ -145,21 +183,33 @@ struct SessionCloseTests {
 
     // MARK: - PHOST-202
 
-    @Test func tryAgainOnALiveOutageClosesTheOldTuner() async throws {
+    /// R-SESSION-CLOSE-4: Try Again does not wait on the stop report, and the reopen still comes
+    /// after the close because LiveTunerGate holds it back.
+    @Test func tryAgainOnALiveOutageClosesTheOldTunerBeforeTheReopen() async throws {
         let service = RecordingPlaybackService()
+        let gate = TestGate()
+        service.stopReportGate = gate
         let vm = makeLiveViewModel(service)
+        vm.liveTunerCloseSettle = 5
         vm.hasReportedStart = true
         vm.playSessionID = "ps-live"
         vm.activeLiveStreamID = "tuner-1"
         vm.canRetryAfterOutage = true
 
         vm.retryAfterOutage()
-        for _ in 0..<200 where service.closedLiveStreams.isEmpty {
-            try? await Task.sleep(for: .milliseconds(10))
-        }
+        #expect(vm.activeLiveStreamID == nil)
+        await gate.arrival(1)
+        try? await Task.sleep(for: .milliseconds(200))
+        #expect(!service.events.contains("open:ch-1"))
 
-        #expect(service.stoppedReports.first?.liveStreamId == "tuner-1")
-        #expect(service.closedLiveStreams == ["tuner-1"])
+        gate.open()
+        await waitUntil { service.events.contains("open:ch-1") }
+
+        let events = service.events
+        let close = events.firstIndex(of: "close:tuner-1")
+        let open = events.firstIndex(of: "open:ch-1")
+        #expect(events.first == "stop:tuner-1")
+        #expect(close != nil && open != nil && close! < open!)
         #expect(service.killedEncodings.contains("ps-live"))
         vm.stopPlayback()
     }
@@ -188,7 +238,7 @@ struct SessionCloseTests {
     // MARK: - PHOST-205
 
     /// A newer session opened while the close was waiting on the stop report: its start flag and its
-    /// tuner handle stay, and only the dead handle is released.
+    /// tuner handle stay, and only the dead handle is closed.
     @Test func aSlowCloseLeavesTheNewerSessionAlone() async throws {
         let service = RecordingPlaybackService()
         let gate = TestGate()
@@ -205,11 +255,33 @@ struct SessionCloseTests {
         vm.hasReportedStart = true
         gate.open()
         await close.value
-        try? await Task.sleep(for: .milliseconds(100))
+        await waitUntil { service.closedLiveStreams.count >= 1 }
 
         #expect(vm.activeLiveStreamID == "tuner-new")
         #expect(vm.hasReportedStart)
         #expect(service.closedLiveStreams == ["tuner-old"])
+    }
+
+    /// R-SESSION-CLOSE-3: a second close while the first waits finds nothing to take, so the channel
+    /// id is closed once.
+    @Test func overlappingClosesReleaseTheTunerOnce() async throws {
+        let service = RecordingPlaybackService()
+        let gate = TestGate()
+        service.stopReportGate = gate
+        let vm = makeLiveViewModel(service)
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.activeLiveStreamID = "tuner-1"
+
+        let first = Task { await vm.closeLiveSessionServerSide() }
+        await gate.arrival(1)
+        await vm.closeLiveSessionServerSide()
+        gate.open()
+        await first.value
+        try? await Task.sleep(for: .milliseconds(150))
+
+        #expect(service.closedLiveStreams == ["tuner-1"])
+        #expect(service.stoppedReports.count == 1)
     }
 
     // MARK: - PHOST-206

@@ -353,14 +353,17 @@ extension PlayerViewModel {
     /// The key token is what pairs this line with the `tuner opened` line above it.
     @discardableResult
     func releaseTuner(_ liveStreamID: String, reason: String) -> Task<Void, Never> {
+        LiveTunerGate.shared.close(tunerCloseWork(liveStreamID, reason: reason))
+    }
+
+    /// The request side of a tuner close, ledger bookkeeping included. Taken out of the ledger here, on
+    /// the way to the request, and back into it if the request never arrived (#147): a close that THREW
+    /// is one no server ever saw, and that handle is one the next launch should still find.
+    func tunerCloseWork(_ liveStreamID: String, reason: String) -> @Sendable () async -> Void {
         let svc = playbackService
         let token = Self.liveLogToken(liveStreamID)
-        // Out of the durable ledger on the way to the request, back into it if the request never
-        // arrived (#147). "Accepted" would not be proof of anything here (Jellyfin answers 204 for any
-        // id at all), but a close that THREW is one no server ever saw, and that handle is one the
-        // next launch should still find.
         let stranded = LiveTunerLedger.shared.take(liveStreamID: liveStreamID)
-        return LiveTunerGate.shared.close {
+        return {
             do {
                 try await svc.closeLiveStream(liveStreamID: liveStreamID)
                 LogTap.shared.note("[Live] tuner close accepted key=\(token) (\(reason))")
@@ -454,8 +457,8 @@ extension PlayerViewModel {
             matchContentEnabled: Self.matchContentEnabled,
             panelIsInHDRMode: Self.panelIsInHDRMode,
             audioBridgeMode: preferences.audioBridgeMode,
-            // Live used to run on the engine default (.off), so a viewer's height-channel choice never
-            // reached the E-AC-3 JOC handling of a broadcast DD+ Atmos stream.
+            // Passed for parity with VOD. Engine 7.70.0 keeps object rendering VOD-only, so this changes
+            // nothing on live today; it is forward-looking.
             objectAudioRendering: preferences.objectAudioRendering,
             isLive: true,
             dvrWindowSeconds: preferences.liveBufferDepth.seconds,
@@ -1168,39 +1171,50 @@ extension PlayerViewModel {
         }
     }
 
-    /// Close the session on the server: stop report with the tuner handle, the orphan-transcode kill,
-    /// the tuner release. The one close for the recovery retune, the channel zap, the outage retry and
-    /// the suspension release (audit PHOST-R201). It names the handles it closes up front and acts only
-    /// on those, so a slow answer cannot reach into a session opened in the meantime (PHOST-205).
+    /// Close the session on the server: stop report with the tuner handle, the tuner release and the
+    /// orphan-transcode kill. The one close for the recovery retune, the channel zap, the outage retry
+    /// and the suspension release (audit PHOST-R201).
+    ///
+    /// The handles are taken on entry (the fields are cleared at once) and the whole close runs inside
+    /// `LiveTunerGate`, so a second close finds nothing to take and every later open waits for this one
+    /// (PHOST-205, R-SESSION-CLOSE-3). Returns nil when there is nothing to close.
     /// `awaitingEncodingKill` is for the suspension release, which must finish inside its background task.
-    func closeLiveSessionServerSide(awaitingEncodingKill: Bool = false) async {
+    @discardableResult
+    func beginLiveSessionClose(awaitingEncodingKill: Bool = false) -> Task<Void, Never>? {
         stopProgressReporting()
         let deadTuner = activeLiveStreamID
         let deadSession = playSessionID
-        if hasReportedStart || deadTuner != nil {
-            // Unstructured, so a zap cancelling the retune that runs this cannot drop the report mid-flight.
-            await Task { await self.reportStop(liveStreamID: deadTuner) }.value
-        }
-        if let deadSession {
-            let svc = playbackService
+        let reportedStart = hasReportedStart
+        activeLiveStreamID = nil
+        hasReportedStart = false
+        guard reportedStart || deadTuner != nil || deadSession != nil else { return nil }
+        let svc = playbackService
+        let report = reportedStart || deadTuner != nil ? PlaybackStopReport(
+            itemId: item.id,
+            mediaSourceId: mediaSourceID,
+            playSessionId: deadSession,
+            positionTicks: completionAwarePositionTicks,
+            liveStreamId: deadTuner
+        ) : nil
+        let seriesID = item.seriesId
+        let serverID = item.serverID
+        let closeTuner = deadTuner.map { tunerCloseWork($0, reason: "session teardown") }
+        return LiveTunerGate.shared.close {
+            if let report {
+                await Self.deliverStop(report, seriesID: seriesID, serverID: serverID, service: svc)
+            }
+            await closeTuner?()
+            guard let deadSession else { return }
             if awaitingEncodingKill {
                 try? await svc.stopActiveEncodings(playSessionID: deadSession)
             } else {
                 Task.detached { try? await svc.stopActiveEncodings(playSessionID: deadSession) }
             }
         }
-        guard playSessionID == deadSession else {
-            // A newer session opened while the awaits above ran. Its tuner id may be the same string
-            // (the id names the channel), so only a handle it does not hold is ours to close.
-            if let deadTuner, activeLiveStreamID != deadTuner {
-                releaseTuner(deadTuner, reason: "session superseded during close")
-            }
-            return
-        }
-        hasReportedStart = false
-        guard let deadTuner else { return }
-        if activeLiveStreamID == deadTuner { activeLiveStreamID = nil }
-        releaseTuner(deadTuner, reason: "session teardown")
+    }
+
+    func closeLiveSessionServerSide(awaitingEncodingKill: Bool = false) async {
+        await beginLiveSessionClose(awaitingEncodingKill: awaitingEncodingKill)?.value
     }
 
     /// Close the dead session, then re-run the live load. Engine `load` supersedes the parked session internally; a CancellationError means a newer load (channel zap) took over mid-retune.

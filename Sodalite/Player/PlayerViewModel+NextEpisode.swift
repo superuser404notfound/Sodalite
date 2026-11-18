@@ -214,7 +214,7 @@ extension PlayerViewModel {
         cancellables.removeAll()
 
         // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
-        makeServerSessionClose(positionTicks: completionAwarePositionTicks)()
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks, refreshesShelf: false)()
 
         // Do NOT call player.stop(): a full stop tears down the native AVPlayer, and AVKit fails to re-register its Now-Playing session against a swapped player, blanking the CC widget (issue #15). engine.load(newURL) reloads in place, preserving the AVPlayer across the seam.
         LogTap.shared.note("[NextEp] reload_in_place (no engine stop)")
@@ -364,7 +364,7 @@ extension PlayerViewModel {
         cancellables.removeAll()
 
         // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
-        makeServerSessionClose(positionTicks: completionAwarePositionTicks)()
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks, refreshesShelf: false)()
 
         // No player.stop() (mirrors playNextEpisode): engine.load(newURL) reloads in place so AVKit's Now-Playing session survives the seam (issue #15).
         resetSessionState(switchingTo: target)

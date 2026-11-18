@@ -66,6 +66,7 @@ final class LiveMultiviewCoordinator {
     /// The tile whose full screen is up, nil while the grid shows.
     @ObservationIgnored private var fullScreenTileID: UUID?
     @ObservationIgnored private var suspensionAssertion: UIBackgroundTaskIdentifier = .invalid
+    @ObservationIgnored private var suspensionToken = UUID()
     @ObservationIgnored private var finished = false
     /// Each tile's frame in window coordinates, as the grid last laid it out.
     @ObservationIgnored var tileFrames: [UUID: CGRect] = [:]
@@ -417,6 +418,8 @@ final class LiveMultiviewCoordinator {
         for tile in session.tiles { tile.viewModel.setAppActive(false) }
         suspendTask?.cancel()
         endSuspensionAssertion()
+        let token = UUID()
+        suspensionToken = token
         // Held strongly on purpose, like the player's own release: an assertion nobody ends is a termination.
         suspensionAssertion = UIApplication.shared.beginBackgroundTask(withName: "multiview-tuner-release") {
             self.suspendTask?.cancel()
@@ -425,6 +428,8 @@ final class LiveMultiviewCoordinator {
         let session = session
         suspendTask = Task { @MainActor in
             await session.suspendAll()
+            // A second trip owns the handle and the assertion by now (audit R-SESSION-CLOSE-6).
+            guard self.suspensionToken == token else { return }
             self.suspendTask = nil
             self.endSuspensionAssertion()
         }

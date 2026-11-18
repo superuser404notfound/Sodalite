@@ -113,31 +113,11 @@ extension PlayerViewModel {
         }
     }
 
-    /// The awaited form of the stop report, for the live retune and the suspension release. The
-    /// payload and the aftermath are `deliverStop`'s, the same ones every VOD close goes through.
-    func reportStop(positionTicks: Int64? = nil, liveStreamID: String? = nil) async {
-        // positionTicks override lets stopPlayback() capture position BEFORE
-        // killing the engine (stop audio first, no trailing buffer on dismiss).
-        // liveStreamID closes a dead tuner on retune (belt-and-braces with
-        // the explicit closeLiveStream).
-        let ticks = positionTicks ?? completionAwarePositionTicks
-        traktScrobble(.stop, positionTicks: ticks)
-        let report = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: ticks,
-            liveStreamId: liveStreamID
-        )
-        await Self.deliverStop(report, seriesID: item.seriesId, serverID: item.serverID,
-                               service: playbackService)
-    }
-
     /// Sends one stop report and tells the rest of the app about it. Every session close ends here
     /// (audit PCORE-R201), so the notification shape and the shelf refresh cannot drift again.
     @MainActor static func deliverStop(
         _ report: PlaybackStopReport, seriesID: String?, serverID: String?,
-        service: JellyfinPlaybackServiceProtocol
+        service: JellyfinPlaybackServiceProtocol, refreshesShelf: Bool = true
     ) async {
         do {
             try await service.reportPlaybackStopped(report)
@@ -153,7 +133,8 @@ extension PlayerViewModel {
             NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: userInfo)
             // Inside the do: a failed report means the server never learned the new
             // position, so the shelf has nothing new to fetch.
-            TopShelfRefresher.invalidate()
+            // Not at an auto-advance seam: Home defers its reload there on purpose (#12).
+            if refreshesShelf { TopShelfRefresher.invalidate() }
         } catch {
             #if DEBUG
             print("[SessionReport] Stop FAILED: \(error)")

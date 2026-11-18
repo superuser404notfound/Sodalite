@@ -1116,7 +1116,14 @@ final class PlayerHostController: AVPlayerViewController {
         // Sodalite#184: from here until the way back has asked the server, a session that is not
         // playing writes nothing. See `SuspendedSessionReturn`.
         if viewModel.hasStartedPlaying, !viewModel.isLiveSession {
-            viewModel.progressReportsHeldForSuspension = true
+            #if os(iOS)
+            let backgroundAudio = backgroundWasPlaying && viewModel.player.playbackBackend != .none
+            #else
+            let backgroundAudio = false
+            #endif
+            viewModel.holdReportsForSuspension(
+                pictureInPictureActive: viewModel.player.pictureInPictureActive,
+                backgroundAudioPlaying: backgroundAudio)
         }
         armLiveSuspensionRelease()
         refreshTopShelfForSuspension()
@@ -1363,7 +1370,11 @@ final class PlayerHostController: AVPlayerViewController {
                 decision.logLabel))
             switch decision {
             case .close(let reportsStop):
-                if reportsStop { viewModel.progressReportsHeldForSuspension = false }
+                if reportsStop {
+                    viewModel.progressReportsHeldForSuspension = false
+                } else {
+                    viewModel.stopReportVetoed = true
+                }
                 dismissPlayer()
             case .reload:
                 viewModel.progressReportsHeldForSuspension = false
