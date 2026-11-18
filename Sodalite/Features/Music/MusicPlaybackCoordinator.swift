@@ -57,6 +57,7 @@ final class MusicPlaybackCoordinator {
     /// The in-flight continuous (hold-to-seek) spool task; non-nil while a
     /// left/right press is held.
     var continuousSeekTask: Task<Void, Never>?
+    var seekScan: SeekScan?
 
     var currentItem: JellyfinItem? {
         guard queue.indices.contains(currentIndex) else { return nil }
@@ -93,6 +94,8 @@ final class MusicPlaybackCoordinator {
     /// Sodalite#242: the profile's normalization mode, read at every track load. Set by the container,
     /// which resolves the active profile's preferences.
     var normalizationModeProvider: () -> MusicNormalization = { .off }
+    /// The profile's skip interval for a direction (-1 back, else forward), read at every press.
+    var skipSecondsProvider: (Int) -> Int = { _ in 10 }
     /// What the playing track was asked to do, kept until it is replaced so its log line can carry the
     /// engine's figures.
     private var normalizationRecord: MusicNormalizationRecord?
@@ -178,7 +181,11 @@ final class MusicPlaybackCoordinator {
 
     /// Standard "previous": >3 s in (or nothing before) restarts the current track, else steps back.
     func previous() {
-        if currentTime > 3 || !hasPrevious {
+        switch Self.previousAction(currentTime: currentTime, loadInFlight: loadTask != nil,
+                                   hasPrevious: hasPrevious) {
+        case .ignore:
+            return
+        case .restart:
             // Restart-in-place: source is loaded, so seek is instant and keeps the play session (a
             // full loadAndPlayCurrent would re-fetch + reload for an audible gap). Explicit play()
             // after, since restarting from paused must resume (seek alone parks the engine at 0).
@@ -186,11 +193,22 @@ final class MusicPlaybackCoordinator {
                 await engine.seek(to: 0)
                 engine.play()
             }
-        } else {
+        case .stepBack:
             reportStopped()
             currentIndex -= 1
             startLoadingCurrent()
         }
+    }
+
+    enum PreviousAction: Equatable { case restart, stepBack, ignore }
+
+    /// LTM-205: while a track is loading, `currentTime` still carries the outgoing track's clock, so
+    /// the decision is made on the track being loaded, which stands at its start. A press then steps
+    /// back, or does nothing when there is nothing before it (the load restarts it anyway).
+    nonisolated static func previousAction(currentTime: Double, loadInFlight: Bool,
+                                           hasPrevious: Bool) -> PreviousAction {
+        if loadInFlight { return hasPrevious ? .stepBack : .ignore }
+        return currentTime > 3 || !hasPrevious ? .restart : .stepBack
     }
 
     func seek(to seconds: Double) {

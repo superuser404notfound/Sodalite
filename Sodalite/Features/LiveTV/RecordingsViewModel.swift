@@ -34,7 +34,14 @@ final class RecordingsViewModel {
     func load() async {
         guard !isLoading else { return }
         isLoading = true
-        defer { isLoading = false }
+        // Owned by the model, not by the view's task: leaving the segment mid-load cancelled the
+        // requests, and the cancellation was stored as "Something went wrong" for the next visit
+        // (audit LTM-204, same fix as the Overview and the guide in e9fe0a11).
+        await Task { await performLoad() }.value
+        isLoading = false
+    }
+
+    private func performLoad() async {
         async let recs = liveTvService.getRecordings(userID: userID, isInProgress: nil)
         // Active recordings via the IsInProgress filter, as jellyfin-web builds its "Active Recordings" row.
         async let active = liveTvService.getRecordings(userID: userID, isInProgress: true)

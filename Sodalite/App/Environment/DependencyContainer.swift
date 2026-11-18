@@ -327,6 +327,9 @@ final class DependencyContainer {
         musicPlaybackCoordinator.normalizationModeProvider = { [weak capturedSettings] in
             capturedSettings?.current.playback.musicNormalization ?? .off
         }
+        musicPlaybackCoordinator.skipSecondsProvider = { [weak capturedSettings] direction in
+            capturedSettings?.current.playback.skipSeconds(direction: direction) ?? 10
+        }
         self.themeSongPlayer = ThemeSongPlayer(
             output: AVThemeSongOutput(),
             isEnabled: { [weak capturedSettings] in capturedSettings?.current.playback.playThemeSongs ?? false },
