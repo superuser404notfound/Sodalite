@@ -20,23 +20,36 @@ struct ChannelListView: View {
     @State private var model: ChannelListViewModel
     let tint: Color
     var onWatchLive: ((LivePlaybackContext) -> Void)?
+    /// False while another Live TV segment is on top of this page (the list stays mounted).
+    var isActive: Bool = true
 
+    @Environment(\.shellPageIsShown) private var pageIsShown
     @State private var searchText = ""
     @State private var channelSelection: ChannelSelection?
     @State private var isPickingGenre = false
 
     init(model: ChannelListViewModel,
          tint: Color,
-         onWatchLive: ((LivePlaybackContext) -> Void)? = nil) {
+         onWatchLive: ((LivePlaybackContext) -> Void)? = nil,
+         isActive: Bool = true) {
         _model = State(initialValue: model)
         self.tint = tint
         self.onWatchLive = onWatchLive
+        self.isActive = isActive
     }
 
     var body: some View {
         content
             .onChange(of: searchText) { _, newValue in model.apply(searchText: newValue) }
             .task { await model.load() }
+            // LTM-206: the schedule window follows the clock, but only while someone can see the list.
+            .task(id: pageIsShown && isActive) {
+                guard pageIsShown && isActive else { return }
+                while !Task.isCancelled {
+                    model.refreshWindow()
+                    try? await Task.sleep(for: .seconds(60))
+                }
+            }
             .menuPresentation(isPresented: $isPickingGenre) {
                 GuideGenrePicker(genres: model.genres, tint: tint)
             }
@@ -104,7 +117,7 @@ struct ChannelListView: View {
                                })
                         .contentShape(Rectangle())
                         .onTapGesture { channelSelection = ChannelSelection(channel: channel) }
-                        .task { await model.ensurePrograms(for: [channel.id]) }
+                        .task(id: model.requestEpoch) { await model.ensurePrograms(for: [channel.id]) }
                 }
             }
             .listStyle(.plain)
@@ -338,7 +351,7 @@ private struct ChannelScheduleSheet: View {
                     Button("common.done") { dismiss() }
                 }
             }
-            .task { await model.ensurePrograms(for: [channel.id]) }
+            .task(id: model.requestEpoch) { await model.ensurePrograms(for: [channel.id]) }
             .sheet(item: $selection) { selected in
                 ProgramInfoPopover(
                     program: selected.program, channel: selected.channel, tint: tint,

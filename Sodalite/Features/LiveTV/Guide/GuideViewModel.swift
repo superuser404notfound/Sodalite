@@ -20,15 +20,17 @@ final class GuideViewModel {
     let timers: LiveTimerStore
 
     private(set) var axis: GuideAxis
+    /// The channel and program loader this guide shares with the channel list (LTM-R203).
+    private let lineup: LiveLineup
     /// What the grid renders: the fetched set narrowed by the search text.
-    private(set) var channels: [JellyfinChannel] = []
-    private(set) var programsByChannel: [String: [JellyfinProgram]] = [:]
-    var isLoadingChannels: Bool { fetchingGeneration != nil }
-    private(set) var channelsComplete = false
-    private(set) var loadError: String?
+    var channels: [JellyfinChannel] { lineup.channels }
+    var programsByChannel: [String: [JellyfinProgram]] { lineup.programsByChannel }
+    var isLoadingChannels: Bool { lineup.isLoadingChannels }
+    var channelsComplete: Bool { lineup.channelsComplete }
+    var loadError: String? { lineup.loadError }
     /// Drives whether the Radio chip is offered at all. Latched: a favourites-only list without a
     /// radio channel must not take the chip away again.
-    private(set) var hasRadioChannels = false
+    var hasRadioChannels: Bool { lineup.hasRadioChannels }
 
     /// Hero content: the last program focused IN THE GRID, held while focus sits on the ruler or
     /// the controls so the strip does not blank out mid-navigation.
@@ -50,24 +52,15 @@ final class GuideViewModel {
     /// category snap), so the controller scrolls rather than follows.
     private(set) var scrollRequestVersion = 0
 
-    private(set) var filter: GuideFilter = .default
-    private(set) var searchText = ""
+    var filter: GuideFilter { lineup.filter }
+    var searchText: String { lineup.searchText }
 
     /// Genre narrowing (#182), applied client-side on top of `filter` and the search.
-    let genres: GuideGenreController
+    var genres: GuideGenreController { lineup.genres }
     /// Category narrowing (#201), applied client-side like the genres.
-    let categories: GuideCategoryController
+    var categories: GuideCategoryController { lineup.categories }
 
     private let service: JellyfinLiveTvServiceProtocol
-    private let userID: String
-    /// Everything fetched for the active filter, before the search narrows it.
-    private var fetchedChannels: [JellyfinChannel] = []
-    private var requestedProgramChannelIDs: Set<String> = []
-    private var loadGeneration = 0
-    /// The generation whose fetch loop is running. Re-entry is refused per generation only: a filter
-    /// switch mid-paging has to start its own loop while the old one is still suspended in its request,
-    /// which then finds itself outdated and quits.
-    private var fetchingGeneration: Int?
     private var didLoad = false
     /// The server's EPG horizon, kept because every later axis rebuild has to honour it too.
     private var guideEnd: Date?
@@ -78,16 +71,13 @@ final class GuideViewModel {
          metrics: GuideMetrics = .current,
          now: Date = Date()) {
         self.service = service
-        self.userID = userID
         self.timers = timers
         self.metrics = metrics
-        self.axis = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute)
-        self.genres = GuideGenreController(service: service, userID: userID)
-        self.categories = GuideCategoryController(service: service, userID: userID)
-        genres.guideWindow = { [unowned self] in (axis.start, axis.end) }
-        genres.onSnapToNow = { [unowned self] in jumpToNow() }
-        genres.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
-        categories.onChannelsChanged = { [unowned self] in recomputeVisibleChannels() }
+        let axis = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute)
+        self.axis = axis
+        self.lineup = LiveLineup(service: service, userID: userID, timers: timers,
+                                 windowStart: axis.start, windowEnd: axis.end)
+        lineup.genres.onSnapToNow = { [unowned self] in jumpToNow() }
     }
 
     var allLoadedPrograms: [JellyfinProgram] { programsByChannel.values.flatMap { $0 } }
@@ -110,20 +100,20 @@ final class GuideViewModel {
             guideEnd = end
             refreshAxis()
         }
-        await fetchChannels()
+        await lineup.fetchChannels()
     }
 
     /// The way back from a failed load (the error view's Retry and the app-wide reload signal). A first
     /// page that failed leaves nothing worth keeping, so the whole load runs again, probes included; a
     /// later page resumes the line-up where it stopped. A guide that loaded fine is left alone.
     func recover() async {
-        guard loadError != nil else { return }
-        loadError = nil
-        if fetchedChannels.isEmpty {
+        guard lineup.loadError != nil else { return }
+        lineup.clearLoadError()
+        if lineup.hasFetchedChannels {
+            await lineup.fetchChannels()
+        } else {
             didLoad = false
             await load()
-        } else {
-            await fetchChannels()
         }
     }
 
@@ -141,96 +131,24 @@ final class GuideViewModel {
         let rebuilt = GuideAxis(now: now, pointsPerMinute: metrics.pointsPerMinute, guideEnd: guideEnd)
         guard rebuilt != axis else { return false }
         axis = rebuilt
-        // A program that ended before the new left edge has no width left (GuideAxis.width answers
-        // 0 and GuideRowMath.spans clamps x to 0), and a zero-width cell is invisible while staying
-        // focusable. It leaves with the window rather than piling up at x = 0.
-        programsByChannel = programsByChannel.mapValues { programs in
-            programs.filter { ($0.endDate ?? .distantFuture) > rebuilt.start }
-        }
-        // The rows were fetched for the OLD window, which no longer covers this one: re-open them so
-        // they are requested again as they come into view. That is also the only thing that brings a
-        // long-running guide a fresh EPG.
-        requestedProgramChannelIDs = []
-        genres.invalidate()
-        categories.invalidate()
+        // Programs that ended before the new left edge leave (a zero-width cell is invisible while
+        // staying focusable), the rows are re-requested as they come into view, and the genre and
+        // category matches are revalidated in place (LTM-203).
+        lineup.setWindow(start: rebuilt.start, end: rebuilt.end)
         return true
     }
 
     func apply(filter newFilter: GuideFilter) async {
         guard newFilter != filter else { return }
         let categoryChanged = newFilter.category != nil && newFilter.category != filter.category
-        let refetch = newFilter.queryItems != filter.queryItems
-        filter = newFilter
         // A category matches what is airing RIGHT NOW. Leaving the axis parked at 23:00 would show
         // channels selected for their 20:15 program, which reads as a broken filter.
         if categoryChanged { jumpToNow() }
-        if refetch {
-            async let resolved: Void = categories.apply(newFilter.category)
-            await reloadChannels()
-            await resolved
-        } else {
-            // Kind and category narrow what is already fetched. The category's resolve empties the
-            // set in the same turn, so the grid never shows the unnarrowed list in between.
-            recomputeVisibleChannels()
-            await categories.apply(newFilter.category)
-        }
+        await lineup.apply(filter: newFilter)
     }
 
     func apply(searchText newValue: String) {
-        searchText = newValue
-        recomputeVisibleChannels()
-    }
-
-    private func reloadChannels() async {
-        loadGeneration += 1
-        fetchedChannels = []
-        channels = []
-        programsByChannel = [:]
-        requestedProgramChannelIDs = []
-        channelsComplete = false
-        await fetchChannels()
-    }
-
-    /// Fetch every page for the active filter, appending progressively so the first page renders
-    /// while the rest arrives.
-    private func fetchChannels() async {
-        let generation = loadGeneration
-        guard fetchingGeneration != generation else { return }
-        fetchingGeneration = generation
-        defer { if fetchingGeneration == generation { fetchingGeneration = nil } }
-        var startIndex = fetchedChannels.count
-        while !channelsComplete, startIndex < Self.channelHardCap {
-            do {
-                let response = try await service.getChannels(
-                    userID: userID, startIndex: startIndex, limit: Self.pageSize, filter: filter)
-                // A filter switch during the loop invalidates everything fetched after it.
-                guard generation == loadGeneration else { return }
-                fetchedChannels.append(contentsOf: response.items)
-                timers.seedFavorites(from: response.items)
-                // Read off the channels themselves: Jellyfin drops a Type=Radio filter, so a probe
-                // for one answered yes on every server with Live TV (#201).
-                if response.items.contains(where: { $0.kind == .radio }) { hasRadioChannels = true }
-                startIndex += response.items.count
-                // A page that came back empty also ends the loop, or a server that ignores
-                // StartIndex would spin here forever.
-                if response.items.count < Self.pageSize { channelsComplete = true }
-                loadError = nil
-                recomputeVisibleChannels()
-            } catch {
-                guard generation == loadGeneration else { return }
-                loadError = ErrorText.user(for: error)
-                return
-            }
-        }
-        channelsComplete = true
-    }
-
-    private func recomputeVisibleChannels() {
-        let query = searchText
-        channels = fetchedChannels.filter { channel in
-            filter.admits(kindOf: channel) && categories.admits(channel) && genres.admits(channel)
-                && (query.isEmpty || Self.matches(channel: channel, query: query))
-        }
+        lineup.apply(searchText: newValue)
     }
 
     // MARK: - Search matching
@@ -249,41 +167,7 @@ final class GuideViewModel {
 
     /// Fetch programs for not-yet-requested channels as their rows come into view.
     func ensurePrograms(for channelIDs: [String]) async {
-        let missing = channelIDs.filter { !requestedProgramChannelIDs.contains($0) }
-        guard !missing.isEmpty else { return }
-        missing.forEach { requestedProgramChannelIDs.insert($0) }
-        do {
-            let programs = try await service.getPrograms(
-                channelIDs: missing, userID: userID, start: axis.start, end: axis.end)
-            var grouped = programsByChannel
-            // A row can be requested a second time after the window moved. Replace it: appending
-            // would leave the old and the new copy of a program side by side, and two entries that
-            // overlap without covering each other both survive GuideRowMath.
-            missing.forEach { grouped[$0] = [] }
-            for program in programs {
-                guard let channelID = program.channelId else { continue }
-                // The MinEndDate overlap query is inclusive, so a program ending exactly at the axis
-                // start has zero span and would render as a one-point sliver. Read live, after the
-                // await, which is also what keeps a response that was requested for the PREVIOUS
-                // window from putting its expired programs back into a row.
-                if let end = program.endDate, end <= axis.start { continue }
-                grouped[channelID, default: []].append(program)
-            }
-            for channelID in missing {
-                guard var row = grouped[channelID] else { continue }
-                row.sort { ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast) }
-                // Overlapping EPG entries stack two cells on the same pixels, and the one behind
-                // stays focusable while being invisible. Sanitized here, not in the grid, so the
-                // anchor's program index and the rendered cells count the same programs.
-                let kept = GuideRowMath.keptIndices(row.map(\.guideTimeRange))
-                grouped[channelID] = kept.map { row[$0] }
-            }
-            programsByChannel = grouped
-            timers.seedTimers(from: programs)
-        } catch {
-            // Leave the rows program-less (the grid shows a placeholder) and allow a retry.
-            missing.forEach { requestedProgramChannelIDs.remove($0) }
-        }
+        await lineup.ensurePrograms(for: channelIDs)
     }
 
     func programs(for channelID: String) -> [JellyfinProgram] {

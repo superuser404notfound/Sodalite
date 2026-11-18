@@ -99,7 +99,8 @@ struct LiveTVTabView: View {
                                         onWatchLive: { context in
                                             liveContext = context
                                             isPlayerPresented = true
-                                        })
+                                        },
+                                        isActive: section == .guide)
                     } else if let guideModel {
                         GuideView(
                             model: guideModel,
@@ -126,7 +127,8 @@ struct LiveTVTabView: View {
                                         onWatchLive: { context in
                                             liveContext = context
                                             isPlayerPresented = true
-                                        })
+                                        },
+                                        isActive: section == .guide)
                     } else {
                         ProgressView()
                     }

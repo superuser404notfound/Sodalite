@@ -34,12 +34,13 @@ final class GuideCategoryController {
         await resolve()
     }
 
-    /// "Airing now" is as old as the moment it was asked.
+    /// "Airing now" is as old as the moment it was asked. The current set stays until the new one
+    /// lands, so a window move does not empty the grid under a focused cell (LTM-203).
     func invalidate() {
-        if category != nil { Task { await resolve() } }
+        if category != nil { Task { await resolve(revalidating: true) } }
     }
 
-    private func resolve() async {
+    private func resolve(revalidating: Bool = false) async {
         generation += 1
         let current = generation
         guard let category else {
@@ -48,15 +49,21 @@ final class GuideCategoryController {
             onChannelsChanged()
             return
         }
-        isResolving = true
-        channelIDs = []
-        onChannelsChanged()
+        if !revalidating {
+            isResolving = true
+            channelIDs = []
+            onChannelsChanged()
+        }
         // A failed lookup leaves the set empty, which the owner shows as "nothing matches". The chip
-        // stays on, so tapping it twice asks again.
+        // stays on, so tapping it twice asks again. A failed revalidation keeps what it had.
         let programs = try? await service.getProgramIndex(
             userID: userID, window: .airing, genres: nil, category: category,
             cap: GuideGenreController.programCap)
         guard current == generation else { return }
+        if revalidating, programs == nil {
+            isResolving = false
+            return
+        }
         channelIDs = Set((programs ?? []).compactMap(\.channelId))
         isResolving = false
         onChannelsChanged()

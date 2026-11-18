@@ -80,10 +80,12 @@ final class GuideGenreController {
     /// does the set of matching channels.
     func invalidate() {
         names = [:]
-        if filter.isActive { Task { await resolve() } }
+        if filter.isActive { Task { await resolve(revalidating: true) } }
     }
 
-    private func resolve() async {
+    /// `revalidating` keeps the current match set until the new one lands, so a window move does not
+    /// empty the grid under a focused cell (LTM-203). Only a user's own change empties first.
+    private func resolve(revalidating: Bool = false) async {
         generation += 1
         let current = generation
         guard filter.isActive else {
@@ -92,9 +94,11 @@ final class GuideGenreController {
             onChannelsChanged()
             return
         }
-        isResolving = true
-        channelIDs = []
-        onChannelsChanged()
+        if !revalidating {
+            isResolving = true
+            channelIDs = []
+            onChannelsChanged()
+        }
         do {
             let programs = try await service.getProgramIndex(
                 userID: userID, window: window(for: filter.scope),
@@ -104,6 +108,11 @@ final class GuideGenreController {
             error = nil
         } catch {
             guard current == generation else { return }
+            // A failed background revalidation keeps the set it had instead of dropping the choice.
+            if revalidating {
+                isResolving = false
+                return
+            }
             // Leaving the list empty would read as "nothing matches". Drop the selection instead
             // and say why in the picker.
             filter.genres = []
