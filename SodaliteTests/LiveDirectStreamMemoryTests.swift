@@ -156,4 +156,38 @@ struct LiveDirectStreamMemoryTests {
         let count = capped.count
         #expect(count == LiveDirectStreamMemory.maxEntries)
     }
+
+    @Test("re-recording an unchanged upstream inside a day does not rewrite the keychain")
+    func unchangedUpstreamSkipsTheWrite() {
+        let keychain = CountingKeychain()
+        let memory = makeMemory(keychain)
+        let t = Date(timeIntervalSince1970: 1_000_000)
+        memory.remember(Self.upstream, userID: Self.user, channelID: Self.channel, now: t)
+        #expect(keychain.saves == 1)
+        memory.remember(Self.upstream, userID: Self.user, channelID: Self.channel, now: t.addingTimeInterval(3600))
+        #expect(keychain.saves == 1)
+        memory.remember(Self.upstream, userID: Self.user, channelID: Self.channel,
+                        now: t.addingTimeInterval(LiveDirectStreamMemory.refreshInterval + 1))
+        #expect(keychain.saves == 2)
+        let moved = URL(string: "https://provider.example/live/u/p/43.m3u8")!
+        memory.remember(moved, userID: Self.user, channelID: Self.channel, now: t.addingTimeInterval(7200))
+        #expect(keychain.saves == 3)
+    }
+}
+
+nonisolated private final class CountingKeychain: KeychainServiceProtocol, @unchecked Sendable {
+    private let inner = InMemoryKeychain()
+    private let lock = NSLock()
+    private var _saves = 0
+    var saves: Int { lock.withLock { _saves } }
+
+    func save(_ data: Data, for key: String) throws {
+        lock.withLock { _saves += 1 }
+        try inner.save(data, for: key)
+    }
+    func save(_ string: String, for key: String) throws { try save(Data(string.utf8), for: key) }
+    func loadData(for key: String) throws -> Data? { try inner.loadData(for: key) }
+    func loadString(for key: String) throws -> String? { try inner.loadString(for: key) }
+    func delete(for key: String) throws { try inner.delete(for: key) }
+    func deleteAll() throws { try inner.deleteAll() }
 }
