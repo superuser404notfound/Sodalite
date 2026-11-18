@@ -34,6 +34,12 @@ extension DependencyContainer {
 
     /// Points the store at the active profile and re-attaches to whatever the session still runs.
     func activateDownloads() {
+        // A run for the profile that just left stops by itself, but it holds the slot until it
+        // notices, and the new profile's own sync would be skipped meanwhile.
+        if downloadSyncTask != nil, downloadStore.activeProfile != appState?.profileKey {
+            downloadSyncTask?.cancel()
+            downloadSyncTask = nil
+        }
         downloadStore.activate(appState?.profileKey)
         if let downloadManager { Task { await downloadManager.reattach() } }
         // The reachability verdict of a cold launch lands during session restore, before the store
@@ -55,9 +61,12 @@ extension DependencyContainer {
                   let secondary = session.itemService as? UserItemDataServing else { return nil }
             return (secondary, session.userID)
         }
+        let runID = UUID()
+        downloadSyncRunID = runID
         downloadSyncTask = Task { [weak self] in
             await sync.run()
-            self?.downloadSyncTask = nil
+            // A newer run may own the slot by now.
+            if self?.downloadSyncRunID == runID { self?.downloadSyncTask = nil }
         }
     }
 }
