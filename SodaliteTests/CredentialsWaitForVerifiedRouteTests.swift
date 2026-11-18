@@ -191,7 +191,7 @@ struct CredentialsWaitForVerifiedRouteTests {
         }
         await container.routeResolveTask?.value
         let auth = ProfileSwitchBoundaryTests.HookedSeerrAuth(result: .failure(APIError.unauthorized(message: nil)))
-        let asked = Flag()
+        let asked = RouteTestFlag()
         auth.onCurrentUser = { asked.value = true }
         try lanSeerrSession(container, auth: auth)
 
@@ -263,7 +263,7 @@ struct CredentialsWaitForVerifiedRouteTests {
         let http = RecordingHTTPClient()
         let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in false }
         container.currentPathReading = { NetworkPathSnapshot.Reading(isSatisfied: true, usesLocalInterface: false, hasLocalInterface: false) }
-        let askedPatiently = Flag()
+        let askedPatiently = RouteTestFlag()
         container.jellyfinIdentity = { _, _ in
             await MainActor.run { askedPatiently.value = true }
             try? await Task.sleep(for: .seconds(30))
@@ -380,7 +380,7 @@ struct CredentialsWaitForVerifiedRouteTests {
 }
 
 @MainActor
-final class Flag {
+final class RouteTestFlag {
     var value = false
 }
 
