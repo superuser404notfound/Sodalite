@@ -453,9 +453,11 @@ struct LaunchProfilePickerView: View {
 
     private func signOutOfCurrentProfile() {
         guard dependencies.activeServer?.id == server.id else { return }
-        dependencies.signOutOfActiveProfile()
-        reloadProfiles()
-        onFinished?()
+        Task {
+            await dependencies.signOutOfActiveProfileAndPurgeDownloads()
+            reloadProfiles()
+            onFinished?()
+        }
     }
 
     private func forget(_ user: RememberedUser) {
@@ -482,12 +484,13 @@ struct LaunchProfilePickerView: View {
     }
 
     private func commitForget(_ user: RememberedUser) {
-        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
-        do {
-            try dependencies.forgetUser(id: user.id, serverID: server.id)
-            reloadProfiles()
-        } catch {
-            switchError = ErrorText.user(for: error)
+        Task {
+            do {
+                try await dependencies.forgetUserAndPurgeDownloads(id: user.id, serverID: server.id)
+                reloadProfiles()
+            } catch {
+                switchError = ErrorText.user(for: error)
+            }
         }
     }
 }

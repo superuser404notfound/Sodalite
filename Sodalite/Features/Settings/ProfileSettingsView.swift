@@ -173,7 +173,7 @@ struct ProfileSettingsView: View {
                                 },
                                 onLongPress: {
                                     if isCurrent {
-                                        dependencies.signOutOfActiveProfile()
+                                        Task { await dependencies.signOutOfActiveProfileAndPurgeDownloads() }
                                     } else {
                                         forget(user)
                                     }
@@ -469,13 +469,14 @@ struct ProfileSettingsView: View {
 
     private func commitForget(_ user: RememberedUser) {
         guard let server = appState.activeServer else { return }
-        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
-        do {
-            // forgetUser clears a default pin naming this profile itself, so no path can forget to.
-            try dependencies.forgetUser(id: user.id, serverID: server.id)
-            refresh()
-        } catch {
-            actionError = ErrorText.user(for: error)
+        Task {
+            do {
+                // forgetUser clears a default pin naming this profile itself, so no path can forget to.
+                try await dependencies.forgetUserAndPurgeDownloads(id: user.id, serverID: server.id)
+                refresh()
+            } catch {
+                actionError = ErrorText.user(for: error)
+            }
         }
     }
 }
