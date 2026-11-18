@@ -30,6 +30,9 @@ enum JellyfinEndpoint: APIEndpoint {
     case localTrailers(userID: String, itemID: String)
     /// GET SpecialFeatures: bare array like LocalTrailers. The server already filters to the displayable extra types, trailers and theme media excluded.
     case specialFeatures(userID: String, itemID: String)
+    /// GET Intros (Sodalite#244): the pre-rolls an intro provider such as the Local Intros plugin hands
+    /// out for this item, in the `{Items, TotalRecordCount}` envelope. Empty without such a plugin.
+    case intros(userID: String, itemID: String)
     /// GET ThemeSongs (Sodalite#219): `{Items, TotalRecordCount, OwnerId}`. InheritFromParent lets a season or an
     /// episode's series stub play the series' song. Empty when the item has none.
     case themeSongs(userID: String, itemID: String)
@@ -132,6 +135,8 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/Items/\(itemID)"
         case .localTrailers(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)/LocalTrailers"
+        case .intros(let userID, let itemID):
+            "/Users/\(userID)/Items/\(itemID)/Intros"
         case .specialFeatures(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)/SpecialFeatures"
         case .themeSongs(_, let itemID):
@@ -287,7 +292,7 @@ enum JellyfinEndpoint: APIEndpoint {
         case .items(_, let query):
             return query.toQueryItems()
 
-        case .localTrailers(let userID, _), .specialFeatures(let userID, _):
+        case .localTrailers(let userID, _), .specialFeatures(let userID, _), .intros(let userID, _):
             // UserId for user data; detailFields so trailers arrive with MediaSources/Chapters like a playable detail item.
             return [
                 URLQueryItem(name: "UserId", value: userID),

@@ -48,9 +48,13 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     func deleteSubtitle(itemID: String, index: Int) async throws
     func buildTranscodeURL(relativePath: String) -> URL?
     func buildLiveStreamFileURL(sourcePath: String) -> URL?
+    /// Sodalite#244: the pre-rolls the server's intro providers (Local Intros plugin) pick for this item.
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem]
 }
 
 extension JellyfinPlaybackServiceProtocol {
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] { [] }
+
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
                          mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
         try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile)
@@ -235,6 +239,14 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> [JellyfinItem] {
         let response: JellyfinItemsResponse = try await client.request(
             endpoint: JellyfinEndpoint.episodes(seriesID: seriesID, seasonID: seasonID, userID: userID),
+            responseType: JellyfinItemsResponse.self
+        )
+        return response.items
+    }
+
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] {
+        let response: JellyfinItemsResponse = try await client.request(
+            endpoint: JellyfinEndpoint.intros(userID: userID, itemID: itemID),
             responseType: JellyfinItemsResponse.self
         )
         return response.items
