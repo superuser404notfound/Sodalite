@@ -159,6 +159,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Pick your version**: when a title has several versions (rips, resolutions, editions), choose which one to play.
 - **Shuffle a series**: random episodes across all seasons.
 - **Trailers**: local trailers play from your server. On iPhone, iPad and Mac, a title without one plays its YouTube trailer instead.
+- **Pre-rolls** (on by default, Settings → Playback): if your server hands out pre-roll videos, for example through the Local Intros plugin, they play before a movie or episode that starts from the beginning. Skip Pre-roll jumps to the next one or straight to the movie. A resume never plays them.
 - **Theme songs** (optional, Settings → Playback): a movie or show page plays its theme song from your server, fades in and out, and never starts over music from another app.
 - **Skip Intro and Skip Recap**: one tap, using the markers your server detected. Recap auto-skip has its own setting.
 - **Next episode**: plays automatically with a countdown of 5 to 30 seconds, or none. The countdown can sit on the credits or wait until the episode really ends. Without a countdown, credits and post-credit scenes play out first.

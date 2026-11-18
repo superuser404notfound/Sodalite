@@ -71458,157 +71458,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači. Reklamní přestávky označené serverem lze přeskočit jedním stisknutím nebo automaticky. Titulky lze nově posunout i v jemných krocích těsně nad spodní okraj, aby zůstaly v černém pruhu. Stylizované titulky ASS se zobrazí od prvního řádku, už nepřeskakují řádky a zůstanou i po změně zvukové stopy nebo další epizodě."
+            "value" : "Omezte kvalitu streamování, jako výchozí hodnotu i v přehrávači. Pořadí verzí se může řídit serverem, kartu další epizody lze vypnout a titulky, které běží napřed nebo pozadu, posunete pro každý titul přímo v přehrávači. Reklamní přestávky označené serverem lze přeskočit jedním stisknutím nebo automaticky. Titulky lze nově posunout i v jemných krocích těsně nad spodní okraj, aby zůstaly v černém pruhu. Stylizované titulky ASS se zobrazí od prvního řádku, už nepřeskakují řádky a zůstanou i po změně zvukové stopy nebo další epizodě. Předfilmy ze serveru, například z pluginu Local Intros, se přehrají před filmem spuštěným od začátku a lze je přeskočit tlačítkem."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren. Reklamepauser, som serveren har markeret, kan springes over med ét tryk eller automatisk. Undertekster kan nu også ligge i fine trin lige over den nederste kant, så de bliver i den sorte bjælke. Stylede ASS-undertekster vises fra første linje, springer ikke længere linjer over og bliver efter et lydsporsskift eller næste afsnit."
+            "value" : "Begræns streamingkvaliteten, som standard og i afspilleren. Versionsrækkefølge kan følge serveren, kortet for næste afsnit kan slås fra, og undertekster, der kommer for tidligt eller for sent, kan forskydes pr. titel direkte fra afspilleren. Reklamepauser, som serveren har markeret, kan springes over med ét tryk eller automatisk. Undertekster kan nu også ligge i fine trin lige over den nederste kant, så de bliver i den sorte bjælke. Stylede ASS-undertekster vises fra første linje, springer ikke længere linjer over og bliver efter et lydsporsskift eller næste afsnit. Forfilm fra serveren, for eksempel fra pluginet Local Intros, afspilles før en film, der starter fra begyndelsen, og kan springes over med en knap."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player. Vom Server markierte Werbepausen lassen sich mit einem Klick oder automatisch überspringen. Untertitel lassen sich jetzt auch in feinen Stufen knapp über den unteren Rand setzen, damit sie im schwarzen Balken bleiben. Gestaltete ASS-Untertitel erscheinen ab der ersten Zeile, überspringen keine Zeilen mehr und bleiben nach einem Tonspurwechsel oder der nächsten Folge sichtbar."
+            "value" : "Begrenze die Streaming-Qualität, als Standard und im Player. Die Versionsreihenfolge kann dem Server folgen, die Karte zur nächsten Folge lässt sich abschalten, und Untertitel, die zu früh oder zu spät laufen, verschiebst du pro Titel direkt im Player. Vom Server markierte Werbepausen lassen sich mit einem Klick oder automatisch überspringen. Untertitel lassen sich jetzt auch in feinen Stufen knapp über den unteren Rand setzen, damit sie im schwarzen Balken bleiben. Gestaltete ASS-Untertitel erscheinen ab der ersten Zeile, überspringen keine Zeilen mehr und bleiben nach einem Tonspurwechsel oder der nächsten Folge sichtbar. Vorfilme deines Servers, etwa aus dem Plugin Local Intros, laufen vor einem Film, der von vorn startet, und lassen sich per Knopf überspringen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player. Τα διαφημιστικά διαλείμματα που έχει σημειώσει ο διακομιστής παραλείπονται με ένα πάτημα ή αυτόματα. Οι υπότιτλοι μπορούν πλέον να τοποθετηθούν και σε μικρά βήματα λίγο πάνω από το κάτω άκρο, ώστε να μένουν στη μαύρη λωρίδα. Οι μορφοποιημένοι υπότιτλοι ASS εμφανίζονται από την πρώτη γραμμή, δεν παραλείπουν πλέον γραμμές και παραμένουν μετά από αλλαγή ήχου ή στο επόμενο επεισόδιο."
+            "value" : "Περιορίστε την ποιότητα ροής, ως προεπιλογή και μέσα στο player. Η Σειρά εκδόσεων μπορεί να ακολουθεί τον διακομιστή, η κάρτα επόμενου επεισοδίου μπορεί να απενεργοποιηθεί, και οι υπότιτλοι που εμφανίζονται νωρίτερα ή αργότερα μετατοπίζονται ανά τίτλο απευθείας από το player. Τα διαφημιστικά διαλείμματα που έχει σημειώσει ο διακομιστής παραλείπονται με ένα πάτημα ή αυτόματα. Οι υπότιτλοι μπορούν πλέον να τοποθετηθούν και σε μικρά βήματα λίγο πάνω από το κάτω άκρο, ώστε να μένουν στη μαύρη λωρίδα. Οι μορφοποιημένοι υπότιτλοι ASS εμφανίζονται από την πρώτη γραμμή, δεν παραλείπουν πλέον γραμμές και παραμένουν μετά από αλλαγή ήχου ή στο επόμενο επεισόδιο. Τα εισαγωγικά βίντεο του διακομιστή, για παράδειγμα από το πρόσθετο Local Intros, παίζουν πριν από μια ταινία που ξεκινά από την αρχή και παραλείπονται με ένα κουμπί."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player. Commercial breaks the server has marked can be skipped with one press or automatically. Subtitles can also sit in fine steps just above the bottom edge, to keep them in the black bar. Styled ASS subtitles show from the first line, no longer skip lines, and stay on after an audio switch or the next episode."
+            "value" : "Cap the streaming quality, as a default and in the player. Version Order can follow the server, the next episode card can be turned off, and subtitles that run early or late can be shifted per title right from the player. Commercial breaks the server has marked can be skipped with one press or automatically. Subtitles can also sit in fine steps just above the bottom edge, to keep them in the black bar. Styled ASS subtitles show from the first line, no longer skip lines, and stay on after an audio switch or the next episode. Pre-roll videos from your server, such as the Local Intros plugin's, play before a movie that starts from the beginning, with a button to skip them."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor. Las pausas publicitarias marcadas por el servidor se omiten con una pulsación o automáticamente. Los subtítulos también pueden colocarse en pasos finos justo por encima del borde inferior, para que queden en la franja negra. Los subtítulos ASS con estilo aparecen desde la primera línea, ya no se saltan líneas y siguen tras cambiar de audio o pasar al siguiente episodio."
+            "value" : "Limita la calidad de streaming, como valor predeterminado y en el reproductor. Orden de versiones puede seguir al servidor, la tarjeta del siguiente episodio se puede desactivar y los subtítulos adelantados o retrasados se desplazan por título desde el propio reproductor. Las pausas publicitarias marcadas por el servidor se omiten con una pulsación o automáticamente. Los subtítulos también pueden colocarse en pasos finos justo por encima del borde inferior, para que queden en la franja negra. Los subtítulos ASS con estilo aparecen desde la primera línea, ya no se saltan líneas y siguen tras cambiar de audio o pasar al siguiente episodio. Los vídeos previos del servidor, como los del plugin Local Intros, se reproducen antes de una película que empieza desde el principio y se pueden omitir con un botón."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta. Palvelimen merkitsemät mainoskatkot voi ohittaa yhdellä painalluksella tai automaattisesti. Tekstitykset voi nyt sijoittaa myös pienin askelin juuri alareunan yläpuolelle, jotta ne pysyvät mustalla palkilla. Muotoillut ASS-tekstitykset näkyvät ensimmäisestä rivistä alkaen, eivät enää ohita rivejä ja pysyvät ääniraidan vaihdon tai seuraavan jakson jälkeen."
+            "value" : "Rajoita suoratoiston laatua, oletuksena ja soittimessa. Versioiden järjestys voi seurata palvelinta, seuraavan jakson kortin voi poistaa käytöstä, ja liian aikaisin tai myöhään näkyviä tekstityksiä voi siirtää nimikekohtaisesti suoraan soittimesta. Palvelimen merkitsemät mainoskatkot voi ohittaa yhdellä painalluksella tai automaattisesti. Tekstitykset voi nyt sijoittaa myös pienin askelin juuri alareunan yläpuolelle, jotta ne pysyvät mustalla palkilla. Muotoillut ASS-tekstitykset näkyvät ensimmäisestä rivistä alkaen, eivät enää ohita rivejä ja pysyvät ääniraidan vaihdon tai seuraavan jakson jälkeen. Palvelimen alkuvideot, esimerkiksi Local Intros -laajennuksesta, toistetaan ennen alusta alkavaa elokuvaa, ja ne voi ohittaa painikkeella."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur. Les coupures pub marquées par le serveur se passent en une pression ou automatiquement. Les sous-titres peuvent aussi se placer par petits pas juste au-dessus du bord inférieur, pour rester dans la bande noire. Les sous-titres ASS stylisés s'affichent dès la première ligne, ne sautent plus de lignes et restent après un changement de piste audio ou à l'épisode suivant."
+            "value" : "Limitez la qualité du streaming, par défaut et dans le lecteur. Ordre des versions peut suivre le serveur, la carte de l’épisode suivant peut être désactivée, et les sous-titres en avance ou en retard se décalent par titre directement depuis le lecteur. Les coupures pub marquées par le serveur se passent en une pression ou automatiquement. Les sous-titres peuvent aussi se placer par petits pas juste au-dessus du bord inférieur, pour rester dans la bande noire. Les sous-titres ASS stylisés s'affichent dès la première ligne, ne sautent plus de lignes et restent après un changement de piste audio ou à l'épisode suivant. Les vidéos d'avant-programme du serveur, par exemple du plugin Local Intros, passent avant un film lancé depuis le début et se passent d'un bouton."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera. Reklamne pauze koje je označio poslužitelj preskaču se jednim pritiskom ili automatski. Titlovi se sada mogu postaviti i u sitnim koracima tik iznad donjeg ruba, kako bi ostali u crnoj traci. Stilizirani ASS titlovi prikazuju se od prvog retka, više ne preskaču retke i ostaju nakon promjene zvuka ili sljedeće epizode."
+            "value" : "Ograničite kvalitetu streaminga, kao zadanu vrijednost i u playeru. Redoslijed verzija može pratiti poslužitelj, kartica sljedeće epizode može se isključiti, a titlovi koji žure ili kasne pomiču se po naslovu izravno iz playera. Reklamne pauze koje je označio poslužitelj preskaču se jednim pritiskom ili automatski. Titlovi se sada mogu postaviti i u sitnim koracima tik iznad donjeg ruba, kako bi ostali u crnoj traci. Stilizirani ASS titlovi prikazuju se od prvog retka, više ne preskaču retke i ostaju nakon promjene zvuka ili sljedeće epizode. Predfilmovi s poslužitelja, na primjer iz dodatka Local Intros, reproduciraju se prije filma koji počinje od početka i mogu se preskočiti gumbom."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el. A szerver által megjelölt reklámszünetek egy gombnyomással vagy automatikusan átugorhatók. A feliratok mostantól finom lépésekben közvetlenül az alsó szél fölé is helyezhetők, hogy a fekete sávban maradjanak. A formázott ASS-feliratok az első sortól megjelennek, már nem hagynak ki sorokat, és hangsávváltás vagy a következő epizód után is megmaradnak."
+            "value" : "Korlátozd a streamelési minőséget, alapértékként és a lejátszóban is. A Verziók sorrendje követheti a szervert, a következő epizód kártyája kikapcsolható, a túl korán vagy túl későn megjelenő feliratok pedig címenként, közvetlenül a lejátszóból tolhatók el. A szerver által megjelölt reklámszünetek egy gombnyomással vagy automatikusan átugorhatók. A feliratok mostantól finom lépésekben közvetlenül az alsó szél fölé is helyezhetők, hogy a fekete sávban maradjanak. A formázott ASS-feliratok az első sortól megjelennek, már nem hagynak ki sorokat, és hangsávváltás vagy a következő epizód után is megmaradnak. A szerver előzetes videói, például a Local Intros bővítményből, az elejéről induló film előtt futnak, és egy gombbal átugorhatók."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player. Le interruzioni pubblicitarie segnate dal server si saltano con un tocco o in automatico. I sottotitoli possono anche stare a piccoli passi appena sopra il bordo inferiore, per restare nella banda nera. I sottotitoli ASS con stile compaiono dalla prima riga, non saltano più righe e restano dopo un cambio di traccia audio o all'episodio successivo."
+            "value" : "Limita la qualità di streaming, come valore predefinito e nel player. Ordine delle versioni può seguire il server, la scheda del prossimo episodio si può disattivare e i sottotitoli in anticipo o in ritardo si possono spostare per ogni titolo direttamente dal player. Le interruzioni pubblicitarie segnate dal server si saltano con un tocco o in automatico. I sottotitoli possono anche stare a piccoli passi appena sopra il bordo inferiore, per restare nella banda nera. I sottotitoli ASS con stile compaiono dalla prima riga, non saltano più righe e restano dopo un cambio di traccia audio o all'episodio successivo. I pre-roll del server, ad esempio quelli del plugin Local Intros, partono prima di un film avviato dall'inizio e si saltano con un pulsante."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。サーバーがマークしたCM区間は、ワンタップまたは自動でスキップできます。字幕は下端のすぐ上に細かい段階で配置することもでき、黒帯の中に収められます。スタイル付きASS字幕が最初の行から表示され、行が飛ばされることもなくなり、音声切り替えや次のエピソードの後も表示されたままになります。"
+            "value" : "ストリーミング画質の上限を、デフォルトとプレーヤー内の両方で設定できます。バージョンの順序をサーバーに合わせられ、次のエピソードのカードはオフにでき、早すぎたり遅すぎたりする字幕はプレーヤーから直接タイトルごとにずらせます。サーバーがマークしたCM区間は、ワンタップまたは自動でスキップできます。字幕は下端のすぐ上に細かい段階で配置することもでき、黒帯の中に収められます。スタイル付きASS字幕が最初の行から表示され、行が飛ばされることもなくなり、音声切り替えや次のエピソードの後も表示されたままになります。サーバーのプレロール動画（Local Intros プラグインなど）が、最初から再生する映画の前に流れ、ボタンでスキップできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다. 서버가 표시한 광고 구간은 버튼 한 번으로 또는 자동으로 건너뛸 수 있습니다. 자막을 아래쪽 가장자리 바로 위에 세밀한 단계로 배치해 검은 띠 안에 둘 수도 있습니다. 스타일 ASS 자막이 첫 줄부터 표시되고, 더 이상 줄을 건너뛰지 않으며, 오디오 전환이나 다음 에피소드 후에도 유지됩니다."
+            "value" : "스트리밍 화질의 상한을 기본값과 플레이어 안에서 정할 수 있습니다. 버전 순서는 서버를 따를 수 있고, 다음 에피소드 카드는 끌 수 있으며, 너무 빠르거나 늦게 나오는 자막은 플레이어에서 바로 타이틀별로 조정할 수 있습니다. 서버가 표시한 광고 구간은 버튼 한 번으로 또는 자동으로 건너뛸 수 있습니다. 자막을 아래쪽 가장자리 바로 위에 세밀한 단계로 배치해 검은 띠 안에 둘 수도 있습니다. 스타일 ASS 자막이 첫 줄부터 표시되고, 더 이상 줄을 건너뛰지 않으며, 오디오 전환이나 다음 에피소드 후에도 유지됩니다. 서버의 프리롤 영상(예: Local Intros 플러그인)이 처음부터 시작하는 영화 앞에 재생되며, 버튼으로 건너뛸 수 있습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren. Reklamepauser serveren har markert, kan hoppes over med ett trykk eller automatisk. Undertekster kan nå også plasseres i små trinn rett over nederste kant, slik at de blir i den svarte stripen. Stilede ASS-undertekster vises fra første linje, hopper ikke lenger over linjer og blir værende etter lydsporbytte eller neste episode."
+            "value" : "Begrens strømmekvaliteten, som standard og i avspilleren. Versjonsrekkefølge kan følge serveren, kortet for neste episode kan slås av, og undertekster som kommer for tidlig eller for sent, kan forskyves per tittel rett fra avspilleren. Reklamepauser serveren har markert, kan hoppes over med ett trykk eller automatisk. Undertekster kan nå også plasseres i små trinn rett over nederste kant, slik at de blir i den svarte stripen. Stilede ASS-undertekster vises fra første linje, hopper ikke lenger over linjer og blir værende etter lydsporbytte eller neste episode. Forfilmer fra serveren, for eksempel fra programtillegget Local Intros, spilles før en film som starter fra begynnelsen, og kan hoppes over med en knapp."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler. Door de server gemarkeerde reclameblokken sla je met één druk of automatisch over. Ondertitels kun je nu ook in kleine stappen net boven de onderrand zetten, zodat ze in de zwarte balk blijven. Opgemaakte ASS-ondertitels verschijnen vanaf de eerste regel, slaan geen regels meer over en blijven staan na een audiowissel of de volgende aflevering."
+            "value" : "Begrens de streamingkwaliteit, als standaard en in de speler. Volgorde van versies kan de server volgen, de kaart voor de volgende aflevering kan uit, en ondertitels die te vroeg of te laat komen, verschuif je per titel direct vanuit de speler. Door de server gemarkeerde reclameblokken sla je met één druk of automatisch over. Ondertitels kun je nu ook in kleine stappen net boven de onderrand zetten, zodat ze in de zwarte balk blijven. Opgemaakte ASS-ondertitels verschijnen vanaf de eerste regel, slaan geen regels meer over en blijven staan na een audiowissel of de volgende aflevering. Voorfilms van de server, bijvoorbeeld uit de plug-in Local Intros, spelen vóór een film die vanaf het begin start, en zijn met een knop over te slaan."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza. Przerwy reklamowe oznaczone przez serwer można pominąć jednym naciśnięciem lub automatycznie. Napisy można też ustawić w drobnych krokach tuż nad dolną krawędzią, aby zostały na czarnym pasku. Stylizowane napisy ASS pojawiają się od pierwszej linii, nie pomijają już linii i zostają po zmianie ścieżki dźwiękowej lub w następnym odcinku."
+            "value" : "Ogranicz jakość streamingu, domyślnie i w odtwarzaczu. Kolejność wersji może podążać za serwerem, kartę następnego odcinka można wyłączyć, a napisy wyświetlane za wcześnie lub za późno można przesunąć dla każdego tytułu prosto z odtwarzacza. Przerwy reklamowe oznaczone przez serwer można pominąć jednym naciśnięciem lub automatycznie. Napisy można też ustawić w drobnych krokach tuż nad dolną krawędzią, aby zostały na czarnym pasku. Stylizowane napisy ASS pojawiają się od pierwszej linii, nie pomijają już linii i zostają po zmianie ścieżki dźwiękowej lub w następnym odcinku. Filmy wstępne z serwera, na przykład z wtyczki Local Intros, odtwarzają się przed filmem uruchamianym od początku i można je pominąć przyciskiem."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player. Intervalos comerciais marcados pelo servidor podem ser pulados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima da borda inferior, para permanecer na faixa preta. Legendas ASS estilizadas aparecem desde a primeira linha, não pulam mais linhas e continuam após trocar o áudio ou no próximo episódio."
+            "value" : "Limite a qualidade do streaming, como padrão e no player. A Ordem das versões pode seguir o servidor, o cartão do próximo episódio pode ser desativado e legendas adiantadas ou atrasadas podem ser deslocadas por título direto no player. Intervalos comerciais marcados pelo servidor podem ser pulados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima da borda inferior, para permanecer na faixa preta. Legendas ASS estilizadas aparecem desde a primeira linha, não pulam mais linhas e continuam após trocar o áudio ou no próximo episódio. As pré-exibições do servidor, como as do plugin Local Intros, tocam antes de um filme iniciado do começo e podem ser puladas com um botão."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor. Os intervalos publicitários marcados pelo servidor podem ser saltados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima do limite inferior, para se manterem na barra preta. As legendas ASS estilizadas aparecem desde a primeira linha, já não saltam linhas e mantêm-se após mudar o áudio ou no episódio seguinte."
+            "value" : "Limite a qualidade de streaming, como predefinição e no leitor. A Ordem das versões pode seguir o servidor, o cartão do episódio seguinte pode ser desativado e as legendas adiantadas ou atrasadas podem ser deslocadas por título diretamente no leitor. Os intervalos publicitários marcados pelo servidor podem ser saltados com um toque ou automaticamente. As legendas também podem ficar em passos finos logo acima do limite inferior, para se manterem na barra preta. As legendas ASS estilizadas aparecem desde a primeira linha, já não saltam linhas e mantêm-se após mudar o áudio ou no episódio seguinte. As pré-exibições do servidor, como as do plugin Local Intros, são reproduzidas antes de um filme iniciado do início e podem ser saltadas com um botão."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player. Pauzele publicitare marcate de server pot fi omise cu o apăsare sau automat. Subtitrările pot fi așezate acum și în pași fini chiar deasupra marginii de jos, ca să rămână în banda neagră. Subtitrările ASS stilizate apar de la primul rând, nu mai sar rânduri și rămân după schimbarea pistei audio sau la episodul următor."
+            "value" : "Limitează calitatea streamingului, ca valoare implicită și în player. Ordinea versiunilor poate urma serverul, cardul episodului următor poate fi dezactivat, iar subtitrările care apar prea devreme sau prea târziu pot fi decalate pentru fiecare titlu direct din player. Pauzele publicitare marcate de server pot fi omise cu o apăsare sau automat. Subtitrările pot fi așezate acum și în pași fini chiar deasupra marginii de jos, ca să rămână în banda neagră. Subtitrările ASS stilizate apar de la primul rând, nu mai sar rânduri și rămân după schimbarea pistei audio sau la episodul următor. Videoclipurile introductive ale serverului, de exemplu din pluginul Local Intros, rulează înaintea unui film pornit de la început și pot fi omise cu un buton."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере. Рекламные паузы, отмеченные сервером, можно пропустить одним нажатием или автоматически. Субтитры теперь можно также разместить мелкими шагами чуть выше нижнего края, чтобы они оставались в чёрной полосе. Стилизованные субтитры ASS появляются с первой строки, больше не пропускают строки и остаются после смены аудиодорожки или в следующей серии."
+            "value" : "Ограничьте качество потока, по умолчанию и в плеере. «Порядок версий» может следовать серверу, карточку следующего эпизода можно отключить, а субтитры, которые спешат или отстают, можно сдвинуть для каждого фильма или серии прямо в плеере. Рекламные паузы, отмеченные сервером, можно пропустить одним нажатием или автоматически. Субтитры теперь можно также разместить мелкими шагами чуть выше нижнего края, чтобы они оставались в чёрной полосе. Стилизованные субтитры ASS появляются с первой строки, больше не пропускают строки и остаются после смены аудиодорожки или в следующей серии. Вступительные ролики с сервера, например из плагина Local Intros, идут перед фильмом, запущенным с начала, и пропускаются кнопкой."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači. Reklamné prestávky označené serverom preskočíte jedným stlačením alebo automaticky. Titulky sa dajú po novom posunúť aj v jemných krokoch tesne nad spodný okraj, aby zostali v čiernom pruhu. Štylizované titulky ASS sa zobrazia od prvého riadku, už nepreskakujú riadky a zostanú aj po zmene zvukovej stopy alebo v ďalšej epizóde."
+            "value" : "Obmedzte kvalitu streamovania, ako predvolenú hodnotu aj v prehrávači. Poradie verzií sa môže riadiť serverom, kartu ďalšej epizódy možno vypnúť a titulky, ktoré idú dopredu alebo meškajú, posuniete pre každý titul priamo v prehrávači. Reklamné prestávky označené serverom preskočíte jedným stlačením alebo automaticky. Titulky sa dajú po novom posunúť aj v jemných krokoch tesne nad spodný okraj, aby zostali v čiernom pruhu. Štylizované titulky ASS sa zobrazia od prvého riadku, už nepreskakujú riadky a zostanú aj po zmene zvukovej stopy alebo v ďalšej epizóde. Predfilmy zo servera, napríklad z pluginu Local Intros, sa prehrajú pred filmom spusteným od začiatku a dajú sa preskočiť tlačidlom."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren. Reklampauser som servern har markerat kan hoppas över med ett tryck eller automatiskt. Undertexter kan nu också placeras i små steg strax ovanför nederkanten, så att de stannar i det svarta fältet. Formaterade ASS-undertexter visas från första raden, hoppar inte längre över rader och ligger kvar efter ett ljudspårsbyte eller nästa avsnitt."
+            "value" : "Begränsa streamingkvaliteten, som standard och i spelaren. Versionsordning kan följa servern, kortet för nästa avsnitt kan stängas av, och undertexter som kommer för tidigt eller för sent kan förskjutas per titel direkt i spelaren. Reklampauser som servern har markerat kan hoppas över med ett tryck eller automatiskt. Undertexter kan nu också placeras i små steg strax ovanför nederkanten, så att de stannar i det svarta fältet. Formaterade ASS-undertexter visas från första raden, hoppar inte längre över rader och ligger kvar efter ett ljudspårsbyte eller nästa avsnitt. Förfilmer från servern, till exempel från tillägget Local Intros, spelas före en film som startar från början och kan hoppas över med en knapp."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir. Sunucunun işaretlediği reklam araları tek dokunuşla veya otomatik olarak atlanabilir. Altyazılar artık siyah bantta kalmaları için alt kenarın hemen üstüne ince adımlarla da yerleştirilebilir. Biçimli ASS altyazıları ilk satırdan itibaren görünür, artık satır atlamaz ve ses parçası değişikliğinden veya sonraki bölümden sonra da kalır."
+            "value" : "Akış kalitesini hem varsayılan olarak hem de oynatıcıda sınırlayın. Sürüm sırası sunucuyu izleyebilir, sonraki bölüm kartı kapatılabilir, erken veya geç gelen altyazılar da başlık başına doğrudan oynatıcıdan kaydırılabilir. Sunucunun işaretlediği reklam araları tek dokunuşla veya otomatik olarak atlanabilir. Altyazılar artık siyah bantta kalmaları için alt kenarın hemen üstüne ince adımlarla da yerleştirilebilir. Biçimli ASS altyazıları ilk satırdan itibaren görünür, artık satır atlamaz ve ses parçası değişikliğinden veya sonraki bölümden sonra da kalır. Sunucunun ön gösterim videoları, örneğin Local Intros eklentisinden, baştan başlayan bir filmden önce oynar ve bir düğmeyle atlanabilir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі. Рекламні паузи, позначені сервером, можна пропустити одним натисканням або автоматично. Субтитри тепер можна також розмістити дрібними кроками трохи вище нижнього краю, щоб вони залишалися в чорній смузі. Стилізовані субтитри ASS зʼявляються з першого рядка, більше не пропускають рядки й лишаються після зміни аудіодоріжки чи в наступній серії."
+            "value" : "Обмежте якість потоку, типово і в плеєрі. «Порядок версій» може відповідати серверу, картку наступного епізоду можна вимкнути, а субтитри, які поспішають або відстають, можна зсунути для кожного фільму чи серії просто в плеєрі. Рекламні паузи, позначені сервером, можна пропустити одним натисканням або автоматично. Субтитри тепер можна також розмістити дрібними кроками трохи вище нижнього краю, щоб вони залишалися в чорній смузі. Стилізовані субтитри ASS зʼявляються з першого рядка, більше не пропускають рядки й лишаються після зміни аудіодоріжки чи в наступній серії. Вступні ролики із сервера, наприклад із плагіна Local Intros, грають перед фільмом, запущеним з початку, і пропускаються кнопкою."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。服务器标记的广告时段可以一键跳过或自动跳过。字幕还可以按细小档位放在紧贴底边的上方，让它留在黑边里。带样式的 ASS 字幕从第一行就会显示，不再跳行，切换音轨或进入下一集后也会保留。"
+            "value" : "可限制串流画质，既能设为默认值，也能在播放器中调整。“版本顺序”可以跟随服务器，下一集卡片可以关闭，过早或过晚出现的字幕可以直接在播放器中按影片调整。服务器标记的广告时段可以一键跳过或自动跳过。字幕还可以按细小档位放在紧贴底边的上方，让它留在黑边里。带样式的 ASS 字幕从第一行就会显示，不再跳行，切换音轨或进入下一集后也会保留。服务器提供的片前视频（例如来自 Local Intros 插件）会在从头播放的电影前播放，并可用按钮跳过。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。伺服器標記的廣告時段可以一鍵跳過或自動跳過。字幕還可以按細小檔位放在緊貼底邊的上方，讓它留在黑邊裡。帶樣式的 ASS 字幕從第一行就會顯示，不再跳行，切換音軌或進入下一集後也會保留。"
+            "value" : "可限制串流畫質，既能設為預設值，也能在播放器中調整。「版本順序」可以依照伺服器，下一集卡片可以關閉，過早或過晚出現的字幕可以直接在播放器中依影片調整。伺服器標記的廣告時段可以一鍵跳過或自動跳過。字幕還可以按細小檔位放在緊貼底邊的上方，讓它留在黑邊裡。帶樣式的 ASS 字幕從第一行就會顯示，不再跳行，切換音軌或進入下一集後也會保留。伺服器提供的片前影片（例如來自 Local Intros 外掛）會在從頭播放的電影前播放，並可用按鈕跳過。"
           }
         }
       }
