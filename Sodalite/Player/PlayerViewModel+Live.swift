@@ -452,6 +452,7 @@ extension PlayerViewModel {
         LoadOptions(
             suppressDisplayCriteria: false,
             forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
+            preferHDR10PlusOverForcedDolbyVision: preferences.preferHDR10PlusOverForcedDolbyVision,
             upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
             upscaleScaler: liveUpscaleScaler,
             matchContentEnabled: Self.matchContentEnabled,

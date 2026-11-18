@@ -2316,6 +2316,7 @@
 		F0C3967D3CA72CD7E2E67805 /* ParentalGatePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7898264CE9403B38D3FB3A /* ParentalGatePolicy.swift */; };
 		F0CD48A08028A8FBB61A7C1B /* SkipBackSubtitleWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AB8B7D07A1B990DF0036F63 /* SkipBackSubtitleWindow.swift */; };
 		F0E2932DF101A3792F0A4C9F /* TabOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1ADA2D6D54F1E19DAF03AF /* TabOrder.swift */; };
+		F0F198E92615F0D4C8310DDE /* DolbyVisionOnHDR10ModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A614CBCC0AC695F29FF511 /* DolbyVisionOnHDR10ModeTests.swift */; };
 		F0F39C716B7F695404B9E1A9 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F75B9F040C820A852BEBC8 /* WhatsNewView.swift */; };
 		F14ABC8BA2EC86EF899D26A4 /* LicenseText-ISC-libass.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01C12B24850C327CD8373DB8 /* LicenseText-ISC-libass.txt */; };
 		F15DBE394D54DC9464B882E2 /* MediaBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1D29668067DEFAAAA1A0D6 /* MediaBadges.swift */; };
@@ -2619,6 +2620,7 @@
 		14F6727C1A1F0FB1F1E2C3AA /* TopShelfAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopShelfAPI.swift; sourceTree = "<group>"; };
 		150A2052222365E6CEFAF631 /* SystemCaptionWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCaptionWindowTests.swift; sourceTree = "<group>"; };
 		156BEF96DC9EC1E45C59CE8B /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
+		15A614CBCC0AC695F29FF511 /* DolbyVisionOnHDR10ModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DolbyVisionOnHDR10ModeTests.swift; sourceTree = "<group>"; };
 		15AEDC905956567B1DB3936F /* UserProfileImageURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileImageURLTests.swift; sourceTree = "<group>"; };
 		15D7F74A9A6EF41AB0AAD09C /* CloudSyncPayloadsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncPayloadsTests.swift; sourceTree = "<group>"; };
 		160817A76C557D7AED59C0BB /* ASSFontCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASSFontCacheTests.swift; sourceTree = "<group>"; };
@@ -4078,6 +4080,7 @@
 				E100E7790E4C6B1A845813C4 /* DirectPlayProfileWMVTests.swift */,
 				7D6C6DB61A5EB3DDD1AF7B2B /* DiscFolderTests.swift */,
 				E9E3BF97D18324FFA9D4E64D /* DiscoveryProbeRaceTests.swift */,
+				15A614CBCC0AC695F29FF511 /* DolbyVisionOnHDR10ModeTests.swift */,
 				A14C48066D3B16BF164F5E86 /* DownloadActivitySummaryTests.swift */,
 				36DC7D67C9AF46CDE324B6E9 /* DownloadButtonStateTests.swift */,
 				36FF12B3F121C8877BF929B6 /* DownloadCleanupTests.swift */,
@@ -7032,6 +7035,7 @@
 				A1DA3C2787809FF62EF5E9F4 /* DirectPlayProfileWMVTests.swift in Sources */,
 				743AC3643B9C6A0EEDCF4C76 /* DiscFolderTests.swift in Sources */,
 				57BFD4311521443D0BD154B8 /* DiscoveryProbeRaceTests.swift in Sources */,
+				F0F198E92615F0D4C8310DDE /* DolbyVisionOnHDR10ModeTests.swift in Sources */,
 				784542712D7AD12E268F0623 /* DownloadActivitySummaryTests.swift in Sources */,
 				A4964BFA14A942EEDD575B98 /* DownloadButtonStateTests.swift in Sources */,
 				8FF748DD95B14E881FD4BEBA /* DownloadCleanupTests.swift in Sources */,
