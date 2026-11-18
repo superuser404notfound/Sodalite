@@ -30,8 +30,21 @@ final class TrickplayTileStore {
     private var decodes: [Int: Task<PlatformImage?, Never>] = [:]
     private var prefetchTask: Task<Void, Never>?
     private var isClosed = false
+    /// Decoded sheets, most recently used last. A sheet is some 23 MB decoded, so these live here and
+    /// not in `ImageCache.shared`, where a scrub evicted Home's artwork (audit PUI-201). A scrub needs
+    /// the sheet under the knob and its neighbour.
+    private var sheets: [(index: Int, image: PlatformImage)] = []
+    nonisolated static let decodedSheetLimit = 3
+    private let sheetLimit: Int
+    /// Sprites that came back empty, with when. A server still generating trickplay 404s the later
+    /// ones, and a hold-scan asks every 80 ms (audit PUI-205).
+    private var failedAt: [Int: ContinuousClock.Instant] = [:]
+    private let retryAfter: Duration
 
-    init(tileSet: TrickplayTileSet, tileURL: @escaping (Int) -> URL?, fetch: @escaping Fetch = TrickplayTileStore.download) {
+    init(tileSet: TrickplayTileSet, tileURL: @escaping (Int) -> URL?, retryAfter: Duration = .seconds(10), sheetLimit: Int = TrickplayTileStore.decodedSheetLimit,
+         fetch: @escaping Fetch = TrickplayTileStore.download) {
+        self.retryAfter = retryAfter
+        self.sheetLimit = sheetLimit
         self.tileSet = tileSet
         self.tileURL = tileURL
         self.fetch = fetch
@@ -42,7 +55,7 @@ final class TrickplayTileStore {
         guard let placement = tileSet.tile(forSeconds: seconds),
               let url = tileURL(placement.tileIndex) else { return nil }
         let sheet: PlatformImage
-        if let cached = ImageCache.shared.image(for: url) {
+        if let cached = resident(placement.tileIndex) {
             sheet = cached
         } else {
             guard let decoded = await self.sheet(placement.tileIndex, url: url) else { return nil }
@@ -75,18 +88,35 @@ final class TrickplayTileStore {
         downloads.values.forEach { $0.cancel() }
         downloads.removeAll()
         decodes.removeAll()
+        sheets.removeAll()
+        failedAt.removeAll()
         bytes.removeAll()
         storedBytes = 0
     }
 
     var storedTileCount: Int { bytes.count }
+    var decodedSheetCount: Int { sheets.count }
+
+    private func resident(_ index: Int) -> PlatformImage? {
+        guard let at = sheets.firstIndex(where: { $0.index == index }) else { return nil }
+        let entry = sheets.remove(at: at)
+        sheets.append(entry)
+        return entry.image
+    }
+
+    private func keep(_ image: PlatformImage, as index: Int) {
+        guard !isClosed else { return }
+        sheets.removeAll { $0.index == index }
+        sheets.append((index, image))
+        if sheets.count > sheetLimit { sheets.removeFirst(sheets.count - sheetLimit) }
+    }
 
     private func sheet(_ index: Int, url: URL) async -> PlatformImage? {
         if let running = decodes[index] { return await running.value }
         let task = Task { [weak self] () -> PlatformImage? in
             guard let self, let data = await self.data(index, url: url) else { return nil }
             guard let image = await Self.decode(data) else { return nil }
-            ImageCache.shared.store(image, for: url)
+            self.keep(image, as: index)
             return image
         }
         decodes[index] = task
@@ -97,12 +127,14 @@ final class TrickplayTileStore {
 
     private func data(_ index: Int, url: URL) async -> Data? {
         if let stored = bytes[index] { return stored }
+        if let failed = failedAt[index], ContinuousClock.now - failed < retryAfter { return nil }
         if let running = downloads[index] { return await running.value }
         let fetch = fetch
         let task = Task { await fetch(url) }
         downloads[index] = task
         let data = await task.value
         downloads[index] = nil
+        if data == nil, !isClosed { failedAt[index] = .now } else { failedAt[index] = nil }
         if let data, !isClosed, bytes[index] == nil, storedBytes + data.count <= Self.byteBudget {
             bytes[index] = data
             storedBytes += data.count
@@ -122,8 +154,7 @@ final class TrickplayTileStore {
     }
 
     @concurrent nonisolated static func download(_ url: URL) async -> Data? {
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 15
+        let request = ImageCache.request(for: url, auth: nil)
         guard case .whole(let data) = await ImageFetch.load(request) else { return nil }
         return data
     }

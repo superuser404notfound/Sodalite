@@ -206,17 +206,39 @@ struct TrickplayTileStoreTests {
         var count: Int { lock.lock(); defer { lock.unlock() }; return value }
     }
 
-    private func store(fetches: Counter, delay: Duration = .zero) throws -> TrickplayTileStore {
+    private func store(fetches: Counter, delay: Duration = .zero, missing: Bool = false, sheetLimit: Int = 3) throws -> TrickplayTileStore {
         let tiles = try #require(TrickplayTileSet(trickplay: ["s": ["2": info]], mediaSourceID: "s", targetWidth: 2))
         let run = UUID().uuidString
         let sprite = Self.sprite
         return TrickplayTileStore(tileSet: tiles,
                                   tileURL: { URL(string: "https://jf.test/\(run)/\($0).jpg") },
+                                  sheetLimit: sheetLimit,
                                   fetch: { _ in
                                       fetches.bump()
                                       if delay > .zero { try? await Task.sleep(for: delay) }
-                                      return sprite
+                                      return missing ? nil : sprite
                                   })
+    }
+
+    @Test("PUI-201: decoded sheets stay in the store, a few at a time, and never in the artwork cache")
+    func decodedSheetsAreBounded() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches, sheetLimit: 2)
+        let before = ImageCache.shared.residentBytes
+        // 12 thumbnails at 4 per sheet is 3 sheets, one more than the store may hold.
+        for second in stride(from: 0.0, through: 11.0, by: 4.0) { _ = await tiles.thumbnail(seconds: second) }
+        #expect(tiles.decodedSheetCount == 2)
+        #expect(ImageCache.shared.residentBytes == before)
+        tiles.close()
+        #expect(tiles.decodedSheetCount == 0)
+    }
+
+    @Test("PUI-205: a sprite that is missing is asked for once, not on every scan tick")
+    func missingSpriteIsNotRetriedAtOnce() async throws {
+        let fetches = Counter()
+        let tiles = try store(fetches: fetches, missing: true)
+        for _ in 0..<10 { #expect(await tiles.thumbnail(seconds: 0) == nil) }
+        #expect(fetches.count == 1)
     }
 
     @Test("a sprite is downloaded once however many positions ask for it")
