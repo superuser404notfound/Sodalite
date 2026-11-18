@@ -110,6 +110,11 @@ extension PlayerViewModel {
                     self.isPlaying = false
                 case .ended:
                     if playedThisIntro { self.finishPrerollWait(.ended) }
+                case .idle:
+                    // The engine was torn down under the intro (a long trip to the Home screen with it
+                    // paused). Our own stop and the next load both drop these sinks first, so an idle
+                    // here means nothing will ever end this intro: move on instead of holding a black frame.
+                    if playedThisIntro { self.finishPrerollWait(.failed) }
                 case .error(let message):
                     LogTap.shared.note("[Preroll] engine_error \(message)")
                     self.finishPrerollWait(.failed)
@@ -163,8 +168,8 @@ extension PlayerViewModel {
             do {
                 race.finish(try await service.getIntros(itemID: itemID, userID: userID))
             } catch {
-                LogTap.shared.note("[Preroll] fetch_failed error=\(error.localizedDescription)")
-                race.finish([])
+                // After a timeout or a cancel this is the cancel arriving late, not a failure.
+                if race.finish([]) { LogTap.shared.note("[Preroll] fetch_failed error=\(error.localizedDescription)") }
             }
         }
         let timer = Task {
