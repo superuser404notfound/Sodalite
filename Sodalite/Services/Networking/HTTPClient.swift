@@ -115,8 +115,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
         let (data, response) = try await requestData(baseURL: baseURL, endpoint: endpoint, headers: headers)
 
         do {
-            let decoded: DecodedResponse<T> = try await Self.decode(from: data, using: decoder)
-            return decoded.value
+            return try await Self.decodeValue(from: data, using: decoder)
         } catch {
             if let url = response.url {
                 LogTap.shared.note(
@@ -125,6 +124,12 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
             }
             throw APIError.decodingError(error)
         }
+    }
+
+    /// The decoded value itself, for the callers outside this class (audit NET-204).
+    static func decodeValue<T: Decodable>(from data: Data, using decoder: JSONDecoder) async throws -> T {
+        let decoded: DecodedResponse<T> = try await decode(from: data, using: decoder)
+        return decoded.value
     }
 
     /// Off the main thread. This client is MainActor, so decoding in `request` put every Jellyfin

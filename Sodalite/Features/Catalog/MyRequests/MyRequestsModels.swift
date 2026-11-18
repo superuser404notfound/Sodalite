@@ -34,10 +34,7 @@ extension MyRequestObservation {
 
 enum SeerrDate {
     static func parse(_ string: String) -> Date? {
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = fractional.date(from: string) { return date }
-        return ISO8601DateFormatter().date(from: string)
+        ISODateParser.parse(string)
     }
 }
 

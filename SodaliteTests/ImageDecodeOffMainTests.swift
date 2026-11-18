@@ -25,9 +25,23 @@ struct ImageDecodeOffMainTests {
             ("Sodalite/Player/PlayerViewModel.swift", "@concurrent nonisolated private static func loadServerChapterImage("),
             ("Sodalite/Player/TrickplayTileStore.swift", "@concurrent nonisolated private static func decode("),
             ("Sodalite/Services/Networking/HTTPClient.swift", "@concurrent nonisolated private static func decode<T: Decodable>("),
+            ("Sodalite/Player/Subtitles/SRTParser.swift", "@concurrent nonisolated static func parse("),
         ]
         for (path, signature) in expected {
             #expect(try sourceFile(path).contains(signature), "\(path) lost @concurrent on its decode")
+        }
+    }
+
+    /// Audit NET-204: the three response paths that used to decode on the main actor go through
+    /// `HTTPClient.decode` now, and no `decoder.decode(` call is left in them.
+    @Test func theClientsDecodeThroughHTTPClient() throws {
+        for path in ["Sodalite/Services/Seerr/SeerrClient.swift",
+                     "Sodalite/Services/Jellyfin/JellyfinClient.swift",
+                     "Sodalite/Services/Jellyfin/JellyfinPlaybackService.swift"] {
+            let source = try sourceFile(path)
+            #expect(source.contains("HTTPClient.decodeValue(from:"), "\(path) does not use HTTPClient.decode")
+            #expect(!source.contains("decoder.decode(") && !source.contains("JSONDecoder().decode("),
+                    "\(path) decodes on the main actor")
         }
     }
 

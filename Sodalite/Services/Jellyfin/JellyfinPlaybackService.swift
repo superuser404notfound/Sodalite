@@ -179,7 +179,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         #endif
 
         do {
-            return try JSONDecoder().decode(PlaybackInfoResponse.self, from: data)
+            return try await HTTPClient.decodeValue(from: data, using: JSONDecoder())
         } catch {
             throw APIError.decodingError(error)
         }
@@ -300,7 +300,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// server; trickplay tiles are not, so the scrub preview stayed empty (Sodalite#234).
     /// `ApiKey` is read since 10.9; `api_key` stays for older servers.
     nonisolated static func tokenQueryItems(_ token: String) -> [URLQueryItem] {
-        [URLQueryItem(name: "api_key", value: token), URLQueryItem(name: "ApiKey", value: token)]
+        JellyfinTokenQuery.items(token)
     }
 
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? {
@@ -379,7 +379,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     func buildLiveStreamFileURL(sourcePath: String) -> URL? {
         guard var relative = Self.liveStreamFileRelativePath(fromSourcePath: sourcePath) else { return nil }
         if let token = client.verifiedAccessToken {
-            let query = Self.tokenQueryItems(token).map { "\($0.name)=\($0.value ?? "")" }.joined(separator: "&")
+            let query = JellyfinTokenQuery.queryString(token)
             relative += (relative.contains("?") ? "&" : "?") + query
         }
         return buildTranscodeURL(relativePath: relative)
