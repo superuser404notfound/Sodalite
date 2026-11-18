@@ -243,7 +243,11 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
             #"{"Id":"s","ItemId":"\#(itemID)","Type":"Intro","StartTicks":0,"EndTicks":300000000}"#.utf8))
         return EpisodeSegments(items: [intro])
     }
-    func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
+    /// Stream URLs by item id, for tests that need the engine to really open something; nil for the rest.
+    var streamURLs: [String: URL] = [:]
+    func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? {
+        streamURLs[itemID]
+    }
 
     /// Sodalite#244: canned pre-rolls by item id, an error to throw instead, and a gate the request waits at.
     var introsByItem: [String: [JellyfinItem]] = [:]
