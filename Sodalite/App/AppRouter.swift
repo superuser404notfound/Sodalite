@@ -118,6 +118,12 @@ struct AppRouter: View {
         #endif
     }
 
+    /// Who the Seerr connection belongs to, nil when there is none.
+    private var seerrIdentityKey: String? {
+        guard appState.isSeerrConnected else { return nil }
+        return "\(appState.activeSeerrProfile?.serverID ?? ""):\(appState.activeSeerrProfile?.userID ?? ""):\(appState.activeSeerrUser?.id ?? 0)"
+    }
+
     var body: some View {
         ZStack {
             if appState.isAuthenticated {
@@ -188,7 +194,8 @@ struct AppRouter: View {
             dependencies.trakt.activate(profile: appState.profileKey)
             dependencies.trakt.sync()
         }
-        .task(id: appState.isSeerrConnected) {
+        // Keyed on who is connected, not on the flag: a switch between two Seerr profiles keeps the flag true.
+        .task(id: seerrIdentityKey) {
             if appState.isSeerrConnected {
                 await refreshPending()
             } else {

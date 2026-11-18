@@ -146,7 +146,7 @@ Every feature is free. Settings are named as they appear in the app.
 ### Trakt
 
 - **Built in, no server plugin**: connect Trakt in Settings → Trakt with a code you enter on your phone.
-- **Scrobbling and sync**: what you watch is scrobbled. Watched status syncs both ways and only ever adds (nothing is marked unwatched by a sync).
+- **Scrobbling and sync**: what you watch is scrobbled. Watched status syncs both ways and only ever adds (nothing is marked unwatched by a sync). Marking a whole series or season watched sends only the episodes Trakt is missing, dated when you watched or marked them.
 - **Ratings and resume points**: your ratings go to Trakt, Trakt ratings fill in what you have not rated, and a position you paused at in another Trakt app becomes your Continue Watching spot here.
 - **Watchlist and lists as Home rows**: a title on your server opens its page; one that is missing opens in Seerr so you can request it.
 - The connection belongs to one profile on one device. If your server runs the Jellyfin Trakt plugin, use only one of the two. Sodalite uses Trakt but is not endorsed or certified by Trakt.

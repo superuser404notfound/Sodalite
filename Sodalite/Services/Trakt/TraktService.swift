@@ -14,6 +14,9 @@ protocol TraktSessionStoring: AnyObject {
 /// the watchlist and lists behind the Home rows, and scrobbling for the player.
 ///
 /// It follows the active profile (`activate`) and keeps nothing about any other profile in memory.
+/// Every activation builds its own `TraktClient` bound to that profile, so an answer that lands
+/// after a switch (a token refresh, a sign-in, a disconnect) is written to the profile it was
+/// started for and cannot reach the one switched to (audit CAT-201).
 @Observable
 @MainActor
 final class TraktService {
@@ -23,10 +26,19 @@ final class TraktService {
     private(set) var isSyncing = false
     private(set) var lastSyncError: String?
 
-    var isAvailable: Bool { client != nil }
+    var isAvailable: Bool { clientID != nil }
     var isConnected: Bool { session != nil }
 
-    @ObservationIgnored private let client: TraktClient?
+    @ObservationIgnored private let clientID: String?
+    @ObservationIgnored private let makeClient: (String) -> TraktClient
+    @ObservationIgnored private var client: TraktClient?
+    /// One client per profile for the process. A refresh token is single use, so a profile switched
+    /// away from and back to inside one round trip has to find the SAME client, with its in-flight
+    /// refresh, and not a second one that spends the token again (audit review R-CATALOG-3).
+    @ObservationIgnored private var clients: [ProfileKey: TraktClient] = [:]
+    @ObservationIgnored private var unboundClient: TraktClient?
+    /// Series the viewer marked watched and the next sync has to push whatever their dates say.
+    @ObservationIgnored private var markedSeriesIDs: Set<String> = []
     @ObservationIgnored private weak var store: TraktSessionStoring?
     @ObservationIgnored private let libraryService: JellyfinLibraryServiceProtocol
     @ObservationIgnored private let itemService: JellyfinItemServiceProtocol
@@ -34,6 +46,8 @@ final class TraktService {
     /// Bumped whenever a sync starts or the profile changes, so a cancelled sync unwinding late does
     /// not clear the state of the one that replaced it.
     @ObservationIgnored private var syncGeneration = 0
+    /// A sync was asked for while one ran (a series marked watched); it runs once more when that ends.
+    @ObservationIgnored private var syncAgain = false
     @ObservationIgnored private var cachedIndex: (profile: ProfileKey, built: Date, index: TraktLibrary.Index)?
     /// Series ids for episodes the player scrobbles, so a binge looks each show up once.
     @ObservationIgnored private var seriesIDsCache: [String: TraktIDs] = [:]
@@ -42,12 +56,40 @@ final class TraktService {
     static let syncInterval: TimeInterval = 5 * 60
 
     init(clientID: String?, store: TraktSessionStoring,
-         libraryService: JellyfinLibraryServiceProtocol, itemService: JellyfinItemServiceProtocol) {
-        self.client = clientID.map { TraktClient(clientID: $0) }
+         libraryService: JellyfinLibraryServiceProtocol, itemService: JellyfinItemServiceProtocol,
+         makeClient: ((String) -> TraktClient)? = nil) {
+        self.clientID = clientID
+        // One URLSession for every client: it is cookie-less and cache-less and each request carries
+        // its own bearer, so sharing it leaks nothing and never leaves one behind (R-CATALOG-4).
+        let shared = TraktClient.makeHTTPClient()
+        self.makeClient = makeClient ?? { TraktClient(clientID: $0, http: shared) }
         self.store = store
         self.libraryService = libraryService
         self.itemService = itemService
-        client?.onTokensChanged = { [weak self] tokens in self?.tokensChanged(tokens) }
+        unboundClient = buildClient(for: nil, tokens: nil)
+        client = unboundClient
+    }
+
+    /// A client whose token changes are saved to `profile`, whatever profile is active by then.
+    private func buildClient(for profile: ProfileKey?, tokens: TraktTokens?) -> TraktClient? {
+        guard let clientID else { return nil }
+        let client = makeClient(clientID)
+        client.setTokens(tokens)
+        client.onTokensChanged = { [weak self] tokens in self?.tokensChanged(tokens, for: profile) }
+        return client
+    }
+
+    /// The profile's client, built on first use. On reuse the tokens are only replaced when the stored
+    /// pair differs, so an in-flight refresh is not cancelled by switching back.
+    private func clientFor(_ profile: ProfileKey?, tokens: TraktTokens?) -> TraktClient? {
+        guard let profile else { return unboundClient }
+        if let existing = clients[profile] {
+            if existing.tokens != tokens { existing.setTokens(tokens) }
+            return existing
+        }
+        let built = buildClient(for: profile, tokens: tokens)
+        clients[profile] = built
+        return built
     }
 
     // MARK: - Profile
@@ -64,22 +106,28 @@ final class TraktService {
         seriesIDsCache = [:]
         self.profile = profile
         session = profile.flatMap { store?.loadTraktSession(for: $0) }
-        client?.setTokens(session?.tokens)
+        // The old client is left to finish: a refresh in flight has spent a single-use refresh token
+        // and its answer still has to reach the profile it belongs to.
+        client = clientFor(profile, tokens: session?.tokens)
+        syncAgain = false
+        markedSeriesIDs = []
         lists = profile.flatMap { TraktCacheStore.load(TraktListsSnapshot.self, name: TraktCacheStore.lists, profile: $0) }
             ?? TraktListsSnapshot()
         NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
     }
 
-    private func tokensChanged(_ tokens: TraktTokens?) {
-        guard let profile, var session else { return }
+    private func tokensChanged(_ tokens: TraktTokens?, for profile: ProfileKey?) {
+        guard let profile else { return }
         guard let tokens else {
             // The refresh token was refused: the connection is gone and only a new sign-in helps.
             LogTap.shared.note("[Trakt] session ended by Trakt, disconnecting \(profile.fingerprint)")
-            disconnectLocally()
+            disconnectLocally(profile)
             return
         }
+        let isActive = profile == self.profile
+        guard var session = isActive ? self.session : store?.loadTraktSession(for: profile) else { return }
         session.tokens = tokens
-        self.session = session
+        if isActive { self.session = session }
         store?.saveTraktSession(session, for: profile)
     }
 
@@ -102,9 +150,12 @@ final class TraktService {
                 let settings = try? await client.get(.userSettings, as: TraktUserSettings.self)
                 let session = TraktSession(tokens: tokens, username: settings?.user.username ?? "Trakt",
                                            isVIP: settings?.user.vip ?? false)
-                self.session = session
+                // The approval was for this profile, so it is stored for it even when the viewer
+                // switched away meanwhile; the profile switched to keeps its own state.
                 store?.saveTraktSession(session, for: profile)
                 LogTap.shared.note("[Trakt] connected \(profile.fingerprint)")
+                guard profile == self.profile else { return }
+                self.session = session
                 sync(force: true)
                 return
             }
@@ -113,19 +164,24 @@ final class TraktService {
     }
 
     func disconnect() async {
+        let profile = self.profile
         await client?.revoke()
-        disconnectLocally()
+        disconnectLocally(profile)
     }
 
-    private func disconnectLocally() {
+    /// Drops the connection of `profile`. The in-memory state only goes when that profile is still
+    /// the active one, so a slow revoke cannot delete the session of the profile switched to.
+    private func disconnectLocally(_ profile: ProfileKey?) {
+        if let profile {
+            store?.deleteTraktSession(for: profile)
+            TraktCacheStore.removeAll(profile)
+            clients[profile]?.setTokens(nil)
+        }
+        guard profile == self.profile else { return }
         syncGeneration += 1
         syncTask?.cancel()
         syncTask = nil
         isSyncing = false
-        if let profile {
-            store?.deleteTraktSession(for: profile)
-            TraktCacheStore.removeAll(profile)
-        }
         session = nil
         client?.setTokens(nil)
         lists = TraktListsSnapshot()
@@ -143,7 +199,11 @@ final class TraktService {
 
     /// Starts a sync unless one ran within `syncInterval` or one is running.
     func sync(force: Bool = false, ignoringInterval: Bool = false) {
-        guard client != nil, let session, syncTask == nil else { return }
+        guard client != nil, let session else { return }
+        guard syncTask == nil else {
+            if force || ignoringInterval { syncAgain = true }
+            return
+        }
         if !force, !ignoringInterval, let last = session.cursors.lastSyncAt,
            Date().timeIntervalSince(last) < Self.syncInterval { return }
         syncGeneration += 1
@@ -154,6 +214,10 @@ final class TraktService {
             guard let self, self.syncGeneration == generation else { return }
             self.syncTask = nil
             self.isSyncing = false
+            if self.syncAgain {
+                self.syncAgain = false
+                self.sync(ignoringInterval: true)
+            }
         }
     }
 
@@ -222,6 +286,15 @@ final class TraktService {
         }
     }
 
+    /// The sync windows, from the keychain cursor alone (CAT-209). First sync: no windows, everything
+    /// both ways. Later: Trakt watches newer than a day before the last sync come in, local watches
+    /// newer than a week before it go out. Pulled out so a test can pin that a lost cache file does
+    /// not turn into a first sync.
+    nonisolated static func watchedWindows(lastSyncAt: Date?) -> (isFirst: Bool, pullSince: Date?, pushSince: Date?) {
+        guard let lastSyncAt else { return (true, nil, nil) }
+        return (false, lastSyncAt.addingTimeInterval(-24 * 60 * 60), lastSyncAt.addingTimeInterval(-7 * 24 * 60 * 60))
+    }
+
     /// Returns the full library when this pass read it, so the rating pass can reuse it.
     private func syncWatchedIfEnabled(
         client: TraktClient, profile: ProfileKey, activities: TraktLastActivities, readFullHistory: Bool,
@@ -229,8 +302,12 @@ final class TraktService {
     ) async throws -> TraktLibrary? {
         guard session?.options.syncWatched == true else { return nil }
         let cached = TraktCacheStore.load(TraktWatchedSnapshot.self, name: TraktCacheStore.watched, profile: profile)
-        let isFirst = cached == nil || cursors.lastSyncAt == nil
-        let traktMoved = isFirst || readFullHistory
+        // The cursors live in the keychain, the snapshot in Caches that the system may purge. A lost
+        // snapshot means "read Trakt again", not "first sync": the windows below still apply, or
+        // everything unwatched since would come back and every deleted play would be pushed (CAT-209).
+        let windows = Self.watchedWindows(lastSyncAt: cursors.lastSyncAt)
+        let isFirst = windows.isFirst
+        let traktMoved = isFirst || readFullHistory || cached == nil
             || activities.movies?.watchedAt != cursors.moviesWatchedAt
             || activities.episodes?.watchedAt != cursors.episodesWatchedAt
 
@@ -249,17 +326,16 @@ final class TraktService {
             snapshot.pushed = cached?.pushed ?? []
             // First sync: everything. After that: what was watched on Trakt since the last one, with
             // a day of slack for clocks and late scrobbles.
-            let since = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-24 * 60 * 60)
-            pull = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows, since: since)
+            pull = TraktWatchedSnapshot(movies: watchedMovies, shows: watchedShows, since: windows.pullSince)
         }
 
         let (library, index) = try await TraktLibrary.load(service: libraryService, userID: profile.userID,
                                                            playedOnly: !traktMoved)
         if traktMoved { cachedIndex = (profile, Date(), index) }
-        let pushSince = isFirst ? nil : cursors.lastSyncAt?.addingTimeInterval(-7 * 24 * 60 * 60)
+        let marked = markedSeriesIDs
         var plan = TraktSyncPlan.watched(movies: library.movies, series: library.series,
                                          episodes: library.episodes, trakt: snapshot, pull: pull,
-                                         pushSince: pushSince)
+                                         pushSince: windows.pushSince, markedSeriesIDs: marked)
         if !showsTrustworthy {
             // A show Trakt counts plays for came back without episodes. Pushing now would send its
             // whole history as new plays, the exact duplication this guard exists for.
@@ -275,6 +351,7 @@ final class TraktService {
             pushedAny = true
             Self.logHistoryResult(data, sent: batch)
         }
+        markedSeriesIDs.subtract(marked)
         TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
         cursors.moviesWatchedAt = activities.movies?.watchedAt
         cursors.episodesWatchedAt = activities.episodes?.watchedAt
@@ -480,6 +557,16 @@ final class TraktService {
     /// rather than at the next sync; unwatched has to, or the sync would pull it back in.
     func playedChanged(for item: JellyfinItem, played: Bool, seasonNumber: Int? = nil) {
         guard let client, session?.options.syncWatched == true else { return }
+        if item.type == .series, played {
+            // A show or season level add makes Trakt stamp a new play "now" on every aired episode,
+            // watched before or not. The sync sends the episodes that are really missing, each with
+            // its own date (CAT-202).
+            markedSeriesIDs.insert(item.id)
+            sync(ignoringInterval: true)
+            return
+        }
+        if item.type == .series { markedSeriesIDs.remove(item.id) }
+        let profile = self.profile
         Task {
             guard let body = await historyBody(for: item, seasonNumber: seasonNumber, watchedAt: played ? Date() : nil)
             else { return }
@@ -496,6 +583,12 @@ final class TraktService {
         }
     }
 
+    /// The removal body for a show or one of its seasons. Never used for an add, see `playedChanged`.
+    nonisolated static func wholeShowOrSeason(ids: TraktIDs, seasonNumber: Int?) -> TraktSyncBody.Show {
+        let seasons = seasonNumber.map { [TraktSyncBody.Show.Season(number: $0, episodes: nil)] }
+        return .init(ids: ids.external, seasons: seasons)
+    }
+
     private func historyBody(for item: JellyfinItem, seasonNumber: Int?, watchedAt: Date?) async -> TraktSyncBody? {
         var body = TraktSyncBody()
         switch item.type {
@@ -504,8 +597,7 @@ final class TraktService {
             body.movies = [.init(ids: ids.external, watchedAt: watchedAt.map(TraktDate.wire))]
         case .series:
             guard let ids = TraktIDs(item: item) else { return nil }
-            let seasons = seasonNumber.map { [TraktSyncBody.Show.Season(number: $0, episodes: nil)] }
-            body.shows = [.init(ids: ids.external, seasons: seasons)]
+            body.shows = [Self.wholeShowOrSeason(ids: ids, seasonNumber: seasonNumber)]
         case .episode:
             guard let season = item.parentIndexNumber, let number = item.indexNumber,
                   let showIDs = await seriesIDs(for: item) else { return nil }
@@ -543,19 +635,30 @@ final class TraktService {
         }
         let before = lists
         let keys = Set(TraktKey.keys(ids))
-        if onList {
-            let entry = TraktListItem(kind: kind, ids: ids, title: item.name, year: item.productionYear, posterURL: nil)
-            lists.watchlist.insert(entry, at: 0)
-        } else {
-            lists.watchlist.removeAll { !keys.isDisjoint(with: TraktKey.keys($0.ids)) }
+        func change(_ snapshot: inout TraktListsSnapshot) {
+            if onList {
+                let entry = TraktListItem(kind: kind, ids: ids, title: item.name, year: item.productionYear, posterURL: nil)
+                snapshot.watchlist.insert(entry, at: 0)
+            } else {
+                snapshot.watchlist.removeAll { !keys.isDisjoint(with: TraktKey.keys($0.ids)) }
+            }
         }
+        change(&lists)
         NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
         do {
             try await client.send(onList ? .addToWatchlist(body) : .removeFromWatchlist(body))
-            TraktCacheStore.save(lists, name: TraktCacheStore.lists, profile: profile)
+            if profile == self.profile {
+                TraktCacheStore.save(lists, name: TraktCacheStore.lists, profile: profile)
+            } else if var cached = TraktCacheStore.load(TraktListsSnapshot.self, name: TraktCacheStore.lists, profile: profile) {
+                change(&cached)
+                TraktCacheStore.save(cached, name: TraktCacheStore.lists, profile: profile)
+            }
         } catch {
-            lists = before
-            NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
+            // After a switch `lists` is another profile's, and the cache file was never touched.
+            if profile == self.profile {
+                lists = before
+                NotificationCenter.default.post(name: .traktListsDidChange, object: nil)
+            }
             throw error
         }
     }

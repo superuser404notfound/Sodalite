@@ -54,7 +54,9 @@ nonisolated struct TraktListsSnapshot: Codable, Sendable, Equatable {
 }
 
 /// Per-profile files under Caches: the watchlist and lists for the Home rows, and the watched
-/// snapshot the sync compares against. Caches, because every byte of it comes back from Trakt.
+/// snapshot the sync compares against. Caches, because it comes back from Trakt, apart from what
+/// Sodalite pushed (`pushed`): losing that resends rejected entries once. The sync windows are not
+/// here but in the keychain session, so a purge never turns a sync into a first one.
 enum TraktCacheStore {
     private static func directory(_ profile: ProfileKey) -> URL? {
         guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
@@ -84,6 +86,7 @@ enum TraktCacheStore {
     /// Per show: the `last_watched_at` the progress was read at, and its watched seasons.
     static let showProgress = "show-progress.json"
     /// v2: a v1 snapshot was built from the seasonless /sync/watched answer and holds no Trakt
-    /// episodes, so it must not count as a previous sync. A new name makes the next sync a first one.
+    /// episodes, so it must not count as a previous sync. A new name makes the next sync read Trakt in
+    /// full; it keeps the since and push windows of the session cursors.
     static let watched = "watched-v2.json"
 }

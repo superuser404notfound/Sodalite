@@ -194,4 +194,54 @@ struct TraktSyncPlanTests {
         #expect(session.options == TraktOptions())
         #expect(session.cursors == TraktSyncCursors())
     }
+
+    // MARK: - Audit review R-CATALOG-1 and R-CATALOG-2
+
+    private func sentBody(show: Int, season: Int, episodes: [Int]) -> TraktSyncBody {
+        var body = TraktSyncBody()
+        body.shows = [.init(ids: TraktIDs(tmdb: show), seasons: [
+            .init(number: season, episodes: episodes.map { .init(number: $0, watchedAt: "unknown") })])]
+        return body
+    }
+
+    private func removal(show: Int, season: Int?) -> TraktSyncBody {
+        var body = TraktSyncBody()
+        body.shows = [.init(ids: TraktIDs(tmdb: show),
+                            seasons: season.map { [.init(number: $0, episodes: nil)] })]
+        return body
+    }
+
+    @Test func aShowLevelRemovalForgetsEveryEpisodeItSent() {
+        var snapshot = TraktWatchedSnapshot()
+        snapshot.record(sentBody(show: 7, season: 1, episodes: [1, 2]))
+        snapshot.record(sentBody(show: 7, season: 2, episodes: [1]))
+        snapshot.record(sentBody(show: 8, season: 1, episodes: [1]))
+        snapshot.forget(removal(show: 7, season: nil))
+        #expect(!snapshot.contains(episodeOf: TraktIDs(tmdb: 7), season: 1, number: 1))
+        #expect(!snapshot.contains(episodeOf: TraktIDs(tmdb: 7), season: 2, number: 1))
+        #expect(snapshot.contains(episodeOf: TraktIDs(tmdb: 8), season: 1, number: 1))
+    }
+
+    @Test func aSeasonRemovalForgetsOnlyThatSeason() {
+        var snapshot = TraktWatchedSnapshot()
+        snapshot.record(sentBody(show: 7, season: 1, episodes: [1, 2]))
+        snapshot.record(sentBody(show: 7, season: 2, episodes: [1]))
+        snapshot.forget(removal(show: 7, season: 1))
+        #expect(!snapshot.contains(episodeOf: TraktIDs(tmdb: 7), season: 1, number: 2))
+        #expect(snapshot.contains(episodeOf: TraktIDs(tmdb: 7), season: 2, number: 1))
+    }
+
+    @Test func aMarkedSeriesPushesAnEpisodeWhoseDateLiesBeforeThePushWindow() {
+        let show = TraktLocalSeries(itemID: "s", ids: TraktIDs(tmdb: 7), rating: nil)
+        let stale = TraktLocalEpisode(itemID: "e", seriesID: "s", season: 1, number: 3, played: true,
+                                      lastPlayed: now.addingTimeInterval(-30 * day))
+        let window = now.addingTimeInterval(-7 * day)
+        let ordinary = TraktSyncPlan.watched(movies: [], series: [show], episodes: [stale],
+                                             trakt: TraktWatchedSnapshot(), pull: nil, pushSince: window)
+        #expect(ordinary.push.shows.isEmpty)
+        let marked = TraktSyncPlan.watched(movies: [], series: [show], episodes: [stale],
+                                           trakt: TraktWatchedSnapshot(), pull: nil, pushSince: window,
+                                           markedSeriesIDs: ["s"])
+        #expect(marked.push.shows.first?.seasons?.first?.episodes?.map(\.number) == [3])
+    }
 }

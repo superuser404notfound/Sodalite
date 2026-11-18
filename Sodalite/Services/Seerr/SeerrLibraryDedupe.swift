@@ -12,6 +12,20 @@ enum SeerrLibraryDedupe {
         media.filter { !$0.isOnServer }
     }
 
+    /// What Jellyseerr suggests next to a title and the server does not have: its recommendations,
+    /// else its similar titles. The fallback runs when recommendations fail, are empty, or are all
+    /// owned, so one failing endpoint does not hide the row. Shared by the catalog and the detail page,
+    /// which had two copies that already disagreed on a failure (audit CAT-R201).
+    static func suggestions(
+        service: SeerrMediaServiceProtocol, mediaType: SeerrMediaType, tmdbID: Int
+    ) async -> [SeerrMedia] {
+        let recommended = (try? await service.recommendations(mediaType: mediaType, tmdbID: tmdbID)) ?? []
+        let candidates = droppingAvailable(recommended)
+        if !candidates.isEmpty { return candidates }
+        let similar = (try? await service.similar(mediaType: mediaType, tmdbID: tmdbID)) ?? []
+        return droppingAvailable(similar)
+    }
+
     /// Remove Seerr entries that match one of the given Jellyfin items. Both keys are qualified by media
     /// type: TMDB reuses numeric ids across the movie and tv namespaces (mirrors SeerrMedia.stableKey),
     /// so an owned movie must not suppress a different series sharing that id (or the same title+year).
