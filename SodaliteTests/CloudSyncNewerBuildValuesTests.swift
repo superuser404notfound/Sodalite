@@ -72,7 +72,7 @@ extension CloudSyncNewerBuildValuesTests {
         #expect(store.hiddenTabsFromNewerBuilds == ["podcasts"])
         #expect(store.syncedHiddenTabs.filter { $0 == hideable.rawValue }.count == 1)
 
-        store.setTab(hideable, hidden: false)
+        store.setHiddenTabs(store.hiddenTabs.subtracting([hideable]))
         #expect(!AppearancePreferences(store: defaults).hiddenTabs.contains(hideable))
     }
 }
