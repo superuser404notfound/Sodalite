@@ -139,41 +139,13 @@ struct SettingsView: View {
     }
 
     /// Loads from the server when `primaryImageTag` is set, else initials.
-    @ViewBuilder
     private var avatar: some View {
-        if let user = appState.activeUser,
-           let url = dependencies.jellyfinImageService.userProfileImageURL(
-               userID: user.id,
-               tag: user.primaryImageTag
-           ) {
-            AsyncCachedImage(url: url) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                initialsCircle
+        ProfileAvatar(
+            name: appState.activeUser?.name ?? "",
+            url: appState.activeUser.flatMap {
+                dependencies.activeProfileAvatarURL(userID: $0.id, tag: $0.primaryImageTag)
             }
-            .clipShape(Circle())
-        } else {
-            initialsCircle
-        }
-    }
-
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 44, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let name = appState.activeUser?.name ?? ""
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
+        )
     }
 
     // MARK: - Settings List

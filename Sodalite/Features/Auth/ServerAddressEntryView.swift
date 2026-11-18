@@ -96,20 +96,7 @@ struct ServerAddressEntryView: View {
                     }
                 }
                 .frame(maxWidth: 500)
-                .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
-                    CertificateTrustSheet(
-                        pending: pending,
-                        serverAddress: vm.serverAddress,
-                        onTrust: { Task { await vm.trustPendingCertificate() } },
-                        onCancel: { vm.pendingTrust = nil }
-                    )
-                }
-                .navigationDestination(isPresented: Bindable(vm).showLogin) {
-                    if let server = vm.discoveredServer {
-                        UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
-                            .themedNavigationDestination()
-                    }
-                }
+                .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
             }
 
             Spacer()
@@ -147,20 +134,7 @@ struct ServerAddressEntryView: View {
                     }
                     .padding(16)
                 }
-                .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
-                    CertificateTrustSheet(
-                        pending: pending,
-                        serverAddress: vm.serverAddress,
-                        onTrust: { Task { await vm.trustPendingCertificate() } },
-                        onCancel: { vm.pendingTrust = nil }
-                    )
-                }
-                .navigationDestination(isPresented: Bindable(vm).showLogin) {
-                    if let server = vm.discoveredServer {
-                        UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
-                            .themedNavigationDestination()
-                    }
-                }
+                .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
 
                 if let error = vm.errorMessage {
                     OnboardingFootnote(text: Text(verbatim: error), isError: true)
@@ -193,20 +167,7 @@ struct ServerAddressEntryView: View {
                         guard !vm.isLoading, !vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                         Task { await vm.connectToServer() }
                     }
-                    .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
-                        CertificateTrustSheet(
-                            pending: pending,
-                            serverAddress: vm.serverAddress,
-                            onTrust: { Task { await vm.trustPendingCertificate() } },
-                            onCancel: { vm.pendingTrust = nil }
-                        )
-                    }
-                    .navigationDestination(isPresented: Bindable(vm).showLogin) {
-                        if let server = vm.discoveredServer {
-                            UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
-                                .themedNavigationDestination()
-                        }
-                    }
+                    .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
 
                 if let error = vm.errorMessage {
                     TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
@@ -225,4 +186,30 @@ struct ServerAddressEntryView: View {
         }
     }
     #endif
+}
+
+/// The certificate question and the step to the user picker, which every variant of the screen
+/// answers the same way (ASD-R202).
+private struct TrustAndLoginDestination: ViewModifier {
+    let vm: ServerAddressEntryViewModel
+    let addMode: Bool
+    let onCompletion: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        content
+            .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
+                CertificateTrustSheet(
+                    pending: pending,
+                    serverAddress: vm.serverAddress,
+                    onTrust: { Task { await vm.trustPendingCertificate() } },
+                    onCancel: { vm.pendingTrust = nil }
+                )
+            }
+            .navigationDestination(isPresented: Bindable(vm).showLogin) {
+                if let server = vm.discoveredServer {
+                    UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
+                        .themedNavigationDestination()
+                }
+            }
+    }
 }

@@ -335,22 +335,10 @@ private struct UserPickerCard: View {
     }
 
     private var avatar: some View {
-        ZStack {
-            if let url = profileImageURL {
-                AsyncCachedImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle
-                    .frame(width: diameter, height: diameter)
-            }
-        }
+        ProfileAvatar(
+            name: user.name, url: profileImageURL, diameter: diameter,
+            font: .system(size: hSizeClass == .compact ? 38 : 52, weight: .semibold, design: .rounded)
+        )
         .overlay(
             // Not `.focusStroke`: padded outward, so it rings the avatar rather than sitting on its
             // edge. A circle offset outward is still a circle, so there is no radius to keep in step.
@@ -362,33 +350,10 @@ private struct UserPickerCard: View {
         .focusResponse(.card, isFocused: isFocused)
     }
 
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: hSizeClass == .compact ? 38 : 52, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let parts = user.name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(user.name.prefix(2)).uppercased()
-    }
-
     /// On the server being signed in to, and without a token: the active session's belongs to
     /// another server, and an avatar needs none.
     private var profileImageURL: URL? {
         guard let baseURL else { return nil }
-        return dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.primaryImageTag,
-            baseURL: baseURL,
-            token: nil
-        )
+        return dependencies.profileAvatarURL(userID: user.id, tag: user.primaryImageTag, baseURL: baseURL)
     }
 }

@@ -46,6 +46,8 @@ final class ServerDiscoveryViewModel {
 
     /// Runs the discovered address through the existing probe so we recover id/name/version and reuse the login flow.
     func selectServer(_ discovered: DiscoveredServer) async -> JellyfinServer? {
+        // A second tap while the probe runs would push a second login flow (ASD-205).
+        guard !isConnecting else { return nil }
         isConnecting = true
         errorMessage = nil
         pendingTrust = nil
@@ -58,10 +60,7 @@ final class ServerDiscoveryViewModel {
             return JellyfinServer(id: info.id, name: info.serverName, internalURL: url, externalURL: nil, version: info.version)
         case .failure(.certificateUntrusted(let host, let fingerprint)):
             pendingServer = discovered
-            pendingTrust = PendingCertificateTrust(
-                host: host,
-                fingerprint: fingerprint,
-                isReplacingAPin: trustStore.pinnedFingerprint(forHost: host) != nil)
+            pendingTrust = CertificateTrustPrompt.pending(host: host, fingerprint: fingerprint, trustStore: trustStore)
             return nil
         case .failure(let error):
             errorMessage = ErrorText.user(for: error)
@@ -72,15 +71,11 @@ final class ServerDiscoveryViewModel {
     /// Records the answer and asks the same server again, so accepting lands on the login screen
     /// rather than back on a list that still refuses.
     func trustPendingCertificate() async -> JellyfinServer? {
-        guard let pending = pendingTrust, let fingerprint = pending.fingerprint,
-              let discovered = pendingServer
-        else {
-            pendingTrust = nil
-            return nil
-        }
-        trustStore.pin(fingerprint, forHost: pending.host)
+        let discovered = pendingServer
+        let pinned = CertificateTrustPrompt.pin(pendingTrust, trustStore: trustStore)
         pendingTrust = nil
         pendingServer = nil
+        guard pinned, let discovered else { return nil }
         return await selectServer(discovered)
     }
 

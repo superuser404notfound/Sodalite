@@ -53,6 +53,14 @@ enum DownloadCleanup {
         }
     }
 
+    /// Removes a profile, then its downloads. The order matters (ASD-201): a `forget` that throws
+    /// leaves the profile in place, and its files with it.
+    static func purge(afterForgetting scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?,
+                      forget: () throws -> Void) async throws {
+        try forget()
+        await perform(scope, store: store, manager: manager)
+    }
+
     static func warning(for usage: DownloadStore.Usage) -> String? {
         guard usage.items > 0 else { return nil }
         return String(localized: "downloads.cleanup.warning \(usage.items) \(usage.bytes.formatted(.byteCount(style: .file)))")
@@ -74,6 +82,24 @@ extension DependencyContainer {
     /// profile through them too, and neither may take a phone's downloads with it.
     func purgeDownloads(_ scope: DownloadCleanupScope) async {
         await DownloadCleanup.perform(scope, store: downloadStore, manager: downloadManager)
+    }
+
+    /// Forgets a remembered profile and, once that worked, deletes its downloads (ASD-201).
+    func forgetUserAndPurgeDownloads(id: String, serverID: String) async throws {
+        try await DownloadCleanup.purge(afterForgetting: .profile(serverID: serverID, userID: id),
+                                        store: downloadStore, manager: downloadManager) {
+            try forgetUser(id: id, serverID: serverID)
+        }
+    }
+
+    /// "Sign out and remove" on the signed-in profile. The downloads go first: the sign-out reroutes
+    /// the session, and the store then points at another profile (ASD-201).
+    func signOutOfActiveProfileAndPurgeDownloads() async {
+        if let server = activeServer,
+           let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) {
+            await purgeDownloads(.profile(serverID: server.id, userID: userID))
+        }
+        signOutOfActiveProfile()
     }
 
     /// The confirmation text with the downloads that go along, when there are any.

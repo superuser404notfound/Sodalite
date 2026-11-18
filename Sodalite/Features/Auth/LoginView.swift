@@ -232,30 +232,7 @@ struct LoginView: View {
 
     private func tvQuickConnect(vm: LoginViewModel) -> some View {
         VStack(spacing: 24) {
-            VStack(spacing: 20) {
-                Text("auth.quickConnect.title")
-                    .font(.headline)
-                if let code = vm.quickConnectCode {
-                    Text("auth.quickConnect.instruction")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    Text(code)
-                        .font(.system(size: 88, weight: .bold, design: .monospaced))
-                    if vm.isPollingQuickConnect {
-                        HStack(spacing: 12) {
-                            ProgressView()
-                            Text("auth.quickConnect.waiting")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                        }
-                    } else if vm.isLoading {
-                        ProgressView()
-                    }
-                } else {
-                    ProgressView()
-                }
-            }
+            QuickConnectCodeView(vm: vm, style: .tv)
             .frame(maxWidth: .infinity)
             .padding(36)
             .background(Color.Theme.restFill, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
@@ -366,31 +343,7 @@ struct LoginView: View {
 
     private func touchQuickConnect(vm: LoginViewModel) -> some View {
         OnboardingCard {
-            VStack(spacing: 14) {
-                Text("auth.quickConnect.title")
-                    .font(.headline)
-                if let code = vm.quickConnectCode {
-                    Text("auth.quickConnect.instruction")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                    Text(code)
-                        .font(.system(size: 44, weight: .bold, design: .monospaced))
-                        .textSelection(.enabled)
-                    if vm.isPollingQuickConnect {
-                        HStack(spacing: 8) {
-                            ProgressView()
-                            Text("auth.quickConnect.waiting")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    } else if vm.isLoading {
-                        ProgressView()
-                    }
-                } else {
-                    ProgressView()
-                }
-            }
+            QuickConnectCodeView(vm: vm, style: .touch)
             .frame(maxWidth: .infinity)
             .padding(20)
         }
@@ -404,40 +357,10 @@ struct LoginView: View {
         // session's host and token belong to another server.
         let url = viewModel.flatMap { vm in
             vm.signInClient.baseURL.flatMap { base in
-                dependencies.jellyfinImageService.userProfileImageURL(
-                    userID: user.id, tag: user.primaryImageTag, baseURL: base, token: nil)
+                dependencies.profileAvatarURL(userID: user.id, tag: user.primaryImageTag, baseURL: base)
             }
         }
-        ZStack {
-            if let url {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle(for: user.name)
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle(for: user.name)
-                    .frame(width: diameter, height: diameter)
-            }
-        }
-    }
-
-    private func initialsCircle(for name: String) -> some View {
-        let parts = name.split(separator: " ")
-        let initials: String = {
-            if parts.count >= 2 {
-                return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-            }
-            return String(name.prefix(2)).uppercased()
-        }()
-        return ZStack {
-            Circle().fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 44, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
+        ProfileAvatar(name: user.name, url: url, diameter: diameter)
     }
 
     private var successOverlay: some View {
@@ -506,31 +429,7 @@ struct LoginView: View {
     @ViewBuilder
     private func quickConnectSection(vm: LoginViewModel) -> some View {
         VStack(spacing: 20) {
-            Text("auth.quickConnect.title")
-                .font(.title3)
-
-            if let code = vm.quickConnectCode {
-                Text("auth.quickConnect.instruction")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-
-                Text(code)
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .padding()
-
-                if vm.isPollingQuickConnect {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                        Text("auth.quickConnect.waiting")
-                            .foregroundStyle(.secondary)
-                    }
-                } else if vm.isLoading {
-                    ProgressView()
-                }
-            } else {
-                ProgressView()
-            }
+            QuickConnectCodeView(vm: vm, style: .desktop)
 
             if let error = vm.errorMessage {
                 Text(error)
@@ -616,5 +515,66 @@ struct LoginView: View {
             forJellyfinUserID: userID,
             jellyfinServerID: serverID
         )
+    }
+}
+
+/// The code, the hint and the waiting line of a Quick Connect attempt. The three platforms differ in
+/// sizes and in the box around it, not in what it shows (ASD-R202).
+private struct QuickConnectCodeView: View {
+    struct Style {
+        let spacing: CGFloat
+        let title: Font
+        let instruction: Font
+        let codeSize: CGFloat
+        let waitingSpacing: CGFloat
+        let selectable: Bool
+        let codePadding: Bool
+
+        static let tv = Style(spacing: 20, title: .headline, instruction: .callout, codeSize: 88,
+                              waitingSpacing: 12, selectable: false, codePadding: false)
+        static let touch = Style(spacing: 14, title: .headline, instruction: .subheadline, codeSize: 44,
+                                 waitingSpacing: 8, selectable: true, codePadding: false)
+        static let desktop = Style(spacing: 20, title: .title3, instruction: .body, codeSize: 48,
+                                   waitingSpacing: 8, selectable: false, codePadding: true)
+    }
+
+    let vm: LoginViewModel
+    let style: Style
+
+    var body: some View {
+        VStack(spacing: style.spacing) {
+            Text("auth.quickConnect.title")
+                .font(style.title)
+            if let code = vm.quickConnectCode {
+                Text("auth.quickConnect.instruction")
+                    .font(style.instruction)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                codeText(code)
+                if vm.isPollingQuickConnect {
+                    HStack(spacing: style.waitingSpacing) {
+                        ProgressView()
+                        Text("auth.quickConnect.waiting")
+                            .font(style.instruction)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if vm.isLoading {
+                    ProgressView()
+                }
+            } else {
+                ProgressView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func codeText(_ code: String) -> some View {
+        let text = Text(code).font(.system(size: style.codeSize, weight: .bold, design: .monospaced))
+        let padded = style.codePadding ? AnyView(text.padding()) : AnyView(text)
+        #if os(tvOS)
+        padded
+        #else
+        if style.selectable { padded.textSelection(.enabled) } else { padded }
+        #endif
     }
 }

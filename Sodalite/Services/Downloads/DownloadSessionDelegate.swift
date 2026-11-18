@@ -119,7 +119,8 @@ nonisolated final class DownloadSessionDelegate: NSObject, URLSessionDownloadDel
             relay.send(.interrupted(tag, resumeData: resumeData))
             return
         }
-        relay.send(.failed(tag, resumeData: resumeData, cancelled: nsError.code == NSURLErrorCancelled))
+        relay.send(.failed(tag, resumeData: resumeData, cancelled: nsError.code == NSURLErrorCancelled,
+                           diskFull: DownloadPlanner.isDiskFull(nsError)))
     }
 
     /// Same pinning store as every other request, so a self-signed server that was trusted once
@@ -152,10 +153,16 @@ final class BackgroundDownloadTransport: DownloadTransport {
         return task.taskIdentifier
     }
 
+    /// A task being cancelled can still be listed under the tag a restart reuses; only the live
+    /// one is the download (ASD-206).
+    nonisolated static func isLive(_ task: URLSessionTask) -> Bool {
+        task.state == .running || task.state == .suspended
+    }
+
     func cancel(tag: DownloadTaskTag, producingResumeData: Bool) async -> Data? {
         for session in sessions {
             let tasks = await session.allTasks
-            guard let task = tasks.first(where: { $0.taskDescription == tag.encoded }) else { continue }
+            guard let task = tasks.first(where: { $0.taskDescription == tag.encoded && Self.isLive($0) }) else { continue }
             if producingResumeData, let download = task as? URLSessionDownloadTask {
                 return await download.cancelByProducingResumeData()
             }
@@ -168,7 +175,7 @@ final class BackgroundDownloadTransport: DownloadTransport {
     func liveTags() async -> Set<DownloadTaskTag> {
         var tags: Set<DownloadTaskTag> = []
         for session in sessions {
-            tags.formUnion(await session.allTasks.compactMap { $0.taskDescription.flatMap(DownloadTaskTag.init(encoded:)) })
+            tags.formUnion(await session.allTasks.filter(Self.isLive).compactMap { $0.taskDescription.flatMap(DownloadTaskTag.init(encoded:)) })
         }
         return tags
     }

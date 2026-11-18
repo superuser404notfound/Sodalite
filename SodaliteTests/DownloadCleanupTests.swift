@@ -45,6 +45,28 @@ struct DownloadCleanupTests {
         #expect(!exists(paths.root))
     }
 
+    private struct ForgetFailed: Error {}
+
+    /// ASD-201: a forget that throws leaves the profile, so its downloads must stay.
+    @Test func aFailedForgetKeepsTheDownloads() async throws {
+        let (store, paths) = try seeded()
+        await #expect(throws: ForgetFailed.self) {
+            try await DownloadCleanup.purge(afterForgetting: .profile(serverID: "a", userID: "u2"),
+                                            store: store, manager: nil) { throw ForgetFailed() }
+        }
+        #expect(exists(paths.profileDirectory(serverID: "a", userID: "u2")))
+    }
+
+    @Test func aSuccessfulForgetPurgesThatProfile() async throws {
+        let (store, paths) = try seeded()
+        var forgotten = false
+        try await DownloadCleanup.purge(afterForgetting: .profile(serverID: "a", userID: "u2"),
+                                        store: store, manager: nil) { forgotten = true }
+        #expect(forgotten)
+        #expect(!exists(paths.profileDirectory(serverID: "a", userID: "u2")))
+        #expect(exists(paths.profileDirectory(serverID: "a", userID: "u1")))
+    }
+
     @Test func warningOnlyWithDownloads() {
         #expect(DownloadCleanup.warning(for: .init(items: 0, bytes: 0)) == nil)
         #expect(DownloadCleanup.warning(for: .init(items: 2, bytes: 2_000_000_000)) != nil)

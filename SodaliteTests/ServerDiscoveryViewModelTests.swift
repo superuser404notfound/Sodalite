@@ -77,4 +77,30 @@ struct ServerDiscoveryViewModelTests {
         #expect(vm.isAlreadyAdded(server("a")))
         #expect(!vm.isAlreadyAdded(server("b")))
     }
+
+    private final class SlowProbe: ServerDiscoveryServiceProtocol, @unchecked Sendable {
+        private(set) var calls = 0
+        func discoverServer(input: String) async -> ServerDiscoveryResult {
+            calls += 1
+            try? await Task.sleep(for: .milliseconds(100))
+            return .failure(.serverUnreachable)
+        }
+    }
+
+    /// ASD-205: a second tap while the probe runs must not start a second connect.
+    @Test func aSecondSelectWhileConnectingIsIgnored() async {
+        let probe = SlowProbe()
+        let vm = ServerDiscoveryViewModel(
+            discovery: FakeDiscovery(yields: []),
+            discoveryService: probe,
+            knownServerIDs: [],
+            trustStore: ServerTrustStore(storage: NoPinStorage())
+        )
+        async let first = vm.selectServer(server("a"))
+        try? await Task.sleep(for: .milliseconds(20))
+        let second = await vm.selectServer(server("a"))
+        _ = await first
+        #expect(second == nil)
+        #expect(probe.calls == 1)
+    }
 }

@@ -71,6 +71,13 @@ enum DownloadPlanner {
         }
     }
 
+    /// A write that ran out of disk arrives as a URL error with the POSIX or Cocoa cause underneath.
+    nonisolated static func isDiskFull(_ error: NSError) -> Bool {
+        if (error.domain == NSPOSIXErrorDomain && error.code == Int(ENOSPC))
+            || (error.domain == NSCocoaErrorDomain && error.code == NSFileWriteOutOfSpaceError) { return true }
+        return (error.userInfo[NSUnderlyingErrorKey] as? NSError).map(isDiskFull) ?? false
+    }
+
     /// The track a transcode keeps: the preferred language, else the default track, else the first.
     static func audioStreamIndex(preferredLanguage: String?, streams: [MediaStream]) -> Int? {
         let audio = streams.filter { $0.type == .audio }

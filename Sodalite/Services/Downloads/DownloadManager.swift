@@ -19,7 +19,7 @@ enum DownloadEnqueueError: LocalizedError, Equatable {
 enum DownloadEvent: Sendable {
     case progress(DownloadTaskTag, written: Int64, expected: Int64)
     case finished(DownloadTaskTag, status: Int, movedTo: URL?)
-    case failed(DownloadTaskTag, resumeData: Data?, cancelled: Bool)
+    case failed(DownloadTaskTag, resumeData: Data?, cancelled: Bool, diskFull: Bool = false)
     /// iOS cancelled the task itself (the app was force-quit, background refresh turned off, the
     /// system short on resources): an interruption, not the viewer's cancel.
     case interrupted(DownloadTaskTag, resumeData: Data?)
@@ -118,9 +118,7 @@ final class DownloadManager {
         let plan = DownloadPlanner.plan(itemID: item.id, source: source, quality: quality, runtimeTicks: detail.runTimeTicks,
                                         audioStreamIndex: audio, baseURL: baseURL)
         // What is queued or running has not landed yet, but it will: its bytes are spoken for.
-        let reserved = store.items.values
-            .filter { [.queued, .downloading, .paused].contains($0.manifest.state) }
-            .reduce(Int64(0)) { $0 + max(($1.manifest.expectedBytes ?? 0) - $1.manifest.receivedBytes, 0) }
+        let reserved = Self.reservedBytes(store.items.values.map(\.manifest), liveProgress: liveProgress)
         if DownloadPlanner.refusesForSpace(estimate: plan.expectedBytes,
                                            available: backend.availableCapacity().map { $0 - reserved }) {
             throw DownloadEnqueueError.noSpace
@@ -152,6 +150,19 @@ final class DownloadManager {
         await fetchSidecars(plan: plan, item: created, profile: profile, backend: backend)
         await fetchArtwork(for: detail, into: created.directory, backend: backend)
         pumpQueue()
+    }
+
+    /// Bytes still to come for what is queued, running or paused. What a running download already
+    /// wrote is out of the free space `availableCapacity` reports, so it is not counted twice
+    /// (ASD-202). `receivedBytes` only moves when a file lands, the live fraction is what shows.
+    static func reservedBytes(_ manifests: [DownloadManifest], liveProgress: [String: Double]) -> Int64 {
+        manifests
+            .filter { [.queued, .downloading, .paused].contains($0.state) }
+            .reduce(Int64(0)) { sum, manifest in
+                let expected = manifest.expectedBytes ?? 0
+                let written = manifest.state == .downloading ? Int64((liveProgress[manifest.itemID] ?? 0) * Double(expected)) : 0
+                return sum + max(expected - max(manifest.receivedBytes, written), 0)
+            }
     }
 
     /// One episode the server refuses does not cost the rest of the season; running out of space does,
@@ -201,8 +212,39 @@ final class DownloadManager {
     }
 
     func retry(itemID: String) {
-        guard store.item(itemID)?.manifest.state == .failed else { return }
-        resume(itemID: itemID)
+        guard let manifest = store.item(itemID)?.manifest, manifest.state == .failed else { return }
+        // A transcode URL the server answered with 4xx is dead: asking for it again fails the same
+        // way, so Retry asks PlaybackInfo for a fresh one first (ASD-208).
+        guard manifest.route == .transcode, manifest.failure == .notAllowed || manifest.failure == .server else {
+            resume(itemID: itemID)
+            return
+        }
+        Task {
+            await refreshTranscode(itemID: itemID)
+            if store.item(itemID)?.manifest.state == .failed { resume(itemID: itemID) }
+        }
+    }
+
+    /// Rewrites the stored transcode URL and play session from a new PlaybackInfo answer. A failed
+    /// ask leaves the old values, so Retry still tries once.
+    func refreshTranscode(itemID: String) async {
+        guard let item = store.item(itemID), item.manifest.route == .transcode,
+              let backend = backend(for: item.manifest), let baseURL = backend.baseURL,
+              let profile = store.activeProfile else { return }
+        let manifest = item.manifest
+        guard let info = try? await backend.playbackInfo(
+                  itemID: itemID, profile: DirectPlayProfile.downloadProfile(maxStreamingBitrate: manifest.quality.maxStreamingBitrate),
+                  mediaSourceID: manifest.mediaSourceID, audioStreamIndex: manifest.audioStreamIndex),
+              let source = info.mediaSources.first(where: { $0.id == manifest.mediaSourceID }) ?? info.mediaSources.first
+        else { return }
+        let plan = DownloadPlanner.plan(itemID: itemID, source: source, quality: manifest.quality, runtimeTicks: manifest.runtimeTicks,
+                                        audioStreamIndex: manifest.audioStreamIndex, baseURL: baseURL)
+        guard plan.route == .transcode, store.activeProfile == profile else { return }
+        let session = info.playSessionId
+        try? store.update(itemID: itemID) {
+            $0.transcodeURL = plan.url.absoluteString
+            $0.playSessionID = session ?? $0.playSessionID
+        }
     }
 
     func cancel(itemID: String) async {
@@ -289,6 +331,13 @@ final class DownloadManager {
                 }
             } else if let movedTo {
                 await finish(tag, file: movedTo)
+            } else {
+                // A 2xx whose file could not be moved: no task is left to finish it (ASD-207).
+                try? FileManager.default.removeItem(at: resumeURL(tag))
+                try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
+                    $0.failure = .server
+                    $0.transition(to: .failed)
+                }
             }
             pumpQueue()
         case let .interrupted(tag, data):
@@ -301,13 +350,13 @@ final class DownloadManager {
                 $0.transition(to: .queued)
             }
             pumpQueue()
-        case let .failed(tag, data, cancelled):
+        case let .failed(tag, data, cancelled, diskFull):
             liveProgress[tag.itemID] = nil
             guard !cancelled,
                   let manifest = store.manifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) else { return }
             if manifest.route == .original, let data { try? data.write(to: resumeURL(tag)) }
             try? store.updateManifest(serverID: tag.serverID, userID: tag.userID, itemID: tag.itemID) {
-                $0.failure = .network
+                $0.failure = diskFull ? .noSpace : .network
                 $0.transition(to: .failed)
             }
             pumpQueue()
@@ -369,8 +418,8 @@ final class DownloadManager {
             url = DownloadPlanner.originalURL(itemID: item.manifest.versionID ?? itemID, baseURL: baseURL)
         case .transcode:
             // Rebuilt from the stored PlaySession: a running encode serves no ranges, so an
-            // interrupted transcode always starts over. PlaybackInfo is asked again lazily only if
-            // this URL answers 4xx (see handle(.finished)).
+            // interrupted transcode always starts over. PlaybackInfo is asked again when Retry
+            // follows a 4xx or 5xx answer (see retry).
             guard let relative = item.manifest.transcodeURL, let built = URL(string: relative, relativeTo: baseURL)?.absoluteURL else { return }
             url = built
         }

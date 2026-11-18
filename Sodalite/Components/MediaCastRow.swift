@@ -182,11 +182,5 @@ private struct MediaCastCard: View {
         .stableTap(isFocused: isFocused) { onSelect?() }
     }
 
-    private var initials: String {
-        let parts = member.name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(member.name.prefix(2)).uppercased()
-    }
+    private var initials: String { member.name.profileInitials }
 }

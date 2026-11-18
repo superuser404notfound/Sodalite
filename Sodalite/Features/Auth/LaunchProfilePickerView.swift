@@ -453,9 +453,11 @@ struct LaunchProfilePickerView: View {
 
     private func signOutOfCurrentProfile() {
         guard dependencies.activeServer?.id == server.id else { return }
-        dependencies.signOutOfActiveProfile()
-        reloadProfiles()
-        onFinished?()
+        Task {
+            await dependencies.signOutOfActiveProfileAndPurgeDownloads()
+            reloadProfiles()
+            onFinished?()
+        }
     }
 
     private func forget(_ user: RememberedUser) {
@@ -482,12 +484,13 @@ struct LaunchProfilePickerView: View {
     }
 
     private func commitForget(_ user: RememberedUser) {
-        Task { await dependencies.purgeDownloads(.profile(serverID: server.id, userID: user.id)) }
-        do {
-            try dependencies.forgetUser(id: user.id, serverID: server.id)
-            reloadProfiles()
-        } catch {
-            switchError = ErrorText.user(for: error)
+        Task {
+            do {
+                try await dependencies.forgetUserAndPurgeDownloads(id: user.id, serverID: server.id)
+                reloadProfiles()
+            } catch {
+                switchError = ErrorText.user(for: error)
+            }
         }
     }
 }
@@ -571,20 +574,10 @@ struct RememberedProfileCard: View {
     }
 
     private var avatar: some View {
-        ZStack {
-            if let url = profileImageURL {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle
-                    .frame(width: diameter, height: diameter)
-            }
-        }
+        ProfileAvatar(
+            name: user.name, url: profileImageURL, diameter: diameter,
+            font: .system(size: 52, weight: .semibold, design: .rounded)
+        )
         .overlay(
             // Green idle ring on the active profile; suppressed when focused (focus-tint ring takes over).
             Circle()
@@ -613,34 +606,11 @@ struct RememberedProfileCard: View {
         .focusResponse(.card, isFocused: isFocused)
     }
 
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 52, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let parts = user.name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(user.name.prefix(2)).uppercased()
-    }
-
     private var profileImageURL: URL? {
         // Against the card's own server: switchServer returns before it writes jellyfinClient.baseURL
         // when the target has no token slot on this device, which is exactly when this picker opens,
         // so the active client can still be pointing at the previous server (Sodalite#119).
-        dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.imageTag,
-            baseURL: dependencies.preferredURL(for: server),
-            token: user.token
-        )
+        dependencies.profileAvatarURL(userID: user.id, tag: user.imageTag, baseURL: dependencies.preferredURL(for: server))
     }
 }
 
