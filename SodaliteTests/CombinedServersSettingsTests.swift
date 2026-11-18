@@ -48,24 +48,37 @@ struct CombinedServersSettingsTests {
         #expect(container.combinedServerStatus(serverC) == .noSession)
     }
 
-    @Test func homePayloadCarriesTheSwitchAndOlderPayloadsDecode() throws {
+    /// Audit 2026-11-17 SYNC-201: which account a second server contributes is decided per device, so
+    /// the switch and its exclusions stay on the box that set them. A record still decodes and applies
+    /// without them, and one from a build that did send them changes nothing here.
+    @Test func combineServersNeverTravelsThroughTheHomeRecord() throws {
         let scope = "srv-x:u-\(UUID().uuidString)"
         let prefs = CombinedServersPreferences(defaults: .standard)
         prefs.setEnabled(true, scope: scope)
         prefs.setExcluded(["srv-q"], scope: scope)
         defer { prefs.setEnabled(false, scope: scope); prefs.setExcluded([], scope: scope) }
-        let payload = ProfileHomeStore.collect(scope: scope, stamp: .now)
-        #expect(payload.combineServers == true)
-        #expect(payload.combineServersExcluded == ["srv-q"])
+        var payload = ProfileHomeStore.collect(scope: scope, stamp: .now)
+        #expect(payload.combineServers == nil)
+        #expect(payload.combineServersExcluded == nil)
 
         let old = #"{"schemaVersion":1,"updatedAt":0,"mergeCWNextUp":false,"rewatchNextUp":false,"collectionGrouping":"server","librarySorts":{}}"#
         let decoded = try JSONDecoder().decode(ProfileHomePayload.self, from: Data(old.utf8))
         #expect(decoded.combineServers == nil)
 
+        // A record from a build that did send the switch: Alice's iPhone, applied on a box where the
+        // second server is signed in as someone else.
+        payload.combineServers = true
+        payload.combineServersExcluded = ["srv-q"]
         let target = "srv-y:u-\(UUID().uuidString)"
-        ProfileHomeStore.apply(payload, scope: target)
         defer { prefs.setEnabled(false, scope: target); prefs.setExcluded([], scope: target) }
+        ProfileHomeStore.apply(payload, scope: target)
+        #expect(!prefs.isEnabled(scope: target))
+        #expect(prefs.excludedServerIDs(scope: target).isEmpty)
+
+        // A switch already on here is not turned off by a record that carries none.
+        prefs.setEnabled(true, scope: target)
+        payload.combineServers = false
+        ProfileHomeStore.apply(payload, scope: target)
         #expect(prefs.isEnabled(scope: target))
-        #expect(prefs.excludedServerIDs(scope: target) == ["srv-q"])
     }
 }
