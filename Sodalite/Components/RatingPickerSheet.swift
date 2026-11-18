@@ -121,7 +121,8 @@ struct RatingPickerSheet: View {
     /// Opens on the stored rating, or mid-scale for an unrated title, so either direction is a short way.
     static func initialStar(for rating: Double?) -> Int {
         guard let rating else { return 5 }
-        return min(10, max(1, Int(rating.rounded())))
+        guard rating.isFinite else { return 5 }
+        return Int(min(10, max(1, rating.rounded())))
     }
 }
 

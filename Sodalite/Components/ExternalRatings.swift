@@ -19,6 +19,11 @@ struct RatingDisplay: Equatable {
 
     /// `awaitingExternal`: a Seerr fetch is still out. The star holds back meanwhile, because when the
     /// named scores land it would vanish again, and swapping a segment out reads worse than one appearing.
+    /// `Int($0)` traps on a huge or non-finite server double (audit CMP-204); anything unusable is nil.
+    private static func percent(_ value: Double) -> Int? {
+        value.isFinite ? Int(min(max(value, 0), 100)) : nil
+    }
+
     static func resolve(
         communityRating: Double?,
         criticRating: Double?,
@@ -32,7 +37,7 @@ struct RatingDisplay: Equatable {
             tmdb: tmdb,
             imdb: imdb,
             community: (named || awaitingExternal) ? nil : communityRating.flatMap { $0 > 0 ? $0 : nil },
-            rottenTomatoes: criticRating.map { Int($0) } ?? external?.rottenTomatoes
+            rottenTomatoes: criticRating.flatMap(Self.percent) ?? external?.rottenTomatoes
         )
     }
 }
