@@ -145,4 +145,16 @@ struct ImagePayloadTests {
         #expect(!ImageFetch.isContentAddressed(URL(string: "https://image.tmdb.org/t/p/w500/x.jpg?tag=1")!))
         #expect(!ImageFetch.isContentAddressed(nil))
     }
+
+    @Test("CMP-205: a whole image with trailing metadata after its end marker is still whole")
+    func trailingBytesAfterTheEndMarker() {
+        for padding in [100, 5_000] {
+            #expect(ImagePayload.isComplete(png() + Data(repeating: 0x20, count: padding)),
+                    "PNG with \(padding) trailing bytes was refused")
+            #expect(ImagePayload.isComplete(jpeg() + Data(repeating: 0x20, count: padding)),
+                    "JPEG with \(padding) trailing bytes was refused")
+        }
+        let whole = jpeg()
+        #expect(ImagePayload.isComplete(cut(whole, to: 0.5) + Data(repeating: 0x20, count: 5_000)) == false)
+    }
 }

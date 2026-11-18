@@ -169,4 +169,23 @@ struct ImageLoadLadderTests {
             return
         }
     }
+
+    @Test("CMP-202: a task cancelled while its request is out ends as cancelled, not as a failure")
+    func cancelledMidRequestIsCancelled() async {
+        let task = Task { () -> Bool in
+            let result = await ImageLoadLadder.run(
+                candidates: [primary],
+                attemptLimit: 3,
+                retryDelayMilliseconds: 250,
+                perAttempt: { _, _ in
+                    withUnsafeCurrentTask { $0?.cancel() }
+                    return .noImage
+                },
+                sleep: noSleep
+            )
+            if case .cancelled = result { return true }
+            return false
+        }
+        #expect(await task.value)
+    }
 }

@@ -65,6 +65,9 @@ enum ImageLoadLadder {
 
             for candidate in candidates {
                 let outcome = await perAttempt(candidate, attempt)
+                // A cancelled request comes back as `.noImage`; without this it ended as a failure
+                // and the logo title flashed its text fallback (audit CMP-202).
+                if Task.isCancelled { return .cancelled }
                 onOutcome(attempt, candidate, outcome)
                 switch outcome {
                 case .image(let image):
