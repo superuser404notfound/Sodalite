@@ -227,26 +227,44 @@ extension DependencyContainer {
         return JellyfinPlaybackService(client: client)
     }
 
+    /// The playback service a report goes through: the snapshot while the address has proved itself.
+    /// Before that, a client that carries the token and profile of NOW but takes the address from
+    /// the live client after the gate admits it, and drops the report if another profile took over
+    /// while it waited. Never the live client, which reads its token when the request is sent
+    /// (audit final review FR-NET-1).
+    func boundPlaybackService() -> JellyfinPlaybackServiceProtocol {
+        if let snapshot = snapshotPlaybackService() { return snapshot }
+        let live = jellyfinClient
+        let profile = activeProfileRef()
+        let client = JellyfinClient(httpClient: httpClient)
+        client.baseURL = live.baseURL
+        client.accessToken = live.accessToken
+        client.routeGate = live.routeGate
+        client.baseURLSource = { [weak live] in live?.baseURL }
+        client.sessionIsStillCurrent = { [weak self] in self?.isActiveProfile(profile) ?? false }
+        return JellyfinPlaybackService(client: client)
+    }
+
     /// The resolver for the session a long-lived piece of work starts under. Every call builds a
-    /// snapshot of the session that is active at THAT moment (like video's stop), because the report
+    /// service for the session that is active at THAT moment (like video's stop), because the report
     /// goes out in a Task that runs after a synchronous profile switch already swapped the token on
-    /// the live client. While the token is still the starting one that is the right session; after
-    /// it changed, the snapshot taken at the start answers. An address that has not proved itself has
-    /// no snapshot, and the report is skipped rather than sent through the live client (R-W2-1).
+    /// the live client. While the profile is still the starting one that is the right session; after
+    /// it changed, the service taken at the start answers. Keyed on the profile, not the token: a
+    /// re-login of the same profile rotates the token and must keep reporting.
     func boundPlaybackReporter() -> () -> JellyfinPlaybackServiceProtocol? {
-        let token = jellyfinClient.accessToken
-        let startSnapshot = snapshotPlaybackService()
+        let profile = activeProfileRef()
+        let start = boundPlaybackService()
         return { [weak self] in
-            guard let self else { return startSnapshot }
-            return self.jellyfinClient.accessToken == token ? self.snapshotPlaybackService() : startSnapshot
+            guard let self else { return start }
+            return self.isActiveProfile(profile) ? self.boundPlaybackService() : start
         }
     }
 
-    /// `service` itself for a secondary session (its own client never switches), a snapshot of the
-    /// active session for the live one. For a report about to be sent from a task that outlives the
-    /// screen, such as a player's stop.
+    /// `service` itself for a secondary session (its own client never switches), a bound service for
+    /// the live one. For a report about to be sent from a task that outlives the screen, such as a
+    /// player's stop.
     func sessionBoundReportService(for service: JellyfinPlaybackServiceProtocol) -> JellyfinPlaybackServiceProtocol {
         guard (service as AnyObject) === (jellyfinPlaybackService as AnyObject) else { return service }
-        return snapshotPlaybackService() ?? service
+        return boundPlaybackService()
     }
 }
