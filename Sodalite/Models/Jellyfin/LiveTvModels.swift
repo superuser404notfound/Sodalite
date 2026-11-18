@@ -47,7 +47,8 @@ extension JellyfinChannel {
             name: try c.decode(String.self, forKey: .name).epgDisplayText,
             channelNumber: try c.decodeIfPresent(String.self, forKey: .channelNumber),
             imageTags: try c.decodeIfPresent([String: String].self, forKey: .imageTags),
-            currentProgram: try c.decodeIfPresent(JellyfinProgram.self, forKey: .currentProgram),
+            // A bad nested program must not cost the channel its place in the guide.
+            currentProgram: try? c.decodeIfPresent(JellyfinProgram.self, forKey: .currentProgram),
             userData: try c.decodeIfPresent(ChannelUserData.self, forKey: .userData),
             serverID: try c.decodeIfPresent(String.self, forKey: .serverID),
             channelType: try c.decodeIfPresent(String.self, forKey: .channelType))
@@ -202,6 +203,19 @@ struct LiveTvChannelsResponse: Codable, Sendable {
     let items: [JellyfinChannel]
     let totalRecordCount: Int?
 
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let list = try c.decode(LossyList<JellyfinChannel>.self, forKey: .items)
+        items = list.elements
+        totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
+        JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
+    }
+
+    init(items: [JellyfinChannel], totalRecordCount: Int?) {
+        self.items = items
+        self.totalRecordCount = totalRecordCount
+    }
+
     enum CodingKeys: String, CodingKey {
         case items = "Items"
         case totalRecordCount = "TotalRecordCount"
@@ -211,6 +225,19 @@ struct LiveTvChannelsResponse: Codable, Sendable {
 struct LiveTvProgramsResponse: Codable, Sendable {
     let items: [JellyfinProgram]
     let totalRecordCount: Int?
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let list = try c.decode(LossyList<JellyfinProgram>.self, forKey: .items)
+        items = list.elements
+        totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
+        JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
+    }
+
+    init(items: [JellyfinProgram], totalRecordCount: Int?) {
+        self.items = items
+        self.totalRecordCount = totalRecordCount
+    }
 
     enum CodingKeys: String, CodingKey {
         case items = "Items"
@@ -291,6 +318,52 @@ struct LiveTvSeriesTimersResponse: Codable, Sendable {
     }
 }
 
+/// Parses the ISO 8601 shapes Jellyfin and Seerr send: `...T10:00:00Z` with no fraction or with 1 to 7
+/// fractional digits. Two immutable parse styles shared by every decode, where the old decoder built
+/// a DateFormatter per date: 152 ms against 3 ms for a 500-program page (audit NET-203).
+nonisolated enum ISODateParser {
+    private static let fractional = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
+    private static let plain = Date.ISO8601FormatStyle()
+    // "+02:00" offsets, which the two above do not read.
+    private static let fractionalColon = Date.ISO8601FormatStyle(timeZoneSeparator: .colon, includingFractionalSeconds: true)
+    private static let plainColon = Date.ISO8601FormatStyle(timeZoneSeparator: .colon)
+
+    static func parse(_ raw: String) -> Date? {
+        if let date = try? fractional.parse(raw) { return date }
+        if let date = try? plain.parse(raw) { return date }
+        if let date = try? fractionalColon.parse(raw) { return date }
+        return try? plainColon.parse(raw)
+    }
+}
+
+/// Decodes a list one element at a time, so an entry that fails (an EPG program with no title) is
+/// dropped and the rest of the page survives (audit NET-206). The generic twin of `FailableJellyfinItem`.
+struct LossyList<Element: Decodable>: Decodable {
+    let elements: [Element]
+    let dropped: Int
+
+    init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var kept: [Element] = []
+        var dropped = 0
+        while !container.isAtEnd {
+            if let element = try? container.decode(Element.self) {
+                kept.append(element)
+            } else {
+                dropped += 1
+                // A failed decode leaves the cursor on the element; step over it.
+                _ = try? container.decode(DiscardedValue.self)
+            }
+        }
+        elements = kept
+        self.dropped = dropped
+    }
+
+    private struct DiscardedValue: Decodable {
+        init(from decoder: Decoder) throws {}
+    }
+}
+
 extension JSONDecoder {
     /// Lenient ISO parse: Jellyfin timestamps carry up to 7 fractional digits + `Z`, which `.iso8601` (max 3) rejects.
     static let jellyfinLiveTv: JSONDecoder = {
@@ -298,16 +371,7 @@ extension JSONDecoder {
         decoder.dateDecodingStrategy = .custom { dec in
             let container = try dec.singleValueContainer()
             let raw = try container.decode(String.self)
-            // Per-call DateFormatter: shared instance would race on `dateFormat` across overlapping Live TV requests.
-            let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = TimeZone(identifier: "UTC")
-            for fmt in ["yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'",
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                        "yyyy-MM-dd'T'HH:mm:ss'Z'"] {
-                formatter.dateFormat = fmt
-                if let date = formatter.date(from: raw) { return date }
-            }
+            if let date = ISODateParser.parse(raw) { return date }
             throw DecodingError.dataCorruptedError(
                 in: container, debugDescription: "Unparseable date: \(raw)")
         }

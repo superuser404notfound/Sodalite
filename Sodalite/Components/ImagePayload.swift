@@ -24,8 +24,8 @@ enum ImagePayload {
         guard data.count >= 16 else { return false }
 
         switch format(of: data) {
-        case .png: return tail(of: data).contains(subsequence: Self.pngEndChunk)
-        case .jpeg: return tail(of: data).contains(subsequence: Self.jpegEndOfImage)
+        case .png: return tail(of: data, window: pngTailWindow).contains(subsequence: Self.pngEndChunk)
+        case .jpeg: return tail(of: data, window: jpegTailWindow).contains(subsequence: Self.jpegEndOfImage)
         case .gif: return data.last == 0x3B
         case .webP: return riffLengthIsSatisfied(data)
         case .unknown: return true
@@ -59,9 +59,15 @@ enum ImagePayload {
     /// `FF 00`, so it means the end of the file and nothing else.
     nonisolated private static let jpegEndOfImage: [UInt8] = [0xFF, 0xD9]
 
-    /// Enough tail to cover an encoder that pads after the end marker, short enough that a cut file
-    /// cannot reach back into a place where the pattern could occur by chance.
-    nonisolated private static func tail(of data: Data) -> [UInt8] { Array(data.suffix(64)) }
+    /// How far back from the end the marker is looked for. Some files carry XMP, a thumbnail or a
+    /// vendor block after it, and Jellyfin serves the original when no resize is needed, so 64 bytes
+    /// refused whole images for good (audit CMP-205). A PNG chunk of twelve fixed bytes cannot turn up
+    /// by chance, so its window is wide. A JPEG's `FF D9` also ends an embedded EXIF thumbnail near
+    /// the head, so its window stays short enough that a cut file does not reach one.
+    nonisolated private static let pngTailWindow = 64 * 1024
+    nonisolated private static let jpegTailWindow = 16 * 1024
+
+    nonisolated private static func tail(of data: Data, window: Int) -> [UInt8] { Array(data.suffix(window)) }
 
     /// A RIFF container states its own payload length in bytes 4..<8, little-endian, counting from
     /// byte 8. Anything shorter than that is a file that stopped early.
@@ -75,8 +81,14 @@ enum ImagePayload {
 private extension Array where Element == UInt8 {
     nonisolated func contains(subsequence pattern: [UInt8]) -> Bool {
         guard pattern.count <= count else { return false }
-        for start in 0...(count - pattern.count) where Array(self[start..<start + pattern.count]) == pattern {
-            return true
+        let first = pattern[0]
+        for start in 0...(count - pattern.count) where self[start] == first {
+            var matches = true
+            for offset in 1..<pattern.count where self[start + offset] != pattern[offset] {
+                matches = false
+                break
+            }
+            if matches { return true }
         }
         return false
     }

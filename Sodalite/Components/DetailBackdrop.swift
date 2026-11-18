@@ -102,11 +102,9 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     @ViewBuilder let primary: () -> Primary
     @ViewBuilder let content: () -> Content
 
-    /// Scroll-driven full-screen dim: 0 at top, ramps to 0.3 one hero-window deep, restoring readability over bright artwork without losing the full-bleed look.
-    @State private var scrollDim: Double = 0
-
-    /// tvOS fold marker state. The offset feeds off the same scroll-geometry hook as scrollDim.
-    @State private var scrollOffset: CGFloat = 0
+    /// Scroll-driven dim and fold-marker state. Held in an object that only the two small layers
+    /// below read, so a scroll frame does not run this body and rebuild the page (audit CMP-203).
+    @State private var scroll = DetailScrollState()
     /// iPhone portrait: whether the band has mostly left the top, so the system's soft top edge may
     /// blur what scrolls under the Dynamic Island and the close button (as on Home and the genre
     /// pages). Only there: landscape and iPad have no island for rows to run under.
@@ -162,14 +160,6 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         #else
         false
         #endif
-    }
-
-    private var showsScrollHint: Bool {
-        reservesScrollHint && ScrollHintPolicy.isVisible(
-            scrollOffset: scrollOffset,
-            belowFoldHeight: belowFoldHeight,
-            hasSettled: hintSettled
-        )
     }
 
     /// Per-side window safe-area insets, used to push only the CONTENT clear of the Dynamic Island while
@@ -256,7 +246,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                         .padding(.bottom, ScrollHintPolicy.primaryBottomInset(reservesHint: reservesScrollHint))
                         .overlay(alignment: .bottom) {
                             if reservesScrollHint {
-                                ScrollHintChevron(isVisible: showsScrollHint)
+                                ScrollHintLayer(scroll: scroll, belowFoldHeight: belowFoldHeight, hasSettled: hintSettled)
                                     .padding(.bottom, 10)
                             }
                         }
@@ -322,13 +312,11 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                 .background(alignment: .top) { TuckGround(palette: artworkPalette) }
             }
         }
-        .background(Color.black.opacity(scrollDim).ignoresSafeArea())
+        .background { ScrollDimLayer(scroll: scroll) }
         .onScrollGeometryChange(for: Double.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { _, offset in
-            // Linear ramp over the clear hero window, capped at 0.3.
-            scrollDim = min(max(offset / heroWindow, 0), 1) * 0.3
-            scrollOffset = offset
+            scroll.update(offset: offset, heroWindow: heroWindow)
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.containerSize.height
@@ -360,9 +348,9 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         // rather than with a report that it "sometimes looks wrong".
         .task {
             try? await Task.sleep(for: .milliseconds(1500))
-            guard scrollOffset > ScrollHintPolicy.hideThreshold else { return }
+            guard scroll.offset > ScrollHintPolicy.hideThreshold else { return }
             LogTap.shared.note(
-                "detail: page settled at offset \(Int(scrollOffset.rounded())) "
+                "detail: page settled at offset \(Int(scroll.offset.rounded())) "
                 + "of viewport \(Int(containerHeight.rounded())), below fold \(Int(belowFoldHeight.rounded()))"
             )
         }
@@ -899,5 +887,48 @@ struct PageScrollProxyCapture: ViewModifier {
                 .onAppear { proxy = pageProxy }
         }
         #endif
+    }
+}
+
+
+/// What a scroll frame writes. Only the derived values are observed, and only when they change:
+/// the dim moves in 1/200 steps and the hint flips once at the threshold, so the page body does not
+/// run per frame (audit CMP-203). The raw offset is for the settle log and is not observed.
+@Observable
+final class DetailScrollState {
+    private(set) var dim: Double = 0
+    private(set) var pastHintThreshold = false
+    @ObservationIgnored private(set) var offset: CGFloat = 0
+
+    func update(offset: Double, heroWindow: CGFloat) {
+        self.offset = CGFloat(offset)
+        // Linear ramp over the clear hero window, capped at 0.3.
+        let ramp = min(max(offset / Double(heroWindow), 0), 1) * 0.3
+        let stepped = (ramp * 200).rounded() / 200
+        if stepped != dim { dim = stepped }
+        let past = CGFloat(offset) >= ScrollHintPolicy.hideThreshold
+        if past != pastHintThreshold { pastHintThreshold = past }
+    }
+}
+
+/// Full-screen dim: 0 at top, 0.3 one hero window deep, restoring readability over bright artwork.
+private struct ScrollDimLayer: View {
+    let scroll: DetailScrollState
+
+    var body: some View {
+        Color.black.opacity(scroll.dim).ignoresSafeArea()
+    }
+}
+
+private struct ScrollHintLayer: View {
+    let scroll: DetailScrollState
+    let belowFoldHeight: CGFloat
+    let hasSettled: Bool
+
+    var body: some View {
+        ScrollHintChevron(isVisible: ScrollHintPolicy.isVisible(
+            scrollOffset: scroll.pastHintThreshold ? ScrollHintPolicy.hideThreshold : 0,
+            belowFoldHeight: belowFoldHeight,
+            hasSettled: hasSettled))
     }
 }

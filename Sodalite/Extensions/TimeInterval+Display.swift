@@ -17,6 +17,18 @@ extension TimeInterval {
     }
 }
 
+extension TimeInterval {
+    /// A position on a clock, "5:03" or "1:02:45" (audit CMP-R201). `padMinutes` gives the player's
+    /// "05:03" below an hour. Negative, NaN and infinite values read as zero rather than trapping.
+    func clockDisplay(padMinutes: Bool = false) -> String {
+        let total = isFinite ? Int(Swift.min(Swift.max(self, 0), 359_999_999)) : 0
+        let h = total / 3600, m = (total % 3600) / 60, s = total % 60
+        let sec = s < 10 ? "0\(s)" : "\(s)"
+        if h > 0 { return "\(h):\(m < 10 ? "0" : "")\(m):\(sec)" }
+        return padMinutes && m < 10 ? "0\(m):\(sec)" : "\(m):\(sec)"
+    }
+}
+
 extension Int64 {
     /// Jellyfin ticks (100ns units) as `durationDisplay`.
     var ticksToDurationDisplay: String {

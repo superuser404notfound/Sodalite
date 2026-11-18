@@ -287,7 +287,7 @@ private struct TimerRow: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 20)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(focused ? 0.10 : 0.04)))
+        .background(RoundedRectangle(cornerRadius: 10).fill(focused ? Color.Theme.focusFill : Color.Theme.restFillFaint))
         .focusableSurface()
         .focused($focused)
         .stableTap(isFocused: focused) { onCancel?() }

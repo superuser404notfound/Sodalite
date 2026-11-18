@@ -63,7 +63,8 @@ final class JellyfinClient {
         let (data, _) = try await httpClient.requestData(
             baseURL: baseURL, endpoint: endpoint, headers: headers)
         do {
-            return try decoder.decode(T.self, from: data)
+            // Off the main actor, like HTTPClient.request (audit NET-204).
+            return try await HTTPClient.decodeValue(from: data, using: decoder)
         } catch {
             // Mirror HTTPClient.request: localized message instead of raw DecodingError.
             throw APIError.decodingError(error)

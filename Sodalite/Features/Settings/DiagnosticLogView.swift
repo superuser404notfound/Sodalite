@@ -332,7 +332,7 @@ struct LogActionLabel: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(.white.opacity(isFocused ? 0.15 : 0.05))
+                    .fill(isFocused ? Color.Theme.focusFill : Color.white.opacity(0.05))
             )
     }
 }

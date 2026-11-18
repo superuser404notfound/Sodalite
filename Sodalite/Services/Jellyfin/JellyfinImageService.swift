@@ -61,8 +61,7 @@ final class JellyfinImageService {
         if let maxHeight { queryItems.append("maxHeight=\(maxHeight)") }
         queryItems.append("quality=90")
         if let token {
-            queryItems.append("api_key=\(token)")
-            queryItems.append("ApiKey=\(token)")
+            queryItems.append(JellyfinTokenQuery.queryString(token))
         }
 
         var raw = baseString + leadingPath

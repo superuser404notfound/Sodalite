@@ -427,14 +427,7 @@ struct TransportBar: View {
     }
 
     private static func formatChapterTime(_ seconds: Double) -> String {
-        let total = Int(max(0, seconds))
-        let h = total / 3600
-        let m = (total % 3600) / 60
-        let s = total % 60
-        if h > 0 {
-            return String(format: "%d:%02d:%02d", h, m, s)
-        }
-        return String(format: "%d:%02d", m, s)
+        seconds.clockDisplay()
     }
 
     /// "E5 · Title": the dropdown lists one season, so the season number is implied by the row above it.

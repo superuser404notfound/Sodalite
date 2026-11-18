@@ -41,7 +41,7 @@ extension PlayerViewModel {
             return
         }
         LogTap.shared.note("[NowPlaying] artwork: GET \(url.absoluteString)")
-        let request = URLRequest(url: url, timeoutInterval: 5.0)
+        let request = ImageCache.request(for: url, auth: nil, timeout: 5)
         guard case .whole(let data) = await ImageFetch.load(request) else {
             LogTap.shared.note("[NowPlaying] artwork: no whole payload")
             return

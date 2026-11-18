@@ -110,7 +110,7 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
             throw SeerrRequestError.noSeasonsAvailable
         }
         do {
-            return try client.decode(SeerrRequest.self, from: data)
+            return try await client.decode(SeerrRequest.self, from: data)
         } catch {
             // Field-debuggable via the Support log: a 2xx that is neither a request object nor a {message} error body is otherwise invisible.
             LogTap.shared.note(
@@ -120,10 +120,10 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
                 "[seerr] createRequest body: \(String(decoding: data.prefix(4096), as: UTF8.self))"
             )
             // Unknown 2xx error variant: show the server's own message over a generic decode failure.
-            if let message = (try? client.decode(SeerrErrorBody.self, from: data))?.message {
+            if let message = (try? await client.decode(SeerrErrorBody.self, from: data))?.message {
                 throw SeerrRequestError.serverRejected(message: message)
             }
-            if let probe = try? client.decode(SeerrDiscardedRequestProbe.self, from: data),
+            if let probe = try? await client.decode(SeerrDiscardedRequestProbe.self, from: data),
                probe.id == nil, probe.type != nil, probe.media != nil {
                 throw SeerrRequestError.requestDiscarded
             }

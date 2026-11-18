@@ -63,4 +63,20 @@ struct ExternalRatingsTests {
         let rtOnly = try decoder.decode(SeerrRatings.self, from: Data(#"{"rt":{"criticsScore":60}}"#.utf8))
         #expect(rtOnly.imdb == nil)
     }
+
+    @Test("CMP-204: a huge or non-finite critic rating clamps or drops instead of trapping")
+    func hugeCriticRating() {
+        func resolve(_ value: Double) -> Int? {
+            RatingDisplay.resolve(communityRating: nil, criticRating: value, external: nil, awaitingExternal: false).rottenTomatoes
+        }
+        #expect(resolve(1e30) == 100)
+        #expect(resolve(-1e30) == 0)
+        #expect(resolve(.infinity) == nil)
+        #expect(resolve(.nan) == nil)
+        #expect(resolve(72.9) == 72)
+        #expect(RatingPickerSheet.initialStar(for: 1e30) == 10)
+        #expect(RatingPickerSheet.initialStar(for: -1e30) == 1)
+        #expect(RatingPickerSheet.initialStar(for: .nan) == 5)
+        #expect(RatingPickerSheet.initialStar(for: 7.6) == 8)
+    }
 }

@@ -89,6 +89,9 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     /// tvOS 26.6. `requestContentReload` is the app's "an outside cause made your last failure
     /// obsolete" signal, and an image that failed transiently is one of the things that gave up.
     @State private var retryOnActivate = false
+    /// Bumped to ask for another load through `.task(id:)`, which cancels the one in flight. An
+    /// unstructured `Task { load() }` was never cancelled and could write an old URL's image (CMP-202).
+    @State private var retryToken = 0
 
     var body: some View {
         ZStack {
@@ -109,19 +112,19 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
                     .zIndex(0)
             }
         }
-        .task(id: "\(url?.absoluteString ?? "")|\(fallbackURL?.absoluteString ?? "")") {
+        .task(id: "\(url?.absoluteString ?? "")|\(fallbackURL?.absoluteString ?? "")|\(retryToken)") {
             await load()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active, retryOnActivate, loaded == nil {
-                Task { await load() }
+                retryToken += 1
             }
         }
         // The server came back, or a permission did. Only the loads that failed in a way that can
         // heal ask again; a 404 and a body that is not an image read the same however often you try.
         .onChange(of: appState.requestContentReload) { _, _ in
             if retryOnActivate, loaded == nil {
-                Task { await load() }
+                retryToken += 1
             }
         }
     }
@@ -178,6 +181,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         switch result {
         case .image(let image):
             loaded = image
+            onLoadFailed?(false)
             onImageLoaded?(image)
         case .exhausted(let armSceneRetry):
             retryOnActivate = armSceneRetry
@@ -222,12 +226,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         }
 
         // Request built on MainActor to read the MainActor-isolated tokens; attach auth only for a participating Jellyfin server, matched by host and port, so external URLs (TMDB/CDN posters) don't see our token.
-        var request = URLRequest(url: url)
-        // 15s, not the 60s default: one hanging poster otherwise holds the row in placeholder for a full minute.
-        request.timeoutInterval = 15
-        if let token = ImageAuth.snapshot(dependencies.sessionRegistry).token(for: url) {
-            request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
-        }
+        let request = ImageCache.request(for: url, auth: ImageAuth.snapshot(dependencies.sessionRegistry))
 
         let outcome = await Self.fetchAndDecode(
             request: request, attempt: attempt, trimsTransparentMargin: trimsTransparentMargin)
@@ -414,16 +413,24 @@ extension ImageCache {
         }
     }
 
-    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async -> Bool {
+    /// The one place an artwork request is built: 15 s rather than the 60 s default (one hanging
+    /// poster otherwise holds a row in placeholder for a minute), and `X-Emby-Token` only for a
+    /// participating Jellyfin server, so an external CDN never sees the token (audit CMP-R202).
+    nonisolated static func request(for url: URL, auth: ImageAuth?, timeout: TimeInterval = 15) -> URLRequest {
         var request = URLRequest(url: url)
-        request.timeoutInterval = 15
-        if let token = auth.token(for: url) {
+        request.timeoutInterval = timeout
+        if let token = auth?.token(for: url) {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
+        return request
+    }
+
+    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async -> Bool {
+        let imageRequest = request(for: url, auth: auth)
         // Same funnel as the foreground path: a prefetch must never be the thing that puts a
         // half-written resize into either cache, and the HTTP entry it would leave behind is what
         // the first focus would then read (Sodalite#123).
-        guard case .whole(let data) = await ImageFetch.load(request),
+        guard case .whole(let data) = await ImageFetch.load(imageRequest),
               let image = PlatformImage(data: data)
         else { return false }
         ImageCache.shared.store(image.preparedForDisplay() ?? image, for: url)
