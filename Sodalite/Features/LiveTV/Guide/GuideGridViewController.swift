@@ -34,6 +34,14 @@ final class GuideGridViewController: UIViewController,
         didSet { view.isUserInteractionEnabled = isActive }
     }
 
+    /// False while the page is hidden (another tab, another Live TV segment). Both stay mounted, so
+    /// `viewDidDisappear` never fires for them and the now-line timer used to run all session
+    /// (audit LTM-207). Turning it back on catches the window up once.
+    var runsClock: Bool = true {
+        didSet { if runsClock != oldValue { syncClock() } }
+    }
+    private var isAppeared = false
+
     let dependencies: DependencyContainer
     let theme: ResolvedAppearanceTheme
     let onSelect: (JellyfinChannel, JellyfinProgram) -> Void
@@ -215,6 +223,7 @@ final class GuideGridViewController: UIViewController,
     /// The one route that does not wait for focus to move: coming back from suspension the screen
     /// is being re-established and focus with it, so there is no settled focus to disturb.
     @objc private func appDidBecomeActive() {
+        guard runsClock else { return }
         refreshAxisIfNeeded(deferWhileFocused: false)
         refreshNow()
     }
@@ -227,14 +236,24 @@ final class GuideGridViewController: UIViewController,
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refreshNow()
-        startNowLineTimer()
+        isAppeared = true
+        syncClock()
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        nowLineTimer?.invalidate()
-        nowLineTimer = nil
+        isAppeared = false
+        syncClock()
+    }
+
+    private func syncClock() {
+        if runsClock && isAppeared {
+            refreshNow()
+            startNowLineTimer()
+        } else {
+            nowLineTimer?.invalidate()
+            nowLineTimer = nil
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -771,11 +790,14 @@ struct GuideGridContainer: UIViewControllerRepresentable {
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appearanceTheme) private var appearanceTheme
+    @Environment(\.shellPageIsShown) private var pageIsShown
 
     func makeUIViewController(context: Context) -> GuideGridViewController {
-        GuideGridViewController(
+        let controller = GuideGridViewController(
             model: model, tint: tint, dependencies: dependencies, theme: appearanceTheme,
             onSelect: onSelect, onPlayChannel: onPlayChannel, onToggleFavorite: onToggleFavorite)
+        controller.runsClock = isActive && pageIsShown
+        return controller
     }
 
     func updateUIViewController(_ controller: GuideGridViewController, context: Context) {
@@ -785,6 +807,8 @@ struct GuideGridContainer: UIViewControllerRepresentable {
         // subtree from the tvOS focus engine, and without it the hidden guide stays focusable
         // behind the other segments.
         if controller.isActive != isActive { controller.isActive = isActive }
+        let runsClock = isActive && pageIsShown
+        if controller.runsClock != runsClock { controller.runsClock = runsClock }
         if controller.lastFocusRequest != focusRequest {
             controller.lastFocusRequest = focusRequest
             // Not on the first pass: 0 is the initial value, and taking focus at launch would pull it
