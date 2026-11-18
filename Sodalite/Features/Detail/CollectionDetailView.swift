@@ -516,7 +516,7 @@ struct CollectionRowButtonStyle: ButtonStyle {
             .fill(.ultraThinMaterial)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(.white.opacity(isFocused ? 0.12 : 0))
+                    .fill(isFocused ? Color.Theme.focusFill : .clear)
             )
     }
 }

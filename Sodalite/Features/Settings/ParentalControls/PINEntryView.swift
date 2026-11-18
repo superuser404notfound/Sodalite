@@ -349,7 +349,7 @@ private struct DigitKey: View {
         content
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(focused ? Color.white.opacity(0.18) : Color.white.opacity(0.06))
+                    .fill(focused ? Color.Theme.focusFill : Color.white.opacity(0.06))
             )
             .focusStroke(cornerRadius: 16, isFocused: focused)
             .focusResponse(.chip, isFocused: focused)

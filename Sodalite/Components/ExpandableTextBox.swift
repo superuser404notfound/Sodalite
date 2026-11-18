@@ -42,7 +42,7 @@ struct ExpandableTextBox: View {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(.ultraThinMaterial)
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isFocused ? .white.opacity(0.1) : .clear)
+                        .fill(isFocused ? Color.Theme.focusFill : .clear)
                 }
             )
             .focusStroke(cornerRadius: 16, isFocused: isFocused)

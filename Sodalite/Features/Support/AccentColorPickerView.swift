@@ -301,7 +301,7 @@ private struct AccentPresetTile: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(.white.opacity(focused ? 0.12 : 0.05))
+                .fill(focused ? Color.Theme.focusFill : Color.white.opacity(0.05))
         )
         .overlay {
             RoundedRectangle(cornerRadius: 18)
