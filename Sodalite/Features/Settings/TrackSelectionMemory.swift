@@ -63,7 +63,8 @@ final class TrackSelectionMemory {
 
     func recordSubtitleOffset(_ seconds: Double, for key: String, now: Date = Date()) {
         var entry = entries[key] ?? TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: now)
-        entry.subtitleOffset = seconds == 0 ? nil : seconds
+        // A cleared offset is 0, not nil: the merge fills nil from the older entry (SYNC-205).
+        entry.subtitleOffset = seconds == 0 && entry.subtitleOffset == nil ? nil : seconds
         entry.updatedAt = now
         write(entry, for: key)
     }

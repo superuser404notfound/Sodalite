@@ -149,6 +149,41 @@ struct CloudSyncMergeTests {
         #expect(CloudSyncMerge.unionTrackMemory(local: local, cloud: cloud).entries["a"]?.subtitle == .off)
     }
 
+    /// Audit 2026-11-17 SYNC-205: a 1.0 device rewrites the entry for a movie when it picks a track, and
+    /// its entry has no offset field. The newer entry wins, the offset must not go with it.
+    @Test("a newer entry without the offset field keeps the offset of the older one")
+    func trackMemoryUnionKeepsAnOffsetTheNewerSideDoesNotKnow() throws {
+        let old = TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: Date(timeIntervalSince1970: 3), subtitleOffset: 1.5)
+        let json = #"{"subtitle":{"off":{}},"updatedAt":800000000}"#
+        let newer = try JSONDecoder().decode(TrackMemoryEntry.self, from: Data(json.utf8))
+        let local = TrackMemoryPayload(updatedAt: Date(timeIntervalSince1970: 3), entries: ["u|item|x": old])
+        let cloud = TrackMemoryPayload(updatedAt: Date(timeIntervalSince1970: 9), entries: ["u|item|x": newer])
+        let newerStamp = Date(timeIntervalSinceReferenceDate: 800000000)
+
+        for merged in [CloudSyncMerge.unionTrackMemory(local: local, cloud: cloud),
+                       CloudSyncMerge.unionTrackMemory(local: cloud, cloud: local)] {
+            let entry = merged.entries["u|item|x"]
+            #expect(entry?.subtitle == .off)
+            #expect(entry?.updatedAt == newerStamp)
+            #expect(entry?.subtitleOffset == 1.5)
+        }
+    }
+
+    @Test("an offset the newer entry sets, including a cleared one, wins over the older offset")
+    func trackMemoryUnionLetsTheNewerOffsetDecide() {
+        let old = TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: Date(timeIntervalSince1970: 3), subtitleOffset: 1.5)
+        let changed = TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: Date(timeIntervalSince1970: 9), subtitleOffset: -0.5)
+        let cleared = TrackMemoryEntry(subtitle: nil, audio: nil, updatedAt: Date(timeIntervalSince1970: 9), subtitleOffset: 0)
+        func merged(_ newer: TrackMemoryEntry) -> Double? {
+            CloudSyncMerge.unionTrackMemory(
+                local: TrackMemoryPayload(updatedAt: .distantPast, entries: ["k": old]),
+                cloud: TrackMemoryPayload(updatedAt: .distantPast, entries: ["k": newer])
+            ).entries["k"]?.subtitleOffset
+        }
+        #expect(merged(changed) == -0.5)
+        #expect(merged(cleared) == 0)
+    }
+
     @Test("the union is capped so both devices converge on the same set")
     func trackMemoryUnionCaps() {
         var localEntries: [String: TrackMemoryEntry] = [:]
