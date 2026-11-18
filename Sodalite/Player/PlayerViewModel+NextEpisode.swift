@@ -186,9 +186,22 @@ extension PlayerViewModel {
             LogTap.shared.note("[NextEp] countdown_fired")
             // New task: calling playNextEpisode() directly would let a nextEpisodeTimer cancel propagate into player.load (CancellationError).
             Task { @MainActor [weak self] in
-                await self?.playNextEpisode()
+                await self?.advanceAfterCountdown()
             }
         }
+    }
+
+    /// A countdown that ran out while the app was suspended or still asking the server what happened
+    /// meanwhile (#184) must not advance: the stop it would send for the old episode is the stale
+    /// write the hold exists to prevent. The card stays up and the viewer decides (audit final
+    /// review FR-PLR-3). A session that kept playing in PiP or on background audio is the newest
+    /// writer and advances as before.
+    func advanceAfterCountdown() async {
+        if isAwaitingBackgroundReload || (progressReportsHeldForSuspension && !playedWhileReportsHeld) {
+            LogTap.shared.note("[NextEp] countdown_held: session is suspended, not advancing")
+            return
+        }
+        await playNextEpisode()
     }
 
     func playNextEpisode() async {
@@ -279,6 +292,8 @@ extension PlayerViewModel {
         lastPlaybackTimeForNextEpisode = 0
         hasReportedStart = false
         hasStartedPlaying = false
+        // The carry belongs to the file it was taken from (audit final review FR-PLR-2).
+        pendingSessionCarry = nil
         showControls = false
         isScrubbing = false
         controlsFocus = .progressBar

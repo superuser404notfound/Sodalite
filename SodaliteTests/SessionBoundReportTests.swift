@@ -73,23 +73,85 @@ struct SessionBoundReportTests {
         #expect(registry.resolve(serverID: "left") == nil)
     }
 
-    @Test func theBoundReporterKeepsTheOldSessionAfterTheTokenChanged() {
+    @Test func theBoundReporterKeepsTheOldSessionAfterTheProfileChanged() throws {
         let container = DependencyContainer(keychainService: InMemoryKeychain())
         container.verifiesServerIdentity = false
-        container.jellyfinClient.baseURL = URL(string: "http://a.lan:8096")
-        container.jellyfinClient.accessToken = "tok-parent"
+        let serverA = JellyfinServer(id: "a", name: "A", internalURL: URL(string: "http://a.lan:8096"), externalURL: nil)
+        let serverB = JellyfinServer(id: "b", name: "B", internalURL: URL(string: "http://b.lan:8096"), externalURL: nil)
+        let parent = try JSONDecoder().decode(JellyfinUser.self, from: Data(#"{"Id":"parent","Name":"P","ServerId":"a"}"#.utf8))
+        let child = try JSONDecoder().decode(JellyfinUser.self, from: Data(#"{"Id":"child","Name":"C","ServerId":"b"}"#.utf8))
+        try container.saveSession(server: serverA, user: parent, token: "tok-parent")
         let reporter = container.boundPlaybackReporter()
         // Built per report from the session as it is then, never the live service (R-W2-1).
         #expect((reporter().map { $0 as AnyObject }) !== (container.jellyfinPlaybackService as AnyObject))
         #expect(reporter()?.baseURL == URL(string: "http://a.lan:8096"))
 
-        container.jellyfinClient.baseURL = URL(string: "http://b.lan:8096")
-        container.jellyfinClient.accessToken = "tok-child"
+        try container.saveSession(server: serverB, user: child, token: "tok-child")
 
         let service = reporter()
         #expect(service != nil)
         #expect((service.map { $0 as AnyObject }) !== (container.jellyfinPlaybackService as AnyObject))
         #expect(service?.baseURL == URL(string: "http://a.lan:8096"))
+    }
+
+    /// FR-NET-2: a re-login of the same profile rotates the token, the track keeps reporting.
+    @Test func aSameProfileReLoginKeepsTheMusicReporterOnTheNewToken() async throws {
+        let http = RecordingHTTPClient()
+        let container = DependencyContainer(
+            keychainService: InMemoryKeychain(),
+            httpClient: http,
+            defaults: UserDefaults(suiteName: "fr-net-2-\(UUID().uuidString)")!
+        )
+        container.verifiesServerIdentity = false
+        let server = JellyfinServer(id: "srv", name: "Home", internalURL: URL(string: "http://10.0.0.2:8096"), externalURL: nil)
+        let parent = try JSONDecoder().decode(JellyfinUser.self, from: Data(#"{"Id":"parent","Name":"P","ServerId":"srv"}"#.utf8))
+        try container.saveSession(server: server, user: parent, token: "tok-old")
+        let reporter = container.boundPlaybackReporter()
+
+        try container.saveSession(server: server, user: parent, token: "tok-new")
+        try await reporter()?.reportPlaybackStopped(
+            PlaybackStopReport(itemId: "A", mediaSourceId: "src", playSessionId: "ps", positionTicks: 1, liveStreamId: nil))
+
+        let stop = http.sent.first { $0.path == "/Sessions/Playing/Stopped" }
+        #expect(stop?.headers["Authorization"]?.contains("tok-new") == true)
+    }
+
+    /// FR-NET-1, the app shape: enforced gate, one live client, the profile picked next takes the
+    /// token over while the stop still waits for the address to prove itself.
+    @Test func aStopWaitingForTheAddressDoesNotGoOutWithTheNextProfilesToken() async throws {
+        let http = RecordingHTTPClient()
+        let container = DependencyContainer(
+            keychainService: InMemoryKeychain(),
+            httpClient: http,
+            defaults: UserDefaults(suiteName: "fr-net-1-\(UUID().uuidString)")!
+        )
+        container.verifiesServerIdentity = true
+        container.currentPathReading = { nil }
+        container.jellyfinProbe = { _, _ in false }
+        let proven = RouteTestFlag()
+        container.jellyfinIdentity = { _, _ in
+            while await !(MainActor.run { proven.value }) { try? await Task.sleep(for: .milliseconds(10)) }
+            return .matches
+        }
+        let server = JellyfinServer(id: "srv", name: "Home", internalURL: URL(string: "http://10.0.0.2:8096"), externalURL: nil)
+        let parent = try JSONDecoder().decode(JellyfinUser.self, from: Data(#"{"Id":"parent","Name":"P","ServerId":"srv"}"#.utf8))
+        try container.saveSession(server: server, user: parent, token: "tok-parent")
+        #expect(container.jellyfinClient.verifiedBaseURL == nil)
+
+        let service = container.sessionBoundReportService(for: container.jellyfinPlaybackService)
+        let stop = Task {
+            try? await service.reportPlaybackStopped(
+                PlaybackStopReport(itemId: "A", mediaSourceId: "src", playSessionId: "ps", positionTicks: 1, liveStreamId: nil))
+        }
+        try? await Task.sleep(for: .milliseconds(50))
+        try container.switchToUser(
+            RememberedUser(id: "child", serverID: "srv", name: "C", imageTag: nil, token: "tok-child"), server: server)
+        proven.value = true
+        await stop.value
+        try? await Task.sleep(for: .milliseconds(200))
+
+        #expect(!http.sent.filter { $0.path == "/Sessions/Playing/Stopped" }
+            .contains { $0.headers["Authorization"]?.contains("tok-child") == true })
     }
 
     /// The app shape: one live client whose token changes underneath (audit review R-W2-1).

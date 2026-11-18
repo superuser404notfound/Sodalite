@@ -235,6 +235,56 @@ struct SessionCloseTests {
         vm.stopPlayback()
     }
 
+    /// FR-PLR-1: a zap made while Try Again's close is still running opens its own channel, and the
+    /// retry's deferred reopen must not open it a second time.
+    @Test func aZapDuringTheLiveTryAgainCloseIsNotFollowedByASecondOpen() async throws {
+        let service = RecordingPlaybackService()
+        let gate = TestGate()
+        service.stopReportGate = gate
+        let vm = makeLiveViewModel(service)
+        vm.zapLineup = LiveChannelLineup(channels: [
+            channel,
+            JellyfinChannel(id: "ch-2", name: "Two", channelNumber: "2", imageTags: nil, currentProgram: nil, userData: nil),
+        ])
+        vm.liveTunerCloseSettle = 0.3
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-live"
+        vm.activeLiveStreamID = "tuner-1"
+        vm.canRetryAfterOutage = true
+        var zapStarts: [String] = []
+        vm.zapStartPlayback = { zapStarts.append(vm.liveChannel?.id ?? "?") }
+
+        vm.retryAfterOutage()
+        await gate.arrival(1)
+        vm.zapPendingOffset = 1
+        await vm.commitZap()
+        #expect(zapStarts == ["ch-2"])
+
+        gate.open()
+        try? await Task.sleep(for: .milliseconds(800))
+
+        #expect(!service.events.contains { $0.hasPrefix("open:") })
+        vm.stopPlayback()
+    }
+
+    /// FR-PLR-3: a next-episode countdown that ran out while the box was suspended does not send the
+    /// old episode's stop during the wake check.
+    @Test func aCountdownThatRanOutWhileSuspendedDoesNotAdvance() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.hasReportedStart = true
+        vm.playSessionID = "ps-1"
+        vm.nextEpisode = try JSONDecoder().decode(
+            JellyfinItem.self, from: Data(#"{"Id":"ep-2","Name":"Next","Type":"Episode"}"#.utf8))
+        vm.progressReportsHeldForSuspension = true
+
+        await vm.advanceAfterCountdown()
+        try? await Task.sleep(for: .milliseconds(200))
+
+        #expect(service.stoppedReports.isEmpty)
+        #expect(vm.item.id == "ep-1")
+    }
+
     // MARK: - PHOST-204
 
     @Test func backCancelsTheLiveRetuneZapAndReplayTasks() throws {

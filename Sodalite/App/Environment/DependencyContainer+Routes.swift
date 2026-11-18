@@ -45,6 +45,13 @@ extension DependencyContainer {
         scheduleRouteResolve()
     }
 
+    /// The monitor's debounced callback, a second after the synchronous reset above already took the
+    /// proofs back. Only the pass runs again, so what that pass proved in between stays proved and a
+    /// two-slot Seerr is not moved to its public slot a second time (audit final review FR-NET-4).
+    func networkPathDidSettle() {
+        scheduleRouteResolve()
+    }
+
     /// Back from the background, where no path update could arrive. The proofs go, but a two-slot
     /// Seerr stays where it is: its requests wait for the pass (`installSeerrRouteHold`), and moving
     /// it sent every foreground's first Seerr request to a public address that may not answer from

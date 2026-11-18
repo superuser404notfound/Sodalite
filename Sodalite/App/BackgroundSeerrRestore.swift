@@ -7,6 +7,12 @@ extension DependencyContainer {
     func restoreSeerrSessionForBackgroundLaunch() async {
         guard let appState, !appState.isSeerrConnected,
               let serverID = activeServer?.id, let userID = activeUserID else { return }
+        // No scene means no Jellyfin restore and no route pass, so home was never proved and a
+        // LAN-only Seerr would wait for it forever. Run the pass here (it is bounded by the route
+        // cap and the identity patience) before the Seerr restore asks (audit final review FR-NET-6).
+        if verifiesServerIdentity, jellyfinClient.baseURL == nil, activeServer?.internalURL != nil, restoreSession() {
+            await routeResolveTask?.value
+        }
         await applySeerrSession(
             forJellyfinUserID: userID,
             jellyfinServerID: serverID,

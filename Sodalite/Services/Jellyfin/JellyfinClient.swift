@@ -16,6 +16,11 @@ final class JellyfinClient {
     /// Holds requests back from a LAN address that has not proved it is this session's server
     /// (audit NET-201). nil on a sign-in client, whose route is resolved before it sends anything.
     var routeGate: RouteGate?
+    /// Set on a client that reports for a session that may already be over (a stop, a track's
+    /// progress): the address follows this source instead of `baseURL`, and the request is dropped
+    /// when the check says the session is no longer the live one. The token it carries is its own.
+    var baseURLSource: (() -> URL?)?
+    var sessionIsStillCurrent: (() -> Bool)?
     /// A sign-in client's route probe while it runs, so the screens share one (audit review R-ROUTE-24).
     var pendingRouteResolve: Task<URL, Never>?
 
@@ -84,11 +89,22 @@ final class JellyfinClient {
     /// Every request waits here, the unauthenticated ones included: the stored-password login is one
     /// of them.
     func admittedBaseURL() async throws -> URL {
-        guard let routeGate else {
-            guard let baseURL else { throw APIError.invalidURL }
-            return baseURL
+        let current: () -> URL? = { self.baseURLSource?() ?? self.baseURL }
+        let url: URL
+        if let routeGate {
+            url = try await routeGate.admit(current)
+        } else {
+            guard let baseURL = current() else { throw APIError.invalidURL }
+            url = baseURL
         }
-        return try await routeGate.admit { baseURL }
+        if let sessionIsStillCurrent, !sessionIsStillCurrent() { throw CancellationError() }
+        return url
+    }
+
+    /// The header for a request built on the spot, like `verifiedAccessToken` it carries the token
+    /// only while the address has proved itself (audit final review FR-NET-5).
+    var verifiedAuthHeader: String {
+        buildMediaBrowserHeader(includeToken: verifiedAccessToken != nil)
     }
 
     func buildAuthHeader() -> String {

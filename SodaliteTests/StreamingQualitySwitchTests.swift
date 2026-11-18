@@ -42,6 +42,23 @@ struct StreamingQualitySwitchTests {
         #expect(service.requestedCaps == [4_000_000])
     }
 
+    /// FR-PLR-2: a rung switch whose load failed leaves its carry pending, and the next switch keeps
+    /// it instead of writing one from the already cleared picks.
+    @Test func aSecondSwitchKeepsTheCarryAFailedLoadLeftBehind() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.streamingQuality = .original
+        vm.activeSubtitleIndex = 3
+
+        vm.selectStreamingQuality(.mbps4)
+        #expect(vm.pendingSessionCarry?.subtitleStreamIndex == 3)
+        #expect(vm.activeSubtitleIndex == nil)
+        vm.selectStreamingQuality(.mbps2)
+
+        #expect(vm.pendingSessionCarry?.subtitleStreamIndex == 3)
+        vm.stopPlayback()
+    }
+
     @Test func pickingTheActiveRungDoesNothing() async throws {
         let service = RecordingPlaybackService()
         let vm = try makeViewModel(service)

@@ -259,7 +259,7 @@ struct AppRouter: View {
             // NET-201). The monitor itself runs everywhere: NetworkPathSnapshot is what tells an
             // unreachable server apart from a device with no network at all (Sodalite#122).
             #if os(iOS) || os(macOS)
-            pathObserver.onPathChange = { dependencies.networkPathDidChange() }
+            pathObserver.onPathChange = { dependencies.networkPathDidSettle() }
             #endif
             pathObserver.start()
         }
