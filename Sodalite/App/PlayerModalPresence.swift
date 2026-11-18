@@ -31,6 +31,7 @@ enum PlayerModalPresence {
     }
 
     static var isPlayerActive: Bool { claims > 0 }
+    static var isPlayerCoverUp: Bool { claims > 0 }
     #else
     static var isPlayerActive: Bool {
         #if os(tvOS)
@@ -38,6 +39,9 @@ enum PlayerModalPresence {
         #endif
         return presentedPlayer() != nil
     }
+
+    /// A player modal is up, PiP alone does not count (Home stays usable next to a PiP window).
+    static var isPlayerCoverUp: Bool { presentedPlayer() != nil }
 
     private static func presentedPlayer() -> UIViewController? {
         guard let scene = UIApplication.shared.connectedScenes
