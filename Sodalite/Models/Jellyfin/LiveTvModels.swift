@@ -202,17 +202,22 @@ struct JellyfinGuideInfo: Codable, Sendable, Equatable {
 struct LiveTvChannelsResponse: Codable, Sendable {
     let items: [JellyfinChannel]
     let totalRecordCount: Int?
+    /// Elements `LossyList` threw away. Pagers count them, or a page that lost one reads as the last (audit FR-DAT-1).
+    var dropped = 0
+    var pageCount: Int { items.count + dropped }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let list = try c.decode(LossyList<JellyfinChannel>.self, forKey: .items)
         items = list.elements
+        dropped = list.dropped
         totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
         JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
     }
 
-    init(items: [JellyfinChannel], totalRecordCount: Int?) {
+    init(items: [JellyfinChannel], totalRecordCount: Int?, dropped: Int = 0) {
         self.items = items
+        self.dropped = dropped
         self.totalRecordCount = totalRecordCount
     }
 
@@ -225,17 +230,22 @@ struct LiveTvChannelsResponse: Codable, Sendable {
 struct LiveTvProgramsResponse: Codable, Sendable {
     let items: [JellyfinProgram]
     let totalRecordCount: Int?
+    /// Elements `LossyList` threw away. Pagers count them, or a page that lost one reads as the last (audit FR-DAT-1).
+    var dropped = 0
+    var pageCount: Int { items.count + dropped }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let list = try c.decode(LossyList<JellyfinProgram>.self, forKey: .items)
         items = list.elements
+        dropped = list.dropped
         totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
         JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
     }
 
-    init(items: [JellyfinProgram], totalRecordCount: Int?) {
+    init(items: [JellyfinProgram], totalRecordCount: Int?, dropped: Int = 0) {
         self.items = items
+        self.dropped = dropped
         self.totalRecordCount = totalRecordCount
     }
 
@@ -329,10 +339,21 @@ nonisolated enum ISODateParser {
     private static let plainColon = Date.ISO8601FormatStyle(timeZoneSeparator: .colon)
 
     static func parse(_ raw: String) -> Date? {
+        parseZoned(raw) ?? (hasZone(raw) ? nil : parseZoned(raw + "Z"))
+    }
+
+    private static func parseZoned(_ raw: String) -> Date? {
         if let date = try? fractional.parse(raw) { return date }
         if let date = try? plain.parse(raw) { return date }
         if let date = try? fractionalColon.parse(raw) { return date }
         return try? plainColon.parse(raw)
+    }
+
+    /// Zone designator after the time part: `Z`, `+hh:mm`, `-hhmm`. The old Live TV parser read a
+    /// zoneless stamp as UTC, so that shape gets a "Z" (audit FR-DAT-2).
+    private static func hasZone(_ raw: String) -> Bool {
+        guard let t = raw.firstIndex(where: { $0 == "T" || $0 == "t" }) else { return true }
+        return raw[t...].contains(where: { $0 == "Z" || $0 == "z" || $0 == "+" || $0 == "-" })
     }
 }
 

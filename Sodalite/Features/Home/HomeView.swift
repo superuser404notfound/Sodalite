@@ -54,8 +54,12 @@ struct HomeView: View {
     /// Home is not the screen: covered, playing from a card, or (tvOS) another tab page on top.
     /// Every reload gate and the banner read this one value (audit BRW-201, BRW-R205).
     private var homeIsHidden: Bool {
-        HomeVisibility.isHidden(covered: isCovered, heroPlayActive: heroPlayItem != nil, pageShown: pageIsShown)
+        HomeVisibility.isHidden(covered: isCovered, heroPlayActive: heroPlayItem != nil, pageShown: pageIsShown,
+                                playerPresented: playerCoverUp)
     }
+
+    /// Any player modal over the app, whoever presented it (audit FR-BRW-1).
+    @State private var playerCoverUp = PlayerModalPresence.isPlayerCoverUp
 
     private struct TraktRowsTrigger: Equatable {
         let lists: TraktListsSnapshot
@@ -194,6 +198,7 @@ struct HomeView: View {
             guard !hidden else { return }
             Task { await viewModel?.refreshIfStale(trigger: .coverDismissed) }
         }
+        .modifier(PlayerCoverTracker(isUp: $playerCoverUp))
         .onReceive(NotificationCenter.default.publisher(for: .homeConfigDidChange)) { _ in
             viewModel?.reloadConfig()
             if homeIsHidden {
@@ -838,5 +843,23 @@ private struct CombinedHomeNotice: View {
         .foregroundStyle(.secondary)
         .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))
         .padding(.trailing, metrics.rowInset)
+    }
+}
+
+/// Keeps `HomeView.playerCoverUp` current from the player presence notification (audit FR-BRW-1).
+private struct PlayerCoverTracker: ViewModifier {
+    @Binding var isUp: Bool
+
+    func body(content: Content) -> some View {
+        content.onReceive(NotificationCenter.default.publisher(for: .playerModalPresenceDidChange)) { _ in
+            isUp = PlayerModalPresence.isPlayerCoverUp
+            // The modal chain can still list the player in its didDisappear; look once more.
+            if isUp {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    isUp = PlayerModalPresence.isPlayerCoverUp
+                }
+            }
+        }
     }
 }

@@ -145,10 +145,10 @@ final class LiveLineup {
                 // Read off the channels themselves: Jellyfin drops a Type=Radio filter, so a probe
                 // for one answered yes on every server with Live TV (#201).
                 if response.items.contains(where: { $0.kind == .radio }) { hasRadioChannels = true }
-                startIndex += response.items.count
+                startIndex += response.pageCount
                 // A page that came back empty also ends the loop, or a server that ignores
                 // StartIndex would spin here forever.
-                if response.items.count < GuideViewModel.pageSize { channelsComplete = true }
+                if response.pageCount < GuideViewModel.pageSize { channelsComplete = true }
                 loadError = nil
                 recomputeVisibleChannels()
             } catch {

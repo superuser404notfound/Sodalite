@@ -13,4 +13,9 @@ struct HomeVisibilityTests {
         #expect(HomeVisibility.isHidden(covered: false, heroPlayActive: true, pageShown: true))
         #expect(HomeVisibility.isHidden(covered: false, heroPlayActive: false, pageShown: false))
     }
+
+    @Test func aPlayerOpenedByTheRouterHidesHome() {
+        #expect(HomeVisibility.isHidden(covered: false, heroPlayActive: false, pageShown: true, playerPresented: true))
+        #expect(!HomeVisibility.isHidden(covered: false, heroPlayActive: false, pageShown: true, playerPresented: false))
+    }
 }

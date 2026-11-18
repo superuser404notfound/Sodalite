@@ -150,6 +150,21 @@ nonisolated struct TraktWatchedSnapshot: Codable, Sendable, Equatable {
     }
 }
 
+/// A change the live UI made to the stored watched snapshot while a sync was running. The sync
+/// applies these to its own copy before it saves, so a mark or unmark made meanwhile is not
+/// overwritten by the older snapshot it loaded (audit FR-BRW-2).
+nonisolated enum TraktSnapshotEdit: Sendable, Equatable {
+    case record(TraktSyncBody)
+    case forget(TraktSyncBody)
+
+    func apply(to snapshot: inout TraktWatchedSnapshot) {
+        switch self {
+        case .record(let body): snapshot.record(body)
+        case .forget(let body): snapshot.forget(body)
+        }
+    }
+}
+
 /// The two-way watched merge. Additive in both directions: something watched on either side ends up
 /// watched on both, and nothing is ever marked unwatched. That makes the first sync of a long
 /// history as safe as the hundredth, and a sync that runs twice harmless.

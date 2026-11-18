@@ -54,16 +54,18 @@ final class JellyfinLiveTvService: JellyfinLiveTvServiceProtocol {
                          category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram] {
         let pageSize = 500
         var collected: [JellyfinProgram] = []
+        var offset = 0
         while collected.count < cap {
             let response: LiveTvProgramsResponse = try await client.request(
                 endpoint: JellyfinEndpoint.liveTvProgramIndex(
                     userID: userID, window: window, genres: genres, category: category,
-                    startIndex: collected.count, limit: pageSize),
+                    startIndex: offset, limit: pageSize),
                 responseType: LiveTvProgramsResponse.self,
                 decoder: .jellyfinLiveTv
             )
             collected.append(contentsOf: response.items)
-            if response.items.count < pageSize { break }
+            offset += response.pageCount
+            if response.pageCount < pageSize { break }
         }
         return collected
     }

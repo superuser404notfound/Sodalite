@@ -113,6 +113,8 @@ final class HomeViewModel {
         defer { isRefreshing = false }
         isDirty = false
         await loadContent()
+        for (itemID, ticks) in pendingPositions { applyPlaybackPosition(itemID: itemID, ticks: ticks) }
+        pendingPositions = [:]
     }
 
     /// True when a change landed while Home was covered and only got an in-place patch (favorited,
@@ -284,7 +286,7 @@ final class HomeViewModel {
     @ObservationIgnored var isHidden = false
     @ObservationIgnored private var isScheduledLoadRunning = false
     @ObservationIgnored private var reloadAgain = false
-    @ObservationIgnored private var pendingPositions: [String: Int64] = [:]
+    @ObservationIgnored private(set) var pendingPositions: [String: Int64] = [:]
 
     isolated deinit {
         // Fan-outs hold self weakly, also while their network work runs (see +Precompute), so this deinit is reached mid-pass; cancel flips Task.isCancelled so the next checkpoint stops early.
@@ -299,6 +301,8 @@ final class HomeViewModel {
     /// Patch a just-watched item's resume progress in place across every row holding it (issue #24). Mirrors the detail-side fix off the authoritative playback-stop payload so the Continue Watching progress bar is right immediately without racing a loadContent() re-fetch. loadContent() still runs for structural changes a patch can't make (re-ordering, dropping out once finished).
     @MainActor
     func applyPlaybackPosition(itemID: String, ticks: Int64) {
+        // A position still queued for a reload that was skipped must not outlive a newer one (audit FR-BRW-4).
+        if pendingPositions[itemID] != nil { pendingPositions[itemID] = ticks }
         for rowIndex in rows.indices {
             for itemIndex in rows[rowIndex].items.indices
             where rows[rowIndex].items[itemIndex].id == itemID {

@@ -294,6 +294,67 @@ struct TraktProfileBindingTests {
         #expect(Wire.shared.count("POST /sync/history") == 2)
     }
 
+    /// FR-BRW-2: an unmark that lands while the sync its own mark started is still pushing must not be
+    /// overwritten by the older snapshot the sync saves at its end. Marking again then reaches Trakt.
+    @Test func anUnmarkDuringTheSyncSurvivesTheSyncsSave() async throws {
+        Wire.shared.reset(hold: ["/sync/history"])
+        let profile = ProfileKey(serverID: "srv-\(UUID().uuidString)", userID: "u")
+        defer { TraktCacheStore.removeAll(profile) }
+        var options = TraktOptions()
+        options.syncRatings = false
+        let store = MemoryStore()
+        store.sessions[profile] = session("A", expiresIn: 3 * 24 * 3600, options: options)
+        let library = Library()
+        library.series = [try item("Series", id: "s1")]
+        library.episodes = [try episode("e1", number: 1, playedDaysAgo: 0), try episode("e2", number: 2, playedDaysAgo: 30)]
+        let service = makeService(store: store, library: library)
+        service.activate(profile: profile)
+        let series = try item("Series", id: "s1")
+
+        service.playedChanged(for: series, played: true)
+        await waitUntil { Wire.shared.heldCount == 1 }
+        service.playedChanged(for: series, played: false)
+        await waitUntil { Wire.shared.count("POST /sync/history/remove") == 1 }
+        try await Task.sleep(for: .milliseconds(100))
+        Wire.shared.releaseHeld()
+        await waitUntil { !service.isSyncing }
+
+        let saved = TraktCacheStore.load(TraktWatchedSnapshot.self, name: TraktCacheStore.watched, profile: profile)
+        #expect(saved?.pushed.contains { $0.hasPrefix("e|") } == false)
+        #expect(saved?.episodes.isEmpty == true)
+
+        Wire.shared.reset(hold: [])
+        service.playedChanged(for: series, played: true)
+        await waitUntil { Wire.shared.count("POST /sync/history") == 1 }
+        #expect(Wire.shared.count("POST /sync/history") == 1)
+    }
+
+    /// FR-BRW-3: a series marked watched on a Combine secondary goes to Trakt directly, with the
+    /// episodes' own dates and no show-level add.
+    @Test func aSecondaryServersSeriesMarkReachesTrakt() async throws {
+        Wire.shared.reset(hold: [])
+        let profile = ProfileKey(serverID: "srv-\(UUID().uuidString)", userID: "u")
+        defer { TraktCacheStore.removeAll(profile) }
+        var options = TraktOptions()
+        options.syncRatings = false
+        let store = MemoryStore()
+        store.sessions[profile] = session("A", expiresIn: 3 * 24 * 3600, options: options)
+        let secondaryLibrary = Library()
+        secondaryLibrary.episodes = [try episode("e1", number: 1, playedDaysAgo: 3), try episode("e2", number: 2, playedDaysAgo: 40)]
+        let service = makeService(store: store)
+        service.secondaryLibrary = { id in id == "other" ? (secondaryLibrary, "u2") : nil }
+        service.activate(profile: profile)
+        let series = try JSONDecoder().decode(JellyfinItem.self, from: Data(
+            #"{"Id":"s9","Name":"S","Type":"Series","ServerId":"other","ProviderIds":{"Tmdb":"603"}}"#.utf8))
+
+        service.playedChanged(for: series, played: true)
+        await waitUntil { Wire.shared.count("POST /sync/history") == 1 }
+        let body = Wire.shared.bodies("POST /sync/history").first ?? ""
+        #expect(body.contains("\"number\":1") && body.contains("\"number\":2"))
+        #expect(!body.contains("\"seasons\":null"))
+        #expect(!body.contains("unknown"))
+    }
+
     @Test func unwatchingASeasonStillRemovesTheWholeSeason() {
         let show = TraktService.wholeShowOrSeason(ids: TraktIDs(imdb: nil, tmdb: 603, tvdb: nil), seasonNumber: 2)
         #expect(show.seasons == [.init(number: 2, episodes: nil)])

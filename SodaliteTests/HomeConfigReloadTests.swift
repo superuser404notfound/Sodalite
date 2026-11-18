@@ -146,6 +146,17 @@ struct HomeConfigReloadTests {
         #expect(service.getLibrariesCalls == 0)
     }
 
+    /// FR-BRW-4: a position queued for a skipped reload gives way to a newer one for the same item.
+    @Test func aSkippedReloadKeepsTheNewestPositionPerItem() async {
+        let vm = makeViewModel(service: MockLibraryService())
+        vm.isHidden = true
+        vm.scheduleReload(applying: ("a", 100))
+        await waitForReload()
+        #expect(vm.pendingPositions["a"] == 100)
+        vm.applyPlaybackPosition(itemID: "a", ticks: 400)
+        #expect(vm.pendingPositions["a"] == 400)
+    }
+
     private func decodeResponse(_ json: String) throws -> JellyfinItemsResponse {
         try JSONDecoder().decode(JellyfinItemsResponse.self, from: Data(json.utf8))
     }

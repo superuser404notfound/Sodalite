@@ -39,6 +39,16 @@ final class TraktService {
     @ObservationIgnored private var unboundClient: TraktClient?
     /// Series the viewer marked watched and the next sync has to push whatever their dates say.
     @ObservationIgnored private var markedSeriesIDs: Set<String> = []
+    /// Marks made again while the running sync was already working on them; the sync keeps those.
+    @ObservationIgnored private var remarkedDuringSync: Set<String> = []
+    /// Live snapshot edits made while a watched sync runs, nil outside one (audit FR-BRW-2).
+    @ObservationIgnored private var snapshotEdits: [TraktSnapshotEdit]?
+    /// The profile whose sync the edit log belongs to. An edit made for another profile while it runs
+    /// (a switch mid-sync) must not land in this profile's snapshot.
+    @ObservationIgnored private var snapshotEditsProfile: ProfileKey?
+    /// A Combine secondary's library and user for a server id, nil for the active server or one that
+    /// is not taking part. Set by the container (audit FR-BRW-3).
+    @ObservationIgnored var secondaryLibrary: (@MainActor (String) -> (service: JellyfinLibraryServiceProtocol, userID: String)?)?
     @ObservationIgnored private weak var store: TraktSessionStoring?
     @ObservationIgnored private let libraryService: JellyfinLibraryServiceProtocol
     @ObservationIgnored private let itemService: JellyfinItemServiceProtocol
@@ -301,6 +311,10 @@ final class TraktService {
         cursors: inout TraktSyncCursors, markedPlayed: inout Int, pushedAny: inout Bool
     ) async throws -> TraktLibrary? {
         guard session?.options.syncWatched == true else { return nil }
+        snapshotEdits = []
+        snapshotEditsProfile = profile
+        remarkedDuringSync = []
+        defer { snapshotEdits = nil; snapshotEditsProfile = nil; remarkedDuringSync = [] }
         let cached = TraktCacheStore.load(TraktWatchedSnapshot.self, name: TraktCacheStore.watched, profile: profile)
         // The cursors live in the keychain, the snapshot in Caches that the system may purge. A lost
         // snapshot means "read Trakt again", not "first sync": the windows below still apply, or
@@ -351,7 +365,10 @@ final class TraktService {
             pushedAny = true
             Self.logHistoryResult(data, sent: batch)
         }
-        markedSeriesIDs.subtract(marked)
+        markedSeriesIDs.subtract(marked.subtracting(remarkedDuringSync))
+        // Marks and unmarks the viewer made during the awaits above land on top of what this sync
+        // loaded, in the order they happened.
+        for edit in snapshotEdits ?? [] { edit.apply(to: &snapshot) }
         TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
         cursors.moviesWatchedAt = activities.movies?.watchedAt
         cursors.episodesWatchedAt = activities.episodes?.watchedAt
@@ -561,17 +578,24 @@ final class TraktService {
             // A show or season level add makes Trakt stamp a new play "now" on every aired episode,
             // watched before or not. The sync sends the episodes that are really missing, each with
             // its own date (CAT-202).
+            if let serverID = item.serverID, let profile, serverID != profile.serverID,
+               let secondary = secondaryLibrary?(serverID) {
+                pushSecondarySeries(item, seasonNumber: seasonNumber, library: secondary, client: client)
+                return
+            }
             markedSeriesIDs.insert(item.id)
+            if snapshotEdits != nil { remarkedDuringSync.insert(item.id) }
             sync(ignoringInterval: true)
             return
         }
-        if item.type == .series { markedSeriesIDs.remove(item.id) }
+        if item.type == .series { markedSeriesIDs.remove(item.id); remarkedDuringSync.remove(item.id) }
         let profile = self.profile
         Task {
             guard let body = await historyBody(for: item, seasonNumber: seasonNumber, watchedAt: played ? Date() : nil)
             else { return }
             do {
                 try await client.send(played ? .addHistory(body) : .removeHistory(body))
+                logSnapshotEdit(played ? .record(body) : .forget(body), for: profile)
                 if let profile, var snapshot = TraktCacheStore.load(TraktWatchedSnapshot.self,
                                                                     name: TraktCacheStore.watched, profile: profile) {
                     if played { snapshot.record(body) } else { snapshot.forget(body) }
@@ -579,6 +603,50 @@ final class TraktService {
                 }
             } catch {
                 LogTap.shared.note("[Trakt] history write failed: \(error)")
+            }
+        }
+    }
+
+    /// A show or season marked watched on a Combine secondary. The sync reads only the active
+    /// library, so its episodes go straight out with their own dates, the way the sync would have
+    /// sent them (audit FR-BRW-3).
+    private func logSnapshotEdit(_ edit: TraktSnapshotEdit, for profile: ProfileKey?) {
+        guard let profile, profile == snapshotEditsProfile else { return }
+        snapshotEdits?.append(edit)
+    }
+
+    private func pushSecondarySeries(_ item: JellyfinItem, seasonNumber: Int?,
+                                     library: (service: JellyfinLibraryServiceProtocol, userID: String),
+                                     client: TraktClient) {
+        guard let ids = TraktIDs(item: item), !ids.isEmpty else { return }
+        let profile = self.profile
+        Task {
+            do {
+                var query = ItemQuery(includeItemTypes: [.episode], sortBy: "SortName", limit: 10_000, fields: "")
+                query.parentID = item.id
+                query.filters = ["IsPlayed"]
+                let episodes = try await library.service.getItems(userID: library.userID, query: query).items
+                var bySeason: [Int: [TraktSyncBody.Show.Season.Episode]] = [:]
+                for episode in episodes where !episode.isVirtual && episode.userData?.played == true {
+                    guard let season = episode.parentIndexNumber, let number = episode.indexNumber else { continue }
+                    if let seasonNumber, season != seasonNumber { continue }
+                    let date = episode.userData?.lastPlayedDate.flatMap(TraktDate.parse)
+                    bySeason[season, default: []].append(.init(number: number, watchedAt: TraktDate.wire(date)))
+                }
+                guard !bySeason.isEmpty else { return }
+                var body = TraktSyncBody()
+                body.shows = [.init(ids: ids.external, seasons: bySeason.keys.sorted().map {
+                    .init(number: $0, episodes: bySeason[$0] ?? [])
+                })]
+                try await client.send(.addHistory(body))
+                logSnapshotEdit(.record(body), for: profile)
+                if let profile, var snapshot = TraktCacheStore.load(TraktWatchedSnapshot.self,
+                                                                    name: TraktCacheStore.watched, profile: profile) {
+                    snapshot.record(body)
+                    TraktCacheStore.save(snapshot, name: TraktCacheStore.watched, profile: profile)
+                }
+            } catch {
+                LogTap.shared.note("[Trakt] history write for a secondary server failed: \(error)")
             }
         }
     }

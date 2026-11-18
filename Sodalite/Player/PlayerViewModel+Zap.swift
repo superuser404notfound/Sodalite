@@ -49,7 +49,7 @@ extension PlayerViewModel {
         }
     }
 
-    private static func fetchLineup(service: JellyfinLiveTvServiceProtocol, userID: String,
+    static func fetchLineup(service: JellyfinLiveTvServiceProtocol, userID: String,
                                     filter: GuideFilter) async -> Result<LiveChannelLineup, Error> {
         var channels: [JellyfinChannel] = []
         var fetched = 0
@@ -58,10 +58,10 @@ extension PlayerViewModel {
                 let page = try await service.getChannels(
                     userID: userID, startIndex: fetched,
                     limit: GuideViewModel.pageSize, filter: filter)
-                fetched += page.items.count
+                fetched += page.pageCount
                 // The kind is narrowed here, not by the server, which ignores Type (#201).
                 channels += page.items.filter(filter.admits(kindOf:))
-                if page.items.count < GuideViewModel.pageSize { break }
+                if page.pageCount < GuideViewModel.pageSize { break }
             } catch {
                 return .failure(error)
             }
