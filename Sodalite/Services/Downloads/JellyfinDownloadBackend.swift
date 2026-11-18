@@ -31,7 +31,7 @@ final class JellyfinDownloadBackend: DownloadBackend {
     /// route resolve instead of sending its token ahead of it (audit NET-201).
     var baseURL: URL? { client?.verifiedBaseURL }
     var hasServer: Bool { client?.baseURL != nil }
-    var authorization: String { client?.buildAuthHeader() ?? "" }
+    var authorization: String { client?.verifiedAuthHeader ?? "" }
     var userID: String { (serverID == nil ? container?.activeUserID : secondary?.userID) ?? "" }
     var preferredAudioLanguage: String? { container?.playbackPreferences.preferredAudioLanguage }
     var versionOrder: VersionOrder { container?.playbackPreferences.versionOrder ?? .quality }

@@ -172,6 +172,74 @@ struct CredentialsWaitForVerifiedRouteTests {
         #expect(container.listRememberedUsers(serverID: serverID).isEmpty)
     }
 
+    /// FR-NET-3: the launch check reads the address the request was finally sent to, not the one it
+    /// saw before it waited in the gate. Last session at home, this launch away, token revoked.
+    @Test func aGenuineRefusalAfterTheRouteMovedStillCounts() async throws {
+        let http = RecordingHTTPClient()
+        let external = externalURL
+        let container = try container(http: http, internalURL: internalURL, externalURL: externalURL) { url, _ in
+            url == external
+        }
+        #expect(container.jellyfinClient.baseURL == internalURL)
+
+        let check = await container.checkActiveSession()
+
+        if case .rejected = check {} else { Issue.record("expected rejected, got \(check)") }
+    }
+
+    /// FR-NET-4: the debounced path callback only re-runs the pass, it does not take the proof back
+    /// a second time.
+    @Test func theDebouncedPathCallbackKeepsWhatThePassProved() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+        await container.routeResolveTask?.value
+        let gate = try #require(container.jellyfinClient.routeGate)
+        #expect(gate.allows(internalURL))
+        let epoch = gate.epoch
+
+        container.networkPathDidSettle()
+
+        #expect(gate.allows(internalURL))
+        #expect(gate.epoch == epoch)
+        await container.routeResolveTask?.value
+    }
+
+    /// FR-NET-5: a header built on the spot carries the token only after the address proved itself.
+    @Test func theDownloadHeaderCarriesNoTokenBeforeTheProof() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+
+        #expect(!container.jellyfinClient.verifiedAuthHeader.contains("token-a"))
+
+        await container.routeResolveTask?.value
+        #expect(container.jellyfinClient.verifiedAuthHeader.contains("token-a-0123456789"))
+    }
+
+    #if !os(macOS)
+    /// FR-NET-6: a launch without a scene restores no Jellyfin session and runs no route pass, so a
+    /// LAN-only Seerr was never trusted. The headless restore runs the pass first.
+    @Test func aSceneLessLaunchProvesHomeBeforeAskingALANSeerr() async throws {
+        let http = RecordingHTTPClient()
+        let container = try container(http: http, internalURL: internalURL, externalURL: nil) { _, _ in true }
+        await container.routeResolveTask?.value
+        let auth = ProfileSwitchBoundaryTests.HookedSeerrAuth(result: .failure(APIError.unauthorized(message: nil)))
+        let asked = RouteTestFlag()
+        auth.onCurrentUser = { asked.value = true }
+        try lanSeerrSession(container, auth: auth)
+        let appState = AppState()
+        container.appState = appState
+        defer { withExtendedLifetime(appState) {} }
+        // What a fresh process looks like before anything ran.
+        container.jellyfinClient.baseURL = nil
+        container.jellyfinClient.accessToken = nil
+        container.isOnVerifiedHomeNetwork = false
+
+        await container.restoreSeerrSessionForBackgroundLaunch()
+
+        #expect(asked.value)
+    }
+    #endif
+
     private func lanSeerrSession(
         _ container: DependencyContainer, auth: ProfileSwitchBoundaryTests.HookedSeerrAuth
     ) throws {

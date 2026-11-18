@@ -54,13 +54,15 @@ extension DependencyContainer {
         // pointers by then, and acting would save this profile's token over it or delete its slots.
         let profile = ProfileRef(serverID: server.id, userID: userID)
         let superseded = SessionCheck.unreachable(CancellationError())
-        let askedURL = jellyfinClient.baseURL
 
         do {
             let user = try await jellyfinAuthService.getCurrentUser()
             return isActiveProfile(profile) ? .valid(user) : superseded
         } catch APIError.unauthorized {
             guard isActiveProfile(profile) else { return superseded }
+            // Read after the request: it waited in the route gate, and the pass may have moved the
+            // address it was finally sent to (audit final review FR-NET-3).
+            let askedURL = jellyfinClient.baseURL
             // A refusal is only the server's when the address it came from is this server: on
             // another network the home LAN address may be a stranger's Jellyfin, and it would get
             // the stored password next, then the profile would be dropped on every device (audit

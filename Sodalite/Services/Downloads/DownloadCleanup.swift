@@ -95,11 +95,19 @@ extension DependencyContainer {
     /// "Sign out and remove" on the signed-in profile. The downloads go first: the sign-out reroutes
     /// the session, and the store then points at another profile (ASD-201).
     func signOutOfActiveProfileAndPurgeDownloads() async {
-        if let server = activeServer,
-           let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) {
-            await purgeDownloads(.profile(serverID: server.id, userID: userID))
+        guard let server = activeServer,
+              let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) else {
+            signOutOfActiveProfile()
+            return
         }
-        signOutOfActiveProfile()
+        // The purge awaits; the profile picked meanwhile must not be the one that is signed out.
+        let ref = ProfileRef(serverID: server.id, userID: userID)
+        await purgeDownloads(.profile(serverID: server.id, userID: userID))
+        if isActiveProfile(ref) {
+            signOutOfActiveProfile()
+        } else {
+            try? forgetUser(id: userID, serverID: server.id)
+        }
     }
 
     /// The confirmation text with the downloads that go along, when there are any.
