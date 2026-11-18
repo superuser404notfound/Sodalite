@@ -129619,6 +129619,166 @@
         }
       }
     },
+    "multiServer.urls.otherServer %@" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na adrese %@ je jiný server Jellyfin. Zadejte adresu tohoto serveru."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ er en anden Jellyfin-server. Indtast en adresse til denne server."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unter %@ läuft ein anderer Jellyfin-Server. Gib eine Adresse dieses Servers ein."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η διεύθυνση %@ ανήκει σε άλλον διακομιστή Jellyfin. Εισαγάγετε μια διεύθυνση αυτού του διακομιστή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is a different Jellyfin server. Enter an address of this server."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ es otro servidor de Jellyfin. Introduce una dirección de este servidor."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ on eri Jellyfin-palvelin. Anna tämän palvelimen osoite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ est un autre serveur Jellyfin. Saisissez une adresse de ce serveur."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ je drugi Jellyfin poslužitelj. Unesite adresu ovog poslužitelja."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ egy másik Jellyfin-szerver. Add meg ennek a szervernek egy címét."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ è un altro server Jellyfin. Inserisci un indirizzo di questo server."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は別の Jellyfin サーバーです。このサーバーのアドレスを入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@은(는) 다른 Jellyfin 서버입니다. 이 서버의 주소를 입력하세요."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ er en annen Jellyfin-server. Skriv inn en adresse til denne serveren."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is een andere Jellyfin-server. Voer een adres van deze server in."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ to inny serwer Jellyfin. Wpisz adres tego serwera."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ é outro servidor Jellyfin. Digite um endereço deste servidor."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ é outro servidor Jellyfin. Introduza um endereço deste servidor."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ este alt server Jellyfin. Introdu o adresă a acestui server."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По адресу %@ находится другой сервер Jellyfin. Введите адрес этого сервера."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na adrese %@ je iný server Jellyfin. Zadajte adresu tohto servera."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ är en annan Jellyfin-server. Ange en adress till den här servern."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ farklı bir Jellyfin sunucusu. Bu sunucunun bir adresini girin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За адресою %@ інший сервер Jellyfin. Введіть адресу цього сервера."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 是另一台 Jellyfin 服务器。请输入这台服务器的地址。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 是另一台 Jellyfin 伺服器。請輸入這台伺服器的位址。"
+          }
+        }
+      }
+    },
     "multiServer.urls.saveAnyway" : {
       "localizations" : {
         "cs" : {

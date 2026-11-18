@@ -31,7 +31,7 @@ nonisolated struct ImageAuth: Sendable {
     static func snapshot(_ registry: ServerSessionRegistry) -> ImageAuth {
         ImageAuth(bases: registry.participants.compactMap { session in
             guard let base = session.client.baseURL,
-                  let token = session.client.accessToken, !token.isEmpty else { return nil }
+                  let token = session.client.verifiedAccessToken, !token.isEmpty else { return nil }
             return (base, token)
         })
     }

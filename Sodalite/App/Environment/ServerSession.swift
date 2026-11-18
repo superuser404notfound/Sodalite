@@ -43,9 +43,18 @@ final class ServerSession {
 
     /// A secondary session on its own client over the shared Jellyfin HTTPClient, so the request
     /// limit stays one ceiling for every server.
-    static func secondary(_ candidate: ParticipantCandidate, baseURL: URL, httpClient: HTTPClientProtocol) -> ServerSession {
+    /// `routeGate` holds its token back from a LAN address until the route resolve has heard that
+    /// address answer as this server (audit NET-201), so it starts unsettled.
+    static func secondary(
+        _ candidate: ParticipantCandidate,
+        baseURL: URL,
+        httpClient: HTTPClientProtocol,
+        routeGate: RouteGate? = nil
+    ) -> ServerSession {
         let client = JellyfinClient(httpClient: httpClient)
         client.onAccessTokenSet = { LogSecrets.register($0) }
+        routeGate?.reset()
+        client.routeGate = routeGate
         client.baseURL = baseURL
         client.accessToken = candidate.credential.token
         let libraryService = JellyfinLibraryService(client: client)

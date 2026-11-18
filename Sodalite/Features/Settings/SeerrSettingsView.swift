@@ -576,6 +576,7 @@ struct SeerrSettingsView: View {
         case .success(let url, let info):
             let server = SeerrServer(url: url)
             dependencies.seerrClient.baseURL = url
+            dependencies.seerrClient.serverID = server.id
             serverSettings = try? await dependencies.seerrAuthService.publicSettings()
             if serverSettings?.acceptsJellyfinLogin == false, usernameText == appState.activeUser?.name {
                 usernameText = ""

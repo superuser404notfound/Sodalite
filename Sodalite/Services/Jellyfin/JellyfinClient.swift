@@ -13,6 +13,24 @@ final class JellyfinClient {
     }
     /// Set by `DependencyContainer` on the live client only, so the token reaches the log redactors.
     var onAccessTokenSet: ((String) -> Void)?
+    /// Holds requests back from a LAN address that has not proved it is this session's server
+    /// (audit NET-201). nil on a sign-in client, whose route is resolved before it sends anything.
+    var routeGate: RouteGate?
+    /// A sign-in client's route probe while it runs, so the screens share one (audit review R-ROUTE-24).
+    var pendingRouteResolve: Task<URL, Never>?
+
+    /// `accessToken` for a URL built on the spot (image `api_key`, a download's header), or nil
+    /// while the address has not proved itself, so such a URL goes out without it.
+    var verifiedAccessToken: String? {
+        guard let baseURL, routeGate?.allows(baseURL) ?? true else { return nil }
+        return accessToken
+    }
+
+    /// `baseURL` once credentials may go there, nil before.
+    var verifiedBaseURL: URL? {
+        guard let baseURL, routeGate?.allows(baseURL) ?? true else { return nil }
+        return baseURL
+    }
 
     init(httpClient: HTTPClientProtocol = HTTPClient()) {
         self.httpClient = httpClient
@@ -24,7 +42,7 @@ final class JellyfinClient {
         endpoint: APIEndpoint,
         responseType: T.Type
     ) async throws -> T {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         return try await httpClient.request(
             baseURL: baseURL,
@@ -40,7 +58,7 @@ final class JellyfinClient {
         responseType: T.Type,
         decoder: JSONDecoder
     ) async throws -> T {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         let (data, _) = try await httpClient.requestData(
             baseURL: baseURL, endpoint: endpoint, headers: headers)
@@ -53,13 +71,23 @@ final class JellyfinClient {
     }
 
     func request(endpoint: APIEndpoint) async throws {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         try await httpClient.request(
             baseURL: baseURL,
             endpoint: endpoint,
             headers: headers
         )
+    }
+
+    /// Every request waits here, the unauthenticated ones included: the stored-password login is one
+    /// of them.
+    func admittedBaseURL() async throws -> URL {
+        guard let routeGate else {
+            guard let baseURL else { throw APIError.invalidURL }
+            return baseURL
+        }
+        return try await routeGate.admit { baseURL }
     }
 
     func buildAuthHeader() -> String {

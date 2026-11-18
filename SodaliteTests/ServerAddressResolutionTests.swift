@@ -81,4 +81,35 @@ struct ServerAddressResolutionTests {
         #expect(ServerAddressResolution.completeURL("http://") == nil)
         #expect(ServerAddressResolution.completeURL("jellyfin.example.com") == nil)
     }
+
+    // MARK: Audit 2026-11-17 ASD-204
+
+    private struct StubDiscovery: ServerDiscoveryServiceProtocol {
+        let serverID: String
+        func discoverServer(input: String) async -> ServerDiscoveryResult {
+            .success(
+                url: URL(string: "http://\(input):8096")!,
+                serverInfo: ServerDiscoveryInfo(id: serverID, serverName: "Jellyfin", version: "10.11")
+            )
+        }
+    }
+
+    @Test("an address that answers as another Jellyfin is not this server's")
+    func anotherServerIsRefused() async {
+        let discover = ServerAddressResolution.jellyfin(
+            StubDiscovery(serverID: "ffffffffffffffffffffffffffffffff"),
+            expectedServerID: "0f1e2d3c4b5a69788796a5b4c3d2e1f0")
+        let outcome = await ServerAddressResolution.resolve("192.168.1.20", discover: discover)
+        #expect(outcome == .otherServer(URL(string: "http://192.168.1.20:8096")!))
+    }
+
+    @Test("the same server is accepted however its id is written")
+    func sameServerIsAccepted() async {
+        let discover = ServerAddressResolution.jellyfin(
+            StubDiscovery(serverID: "0F1E2D3C-4B5A-6978-8796-A5B4C3D2E1F0"),
+            expectedServerID: "0f1e2d3c4b5a69788796a5b4c3d2e1f0")
+        let outcome = await ServerAddressResolution.resolve("192.168.1.20", discover: discover)
+        #expect(outcome == .resolved(URL(string: "http://192.168.1.20:8096")!))
+    }
 }
+

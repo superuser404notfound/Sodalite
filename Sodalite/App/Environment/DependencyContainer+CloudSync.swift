@@ -128,14 +128,20 @@ extension DependencyContainer {
         }
 
         // A synced URL edit to the active server must reach the live client without a relaunch
-        // (an Apple TV picks up edits made on the iPhone). scheduleRouteResolve only reads + probes,
-        // so it is safe inside the apply path and does not echo a cloud write back.
+        // (an Apple TV picks up edits made on the iPhone). The resolve only reads + probes, so it is
+        // safe inside the apply path and does not echo a cloud write back.
         if incoming.id == activeServer?.id {
             // The in-memory copy has to move with the keychain: a profile switch persists whatever
             // AppState holds through addServer, so leaving it on the pre-sync snapshot wrote the old
             // URL slots straight back out again (Sodalite#45). id-guarded inside AppState.
             appState?.updateActiveServer(incoming)
-            scheduleRouteResolve()
+            // Every republish lands here (a re-login, a pin, a version refresh); only new addresses
+            // take back what the old ones proved (audit review R-ROUTE-7).
+            if local?.internalURL != incoming.internalURL || local?.externalURL != incoming.externalURL {
+                liveRouteDidChange()
+            } else {
+                scheduleRouteResolve()
+            }
         }
 
         // Remembered profiles union across devices (Sodalite#45). A payload is a statement about the

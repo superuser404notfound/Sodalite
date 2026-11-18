@@ -21,7 +21,18 @@ nonisolated enum ServerAddressResolution {
         case unreachable(URL)
         /// Nothing answered and the text is missing what it would take to store it unverified.
         case unresolved
+        /// A Jellyfin answered, but not the server whose address is being edited (audit ASD-204).
+        case otherServer(URL)
     }
+
+    /// What discovery made of the text.
+    enum Answer: Sendable, Equatable {
+        case found(URL)
+        /// Answered as another server than the one being edited.
+        case otherServer(URL)
+    }
+
+    typealias Discover = @Sendable (String) async -> Answer?
 
     /// How long discovery gets before the editor stops waiting on it.
     ///
@@ -34,15 +45,28 @@ nonisolated enum ServerAddressResolution {
     static func resolve(
         _ text: String,
         budget: Duration = probeBudget,
-        discover: @escaping @Sendable (String) async -> URL?
+        discover: @escaping Discover
     ) async -> Outcome {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return .empty }
-        if let answered = await answer(within: budget, { await discover(trimmed) }) {
-            return .resolved(answered)
+        switch await answer(within: budget, { await discover(trimmed) }) {
+        case .found(let url)?: return .resolved(url)
+        case .otherServer(let url)?: return .otherServer(url)
+        case nil: break
         }
         if let complete = completeURL(trimmed) { return .unreachable(complete) }
         return .unresolved
+    }
+
+    /// For discovery that can only say where something answered.
+    static func resolve(
+        _ text: String,
+        budget: Duration = probeBudget,
+        discover: @escaping @Sendable (String) async -> URL?
+    ) async -> Outcome {
+        await resolve(text, budget: budget, discover: { (input: String) -> Answer? in
+            await discover(input).map(Answer.found)
+        })
     }
 
     /// A URL carrying everything needed to store it without asking a server: a scheme this app
@@ -56,11 +80,11 @@ nonisolated enum ServerAddressResolution {
         return url
     }
 
-    private static func answer(
+    private static func answer<T: Sendable>(
         within budget: Duration,
-        _ work: @escaping @Sendable () async -> URL?
-    ) async -> URL? {
-        await withTaskGroup(of: URL?.self) { group in
+        _ work: @escaping @Sendable () async -> T?
+    ) async -> T? {
+        await withTaskGroup(of: T?.self) { group in
             group.addTask { await work() }
             group.addTask {
                 try? await Task.sleep(for: budget)
@@ -75,17 +99,25 @@ nonisolated enum ServerAddressResolution {
 
 extension ServerAddressResolution {
     /// The discovery each backend already uses in setup, in the shape the editors ask for.
-    static func jellyfin(_ service: any ServerDiscoveryServiceProtocol) -> @Sendable (String) async -> URL? {
+    /// `expectedServerID` is the server whose slot is being filled. Discovery only asks whether a
+    /// Jellyfin answers, so without it the second slot of server A could be set to server B, and
+    /// the first frame of the next launch would send A's token there (audit ASD-204). An id missing
+    /// on either side has nothing to compare.
+    static func jellyfin(_ service: any ServerDiscoveryServiceProtocol, expectedServerID: String) -> Discover {
         { input in
-            guard case .success(let url, _) = await service.discoverServer(input: input) else { return nil }
-            return url
+            guard case .success(let url, let info) = await service.discoverServer(input: input) else { return nil }
+            if !expectedServerID.isEmpty, !info.id.isEmpty, !ServerProbe.isSameServer(info.id, expectedServerID) {
+                return .otherServer(url)
+            }
+            return .found(url)
         }
     }
 
-    static func seerr(_ service: any SeerrServerDiscoveryServiceProtocol) -> @Sendable (String) async -> URL? {
+    /// Seerr has no id to compare: anything that answers is taken.
+    static func seerr(_ service: any SeerrServerDiscoveryServiceProtocol) -> Discover {
         { input in
             guard case .success(let url, _) = await service.discoverServer(input: input) else { return nil }
-            return url
+            return .found(url)
         }
     }
 }

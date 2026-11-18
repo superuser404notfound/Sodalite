@@ -14,6 +14,8 @@ struct SignOutEverywhereTests {
 
     private func signedIn() throws -> DependencyContainer {
         let container = DependencyContainer(keychainService: InMemoryKeychain())
+        // The genuine server answers at its address; the stranger case stubs its own.
+        container.jellyfinProbe = { _, _ in true }
         let active = try JSONDecoder().decode(
             JellyfinUser.self,
             from: Data(#"{"Id":"user-a","Name":"Vincent","ServerId":"srv-soe"}"#.utf8)
@@ -74,6 +76,22 @@ struct SignOutEverywhereTests {
 
         #expect(outcome == .forgotten)
         #expect(ids(container) == ["user-a"])
+    }
+
+    /// Audit review R-ROUTE-4: a 401 from an address that does not answer as this server says
+    /// nothing about the token, so it must not be logged as revoked and the profile stays.
+    @Test func aRefusalFromAStrangerRevokesNothing() async throws {
+        let container = try signedIn()
+        container.jellyfinIdentity = { _, _ in .otherServer }
+
+        await #expect(throws: APIError.self) {
+            try await container.signOutEverywhere(other, server: server) { _ in
+                throw APIError.unauthorized(message: nil)
+            }
+        }
+
+        #expect(ids(container) == ["user-a", "user-b"])
+        #expect(container.listForgottenUsers(serverID: server.id).isEmpty)
     }
 
     @Test func aNetworkFailureChangesNothing() async throws {

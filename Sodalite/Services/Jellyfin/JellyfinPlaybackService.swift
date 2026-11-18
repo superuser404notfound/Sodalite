@@ -135,7 +135,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         body: [String: Any],
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
-        guard let baseURL = client.baseURL else { throw APIError.invalidURL }
+        let baseURL = try await client.admittedBaseURL()
 
         // Caller picks the profile (DirectPlayProfile.current() touches UIScreen, must run on the main actor); empty fallback shouldn't happen in practice.
         let deviceProfile = profile ?? [:]
@@ -281,7 +281,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     private func buildMediaStreamURL(pathPrefix: String, itemID: String, mediaSourceID: String, container: String?, defaultExt: String, isStatic: Bool) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let ext = container ?? defaultExt
         var components = URLComponents(url: baseURL.appendingPathComponent("/\(pathPrefix)/\(itemID)/stream.\(ext)"), resolvingAgainstBaseURL: true)
         var queryItems = [
@@ -304,7 +304,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let fmt = Self.subtitleRouteFormat(forCodec: format)
         let path = "/Videos/\(itemID)/\(mediaSourceID)/Subtitles/\(streamIndex)/0/Stream.\(fmt)"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
@@ -324,7 +324,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func buildChapterImageURL(itemID: String, chapterIndex: Int, imageTag: String, maxWidth: Int) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let path = "/Items/\(itemID)/Images/Chapter/\(chapterIndex)"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
         components?.queryItems = [
@@ -337,7 +337,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func buildTrickplayTileURL(itemID: String, width: Int, tileIndex: Int) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let path = "/Videos/\(itemID)/Trickplay/\(width)/\(tileIndex).jpg"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
         components?.queryItems = Self.tokenQueryItems(token)
@@ -378,7 +378,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// gaining an authorization policy later; the route ignores it today.
     func buildLiveStreamFileURL(sourcePath: String) -> URL? {
         guard var relative = Self.liveStreamFileRelativePath(fromSourcePath: sourcePath) else { return nil }
-        if let token = client.accessToken {
+        if let token = client.verifiedAccessToken {
             let query = Self.tokenQueryItems(token).map { "\($0.name)=\($0.value ?? "")" }.joined(separator: "&")
             relative += (relative.contains("?") ? "&" : "?") + query
         }

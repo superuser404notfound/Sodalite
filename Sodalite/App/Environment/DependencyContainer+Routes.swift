@@ -1,22 +1,154 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 /// Dual-URL route resolution. Synchronous session paths set an optimistic
 /// baseURL via preferredURL(lastKnown:) for first-frame correctness; this
-/// extension then probes and corrects asynchronously. A route change only
-/// affects new requests; active playback keeps its absolute stream URL.
+/// extension then probes and corrects asynchronously. A LAN address gets no
+/// credentials until its probe has named this server (`RouteGate`, audit
+/// NET-201). A route change only affects new requests; active playback keeps
+/// its absolute stream URL.
 extension DependencyContainer {
-    /// Debounce/cancel seam for the iOS path-change and foreground triggers.
-    func scheduleRouteResolve() {
+    /// The one owner of a route re-measure (audit SHELL-R202). Every trigger, a launch, a switch, a
+    /// path change, a failed request, the recheck watch and Try Again, lands here, and a newer pass
+    /// cancels the one still running, so two passes never race each other's address and verdict
+    /// writes. Returns the pass so a caller that needs the answer can await it.
+    @discardableResult
+    func scheduleRouteResolve() -> Task<Void, Never> {
         routeResolveTask?.cancel()
-        routeResolveTask = Task { [weak self] in
-            await self?.resolveActiveRoutes()
+        let pass = Task { [weak self] in
+            guard let self else { return }
+            self.routePassesRunning += 1
+            defer { self.routePassesRunning -= 1 }
+            await self.resolveActiveRoutes()
+        }
+        routeResolveTask = pass
+        return pass
+    }
+
+    /// The live client now belongs to another session (or to none), or its server's addresses were
+    /// edited. A pass that started before must not write its address, verdict or Top Shelf mirror
+    /// into what the client is now (audit SHELL-201), so the generation moves before the new pass.
+    func liveRouteDidChange() {
+        routeGeneration &+= 1
+        forgetVerifiedRoutes(includingSecondaries: false, movesSeerrOffLAN: true)
+        scheduleRouteResolve()
+    }
+
+    /// The device may be on another network now, where the home LAN addresses belong to somebody
+    /// else, so nothing proved before counts (audit NET-201).
+    func networkPathDidChange() {
+        forgetVerifiedRoutes(includingSecondaries: true, movesSeerrOffLAN: true)
+        scheduleRouteResolve()
+    }
+
+    /// Back from the background, where no path update could arrive. The proofs go, but a two-slot
+    /// Seerr stays where it is: its requests wait for the pass (`installSeerrRouteHold`), and moving
+    /// it sent every foreground's first Seerr request to a public address that may not answer from
+    /// inside the house (audit review R-ROUTE-23).
+    func appDidReturnFromBackground() {
+        forgetVerifiedRoutes(includingSecondaries: true, movesSeerrOffLAN: false)
+        scheduleRouteResolve()
+    }
+
+    /// The moments the network may have changed under the app, answered synchronously: the path
+    /// monitor's own update (its callback is debounced a second), and on iOS the return from the
+    /// background, which comes before the monitor has caught up. Without it the foreground work sent
+    /// the token, and the Seerr cookie, on the old network's proof (audit review R-ROUTE-3).
+    func observeRouteProofInvalidations() {
+        let center = NotificationCenter.default
+        // queue nil: delivered on the posting thread, before the next foreground step runs.
+        center.addObserver(forName: .networkPathWillChange, object: nil, queue: nil) { [weak self] _ in
+            MainActor.assumeIsolated { self?.networkPathDidChange() }
+        }
+        #if os(iOS)
+        center.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.appDidReturnFromBackground() }
+        }
+        #endif
+        #if os(macOS)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification, object: nil, queue: nil
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.networkPathDidChange() }
+        }
+        #endif
+    }
+
+    private func forgetVerifiedRoutes(includingSecondaries: Bool, movesSeerrOffLAN: Bool) {
+        jellyfinClient.routeGate?.reset()
+        if includingSecondaries {
+            for session in sessionRegistry.participants where !session.isActive {
+                session.client.routeGate?.reset()
+            }
+            // A login screen left open across the change must not keep the old network's proof
+            // (audit review R-ROUTE-24).
+            signInClients.removeAll { $0.client == nil }
+            for entry in signInClients {
+                guard let client = entry.client else { continue }
+                client.routeGate?.reset()
+                startSignInResolve(for: entry.server, client: client)
+            }
+        }
+        mirroredSessionURL = nil
+        isOnVerifiedHomeNetwork = false
+        // Seerr's LAN slot rides on that proof, so its cookie goes to the public slot until it is back.
+        if movesSeerrOffLAN, let seerr = appState?.activeSeerrServer, seerrClient.baseURL != nil {
+            seerrClient.baseURL = preferredSeerrURL(for: seerr)
+        }
+    }
+
+    /// Seerr cannot be asked who it is, so its LAN address gets a hold instead of a gate: a request
+    /// waits for the Jellyfin pass to say where the device is, then goes only where Seerr may be
+    /// trusted (audit review R-ROUTE-23).
+    func installSeerrRouteHold() {
+        seerrClient.routeHold = { [weak self] current in
+            if let self, self.verifiesServerIdentity {
+                await self.jellyfinClient.routeGate?.waitUntilSettled()
+                try Task.checkCancellation()
+                guard let url = current() else { throw APIError.invalidURL }
+                guard self.seerrMayTrust(url, seerrID: self.seerrClient.serverID) else {
+                    throw APIError.serverUnreachable
+                }
+                return url
+            }
+            guard let url = current() else { throw APIError.invalidURL }
+            return url
         }
     }
 
     func resolveActiveRoutes() async {
-        await resolveJellyfinRoute()
-        await resolveSeerrRoute()
-        await resolveSecondaryRoutes()
+        let generation = routeGeneration
+        // Secondaries have their own addresses and gates, so they need not queue behind the
+        // active server's slower slot.
+        async let secondaries: Void = resolveSecondaryRoutes(generation: generation)
+        await resolveJellyfinRoute(generation: generation)
+        await resolveSeerrRoute(generation: generation)
+        await secondaries
+    }
+
+    /// The identity probe, reporting each answer to `gate` as it lands, so a request held for one
+    /// address goes the moment that address proves itself rather than after the slower slot.
+    func verifyingProbe(
+        serverID: String, gate: RouteGate?, epoch: UInt64
+    ) -> @Sendable (URL) async -> Bool {
+        { [jellyfinAnswer, weak gate] url in
+            let answer = await jellyfinAnswer(url, serverID)
+            // Cancelled because the other slot won: that says nothing about this one.
+            if !Task.isCancelled { await gate?.record(url, identity: answer.identity, epoch: epoch) }
+            return answer.isReady
+        }
+    }
+
+    /// Still the pass the current session asked for: not replaced by a newer pass, and no session
+    /// change since it started.
+    func isCurrentRoutePass(_ generation: UInt64) -> Bool {
+        !Task.isCancelled && generation == routeGeneration
     }
 
     /// A client of its own for signing in to `server`: no token, and an address the live session
@@ -28,10 +160,28 @@ extension DependencyContainer {
     /// left the session talking to the wrong server, and a restore landing mid-login moved the
     /// client back so the password typed for one server was posted to the other (audit SESSION-1).
     /// Only `saveSession` / `switchToUser` write the live client.
+    ///
+    /// It carries a gate of its own that the route probe started here settles, so nothing it sends
+    /// (a typed password, a token to revoke, a PIN-recovery login) reaches a LAN address before
+    /// that address proved it is this server (audit review R-ROUTE-4).
     func makeSignInClient(for server: JellyfinServer) -> JellyfinClient {
         let client = JellyfinClient(httpClient: httpClient)
         client.baseURL = preferredURL(for: server)
+        let gate = RouteGate(isEnforced: verifiesServerIdentity)
+        gate.reset()
+        client.routeGate = gate
+        signInClients.removeAll { $0.client == nil }
+        signInClients.append(SignInClientEntry(client: client, server: server))
+        startSignInResolve(for: server, client: client)
         return client
+    }
+
+    /// One probe per sign-in client at a time; the screens await it instead of starting another.
+    private func startSignInResolve(for server: JellyfinServer, client: JellyfinClient) {
+        client.pendingRouteResolve = Task { [weak self, weak client] in
+            guard let self, let client else { return server.url }
+            return await self.probeSignInRoute(for: server, client: client)
+        }
     }
 
     /// Points a sign-in client at whichever of a server's addresses answers, for a server that is
@@ -48,35 +198,89 @@ extension DependencyContainer {
     /// at nothing, and an unreachable server still gets an address to fail against and report.
     @discardableResult
     func resolveSignInRoute(for server: JellyfinServer, client: JellyfinClient) async -> URL {
+        // A retry after the probe settled on an address that never proved itself asks again;
+        // otherwise every caller shares the probe already running (audit review R-ROUTE-24).
+        let settledUnproved = client.routeGate.map { gate in
+            gate.isSettled && !(client.baseURL.map(gate.allows) ?? false)
+        } ?? true
+        if settledUnproved || client.pendingRouteResolve == nil {
+            startSignInResolve(for: server, client: client)
+        }
+        guard let pending = client.pendingRouteResolve else { return preferredURL(for: server) }
+        return await pending.value
+    }
+
+    private func probeSignInRoute(for server: JellyfinServer, client: JellyfinClient) async -> URL {
+        let gate = client.routeGate
+        let epoch = gate?.epoch ?? 0
         let optimistic = preferredURL(for: server)
-        client.baseURL = optimistic
+        // Not once the gate settled: a late probe must not rewind a proved address.
+        if !(gate?.isSettled ?? false) { client.baseURL = optimistic }
         guard let resolved = await ServerRouteResolver.resolve(
             internalURL: server.internalURL,
             externalURL: server.externalURL,
             lastKnown: serverRouteStore.lastRoute(serverID: server.id),
-            probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
-        ) else { return optimistic }
+            probe: verifyingProbe(serverID: server.id, gate: gate, epoch: epoch)
+        ) else {
+            gate?.settle(epoch: epoch)
+            return optimistic
+        }
         serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
         client.baseURL = resolved.url
+        await proveIfStillUnproved(resolved.url, serverID: server.id, gate: gate, epoch: epoch)
+        gate?.settle(epoch: epoch)
         return resolved.url
     }
 
-    private func resolveJellyfinRoute() async {
+    /// The route probe's two second cap is for picking between slots. The address that won, if it
+    /// did not prove itself inside that cap, gets the patient identity check before the epoch
+    /// settles, so a slow LAN server is not shut out of its own session (audit review R-ROUTE-1).
+    ///
+    /// Also after the first settle, so a server that was down at that moment and now answers
+    /// slowly gets its LAN back (audit review R-ROUTE-22). Never where the device evidently is not
+    /// on the server's network: there the eight seconds only held every request before the same
+    /// refusal (audit review R-ROUTE-21).
+    func proveIfStillUnproved(_ url: URL, serverID: String, gate: RouteGate?, epoch: UInt64) async {
+        guard let gate, gate.isEnforced, gate.epoch == epoch,
+              RouteGate.needsProof(url), !gate.hasVerified(url),
+              mayBeOnNetwork(of: url, knownSubnets: ServerHomeNetworks.known(serverID: serverID))
+        else { return }
+        let identity = await jellyfinIdentity(url, serverID)
+        gate.record(url, identity: identity, epoch: epoch)
+    }
+
+    /// Whether the device may stand on the network a LAN `url` lives on: not on cellular or with no
+    /// network, and not on a Wi-Fi the server never answered from. No reading is not evidence.
+    func mayBeOnNetwork(of url: URL, knownSubnets: Set<String>) -> Bool {
+        guard let reading = currentPathReading() else { return true }
+        guard reading.isSatisfied, reading.isAttachedToALocalNetwork else { return false }
+        return !ServerHomeNetworks.isForeign(
+            current: reading.subnets, known: knownSubnets, serverHost: url.host() ?? "")
+    }
+
+    private func resolveJellyfinRoute(generation: UInt64) async {
+        let gate = jellyfinClient.routeGate
+        let epoch = gate?.epoch ?? 0
         guard let server = activeServer else {
             activeJellyfinRoute = nil
             isOnVerifiedHomeNetwork = false
             // Nothing to be reachable or not: a signed-out session must not keep the last server's
             // verdict standing behind the login screen.
             appState?.serverReachability = .unknown
+            gate?.settle(epoch: epoch)
             return
         }
+        let probe = verifyingProbe(serverID: server.id, gate: gate, epoch: epoch)
         guard let resolved = await ServerRouteResolver.resolve(
             internalURL: server.internalURL,
             externalURL: server.externalURL,
             lastKnown: serverRouteStore.lastRoute(serverID: server.id),
-            probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
-        ) else { return }
-        guard !Task.isCancelled else { return }
+            probe: probe
+        ) else {
+            gate?.settle(epoch: epoch)
+            return
+        }
+        guard isCurrentRoutePass(generation) else { return }
 
         // One failed probe is a suspicion; two are a verdict. The probe's two second cap is tight
         // on a slow cellular link, and being wrong is no longer free: a failure now paints a screen
@@ -84,22 +288,34 @@ extension DependencyContainer {
         // an error before its first row landed. Paid only on the failure path, and only once.
         var isReachable = resolved.isReachable
         if !isReachable {
-            isReachable = await jellyfinProbe(resolved.url, server.id)
-            guard !Task.isCancelled else { return }
+            isReachable = await probe(resolved.url)
+            guard isCurrentRoutePass(generation) else { return }
         }
         publishReachability(url: resolved.url, isReachable: isReachable, server: server)
         isOnVerifiedHomeNetwork = resolved.route == .internal && isReachable
 
         serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
         activeJellyfinRoute = resolved.route
-        guard jellyfinClient.baseURL != resolved.url else { return }
-
+        let moved = jellyfinClient.baseURL != resolved.url
         jellyfinClient.baseURL = resolved.url
-        rewriteSessionMirror(server: server, resolvedURL: resolved.url)
+        await proveIfStillUnproved(resolved.url, serverID: server.id, gate: gate, epoch: epoch)
+        guard isCurrentRoutePass(generation) else { return }
+        // After the move, so a held request reads the address it is released to.
+        gate?.settle(epoch: epoch)
+        // A queued download waits for this proof, and nothing else starts it again (R-ROUTE-6).
+        downloadManager?.serversChanged()
+
+        // The Top Shelf extension sends the token wherever the mirror says, so the mirror is
+        // written here, for an address credentials may go to, and not by the session writes.
+        if jellyfinClient.verifiedBaseURL == resolved.url, mirroredSessionURL != resolved.url {
+            rewriteSessionMirror(server: server, resolvedURL: resolved.url)
+            mirroredSessionURL = resolved.url
+        }
+        guard moved else { return }
         NotificationCenter.default.post(name: .serverRouteDidChange, object: nil)
     }
 
-    private func resolveSeerrRoute() async {
+    private func resolveSeerrRoute(generation: UInt64) async {
         guard let server = appState?.activeSeerrServer, seerrClient.sessionCookie != nil else {
             activeSeerrRoute = nil
             return
@@ -115,7 +331,7 @@ extension DependencyContainer {
             lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)),
             probe: { await ServerProbe.seerr($0) }
         ) else { return }
-        guard !Task.isCancelled else { return }
+        guard isCurrentRoutePass(generation), appState?.activeSeerrServer?.id == server.id else { return }
 
         serverRouteStore.setLastRoute(resolved.route, serverID: seerrRouteKey(server.id))
         activeSeerrRoute = resolved.route
@@ -182,7 +398,10 @@ extension DependencyContainer {
     /// verdict still says the server is fine, since past that the watch below owns the question;
     /// only one re-measure in flight; and not twice inside the cooldown, so a server that answers
     /// the probe while its API keeps failing cannot turn every request into another probe.
-    func noteServerDidNotServe() {
+    func noteServerDidNotServe(baseURL: URL) {
+        // Only the active server's address: a Combine secondary rides the same HTTP client, and
+        // its failures re-measured this route every cooldown (audit NET-208).
+        guard baseURL == jellyfinClient.baseURL else { return }
         guard let appState, activeServer != nil, !appState.serverReachability.isFailure else { return }
         guard transportRecheckTask == nil else { return }
         if let last = lastTransportRecheck, ContinuousClock.now - last < ReachabilityRecheck.cooldown {
@@ -190,8 +409,9 @@ extension DependencyContainer {
         }
         lastTransportRecheck = .now
         LogTap.shared.note("[network] a request went unserved, re-measuring")
+        let pass = scheduleRouteResolve()
         transportRecheckTask = Task { [weak self] in
-            await self?.resolveActiveRoutes()
+            await pass.value
             self?.transportRecheckTask = nil
         }
     }
@@ -211,7 +431,14 @@ extension DependencyContainer {
     /// the server is still down costs one failed refresh round and no state: an identity refresh
     /// that cannot reach the server now keeps what it had.
     func retryAfterFailure() async {
-        await resolveActiveRoutes()
+        var pass = scheduleRouteResolve()
+        // A launch, a Seerr connect or a path change may replace this pass; the reload has to wait
+        // for the one that actually decides, or it lands on the old verdict (audit review R-ROUTE-9).
+        while true {
+            await pass.value
+            guard let current = routeResolveTask, current != pass else { break }
+            pass = current
+        }
         appState?.requestContentReload += 1
     }
 
@@ -250,7 +477,13 @@ extension DependencyContainer {
                 } else if attempt == ReachabilityRecheck.attemptsBeforeCeiling {
                     LogTap.shared.note("[network] recheck settling to one attempt every \(delay), quietly")
                 }
-                await self.resolveActiveRoutes()
+                // A pass already running (a launch still in its identity check) is the answer this
+                // tick wants; replacing it restarted the whole wait (audit review R-ROUTE-21).
+                if self.routePassesRunning > 0, let running = self.routeResolveTask {
+                    await running.value
+                } else {
+                    await self.scheduleRouteResolve().value
+                }
             }
             LogTap.shared.note("[network] recheck watch stopped")
             self?.reachabilityWatchTask = nil
@@ -264,8 +497,74 @@ extension DependencyContainer {
         server.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: server.id))
     }
 
+    /// Never the LAN slot of a two-slot Seerr before Jellyfin's internal address has proved this is
+    /// the home network: Seerr cannot be asked who it is, and the session cookie goes with the first
+    /// request (audit NET-201).
     func preferredSeerrURL(for server: SeerrServer) -> URL {
-        server.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)))
+        let slots = ServerRouteResolver.seerrSlots(
+            internalURL: server.internalURL,
+            externalURL: server.externalURL,
+            onVerifiedHomeNetwork: isOnVerifiedHomeNetwork
+        )
+        let allowed = SeerrServer(id: server.id, internalURL: slots.internalURL, externalURL: slots.externalURL)
+        return allowed.preferredURL(lastKnown: serverRouteStore.lastRoute(serverID: seerrRouteKey(server.id)))
+    }
+
+    /// Whether a 401/403 from `url` speaks for the Seerr server (audit NET-202). A LAN address does
+    /// only on the proved home network; anywhere else it may be anybody's.
+    func seerrRefusalCounts(at url: URL?, seerrID: String?) -> Bool {
+        seerrMayTrust(url, seerrID: seerrID)
+    }
+
+    /// Whether Seerr at `url` may get the cookie and be believed. Seerr cannot be asked who it is,
+    /// so a LAN address is trusted on the proved home network, or where Jellyfin has no LAN slot to
+    /// prove it with: there is nothing to wait for, and a genuine 401 must still end a dead session
+    /// (audit review R-ROUTE-8).
+    func seerrMayTrust(_ url: URL?, seerrID: String?) -> Bool {
+        guard verifiesServerIdentity else { return true }
+        guard let url else { return false }
+        guard RouteGate.needsProof(url), !isOnVerifiedHomeNetwork else { return true }
+        // Jellyfin's LAN slot is how home is proved; while it has one and it did not, this is not home.
+        guard activeServer?.internalURL == nil else { return false }
+        // Nothing to prove home with: only a network this Seerr answered from before, or, with no
+        // history, one whose subnet holds its address (audit review R-ROUTE-25).
+        guard let reading = currentPathReading(), reading.isAttachedToALocalNetwork,
+              !reading.subnets.isEmpty
+        else { return false }
+        let known = seerrID.map { ServerHomeNetworks.known(serverID: seerrRouteKey($0)) } ?? []
+        return !ServerHomeNetworks.isForeign(current: reading.subnets, known: known, serverHost: url.host() ?? "")
+    }
+
+    /// Whether a 401 from `url` speaks for `server` (audit NET-202): the address still the one the
+    /// session uses, and it answers `System/Info/Public` with this server's id right now. Asked only
+    /// on a refusal, so it costs nothing on the normal path, and it also catches a proxy in front
+    /// that answers 401 for everything.
+    func jellyfinRefusalCounts(at url: URL?, server: JellyfinServer) async -> Bool {
+        guard verifiesServerIdentity else { return true }
+        guard let url, url == jellyfinClient.baseURL else { return false }
+        return await jellyfinIdentity(url, server.id) == .matches
+    }
+
+    /// Readiness and identity as one yes/no, the shape the route resolver and older tests use.
+    /// Setting it stubs both halves: a yes is this server and ready, a no is silence.
+    var jellyfinProbe: @Sendable (URL, String) async -> Bool {
+        get {
+            let answer = jellyfinAnswer
+            return { await answer($0, $1).isReady }
+        }
+        set {
+            jellyfinAnswer = { await newValue($0, $1) ? .ready : .silent }
+            jellyfinIdentity = { await newValue($0, $1) ? .matches : .noAnswer }
+        }
+    }
+
+    /// Off for a container over a test double (see `RouteGate.isEnforced`). Tests switch it on.
+    var verifiesServerIdentity: Bool {
+        get { jellyfinClient.routeGate?.isEnforced ?? false }
+        set {
+            jellyfinClient.routeGate?.isEnforced = newValue
+            sessionRegistry.verifiesServerIdentity = newValue
+        }
     }
 
     /// TopShelf reads absolute image URLs from the mirror; keep it on the live route.
@@ -279,5 +578,17 @@ extension DependencyContainer {
             userID: userID,
             accessToken: token
         )
+    }
+}
+
+/// A sign-in client the container may have to reset, held weakly: the screen owns it.
+@MainActor
+final class SignInClientEntry {
+    weak var client: JellyfinClient?
+    let server: JellyfinServer
+
+    init(client: JellyfinClient, server: JellyfinServer) {
+        self.client = client
+        self.server = server
     }
 }

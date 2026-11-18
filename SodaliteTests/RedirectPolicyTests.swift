@@ -61,4 +61,27 @@ struct RedirectPolicyTests {
             from: request("https://jf.example.com/web", credentials: true)))
         #expect(followed.value(forHTTPHeaderField: "Cookie") == "connect.sid=cookie")
     }
+
+    // MARK: Audit 2026-11-17 NET-209
+
+    @Test("a token in the URL does not follow a forward-auth hop to another host")
+    func tokenizedURLRefusedCrossHost() {
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/?rd=https%3A%2F%2Fjf.example.com%2FItems%2Fx%2FImages%2FPrimary%3Fapi_key%3Dtok", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?api_key=tok&ApiKey=tok", credentials: false)) == nil)
+        #expect(RedirectPolicy.redirect(
+            request("https://new.example.com/Videos/x/stream?ApiKey=tok", credentials: false),
+            from: request("https://jf.example.com/Videos/x/stream?ApiKey=tok", credentials: false)) == nil)
+    }
+
+    @Test("a tokenized URL still takes the same-host upgrade, and an untokenized one still crosses")
+    func tokenizedURLKeepsTheAllowedHops() {
+        #expect(RedirectPolicy.redirect(
+            request("https://jf.example.com/Items/x/Images/Primary?api_key=tok", credentials: false),
+            from: request("http://jf.example.com/Items/x/Images/Primary?api_key=tok", credentials: false)) != nil)
+        #expect(RedirectPolicy.redirect(
+            request("https://cdn.example.com/poster.jpg", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?tag=t", credentials: false)) != nil)
+    }
 }
+

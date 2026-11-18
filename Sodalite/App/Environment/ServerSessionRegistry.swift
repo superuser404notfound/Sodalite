@@ -22,6 +22,9 @@ final class ServerSessionRegistry {
     /// Fires when a session joins, leaves, rotates its token or moves address: the container
     /// mirrors the secondaries to the Top Shelf off it (Sodalite#218).
     @ObservationIgnored var onSessionsChanged: (() -> Void)?
+    /// Real transport: a secondary built from here on waits for its LAN address to prove itself
+    /// before it sends its token (audit NET-201).
+    @ObservationIgnored var verifiesServerIdentity = false
 
     init(
         activeClient: JellyfinClient,
@@ -64,7 +67,10 @@ final class ServerSessionRegistry {
                 next[candidate.server.id] = existing
             } else {
                 next[candidate.server.id] = (
-                    ServerSession.secondary(candidate, baseURL: baseURL(candidate.server), httpClient: httpClient),
+                    ServerSession.secondary(
+                        candidate, baseURL: baseURL(candidate.server), httpClient: httpClient,
+                        routeGate: verifiesServerIdentity ? RouteGate(isEnforced: true) : nil
+                    ),
                     candidate.credential
                 )
             }
@@ -99,7 +105,7 @@ final class ServerSessionRegistry {
     func endpoint(forServerID serverID: String?) -> (baseURL: URL, token: String?)? {
         let client = session(forServerID: serverID).client
         guard let base = client.baseURL else { return nil }
-        return (base, client.accessToken)
+        return (base, client.verifiedAccessToken)
     }
 
     func updateRoute(_ url: URL, for session: ServerSession) {
@@ -114,7 +120,7 @@ final class ServerSessionRegistry {
         guard !active.userID.isEmpty else { return nil }
         let members = participants.filter { !$0.isActive }.compactMap { session -> ShelfParticipants.Member? in
             guard let serverID = session.server?.id,
-                  let url = session.client.baseURL,
+                  let url = session.client.verifiedBaseURL,
                   let token = session.client.accessToken
             else { return nil }
             return ShelfParticipants.Member(serverID: serverID, serverURL: url.absoluteString,

@@ -3,6 +3,10 @@ import Foundation
 /// App-wide notification names, centralised because posters/observers span features (player, detail, auth, catalog).
 extension Notification.Name {
     static let homeConfigDidChange = Notification.Name("homeConfigDidChange")
+    /// Posted by `NetworkPathObserver` the moment the path changes, ahead of its debounced
+    /// callback, so the route proofs of the old network are gone before anything sends again
+    /// (audit review R-ROUTE-3).
+    static let networkPathWillChange = Notification.Name("networkPathWillChange")
     /// Posted by a library grid after the user picked a sort (Sodalite#78) so CloudSyncService mirrors
     /// the choice. Separate from `.homeConfigDidChange`, which HomeView answers with a full row reload
     /// the grid does not need.

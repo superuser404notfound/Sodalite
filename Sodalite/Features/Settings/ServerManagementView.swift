@@ -76,7 +76,8 @@ struct ServerManagementView: View {
                 externalPlaceholder: "multiServer.urls.external.placeholder",
                 initialInternalURL: server.internalURL,
                 initialExternalURL: server.externalURL,
-                resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                resolve: ServerAddressResolution.jellyfin(
+                    dependencies.serverDiscoveryService, expectedServerID: server.id),
                 onSave: { internalURL, externalURL in
                     try? dependencies.updateServerURLs(
                         serverID: server.id,

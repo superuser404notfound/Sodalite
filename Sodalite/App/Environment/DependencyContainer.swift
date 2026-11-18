@@ -141,17 +141,34 @@ final class DependencyContainer {
     /// When each server was last made active here, which orders a combined Home's secondaries.
     let serverActivation: ServerActivationStore
     let combinedServers: CombinedServersPreferences
-    /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
-    /// closure so the sign-in route can be tested without a network; the app never replaces it.
-    var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
-        await ServerProbe.jellyfin($0, expectedServerID: $1)
+    /// How a Jellyfin address is asked whether it answers AS the server with this id, and whether
+    /// it is ready. Stored closures so routes can be tested without a network; the app never
+    /// replaces them. `jellyfinIdentity` is the patient identity half alone (audit review R-ROUTE-1).
+    var jellyfinAnswer: @Sendable (URL, String) async -> ServerProbe.Answer = {
+        await ServerProbe.jellyfinAnswer($0, expectedServerID: $1)
     }
+    var jellyfinIdentity: @Sendable (URL, String) async -> ServerProbe.Identity = {
+        await ServerProbe.identity($0, expectedServerID: $1)
+    }
+    /// Where the device stands, a seam so the "is this the server's network" questions are testable.
+    var currentPathReading: @Sendable () -> NetworkPathSnapshot.Reading? = { NetworkPathSnapshot.shared.current }
+    /// The sign-in clients alive right now, so a network change takes back their proofs too.
+    var signInClients: [SignInClientEntry] = []
+    /// Passes started and not yet returned, so the recheck watch can wait for one instead of
+    /// cancelling it (audit review R-ROUTE-21).
+    var routePassesRunning = 0
     var activeJellyfinRoute: ServerRoute?
     /// Jellyfin's internal address answered its identity probe in the last resolve, which is what
     /// lets Seerr use its own internal address (`ServerRouteResolver.seerrSlots`).
     var isOnVerifiedHomeNetwork = false
     var activeSeerrRoute: ServerRoute?
     var routeResolveTask: Task<Void, Never>?
+    /// Moves whenever the live client changes session, so a route pass that started for the
+    /// previous one writes nothing (audit SHELL-201).
+    var routeGeneration: UInt64 = 0
+    /// The address the Top Shelf mirror was last written with for this session, so a pass that
+    /// changes nothing does not rewrite the shared keychain item.
+    var mirroredSessionURL: URL?
     /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
     var transportRecheckTask: Task<Void, Never>?
     var lastTransportRecheck: ContinuousClock.Instant?
@@ -188,7 +205,11 @@ final class DependencyContainer {
         self.combinedServers = CombinedServersPreferences(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
-        self.jellyfinClient = JellyfinClient(httpClient: httpClient)
+        // A test double reaches no network, so it has no address to prove (audit NET-201).
+        let verifiesServerIdentity = httpClient is HTTPClient
+        let liveClient = JellyfinClient(httpClient: httpClient)
+        liveClient.routeGate = RouteGate(isEnforced: verifiesServerIdentity)
+        self.jellyfinClient = liveClient
         // Both discovery services share ONE client of their own: a probe the user is watching a
         // spinner for must not queue behind Home's fan-out or Catalog's rows, and the transport
         // timing that says which phase ate a capped probe belongs on discovery only (Sodalite#82).
@@ -213,6 +234,7 @@ final class DependencyContainer {
             liveTvService: jellyfinLiveTvService,
             musicService: jellyfinMusicService
         )
+        sessionRegistry.verifiesServerIdentity = verifiesServerIdentity
         self.sessionRegistry = sessionRegistry
         self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
             sessionRegistry?.endpoint(forServerID: serverID)
@@ -327,8 +349,8 @@ final class DependencyContainer {
         // Sodalite#126, and last because it captures self. The Jellyfin client alone: a Seerr
         // timeout says nothing about which Jellyfin address answers. Concrete client only, since
         // the hook is a real-transport concern and a mock has no verdict to keep honest.
-        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] in
-            Task { @MainActor in self?.noteServerDidNotServe() }
+        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] baseURL in
+            Task { @MainActor in self?.noteServerDidNotServe(baseURL: baseURL) }
         }
 
         // Every credential the session holds is named to both log redactors as it arrives, so a line
@@ -339,6 +361,9 @@ final class DependencyContainer {
         sessionRegistry.onSessionsChanged = { [weak sessionRegistry] in
             SharedSessionMirror.writeParticipants(sessionRegistry?.shelfParticipants)
         }
+
+        observeRouteProofInvalidations()
+        installSeerrRouteHold()
 
         // Last, because the closures capture self and the migration reads the keychain through it.
         profileSettings.activeKey = { [weak self] in self?.appState?.profileKey }
@@ -489,21 +514,14 @@ final class DependencyContainer {
             return false
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
 
-        // Re-project SharedSessionMirror every cold launch so TopShelf stays in lockstep even if a prior version never wrote it or the shelf's bucket was wiped.
-        if let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        }
+        // The route pass re-projects SharedSessionMirror once the address has proved itself, which
+        // keeps TopShelf in lockstep even if a prior version never wrote it.
         serverActivation.stamp(serverID: server.id)
         refreshSessionRegistry()
-        scheduleRouteResolve()
+        liveRouteDidChange()
         return true
     }
 
@@ -533,15 +551,11 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: user.id,
-            accessToken: token
-        )
+        // The route pass writes the new session once its address has proved itself; until then the
+        // shelf must not keep showing the previous one.
+        SharedSessionMirror.clear()
 
         // Upsert into remembered-profiles so the user can later switch profiles without re-auth.
         try rememberUser(
@@ -557,7 +571,7 @@ final class DependencyContainer {
         serverActivation.stamp(serverID: server.id)
         refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     // MARK: - Known Servers
@@ -635,7 +649,7 @@ final class DependencyContainer {
         appState?.updateActiveServer(updated)
         if activeServer?.id == serverID {
             jellyfinClient.baseURL = preferredURL(for: updated)
-            scheduleRouteResolve()
+            liveRouteDidChange()
         }
     }
 
@@ -810,8 +824,6 @@ final class DependencyContainer {
         sessionNote("switch \(previousServerID.map { String($0.prefix(8)) } ?? "none") -> \(label(for: server)) on this device's own token.")
         try keychainService.save(serverID, for: KeychainKeys.activeServerID)
 
-        let sessionURL = preferredURL(for: server)
-
         let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID))
 
         // No wipe here any more: FilterCache entries carry their own identity, so the target reads
@@ -839,22 +851,14 @@ final class DependencyContainer {
             try? keychainService.delete(for: KeychainKeys.activeUserImageTag)
         }
 
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
-
-        if let userID {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        } else {
-            SharedSessionMirror.clear()
-        }
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
         serverActivation.stamp(serverID: serverID)
         refreshSessionRegistry()
-        scheduleRouteResolve()
+        liveRouteDidChange()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
         Task { @MainActor in
@@ -916,6 +920,7 @@ final class DependencyContainer {
                     jellyfinClient.baseURL = preferredURL(for: successor)
                     jellyfinClient.accessToken = nil
                     SharedSessionMirror.clear()
+                    liveRouteDidChange()
                 }
             } else {
                 sessionNote("removed the last server; no session left on this device.")
@@ -923,6 +928,7 @@ final class DependencyContainer {
                 jellyfinClient.baseURL = nil
                 jellyfinClient.accessToken = nil
                 SharedSessionMirror.clear()
+                liveRouteDidChange()
             }
         }
 
@@ -1094,22 +1100,17 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
         serverActivation.stamp(serverID: server.id)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = remembered.token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: remembered.id,
-            accessToken: remembered.token
-        )
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
         // Seerr left to the caller's restoreSeerrSession(forJellyfinUserID:jellyfinServerID:) so each profile picks up its own session, or lands on the empty state.
 
         refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     /// Re-stamps the server's own name for a (server, user) onto both stores that cache it: the global activeUserName entry and the server's remembered profile. Called once /Users/Me has spoken, so a rename (or a name inherited from another server by an install predating the per-server name resolution) heals instead of surviving every launch.
@@ -1328,6 +1329,7 @@ final class DependencyContainer {
 
         jellyfinClient.baseURL = nil
         jellyfinClient.accessToken = nil
+        liveRouteDidChange()
 
         SharedSessionMirror.clearAll()
 
@@ -1668,6 +1670,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
         seerrClient.sessionCookie = cookie
         return server
     }
@@ -1702,6 +1705,7 @@ final class DependencyContainer {
             jellyfinServerID: jellyfinServerID
         ).map { rediscovered.fillingEmptyURLSlots(fromKnown: $0) } ?? rediscovered
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
 
         if let jellyfinUserID, let jellyfinServerID, let cookie = seerrClient.sessionCookie {
             // Profile-scoped persistence. The global (pre-0.3.0) entry is NOT refreshed here: rewriting it kept the legacy fallback live and let a scopeless profile inherit whoever last logged in. Global keys are read-only legacy now (see syncSeerrSession).
@@ -1763,6 +1767,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: updated)
+        seerrClient.serverID = updated.id
         appState?.updateActiveSeerrServer(updated)
         scheduleRouteResolve()
     }
@@ -1782,6 +1787,7 @@ final class DependencyContainer {
             return nil
         }
         seerrClient.baseURL = preferredSeerrURL(for: remembered.seerrServer)
+        seerrClient.serverID = remembered.seerrServer.id
         seerrClient.sessionCookie = remembered.cookie
         return remembered.seerrServer
     }
@@ -1802,6 +1808,7 @@ final class DependencyContainer {
     /// Drops the in-memory Seerr identity without touching keychain. Used on tvOS-user change: the previous user's persisted session must survive, but the live client must stop acting as them immediately.
     func detachSeerrClient() {
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1813,6 +1820,7 @@ final class DependencyContainer {
         try keychainService.delete(for: KeychainKeys.seerrServer)
 
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1841,8 +1849,26 @@ final class DependencyContainer {
             return .notConfigured
         }
 
+        // Which Seerr slot the cookie may go to depends on whether Jellyfin's LAN address proved
+        // this is the home network, and the launch pass is still finding out (audit NET-201). At
+        // home that takes tens of milliseconds.
+        if verifiesServerIdentity {
+            await jellyfinClient.routeGate?.waitUntilSettled()
+            guard generation == seerrSyncGeneration, !Task.isCancelled else { return .transientFailure }
+            seerrClient.baseURL = preferredSeerrURL(for: server)
+            // A LAN-only Seerr off the proved home network may be anybody's: the cookie stays here
+            // and the session is kept for a later try (audit review R-ROUTE-8).
+            guard seerrMayTrust(seerrClient.baseURL, seerrID: server.id) else { return .transientFailure }
+        }
+        let askedURL = seerrClient.baseURL
+
         do {
             let user = try await seerrAuthService.currentUser()
+            // Where a LAN Seerr answered is what lets it be trusted there later without a Jellyfin
+            // LAN slot to prove home with (audit review R-ROUTE-25).
+            if let askedURL, RouteGate.needsProof(askedURL), let subnets = currentPathReading()?.subnets {
+                ServerHomeNetworks.record(subnets, serverID: seerrRouteKey(server.id))
+            }
 
             // Legacy bridge: persist a globally-restored session as a scoped copy, then retire the global entry (else a DIFFERENT scopeless profile inherits this cookie at a later cold launch).
             if scopedServer == nil, let jellyfinUserID, let jellyfinServerID {
@@ -1859,6 +1885,12 @@ final class DependencyContainer {
             }
             return .connected(server: server, user: user)
         } catch let error as APIError where error.isUnauthorized {
+            // Whatever sits at a LAN address on somebody else's network is not this Seerr refusing
+            // the cookie (audit NET-202).
+            guard seerrRefusalCounts(at: askedURL, seerrID: server.id) else {
+                sessionNote("Seerr refused the session at \(askedURL?.host() ?? "?"), an address not proved to be this Seerr here; keeping it.")
+                return .transientFailure
+            }
             // Cookie rejected: drop the entry (scoped copy only when that was probed, leaving other profiles untouched).
             if scopedServer != nil, let jellyfinUserID, let jellyfinServerID {
                 forgetRememberedSeerr(

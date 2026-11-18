@@ -123,6 +123,31 @@ enum ServerProbe {
         await responds(at: base.appending(path: jellyfinReadinessPath))
     }
 
+    /// What one address said about itself, in two halves that answer different questions.
+    struct Answer: Sendable, Equatable {
+        /// Is this the server the session belongs to? The only half that decides whether
+        /// credentials may go there (`RouteGate`, audit review R-ROUTE-1).
+        let identity: Identity
+        /// Readiness as well: the half that picks a route and feeds the verdict.
+        let isReady: Bool
+
+        static let ready = Answer(identity: .matches, isReady: true)
+        static let silent = Answer(identity: .noAnswer, isReady: false)
+    }
+
+    enum Identity: Sendable, Equatable {
+        case matches
+        /// Answered `System/Info/Public` as some other server: whoever is there now is not ours.
+        case otherServer
+        /// No usable answer in time. Says nothing about who is there, so it takes no proof back.
+        case noAnswer
+    }
+
+    /// The identity half has more patience than the route half: a LAN server that is slow to
+    /// answer (busy with a scan, Wi-Fi still associating) must not lose its requests to the cap
+    /// that is there to pick between two slots quickly.
+    static let identityPatience: TimeInterval = 8
+
     /// Readiness plus identity, for a probe whose winner becomes the session's address.
     ///
     /// Readiness alone crowned any host that answered, 401 and 404 included, so on another network
@@ -131,26 +156,53 @@ enum ServerProbe {
     /// slot now only counts when `System/Info/Public` names the server this session belongs to.
     /// A server stored without an id (discovery tolerates one) has nothing to compare against.
     static func jellyfin(_ base: URL, expectedServerID: String) async -> Bool {
-        guard !expectedServerID.isEmpty else { return await jellyfin(base) }
+        await jellyfinAnswer(base, expectedServerID: expectedServerID).isReady
+    }
+
+    static func jellyfinAnswer(_ base: URL, expectedServerID: String) async -> Answer {
         async let ready = outcome(at: base.appending(path: jellyfinReadinessPath))
-        let failure: String?
-        switch await outcome(at: base.appending(path: "System/Info/Public")) {
-        case .failed(let reason):
-            failure = "System/Info/Public \(reason)"
-        case .answered(_, let response) where !(200...299).contains(response.statusCode):
-            failure = "System/Info/Public HTTP \(response.statusCode)"
-        case .answered(let data, _) where !identifies(data, as: expectedServerID):
-            failure = "answers as server \(answeredID(data)), session expects \(expectedServerID.prefix(8))"
-        case .answered:
+        var identity = Identity.matches
+        var failure: String?
+        if !expectedServerID.isEmpty {
+            let judged = judge(await outcome(at: base.appending(path: "System/Info/Public")),
+                               expectedServerID: expectedServerID)
+            identity = judged.0
+            failure = judged.1
+        }
+        if failure == nil, identity == .matches {
             switch await ready {
             case .failed(let reason): failure = "\(jellyfinReadinessPath) \(reason)"
             case .answered(_, let response) where !answers(statusCode: response.statusCode):
                 failure = "\(jellyfinReadinessPath) HTTP \(response.statusCode)"
-            case .answered: failure = nil
+            case .answered: break
             }
         }
         noteProbeFailure(failure, host: base.host() ?? "?")
-        return failure == nil
+        return Answer(identity: identity, isReady: identity == .matches && failure == nil)
+    }
+
+    /// The identity half alone, with `timeout` instead of the route probe's two second cap.
+    static func identity(_ base: URL, expectedServerID: String, timeout: TimeInterval = identityPatience) async -> Identity {
+        guard !expectedServerID.isEmpty else { return .matches }
+        let judged = judge(
+            await outcome(at: base.appending(path: "System/Info/Public"), timeout: timeout),
+            expectedServerID: expectedServerID)
+        let identity = judged.0
+        if let failure = judged.1 { LogTap.shared.note("[network] identity check of \(base.host() ?? "?") failed: \(failure)") }
+        return identity
+    }
+
+    private static func judge(_ outcome: ProbeOutcome, expectedServerID: String) -> (Identity, String?) {
+        switch outcome {
+        case .failed(let reason):
+            return (.noAnswer, "System/Info/Public \(reason)")
+        case .answered(_, let response) where !(200...299).contains(response.statusCode):
+            return (.noAnswer, "System/Info/Public HTTP \(response.statusCode)")
+        case .answered(let data, _) where !identifies(data, as: expectedServerID):
+            return (.otherServer, "answers as server \(answeredID(data)), session expects \(expectedServerID.prefix(8))")
+        case .answered:
+            return (.matches, nil)
+        }
     }
 
     /// Why the last identity probe of each host failed, so a failure that keeps repeating is logged
@@ -183,7 +235,11 @@ enum ServerProbe {
         return normalizedServerID(id) == normalizedServerID(expectedServerID)
     }
 
-    private static func normalizedServerID(_ id: String) -> String {
+    nonisolated static func isSameServer(_ id: String, _ other: String) -> Bool {
+        normalizedServerID(id) == normalizedServerID(other)
+    }
+
+    nonisolated private static func normalizedServerID(_ id: String) -> String {
         id.replacingOccurrences(of: "-", with: "").lowercased()
     }
 
@@ -207,7 +263,7 @@ enum ServerProbe {
         case failed(String)
     }
 
-    private static func outcome(at url: URL) async -> ProbeOutcome {
+    private static func outcome(at url: URL, timeout: TimeInterval = timeout) async -> ProbeOutcome {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
         config.timeoutIntervalForResource = timeout

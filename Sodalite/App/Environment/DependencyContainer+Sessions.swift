@@ -20,6 +20,10 @@ extension DependencyContainer {
             secondaries: candidates,
             baseURL: { preferredURL(for: $0) }
         )
+        // A secondary built just now holds its token until a pass has probed it (audit NET-201).
+        if sessionRegistry.participants.contains(where: { !$0.isActive && $0.client.routeGate?.isSettled == false }) {
+            scheduleRouteResolve()
+        }
         // Also when nothing changed: a logout cleared the slot, and the registry only reports change.
         SharedSessionMirror.writeParticipants(sessionRegistry.shelfParticipants)
         downloadManager?.serversChanged()
@@ -29,21 +33,40 @@ extension DependencyContainer {
     }
 
     /// Points each secondary at whichever of its addresses answers, as `resolveJellyfinRoute` does
-    /// for the active one.
-    func resolveSecondaryRoutes() async {
-        for session in sessionRegistry.participants where !session.isActive {
-            guard let server = session.server else { continue }
-            guard let resolved = await ServerRouteResolver.resolve(
-                internalURL: server.internalURL,
-                externalURL: server.externalURL,
-                lastKnown: serverRouteStore.lastRoute(serverID: server.id),
-                probe: { [jellyfinProbe, id = server.id] in await jellyfinProbe($0, id) }
-            ) else { continue }
-            serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
-            sessionRegistry.updateRoute(resolved.url, for: session)
-            await session.loadUserIfNeeded()
+    /// for the active one, all at once: each one waits on its own slowest slot only.
+    func resolveSecondaryRoutes(generation: UInt64) async {
+        let secondaries = sessionRegistry.participants.filter { !$0.isActive && $0.server != nil }
+        await withTaskGroup(of: Void.self) { group in
+            for session in secondaries {
+                group.addTask { await self.resolveSecondaryRoute(session, generation: generation) }
+            }
         }
+        guard isCurrentRoutePass(generation) else { return }
+        // A secondary whose address just proved itself can join the Top Shelf (Sodalite#218).
+        SharedSessionMirror.writeParticipants(sessionRegistry.shelfParticipants)
         downloadManager?.serversChanged()
+    }
+
+    private func resolveSecondaryRoute(_ session: ServerSession, generation: UInt64) async {
+        guard let server = session.server else { return }
+        let gate = session.client.routeGate
+        let epoch = gate?.epoch ?? 0
+        guard let resolved = await ServerRouteResolver.resolve(
+            internalURL: server.internalURL,
+            externalURL: server.externalURL,
+            lastKnown: serverRouteStore.lastRoute(serverID: server.id),
+            probe: verifyingProbe(serverID: server.id, gate: gate, epoch: epoch)
+        ) else {
+            gate?.settle(epoch: epoch)
+            return
+        }
+        guard isCurrentRoutePass(generation) else { return }
+        serverRouteStore.setLastRoute(resolved.route, serverID: server.id)
+        sessionRegistry.updateRoute(resolved.url, for: session)
+        await proveIfStillUnproved(resolved.url, serverID: server.id, gate: gate, epoch: epoch)
+        guard isCurrentRoutePass(generation) else { return }
+        gate?.settle(epoch: epoch)
+        await session.loadUserIfNeeded()
     }
 }
 

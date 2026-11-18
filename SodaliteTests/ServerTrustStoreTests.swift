@@ -53,6 +53,20 @@ struct ServerTrustStoreTests {
         #expect(reopened.pinnedFingerprint(forHost: "media.lan:8920") == "a419")
     }
 
+    /// Audit 2026-11-17 NET-205: the reset wiped the keychain item, but the pins in memory kept
+    /// the old certificates accepted, and the next accepted one wrote them all back.
+    @Test("A factory reset takes the pins out of memory too")
+    func resetForgetsEveryPin() {
+        let storage = FakePinStorage(["old.lan:8920": "dead"])
+        let store = ServerTrustStore(storage: storage)
+
+        store.removeAll()
+        store.pin("beef", forHost: "new.lan:8920")
+
+        #expect(store.pinnedFingerprint(forHost: "old.lan:8920") == nil)
+        #expect(storage.loadPins() == ["new.lan:8920": "beef"])
+    }
+
     @Test("One address is one host however it was typed")
     func hostKeyNormalises() {
         // The port is part of the key, because a second Jellyfin on the same box behind a different

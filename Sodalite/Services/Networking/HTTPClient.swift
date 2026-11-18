@@ -65,7 +65,10 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
     ///
     /// A cancelled request never reaches it: cancellation is answered above, and a request the app
     /// itself called off is not news about a server.
-    nonisolated(unsafe) var onServerDidNotServe: (@Sendable () -> Void)?
+    ///
+    /// Carries the base URL the request went to: Combine secondaries share this client, and a
+    /// friend's dead server says nothing about the active one (audit NET-208).
+    nonisolated(unsafe) var onServerDidNotServe: (@Sendable (URL) -> Void)?
 
     nonisolated init(
         session: URLSession? = nil,
@@ -176,7 +179,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
                     HTTPDiagnostics.transport(method: endpoint.method.rawValue, url: url, error: error)
                 )
             }
-            onServerDidNotServe?()
+            onServerDidNotServe?(baseURL)
             throw await Self.transportFailure(error, url: urlRequest.url)
         }
 
@@ -193,7 +196,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
             #endif
             return (data, httpResponse)
         default:
-            if (500...599).contains(httpResponse.statusCode) { onServerDidNotServe?() }
+            if (500...599).contains(httpResponse.statusCode) { onServerDidNotServe?(baseURL) }
             if let url = httpResponse.url {
                 LogTap.shared.note(
                     HTTPDiagnostics.status(
