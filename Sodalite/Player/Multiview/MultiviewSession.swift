@@ -36,8 +36,16 @@ final class MultiviewSession {
     @ObservationIgnored private let audioFollowDelay: Duration
     @ObservationIgnored private let retune: (PlayerViewModel) async -> Void
     @ObservationIgnored private let suspend: @MainActor @Sendable (PlayerViewModel) async -> Void
-    @ObservationIgnored private let park: @MainActor @Sendable (PlayerViewModel) async -> Void
+    /// Answers whether the tile's tuner really went back.
+    @ObservationIgnored private let park: @MainActor @Sendable (PlayerViewModel) async -> Bool
     @ObservationIgnored private var pendingAudio: Task<Void, Never>?
+    /// The channel lineup every tile zaps through. Tiles are seeded with it instead of each paging
+    /// the whole list again (audit PHOST-207).
+    @ObservationIgnored var sharedLineup: LiveChannelLineup? {
+        didSet { for tile in tiles where tile.viewModel.zapLineup == nil { tile.viewModel.zapLineup = sharedLineup } }
+    }
+    /// The survivor of `end()`, kept so a park that finishes after the grid is gone can still bring it back.
+    @ObservationIgnored private weak var endedSurvivor: PlayerViewModel?
 
     init(
         first: PlayerViewModel,
@@ -49,7 +57,7 @@ final class MultiviewSession {
         suspend: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = {
             await $0.releaseLiveSessionForSuspension(waitingForTeardownUpTo: 18)
         },
-        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Void = { await $0.parkHiddenLiveTile() }
+        park: @escaping @MainActor @Sendable (PlayerViewModel) async -> Bool = { await $0.parkHiddenLiveTile() }
     ) {
         // The first tile is the channel already on screen: it keeps playing on whatever engine it has, and
         // a survivor of an earlier grid keeps that engine's slot so no later tile is handed it again.
@@ -63,6 +71,7 @@ final class MultiviewSession {
         self.retune = retune
         self.suspend = suspend
         self.park = park
+        sharedLineup = first.zapLineup
         applyVolumes()
     }
 
@@ -82,6 +91,7 @@ final class MultiviewSession {
         let vm = makeTileVM(channel, engine)
         vm.isMultiviewTile = true
         vm.sharedOutputRole = .secondary
+        vm.zapLineup = sharedLineup
         tiles.append(MultiviewTile(id: UUID(), channel: channel, viewModel: vm, slot: slot))
         applyVolumes()
         vm.beginPlayback()
@@ -94,6 +104,7 @@ final class MultiviewSession {
         let vm = makeTileVM(channel, old.player)
         vm.isMultiviewTile = true
         vm.sharedOutputRole = old.sharedOutputRole
+        vm.zapLineup = sharedLineup
         tiles[index].channel = channel
         tiles[index].viewModel = vm
         parkedTileIDs.remove(id)
@@ -135,6 +146,7 @@ final class MultiviewSession {
         guard !tiles.isEmpty else { return nil }
         let survivorIndex = tiles.firstIndex(where: { $0.id == audibleTileID }) ?? 0
         let survivor = tiles[survivorIndex].viewModel
+        let survivorWasParked = parkedTileIDs.contains(tiles[survivorIndex].id)
         for (index, tile) in tiles.enumerated() where index != survivorIndex {
             release(tile.viewModel)
         }
@@ -142,6 +154,11 @@ final class MultiviewSession {
         survivor.sharedOutputRole = .primary
         survivor.isMultiviewTile = false
         tiles = []
+        parkedTileIDs = []
+        endedSurvivor = survivor
+        // Focus can have moved sound onto a tile that was parked, and the continuing player would show
+        // a stopped engine (audit PHOST-203).
+        if survivorWasParked { bringBack(survivor) }
         return survivor
     }
 
@@ -171,10 +188,20 @@ final class MultiviewSession {
     /// Every tile but `visible` gives its tuner back, for other clients while nobody sees those tiles.
     func parkHidden(except visible: UUID) async {
         let hidden = tiles.filter { $0.id != visible && !parkedTileIDs.contains($0.id) }
-        parkedTileIDs.formUnion(hidden.map(\.id))
         for tile in hidden {
-            await park(tile.viewModel)
+            // Only a tile whose tuner went back is parked; the others kept streaming and need no retune.
+            guard await park(tile.viewModel) else { continue }
+            if let current = tiles.first(where: { $0.id == tile.id }), current.viewModel === tile.viewModel {
+                parkedTileIDs.insert(tile.id)
+            } else if endedSurvivor === tile.viewModel {
+                bringBack(tile.viewModel)
+            }
         }
+    }
+
+    private func bringBack(_ vm: PlayerViewModel) {
+        let retune = retune
+        Task { @MainActor in await retune(vm) }
     }
 
     /// One tune at a time, in grid order, for the tiles `parkHidden` let go.

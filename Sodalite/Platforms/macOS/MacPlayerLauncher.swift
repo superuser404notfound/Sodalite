@@ -38,20 +38,10 @@ struct PlayerLauncher: View {
     var body: some View {
         Color.clear
             .allowsHitTesting(false)
-            .modifier(MacPlayerWindowPresenter(session: $session, theme: appearanceTheme) {
-                isPresented = false
-            })
-            .onChange(of: isPresented, initial: true) { _, presented in
-                if presented, session == nil, let item {
-                    session = makeViewModel(for: item)
-                } else if !presented {
-                    session = nil
-                }
-            }
-            // A deep link tears the player down before it resolves the item it is opening.
-            .onChange(of: appState.requestPlayerDismissal) { _, _ in
-                isPresented = false
-            }
+            .modifier(MacPlayerSessionPresenter(
+                isPresented: $isPresented, session: $session, theme: appearanceTheme,
+                launchKey: item?.id,
+                makeViewModel: { item.map(makeViewModel(for:)) }))
     }
 
     private func makeViewModel(for item: JellyfinItem) -> PlayerViewModel {

@@ -10,8 +10,9 @@ import AetherEngine
 ///
 /// The engine (`DependencyContainer.playerEngine`) is a process-wide singleton shared with the video
 /// player. A video load while a music queue is live triggers the engine's own `stopInternal`, tearing
-/// down the audio host; this coordinator watches `playbackBackend` leave `.audio` and clears its own
-/// state WITHOUT re-stopping the engine (it has already moved on).
+/// down the audio host; `PlayerViewModel.startPlayback` announces that with `yieldToVideo()` first, and a
+/// video backend appearing triggers it as well. Either clears this coordinator's state WITHOUT
+/// re-stopping the engine (it has already moved on).
 ///
 /// System Now-Playing is owned by the engine (`ownsAudioNowPlaying`); the `+NowPlaying` extension hands it
 /// the track's identity and cover and the queue's next/previous at every track change.
@@ -207,6 +208,32 @@ final class MusicPlaybackCoordinator {
         reportStopped()
         logFinishedNormalization()
         engine.stop()
+        queue = []
+        currentIndex = 0
+        isPlaying = false
+        currentTime = 0
+        duration = 0
+        playSessionId = nil
+        currentMediaSourceId = nil
+        reportResolver = nil
+        clearNowPlayingInfo()
+        isStopping = false
+    }
+
+    /// A video or live player is about to load on the shared engine. Clears OUR state without
+    /// `engine.stop()` (that would stop the video that took over). The players announce this before
+    /// `engine.load`, because inferring it from the backend reaching `.native` / `.software` missed a
+    /// video whose load failed before a backend existed and left a dead queue behind (audit LTM-202).
+    func yieldToVideo() {
+        guard !queue.isEmpty else { return }
+        isStopping = true
+        // A music load still in flight must not finish into the engine after the handoff.
+        loadTask?.cancel()
+        loadTask = nil
+        loadGeneration += 1
+        reportStopped()
+        // The engine has already torn the audio host down; its report holds that track's figures.
+        logFinishedNormalization()
         queue = []
         currentIndex = 0
         isPlaying = false
@@ -415,23 +442,7 @@ final class MusicPlaybackCoordinator {
                 // backends so our own stop()'s `.audio -> .none` doesn't re-enter here.
                 guard backend == .native || backend == .software else { return }
                 guard !self.queue.isEmpty else { return }
-                self.isStopping = true
-                // A music load still in flight must not finish into the engine after the handoff.
-                self.loadTask?.cancel()
-                self.loadTask = nil
-                self.loadGeneration += 1
-                self.reportStopped()
-                // The engine has already torn the audio host down; its report holds that track's figures.
-                self.logFinishedNormalization()
-                self.queue = []
-                self.currentIndex = 0
-                self.isPlaying = false
-                self.currentTime = 0
-                self.duration = 0
-                self.playSessionId = nil
-                self.currentMediaSourceId = nil
-                self.clearNowPlayingInfo()
-                self.isStopping = false
+                self.yieldToVideo()
             }
             .store(in: &cancellables)
 

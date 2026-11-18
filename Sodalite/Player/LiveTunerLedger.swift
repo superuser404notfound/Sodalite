@@ -113,6 +113,15 @@ final class LiveTunerLedger {
             .sorted { $0.openedAt > $1.openedAt }
     }
 
+    /// One sweep per signed-in server. A record carries the user id of the server it was opened on, so
+    /// a channel played from a secondary Combine server is closed through that server's own session
+    /// (audit PHOST-208).
+    func sweep(targets: [(userID: String, service: JellyfinPlaybackServiceProtocol)]) async {
+        for target in targets {
+            await sweep(userID: target.userID, using: target.service)
+        }
+    }
+
     /// Close what an earlier run left open, then forget it.
     ///
     /// Runs on a session that has just been restored, so the requests carry the same identity the

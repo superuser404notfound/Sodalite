@@ -781,9 +781,16 @@ struct AppRouter: View {
     /// Close live streams an earlier run left open on the server (#147). Cheap when there is nothing
     /// to do: the ledger is a local read, and a run with no leftovers makes no request at all.
     private func sweepOrphanedLiveStreams() async {
-        guard appState.isAuthenticated, let userID = dependencies.activeUserID else { return }
-        await LiveTunerLedger.shared.sweep(
-            userID: userID, using: dependencies.jellyfinPlaybackService)
+        guard appState.isAuthenticated else { return }
+        var targets: [(userID: String, service: JellyfinPlaybackServiceProtocol)] = []
+        if let userID = dependencies.activeUserID {
+            targets.append((userID, dependencies.jellyfinPlaybackService))
+        }
+        // A tuner opened on a secondary Combine server sits under that server's user id.
+        for session in dependencies.sessionRegistry.participants where !session.isActive && !session.userID.isEmpty {
+            targets.append((session.userID, session.playbackService))
+        }
+        await LiveTunerLedger.shared.sweep(targets: targets)
     }
 
     private func performRestore() async {

@@ -23,38 +23,19 @@ struct LivePlayerLauncher: View {
     var body: some View {
         Color.clear
             .allowsHitTesting(false)
-            .modifier(MacPlayerWindowPresenter(session: $session, theme: appearanceTheme) {
-                isPresented = false
-            })
-            .onChange(of: isPresented, initial: true) { _, presented in
-                if presented, session == nil, let context {
-                    session = makeViewModel(for: context)
-                } else if !presented {
-                    session = nil
-                }
-            }
-            .onChange(of: appState.requestPlayerDismissal) { _, _ in
-                isPresented = false
-            }
+            .modifier(MacPlayerSessionPresenter(
+                isPresented: $isPresented, session: $session, theme: appearanceTheme,
+                launchKey: context?.id,
+                makeViewModel: { context.map(makeViewModel(for:)) }))
     }
 
     private func makeViewModel(for context: LivePlaybackContext) -> PlayerViewModel {
         let state = appState
-        return PlayerViewModel(
-            item: JellyfinItem(liveChannel: context.channel, program: context.program),
-            startFromBeginning: true,
-            playbackService: playbackService,
-            userID: userID,
-            preferences: preferences,
-            canTranscodeAudio: canTranscodeAudio,
-            isLiveSession: true,
-            liveChannel: context.channel,
-            liveProgram: context.program,
-            liveTvService: liveTvService,
-            directStreamMemory: directStreamMemory,
-            zapFilter: context.zapFilter,
-            serverName: serverName,
+        return LiveSessionFactory(
+            playbackService: playbackService, liveTvService: liveTvService, userID: userID,
+            preferences: preferences, directStreamMemory: directStreamMemory,
+            canTranscodeAudio: canTranscodeAudio, serverName: serverName,
             serverReachability: { state.serverReachability }
-        )
+        ).makeViewModel(channel: context.channel, program: context.program, zapFilter: context.zapFilter)
     }
 }
