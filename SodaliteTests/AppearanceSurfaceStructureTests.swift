@@ -117,7 +117,8 @@ struct AppearanceSurfaceStructureTests {
         let expectedCounts = [
             "Sodalite/Features/Auth/ServerDiscoveryView.swift": 2,
             "Sodalite/Features/Auth/LaunchProfilePickerView.swift": 1,
-            "Sodalite/Features/Auth/ServerAddressEntryView.swift": 3,
+            // One shared destination modifier, used by all three platform variants (audit ASD-R202).
+            "Sodalite/Features/Auth/ServerAddressEntryView.swift": 1,
             "Sodalite/Features/Auth/UserPickerView.swift": 1
         ]
 
@@ -130,6 +131,8 @@ struct AppearanceSurfaceStructureTests {
                 ) == expectedCount
             )
         }
+        let addressEntry = try sourceFile("Sodalite/Features/Auth/ServerAddressEntryView.swift")
+        #expect(occurrenceCount(of: ".modifier(TrustAndLoginDestination(", in: addressEntry) == 3)
     }
 
     @Test("settings owns one presentation renderer and child pages inherit it")
