@@ -69,42 +69,14 @@ struct ActiveUserBadge: View {
     }
 
     private func avatar(for user: JellyfinUser) -> some View {
-        ZStack {
-            if let url = dependencies.jellyfinImageService.userProfileImageURL(
-                userID: user.id,
-                tag: user.primaryImageTag
-            ) {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle(for: user)
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle(for: user)
-                    .frame(width: diameter, height: diameter)
-            }
-        }
+        ProfileAvatar(
+            name: user.name,
+            url: dependencies.activeProfileAvatarURL(userID: user.id, tag: user.primaryImageTag),
+            diameter: diameter,
+            font: .system(size: 18, weight: .semibold, design: .rounded)
+        )
         .overlay(
             Circle().strokeBorder(Color.Theme.hairline, lineWidth: 1)
         )
-    }
-
-    private func initialsCircle(for user: JellyfinUser) -> some View {
-        ZStack {
-            Circle().fill(.ultraThinMaterial)
-            Text(initials(for: user.name))
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private func initials(for name: String) -> String {
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
     }
 }

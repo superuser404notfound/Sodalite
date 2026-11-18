@@ -48,44 +48,19 @@ struct SidebarProfileAvatar: View {
     private var isOnFocusPill: Bool { state == .focused }
 
     var body: some View {
-        ZStack {
-            if let url = dependencies.jellyfinImageService.userProfileImageURL(
-                userID: user.id,
-                tag: user.primaryImageTag
-            ) {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle(for: user)
-                }
-                .clipShape(Circle())
-            } else {
-                initialsCircle(for: user)
-            }
-        }
+        ProfileAvatar(
+            name: user.name,
+            url: dependencies.activeProfileAvatarURL(userID: user.id, tag: user.primaryImageTag),
+            font: .system(size: 16, weight: .semibold, design: .rounded),
+            fill: isOnFocusPill ? AnyShapeStyle(Color.clear) : AnyShapeStyle(Color.Theme.restFill),
+            textStyle: AnyShapeStyle(state.labelColor)
+        )
         .overlay(
             Circle().strokeBorder(
                 isOnFocusPill ? state.labelColor : Color.Theme.hairline,
                 lineWidth: isOnFocusPill ? 2 : 1
             )
         )
-    }
-
-    private func initialsCircle(for user: JellyfinUser) -> some View {
-        ZStack {
-            Circle().fill(isOnFocusPill ? Color.clear : Color.Theme.restFill)
-            Text(Self.initials(for: user.name))
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(state.labelColor)
-        }
-    }
-
-    static func initials(for name: String) -> String {
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
     }
 }
 #endif

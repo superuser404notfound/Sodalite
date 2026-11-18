@@ -423,51 +423,20 @@ private struct ServerManagementRow: View {
         .foregroundStyle(.secondary)
     }
 
-    @ViewBuilder
     private func avatarCircle(for user: RememberedUser) -> some View {
         // Against THIS row's server, not the active one: the list draws every known server's
         // profiles, and the shared image service answers for whichever is active (Sodalite#119).
-        let url = dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.imageTag,
-            baseURL: dependencies.preferredURL(for: server),
-            token: user.token
+        ProfileAvatar(
+            name: user.name,
+            url: dependencies.profileAvatarURL(userID: user.id, tag: user.imageTag,
+                                               baseURL: dependencies.preferredURL(for: server)),
+            diameter: 40,
+            font: .caption.bold()
         )
-        ZStack {
-            if let url {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsFallback(for: user)
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-            } else {
-                initialsFallback(for: user)
-            }
-        }
         .overlay(
             Circle()
                 .strokeBorder(Color.white.opacity(0.4), lineWidth: 2)
         )
-    }
-
-    private func initialsFallback(for user: RememberedUser) -> some View {
-        let initials: String = {
-            let parts = user.name.split(separator: " ")
-            if parts.count >= 2 {
-                return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-            }
-            return String(user.name.prefix(2)).uppercased()
-        }()
-        return ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-                .frame(width: 40, height: 40)
-            Text(initials)
-                .font(.caption.bold())
-                .foregroundStyle(.primary)
-        }
     }
 }
 

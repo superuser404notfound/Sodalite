@@ -311,13 +311,7 @@ struct PersonDetailView: View {
         )
     }
 
-    private func initials(_ profile: PersonProfile?) -> String {
-        let parts = displayName(profile).split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(displayName(profile).prefix(2)).uppercased()
-    }
+    private func initials(_ profile: PersonProfile?) -> String { displayName(profile).profileInitials }
 
     // MARK: - Actions
 
