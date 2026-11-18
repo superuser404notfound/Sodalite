@@ -140,6 +140,8 @@ extension PlayerViewModel {
     /// buffered DVR window (`liveSeekableRange`) for live. 0 = nothing to scrub
     /// (gates the entry points).
     var scrubReferenceDuration: Double {
+        // A pre-roll plays under the movie's item, so every span here would be the movie's (Sodalite#244).
+        if isPlayingPreroll { return 0 }
         if isLiveSession {
             // Sodalite#104: the RAIL's block, not the resident range. A press has to move the knob by
             // the seconds it names, and the knob is drawn across the block.

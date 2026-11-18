@@ -219,7 +219,11 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
         )
     }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
-    func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
+    private var _progressReports = 0
+    var progressReports: Int { lock.withLock { _progressReports } }
+    func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {
+        lock.withLock { _progressReports += 1 }
+    }
     func closeLiveStream(liveStreamID: String) async throws {
         lock.withLock {
             _closedLiveStreams.append(liveStreamID)

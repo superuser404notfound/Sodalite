@@ -220,7 +220,10 @@ struct PlayerTouchControls: View {
 
             iconRow
 
-            scrubber
+            // A pre-roll plays under the movie's item: its scrubber and times would be the movie's (Sodalite#244).
+            if !viewModel.isPlayingPreroll {
+                scrubber
+            }
 
             // Sodalite#104: the same programme framing the ten-foot bar carries, in the type scale
             // this one already gives its two time slots. Both read one implementation.
@@ -236,6 +239,7 @@ struct PlayerTouchControls: View {
                 // since the tune and a permanent -00:00 (Sodalite#104).
                 Text(viewModel.isLiveSession ? viewModel.livePositionLabel : viewModel.currentTime)
                     .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
+                    .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 Spacer()
                 Button { viewModel.togglePlayPause() } label: {
                     Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
@@ -251,6 +255,7 @@ struct PlayerTouchControls: View {
                 } else {
                     Text(viewModel.remainingTime)
                         .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
+                        .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 }
             }
         }
@@ -271,8 +276,11 @@ struct PlayerTouchControls: View {
                 iconButton("forward.end.fill") { viewModel.skipActiveSegment() }
             }
             // One list for both session kinds: the touch bar has never had a live row of its own.
-            ForEach(controls.visibleControls(in: .transport), id: \.self) { control in
-                iconRowButton(control)
+            // None of them during a pre-roll: tracks, chapters, quality and Restart all act on the movie.
+            if !viewModel.isPlayingPreroll {
+                ForEach(controls.visibleControls(in: .transport), id: \.self) { control in
+                    iconRowButton(control)
+                }
             }
         }
     }

@@ -87,6 +87,8 @@ extension PlayerViewModel {
     /// the way out (`progressReportsHeldForSuspension`).
     /// `allowsZero` is for the restart, whose whole point is to move the resume point to 0.
     func reportProgress(whileHeld: Bool = false, allowsZero: Bool = false) async {
+        // The item is the movie while a pre-roll plays, and nothing about the movie happened yet.
+        guard !isPlayingPreroll else { return }
         guard whileHeld || !progressReportsHeldForSuspension || isPlaying else { return }
         let ticks = currentPositionTicks
         guard ticks > 0 || allowsZero else { return } // Don't report position 0

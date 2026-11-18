@@ -2938,7 +2938,8 @@ final class PlayerViewModel {
     /// Jump to the start of the current item and play. Live is excluded: tvOS renders LiveTransportBar
     /// there and the iOS icon row hides the button, this guard is the second line of defence.
     func restartFromBeginning() {
-        guard !isLiveSession else { return }
+        // A pre-roll is not the movie: its restart would reset the movie's resume point (Sodalite#244).
+        guard !isLiveSession, !isPlayingPreroll else { return }
         // The session's resume point is 0 from here on: `currentPositionTicks` falls back to it while the
         // clock reads 0, and a Back during the restart's rebuffer must not store the old one (audit PCORE-205).
         resumePositionTicks = 0

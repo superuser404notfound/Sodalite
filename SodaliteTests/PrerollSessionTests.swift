@@ -11,7 +11,8 @@ struct PrerollSessionTests {
     private func movie(_ id: String = "m1", resumeTicks: Int64? = nil) throws -> JellyfinItem {
         let userData = resumeTicks.map { #","UserData":{"PlaybackPositionTicks":\#($0),"Played":false}"# } ?? ""
         return try JSONDecoder().decode(
-            JellyfinItem.self, from: Data(#"{"Id":"\#(id)","Name":"Movie","Type":"Movie"\#(userData)}"#.utf8))
+            JellyfinItem.self,
+            from: Data(#"{"Id":"\#(id)","Name":"Movie","Type":"Movie","RunTimeTicks":72000000000\#(userData)}"#.utf8))
     }
 
     private func makeVM(item: JellyfinItem, service: RecordingPlaybackService, prerolls: Bool = true,
@@ -121,6 +122,38 @@ struct PrerollSessionTests {
         #expect(vm.showControls)
     }
     #endif
+
+    @Test("no seek, scrub or scan reaches an intro: they would land on the movie's timeline")
+    func seekingIgnoresPreroll() throws {
+        let vm = makeVM(item: try movie(), service: RecordingPlaybackService())
+        #expect(vm.scrubReferenceDuration > 0)
+        vm.isPlayingPreroll = true
+        #expect(vm.scrubReferenceDuration == 0)
+        vm.scrub(delta: 0.4)
+        vm.beginContinuousSeek(direction: 1)
+        #expect(!vm.isScrubbing)
+    }
+
+    @Test("Restart waits for the movie")
+    func movieActionsIgnorePreroll() throws {
+        let vm = makeVM(item: try movie(), service: RecordingPlaybackService())
+        vm.isPlayingPreroll = true
+        vm.resumePositionTicks = 42
+        vm.restartFromBeginning()
+        #expect(vm.resumePositionTicks == 42)
+    }
+
+    @Test("an intro never sends the movie's progress, not even a forced zero")
+    func progressNeverReportedDuringPreroll() async throws {
+        let service = RecordingPlaybackService()
+        let vm = makeVM(item: try movie(), service: service)
+        vm.isPlayingPreroll = true
+        await vm.reportProgress(allowsZero: true)
+        #expect(service.progressReports == 0)
+        vm.isPlayingPreroll = false
+        await vm.reportProgress(allowsZero: true)
+        #expect(service.progressReports == 1)
+    }
 
     @Test("Skip Pre-roll with nothing playing is harmless")
     func skipWithoutPrerollIsANoOp() throws {

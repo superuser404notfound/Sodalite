@@ -200,26 +200,39 @@ struct MacPlayerScreen: View {
         VStack(spacing: 8) {
             // Bound to the view model's own scrub state, so a drag reads the position it is dragging
             // to while the committed one keeps arriving from the engine behind it.
-            MacScrubBar(viewModel: viewModel, onInteraction: revealControls)
+            // A pre-roll plays under the movie's item, so the timeline, the jumps and the menus would all
+            // act on the movie; only play/pause and full screen stay (Sodalite#244).
+            let preroll = viewModel.isPlayingPreroll
+            if !preroll {
+                MacScrubBar(viewModel: viewModel, onInteraction: revealControls)
+            }
 
             HStack(spacing: 16) {
                 Text(viewModel.isScrubbing ? viewModel.scrubTime : viewModel.currentTime)
                     .monospacedDigit()
+                    .opacity(preroll ? 0 : 1)
 
                 Spacer(minLength: 0)
 
-                transportButton("gobackward.10") { skip(direction: -1) }
+                if !preroll {
+                    transportButton("gobackward.10") { skip(direction: -1) }
+                }
                 transportButton(viewModel.isPlaying ? "pause.fill" : "play.fill", size: .title) {
                     viewModel.togglePlayPause()
                 }
-                transportButton("goforward.10") { skip(direction: 1) }
+                if !preroll {
+                    transportButton("goforward.10") { skip(direction: 1) }
+                }
 
                 Spacer(minLength: 0)
 
-                MacPlayerMenus(viewModel: viewModel)
+                if !preroll {
+                    MacPlayerMenus(viewModel: viewModel)
+                }
                 transportButton("arrow.up.left.and.arrow.down.right", size: .body, action: toggleFullScreen)
                 Text(viewModel.remainingTime)
                     .monospacedDigit()
+                    .opacity(preroll ? 0 : 1)
             }
             .font(.callout)
         }
