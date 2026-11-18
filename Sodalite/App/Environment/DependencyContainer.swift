@@ -820,8 +820,8 @@ final class DependencyContainer {
         // activeSessionIdentity onChange only catches the completed setAuthenticated, which lags the async
         // probe on a server switch, so the previous server's track would keep playing. Covers removeServer's
         // active-server promotion (it calls this).
-        // Synchronous: the track's reports are bound to its own session, so nothing is lost by stopping
-        // first, and a deferred stop is one more window for the new session to be the one in charge.
+        // Synchronous, and the stop report is built from a snapshot of the session as it is right now,
+        // so the token swap that follows in this same turn cannot redirect it (R-W2-1).
         stopSessionScopedMusic()
 
         if let resumable {

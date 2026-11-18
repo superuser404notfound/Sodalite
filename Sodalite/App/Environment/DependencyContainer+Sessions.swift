@@ -227,15 +227,18 @@ extension DependencyContainer {
         return JellyfinPlaybackService(client: client)
     }
 
-    /// The service for the session a long-lived piece of work starts under. Follows the live
-    /// service while that session is still the active one (so a route change reaches it), and
-    /// falls back to the snapshot the moment the token changed.
+    /// The resolver for the session a long-lived piece of work starts under. Every call builds a
+    /// snapshot of the session that is active at THAT moment (like video's stop), because the report
+    /// goes out in a Task that runs after a synchronous profile switch already swapped the token on
+    /// the live client. While the token is still the starting one that is the right session; after
+    /// it changed, the snapshot taken at the start answers. An address that has not proved itself has
+    /// no snapshot, and the report is skipped rather than sent through the live client (R-W2-1).
     func boundPlaybackReporter() -> () -> JellyfinPlaybackServiceProtocol? {
         let token = jellyfinClient.accessToken
-        let snapshot = snapshotPlaybackService()
+        let startSnapshot = snapshotPlaybackService()
         return { [weak self] in
-            guard let self else { return snapshot }
-            return self.jellyfinClient.accessToken == token ? self.jellyfinPlaybackService : snapshot
+            guard let self else { return startSnapshot }
+            return self.jellyfinClient.accessToken == token ? self.snapshotPlaybackService() : startSnapshot
         }
     }
 
