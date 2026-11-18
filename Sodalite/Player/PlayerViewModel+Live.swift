@@ -1308,10 +1308,14 @@ extension PlayerViewModel {
     /// nothing left to resume onto.
     /// Sodalite#175: a multiview tile hidden behind another tile's full screen hands its tuner back the
     /// way a suspension does; `retuneLiveStream()` brings it back when the grid shows again.
-    func parkHiddenLiveTile() async {
-        guard isLiveSession, activeLiveStreamID != nil, errorMessage == nil, tileRefusal == nil else { return }
+    /// True when the tuner really went back. A direct-route tile holds none and a failed one shows an
+    /// error, so there is nothing to bring back for them (audit PHOST-203).
+    func parkHiddenLiveTile() async -> Bool {
+        guard isLiveSession, activeLiveStreamID != nil, errorMessage == nil, tileRefusal == nil else { return false }
         player.stop()
+        liveTunerReleasedWhileSuspended = false
         await releaseLiveSessionForSuspension(waitingForTeardownUpTo: 5)
+        return liveTunerReleasedWhileSuspended
     }
 
     func releaseLiveSessionForSuspension(waitingForTeardownUpTo timeout: TimeInterval) async {

@@ -105,13 +105,16 @@ final class PlayerViewModel {
         case downloading(id: String)
         case error(String)
         /// Download POST accepted but track not attached by the time polling stopped (slow CDN).
-        /// Carries the requested subtitle + pre-download stream-index snapshot so "Try again"
-        /// re-checks without re-downloading. `message` is the localized pending copy.
-        case downloadTimedOut(info: RemoteSubtitleInfo, before: Set<Int>, message: String)
+        /// Carries the requested subtitle + the external streams that existed before the download so
+        /// "Try again" re-checks without re-downloading. `message` is the localized pending copy.
+        case downloadTimedOut(info: RemoteSubtitleInfo, before: [ExternalSubtitleSignature], message: String)
     }
 
     var subtitleSearchVisible = false
     var subtitleSearchState: SubtitleSearchState = .idle
+    /// Bumped by every search and by dismissing the overlay; a result that finds it moved is stale
+    /// (audit PUI-207).
+    @ObservationIgnored var subtitleSearchGeneration = 0
     /// 3-letter ISO language for the next search; seeded from preferred subtitle, then device language.
     var subtitleSearchLanguage: String = "eng"
 
@@ -272,6 +275,11 @@ final class PlayerViewModel {
     }
     var secondarySubtitleMaxCueDuration: Double = 60
     var activeSecondarySubtitleIndex: Int?
+    /// What the overlays draw: cues of a secondary track that is not picked are never shown, whatever
+    /// the mirror still holds (audit PCORE-203).
+    var shownSecondarySubtitleCues: [SubtitleCue] {
+        activeSecondarySubtitleIndex == nil ? [] : secondarySubtitleCues
+    }
     /// Lowercased Jellyfin codec of the secondary track; gates the same raw-ASS stripper as the primary.
     var activeSecondarySubtitleCodec: String? {
         guard let index = activeSecondarySubtitleIndex else { return nil }
@@ -352,8 +360,11 @@ final class PlayerViewModel {
         }
     }
 
+    /// The one list of picture-based subtitle codecs, every spelling Jellyfin and ffprobe use. The rank
+    /// functions and the downloads planner ask `isBitmapSubtitle`, not their own copies (audit PCORE-R203).
     static let bitmapSubtitleCodecs: Set<String> = [
-        "pgssub", "hdmv_pgs_subtitle", "dvbsub", "dvb_subtitle", "dvdsub", "dvd_subtitle", "xsub",
+        "pgssub", "pgs", "hdmv_pgs_subtitle", "dvbsub", "dvb_sub", "dvb_subtitle",
+        "dvdsub", "dvd_sub", "dvd_subtitle", "vobsub", "xsub",
     ]
 
     static func isBitmapSubtitle(_ stream: MediaStream) -> Bool {
@@ -621,6 +632,13 @@ final class PlayerViewModel {
     /// When set, `startPlayback()` selects the matching PlaybackInfo source instead of first.
     /// Nil keeps default-first. Set by the detail-view version picker.
     let preferredMediaSourceID: String?
+    /// The item `preferredMediaSourceID` was picked for. The version id belongs to that item only, so
+    /// `launchPinnedSourceID` drops it once the session plays another one (audit PCORE-204).
+    let launchItemID: String
+
+    /// The source id to pin in PlaybackInfo for the item on screen: the launch pick while the launch
+    /// item plays, nothing for any item an episode switch or a replacement brought in.
+    var launchPinnedSourceID: String? { item.id == launchItemID ? preferredMediaSourceID : nil }
 
     /// Sodalite#81: the downloaded file this session plays instead of asking the server. Changes on an
     /// auto-advance to another downloaded episode.
@@ -644,9 +662,9 @@ final class PlayerViewModel {
     @ObservationIgnored var serverConfirmedUnreachable = false
     /// Position the outage interrupted, so "Try again" resumes there instead of at the item's last
     /// server-side progress report (which is up to 10s stale, and a dead server never received the last one).
-    @ObservationIgnored private var outageResumeSeconds: Double?
+    @ObservationIgnored var outageResumeSeconds: Double?
     /// Set by a retry; overrides the resume position `startPlayback()` would take from `item.userData`.
-    @ObservationIgnored private(set) var resumeOverrideSeconds: Double?
+    @ObservationIgnored var resumeOverrideSeconds: Double?
     /// Stall time before the connection chip appears. Long enough that an ordinary segment-boundary
     /// hiccup never shows it.
     @ObservationIgnored static let connectionNoticeDelay: Double = 2
@@ -762,6 +780,12 @@ final class PlayerViewModel {
     /// so a teardown racing an in-flight load (incl. next-episode / season-picker tasks, not loadTask
     /// and thus uncancellable) still bails before or stops right after `player.load()`.
     var isTearingDown = false
+    /// Bumped by `startPlayback` and `stopPlayback`. A task that is not `loadTask` (cover fetch, segment
+    /// fetch, subtitle search) captures it and drops its result when it moved, so a late answer never
+    /// lands on the next session (audit PCORE-R204). `isTearingDown` cannot say this: `startPlayback`
+    /// resets it at entry.
+    @ObservationIgnored private(set) var sessionGeneration = 0
+    func advanceSessionGeneration() { sessionGeneration += 1 }
     /// Once-per-session gate for `stopPlayback()`: a Back reaches it twice (dismissPlayer, then
     /// viewWillDisappear), and the second pass reads a playhead `player.stop()` already zeroed.
     /// Separate from `isTearingDown`, which other paths latch too. Reset by `startPlayback`.
@@ -862,6 +886,11 @@ final class PlayerViewModel {
     /// In-flight transcode-path SRT load (server extraction can take up to 120s). Cancelled when the
     /// user switches or disables the subtitle track so a stale load can't clobber the new selection.
     @ObservationIgnored private var subtitleLoadTask: Task<Void, Never>?
+
+    func cancelSubtitleLoad() {
+        subtitleLoadTask?.cancel()
+        subtitleLoadTask = nil
+    }
 
     /// Live only: the automatic subtitle pick runs once per session, when the engine's track list
     /// first arrives. A latch rather than a time guard, so a republished list cannot override a pick
@@ -1044,6 +1073,7 @@ final class PlayerViewModel {
         self.scrubPreview = ScrubPreviewProvider()
         self.cachedPlaybackInfo = cachedPlaybackInfo
         self.preferredMediaSourceID = preferredMediaSourceID
+        self.launchItemID = item.id
         self.playQueue = playQueue
         self.queueIndex = 0
         self.isLiveSession = isLiveSession
@@ -1208,8 +1238,14 @@ final class PlayerViewModel {
     func startPlayback() async {
         // A launch cancelled before it ran (stop, remove or zap in the same turn) must not undo that stop.
         guard !Task.isCancelled else { return }
+        sessionGeneration += 1
         isTearingDown = false
         didStopPlayback = false
+        // Music holds the same engine; it is told before the load, not left to infer it from a backend
+        // that a failing load never reaches (audit LTM-202). Tiles run on engines of their own.
+        if player === DependencyContainer.playerEngine {
+            DependencyContainer.shared.musicPlaybackCoordinator.yieldToVideo()
+        }
         applySubtitleOffsetReach()
         // Everything a previous attempt on this view model armed (a retry, an item recovery): its sinks
         // would double every handler, and a carried-over start flag would swallow this session's start.
@@ -1285,7 +1321,8 @@ final class PlayerViewModel {
                 await reportStart()
                 startProgressReporting()
                 #if os(tvOS)
-                loadZapLineupIfNeeded()
+                // A multiview tile is handed the grid's lineup, and loads its own on its first zap.
+                if !isMultiviewTile { loadZapLineupIfNeeded() }
                 #endif
                 return
             }
@@ -1444,11 +1481,9 @@ final class PlayerViewModel {
                     // external display), where the on-frame overlay can't draw. The engine marks the rendition
                     // matching nativeSubtitlePreferredLanguages DEFAULT=YES (required for a host-selected legible
                     // track to render) and exposes it as nativeSubtitleDefaultOrdinal.
-                    prepareNativeSubtitles: Self.nativeSubtitleRenditionEnabled,
-                    eagerNativeSubtitleReaders: Self.nativeSubtitleRenditionEnabled,
-                    nativeSubtitlePreferredLanguages: Self.nativeSubtitleRenditionEnabled
-                        ? (preferences.preferredSubtitleLanguage.map { [$0] } ?? [])
-                        : [],
+                    prepareNativeSubtitles: true,
+                    eagerNativeSubtitleReaders: true,
+                    nativeSubtitlePreferredLanguages: preferences.preferredSubtitleLanguage.map { [$0] } ?? [],
                     probesize: probeBudget.probesize,
                     maxAnalyzeDuration: probeBudget.maxAnalyzeDuration,
                     preferredAudioLanguages: preferredAudio.map { [$0] } ?? [],
@@ -1559,7 +1594,7 @@ final class PlayerViewModel {
         // Only a source id the server gave out is pinned: a guessed one that matches no source makes
         // Jellyfin answer with none.
         let switchSourceID = pendingMediaSourceID
-        let pinnedSourceID = switchSourceID ?? preferredMediaSourceID
+        let pinnedSourceID = switchSourceID ?? launchPinnedSourceID
         let audioStreamIndex = pendingAudioStreamIndex
         pendingMediaSourceID = nil
         pendingAudioStreamIndex = nil
@@ -1579,7 +1614,7 @@ final class PlayerViewModel {
             try throwIfSuperseded()
         }
 
-        guard var source = info.mediaSources.first(where: { $0.id == preferredMediaSourceID })
+        guard var source = info.mediaSources.first(where: { $0.id == launchPinnedSourceID })
             ?? info.mediaSources.first else {
             throw PlayerEngineError.noSource
         }
@@ -1662,15 +1697,6 @@ final class PlayerViewModel {
         #endif
     }
 
-    /// Sodalite#32 / #34: gates serving the native WebVTT legible rendition. It exists so AVKit can
-    /// render a real subtitle track itself whenever the video leaves the app's own view hierarchy (a PiP window,
-    /// an AirPlay receiver, or a wired external display), where the host's on-frame overlay cannot draw. The
-    /// engine serves DEFAULT=NO,AUTOSELECT=NO renditions with eager readers; the host selects one on those transitions and
-    /// deselects it back in fullscreen, where the on-frame overlay owns subtitles. tvOS was overlay-only until
-    /// tvOS PiP (2026-07-20); fullscreen stays overlay-owned on both platforms via the engine's #38
-    /// deselect-at-load pin.
-    static var nativeSubtitleRenditionEnabled: Bool { true }
-
     /// Tear down the session. Local work (progress reporting, KVO, engine stop) finishes inline;
     /// the network reportStop is detached so a slow Jellyfin server can't stall the dismiss path
     /// (default 30s timeout would leave the player up on a slow CDN, DrHurt #12). Session endpoints
@@ -1678,6 +1704,7 @@ final class PlayerViewModel {
     func stopPlayback() {
         guard !didStopPlayback else { return }
         didStopPlayback = true
+        sessionGeneration += 1
         // Latch teardown + cancel the in-flight launch (re-checked after every await in startPlayback;
         // cancel throws CancellationError out of player.load()) so a back-press-during-load can't resume
         // into player.load() after the player.stop() below.
@@ -2648,6 +2675,13 @@ final class PlayerViewModel {
         lastLiveRetuneAt = nil
         cancelLiveReplayRetry()
         clearError()
+        if !isLiveSession {
+            // The new session starts with nothing picked; the viewer's picks come back through the carry.
+            pendingSessionCarry = SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
+                                               secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
+                                               speedIndex: activeSpeedIndex)
+        }
+        resetSessionState(.sameItemReload)
         player.stop()
         guard isLiveSession else {
             beginPlayback()
@@ -2676,6 +2710,7 @@ final class PlayerViewModel {
         cachedPlaybackInfo = nil
         resumeOverrideSeconds = seconds
         clearError()
+        resetSessionState(.sameItemReload)
         player.stop()
         beginPlayback()
     }
@@ -2750,6 +2785,7 @@ final class PlayerViewModel {
         outageResumeSeconds = nil
         outageWatchdog?.reset()
         clearError()
+        resetSessionState(.sameItemReload)
         player.stop()
         closeServerSession()
         beginPlayback()
@@ -2865,13 +2901,20 @@ final class PlayerViewModel {
     /// there and the iOS icon row hides the button, this guard is the second line of defence.
     func restartFromBeginning() {
         guard !isLiveSession else { return }
+        // The session's resume point is 0 from here on: `currentPositionTicks` falls back to it while the
+        // clock reads 0, and a Back during the restart's rebuffer must not store the old one (audit PCORE-205).
+        resumePositionTicks = 0
+        playbackTime = 0
         Task { [weak self] in
             await self?.player.seek(to: 0)
             guard let self else { return }
             if !isPlaying { player.play() }
             // Move Jellyfin's resume point to 0 now: closing the player right after the restart
             // would otherwise restore the pre-restart position on the next open.
-            reportProgressIfNeeded()
+            progressReportOnDemandTask?.cancel()
+            progressReportOnDemandTask = Task { @MainActor [weak self] in
+                await self?.reportProgress(allowsZero: true)
+            }
             scheduleControlsHide()
         }
     }
@@ -2914,9 +2957,7 @@ final class PlayerViewModel {
             if stream.isExternal == true { return true }
             let lang = stream.language ?? "und"
             let hasDescriptor = stream.isForced == true
-                || (stream.title?.lowercased()).map { t in
-                    ["sdh", "commentary", "cc", "signs", "songs", "hearing", "forced", "musik", "music", "full"].contains(where: { t.contains($0) })
-                } ?? false
+                || TrackDisplayFormatter.hasSubtitleDescriptor(stream.title)
             let codecKey = stream.codec?.lowercased() ?? ""
             let key = hasDescriptor
                 ? "\(lang)_\(stream.title ?? "")_\(codecKey)"
@@ -3123,7 +3164,7 @@ final class PlayerViewModel {
     /// left at the renderer's default. When iOS turned captions on by itself (automatic captions on mute)
     /// the result was an empty grey box over the frame: invisible text inside a box nobody had styled.
     func setNativeSubtitleRenditionVisible(_ visible: Bool) {
-        guard Self.nativeSubtitleRenditionEnabled, let item = player.currentAVPlayer?.currentItem else { return }
+        guard let item = player.currentAVPlayer?.currentItem else { return }
         if Self.renditionShowsText(requested: visible, route: player.videoRoute) {
             item.textStyleRules = nil
         } else if let transparent = AVTextStyleRule(textMarkupAttributes: [
@@ -3156,7 +3197,6 @@ final class PlayerViewModel {
     /// select the native rendition matching the user's active subtitle so AVKit renders it itself, and make it
     /// visible (default styling).
     func enterNativeSubtitleRendering() {
-        guard Self.nativeSubtitleRenditionEnabled else { return }
         setNativeSubtitleRenditionVisible(true)
         player.setNativeSubtitleRendering(true)
         nativeSubtitleRenderingActive = true
@@ -3165,7 +3205,6 @@ final class PlayerViewModel {
     /// Video returned to fullscreen inside the app: deselect the native rendition so it does not render; the
     /// on-frame overlay owns subtitles again.
     func exitNativeSubtitleRendering() {
-        guard Self.nativeSubtitleRenditionEnabled else { return }
         player.setNativeSubtitleRendering(false)
         nativeSubtitleRenderingActive = false
     }
@@ -3209,20 +3248,16 @@ final class PlayerViewModel {
     static func subtitleAutoPickRank(_ stream: MediaStream) -> Int {
         let title = stream.title?.lowercased() ?? ""
         let descriptorRank: Int = {
-            let isSpecialPurpose = ["signs", "songs", "music", "musik", "commentary"]
-                .contains(where: { title.contains($0) })
+            let isSpecialPurpose = TrackDisplayFormatter.title(
+                title, hasAnyWordOf: ["signs", "songs", "music", "musik", "commentary"])
             if isSpecialPurpose { return 3 }
             let isForced = stream.isForced == true || title.contains("forced")
             if isForced { return 2 }
-            let isSDH = ["sdh", "cc", "hearing"]
-                .contains(where: { title.contains($0) })
+            let isSDH = TrackDisplayFormatter.title(title, hasAnyWordOf: ["sdh", "cc", "hearing"])
             if isSDH { return 1 }
             return 0
         }()
-        let codec = stream.codec?.lowercased() ?? ""
-        let isBitmap = ["pgs", "hdmv", "dvb_sub", "dvbsub", "dvd_sub", "dvdsub", "vobsub", "xsub"]
-            .contains(where: { codec.contains($0) })
-        return descriptorRank * 2 + (isBitmap ? 1 : 0)
+        return descriptorRank * 2 + (isBitmapSubtitle(stream) ? 1 : 0)
     }
 
     /// Effective preferred audio language for foreign-audio detection. Settings' "Auto" stores nil; we
@@ -3378,6 +3413,7 @@ final class PlayerViewModel {
     /// Fetch intro + outro + recap markers and commercial breaks once on startup. Safe if the server lacks the endpoint
     /// (empty struct, features stay off).
     func loadEpisodeSegments() async {
+        let generation = sessionGeneration
         didAutoSkipCurrentIntro = false
         didAutoSkipCurrentRecap = false
         didAutoSkipCurrentOutro = false
@@ -3385,6 +3421,8 @@ final class PlayerViewModel {
         didSkipCurrentSegment = nil
         do {
             let segments = try await playbackService.getEpisodeSegments(itemID: item.id)
+            // A late answer for the episode the player just left (audit PCORE-206).
+            guard generation == sessionGeneration else { return }
             introSegment = segments.intro
             outroSegment = segments.outro
             recapSegment = segments.recap
@@ -3393,6 +3431,7 @@ final class PlayerViewModel {
             #if DEBUG
             print("[MediaSegments] Fetch failed: \(error)")
             #endif
+            guard generation == sessionGeneration else { return }
             introSegment = nil
             outroSegment = nil
             recapSegment = nil

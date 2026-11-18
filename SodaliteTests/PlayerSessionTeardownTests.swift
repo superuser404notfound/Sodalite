@@ -229,13 +229,27 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     func getSessions() async throws -> [JellyfinSessionInfo] { [] }
     func getSeasons(seriesID: String, userID: String) async throws -> [JellyfinItem] { [] }
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> [JellyfinItem] { [] }
-    func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments { throw NotUsed() }
+    /// Holds `getEpisodeSegments` at this gate and then answers with an intro, so a test can switch
+    /// items while a fetch is in flight. Without a gate the call fails, as before.
+    var episodeSegmentsGate: TestGate?
+    func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments {
+        guard let gate = episodeSegmentsGate else { throw NotUsed() }
+        await gate.pass()
+        let intro = try JSONDecoder().decode(MediaSegment.self, from: Data(
+            #"{"Id":"s","ItemId":"\#(itemID)","Type":"Intro","StartTicks":0,"EndTicks":300000000}"#.utf8))
+        return EpisodeSegments(items: [intro])
+    }
     func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
     func buildAudioStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? { nil }
     func buildChapterImageURL(itemID: String, chapterIndex: Int, imageTag: String, maxWidth: Int) -> URL? { nil }
     func buildTrickplayTileURL(itemID: String, width: Int, tileIndex: Int) -> URL? { nil }
-    func searchRemoteSubtitles(itemID: String, language: String) async throws -> [RemoteSubtitleInfo] { [] }
+    /// Holds `searchRemoteSubtitles` at this gate (each call passes it once) before answering `[]`.
+    var searchGate: TestGate?
+    func searchRemoteSubtitles(itemID: String, language: String) async throws -> [RemoteSubtitleInfo] {
+        await searchGate?.pass()
+        return []
+    }
     func downloadRemoteSubtitle(itemID: String, subtitleID: String) async throws {}
     func deleteSubtitle(itemID: String, index: Int) async throws {}
     func buildTranscodeURL(relativePath: String) -> URL? { nil }

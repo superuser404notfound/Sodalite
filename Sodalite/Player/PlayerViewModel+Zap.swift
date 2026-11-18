@@ -220,14 +220,7 @@ extension PlayerViewModel {
         errorMessage = nil
         videoFormat = .sdr
         clearVideoFormatAnnouncement()
-        subtitleCues = []
-        subtitleStreams = []
-        externalEngineTrackIDs = [:]
-        activeSubtitleIndex = nil
-        activeAudioIndex = nil
-        forcedSubtitleFallback = .none
-        activeSubtitleCodec = nil
-        deactivateASSRendering()
+        resetTrackState(clearsStreams: true)
         showControls = false
         isScrubbing = false
         controlsFocus = .progressBar

@@ -219,15 +219,32 @@ extension PlayerViewModel {
         // Do NOT call player.stop(): a full stop tears down the native AVPlayer, and AVKit fails to re-register its Now-Playing session against a swapped player, blanking the CC widget (issue #15). engine.load(newURL) reloads in place, preserving the AVPlayer across the seam.
         LogTap.shared.note("[NextEp] reload_in_place (no engine stop)")
 
-        resetSessionState(switchingTo: next)
+        resetSessionState(.itemSwitch(to: next))
 
         LogTap.shared.note("[NextEp] start_playback_enter id=\(item.id)")
         await startPlayback()
         LogTap.shared.note("[NextEp] start_playback_exit error=\(errorMessage ?? "nil") isPlaying=\(isPlaying)")
     }
 
-    /// Shared per-session reset for both episode-switch paths (auto-advance + season picker). Single owner on purpose: the two inline copies had drifted once (a stray player.stop() in the picker path, breaking the issue-#15 AVPlayer-reuse design).
-    private func resetSessionState(switchingTo newItem: JellyfinItem) {
+    /// How much of the per-session state a reset wipes.
+    enum SessionResetScope {
+        /// The player moves to another item (auto-advance, queue, season picker).
+        case itemSwitch(to: JellyfinItem)
+        /// The same item loads again from a stopped engine (outage retry, rung switch, item recovery).
+        case sameItemReload
+    }
+
+    /// The one place per-session state is cleared. Every path that starts another session on this view
+    /// model (both episode switches, the outage retry, the rung switch, the item recovery) calls it, so a
+    /// field cannot be wiped by one path and forgotten by another (audit PCORE-R202). A new per-session
+    /// field goes here, and into `SessionResetTests`. The item switch deliberately keeps the engine, the
+    /// play queue, `isInputLocked` and the picker's season list (issue #15).
+    func resetSessionState(_ scope: SessionResetScope) {
+        resetTrackState(clearsStreams: scope.isItemSwitch)
+        // The engine comes back at 1.0x; the speed badge must match it instead of the prior session's rate.
+        activeSpeedIndex = 2
+        guard case .itemSwitch(let newItem) = scope else { return }
+
         item = newItem
         localDownload = downloadStore?.completedItem(newItem.id)
         // Single choke point for every in-session item switch (auto-advance, queue, season picker), so
@@ -238,6 +255,7 @@ extension PlayerViewModel {
             object: nil,
             userInfo: [PlayerItemSwitchKey.item: newItem]
         )
+        advanceSessionGeneration()
         startFromBeginning = true
         // A response the successor warm fetched for THIS item is the one thing worth carrying across
         // the switch: it is exactly what the seam would otherwise ask the server for again while the
@@ -250,21 +268,6 @@ extension PlayerViewModel {
         errorMessage = nil
         videoFormat = .sdr
         clearVideoFormatAnnouncement()
-        subtitleCues = []
-        subtitleStreams = []
-        externalEngineTrackIDs = [:]
-        activeSubtitleIndex = nil
-        activeAudioIndex = nil
-        // The in-place AVPlayer reload (issue #15) resumes the next item at 1.0x; reset to the
-        // 1.0x index so the speed badge/picker match the engine instead of the prior episode's rate.
-        activeSpeedIndex = 2
-        // This path bypasses teardown() for AVPlayer reuse (issue #15), so deactivate explicitly: stale ASS script and subtitle-search overlay would otherwise survive onto the next episode.
-        deactivateASSRendering()
-        dismissSubtitleSearch()
-        subtitleDeleteState = .hidden
-        activeSubtitleCodec = nil
-        // Silent forced fallback is per-item (streams + audio language); the next load re-resolves it.
-        forcedSubtitleFallback = .none
         didAttemptReplacedItemRecovery = false
         nextEpisode = nil
         hasFetchedNextEpisode = false
@@ -273,6 +276,7 @@ extension PlayerViewModel {
         nextEpisodeOverlayDismissed = false
         nextEpisodeCountdown = 10
         isCountdownActive = false
+        lastPlaybackTimeForNextEpisode = 0
         hasReportedStart = false
         hasStartedPlaying = false
         showControls = false
@@ -282,6 +286,9 @@ extension PlayerViewModel {
         progress = 0
         playbackTime = 0
         resumePositionTicks = 0
+        resumeOverrideSeconds = nil
+        outageResumeSeconds = nil
+        serverConfirmedUnreachable = false
         introSegment = nil
         outroSegment = nil
         recapSegment = nil
@@ -292,6 +299,29 @@ extension PlayerViewModel {
         didAutoSkipCurrentOutro = false
         autoSkippedCommercialStarts = []
         didSkipCurrentSegment = nil
+    }
+
+    /// What the engine drops on every load, mirrored on the view-model side: both subtitle picks, their
+    /// cues and the overlay state that draws them. `clearsStreams` is for a different item, whose
+    /// stream list is not this one's; a reload of the same item re-reads it from PlaybackInfo anyway.
+    func resetTrackState(clearsStreams: Bool) {
+        if clearsStreams {
+            subtitleStreams = []
+            externalEngineTrackIDs = [:]
+            activeAudioIndex = nil
+        }
+        cancelSubtitleLoad()
+        subtitleCues = []
+        activeSubtitleIndex = nil
+        activeSubtitleCodec = nil
+        secondarySubtitleCues = []
+        activeSecondarySubtitleIndex = nil
+        // Silent forced fallback is per-item (streams + audio language); the next load re-resolves it.
+        forcedSubtitleFallback = .none
+        // This path bypasses teardown() for AVPlayer reuse (issue #15), so deactivate explicitly: stale ASS script and subtitle-search overlay would otherwise survive onto the next episode.
+        deactivateASSRendering()
+        dismissSubtitleSearch()
+        subtitleDeleteState = .hidden
     }
 
     func cancelNextEpisode() {
@@ -367,8 +397,15 @@ extension PlayerViewModel {
         makeServerSessionClose(positionTicks: completionAwarePositionTicks, refreshesShelf: false)()
 
         // No player.stop() (mirrors playNextEpisode): engine.load(newURL) reloads in place so AVKit's Now-Playing session survives the seam (issue #15).
-        resetSessionState(switchingTo: target)
+        resetSessionState(.itemSwitch(to: target))
 
         await startPlayback()
+    }
+}
+
+extension PlayerViewModel.SessionResetScope {
+    var isItemSwitch: Bool {
+        if case .itemSwitch = self { return true }
+        return false
     }
 }

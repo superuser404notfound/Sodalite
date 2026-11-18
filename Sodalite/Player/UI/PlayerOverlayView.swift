@@ -957,12 +957,12 @@ private struct SubtitleLayer: View {
         // owns them; drawing here as well double-draws on the device and on the way back from the route.
         // Keep the styled ASS layer mounted even while the cue array is momentarily empty (seek resets); libass already holds the assembled script.
         if !viewModel.nativeSubtitleRenderingActive,
-           viewModel.assRenderer != nil || !viewModel.subtitleCues.isEmpty || !viewModel.secondarySubtitleCues.isEmpty {
+           viewModel.assRenderer != nil || !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
             SubtitleOverlayView(
                 cues: viewModel.subtitleCues,
                 currentTime: viewModel.subtitleTime,
                 maxCueDuration: viewModel.subtitleMaxCueDuration,
-                secondaryCues: viewModel.secondarySubtitleCues,
+                secondaryCues: viewModel.shownSecondarySubtitleCues,
                 secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                 fontSize: viewModel.preferences.subtitleFontSize,
                 textColor: viewModel.preferences.subtitleColor,

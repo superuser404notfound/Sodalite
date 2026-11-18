@@ -36,6 +36,9 @@ extension PlayerViewModel {
 
     /// Async-fetch the primary image and re-stage externalMetadata with artwork; engine writes to the live item, AVKit re-reads on the next publish tick. Failures leave title-only metadata in place.
     func refreshExternalMetadataWithArtwork() async {
+        // The engine is process-wide and keeps staged metadata across loads, so a cover that lands after
+        // the session moved on would be shown for the next item (audit PCORE-206).
+        let generation = sessionGeneration
         guard let url = primaryImageURL() else {
             LogTap.shared.note("[NowPlaying] artwork: no URL for item id=\(item.id)")
             return
@@ -47,15 +50,18 @@ extension PlayerViewModel {
             return
         }
         LogTap.shared.note("[NowPlaying] artwork: bytes=\(data.count)")
-        guard let image = PlatformImage(data: data),
-              let jpeg = image.jpegData(compressionQuality: 0.85) else {
+        guard let jpeg = await Self.nowPlayingJPEG(from: data) else {
             LogTap.shared.note("[NowPlaying] artwork: decode/re-encode failed")
             return
         }
-        await MainActor.run {
-            let items = self.buildExternalMetadataItems(artworkData: jpeg)
-            self.player.setExternalMetadata(items)
-        }
+        guard generation == sessionGeneration, !isTearingDown else { return }
+        player.setExternalMetadata(buildExternalMetadataItems(artworkData: jpeg))
+    }
+
+    /// Full decode plus JPEG encode of the cover (about 1.4 MP for a portrait poster), off the main actor
+    /// (audit PCORE-207; Sodalite#212 explains why `@concurrent` and not just `nonisolated`).
+    @concurrent nonisolated static func nowPlayingJPEG(from data: Data) async -> Data? {
+        PlatformImage(data: data)?.jpegData(compressionQuality: 0.85)
     }
 
     // MARK: - External metadata builder
