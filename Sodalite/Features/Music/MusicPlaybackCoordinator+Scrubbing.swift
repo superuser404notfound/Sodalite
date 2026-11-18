@@ -20,15 +20,13 @@ extension MusicPlaybackCoordinator {
         isScrubbing ? scrubProgress * duration : currentTime
     }
 
-    private var skipSeconds: Double { 10 }
-
     /// Discrete left/right skip: enters the scrub preview and nudges the
     /// position by the configured interval (committed on Select).
     func seekSkip(direction: Int) {
         let dur = duration
         guard dur > 0 else { return }
         beginScrubIfNeeded()
-        let delta = Double(direction < 0 ? -1 : 1) * skipSeconds / dur
+        let delta = Double(direction < 0 ? -1 : 1) * Double(skipSecondsProvider(direction)) / dur
         scrubProgress = min(max(scrubProgress + delta, 0), 1)
     }
 
@@ -44,25 +42,35 @@ extension MusicPlaybackCoordinator {
         scrubProgress = min(max(fraction, 0), 1)
     }
 
-    /// Begin a continuous (hold-to-seek) spool in `direction` (-1 left, +1
-    /// right). Accelerates from 15x to 240x, same curve as the video player.
+    /// Begin a continuous (hold-to-seek) spool in `direction` (-1 left, +1 right), or take over a
+    /// running one. Runs on the video player's `SeekScan`, so the distance and the stage come off
+    /// the clock and not off a tick count (LTM-R202, the Sodalite#186 error).
     func beginContinuousSeek(direction: Int) {
         let dur = duration
         guard dur > 0 else { return }
         beginScrubIfNeeded()
+        if seekScan != nil, continuousSeekTask != nil {
+            seekScan?.hold(direction: direction, at: .now)
+            return
+        }
+        seekScan = SeekScan(rates: SeekReadout.scanRates(durationSeconds: dur),
+                            direction: direction, heldAt: .now)
         continuousSeekTask?.cancel()
-        let dir = Double(direction < 0 ? -1 : 1)
         continuousSeekTask = Task { @MainActor [weak self] in
-            let tick = 0.08
-            var held = 0.0
+            let clock = ContinuousClock()
+            var last = clock.now
             while !Task.isCancelled {
-                guard let self else { return }
+                guard let self, var scan = self.seekScan else { return }
                 let dur = self.duration
                 guard dur > 0 else { return }
-                let rate = min(15 + held * 26, 240)
-                self.scrubProgress = min(max(self.scrubProgress + dir * rate * tick / dur, 0), 1)
-                try? await Task.sleep(for: .seconds(tick))
-                held += tick
+                let now = clock.now
+                scan.tick(at: now)
+                self.seekScan = scan
+                let elapsed = last.duration(to: now) / .seconds(1)
+                last = now
+                let delta = Double(scan.direction) * Double(scan.rate) * elapsed / dur
+                self.scrubProgress = min(max(self.scrubProgress + delta, 0), 1)
+                try? await Task.sleep(for: .milliseconds(80))
             }
         }
     }
@@ -73,6 +81,7 @@ extension MusicPlaybackCoordinator {
     func endContinuousSeek() {
         continuousSeekTask?.cancel()
         continuousSeekTask = nil
+        seekScan = nil
     }
 
     /// Commit the preview position and seek there. Playback continues as it
@@ -83,6 +92,7 @@ extension MusicPlaybackCoordinator {
         // the next beginScrubIfNeeded's initial position.
         continuousSeekTask?.cancel()
         continuousSeekTask = nil
+        seekScan = nil
         let dur = duration
         guard isScrubbing, dur > 0 else {
             isScrubbing = false
@@ -96,6 +106,7 @@ extension MusicPlaybackCoordinator {
     func cancelScrub() {
         continuousSeekTask?.cancel()
         continuousSeekTask = nil
+        seekScan = nil
         isScrubbing = false
     }
 
