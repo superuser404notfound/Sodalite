@@ -118,6 +118,82 @@ struct ProfileSettingsContainerTests {
         #expect(captured.subtitleFontSize == "small")
     }
 
+    /// Audit 2026-11-17 SYNC-203: the record is built when the engine asks for it, and by then another
+    /// profile may be active. It has to carry the profile the edit was made in.
+    @Test func theLegacyRecordIsBuiltFromTheProfileItWasEditedIn() throws {
+        let server = "c-\(UUID().uuidString)"
+        let container = try signedIn(scratch("legacySend"), as: "alice", server: server)
+        let prefs = CloudSyncPreferences(store: scratch("legacySendSync"))
+        prefs.adoptionCompleted = true
+        let service = CloudSyncService(dependencies: container, preferences: prefs)
+        let bob = ProfileKey(serverID: server, userID: "bob")
+        container.profileSettings.settings(for: bob).playback.subtitleFontSize = .small
+        container.playbackPreferences.subtitleFontSize = .xlarge
+
+        state.setAuthenticated(
+            server: container.listKnownServers()[0],
+            user: JellyfinUser(id: "bob", name: "bob", serverID: server, hasPassword: true, primaryImageTag: nil, policy: nil)
+        )
+        #expect(container.activeProfileKey == bob)
+        #expect(container.playbackPreferences.subtitleFontSize == .small)
+
+        let data = try #require(service.encodeLocalPayload(recordName: CloudSyncRecordName.settings(.playback), stamp: .now))
+        let record = try JSONDecoder().decode(PlaybackSettingsPayload.self, from: data)
+        #expect(record.subtitleFontSize == "xlarge")
+        withExtendedLifetime(service) {}
+    }
+
+    /// Audit 2026-11-17 SYNC-R202: a reset used to leave the late fields of the legacy stores in memory,
+    /// and the next profile seeded from them.
+    @Test func aResetRebuildsTheLegacyStoresIncludingTheLateFields() throws {
+        let suite = "profileContainer.legacyReset"
+        let defaults = scratch("legacyReset")
+        let registry = ProfileSettingsRegistry(defaults: defaults)
+        let virgin = ProfileSettingsRegistry(defaults: scratch("legacyResetVirgin"))
+        registry.legacy.playback.playThemeSongs.toggle()
+        registry.legacy.playback.autoSkipCommercials.toggle()
+        registry.legacy.appearance.showPosterRating.toggle()
+        registry.legacy.appearance.setTabOrder(["settings", "home"])
+
+        defaults.removePersistentDomain(forName: suite)
+        registry.resetAll()
+
+        #expect(registry.legacy.playback.playThemeSongs == virgin.legacy.playback.playThemeSongs)
+        #expect(registry.legacy.playback.autoSkipCommercials == virgin.legacy.playback.autoSkipCommercials)
+        #expect(registry.legacy.appearance.showPosterRating == virgin.legacy.appearance.showPosterRating)
+        #expect(registry.legacy.appearance.tabOrder == virgin.legacy.appearance.tabOrder)
+    }
+
+    /// The legacy record goes through the profile mapping now: what it carries lands, what it does
+    /// not carry stays, and the device values never move.
+    @Test func aLegacyPlaybackRecordKeepsTheFieldsItDoesNotCarry() throws {
+        let container = try signedIn(scratch("legacyLate"), as: "alice", server: "c-\(UUID().uuidString)")
+        guard case .playback(var payload) = container.collectSettingsPayload(.playback, stamp: .now) else {
+            Issue.record("wrong case"); return
+        }
+        let store = container.profileSettings.legacy.playback
+        store.subtitlesOnSkipBack = true
+        store.autoSkipRecap = true
+        store.playThemeSongs = false
+        payload.subtitlesOnSkipBack = nil
+        payload.autoSkipRecap = nil
+        payload.skipForwardSeconds = nil
+        payload.skipBackwardSeconds = nil
+        payload.skipIntervalSeconds = 45
+        payload.subtitleFontSize = "no-such-size"
+        payload.networkBufferDepth = "unlimited"
+
+        container.applySettingsPayload(.playback(payload))
+
+        #expect(store.subtitlesOnSkipBack)
+        #expect(store.autoSkipRecap)
+        #expect(!store.playThemeSongs)
+        #expect(store.skipForwardSeconds == 45)
+        #expect(store.skipBackwardSeconds == 45)
+        #expect(store.subtitleFontSize == PlaybackPreferences(store: scratch("legacyLateVirgin")).subtitleFontSize)
+        #expect(container.devicePreferences.networkBufferDepth != .unlimited)
+    }
+
     @Test func aProfileRecordIsAppliedWithoutCountingAsAnEdit() throws {
         let server = "c-\(UUID().uuidString)"
         let container = try signedIn(scratch("profileApply"), as: "alice", server: server)
