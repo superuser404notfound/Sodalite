@@ -15,7 +15,9 @@ struct LiveTvLenientDecodeTests {
                       "2026-06-11T10:20:00.000Z",       // 3 digits, Seerr
                       "2026-06-11T10:20:00Z",           // none
                       "2026-06-11T12:20:00+02:00",      // offset
-                      "2026-06-11T10:20:00.000+00:00"]
+                      "2026-06-11T10:20:00.000+00:00",
+                      "2026-06-11T10:20:00",            // no zone reads as UTC (FR-DAT-2)
+                      "2026-06-11T10:20:00.0000000"]
         for raw in shapes {
             #expect(ISODateParser.parse(raw) == reference, "\(raw)")
         }

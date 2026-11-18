@@ -173,6 +173,7 @@
 		11731C81970A850B5B629797 /* KeyboardTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6332B522C9A0A9E3BD4213 /* KeyboardTransport.swift */; };
 		118BC52B1D1724D8C0B43CC7 /* OpenSourceLicenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9FD615D950EA340BB597EF /* OpenSourceLicenses.swift */; };
 		11AA6F2C02AC8506A2DBC844 /* HomeViewModel+Rows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B72371460030EB19A5DC39F /* HomeViewModel+Rows.swift */; };
+		11B51AD3E4107435D1463C32 /* LiveTvPagingDropTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92AE28CF6CA7DFA6E5CE3AC1 /* LiveTvPagingDropTests.swift */; };
 		11B6DD8BB9E9F09A9ED00DA0 /* DependencyContainer+Routes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E53795954AE52383DBA19D4 /* DependencyContainer+Routes.swift */; };
 		11C77DAE12710DBA70F5DF02 /* NowPlayingWaveIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DDD1EA2510104B724CB32 /* NowPlayingWaveIcon.swift */; };
 		11DDFD76E3BE9E6DC6932BF6 /* SerialRequestQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063B1ABA9270C82B6D74269 /* SerialRequestQueueTests.swift */; };
@@ -3158,6 +3159,7 @@
 		91F4C7F76A85529DD15FB920 /* SubtitleOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleOverlayView.swift; sourceTree = "<group>"; };
 		92353AB1EDBB02FB5A2AC000 /* LRUCostCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LRUCostCache.swift; sourceTree = "<group>"; };
 		925EEBD1F614A914B17BA4B7 /* SparseGridStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparseGridStore.swift; sourceTree = "<group>"; };
+		92AE28CF6CA7DFA6E5CE3AC1 /* LiveTvPagingDropTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTvPagingDropTests.swift; sourceTree = "<group>"; };
 		92C116449AE00A9C9E64ABEA /* CinemaNoirBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CinemaNoirBackground.swift; sourceTree = "<group>"; };
 		92C38FEA18079E81D8B4C567 /* MusicPlaybackCoordinator+NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MusicPlaybackCoordinator+NowPlaying.swift"; sourceTree = "<group>"; };
 		92E81D87A395406880D1F11F /* LaunchProfilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchProfilePickerView.swift; sourceTree = "<group>"; };
@@ -4183,6 +4185,7 @@
 				0FDD7CE4A2694DA3EBD7C600 /* LiveTunerLedgerTests.swift */,
 				FDB8A4B048B78DDC5C2B3258 /* LiveTunerStreamURLTests.swift */,
 				026766989360EF068DCB3B4E /* LiveTvLenientDecodeTests.swift */,
+				92AE28CF6CA7DFA6E5CE3AC1 /* LiveTvPagingDropTests.swift */,
 				A07F28C0BB4A8EA04756A6A8 /* LiveTvProgramTests.swift */,
 				53F41C2D1114121CA16FA2AF /* LiveUnopenedPlaybackInfoTests.swift */,
 				E585EECADA5A1372977990DE /* LiveZapCommitTests.swift */,
@@ -7110,6 +7113,7 @@
 				18851BC01748CF64DA5A18C2 /* LiveTunerLedgerTests.swift in Sources */,
 				BB90340A37072938EF4EA9C7 /* LiveTunerStreamURLTests.swift in Sources */,
 				83A01377D9ECBCBE58DAD73F /* LiveTvLenientDecodeTests.swift in Sources */,
+				11B51AD3E4107435D1463C32 /* LiveTvPagingDropTests.swift in Sources */,
 				A7201594DA0940BF3760185B /* LiveTvProgramTests.swift in Sources */,
 				27BAB248785820107007C865 /* LiveUnopenedPlaybackInfoTests.swift in Sources */,
 				3B667F3D678AC08B54B740DE /* LiveZapCommitTests.swift in Sources */,
