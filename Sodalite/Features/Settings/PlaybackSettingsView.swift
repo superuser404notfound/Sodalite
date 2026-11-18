@@ -146,6 +146,16 @@ struct PlaybackSettingsView: View {
                 .opacity(countdownApplies && prefs.nextEpisodeCountdownLength > 0 ? 1 : 0.4)
 
                 boolRow(
+                    icon: "film.stack",
+                    title: "settings.playback.playPrerolls",
+                    subtitle: "settings.playback.playPrerolls.subtitle",
+                    value: Binding(
+                        get: { prefs.playPrerolls },
+                        set: { prefs.playPrerolls = $0 }
+                    )
+                )
+
+                boolRow(
                     icon: "forward.end.fill",
                     title: "settings.playback.autoSkipIntro",
                     subtitle: "settings.playback.autoSkipIntro.subtitle",

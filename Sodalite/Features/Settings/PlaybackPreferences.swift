@@ -51,6 +51,7 @@ final class PlaybackPreferences {
         static let playerControls = "playback.playerControls"
         static let versionOrder = "playback.versionOrder"
         static let playThemeSongs = "playback.playThemeSongs"
+        static let playPrerolls = "playback.playPrerolls"
         static let musicNormalization = "playback.musicNormalization"
     }
 
@@ -321,6 +322,12 @@ final class PlaybackPreferences {
     /// Sodalite#219: detail pages play the server's theme song. Off by default, it is sound nobody asked for.
     var playThemeSongs: Bool {
         didSet { store.set(playThemeSongs, forKey: Keys.playThemeSongs) }
+    }
+
+    /// Sodalite#244: plays the server's pre-rolls (Local Intros plugin) before a start from the beginning.
+    /// On by default like Jellyfin-Web's cinema mode; without such a plugin the server hands out none.
+    var playPrerolls: Bool {
+        didSet { store.set(playPrerolls, forKey: Keys.playPrerolls) }
     }
 
     /// Sodalite#242: plays music at the loudness the server measured. Off by default, it needs the
@@ -685,6 +692,7 @@ final class PlaybackPreferences {
         self.showNextEpisodeCard = store.object(forKey: Keys.showNextEpisodeCard) as? Bool ?? true
         self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
         self.playThemeSongs = store.object(forKey: Keys.playThemeSongs) as? Bool ?? false
+        self.playPrerolls = store.object(forKey: Keys.playPrerolls) as? Bool ?? true
         self.versionOrder = store.string(forKey: Keys.versionOrder).flatMap(VersionOrder.init(rawValue:)) ?? .quality
         self.musicNormalization = store.string(forKey: Keys.musicNormalization)
             .flatMap(MusicNormalization.init(rawValue:)) ?? .off

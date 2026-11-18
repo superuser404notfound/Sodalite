@@ -213332,6 +213332,328 @@
         }
       }
     },
+    "settings.playback.playPrerolls" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přehrávat předfilmy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspil forfilm"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorfilme abspielen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναπαραγωγή εισαγωγικών βίντεο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play Pre-rolls"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir vídeos previos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toista alkuvideot"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire l'avant-programme"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduciraj predfilmove"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Előzetes videók lejátszása"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci pre-roll"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレロールを再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프리롤 재생"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spill av forfilmer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voorfilms afspelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarzaj filmy wstępne"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir pré-exibições"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir pré-exibições"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redă videoclipurile introductive"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вступительные ролики"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prehrávať predfilmy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela upp förfilmer"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ön Gösterimleri Oynat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вступні ролики"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放片前视频"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放片前影片"
+          }
+        }
+      }
+    },
+    "settings.playback.playPrerolls.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Před filmem nebo epizodou spuštěnou od začátku přehraje předfilmy ze serveru, například z pluginu Local Intros."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspiller serverens forfilm, for eksempel fra pluginet Local Intros, før en film eller et afsnit, der starter fra begyndelsen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spielt die Vorfilme deines Servers, zum Beispiel aus dem Plugin Local Intros, vor einem Film oder einer Folge, die von vorn startet."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναπαράγει τα εισαγωγικά βίντεο του διακομιστή, για παράδειγμα από το πρόσθετο Local Intros, πριν από μια ταινία ή ένα επεισόδιο που ξεκινά από την αρχή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plays the pre-roll videos your server provides, for example from the Local Intros plugin, before a movie or episode that starts from the beginning."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduce los vídeos previos de tu servidor, por ejemplo del plugin Local Intros, antes de una película o un episodio que empieza desde el principio."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toistaa palvelimen alkuvideot, esimerkiksi Local Intros -laajennuksesta, ennen alusta alkavaa elokuvaa tai jaksoa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lit les vidéos d'avant-programme de votre serveur, par exemple du plugin Local Intros, avant un film ou un épisode lancé depuis le début."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducira predfilmove s poslužitelja, na primjer iz dodatka Local Intros, prije filma ili epizode koja počinje od početka."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lejátssza a szerver előzetes videóit, például a Local Intros bővítményből, mielőtt egy film vagy epizód az elejéről indul."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduce i pre-roll del server, ad esempio dal plugin Local Intros, prima di un film o di un episodio avviato dall'inizio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初から再生する映画やエピソードの前に、サーバーのプレロール動画（Local Intros プラグインなど）を再生します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "처음부터 시작하는 영화나 에피소드 앞에 서버의 프리롤 영상(예: Local Intros 플러그인)을 재생합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spiller av serverens forfilmer, for eksempel fra programtillegget Local Intros, før en film eller episode som starter fra begynnelsen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speelt de voorfilms van je server af, bijvoorbeeld uit de plug-in Local Intros, vóór een film of aflevering die vanaf het begin start."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwarza filmy wstępne z serwera, na przykład z wtyczki Local Intros, przed filmem lub odcinkiem uruchamianym od początku."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduz as pré-exibições do seu servidor, por exemplo do plugin Local Intros, antes de um filme ou episódio iniciado do começo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduz as pré-exibições do servidor, por exemplo do plugin Local Intros, antes de um filme ou episódio iniciado do início."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redă videoclipurile introductive ale serverului, de exemplu din pluginul Local Intros, înainte de un film sau un episod pornit de la început."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизводит вступительные ролики с сервера, например из плагина Local Intros, перед фильмом или серией, запущенными с начала."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred filmom alebo epizódou spustenou od začiatku prehrá predfilmy zo servera, napríklad z pluginu Local Intros."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spelar upp serverns förfilmer, till exempel från tillägget Local Intros, före en film eller ett avsnitt som startar från början."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baştan başlayan bir film veya bölümden önce sunucunun ön gösterim videolarını, örneğin Local Intros eklentisinden, oynatır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворює вступні ролики із сервера, наприклад із плагіна Local Intros, перед фільмом або серією, запущеними з початку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从头开始播放电影或剧集前，先播放服务器提供的片前视频，例如来自 Local Intros 插件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從頭開始播放電影或影集前，先播放伺服器提供的片前影片，例如來自 Local Intros 外掛。"
+          }
+        }
+      }
+    },
     "settings.playback.preferLossless" : {
       "extractionState" : "manual",
       "localizations" : {
