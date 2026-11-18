@@ -118,4 +118,6 @@ extension HomeViewModel {
 
 /// Thrown by the Upcoming lookup while there is no Seerr session, so "not asked yet" is not
 /// remembered as "nothing announced" (BRW-202).
-struct SeerrLookupUnavailable: Error {}
+struct SeerrLookupUnavailable: LocalizedError {
+    var errorDescription: String? { APIError.serverUnreachable.errorDescription }
+}

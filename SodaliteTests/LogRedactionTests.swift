@@ -271,8 +271,8 @@ struct LogRedactionHostileShapeTests {
 
     @Test("a decoded Seerr cookie goes whole, not only its s: prefix")
     func decodedConnectSID() {
-        let line = LogRedaction.redact("Cookie: connect.sid=s:\(secret).sigpart; Path=/")
-        #expect(line == "Cookie: connect.sid=<redacted>; Path=/")
+        let line = LogRedaction.redact("Set-Cookie: connect.sid=s:\(secret).sigpart; Path=/")
+        #expect(line == "Set-Cookie: connect.sid=<redacted>; Path=/")
     }
 
     @Test("a raw @ inside a password does not leave the rest of it readable")
@@ -418,7 +418,7 @@ struct LogRedactionEngineAuditTests {
     @Test("the other backends' credential names are covered", arguments: [
         ("Authorization: Bearer SECRETopaque12345", "Authorization: Bearer <redacted>"),
         ("Authorization: Basic dmluY2VudDpzZWNyZXQxMjM0", "Authorization: Basic <redacted>"),
-        ("Cookie: PHPSESSID=SECRETsess123; other=1", "Cookie: <redacted>; other=1"),
+        ("Cookie: PHPSESSID=SECRETsess123; other=1", "Cookie: <redacted>"),
         ("Set-Cookie: session=SECRETsess123; Path=/", "Set-Cookie: <redacted>; Path=/"),
         ("X-Api-Key: SECRETkey123", "X-Api-Key: <redacted>"),
         ("https://h/a?api-key=SECRETkey123&x=1", "https://h/a?api-key=<redacted>&x=1"),
@@ -460,14 +460,14 @@ struct LogRedactionEngineAuditTests {
                 == "https://h/a?mediabrowsertoken=<redacted>&x=1")
     }
 
-    /// `cookie` is a key now, and a `Cookie:` header's value runs to its first `;`. The Seerr cookie
-    /// keeps its own rule (name stays readable, decoded `s:` prefix skipped), so the header key steps
-    /// aside for it.
-    @Test("a Seerr session cookie in a Cookie header still keeps its name and goes whole", arguments: [
-        ("Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/", "Cookie: connect.sid=<redacted>; Path=/"),
+    /// A request `Cookie:` header goes whole, every pair in it (audit review R-REDACTION-4). A
+    /// `Set-Cookie:` carries one cookie, so the Seerr one keeps its own rule there (name stays
+    /// readable, decoded `s:` prefix skipped).
+    @Test("a Seerr session cookie goes whole, by name in Set-Cookie and with the header in Cookie", arguments: [
+        ("Cookie: connect.sid=s:SECRETabc123def.sigpart; Path=/", "Cookie: <redacted>"),
         ("Set-Cookie: connect.sid=s%3ASECRETabc123def.sigpart; Path=/; HttpOnly",
          "Set-Cookie: connect.sid=<redacted>; Path=/; HttpOnly"),
-        ("cookie: Connect.SID=s:SECRETabc123def.sigpart; x=1", "cookie: Connect.SID=<redacted>; x=1"),
+        ("cookie: Connect.SID=s:SECRETabc123def.sigpart; x=1", "cookie: <redacted>"),
     ])
     func seerrCookieHeader(input: String, expected: String) {
         #expect(LogRedaction.redact(input) == expected)
