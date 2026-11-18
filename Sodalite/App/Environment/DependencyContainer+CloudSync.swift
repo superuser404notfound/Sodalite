@@ -431,72 +431,10 @@ extension DependencyContainer {
             // describe the sender's box, and applied here two Apple TVs kept switching each other's
             // Top Shelf, buffers and Dolby Vision override through any unrelated edit.
             let store = profileSettings.legacy.playback
-            store.autoplayNextEpisode = p.autoplayNextEpisode
-            store.autoSkipIntro = p.autoSkipIntro
-            store.autoSkipOutro = p.autoSkipOutro
-            store.nextEpisodeCountdownSeconds = p.nextEpisodeCountdownSeconds
-            store.skipForwardSeconds = p.skipForwardSeconds ?? p.skipIntervalSeconds
-            store.skipBackwardSeconds = p.skipBackwardSeconds ?? p.skipIntervalSeconds
-            store.preferredAudioLanguage = p.preferredAudioLanguage
-            store.preferredSubtitleLanguage = p.preferredSubtitleLanguage
-            store.autoSubtitleForForeignAudio = p.autoSubtitleForForeignAudio
-            store.styledASSSubtitles = p.styledASSSubtitles
-            store.subtitleFontSize = PlaybackPreferences.SubtitleFontSize(rawValue: p.subtitleFontSize) ?? store.subtitleFontSize
-            store.subtitleColor = PlaybackPreferences.SubtitleColor(rawValue: p.subtitleColor) ?? store.subtitleColor
-            store.subtitleBackground = PlaybackPreferences.SubtitleBackground(rawValue: p.subtitleBackground) ?? store.subtitleBackground
-            store.subtitleDelaySeconds = p.subtitleDelaySeconds
-            store.subtitleVerticalPosition = PlaybackPreferences.SubtitleVerticalPosition(rawValue: p.subtitleVerticalPosition) ?? store.subtitleVerticalPosition
-            store.subtitleFont = PlaybackPreferences.SubtitleFont(rawValue: p.subtitleFont) ?? store.subtitleFont
-            store.subtitleWeight = PlaybackPreferences.SubtitleWeight(rawValue: p.subtitleWeight) ?? store.subtitleWeight
-            store.pictureMode = PlaybackPreferences.PictureMode(rawValue: p.pictureMode) ?? store.pictureMode
-            store.showScrubPreview = p.showScrubPreview
-            store.preferServerTrickplay = p.preferServerTrickplay
-            // Absent on payloads from builds before these fields existed; leave the local
-            // value alone rather than resetting it to a default.
-            if let remember = p.rememberTrackSelections { store.rememberTrackSelections = remember }
-            if let forced = p.autoForcedSubtitles { store.autoForcedSubtitles = forced }
-            if let autoSkipRecap = p.autoSkipRecap { store.autoSkipRecap = autoSkipRecap }
-            if let skipBackSubs = p.subtitlesOnSkipBack { store.subtitlesOnSkipBack = skipBackSubs }
-            if let countdown = p.autoplayCountdown { store.autoplayCountdown = countdown }
-            if let card = p.showNextEpisodeCard { store.showNextEpisodeCard = card }
-            if let ratingPrompt = p.askForRatingAfterMovie { store.askForRatingAfterMovie = ratingPrompt }
-            if let touchpadScrub = p.touchpadScrubbing { store.touchpadScrubbing = touchpadScrub }
-            if let anchor = p.nextEpisodeCountdownAnchor {
-                store.nextEpisodeCountdownAnchor =
-                    NextEpisodePolicy.CountdownAnchor(rawValue: anchor) ?? store.nextEpisodeCountdownAnchor
-            }
+            ProfilePlaybackPayload(legacy: p, base: store).apply(to: store)
         case .appearance(let a):
             let store = profileSettings.legacy.appearance
-            if let accentChoice = AppearancePreferences.AccentChoice(rawValue: a.accentChoice) {
-                store.accentChoice = accentChoice
-            }
-            if let backgroundStyle = BackgroundStyle(rawValue: a.backgroundStyle) {
-                store.backgroundStyle = backgroundStyle
-            }
-            store.showContentLogos = a.showContentLogos
-            store.continueWatchingImage = AppearancePreferences.ContinueWatchingImage(rawValue: a.continueWatchingImage) ?? store.continueWatchingImage
-            store.largeCards = a.largeCards
-            store.nowPlayingUsesSeriesPoster = a.nowPlayingUsesSeriesPoster
-            store.spoilerProtectionEnabled = a.spoilerProtectionEnabled
-            store.spoilerHideEpisodes = a.spoilerHideEpisodes
-            store.spoilerHideMovies = a.spoilerHideMovies
-            store.showPosterBadges = a.showPosterBadges
-            store.showDetailBadges = a.showDetailBadges
-            store.showLibraryNames = a.showLibraryNames
-            store.showPosterProgress = a.showPosterProgress
-            store.showCommunityRating = a.showCommunityRating
-            store.showCriticRating = a.showCriticRating
-            store.showTagline = a.showTagline
-            store.spoilerHideEpisodeTitles = a.spoilerHideEpisodeTitles
-            // Absent field = sender predates tab visibility, so it carries no opinion; applying an empty set would silently unhide the receiver's tabs (Sodalite#62).
-            if let tabs = a.hiddenTabs {
-                store.applySyncedHiddenTabs(tabs)
-            }
-            // Same shape (Sodalite#140): absent means the sender has no navigation style to offer,
-            // and a default applied here would move the receiver's whole shell out from under it.
-            if let style = a.navigationStyle.flatMap(AppearancePreferences.NavigationStyle.init(rawValue:)) {
-                store.navigationStyle = style
-            }
+            ProfileAppearancePayload(legacy: a, base: store).apply(to: store)
         case .auth(let a):
             authPreferences.launchBehavior = AuthPreferences.LaunchBehavior(rawValue: a.launchBehavior) ?? authPreferences.launchBehavior
             // a.defaultUserID and a.defaultServerID are both retired here, still written for older
