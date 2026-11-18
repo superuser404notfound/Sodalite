@@ -695,6 +695,23 @@ struct SeriesDetailView: View {
                             .id("episodeRow")
                     }
 
+                    // Sodalite#243. The `extras` folder inside a season folder belongs to that season,
+                    // so it follows the season bar and sits right under its episodes, apart from the
+                    // show's own extras further down.
+                    if let season = vm.selectedSeason, !vm.selectedSeasonExtras.isEmpty {
+                        TrailersAndExtrasRow(
+                            localTrailers: [],
+                            youTubeTrailers: [],
+                            extras: vm.selectedSeasonExtras,
+                            title: "detail.seasonExtras \(season.name)",
+                            imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
+                            fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
+                            onItemSelected: { playExtra($0) },
+                            onYouTubeSelected: { _ in }
+                        )
+                        .id("seasonExtras-\(season.id)")
+                    }
+
                     // Cast above Related (Sodalite#47): with the season/episode block over
                     // it, the cast row already sits far down the page for viewers who only
                     // want the people.
@@ -732,12 +749,7 @@ struct SeriesDetailView: View {
                             extras: vm.specialFeatures,
                             imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
                             fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
-                            onItemSelected: { extra in
-                                playItem = extra
-                                playFromBeginning = true
-                                playOriginatedFromPlayButton = false
-                                showPlayer = true
-                            },
+                            onItemSelected: { playExtra($0) },
                             onYouTubeSelected: { trailer in
                                 #if !os(tvOS)
                                 youTubeTrailer = trailer
@@ -787,6 +799,14 @@ struct SeriesDetailView: View {
         }
         .modifier(PageScrollProxyCapture(proxy: $pageScrollProxy))
         .transition(.opacity)
+    }
+
+    /// Trailers and extras are their own server items and always play from the start.
+    private func playExtra(_ extra: JellyfinItem) {
+        playItem = extra
+        playFromBeginning = true
+        playOriginatedFromPlayButton = false
+        showPlayer = true
     }
 
     // MARK: - Glass Panel

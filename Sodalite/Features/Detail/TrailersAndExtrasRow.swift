@@ -10,6 +10,8 @@ struct TrailersAndExtrasRow: View {
     let localTrailers: [JellyfinItem]
     let youTubeTrailers: [YouTubeTrailer]
     let extras: [JellyfinItem]
+    /// Overrides the heading; the season's own row names its season (Sodalite#243).
+    var title: LocalizedStringKey?
     let imageURLProvider: (JellyfinItem) -> URL?
     let fallbackURLProvider: (JellyfinItem) -> URL?
     let onItemSelected: (JellyfinItem) -> Void
@@ -35,7 +37,7 @@ struct TrailersAndExtrasRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Self.title(hasTrailers: hasTrailers, hasExtras: !extras.isEmpty))
+            Text(title ?? Self.title(hasTrailers: hasTrailers, hasExtras: !extras.isEmpty))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.leading, leadingInset)

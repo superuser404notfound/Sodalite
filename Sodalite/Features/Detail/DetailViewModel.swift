@@ -24,7 +24,9 @@ final class DetailViewModel {
     var favoriteOverrides: [String: Bool] = [:]
     /// Rating overrides keyed by episode ID, for the same reason; an inner nil is a cleared rating.
     var ratingOverrides: [String: Double?] = [:]
-    var seasons: [JellyfinItem] = []
+    var seasons: [JellyfinItem] = [] {
+        didSet { loadSelectedSeasonExtras() }
+    }
     var episodes: [JellyfinItem] = []
     /// Cache-miss episode fetch for the selected season in flight; drives the skeleton row instead of a blank ("grey then everything at once" slow-CDN symptom).
     var isLoadingEpisodes = false
@@ -45,7 +47,13 @@ final class DetailViewModel {
     var externalRatings: ExternalRatings?
     /// A ratings fetch is out, so the metadata line holds the server's star back. Capped by a deadline so a slow Seerr cannot keep it hidden.
     var isAwaitingExternalRatings = false
-    var selectedSeasonID: String?
+    var selectedSeasonID: String? {
+        didSet { loadSelectedSeasonExtras() }
+    }
+    /// A season's own extras, from the `extras` folder inside its folder (Sodalite#243), keyed by season id.
+    /// Filled per season on first selection; a failed fetch leaves no entry, so the next selection retries.
+    private(set) var seasonExtras: [String: [JellyfinItem]] = [:]
+    @ObservationIgnored private var seasonExtrasInFlight: Set<String> = []
     var isLoading = false
     /// True once full-detail settles (success or failure). isLoading can flip false at the snapshot deadline while the detail roundtrip is still in flight, so views key overview/secondary placeholders on this to reserve space (Sodalite#15).
     var hasFullDetail = false
@@ -82,6 +90,11 @@ final class DetailViewModel {
     /// Season the tab bar currently has selected; the season synopsis box reads its overview.
     var selectedSeason: JellyfinItem? {
         selectedSeasonID.flatMap { id in seasons.first(where: { $0.id == id }) }
+    }
+
+    /// Extras of the season on screen; empty while they load and for a season without any.
+    var selectedSeasonExtras: [JellyfinItem] {
+        selectedSeasonID.flatMap { seasonExtras[$0] } ?? []
     }
 
     private let itemService: JellyfinItemServiceProtocol
@@ -258,6 +271,21 @@ final class DetailViewModel {
             guard let self else { return }
             let extras = (try? await itemService.getSpecialFeatures(userID: userID, itemID: itemID)) ?? []
             await MainActor.run { self.specialFeatures = extras }
+        }
+    }
+
+    /// Runs on every change of the selection or the season list, because either can land first: an
+    /// episode deep link selects its season before getSeasons has said whether it has extras.
+    private func loadSelectedSeasonExtras() {
+        guard let season = selectedSeason, (season.specialFeatureCount ?? 0) > 0,
+              seasonExtras[season.id] == nil, !seasonExtrasInFlight.contains(season.id) else { return }
+        let seasonID = season.id
+        seasonExtrasInFlight.insert(seasonID)
+        Task { [weak self] in
+            guard let self else { return }
+            let extras = try? await itemService.getSpecialFeatures(userID: userID, itemID: seasonID)
+            seasonExtrasInFlight.remove(seasonID)
+            if let extras { seasonExtras[seasonID] = extras }
         }
     }
 

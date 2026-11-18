@@ -565,7 +565,8 @@ enum JellyfinEndpoint: APIEndpoint {
     /// Season bar: ChildCount (episode count per season) without defaultFields' heavy arrays. Name/index/watched are base/UserData fields.
     /// It must be `ChildCount`, NOT `ItemCounts`: Jellyfin's DtoService fills a Season's ChildCount only under `ItemFields.ChildCount`; `ItemCounts` sets it on the ItemsByName path (people/genres/studios) and leaves a Season's nil. With the wrong field every season read as zero episodes, which the catalog's Jellyfin ground-truth reconcile scores as "deleted".
     /// Overview rides along for the season synopsis box: a per-season text field, not one of defaultFields' heavy arrays, so the round-trip stays cheap.
-    static let seasonListFields = "ChildCount,Overview"
+    /// SpecialFeatureCount gates the season's own extras row (Sodalite#243): one count per season, and the extras themselves are fetched only for a season that has some.
+    static let seasonListFields = "ChildCount,Overview,SpecialFeatureCount"
 
     /// Episode list: only synopsis + thumbnail; name/index/runtime/watched are base/UserData. Heavy per-episode arrays omitted, episode detail pulls them lazily on open.
     static let episodeListFields = "Overview,ImageTags"
