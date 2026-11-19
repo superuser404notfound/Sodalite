@@ -156,6 +156,7 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **Direct Play for almost everything**: H.264, HEVC (including Main10), AV1, VP9, VP8, MPEG-4 Part 2 (XviD / DivX), MPEG-2, VC-1, old Microsoft formats (MS-MPEG4 v1 to v3, WMV1 to WMV3) and old Flash video (Sorenson Spark, On2 VP6). Containers: MKV, MP4, MOV, AVI, MPEG-TS, M2TS, VOB, 3GP, WebM, OGG, ASF / WMV and FLV, with their audio. Only rare codecs like Theora and RealVideo still go through the server.
 - **Resume anywhere**: pick up where you left off, on any device. A Restart button plays from the start instead.
+- **Quick return**: close a title and resume it later while the app is still open, and it starts right away from what was already loaded instead of fetching it again. Switching profile or server drops what was kept.
 - **Pick your version**: when a title has several versions (rips, resolutions, editions), choose which one to play.
 - **Shuffle a series**: random episodes across all seasons.
 - **Trailers**: local trailers play from your server. On iPhone, iPad and Mac, a title without one plays its YouTube trailer instead.
