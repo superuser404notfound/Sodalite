@@ -762,8 +762,6 @@ final class PlaybackPreferences {
     }
 }
 
-/// AetherEngine#846 / #1039: the Enhanced Upscaling picker. `withAnimation` keeps the automatic scaler for
-/// everything else and gives animated titles the engine's line-art scaler.
 /// "Dolby Vision on HDR10 Displays": off, on for every Profile 8.1 / 7 file, or on except for a file
 /// that also carries HDR10+, which keeps its HDR10+ (Sodalite#245).
 enum DolbyVisionOnHDR10Mode: String, CaseIterable, Sendable, Identifiable {
@@ -776,6 +774,8 @@ enum DolbyVisionOnHDR10Mode: String, CaseIterable, Sendable, Identifiable {
     }
 }
 
+/// AetherEngine#846 / #1039: the Enhanced Upscaling picker. `withAnimation` keeps the automatic scaler for
+/// everything else and gives animated titles the engine's line-art scaler.
 enum EnhancedUpscalingMode: String, CaseIterable, Sendable, Identifiable {
     case off, on, withAnimation
     var id: String { rawValue }
