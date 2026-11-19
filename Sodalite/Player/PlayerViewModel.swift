@@ -390,9 +390,39 @@ final class PlayerViewModel {
 
     /// The engine names an embedded track by its container index, Jellyfin by its place in a list
     /// that starts with the source's external files, so every external stream numbered below an
-    /// embedded one pushes its Jellyfin index one place past the container's.
+    /// embedded one pushes its Jellyfin index one place past the container's. A track Jellyfin does
+    /// not list carries its engine id in its index already (Sodalite#247).
     static func embeddedEngineTrackID(forJellyfinIndex index: Int, in streams: [MediaStream]) -> Int {
-        index - streams.filter { $0.isExternal == true && $0.index < index }.count
+        if let engineID = EngineSubtitleInventory.engineTrackID(forMenuIndex: index) { return engineID }
+        return index - streams.filter { $0.isExternal == true && $0.index < index }.count
+    }
+
+    /// The subtitle menu for a Jellyfin stream list. Where the played file is the one the engine
+    /// opened (VOD outside a transcode), the tracks the engine found and Jellyfin does not list join
+    /// it (Sodalite#247). A transcode renumbers the streams and serves text tracks as files, so the
+    /// engine's table says nothing about Jellyfin's there.
+    func subtitleMenuStreams(from sourceStreams: [MediaStream]) -> [MediaStream] {
+        guard !isLiveSession, !isPlayingPreroll, subtitlePlayMethod != .transcode else {
+            return Self.dedupedSubtitleStreams(from: sourceStreams)
+        }
+        return EngineSubtitleInventory.mergedStreams(sourceStreams: sourceStreams,
+                                                     engineTracks: player.subtitleTracks)
+    }
+
+    /// Re-reads the engine's track table into the VOD menu. Runs once right after the load, before
+    /// the automatic pick, so a remembered or preferred track Jellyfin does not list can be chosen,
+    /// and again whenever the engine publishes later (the A53 captions surface on their first data).
+    func refreshEngineSubtitleInventory() {
+        guard !isLiveSession, !isPlayingPreroll, subtitlePlayMethod != .transcode else { return }
+        let merged = subtitleMenuStreams(from: sourceMediaStreams)
+        guard merged.map(\.index) != subtitleStreams.map(\.index) else { return }
+        let added = merged.compactMap { stream in
+            EngineSubtitleInventory.engineTrackID(forMenuIndex: stream.index)
+                .map { "\($0):\(stream.codec ?? "?")/\(stream.language ?? "und")" }
+        }
+        LogTap.shared.note("[Subtitles] engine adds \(added.count) track(s) Jellyfin does not list"
+            + (added.isEmpty ? "" : ": " + added.joined(separator: ", ")))
+        subtitleStreams = merged
     }
 
     func embeddedEngineTrackID(_ index: Int) -> Int {
@@ -1535,6 +1565,7 @@ final class PlayerViewModel {
             // (PiP / external display, #32 / #34), so the two never double up. Fullscreen behaviour is identical to main.
             resetNativeSubtitleRenderingState()
             resetTemporarySubtitleWindows()
+            refreshEngineSubtitleInventory()
             if let carry = pendingSessionCarry {
                 pendingSessionCarry = nil
                 applySessionCarry(carry)
@@ -2276,7 +2307,13 @@ final class PlayerViewModel {
         player.$subtitleTracks
             .receive(on: DispatchQueue.main)
             .sink { [weak self] tracks in
-                guard let self, self.isLiveSession else { return }
+                guard let self else { return }
+                guard self.isLiveSession else {
+                    // A load in flight still shows the previous item's table; the load itself reads
+                    // the fresh one before its automatic pick.
+                    if !self.hostLoadActive { self.refreshEngineSubtitleInventory() }
+                    return
+                }
                 let mapped = LiveSubtitleTracks.mediaStreams(from: tracks)
                 let indices = mapped.map(\.index)
                 guard indices != self.lastLiveSubtitleIndices else { return }
@@ -3087,10 +3124,19 @@ final class PlayerViewModel {
     /// The viewer's picks from before a same-item reload. The audio track already came back through
     /// the reload's AudioStreamIndex.
     private func applySessionCarry(_ carry: SessionCarry) {
-        selectSubtitleTrack(id: carry.subtitleStreamIndex)
-        if let secondary = carry.secondarySubtitleStreamIndex { selectSecondarySubtitleTrack(id: secondary) }
+        selectSubtitleTrack(id: carriedSubtitleIndex(carry.subtitleStreamIndex))
+        if let secondary = carriedSubtitleIndex(carry.secondarySubtitleStreamIndex) {
+            selectSecondarySubtitleTrack(id: secondary)
+        }
         activeSpeedIndex = carry.speedIndex
         if let rate = Self.rateToRestore(speedIndex: carry.speedIndex) { player.setRate(rate) }
+    }
+
+    /// A track only the engine listed exists only while the engine's table is the menu: a quality
+    /// switch into a transcode has no such track, and Jellyfin would be asked for an index it never gave.
+    private func carriedSubtitleIndex(_ index: Int?) -> Int? {
+        guard let index, EngineSubtitleInventory.engineTrackID(forMenuIndex: index) != nil else { return index }
+        return subtitleStreams.contains { $0.index == index } ? index : nil
     }
 
     private func resolveInitialTracks(audioLanguage: String?) {

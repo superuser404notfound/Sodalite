@@ -351,7 +351,7 @@ extension PlayerViewModel {
     /// and both stream lists change together (audit PUI-202, PUI-203).
     func adoptRefreshedMediaStreams(_ mediaStreams: [MediaStream]?, removing removedIndex: Int? = nil) {
         let old = subtitleStreams.filter { $0.index != removedIndex }
-        let new = Self.dedupedSubtitleStreams(from: mediaStreams)
+        let new = subtitleMenuStreams(from: mediaStreams ?? [])
         activeSubtitleIndex = Self.remappedSubtitleIndex(activeSubtitleIndex, old: old, new: new)
         activeSecondarySubtitleIndex = Self.remappedSubtitleIndex(activeSecondarySubtitleIndex, old: old, new: new)
         externalEngineTrackIDs = externalEngineTrackIDs.reduce(into: [:]) { result, entry in

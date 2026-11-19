@@ -184,6 +184,7 @@ Every feature is free. Settings are named as they appear in the app.
 ### Subtitles and tracks
 
 - **Every subtitle format, drawn on the device**: SubRip, ASS, SSA, WebVTT, mov_text, PGS, DVB, DVD, CEA-608 closed captions and DVB Teletext, embedded or as `.srt` / `.ass` / `.vtt` files. Your server does not need to extract or burn anything.
+- **Tracks the server missed**: the subtitle menu lists every track inside the file, also the ones your server's scan did not record, and closed captions carried in the video picture itself.
 - **Styled ASS / SSA**: original fonts, colors and positions, or plain text if you prefer (Settings → Playback).
 - **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. Fully automatic.
 - **Subtitles on skip back**: skipping back turns subtitles on until you are past where you jumped from, then off again. Also works in live TV's timeshift.

@@ -406,7 +406,9 @@ struct StatsOverlayView: View {
     /// The engine's track stands in where Jellyfin has no stream to name: a live channel carries its
     /// subtitles inside the transport stream, and the item that launched it is a channel, not a file.
     private var subtitleSection: some View {
-        let engineTrack = player.subtitleTracks.first { $0.id == activeSubtitleIndex }
+        // A VOD track Jellyfin does not list carries its engine id inside its index (Sodalite#247).
+        let engineID = activeSubtitleIndex.map { EngineSubtitleInventory.engineTrackID(forMenuIndex: $0) ?? $0 }
+        let engineTrack = player.subtitleTracks.first { $0.id == engineID }
         return section("detail.tech.subtitles") {
             if let codec = activeSubtitleStream?.codec?.uppercased()
                 ?? engineTrack?.codec.uppercased() {
