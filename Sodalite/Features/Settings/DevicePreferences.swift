@@ -25,6 +25,7 @@ final class DevicePreferences {
         static let streamingQualityWifi = "playback.streamingQualityWifi"
         static let streamingQualityCellular = "playback.streamingQualityCellular"
         static let forceDolbyVisionOnNonDVDisplay = "playback.forceDolbyVisionOnNonDVDisplay"
+        static let preferHDR10PlusOverForcedDolbyVision = "playback.preferHDR10PlusOverForcedDolbyVision"
         static let enhancedUpscaling = "playback.enhancedUpscaling"
         static let lineArtUpscaling = "playback.lineArtUpscaling"
         static let showTopShelfRow = "appearance.showTopShelfRow"
@@ -127,6 +128,24 @@ final class DevicePreferences {
         didSet { store.set(forceDolbyVisionOnNonDVDisplay, forKey: Keys.forceDolbyVisionOnNonDVDisplay) }
     }
 
+    /// Sodalite#245. With the route above on, a file that also carries HDR10+ keeps it instead
+    /// (`LoadOptions.preferHDR10PlusOverForcedDolbyVision`). tvOS cannot say whether the panel takes
+    /// HDR10+, so it is the viewer's call. Default ON on tvOS: a TV without Dolby Vision is nearly
+    /// always a Samsung, and those take HDR10+.
+    static var preferHDR10PlusOverForcedDolbyVisionDefault: Bool {
+        #if os(tvOS)
+        true
+        #else
+        false
+        #endif
+    }
+
+    var preferHDR10PlusOverForcedDolbyVision: Bool {
+        didSet {
+            store.set(preferHDR10PlusOverForcedDolbyVision, forKey: Keys.preferHDR10PlusOverForcedDolbyVision)
+        }
+    }
+
     /// AetherEngine#846, default OFF. Upscales 8-bit SDR below 1080p on this device's GPU before it
     /// reaches the screen. A device value: what the hardware can afford is not the profile's business.
     var enhancedUpscaling: Bool {
@@ -218,6 +237,9 @@ final class DevicePreferences {
             .flatMap(StreamingQuality.init(rawValue:)) ?? .original
         self.forceDolbyVisionOnNonDVDisplay = store.object(forKey: Keys.forceDolbyVisionOnNonDVDisplay) as? Bool
             ?? Self.forceDolbyVisionOnNonDVDisplayDefault
+        self.preferHDR10PlusOverForcedDolbyVision =
+            store.object(forKey: Keys.preferHDR10PlusOverForcedDolbyVision) as? Bool
+            ?? Self.preferHDR10PlusOverForcedDolbyVisionDefault
         self.enhancedUpscaling = store.object(forKey: Keys.enhancedUpscaling) as? Bool ?? false
         self.lineArtUpscaling = store.object(forKey: Keys.lineArtUpscaling) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
@@ -254,6 +276,7 @@ final class DevicePreferences {
         update(\.streamingQualityWifi)
         update(\.streamingQualityCellular)
         update(\.forceDolbyVisionOnNonDVDisplay)
+        update(\.preferHDR10PlusOverForcedDolbyVision)
         update(\.enhancedUpscaling)
         update(\.lineArtUpscaling)
         update(\.showTopShelfRow)

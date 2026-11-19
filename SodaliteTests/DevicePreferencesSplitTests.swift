@@ -128,6 +128,7 @@ struct DevicePreferencesSplitTests {
         device.streamingQualityWifi = other(device.streamingQualityWifi)
         device.streamingQualityCellular = other(device.streamingQualityCellular)
         device.forceDolbyVisionOnNonDVDisplay.toggle()
+        device.preferHDR10PlusOverForcedDolbyVision.toggle()
         device.enhancedUpscaling.toggle()
         device.lineArtUpscaling.toggle()
         device.showTopShelfRow.toggle()
@@ -142,7 +143,7 @@ struct DevicePreferencesSplitTests {
 
         let names = Set(Mirror(reflecting: device).children.compactMap(\.label)
             .filter { $0.hasPrefix("_") && $0 != "_$observationRegistrar" }.map { String($0.dropFirst()) })
-        #expect(names.count == 24)
+        #expect(names.count == 25)
 
         defaults.removePersistentDomain(forName: suite)
         device.reloadFromStore()

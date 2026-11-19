@@ -502,14 +502,17 @@ struct PlaybackSettingsView: View {
 
                 // AetherEngine#455: only a display without Dolby Vision of its own has anything to gain
                 // here, so on one that has it the row greys out rather than offering a dead switch.
-                boolRow(
+                // Sodalite#245: the third value lets a file's own HDR10+ win on an HDR10+ TV.
+                ValuePickerRow(
                     icon: "sparkles.tv",
                     title: "settings.playback.forceDolbyVision",
                     subtitle: "settings.playback.forceDolbyVision.subtitle",
-                    value: Binding(
-                        get: { prefs.forceDolbyVisionOnNonDVDisplay },
-                        set: { prefs.forceDolbyVisionOnNonDVDisplay = $0 }
-                    )
+                    options: DolbyVisionOnHDR10Mode.allCases,
+                    selection: Binding(
+                        get: { prefs.dolbyVisionOnHDR10Mode },
+                        set: { prefs.dolbyVisionOnHDR10Mode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
                 .settingsValueScope(.device)
                 .disabled(displayHasDolbyVision)

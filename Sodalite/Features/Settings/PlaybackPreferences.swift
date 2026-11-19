@@ -592,6 +592,23 @@ final class PlaybackPreferences {
         set { device.forceDolbyVisionOnNonDVDisplay = newValue }
     }
 
+    var preferHDR10PlusOverForcedDolbyVision: Bool {
+        get { device.preferHDR10PlusOverForcedDolbyVision }
+        set { device.preferHDR10PlusOverForcedDolbyVision = newValue }
+    }
+
+    /// The settings row over the two values above (Sodalite#245).
+    var dolbyVisionOnHDR10Mode: DolbyVisionOnHDR10Mode {
+        get {
+            DolbyVisionOnHDR10Mode(force: forceDolbyVisionOnNonDVDisplay,
+                                   preferHDR10Plus: preferHDR10PlusOverForcedDolbyVision)
+        }
+        set {
+            forceDolbyVisionOnNonDVDisplay = newValue != .off
+            preferHDR10PlusOverForcedDolbyVision = newValue == .hdr10PlusFirst
+        }
+    }
+
     var enhancedUpscaling: Bool {
         get { device.enhancedUpscaling }
         set { device.enhancedUpscaling = newValue }
@@ -742,6 +759,18 @@ final class PlaybackPreferences {
             keyspace: PreferenceKeyspace(defaults: defaults, scope: scope),
             device: device ?? DevicePreferences(store: defaults)
         )
+    }
+}
+
+/// "Dolby Vision on HDR10 Displays": off, on for every Profile 8.1 / 7 file, or on except for a file
+/// that also carries HDR10+, which keeps its HDR10+ (Sodalite#245).
+enum DolbyVisionOnHDR10Mode: String, CaseIterable, Sendable, Identifiable {
+    case off, on, hdr10PlusFirst
+    var id: String { rawValue }
+    var titleKey: String { "settings.playback.forceDolbyVision.\(rawValue)" }
+
+    init(force: Bool, preferHDR10Plus: Bool) {
+        self = !force ? .off : (preferHDR10Plus ? .hdr10PlusFirst : .on)
     }
 }
 

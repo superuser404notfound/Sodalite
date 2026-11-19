@@ -1519,6 +1519,7 @@ final class PlayerViewModel {
                 options: LoadOptions(
                     suppressDisplayCriteria: false,
                     forceDolbyVisionOnNonDVDisplay: preferences.forceDolbyVisionOnNonDVDisplay,
+                    preferHDR10PlusOverForcedDolbyVision: preferences.preferHDR10PlusOverForcedDolbyVision,
                     upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
                     upscaleScaler: upscaleScaler,
                     matchContentEnabled: Self.matchContentEnabled,
