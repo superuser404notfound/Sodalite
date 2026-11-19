@@ -3,6 +3,7 @@ import Foundation
 /// What the banner at the top of Home pages through, per profile scope like the rows below it.
 enum HomeHeroMode: String, CaseIterable {
     case off
+    /// The newest titles the viewer has not watched yet (Sodalite#246).
     case recentlyAdded
     /// Unwatched titles from the whole library, shuffled on every load: what the rows below do not show.
     case discover

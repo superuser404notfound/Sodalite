@@ -120,7 +120,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Local and remote address**: give a server a local and a remote URL. Sodalite uses whichever one answers, so it also works over a VPN. Editable on iPhone and iPad for Jellyfin and Seerr, with a badge for the active route.
 - **Your sign-in stays with your server**: a local address gets your login only after it has answered as your own Jellyfin. On someone else's Wi-Fi the same address can be another device, and Sodalite sends it nothing. A second address that turns out to be a different Jellyfin is refused when you save it.
 - **Home rows**: Continue Watching, Next Up, Latest Movies, Latest Shows and My Media. Turn every row on or off, change the order, merge Continue Watching and Next Up, add a Latest row per library, and give any row a name of your own.
-- **Home banner**: pages through Recently Added, Discover (unwatched titles picked at random) or Favorites, or stays off. Customize Home also sets which movie and show libraries it picks from.
+- **Home banner**: pages through Recently Added (the newest titles you have not watched yet), Discover (unwatched titles picked at random) or Favorites, or stays off. Customize Home also sets which movie and show libraries it picks from.
 - **Recently Released**: two optional rows that sort by release date instead of by when a title reached your server.
 - **Upcoming**: an optional row with the next episode of every show you are caught up on, and when it airs. Needs a metadata plugin that lists unaired episodes; Seerr fills in the rest.
 - **Arrange My Media**: Customize Home sets the order of your libraries and hides the ones you do not need, also across combined servers.
