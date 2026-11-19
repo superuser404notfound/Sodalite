@@ -146,7 +146,7 @@ extension HomeViewModel {
         }
     }
 
-    private static func heroQuery(_ mode: HomeHeroMode) -> ItemQuery {
+    static func heroQuery(_ mode: HomeHeroMode) -> ItemQuery {
         var query = ItemQuery(
             includeItemTypes: [.movie, .series],
             limit: heroLimit * 2,
@@ -156,6 +156,10 @@ extension HomeViewModel {
         case .recentlyAdded:
             query.sortBy = "DateCreated"
             query.sortOrder = "Descending"
+            // The banner advertises what to watch next, so a title already seen has no place in it
+            // (Sodalite#246). A show counts as seen only once every episode is, so one with new
+            // episodes stays. The Recently Added rows below keep everything, as Jellyfin intends.
+            query.filters = ["IsUnplayed"]
         case .discover:
             query.sortBy = "Random"
             query.filters = ["IsUnplayed"]
