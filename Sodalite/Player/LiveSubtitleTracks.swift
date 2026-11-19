@@ -16,14 +16,6 @@ enum LiveSubtitleTracks {
             // engine through the external select path. They cannot occur on live, and mapping one
             // would publish an index that resolves to nothing.
             .filter { !$0.isExternal }
-            .map { track in
-                MediaStream(index: track.id, type: .subtitle, codec: track.codec,
-                            language: track.language, displayTitle: nil,
-                            title: track.name.isEmpty ? nil : track.name,
-                            isDefault: track.isDefault, isForced: track.isForced,
-                            isExternal: false, height: nil, width: nil, channels: nil,
-                            videoRange: nil, videoRangeType: nil, averageFrameRate: nil,
-                            realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: nil)
-            }
+            .map { EngineSubtitleInventory.mediaStream(from: $0, index: $0.id, displayTitle: nil) }
     }
 }
