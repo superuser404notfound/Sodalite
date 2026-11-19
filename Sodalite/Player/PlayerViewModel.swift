@@ -1543,6 +1543,10 @@ final class PlayerViewModel {
                     preferredAudioLanguages: preferredAudio.map { [$0] } ?? [],
                     externalSubtitles: externalSubs.descriptors,
                     forwardBufferSegments: preferences.networkBufferDepth.forwardBufferSegments,
+                    // AE#1095: closing the player keeps what this session fetched, so leaving to the
+                    // detail page and pressing Resume plays it from disk. The engine ignores it on a
+                    // transcode (nativeRemoteHLS) and drops it on any other load.
+                    retainsSessionCacheAfterStop: true,
                     audioDelaySeconds: preferences.audioDelaySeconds,
                     audioShaping: preferences.audioShaping()
                 ),

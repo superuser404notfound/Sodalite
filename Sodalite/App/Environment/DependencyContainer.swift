@@ -407,6 +407,9 @@ final class DependencyContainer {
         if musicPlaybackCoordinator.currentItem != nil {
             musicPlaybackCoordinator.stop()
         }
+        // The segments the last player kept for a Resume (AE#1095) belong to this identity. The next
+        // one could never reuse them (its token makes a different URL), they would only hold disk.
+        AetherEngine.discardRetainedSessionCache()
     }
 
     private func trimFilterCache(keeping survivor: CacheIdentity?) {

@@ -73078,157 +73078,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Délky a zbývající čas vypadají všude stejně, ve vašem jazyce. Plné zařízení to řekne, místo aby vinilo soubor, a na chybových obrazovkách přehrávače přepíná mezi tlačítky přejetí."
+            "value" : "Délky a zbývající čas vypadají všude stejně, ve vašem jazyce. Plné zařízení to řekne, místo aby vinilo soubor, a na chybových obrazovkách přehrávače přepíná mezi tlačítky přejetí. Když titul zavřete a později, dokud aplikace běží, v něm pokračujete, rozběhne se hned z toho, co už bylo načteno."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Spilletider og resterende tid ser ens ud overalt, på dit sprog. En fuld enhed siger det i stedet for at give filen skylden, og et swipe skifter mellem knapperne på afspillerens fejlskærme."
+            "value" : "Spilletider og resterende tid ser ens ud overalt, på dit sprog. En fuld enhed siger det i stedet for at give filen skylden, og et swipe skifter mellem knapperne på afspillerens fejlskærme. Lukker du en titel og fortsætter senere, mens appen stadig er åben, starter den med det samme fra det, der allerede var hentet."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Laufzeiten und Restzeit lesen sich überall gleich, in deiner Sprache. Ein volles Gerät sagt das, statt der Datei die Schuld zu geben, und auf den Fehlerseiten des Players wechselt ein Wisch zwischen den Tasten."
+            "value" : "Laufzeiten und Restzeit lesen sich überall gleich, in deiner Sprache. Ein volles Gerät sagt das, statt der Datei die Schuld zu geben, und auf den Fehlerseiten des Players wechselt ein Wisch zwischen den Tasten. Schließt du einen Titel und setzt ihn später fort, solange die App noch offen ist, startet er sofort aus dem, was schon geladen war."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Οι διάρκειες και ο υπολειπόμενος χρόνος εμφανίζονται παντού ίδια, στη γλώσσα σας. Μια γεμάτη συσκευή το λέει αντί να κατηγορεί το αρχείο, και μια σάρωση μετακινεί ανάμεσα στα κουμπιά στις οθόνες σφάλματος του player."
+            "value" : "Οι διάρκειες και ο υπολειπόμενος χρόνος εμφανίζονται παντού ίδια, στη γλώσσα σας. Μια γεμάτη συσκευή το λέει αντί να κατηγορεί το αρχείο, και μια σάρωση μετακινεί ανάμεσα στα κουμπιά στις οθόνες σφάλματος του player. Αν κλείσετε έναν τίτλο και τον συνεχίσετε αργότερα όσο η εφαρμογή είναι ακόμα ανοιχτή, ξεκινά αμέσως από ό,τι είχε ήδη φορτωθεί."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Runtimes and time left read the same everywhere, in your language. A full device says so instead of blaming the file, and a swipe moves between the buttons on the player's error screens."
+            "value" : "Runtimes and time left read the same everywhere, in your language. A full device says so instead of blaming the file, and a swipe moves between the buttons on the player's error screens. Close a title and resume it later while the app is still open, and it starts right away from what was already loaded."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las duraciones y el tiempo restante se ven igual en todas partes, en tu idioma. Un dispositivo lleno lo dice en lugar de culpar al archivo, y deslizar cambia entre los botones de las pantallas de error del reproductor."
+            "value" : "Las duraciones y el tiempo restante se ven igual en todas partes, en tu idioma. Un dispositivo lleno lo dice en lugar de culpar al archivo, y deslizar cambia entre los botones de las pantallas de error del reproductor. Si cierras un título y lo reanudas más tarde con la app aún abierta, empieza al instante con lo que ya estaba cargado."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kestot ja jäljellä oleva aika näyttävät kaikkialla samalta, omalla kielelläsi. Täynnä oleva laite kertoo sen eikä syytä tiedostoa, ja pyyhkäisy siirtää painikkeiden välillä soittimen virhenäkymissä."
+            "value" : "Kestot ja jäljellä oleva aika näyttävät kaikkialla samalta, omalla kielelläsi. Täynnä oleva laite kertoo sen eikä syytä tiedostoa, ja pyyhkäisy siirtää painikkeiden välillä soittimen virhenäkymissä. Kun suljet nimikkeen ja jatkat sitä myöhemmin sovelluksen ollessa yhä auki, se alkaa heti jo ladatusta osasta."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les durées et le temps restant s’affichent partout de la même façon, dans votre langue. Un appareil plein le dit au lieu d’accuser le fichier, et un balayage passe d’un bouton à l’autre sur les écrans d’erreur du lecteur."
+            "value" : "Les durées et le temps restant s’affichent partout de la même façon, dans votre langue. Un appareil plein le dit au lieu d’accuser le fichier, et un balayage passe d’un bouton à l’autre sur les écrans d’erreur du lecteur. Si vous fermez un titre et le reprenez plus tard pendant que l’app est encore ouverte, il démarre aussitôt à partir de ce qui était déjà chargé."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trajanja i preostalo vrijeme sada svugdje izgledaju isto, na vašem jeziku. Pun uređaj to kaže umjesto da okrivljuje datoteku, a prelazak prstom mijenja gumbe na zaslonima pogreške playera."
+            "value" : "Trajanja i preostalo vrijeme sada svugdje izgledaju isto, na vašem jeziku. Pun uređaj to kaže umjesto da okrivljuje datoteku, a prelazak prstom mijenja gumbe na zaslonima pogreške playera. Zatvorite li naslov i nastavite ga kasnije dok je aplikacija još otvorena, kreće odmah iz onoga što je već učitano."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A játékidő és a hátralévő idő mindenhol egyformán jelenik meg, a te nyelveden. A megtelt eszköz ezt jelzi ahelyett, hogy a fájlt okolná, a lejátszó hibaképernyőin pedig pöccintéssel lehet váltani a gombok között."
+            "value" : "A játékidő és a hátralévő idő mindenhol egyformán jelenik meg, a te nyelveden. A megtelt eszköz ezt jelzi ahelyett, hogy a fájlt okolná, a lejátszó hibaképernyőin pedig pöccintéssel lehet váltani a gombok között. Ha bezársz egy címet, és később folytatod, amíg az app még nyitva van, azonnal indul abból, ami már betöltődött."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Durate e tempo rimanente appaiono ovunque allo stesso modo, nella tua lingua. Un dispositivo pieno lo dice chiaramente invece di incolpare il file, e uno scorrimento passa da un pulsante all’altro nelle schermate di errore del player."
+            "value" : "Durate e tempo rimanente appaiono ovunque allo stesso modo, nella tua lingua. Un dispositivo pieno lo dice chiaramente invece di incolpare il file, e uno scorrimento passa da un pulsante all’altro nelle schermate di errore del player. Se chiudi un titolo e lo riprendi più tardi con l’app ancora aperta, parte subito da ciò che era già stato caricato."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再生時間と残り時間の表示がどこでも統一され、お使いの言語で表示されます。デバイスの容量が不足したときはファイルのせいにせずそう表示し、プレーヤーのエラー画面ではスワイプでボタン間を移動できます。"
+            "value" : "再生時間と残り時間の表示がどこでも統一され、お使いの言語で表示されます。デバイスの容量が不足したときはファイルのせいにせずそう表示し、プレーヤーのエラー画面ではスワイプでボタン間を移動できます。 タイトルを閉じても、アプリを開いたまま後で再開すれば、読み込み済みの部分からすぐに再生が始まります。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "재생 시간과 남은 시간이 어디서나 같은 형식으로, 사용하는 언어로 표시됩니다. 기기 저장 공간이 가득 차면 파일 탓을 하지 않고 그대로 알려 주며, 플레이어의 오류 화면에서는 스와이프로 버튼 사이를 이동할 수 있습니다."
+            "value" : "재생 시간과 남은 시간이 어디서나 같은 형식으로, 사용하는 언어로 표시됩니다. 기기 저장 공간이 가득 차면 파일 탓을 하지 않고 그대로 알려 주며, 플레이어의 오류 화면에서는 스와이프로 버튼 사이를 이동할 수 있습니다. 타이틀을 닫았다가 앱이 열려 있는 동안 나중에 이어 보면, 이미 불러온 부분부터 바로 시작됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Spilletid og gjenværende tid ser like ut overalt, på ditt språk. En full enhet sier fra om det i stedet for å skylde på filen, og et sveip flytter mellom knappene på avspillerens feilskjermer."
+            "value" : "Spilletid og gjenværende tid ser like ut overalt, på ditt språk. En full enhet sier fra om det i stedet for å skylde på filen, og et sveip flytter mellom knappene på avspillerens feilskjermer. Lukker du en tittel og fortsetter senere mens appen fortsatt er åpen, starter den med en gang fra det som allerede var lastet."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speelduur en resterende tijd zien er overal hetzelfde uit, in jouw taal. Een vol apparaat zegt dat ook, in plaats van het bestand de schuld te geven, en een veeg wisselt tussen de knoppen op de foutschermen van de speler."
+            "value" : "Speelduur en resterende tijd zien er overal hetzelfde uit, in jouw taal. Een vol apparaat zegt dat ook, in plaats van het bestand de schuld te geven, en een veeg wisselt tussen de knoppen op de foutschermen van de speler. Sluit je een titel en hervat je hem later terwijl de app nog open is, dan start hij meteen vanuit wat al geladen was."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Czas trwania i pozostały czas wyglądają wszędzie tak samo, w Twoim języku. Pełne urządzenie mówi o tym wprost, zamiast obwiniać plik, a przesunięcie palcem przełącza między przyciskami na ekranach błędów odtwarzacza."
+            "value" : "Czas trwania i pozostały czas wyglądają wszędzie tak samo, w Twoim języku. Pełne urządzenie mówi o tym wprost, zamiast obwiniać plik, a przesunięcie palcem przełącza między przyciskami na ekranach błędów odtwarzacza. Gdy zamkniesz tytuł i wznowisz go później, póki aplikacja jest otwarta, rusza od razu z tego, co już zostało wczytane."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Durações e tempo restante aparecem iguais em todo lugar, no seu idioma. Um dispositivo cheio avisa isso em vez de culpar o arquivo, e um deslize alterna entre os botões nas telas de erro do player."
+            "value" : "Durações e tempo restante aparecem iguais em todo lugar, no seu idioma. Um dispositivo cheio avisa isso em vez de culpar o arquivo, e um deslize alterna entre os botões nas telas de erro do player. Se você fechar um título e retomá-lo depois com o app ainda aberto, ele começa na hora a partir do que já estava carregado."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As durações e o tempo restante aparecem iguais em todo o lado, no seu idioma. Um dispositivo cheio indica-o em vez de culpar o ficheiro, e um deslize alterna entre os botões nos ecrãs de erro do leitor."
+            "value" : "As durações e o tempo restante aparecem iguais em todo o lado, no seu idioma. Um dispositivo cheio indica-o em vez de culpar o ficheiro, e um deslize alterna entre os botões nos ecrãs de erro do leitor. Se fechar um título e o retomar mais tarde com a app ainda aberta, começa de imediato a partir do que já estava carregado."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Duratele și timpul rămas arată la fel peste tot, în limba ta. Un dispozitiv plin spune acest lucru în loc să dea vina pe fișier, iar pe ecranele de eroare ale playerului o glisare trece între butoane."
+            "value" : "Duratele și timpul rămas arată la fel peste tot, în limba ta. Un dispozitiv plin spune acest lucru în loc să dea vina pe fișier, iar pe ecranele de eroare ale playerului o glisare trece între butoane. Dacă închizi un titlu și îl reiei mai târziu cât aplicația e încă deschisă, pornește imediat din ce era deja încărcat."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Длительность и оставшееся время везде выглядят одинаково, на вашем языке. Заполненное устройство прямо об этом сообщает, не обвиняя файл, а на экранах ошибок плеера свайп переключает между кнопками."
+            "value" : "Длительность и оставшееся время везде выглядят одинаково, на вашем языке. Заполненное устройство прямо об этом сообщает, не обвиняя файл, а на экранах ошибок плеера свайп переключает между кнопками. Если закрыть фильм и продолжить его позже, пока приложение открыто, он сразу начнётся с уже загруженного."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dĺžky a zostávajúci čas vyzerajú všade rovnako, vo vašom jazyku. Plné zariadenie to povie priamo namiesto toho, aby vinilo súbor, a na chybových obrazovkách prehrávača prepína medzi tlačidlami potiahnutie."
+            "value" : "Dĺžky a zostávajúci čas vyzerajú všade rovnako, vo vašom jazyku. Plné zariadenie to povie priamo namiesto toho, aby vinilo súbor, a na chybových obrazovkách prehrávača prepína medzi tlačidlami potiahnutie. Keď titul zatvoríte a neskôr, kým aplikácia beží, v ňom pokračujete, rozbehne sa hneď z toho, čo už bolo načítané."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speltid och återstående tid ser likadana ut överallt, på ditt språk. En full enhet säger det i stället för att skylla på filen, och ett svep flyttar mellan knapparna på spelarens felskärmar."
+            "value" : "Speltid och återstående tid ser likadana ut överallt, på ditt språk. En full enhet säger det i stället för att skylla på filen, och ett svep flyttar mellan knapparna på spelarens felskärmar. Stänger du en titel och fortsätter senare medan appen fortfarande är öppen, startar den direkt från det som redan var laddat."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Süreler ve kalan süre her yerde aynı biçimde ve sizin dilinizde görünüyor. Dolu bir cihaz dosyayı suçlamak yerine bunu söylüyor ve oynatıcının hata ekranlarında kaydırma düğmeler arasında geçiş yapıyor."
+            "value" : "Süreler ve kalan süre her yerde aynı biçimde ve sizin dilinizde görünüyor. Dolu bir cihaz dosyayı suçlamak yerine bunu söylüyor ve oynatıcının hata ekranlarında kaydırma düğmeler arasında geçiş yapıyor. Bir içeriği kapatıp uygulama hâlâ açıkken daha sonra devam ettirirseniz, zaten yüklenmiş kısımdan hemen başlar."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Тривалість і залишок часу всюди виглядають однаково, вашою мовою. Заповнений пристрій прямо про це повідомляє, не звинувачуючи файл, а на екранах помилок плеєра свайп перемикає між кнопками."
+            "value" : "Тривалість і залишок часу всюди виглядають однаково, вашою мовою. Заповнений пристрій прямо про це повідомляє, не звинувачуючи файл, а на екранах помилок плеєра свайп перемикає між кнопками. Якщо закрити фільм і продовжити його пізніше, поки застосунок відкритий, він одразу почнеться з уже завантаженого."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "时长和剩余时间在各处以相同格式、用你的语言显示。设备存储已满时会直接说明，而不再归咎于文件；在播放器的错误界面中，轻扫即可在按钮之间切换。"
+            "value" : "时长和剩余时间在各处以相同格式、用你的语言显示。设备存储已满时会直接说明，而不再归咎于文件；在播放器的错误界面中，轻扫即可在按钮之间切换。关闭某个影片后，只要应用仍开着，稍后继续播放时会直接从已加载的部分立即开始。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "片長和剩餘時間在各處以相同格式、用你的語言顯示。裝置儲存空間已滿時會直接說明，而不再歸咎於檔案；在播放器的錯誤畫面中，輕掃即可在按鈕之間切換。"
+            "value" : "片長和剩餘時間在各處以相同格式、用你的語言顯示。裝置儲存空間已滿時會直接說明，而不再歸咎於檔案；在播放器的錯誤畫面中，輕掃即可在按鈕之間切換。關閉某部影片後，只要 App 仍開著，稍後繼續播放時會直接從已載入的部分立即開始。"
           }
         }
       }
