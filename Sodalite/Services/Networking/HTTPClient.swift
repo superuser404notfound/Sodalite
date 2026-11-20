@@ -65,7 +65,10 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
     ///
     /// A cancelled request never reaches it: cancellation is answered above, and a request the app
     /// itself called off is not news about a server.
-    nonisolated(unsafe) var onServerDidNotServe: (@Sendable () -> Void)?
+    ///
+    /// Carries the base URL the request went to: Combine secondaries share this client, and a
+    /// friend's dead server says nothing about the active one (audit NET-208).
+    nonisolated(unsafe) var onServerDidNotServe: (@Sendable (URL) -> Void)?
 
     nonisolated init(
         session: URLSession? = nil,
@@ -112,7 +115,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
         let (data, response) = try await requestData(baseURL: baseURL, endpoint: endpoint, headers: headers)
 
         do {
-            return try decoder.decode(T.self, from: data)
+            return try await Self.decodeValue(from: data, using: decoder)
         } catch {
             if let url = response.url {
                 LogTap.shared.note(
@@ -121,6 +124,22 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
             }
             throw APIError.decodingError(error)
         }
+    }
+
+    /// The decoded value itself, for the callers outside this class (audit NET-204).
+    static func decodeValue<T: Decodable>(from data: Data, using decoder: JSONDecoder) async throws -> T {
+        let decoded: DecodedResponse<T> = try await decode(from: data, using: decoder)
+        return decoded.value
+    }
+
+    /// Off the main thread. This client is MainActor, so decoding in `request` put every Jellyfin
+    /// response on it: 15 ms for one 145 KB Home row on an Apple TV 4K (2022), about 30 ms for the
+    /// rows of one Home load, more for a library grid. The value comes back in `DecodedResponse` so
+    /// the response types need not all be Sendable.
+    @concurrent nonisolated private static func decode<T: Decodable>(
+        from data: Data, using decoder: JSONDecoder
+    ) async throws -> DecodedResponse<T> {
+        DecodedResponse(value: try decoder.decode(T.self, from: data))
     }
 
     func request(
@@ -165,7 +184,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
                     HTTPDiagnostics.transport(method: endpoint.method.rawValue, url: url, error: error)
                 )
             }
-            onServerDidNotServe?()
+            onServerDidNotServe?(baseURL)
             throw await Self.transportFailure(error, url: urlRequest.url)
         }
 
@@ -182,7 +201,7 @@ final class HTTPClient: HTTPClientProtocol, @unchecked Sendable {
             #endif
             return (data, httpResponse)
         default:
-            if (500...599).contains(httpResponse.statusCode) { onServerDidNotServe?() }
+            if (500...599).contains(httpResponse.statusCode) { onServerDidNotServe?(baseURL) }
             if let url = httpResponse.url {
                 LogTap.shared.note(
                     HTTPDiagnostics.status(
@@ -385,4 +404,10 @@ private struct AnyEncodable: Encodable {
     func encode(to encoder: Encoder) throws {
         try _encode(encoder)
     }
+}
+
+/// Carries a freshly decoded response from the decode thread back to the caller. Unchecked because
+/// the value is created there, handed over once and never touched by the decode side again.
+private nonisolated struct DecodedResponse<T>: @unchecked Sendable {
+    let value: T
 }

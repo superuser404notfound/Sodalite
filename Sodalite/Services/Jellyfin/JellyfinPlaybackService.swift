@@ -8,13 +8,22 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     /// because the tuner sweep has to tell our own session apart from every other client's (#147).
     var deviceID: String { get }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse
+    /// Same request pinned to one media source, naming the audio stream a transcode should carry.
+    /// Jellyfin applies a stream index only to the source the request names, and then answers with
+    /// that source alone (Sodalite#87).
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse
     /// Live PlaybackInfo: AutoOpenLiveStream probes the stream (known codecs → DirectStream/copy, real LiveStreamId for tuner release); maxStreamingBitrate caps a transcode.
     ///
     /// `enableDirectPlay` is true for every ordinary tune and false only on the second pass a channel
     /// with undecodable audio takes (#100). Jellyfin answers a DirectPlay verdict with neither a
     /// TranscodingUrl nor a reason, so taking that verdict off the table is the only way to see what
     /// else the server would have offered.
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse
+    ///
+    /// `autoOpenLiveStream` false asks without opening anything: no tuner, no probe, no handle to close.
+    /// The answer carries the channel's lineup source as is, which for an M3U channel is the provider
+    /// URL in `Path`, and that is all the direct route needs (#204).
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws
     func reportPlaybackStopped(_ report: PlaybackStopReport) async throws
@@ -39,6 +48,17 @@ protocol JellyfinPlaybackServiceProtocol: EpisodeCatalogQuerying {
     func deleteSubtitle(itemID: String, index: Int) async throws
     func buildTranscodeURL(relativePath: String) -> URL?
     func buildLiveStreamFileURL(sourcePath: String) -> URL?
+    /// Sodalite#244: the pre-rolls the server's intro providers (Local Intros plugin) pick for this item.
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem]
+}
+
+extension JellyfinPlaybackServiceProtocol {
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] { [] }
+
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile)
+    }
 }
 
 final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
@@ -53,29 +73,73 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil) async throws -> PlaybackInfoResponse {
-        try await postPlaybackInfo(profile: profile) { payload in
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile,
+                                  mediaSourceID: nil, audioStreamIndex: nil)
+    }
+
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        let body = Self.vodPlaybackInfoBody(profile: profile ?? [:], mediaSourceID: mediaSourceID,
+                                            audioStreamIndex: audioStreamIndex)
+        return try await postPlaybackInfo(profile: profile, body: body) { payload in
             JellyfinEndpoint.playbackInfo(itemID: itemID, userID: userID, payload: payload)
         }
     }
 
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil, maxStreamingBitrate: Int, enableDirectPlay: Bool = true) async throws -> PlaybackInfoResponse {
-        try await postPlaybackInfo(profile: profile, enableDirectPlay: enableDirectPlay) { payload in
+    /// The VOD body: the rung travels as the top-level `MaxStreamingBitrate` too (Sodalite#87), and
+    /// `SubtitleStreamIndex` is -1, "none". Sodalite draws every subtitle itself; a stream the server
+    /// picked would be burned into a transcode, which Jellyfin prepares by extracting every subtitle
+    /// from the whole file first (a minute on a 15 GB remux, measured 2026-09-28), and would then
+    /// show twice. Both indexes count only with `MediaSourceId` set, and only a source id the server
+    /// gave out may go there: one that matches no source makes it answer with no source at all.
+    static func vodPlaybackInfoBody(profile: [String: Any], mediaSourceID: String?,
+                                    audioStreamIndex: Int?) -> [String: Any] {
+        var body = playbackInfoBody(profile: profile,
+                                    maxStreamingBitrate: profile["MaxStreamingBitrate"] as? Int,
+                                    audioStreamIndex: audioStreamIndex, enableDirectPlay: true)
+        body["SubtitleStreamIndex"] = -1
+        if let mediaSourceID { body["MediaSourceId"] = mediaSourceID }
+        return body
+    }
+
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]? = nil, maxStreamingBitrate: Int, enableDirectPlay: Bool = true, autoOpenLiveStream: Bool = true) async throws -> PlaybackInfoResponse {
+        let body = Self.playbackInfoBody(profile: profile ?? [:], maxStreamingBitrate: nil,
+                                         enableDirectPlay: enableDirectPlay)
+        return try await postPlaybackInfo(profile: profile, body: body) { payload in
             JellyfinEndpoint.livePlaybackInfo(
                 itemID: itemID,
                 userID: userID,
                 maxStreamingBitrate: maxStreamingBitrate,
-                payload: payload
+                payload: payload,
+                autoOpen: autoOpenLiveStream
             )
         }
+    }
+
+    /// The PlaybackInfo body. For VOD the rung also travels as the top-level `MaxStreamingBitrate`,
+    /// the PlaybackInfoDto field (Sodalite#87). Live passes nil: it sends its cap as a query item, and
+    /// a second value in the body could contradict the 12 Mbit/s re-encode pass.
+    ///
+    /// `EnableDirectPlay` is sent only when it is false. The field defaults to true on every Jellyfin
+    /// that has it, and a body that names it on every request would carry a flag most servers never
+    /// needed to read.
+    static func playbackInfoBody(profile: [String: Any], maxStreamingBitrate: Int?,
+                                 audioStreamIndex: Int? = nil,
+                                 enableDirectPlay: Bool) -> [String: Any] {
+        var body: [String: Any] = ["DeviceProfile": profile]
+        if let maxStreamingBitrate { body["MaxStreamingBitrate"] = maxStreamingBitrate }
+        if let audioStreamIndex { body["AudioStreamIndex"] = audioStreamIndex }
+        if !enableDirectPlay { body["EnableDirectPlay"] = false }
+        return body
     }
 
     /// Routes through the shared HTTPClient (limiter, timeouts, APIError, cookie-free) not URLSession.shared; uses requestData + manual decode because DEBUG codec diagnostics need raw data.
     private func postPlaybackInfo(
         profile: [String: Any]?,
-        enableDirectPlay: Bool = true,
+        body: [String: Any],
         endpoint: (JSONValue) throws -> JellyfinEndpoint
     ) async throws -> PlaybackInfoResponse {
-        guard let baseURL = client.baseURL else { throw APIError.invalidURL }
+        let baseURL = try await client.admittedBaseURL()
 
         // Caller picks the profile (DirectPlayProfile.current() touches UIScreen, must run on the main actor); empty fallback shouldn't happen in practice.
         let deviceProfile = profile ?? [:]
@@ -86,12 +150,6 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         }
         #endif
 
-        // Sent only when it is false. The field defaults to true on every Jellyfin that has it, and a
-        // body that names it on every request would carry a flag most servers never needed to read.
-        var body: [String: Any] = ["DeviceProfile": deviceProfile]
-        if !enableDirectPlay {
-            body["EnableDirectPlay"] = false
-        }
         let payload = try JSONValue(jsonObject: body)
         let headers = [
             "Authorization": client.buildAuthHeader(),
@@ -125,7 +183,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         #endif
 
         do {
-            return try JSONDecoder().decode(PlaybackInfoResponse.self, from: data)
+            return try await HTTPClient.decodeValue(from: data, using: JSONDecoder())
         } catch {
             throw APIError.decodingError(error)
         }
@@ -186,18 +244,22 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         return response.items
     }
 
-    /// Intro + outro + recap markers in one call; empty struct on 404 (pre-10.10 without intro-skipper) or no segments.
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] {
+        let response: JellyfinItemsResponse = try await client.request(
+            endpoint: JellyfinEndpoint.intros(userID: userID, itemID: itemID),
+            responseType: JellyfinItemsResponse.self
+        )
+        return response.items
+    }
+
+    /// Intro + outro + recap markers and all commercial breaks in one call; empty struct on 404 (pre-10.10 without intro-skipper) or no segments.
     func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments {
         do {
             let response: MediaSegmentsResponse = try await client.request(
                 endpoint: JellyfinEndpoint.mediaSegments(itemID: itemID),
                 responseType: MediaSegmentsResponse.self
             )
-            return EpisodeSegments(
-                intro: response.items.first(where: { $0.type == .intro }),
-                outro: response.items.first(where: { $0.type == .outro }),
-                recap: response.items.first(where: { $0.type == .recap })
-            )
+            return EpisodeSegments(items: response.items)
         } catch APIError.httpError(let status, _) where status == 404 {
             return EpisodeSegments(intro: nil, outro: nil, recap: nil)
         }
@@ -231,13 +293,12 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     private func buildMediaStreamURL(pathPrefix: String, itemID: String, mediaSourceID: String, container: String?, defaultExt: String, isStatic: Bool) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let ext = container ?? defaultExt
         var components = URLComponents(url: baseURL.appendingPathComponent("/\(pathPrefix)/\(itemID)/stream.\(ext)"), resolvingAgainstBaseURL: true)
         var queryItems = [
             URLQueryItem(name: "MediaSourceId", value: mediaSourceID),
-            URLQueryItem(name: "api_key", value: token),
-        ]
+        ] + Self.tokenQueryItems(token)
         if isStatic {
             queryItems.append(URLQueryItem(name: "Static", value: "true"))
         }
@@ -245,12 +306,21 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
         return components?.url
     }
 
+    /// The access token for a URL the player or an image loader fetches without our headers.
+    /// Jellyfin 12 no longer reads `api_key` on any route (`/Items/{id}/PlaybackInfo` answers 401
+    /// with it, 200 with `ApiKey`). Routes that seemed to accept it are anonymous on a default
+    /// server; trickplay tiles are not, so the scrub preview stayed empty (Sodalite#234).
+    /// `ApiKey` is read since 10.9; `api_key` stays for older servers.
+    nonisolated static func tokenQueryItems(_ token: String) -> [URLQueryItem] {
+        JellyfinTokenQuery.items(token)
+    }
+
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let fmt = Self.subtitleRouteFormat(forCodec: format)
         let path = "/Videos/\(itemID)/\(mediaSourceID)/Subtitles/\(streamIndex)/0/Stream.\(fmt)"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
-        components?.queryItems = [URLQueryItem(name: "api_key", value: token)]
+        components?.queryItems = Self.tokenQueryItems(token)
         return components?.url
     }
 
@@ -266,7 +336,7 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     }
 
     func buildChapterImageURL(itemID: String, chapterIndex: Int, imageTag: String, maxWidth: Int) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let path = "/Items/\(itemID)/Images/Chapter/\(chapterIndex)"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
         components?.queryItems = [
@@ -274,16 +344,15 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
             URLQueryItem(name: "tag", value: imageTag),
             URLQueryItem(name: "maxWidth", value: String(maxWidth)),
             URLQueryItem(name: "quality", value: "90"),
-            URLQueryItem(name: "api_key", value: token),
-        ]
+        ] + Self.tokenQueryItems(token)
         return components?.url
     }
 
     func buildTrickplayTileURL(itemID: String, width: Int, tileIndex: Int) -> URL? {
-        guard let baseURL = client.baseURL, let token = client.accessToken else { return nil }
+        guard let baseURL = client.baseURL, let token = client.verifiedAccessToken else { return nil }
         let path = "/Videos/\(itemID)/Trickplay/\(width)/\(tileIndex).jpg"
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)
-        components?.queryItems = [URLQueryItem(name: "api_key", value: token)]
+        components?.queryItems = Self.tokenQueryItems(token)
         return components?.url
     }
 
@@ -317,12 +386,13 @@ final class JellyfinPlaybackService: JellyfinPlaybackServiceProtocol {
     /// own bind address, so for a client reaching Jellyfin over WAN, a reverse proxy, HTTPS or a VPN
     /// hostname it resolves to nothing and fails as a connection timeout rather than an error. Keep the
     /// server-relative part only and re-anchor it on the URL we are actually connected on, subpath and
-    /// all. `api_key` rides along so the request correlates in server logs and survives the route
+    /// all. The token rides along so the request correlates in server logs and survives the route
     /// gaining an authorization policy later; the route ignores it today.
     func buildLiveStreamFileURL(sourcePath: String) -> URL? {
         guard var relative = Self.liveStreamFileRelativePath(fromSourcePath: sourcePath) else { return nil }
-        if let token = client.accessToken {
-            relative += relative.contains("?") ? "&api_key=\(token)" : "?api_key=\(token)"
+        if let token = client.verifiedAccessToken {
+            let query = JellyfinTokenQuery.queryString(token)
+            relative += (relative.contains("?") ? "&" : "?") + query
         }
         return buildTranscodeURL(relativePath: relative)
     }

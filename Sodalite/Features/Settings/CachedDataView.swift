@@ -104,7 +104,6 @@ struct CachedDataView: View {
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
             }
             Spacer()
             Text(Self.size(bytes))
@@ -130,7 +129,6 @@ struct CachedDataView: View {
                     Text("settings.cachedData.clear.subtitle", bundle: .main)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
                 }
                 Spacer()
             }

@@ -20,6 +20,39 @@ struct UserPickerView: View {
     @State private var signInClient: JellyfinClient?
 
     var body: some View {
+        screen
+            .task {
+                await loadUsers()
+            }
+            .navigationDestination(isPresented: Binding(
+                get: { selectedUser != nil || manualLogin },
+                set: { active in
+                    if !active {
+                        selectedUser = nil
+                        manualLogin = false
+                    }
+                }
+            )) {
+                LoginView(
+                    server: server,
+                    preSelectedUser: selectedUser,
+                    addMode: addMode,
+                    onCompletion: onCompletion
+                )
+                .themedNavigationDestination()
+            }
+    }
+
+    @ViewBuilder
+    private var screen: some View {
+        #if os(iOS)
+        touchScreen
+        #else
+        focusScreen
+        #endif
+    }
+
+    private var focusScreen: some View {
         VStack(spacing: 40) {
             header
 
@@ -36,27 +69,63 @@ struct UserPickerView: View {
         }
         .screenContentInset()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task {
-            await loadUsers()
-        }
-        .navigationDestination(isPresented: Binding(
-            get: { selectedUser != nil || manualLogin },
-            set: { active in
-                if !active {
-                    selectedUser = nil
-                    manualLogin = false
+    }
+
+    #if os(iOS)
+    private var touchScreen: some View {
+        OnboardingScaffold(
+            title: Text(verbatim: server.name),
+            subtitle: Text(String(localized: "auth.users.title", defaultValue: "Who's watching?"))
+        ) {
+            if isLoading {
+                ProgressView()
+                    .padding(.top, 24)
+            } else if let errorMessage {
+                touchNotice(systemImage: "exclamationmark.triangle", message: errorMessage)
+            } else if users.isEmpty {
+                touchNotice(systemImage: "person.crop.circle.badge.questionmark", message: emptyMessage)
+            } else {
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: min(3, users.count)),
+                    spacing: 24
+                ) {
+                    ForEach(users) { user in
+                        UserPickerCard(user: user, baseURL: signInClient?.baseURL) {
+                            selectedUser = user
+                        }
+                    }
                 }
+                .padding(.top, 8)
             }
-        )) {
-            LoginView(
-                server: server,
-                preSelectedUser: selectedUser,
-                addMode: addMode,
-                onCompletion: onCompletion
-            )
-            .themedNavigationDestination()
+        } actions: {
+            if errorMessage != nil {
+                OnboardingPrimaryButton(title: "home.retry") {
+                    Task { await loadUsers() }
+                }
+                OnboardingSecondaryButton(title: "auth.users.signIn") { manualLogin = true }
+            } else if users.isEmpty && !isLoading {
+                OnboardingPrimaryButton(title: "auth.users.signIn") { manualLogin = true }
+            } else if !isLoading {
+                OnboardingSecondaryButton(title: "auth.users.manual") { manualLogin = true }
+            }
         }
     }
+
+    private func touchNotice(systemImage: String, message: String) -> some View {
+        OnboardingCard {
+            VStack(spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 36))
+                    .foregroundStyle(.tertiary)
+                Text(verbatim: message)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(20)
+        }
+    }
+    #endif
 
     // MARK: - Header
 
@@ -64,7 +133,12 @@ struct UserPickerView: View {
         VStack(spacing: 12) {
             Text(server.name)
                 .font(.title2)
+                // Bold on the TV, like the title of the sign-in screens around it.
+                #if os(tvOS)
+                .fontWeight(.bold)
+                #else
                 .fontWeight(.semibold)
+                #endif
 
             Text(String(
                 localized: "auth.users.title",
@@ -135,20 +209,24 @@ struct UserPickerView: View {
 
     // MARK: - States
 
+    private var emptyMessage: String {
+        allProfilesAlreadyAdded
+            ? String(
+                localized: "auth.users.allAdded",
+                defaultValue: "All profiles on this server are already added."
+            )
+            : String(
+                localized: "auth.users.empty",
+                defaultValue: "No users visible from the server. Sign in manually instead."
+            )
+    }
+
     private var emptyState: some View {
         VStack(spacing: 20) {
             Image(systemName: "person.crop.circle.badge.questionmark")
                 .font(.system(size: hSizeClass == .compact ? 44 : 60))
                 .foregroundStyle(.tertiary)
-            Text(allProfilesAlreadyAdded
-                ? String(
-                    localized: "auth.users.allAdded",
-                    defaultValue: "All profiles on this server are already added."
-                )
-                : String(
-                    localized: "auth.users.empty",
-                    defaultValue: "No users visible from the server. Sign in manually instead."
-                ))
+            Text(verbatim: emptyMessage)
             .font(.body)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
@@ -257,22 +335,10 @@ private struct UserPickerCard: View {
     }
 
     private var avatar: some View {
-        ZStack {
-            if let url = profileImageURL {
-                AsyncCachedImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle
-                    .frame(width: diameter, height: diameter)
-            }
-        }
+        ProfileAvatar(
+            name: user.name, url: profileImageURL, diameter: diameter,
+            font: .system(size: hSizeClass == .compact ? 38 : 52, weight: .semibold, design: .rounded)
+        )
         .overlay(
             // Not `.focusStroke`: padded outward, so it rings the avatar rather than sitting on its
             // edge. A circle offset outward is still a circle, so there is no radius to keep in step.
@@ -284,33 +350,10 @@ private struct UserPickerCard: View {
         .focusResponse(.card, isFocused: isFocused)
     }
 
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: hSizeClass == .compact ? 38 : 52, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let parts = user.name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(user.name.prefix(2)).uppercased()
-    }
-
     /// On the server being signed in to, and without a token: the active session's belongs to
     /// another server, and an avatar needs none.
     private var profileImageURL: URL? {
         guard let baseURL else { return nil }
-        return dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.primaryImageTag,
-            baseURL: baseURL,
-            token: nil
-        )
+        return dependencies.profileAvatarURL(userID: user.id, tag: user.primaryImageTag, baseURL: baseURL)
     }
 }

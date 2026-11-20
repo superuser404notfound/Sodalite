@@ -1,4 +1,6 @@
+#if canImport(UIKit)
 import UIKit
+#endif
 import AetherEngine
 
 /// Shared deep-link teardown for the UIKit player modal (SodaliteApp URL handler + AppRouter resolver). Used because the SwiftUI binding-only dismiss proved unreliable across the scene-foreground transition (a TopShelf resume from a paused player didn't always reach UIKit fast enough for the new cover to present on top).
@@ -6,6 +8,11 @@ import AetherEngine
 enum PlayerModalDismisser {
     /// Walks the active scene's modal chain and dismisses PlayerHostController if presented (dismissing the direct presenter leaves other modal levels alone). Logged via EngineLog with `logPrefix` for TestFlight overlay confirmation.
     static func dismissActive(logPrefix: String) {
+        #if os(macOS)
+        // Nothing to walk: the Mac player closes off `appState.requestPlayerDismissal`, which every
+        // caller of this bumps in the same turn.
+        EngineLog.emit("\(logPrefix) deep-link dismiss: the Mac player closes on the dismissal request")
+        #else
         #if os(tvOS)
         // Deep-link teardown must also cover a session living in the PiP window (no modal to walk).
         PiPSessionCoordinator.shared.endActiveSession()
@@ -23,6 +30,14 @@ enum PlayerModalDismisser {
         var presenter: UIViewController? = window.rootViewController
         while let current = presenter {
             guard let presented = current.presentedViewController else { break }
+            #if os(tvOS)
+            if let grid = presented as? MultiviewHostController {
+                EngineLog.emit("\(logPrefix) deep-link dismiss: stopping multiview")
+                grid.coordinator.stopAll()
+                if current.presentedViewController === grid { current.dismiss(animated: false) }
+                return
+            }
+            #endif
             if presented is PlayerHostController {
                 EngineLog.emit("\(logPrefix) deep-link dismiss: tearing down active player modal")
                 current.dismiss(animated: false)
@@ -31,5 +46,6 @@ enum PlayerModalDismisser {
             presenter = presented
         }
         EngineLog.emit("\(logPrefix) deep-link dismiss: no player in modal chain")
+        #endif
     }
 }

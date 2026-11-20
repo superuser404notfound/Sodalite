@@ -1,3 +1,7 @@
+#if !os(macOS)
+// Player chrome for the UIKit host: it is display-only by construction, because
+// PlayerHostController owns every press and moves a cursor through it. macOS has its own
+// transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 
 // MARK: - Dropdown Item
@@ -22,6 +26,9 @@ struct DropdownItem {
     /// Pins this row as a fixed header above the scroll list (subtitle "Secondary: ...").
     var isPinnedHeader: Bool = false
     var separatorBelow: Bool = false
+    /// Titles this row can switch to; the row reserves the widest, so stepping a value does not
+    /// resize the menu.
+    var widthCandidates: [String] = []
 }
 
 // MARK: - The chip
@@ -47,10 +54,19 @@ struct TransportTrackLabel: View {
         return labelWidth > 0 ? labelWidth : nil
     }
 
+    /// Focused, the chip is a filled accent pill, so its glyph and label take the accent's own
+    /// paired foreground rather than white (Sodalite#124, the role pair Now Playing already uses).
+    private var foreground: AnyShapeStyle {
+        isFocused
+            ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
+            : AnyShapeStyle(.white.opacity(0.6))
+    }
+
     /// Collapsible trailing text, with the gap to the leading glyph baked into the measured width.
     private var labelInner: some View {
         Text(label)
             .font(.callout)
+            .modifier(SnappedFocusForeground(style: foreground, isFocused: isFocused))
             // Single-line guarantee so an open dropdown's layout pressure can't break labels mid-word.
             .lineLimit(1)
             .padding(.leading, 8)
@@ -66,6 +82,7 @@ struct TransportTrackLabel: View {
             } else {
                 Image(systemName: icon)
                     .font(.callout)
+                    .modifier(SnappedFocusForeground(style: foreground, isFocused: isFocused))
             }
 
             labelInner
@@ -73,11 +90,7 @@ struct TransportTrackLabel: View {
                 .opacity(showsLabel ? 1 : 0)
                 .clipped()
         }
-        // Focused, the chip is a filled accent pill, so its glyph and label take the accent's own
-        // paired foreground rather than white (Sodalite#124, the role pair Now Playing already uses).
-        .foregroundStyle(isFocused
-            ? AnyShapeStyle(appearanceTheme.palette.foreground.color)
-            : AnyShapeStyle(.white.opacity(0.6)))
+        .foregroundStyle(foreground)
         // Tighter padding for icon-only pills so they read as compact squares, not empty capsules.
         .padding(.horizontal, showsLabel ? 16 : 12)
         .padding(.vertical, 8)
@@ -100,14 +113,29 @@ struct TransportTrackLabel: View {
                 // fill, and over a bright video frame a see-through pill loses the 3:1 it guarantees.
                 // No focus ring here, an accent stroke on an accent fill is invisible; the fill,
                 // the scale step and the shadow carry the focus on their own.
-                .fill(isFocused
-                    ? AnyShapeStyle(appearanceTheme.palette.control.color)
-                    : AnyShapeStyle(.clear))
+                .fill(appearanceTheme.palette.control.color)
+                // The fill moves with the focus at once while width and reflow keep the row's curve:
+                // crossfaded over 0.32 s, the pill being left stayed lit long enough that a click
+                // looked like it would land there.
+                .animation(nil) { $0.opacity(isFocused ? 1 : 0) }
         )
         // Depth cue so the focused pill reads as raised, not just tinted. The role's curve is also
         // forced by the enclosing row via a transaction, so every sibling interpolates together
         // instead of distant pills snapping; that is why `.pill` is the one role not on `settle`.
         .focusResponse(.pill, isFocused: isFocused)
+    }
+}
+
+/// The glyph and label colour switch with the fill, outside the row's 0.32 s curve. It has to sit on the
+/// leaf: a scoped nil animation around the chip's `foregroundStyle` still let the colour crossfade.
+private struct SnappedFocusForeground: ViewModifier {
+    let style: AnyShapeStyle
+    let isFocused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(style)
+            .transaction(value: isFocused) { $0.animation = nil }
     }
 }
 
@@ -159,12 +187,24 @@ struct PlayerTrackDropdownList: View {
                 }
                 ScrollViewReader { proxy in
                     ScrollView {
-                        // Lazy: a chapter or episode row loads its image on appear, and an eager
-                        // stack mounted all of them at once, queueing every still of the file.
-                        LazyVStack(spacing: 0) {
-                            ForEach(scrollIndexed, id: \.offset) { idx, item in
-                                dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
-                                    .id(idx)
+                        // Lazy only for image rows: a chapter or episode row loads its image on appear,
+                        // and an eager stack mounted all of them at once, queueing every still of the
+                        // file. A lazy stack measures only the rows it has made, though, so a text list
+                        // took its FIRST row's width and clipped every longer one below it (Sodalite#87:
+                        // "Bis..." under "Original"). Text rows are cheap, so they all count.
+                        if hasImages {
+                            LazyVStack(spacing: 0) {
+                                ForEach(scrollIndexed, id: \.offset) { idx, item in
+                                    dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
+                                        .id(idx)
+                                }
+                            }
+                        } else {
+                            VStack(spacing: 0) {
+                                ForEach(scrollIndexed, id: \.offset) { idx, item in
+                                    dropdownRow(item: item, hasImages: hasImages, rowHeight: rowHeight)
+                                        .id(idx)
+                                }
                             }
                         }
                     }
@@ -230,10 +270,15 @@ struct PlayerTrackDropdownList: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
             }
 
-            Text(item.title)
-                .font(.callout)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
+            ZStack(alignment: .leading) {
+                ForEach(item.widthCandidates, id: \.self) { candidate in
+                    Text(candidate).font(.callout).lineLimit(2).hidden()
+                }
+                Text(item.title)
+                    .font(.callout)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
 
             Spacer()
 
@@ -282,3 +327,4 @@ private struct ChapterThumbnailView: View {
         }
     }
 }
+#endif

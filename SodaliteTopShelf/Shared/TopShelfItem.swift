@@ -16,6 +16,11 @@ nonisolated struct TopShelfItem: Codable, Sendable {
     let parentThumbItemId: String?
     let runTimeTicks: Int64?
     let userData: TopShelfUserData?
+    let providerIds: [String: String]?
+    /// The secondary server this came from in a combined shelf (Sodalite#218), stamped after the
+    /// fetch rather than read off `ServerId`: two servers cloned from one setup can share that.
+    /// nil for the active server. Not a Jellyfin field; it only round-trips through the cache.
+    var sourceServerID: String?
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -32,6 +37,8 @@ nonisolated struct TopShelfItem: Codable, Sendable {
         case parentThumbItemId = "ParentThumbItemId"
         case runTimeTicks = "RunTimeTicks"
         case userData = "UserData"
+        case providerIds = "ProviderIds"
+        case sourceServerID = "SodaliteSourceServerID"
     }
 }
 
@@ -61,14 +68,41 @@ nonisolated struct TopShelfImageTags: Codable, Sendable {
 nonisolated struct TopShelfUserData: Codable, Sendable {
     let playedPercentage: Double?
     let playbackPositionTicks: Int64?
+    let lastPlayedDate: String?
 
     enum CodingKeys: String, CodingKey {
         case playedPercentage = "PlayedPercentage"
         case playbackPositionTicks = "PlaybackPositionTicks"
+        case lastPlayedDate = "LastPlayedDate"
     }
 }
 
 nonisolated extension TopShelfItem {
+    /// The cell's identity on the shelf and in the artwork file names. The bare item id for the
+    /// active server, so nothing a single-server shelf already rendered changes name; a secondary's
+    /// carries its server, since two servers can hold the same id. Item first: `ResumeBarFile`
+    /// keeps 48 characters of it, which must still hold the whole item id.
+    var shelfKey: String {
+        sourceServerID.map { "\(id)-\($0)" } ?? id
+    }
+
+    func stamped(serverID: String?) -> TopShelfItem {
+        var copy = self
+        copy.sourceServerID = serverID
+        return copy
+    }
+
+    /// The two rows as the shelf shows them: an item appears once, in Continue Watching if it is
+    /// there. `EnableResumable=false` keeps a part-watched episode out of Next Up on current
+    /// servers, older ones ignore it, and a repeated identifier is one the shelf has no use for.
+    static func shelfRows(resume: [TopShelfItem],
+                          nextUp: [TopShelfItem]) -> (resume: [TopShelfItem], nextUp: [TopShelfItem]) {
+        var seen = Set<String>()
+        let resume = resume.filter { seen.insert($0.shelfKey).inserted }
+        let nextUp = nextUp.filter { seen.insert($0.shelfKey).inserted }
+        return (resume, nextUp)
+    }
+
     /// Wide thumbnail for the carousel cell, along whichever chain the viewer picked in Settings
     /// (`TopShelfArtwork`). Episode resolution is capped at the server's image-extraction-width
     /// setting (320 old default, can't upscale client-side), which is the reason the choice exists:
@@ -103,7 +137,7 @@ nonisolated extension TopShelfItem {
                                             token: session.accessToken,
                                             artwork: artwork)
         else { return nil }
-        return ResumeBarArtwork.Cell(itemID: id, remote: remote, fraction: topShelfProgress)
+        return ResumeBarArtwork.Cell(itemID: shelfKey, remote: remote, fraction: topShelfProgress)
     }
 
     /// Resume bar for the cell. Percentage first (what /Items/Resume returns), ticks as the
@@ -115,23 +149,25 @@ nonisolated extension TopShelfItem {
     }
 
     /// Card headline: movies render bare name; episodes prefix series + S/E breadcrumb (the still alone doesn't identify the show).
-    var topShelfTitle: String {
+    /// A title veiled by `TopShelfTitleVeil` drops out and leaves the series and the numbers.
+    func topShelfTitle(veil: TopShelfTitleVeil = .off) -> String {
         guard type == .episode, let series = seriesName else { return name }
         return EpisodeMetadataFormatter.label(seriesName: series,
                                               season: parentIndexNumber,
                                               episode: indexNumber,
-                                              title: name)
+                                              title: veil.hidesTitle(of: self) ? nil : name)
     }
 
     /// format=Jpg so the image-cache daemon never hits a WebP/AVIF response ImageIO can choke on in
     /// the tight extension budget, and it costs nothing on a JPEG source, which Jellyfin passes
     /// through unconverted. The width is `ImageWidth.topShelfSource`, a cap rather than a request,
     /// and no `quality`: both exist to stop the server re-encoding a file it could hand over as it
-    /// is. enableImageEnhancers=false skips a downscaling server transform.
+    /// is. enableImageEnhancers=false skips a downscaling server transform. The token goes under
+    /// both names: Jellyfin 12 reads only `ApiKey`, servers before 10.9 only `api_key`.
     private func imageURL(baseURL: URL, itemID: String, kind: String, tag: String, token: String) -> URL? {
         var base = baseURL.absoluteString
         while base.hasSuffix("/") { base.removeLast() }
-        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfSource)&format=Jpg&enableImageEnhancers=false&api_key=\(token)"
+        let raw = "\(base)/Items/\(itemID)/Images/\(kind)?tag=\(tag)&maxWidth=\(ImageWidth.topShelfSource)&format=Jpg&enableImageEnhancers=false&api_key=\(token)&ApiKey=\(token)"
         return URL(string: raw)
     }
 }

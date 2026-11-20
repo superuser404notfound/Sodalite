@@ -36,11 +36,13 @@ enum ExternalPlaybackPresentation {
     /// Wired wins over wireless: an Apple TV reached over a cable exposes both ports on some adapters,
     /// and the wired one is what actually carries the picture. Same precedence as the engine's
     /// `isWiredHDMIExternalDisplay` discriminator, which decides the LAN reload on the other side.
+    #if !os(macOS)
     static func destination(ports: [(type: AVAudioSession.Port, name: String)]) -> ExternalPlaybackDestination {
         if ports.contains(where: { $0.type == .HDMI }) { return .externalDisplay }
         guard let wireless = ports.first(where: { $0.type == .airPlay }) else { return .externalDisplay }
         return .airPlay(name: displayName(forPort: wireless.name))
     }
+    #endif
 
     /// A receiver's own name, or nil where the port only repeats the protocol. "AirPlay" as a device
     /// name would render as "Playing on AirPlay".
@@ -86,6 +88,7 @@ enum ExternalPlaybackPresentation {
     /// set of numbers that a retune of either would silently leave behind. Centering on the screen
     /// instead put the block a sixth of the height too low in portrait and ran it off the bottom edge
     /// in landscape, where the two scrims together claim well over half of a phone's height.
+    #if !os(macOS)
     static func contentBand(screenHeight: CGFloat) -> (minY: CGFloat, height: CGFloat) {
         let top = PlayerOverlayView.titleScrimHeight(playerHeight: screenHeight)
         let bottom = PlayerOverlayView.controlScrimHeight(playerHeight: screenHeight)
@@ -98,4 +101,5 @@ enum ExternalPlaybackPresentation {
         let reserve = bandHeight < shortBandHeight ? shortTextBlockHeight : textBlockHeight
         return min(isPad ? 320 : 200, max(64, bandHeight - reserve))
     }
+    #endif
 }

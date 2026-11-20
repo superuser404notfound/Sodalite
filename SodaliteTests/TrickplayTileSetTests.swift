@@ -48,3 +48,26 @@ struct TrickplayTileSetTests {
         #expect(TrickplayTileSet(trickplay: ["s": [:]], mediaSourceID: "s", targetWidth: 320) == nil)
     }
 }
+
+struct TrickplayTileOrderTests {
+    private func set(count: Int) throws -> TrickplayTileSet {
+        let info = TrickplayInfo(width: 320, height: 180, tileWidth: 10, tileHeight: 10,
+                                 thumbnailCount: count, interval: 10000, bandwidth: nil)
+        return try #require(TrickplayTileSet(trickplay: ["s": ["320": info]], mediaSourceID: "s", targetWidth: 320))
+    }
+
+    @Test("a partial last sprite still counts")
+    func tileCount() throws {
+        #expect(try set(count: 240).tileCount == 3)
+        #expect(try set(count: 200).tileCount == 2)
+        #expect(try set(count: 1).tileCount == 1)
+    }
+
+    @Test("the playhead's sprite first, then outward, later before earlier")
+    func orderAroundPlayhead() throws {
+        // 100 thumbs per sprite at 10 s: 2500 s sits in sprite 2 of 6.
+        #expect(try set(count: 600).tileOrder(nearestTo: 2500) == [2, 3, 1, 4, 0, 5])
+        #expect(try set(count: 600).tileOrder(nearestTo: 0) == [0, 1, 2, 3, 4, 5])
+        #expect(try set(count: 600).tileOrder(nearestTo: 1_000_000) == [5, 4, 3, 2, 1, 0])
+    }
+}

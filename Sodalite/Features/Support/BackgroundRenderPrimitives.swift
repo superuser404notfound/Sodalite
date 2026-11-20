@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// A gradient stop expressed as opacity over a single tint, so the falloff
 /// can be reasoned about and tested without materialising a `Color`.
@@ -28,19 +27,18 @@ enum BackgroundGrain {
     static let filmOpacity: Double = 0.045
     static let ditherOpacity: Double = 0.03
 
-    static let image: UIImage = {
+    static let image: PlatformImage = {
         var seed: UInt64 = 0x534F44414C495445
         func next() -> UInt8 {
             seed = 6364136223846793005 &* seed &+ 1442695040888963407
             return UInt8(truncatingIfNeeded: seed >> 40)
         }
-        return UIGraphicsImageRenderer(size: CGSize(width: 96, height: 96)).image { context in
-            let cg = context.cgContext
+        return PlatformImage.drawn(size: CGSize(width: 96, height: 96)) { context in
             for y in 0..<96 {
                 for x in 0..<96 {
                     let value = CGFloat(next()) / 255
-                    cg.setFillColor(UIColor(white: value, alpha: 1).cgColor)
-                    cg.fill(CGRect(x: x, y: y, width: 1, height: 1))
+                    context.setFillColor(CGColor(gray: value, alpha: 1))
+                    context.fill(CGRect(x: x, y: y, width: 1, height: 1))
                 }
             }
         }
@@ -58,7 +56,7 @@ struct BackgroundGrainLayer: View {
 
     var body: some View {
         Rectangle()
-            .fill(ImagePaint(image: Image(uiImage: BackgroundGrain.image), scale: 1))
+            .fill(ImagePaint(image: Image(platformImage: BackgroundGrain.image), scale: 1))
             .opacity(opacity)
             .allowsHitTesting(false)
     }

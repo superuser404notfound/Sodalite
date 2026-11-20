@@ -94,7 +94,7 @@ struct GuideHeroView: View {
     /// rather than leaving an empty separator behind.
     private func subtitleLine(for program: JellyfinProgram) -> String? {
         var parts: [String] = []
-        if let episode = episodeLabel(for: program) { parts.append(episode) }
+        if let identity = program.identityLabel { parts.append(identity) }
         if let name = channel?.name ?? program.channelName { parts.append(name) }
         if let start = program.startDate, let end = program.endDate {
             let formatter = DateFormatter.guideShortTime
@@ -104,20 +104,10 @@ struct GuideHeroView: View {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
-    /// Same cascade as `ProgramInfoPopover.episodeLabel`: episode title, then series name, then bare
-    /// season and episode numbers, dropping anything that just repeats the title.
-    private func episodeLabel(for program: JellyfinProgram) -> String? {
-        EpisodeMetadataFormatter.programLabel(season: program.parentIndexNumber,
-                                              episode: program.indexNumber,
-                                              episodeTitle: program.episodeTitle,
-                                              seriesName: program.seriesName,
-                                              header: program.name)
-    }
-
     private var programImageURL: URL? {
         guard let program, !program.isSynthesized else { return nil }
         return dependencies.jellyfinImageService.imageURL(
-            itemID: program.id, imageType: .primary,
+            itemID: program.id, serverID: program.serverID, imageType: .primary,
             tag: program.primaryImageTag,
             maxWidth: Int(metrics.heroThumbSize.width * 2))
     }
@@ -125,13 +115,13 @@ struct GuideHeroView: View {
     private var channelLogoURL: URL? {
         guard let channel else { return nil }
         return dependencies.jellyfinImageService.imageURL(
-            itemID: channel.id, imageType: .primary,
+            itemID: channel.id, serverID: channel.serverID, imageType: .primary,
             tag: channel.primaryImageTag,
             maxWidth: Int(metrics.heroThumbSize.width * 2))
     }
 }
 
-/// Progress and remaining minutes for an airing program. Its own view with its own clock, so the
+/// Progress and time remaining for an airing program. Its own view with its own clock, so the
 /// minute tick invalidates this bar and nothing above it.
 private struct GuideHeroProgressBar: View {
     let program: JellyfinProgram
@@ -149,8 +139,8 @@ private struct GuideHeroProgressBar: View {
                 }
                 .frame(width: 160, height: 5)
 
-                if let remaining = remainingMinutes(at: context.date) {
-                    Text("livetv.guide.hero.remaining \(remaining)")
+                if let remaining = remaining(at: context.date) {
+                    Text(verbatim: remaining)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -168,9 +158,10 @@ private struct GuideHeroProgressBar: View {
         return CGFloat(min(1, max(0, now.timeIntervalSince(start) / total)))
     }
 
-    private func remainingMinutes(at now: Date) -> Int? {
+    /// The bar beside it says what the number counts, so no "left" (Sodalite#146, #165).
+    private func remaining(at now: Date) -> String? {
         guard let end = program.endDate, end > now else { return nil }
-        return max(1, Int(end.timeIntervalSince(now) / 60))
+        return end.timeIntervalSince(now).durationDisplay
     }
 }
 

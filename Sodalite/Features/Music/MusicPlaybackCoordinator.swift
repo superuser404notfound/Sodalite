@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import AVFoundation
 import MediaPlayer
-import UIKit
 import AetherEngine
 
 /// Owns music playback end-to-end: queue, transport, the shared `AetherEngine` audio-only backend,
@@ -11,11 +10,12 @@ import AetherEngine
 ///
 /// The engine (`DependencyContainer.playerEngine`) is a process-wide singleton shared with the video
 /// player. A video load while a music queue is live triggers the engine's own `stopInternal`, tearing
-/// down the audio host; this coordinator watches `playbackBackend` leave `.audio` and clears its own
-/// state WITHOUT re-stopping the engine (it has already moved on).
+/// down the audio host; `PlayerViewModel.startPlayback` announces that with `yieldToVideo()` first, and a
+/// video backend appearing triggers it as well. Either clears this coordinator's state WITHOUT
+/// re-stopping the engine (it has already moved on).
 ///
-/// System Now-Playing is driven by the `+NowPlaying` extension via a per-player `MPNowPlayingSession`;
-/// applyNowPlayingInfo / clearNowPlayingInfo fire at every track-change / play-pause / seek.
+/// System Now-Playing is owned by the engine (`ownsAudioNowPlaying`); the `+NowPlaying` extension hands it
+/// the track's identity and cover and the queue's next/previous at every track change.
 @MainActor
 @Observable
 final class MusicPlaybackCoordinator {
@@ -24,6 +24,17 @@ final class MusicPlaybackCoordinator {
     private let playbackService: JellyfinPlaybackServiceProtocol
     let imageService: JellyfinImageService
     private let userIDProvider: () -> String?
+    /// A track from another server in a combined setup is streamed from, and reported to, its own
+    /// server as that server's user (Sodalite#85). nil means the active server.
+    private let secondaryRoute: (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)?
+    /// Whether an item's server still takes part. A track whose server left a combined setup has no
+    /// session to stream or report through, and must not fall back to the active account.
+    private let isRoutable: (JellyfinItem) -> Bool
+    /// Pins the active session for one track: the returned resolver answers with the service that
+    /// session reports through, even after a profile or server switch (audit LTM-201).
+    var bindActiveReporter: () -> () -> JellyfinPlaybackServiceProtocol?
+    /// The current track's own reporter, bound when its load started.
+    private var reportResolver: (() -> JellyfinPlaybackServiceProtocol?)?
 
     private(set) var queue: [JellyfinItem] = []
     private(set) var currentIndex: Int = 0
@@ -47,6 +58,7 @@ final class MusicPlaybackCoordinator {
     /// The in-flight continuous (hold-to-seek) spool task; non-nil while a
     /// left/right press is held.
     var continuousSeekTask: Task<Void, Never>?
+    var seekScan: SeekScan?
 
     var currentItem: JellyfinItem? {
         guard queue.indices.contains(currentIndex) else { return nil }
@@ -72,19 +84,22 @@ final class MusicPlaybackCoordinator {
     /// before any teardown so the `$state` sink doesn't mistake the stop for end-of-track (`.ended`) and recursively advance.
     private var isStopping: Bool = false
     private var cancellables = Set<AnyCancellable>()
-    /// The 2 s now-playing refresh; non-nil only while a queue is live.
-    private var nowPlayingKeepAlive: AnyCancellable?
-
-    /// Now-Playing bookkeeping (see +NowPlaying). registeredCommandCenterID = the MPRemoteCommandCenter
-    /// the handlers are bound to; the resolved center flips per track between session (AVPlayer) and
-    /// shared default (FFmpeg). nowPlayingArtworkItemID = item id at artwork-load start, compared on completion to drop stale artwork.
-    var registeredCommandCenterID: ObjectIdentifier?
+    /// Now-Playing bookkeeping (see +NowPlaying). nowPlayingArtworkItemID = item id at artwork-load start,
+    /// compared on completion to drop stale artwork.
     var nowPlayingArtworkItemID: String?
-    /// Cached current-track artwork so a state/duration refresh keeps showing it instead of flashing
-    /// empty mid-load. Both paths use it: the AVPlayer path stages it into AVPlayerItem.nowPlayingInfo,
-    /// the FFmpeg fallback writes it to the shared center. Cleared on stop / track change.
+    /// Cached current-track artwork so a restage keeps showing it instead of flashing the placeholder.
+    /// Cleared on stop / track change.
     var cachedArtwork: MPMediaItemArtwork?
     var cachedArtworkItemID: String?
+
+    /// Sodalite#242: the profile's normalization mode, read at every track load. Set by the container,
+    /// which resolves the active profile's preferences.
+    var normalizationModeProvider: () -> MusicNormalization = { .off }
+    /// The profile's skip interval for a direction (-1 back, else forward), read at every press.
+    var skipSecondsProvider: (Int) -> Int = { _ in 10 }
+    /// What the playing track was asked to do, kept until it is replaced so its log line can carry the
+    /// engine's figures.
+    private var normalizationRecord: MusicNormalizationRecord?
 
     /// Minimum spacing between fire-and-forget progress reports.
     private static let progressReportInterval: TimeInterval = 10
@@ -92,11 +107,17 @@ final class MusicPlaybackCoordinator {
     init(engine: AetherEngine,
          playbackService: JellyfinPlaybackServiceProtocol,
          imageService: JellyfinImageService,
-         userIDProvider: @escaping () -> String?) {
+         userIDProvider: @escaping () -> String?,
+         secondaryRoute: @escaping (JellyfinItem) -> (service: JellyfinPlaybackServiceProtocol, userID: String)? = { _ in nil },
+         isRoutable: @escaping (JellyfinItem) -> Bool = { _ in true },
+         bindActiveReporter: (() -> () -> JellyfinPlaybackServiceProtocol?)? = nil) {
         self.engine = engine
+        self.isRoutable = isRoutable
+        self.bindActiveReporter = bindActiveReporter ?? { [playbackService] in { playbackService } }
         self.playbackService = playbackService
         self.imageService = imageService
         self.userIDProvider = userIDProvider
+        self.secondaryRoute = secondaryRoute
         subscribeToEngine()
     }
 
@@ -161,7 +182,11 @@ final class MusicPlaybackCoordinator {
 
     /// Standard "previous": >3 s in (or nothing before) restarts the current track, else steps back.
     func previous() {
-        if currentTime > 3 || !hasPrevious {
+        switch Self.previousAction(currentTime: currentTime, loadInFlight: loadTask != nil,
+                                   hasPrevious: hasPrevious) {
+        case .ignore:
+            return
+        case .restart:
             // Restart-in-place: source is loaded, so seek is instant and keeps the play session (a
             // full loadAndPlayCurrent would re-fetch + reload for an audible gap). Explicit play()
             // after, since restarting from paused must resume (seek alone parks the engine at 0).
@@ -169,17 +194,26 @@ final class MusicPlaybackCoordinator {
                 await engine.seek(to: 0)
                 engine.play()
             }
-            applyNowPlayingInfo()
-        } else {
+        case .stepBack:
             reportStopped()
             currentIndex -= 1
             startLoadingCurrent()
         }
     }
 
+    enum PreviousAction: Equatable { case restart, stepBack, ignore }
+
+    /// LTM-205: while a track is loading, `currentTime` still carries the outgoing track's clock, so
+    /// the decision is made on the track being loaded, which stands at its start. A press then steps
+    /// back, or does nothing when there is nothing before it (the load restarts it anyway).
+    nonisolated static func previousAction(currentTime: Double, loadInFlight: Bool,
+                                           hasPrevious: Bool) -> PreviousAction {
+        if loadInFlight { return hasPrevious ? .stepBack : .ignore }
+        return currentTime > 3 || !hasPrevious ? .restart : .stepBack
+    }
+
     func seek(to seconds: Double) {
         Task { await engine.seek(to: seconds) }
-        applyNowPlayingInfo()
     }
 
     /// User-driven stop. Latches `isStopping` first so the engine's `.idle` (then `.none`) transition
@@ -190,6 +224,7 @@ final class MusicPlaybackCoordinator {
         loadTask = nil
         loadGeneration += 1
         reportStopped()
+        logFinishedNormalization()
         engine.stop()
         queue = []
         currentIndex = 0
@@ -198,7 +233,33 @@ final class MusicPlaybackCoordinator {
         duration = 0
         playSessionId = nil
         currentMediaSourceId = nil
-        stopNowPlayingKeepAlive()
+        reportResolver = nil
+        clearNowPlayingInfo()
+        isStopping = false
+    }
+
+    /// A video or live player is about to load on the shared engine. Clears OUR state without
+    /// `engine.stop()` (that would stop the video that took over). The players announce this before
+    /// `engine.load`, because inferring it from the backend reaching `.native` / `.software` missed a
+    /// video whose load failed before a backend existed and left a dead queue behind (audit LTM-202).
+    func yieldToVideo() {
+        guard !queue.isEmpty else { return }
+        isStopping = true
+        // A music load still in flight must not finish into the engine after the handoff.
+        loadTask?.cancel()
+        loadTask = nil
+        loadGeneration += 1
+        reportStopped()
+        // The engine has already torn the audio host down; its report holds that track's figures.
+        logFinishedNormalization()
+        queue = []
+        currentIndex = 0
+        isPlaying = false
+        currentTime = 0
+        duration = 0
+        playSessionId = nil
+        currentMediaSourceId = nil
+        reportResolver = nil
         clearNowPlayingInfo()
         isStopping = false
     }
@@ -212,6 +273,7 @@ final class MusicPlaybackCoordinator {
         // window would pair the new item with the old session and the old playhead.
         currentMediaSourceId = nil
         playSessionId = nil
+        reportResolver = nil
         loadTask?.cancel()
         loadGeneration += 1
         let generation = loadGeneration
@@ -223,7 +285,20 @@ final class MusicPlaybackCoordinator {
     }
 
     private func loadAndPlayCurrent(generation: Int) async {
-        guard let item = currentItem, let userID = userIDProvider() else { return }
+        guard let item = currentItem else { return }
+        guard isRoutable(item) else {
+            LogTap.shared.note("[MusicCoordinator] \(item.name) belongs to a server that left the combined setup")
+            return
+        }
+        let route = secondaryRoute(item)
+        guard let userID = route?.userID ?? userIDProvider() else { return }
+        let playbackService = route?.service ?? self.playbackService
+        // Bound before the first await: the reports of this track go out under the session it started in.
+        if let route {
+            reportResolver = { route.service }
+        } else {
+            reportResolver = bindActiveReporter()
+        }
 
         configureAudioSessionIfNeeded()
 
@@ -256,19 +331,24 @@ final class MusicPlaybackCoordinator {
             // this track. Here (not earlier) so a load failure leaves the latch as-is.
             isStopping = false
 
+            logFinishedNormalization()
+            let mode = normalizationModeProvider()
+            let record = mode == .off ? nil : MusicNormalizationRecord(item: item, mode: mode)
+            normalizationRecord = record
+
             try await engine.load(
                 url: url,
                 startPosition: nil,
-                options: LoadOptions(audioOnly: true)
+                options: LoadOptions(audioOnly: true, normalizationGainDB: record?.pick?.gainDB)
             )
             guard generation == loadGeneration else { return }
 
-            // Publish now-playing + register remote commands BEFORE the first play(): tvOS only
-            // registers the app as the system Now-Playing source (and flips the Siri Remote to a play
-            // affordance) when the info center is populated and handlers bound ahead of playback (WWDC17 S251).
+            // Identity and track commands BEFORE the first play(): tvOS only registers the app as the
+            // system Now-Playing source (and flips the Siri Remote to a play affordance) when the card is
+            // populated and handlers bound ahead of playback (WWDC17 S251). The engine bound the transport
+            // commands during load.
             applyNowPlayingInfo()
             engine.play()
-            startNowPlayingKeepAlive()
 
             reportStart()
         } catch is CancellationError {
@@ -286,6 +366,10 @@ final class MusicPlaybackCoordinator {
     /// system can deactivate on pause, after which AVPlayer.play() yields no audio until reactivated.
     /// setCategory/setActive are idempotent, so repeated calls are cheap.
     private func configureAudioSessionIfNeeded() {
+        #if os(macOS)
+        // There is no app-level audio session on a Mac: output is the device's, and AVPlayer plays
+        // into it without being asked.
+        #else
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(.playback, mode: .default)
@@ -294,6 +378,29 @@ final class MusicPlaybackCoordinator {
         } catch {
             LogTap.shared.note("[MusicCoordinator] audio session setup FAILED: \(error.localizedDescription)")
         }
+        #endif
+    }
+
+    // MARK: - Normalization (Sodalite#242)
+
+    /// Writes the outgoing track's line. Call before the engine loads or stops anything else.
+    private func logFinishedNormalization() {
+        guard let record = normalizationRecord else { return }
+        normalizationRecord = nil
+        // Without a gain the engine ran no stage, and its report would be an older track's.
+        let report = record.pick?.gainDB == nil ? nil : engine.normalizationGainReport
+        LogTap.shared.note(record.logLine(report: report))
+    }
+
+    /// The setting changed: the playing track follows at once, the engine ramps to the new gain.
+    func normalizationSettingChanged() {
+        guard let item = currentItem, loadTask == nil, engine.playbackBackend == .audio else { return }
+        let mode = normalizationModeProvider()
+        guard mode != (normalizationRecord?.mode ?? .off) else { return }
+        logFinishedNormalization()
+        let record = mode == .off ? nil : MusicNormalizationRecord(item: item, mode: mode)
+        normalizationRecord = record
+        engine.setNormalizationGain(record?.pick?.gainDB)
     }
 
     // MARK: - Engine observation
@@ -319,9 +426,6 @@ final class MusicPlaybackCoordinator {
                 guard let self else { return }
                 guard dur > 0, dur != self.duration else { return }
                 self.duration = dur
-                // AVPlayer publishes duration async after the item is ready, so the now-playing set
-                // at track load had duration 0; refresh so system UI shows the right length / progress.
-                self.applyNowPlayingInfo()
             }
             .store(in: &cancellables)
 
@@ -329,12 +433,7 @@ final class MusicPlaybackCoordinator {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard let self else { return }
-                let wasPlaying = self.isPlaying
                 self.isPlaying = (state == .playing)
-                // Refresh now-playing on a play/pause transition so native rate / elapsed match.
-                if self.isPlaying != wasPlaying {
-                    self.applyNowPlayingInfo()
-                }
 
                 // Natural end-of-track: the engine reaches `.ended` when the source runs out (#63;
                 // user-driven stop latches isStopping and drives `.idle`, so matching `.ended` is exact).
@@ -361,22 +460,7 @@ final class MusicPlaybackCoordinator {
                 // backends so our own stop()'s `.audio -> .none` doesn't re-enter here.
                 guard backend == .native || backend == .software else { return }
                 guard !self.queue.isEmpty else { return }
-                self.isStopping = true
-                // A music load still in flight must not finish into the engine after the handoff.
-                self.loadTask?.cancel()
-                self.loadTask = nil
-                self.loadGeneration += 1
-                self.reportStopped()
-                self.queue = []
-                self.currentIndex = 0
-                self.isPlaying = false
-                self.currentTime = 0
-                self.duration = 0
-                self.playSessionId = nil
-                self.currentMediaSourceId = nil
-                self.stopNowPlayingKeepAlive()
-                self.clearNowPlayingInfo()
-                self.isStopping = false
+                self.yieldToVideo()
             }
             .store(in: &cancellables)
 
@@ -384,8 +468,8 @@ final class MusicPlaybackCoordinator {
         // from an update landing around the background transition; if the last write was while
         // foreground (music started before minimizing) the badge never appears. Re-publishing here
         // with live state gives the system a fresh entry the moment the app backgrounds.
-        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
-            .merge(with: NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification))
+        NotificationCenter.default.publisher(for: AppActivity.didLeaveForeground)
+            .merge(with: NotificationCenter.default.publisher(for: AppActivity.didBecomeActive))
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self, self.currentItem != nil else { return }
@@ -393,26 +477,6 @@ final class MusicPlaybackCoordinator {
             }
             .store(in: &cancellables)
 
-    }
-
-    /// Keep the system now-playing entry fresh while a track is loaded (playing OR paused). tvOS
-    /// renders the Home overlay from a recent entry and drops a stale one, so without this the badge
-    /// lags ~2s behind our last write and a pause drops the overlay + remote play route. Light 2s
-    /// elapsed/rate refresh; started on first load, cancelled with the session (the coordinator is
-    /// process-lifetime, and an always-on timer was a permanent 0.5 Hz wakeup even when idle).
-    private func startNowPlayingKeepAlive() {
-        guard nowPlayingKeepAlive == nil else { return }
-        nowPlayingKeepAlive = Timer.publish(every: 2, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self, self.currentItem != nil else { return }
-                self.refreshNowPlayingElapsed()
-            }
-    }
-
-    private func stopNowPlayingKeepAlive() {
-        nowPlayingKeepAlive?.cancel()
-        nowPlayingKeepAlive = nil
     }
 
     // MARK: - Jellyfin session reporting
@@ -431,7 +495,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackStart(report) }
     }
 
@@ -450,7 +514,7 @@ final class MusicPlaybackCoordinator {
             audioStreamIndex: nil,
             subtitleStreamIndex: nil
         )
-        let svc = playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackProgress(report) }
     }
 
@@ -463,7 +527,7 @@ final class MusicPlaybackCoordinator {
             positionTicks: positionTicks,
             liveStreamId: nil
         )
-        let svc = playbackService
+        guard let svc = reportResolver?() else { return }
         Task { try? await svc.reportPlaybackStopped(report) }
     }
 }

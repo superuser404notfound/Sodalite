@@ -122,9 +122,48 @@ struct ImagePayloadTests {
         // back. Measured against a server built to that shape: the whole ladder and every later
         // visit read 73438 bytes of a 367194-byte PNG. The first pass may read the cache like any
         // other request; a later one exists only because the last answer was half a file.
-        #expect(ImageFetch.cachePolicy(forAttempt: 0) == .useProtocolCachePolicy)
+        let tagged = URL(string: "http://s:8096/Items/abc/Images/Primary?tag=f00d&maxWidth=640&quality=90")!
+        let untagged = URL(string: "http://s:8096/Items/abc/Images/Primary?maxWidth=640")!
+        #expect(ImageFetch.cachePolicy(forAttempt: 0, url: untagged) == .useProtocolCachePolicy)
         for attempt in 1...4 {
-            #expect(ImageFetch.cachePolicy(forAttempt: attempt) == .reloadIgnoringLocalCacheData)
+            #expect(ImageFetch.cachePolicy(forAttempt: attempt, url: untagged) == .reloadIgnoringLocalCacheData)
+            #expect(ImageFetch.cachePolicy(forAttempt: attempt, url: tagged) == .reloadIgnoringLocalCacheData)
         }
+    }
+
+    /// The tag is the image's content hash, so a stored copy is never stale and an image evicted
+    /// from memory comes back from disk instead of from a revalidation round trip (Sodalite#212).
+    @Test func aTaggedJellyfinImageIsReadFromTheCacheWithoutAskingTheServer() {
+        let tagged = URL(string: "http://s:8096/Items/abc/Images/Backdrop/0?tag=f00d&maxWidth=960")!
+        #expect(ImageFetch.cachePolicy(forAttempt: 0, url: tagged) == .returnCacheDataElseLoad)
+    }
+
+    @Test func onlyAJellyfinImageWithANonEmptyTagCountsAsContentAddressed() {
+        #expect(ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary?tag=1")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary?tag=")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "http://s/Items/a/Images/Primary")!))
+        #expect(!ImageFetch.isContentAddressed(URL(string: "https://image.tmdb.org/t/p/w500/x.jpg?tag=1")!))
+        #expect(!ImageFetch.isContentAddressed(nil))
+    }
+
+    @Test("CMP-205: a whole image with trailing metadata after its end marker is still whole")
+    func trailingBytesAfterTheEndMarker() {
+        for padding in [100, 5_000] {
+            #expect(ImagePayload.isComplete(png() + Data(repeating: 0x20, count: padding)),
+                    "PNG with \(padding) trailing bytes was refused")
+            #expect(ImagePayload.isComplete(jpeg() + Data(repeating: 0x20, count: padding)),
+                    "JPEG with \(padding) trailing bytes was refused")
+        }
+        let whole = jpeg()
+        #expect(ImagePayload.isComplete(cut(whole, to: 0.5) + Data(repeating: 0x20, count: 5_000)) == false)
+    }
+
+    /// Audit review R-W2-5: a small original that stopped early still carries the end marker of its
+    /// EXIF thumbnail near the head.
+    @Test func aCutSmallJpegDoesNotPassOnItsThumbnailsEndMarker() {
+        var cutFile: [UInt8] = [0xFF, 0xD8, 0xFF, 0xE1] + Array(repeating: 0x11, count: 60)
+        cutFile += [0xFF, 0xD9] + Array(repeating: 0x22, count: 9_000)
+        #expect(ImagePayload.isComplete(Data(cutFile)) == false)
+        #expect(ImagePayload.isComplete(Data(cutFile + [0xFF, 0xD9])))
     }
 }

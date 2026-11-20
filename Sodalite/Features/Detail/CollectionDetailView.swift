@@ -3,6 +3,10 @@ import SwiftUI
 struct CollectionDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var viewModel: DetailViewModel?
@@ -25,6 +29,7 @@ struct CollectionDetailView: View {
     /// One shot: re-pushing focus on every appear would yank the viewer back to row one after
     /// every return from a film or a pushed detail page.
     @State private var didFocusFirstRow = false
+    @State private var memberFilter: CollectionMembers.Filter = .all
 
     let item: JellyfinItem
 
@@ -49,17 +54,17 @@ struct CollectionDetailView: View {
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
                     startFromBeginning: playFromBeginning,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: nil,
                     preferredMediaSourceID: nil,
                     playQueue: playQueue
@@ -69,6 +74,20 @@ struct CollectionDetailView: View {
         }
         .onChange(of: appState.requestPlayerDismissal) { _, _ in
             if showPlayer { showPlayer = false }
+        }
+        // A film watched from here (or a Radarr upgrade) changes the members; without these the
+        // checkmarks and Play's start index kept the state the page opened with (audit DET-202).
+        .onReceive(NotificationCenter.default.publisher(for: .playbackProgressDidChange)) { note in
+            let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
+            let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            Task { @MainActor in
+                await viewModel?.handlePlaybackStop(itemID: itemID, ticks: ticks)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .libraryItemDidReplace)) { note in
+            guard let staleID = note.userInfo?[LibraryItemReplacementKey.staleID] as? String,
+                  let replacement = note.userInfo?[LibraryItemReplacementKey.item] as? JellyfinItem else { return }
+            viewModel?.applyItemReplacement(staleID: staleID, newItem: replacement)
         }
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
@@ -89,13 +108,14 @@ struct CollectionDetailView: View {
             #endif
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    playbackService: dependencies.jellyfinPlaybackService
+                    playbackService: session.playbackService,
+                    streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
                 Task {
                     // loadFullDetail loads collection items internally for .boxSet; a separate loadCollectionItems would be a redundant round trip.
@@ -116,6 +136,8 @@ struct CollectionDetailView: View {
             DetailContentOverlay(
                 heroImageURL: vm.backdropURL(for: vm.item),
                 heroPosterURL: vm.heroPosterURL(for: vm.item),
+                heroTallImageURL: vm.backdropURL(for: vm.item, maxWidth: ImageWidth.tallHero),
+                portraitHero: true,
                 primary: {
                 // Glass panel + action buttons as the bottom-aligned first-page block, matching movie/series detail (Sodalite#15 round 6).
                 VStack(alignment: .leading, spacing: 24) {
@@ -138,7 +160,7 @@ struct CollectionDetailView: View {
                 if !vm.collectionItems.isEmpty {
                     // With no overview above it the first row is what sits under the fold, and the
                     // page opens focused on it, so it carries the correction instead.
-                    collectionList(vm: vm, correctsUpMove: !hasOverview)
+                    collectionMembers(vm: vm, correctsUpMove: !hasOverview)
                 }
             }
         }
@@ -193,13 +215,15 @@ struct CollectionDetailView: View {
     private func primaryActionButton(vm: DetailViewModel) -> some View {
         let queue = playableItems(vm: vm)
         let start = CollectionPlaybackQueue.startIndex(
-            playedFlags: queue.map { $0.userData?.played == true }
+            playedFlags: queue.map { vm.isPlayed($0) }
         )
         return GlassActionButton(
             title: "detail.play",
             systemImage: "play.fill",
             isProminent: true,
-            subtitle: queue.indices.contains(start) ? queue[start].name : nil,
+            subtitle: queue.indices.contains(start)
+                ? dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: queue[start])
+                : nil,
             action: {
                 guard queue.indices.contains(start) else { return }
                 playItem = queue[start]
@@ -239,19 +263,86 @@ struct CollectionDetailView: View {
         )
     }
 
-    // MARK: - Collection Items (vertical list)
+    // MARK: - Collection Items
 
-    /// `correctsUpMove` sends the first row's up-move back to Play; only set when no overview box
-    /// sits between the row and the button row, which would otherwise become unreachable.
-    private func collectionList(vm: DetailViewModel, correctsUpMove: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+    /// Heading, the Movies / Shows filter where the collection mixes both, then the members as a
+    /// list or a grid (`CollectionMembers.usesGrid`).
+    private func collectionMembers(vm: DetailViewModel, correctsUpMove: Bool) -> some View {
+        let all = vm.collectionItems
+        let members = CollectionMembers.visible(all, filter: memberFilter)
+        let offersFilter = CollectionMembers.offersFilter(all)
+        return VStack(alignment: .leading, spacing: 16) {
             Text("detail.collection.items")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal, metrics.rowInset)
 
+            if offersFilter {
+                HStack(spacing: 12) {
+                    ForEach(CollectionMembers.Filter.allCases) { filter in
+                        FilterChip(
+                            title: filter.title,
+                            count: CollectionMembers.visible(all, filter: filter).count,
+                            isSelected: memberFilter == filter
+                        ) { memberFilter = filter }
+                    }
+                }
+                .padding(.horizontal, metrics.rowInset)
+            }
+
+            if CollectionMembers.usesGrid(all) {
+                collectionGrid(CollectionMembers.gridSections(all, filter: memberFilter),
+                               correctsUpMove: correctsUpMove && !offersFilter)
+            } else {
+                collectionList(members, correctsUpMove: correctsUpMove && !offersFilter)
+            }
+        }
+    }
+
+    private func collectionGrid(_ sections: [CollectionMembers.GridSection], correctsUpMove: Bool) -> some View {
+        let scale = dependencies.appearancePreferences.cardScale
+        return VStack(alignment: .leading, spacing: 32) {
+            ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
+                VStack(alignment: .leading, spacing: 16) {
+                    if let title = section.title {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                    }
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: metrics.gridColumnMinimum(for: section.style, cardScale: scale)),
+                                           spacing: metrics.gridSpacing)],
+                        spacing: metrics.gridSpacing
+                    ) {
+                        ForEach(Array(section.items.enumerated()), id: \.element.id) { index, member in
+                            Button { selectedItem = member } label: {
+                                MediaCard(
+                                    item: member,
+                                    imageURL: dependencies.jellyfinImageService.posterURL(
+                                        for: member, maxWidth: ArtworkShape.imageWidth(for: section.style)),
+                                    style: section.style,
+                                    isFocused: focusedItemID == member.id
+                                )
+                            }
+                            .buttonStyle(GridCardButtonStyle())
+                            .focused($focusedItemID, equals: member.id)
+                            .onFocusMoveUp(active: correctsUpMove && sectionIndex == 0 && index == 0) {
+                                playButtonFocused = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, metrics.rowInset)
+    }
+
+    /// `correctsUpMove` sends the first row's up-move back to Play; only set when no overview box
+    /// sits between the row and the button row, which would otherwise become unreachable.
+    private func collectionList(_ members: [JellyfinItem], correctsUpMove: Bool) -> some View {
+        Group {
             VStack(spacing: 12) {
-                ForEach(Array(vm.collectionItems.enumerated()), id: \.element.id) { index, movie in
+                ForEach(Array(members.enumerated()), id: \.element.id) { index, movie in
                     CollectionItemRow(
                         item: movie,
                         imageURL: dependencies.jellyfinImageService.posterURL(for: movie, maxWidth: ImageWidth.thumbnail),
@@ -272,6 +363,7 @@ struct CollectionDetailView: View {
 
 struct CollectionItemRow: View {
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     let item: JellyfinItem
@@ -285,10 +377,27 @@ struct CollectionItemRow: View {
         return overview
     }
 
+    private var seriesLine: String? { Self.seriesLine(for: item) }
+
     /// Three overview lines fill the poster height, so the text block tops out next to it.
     /// Without an overview the block is too short for that and stays centered.
     static func verticalAlignment(hasOverview: Bool) -> VerticalAlignment {
         hasOverview ? .top : .center
+    }
+
+    /// `Friends · S3, E15` above an episode's title: a playlist mixes shows, and the episode title
+    /// alone does not say which one it belongs to. Nil for everything that is not an episode.
+    static func seriesLine(for item: JellyfinItem) -> String? {
+        guard item.type == .episode, let series = item.seriesName, !series.isEmpty else { return nil }
+        return EpisodeMetadataFormatter.label(seriesName: series,
+                                              season: item.parentIndexNumber,
+                                              episode: item.indexNumber,
+                                              title: nil)
+    }
+
+    /// The series line costs one overview line, so the text block still ends at the poster.
+    static func overviewLineLimit(hasSeriesLine: Bool) -> Int {
+        hasSeriesLine ? 2 : 3
     }
 
     var body: some View {
@@ -306,7 +415,15 @@ struct CollectionItemRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(item.name)
+                    if let seriesLine {
+                        Text(seriesLine)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    Text(dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: item))
                         .font(metrics.listTitleFont)
                         .fontWeight(.medium)
                         .lineLimit(1)
@@ -322,7 +439,7 @@ struct CollectionItemRow: View {
                                 .lineLimit(1)
                         }
                         if let runtime = item.runTimeTicks {
-                            Text(runtime.ticksToDisplay)
+                            Text(runtime.ticksToDurationDisplay)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
@@ -360,7 +477,7 @@ struct CollectionItemRow: View {
                         Text(overview)
                             .font(metrics.listOverviewFont)
                             .foregroundStyle(.tertiary)
-                            .lineLimit(3)
+                            .lineLimit(Self.overviewLineLimit(hasSeriesLine: seriesLine != nil))
                     }
                 }
 
@@ -399,7 +516,7 @@ struct CollectionRowButtonStyle: ButtonStyle {
             .fill(.ultraThinMaterial)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(.white.opacity(isFocused ? 0.12 : 0))
+                    .fill(isFocused ? Color.Theme.focusFill : .clear)
             )
     }
 }

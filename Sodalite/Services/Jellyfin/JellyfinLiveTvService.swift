@@ -4,6 +4,10 @@ protocol JellyfinLiveTvServiceProtocol: Sendable {
     func getChannels(userID: String, startIndex: Int, limit: Int,
                      filter: GuideFilter) async throws -> LiveTvChannelsResponse
     func getPrograms(channelIDs: [String], userID: String, start: Date, end: Date) async throws -> [JellyfinProgram]
+    /// Programs across the whole line-up in `window`, narrowed to `genres` (Jellyfin's pipe-delimited
+    /// OR) and to `category`'s program flag when given. Paged internally up to `cap`.
+    func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
+                         category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram]
     func getGuideInfo() async throws -> JellyfinGuideInfo
     /// Channels are BaseItemDto, so favorite reuses the generic FavoriteItems endpoint.
     func setFavorite(userID: String, channelID: String, isFavorite: Bool) async throws
@@ -44,6 +48,26 @@ final class JellyfinLiveTvService: JellyfinLiveTvServiceProtocol {
             decoder: .jellyfinLiveTv
         )
         return response.items
+    }
+
+    func getProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
+                         category: GuideFilter.Category?, cap: Int) async throws -> [JellyfinProgram] {
+        let pageSize = 500
+        var collected: [JellyfinProgram] = []
+        var offset = 0
+        while collected.count < cap {
+            let response: LiveTvProgramsResponse = try await client.request(
+                endpoint: JellyfinEndpoint.liveTvProgramIndex(
+                    userID: userID, window: window, genres: genres, category: category,
+                    startIndex: offset, limit: pageSize),
+                responseType: LiveTvProgramsResponse.self,
+                decoder: .jellyfinLiveTv
+            )
+            collected.append(contentsOf: response.items)
+            offset += response.pageCount
+            if response.pageCount < pageSize { break }
+        }
+        return collected
     }
 
     func getGuideInfo() async throws -> JellyfinGuideInfo {

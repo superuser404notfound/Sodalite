@@ -60,8 +60,10 @@ struct WhatsNewView: View {
         .padding(.bottom, isCompact ? 28 : 50)
     }
 
+    /// Lazy: a release carries dozens of highlights, and building every focusable row at once
+    /// stalled the cover's slide-in.
     private var highlightsList: some View {
-        VStack(alignment: .leading, spacing: 28) {
+        LazyVStack(alignment: .leading, spacing: 28) {
             ForEach(Array(entry.highlights.enumerated()), id: \.element.id) { index, highlight in
                 HighlightRow(highlight: highlight)
                     .prefersDefaultFocusCompat(index == 0, in: focusNamespace)
@@ -124,7 +126,7 @@ private struct HighlightRow: View {
         .focusStroke(cornerRadius: 16, isFocused: isFocused)
         .focusResponse(.tile, isFocused: isFocused)
         // Focusable so the tvOS focus engine has a scroll anchor; without it a long changelog can't be scrolled.
-        .focusable()
+        .focusableSurface()
         .focused($isFocused)
     }
 

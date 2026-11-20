@@ -1,0 +1,110 @@
+import Foundation
+
+protocol UserItemDataServing: Sendable {
+    func userData(itemID: String, userID: String) async throws -> UserItemData
+    func updateUserData(itemID: String, userID: String, positionTicks: Int64, played: Bool, lastPlayed: Date) async throws
+}
+
+/// Jellyfin writes seven fractional digits, which `ISO8601DateFormatter` rejects at any setting.
+enum JellyfinDate {
+    static func parse(_ raw: String?) -> Date? {
+        guard let raw, !raw.isEmpty else { return nil }
+        var trimmed = raw
+        if let dot = raw.firstIndex(of: ".") {
+            let tail = raw[dot...].drop { $0 == "." || $0.isNumber }
+            trimmed = String(raw[..<dot]) + tail
+        }
+        return ISO8601DateFormatter().date(from: trimmed)
+    }
+
+    static func format(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+}
+
+enum DownloadSyncDecision: Equatable {
+    case push, adopt, nothing
+}
+
+/// Reconciles what local sessions wrote into the manifests with the server's UserData (Sodalite#81).
+/// The newer `LastPlayedDate` wins in both directions, so a film finished on the TV is not rewound by
+/// a phone that watched its first ten minutes offline a day earlier.
+@MainActor
+final class DownloadProgressSync {
+    typealias Route = (service: any UserItemDataServing, userID: String)
+
+    private let store: DownloadStore
+    /// Where an item's progress lives, by the manifest's `originServerID` (nil = the profile's own
+    /// server); nil skips the item this run.
+    private let route: (String?) -> Route?
+    private let now: () -> Date
+    private var isRunning = false
+
+    init(store: DownloadStore, now: @escaping () -> Date = Date.init, route: @escaping (String?) -> Route?) {
+        self.store = store
+        self.route = route
+        self.now = now
+    }
+
+    convenience init(store: DownloadStore, service: any UserItemDataServing, userID: String, now: @escaping () -> Date = Date.init) {
+        self.init(store: store, now: now) { $0 == nil ? (service, userID) : nil }
+    }
+
+    static func decide(local: DownloadLocalProgress, server: UserItemData) -> DownloadSyncDecision {
+        guard let localDate = local.lastPlayed else { return .adopt }
+        guard let serverDate = JellyfinDate.parse(server.lastPlayedDate) else { return .push }
+        // Second precision: the server rounds what we send.
+        let l = localDate.timeIntervalSince1970.rounded(.down)
+        let s = serverDate.timeIntervalSince1970.rounded(.down)
+        if l > s { return .push }
+        if s > l { return .adopt }
+        return .nothing
+    }
+
+    /// Runs for the profile that is active when it starts and stops the moment another one is. The
+    /// store's `items` and `update(itemID:)` follow the ACTIVE profile, so after a switch they would
+    /// write this profile's server state into the next one's manifests (audit SHELL-203).
+    func run() async {
+        guard !isRunning, let profile = store.activeProfile else { return }
+        isRunning = true
+        defer { isRunning = false }
+        for item in Array(store.items.values) where item.manifest.state == .complete || item.manifest.state == .missingOnServer {
+            guard store.activeProfile == profile, !Task.isCancelled else { return }
+            let id = item.manifest.itemID
+            // A server now signed in as someone else would get this user's history pushed into theirs.
+            guard let (service, userID) = route(item.manifest.originServerID),
+                  item.manifest.originUserID == nil || item.manifest.originUserID == userID,
+                  let server = try? await service.userData(itemID: id, userID: userID) else { continue }
+            guard store.activeProfile == profile, !Task.isCancelled else { return }
+            let local = item.manifest.progress
+            switch Self.decide(local: local, server: server) {
+            case .push:
+                guard let lastPlayed = local.lastPlayed,
+                      (try? await service.updateUserData(itemID: id, userID: userID, positionTicks: local.positionTicks,
+                                                         played: local.played, lastPlayed: lastPlayed)) != nil else { continue }
+                stamp(id, profile: profile)
+                // One post per item keeps the detail pages' payload patch (issue #24); Home coalesces
+                // them into one reload (audit BRW-207, review R-BROWSE-2).
+                NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: [
+                    PlaybackProgressKey.itemID: id, PlaybackProgressKey.positionTicks: local.positionTicks,
+                ])
+            case .adopt:
+                try? store.updateManifest(serverID: profile.serverID, userID: profile.userID, itemID: id) {
+                    $0.progress.positionTicks = server.playbackPositionTicks ?? 0
+                    $0.progress.played = server.played ?? false
+                    $0.progress.lastPlayed = JellyfinDate.parse(server.lastPlayedDate)
+                    $0.progress.lastSyncedAt = now()
+                }
+            case .nothing:
+                stamp(id, profile: profile)
+            }
+        }
+    }
+
+    private func stamp(_ id: String, profile: ProfileKey) {
+        let date = now()
+        try? store.updateManifest(serverID: profile.serverID, userID: profile.userID, itemID: id) { $0.progress.lastSyncedAt = date }
+    }
+}

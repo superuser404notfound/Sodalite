@@ -17,7 +17,9 @@ struct LaunchProfilePickerView: View {
     /// when the target holds no session this device may resume unasked (Sodalite#74). In reprompt
     /// context, picking the active profile must not switch or clear caches, just dismiss; in
     /// switchServer context every card belongs to another server, so every card is a real switch.
-    enum Context { case launch, reprompt, switchServer }
+    /// `chooser`: opened on purpose, from the iOS profile badge or as the tvOS profile tab;
+    /// dismissible, and the active card just closes it.
+    enum Context { case launch, reprompt, switchServer, chooser }
     var context: Context = .launch
     /// Cover dismissal (reprompt + switchServer); nil in launch context.
     var onFinished: (() -> Void)? = nil
@@ -25,6 +27,8 @@ struct LaunchProfilePickerView: View {
     @State private var rememberedUsers: [RememberedUser] = []
     @State private var navigateToAddProfile = false
     @State private var switchError: String?
+    /// Sodalite#81: a profile with downloads on this device, waiting for the viewer to confirm.
+    @State private var pendingForget: RememberedUser?
     /// Set when this picker is the screen a refused profile landed on; its own alert, because the
     /// switch-failed title would be describing something the user never did (Sodalite#90).
     @State private var rejectionNotice: String?
@@ -51,7 +55,17 @@ struct LaunchProfilePickerView: View {
             // current" as tapping the active card, PIN included. On the root only: a pushed screen
             // keeps its own Menu press for popping.
             .onExitCommandIfEnabled(context == .reprompt) { continueAsCurrent() }
+            #if os(iOS)
+            .toolbar {
+                if context == .chooser {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(role: .close) { onFinished?() }
+                    }
+                }
+            }
+            #endif
             .screenContentInset()
+            .scrollsWhenTooTall()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $navigateToAddProfile) {
                 UserPickerView(server: server)
@@ -87,6 +101,13 @@ struct LaunchProfilePickerView: View {
             } message: { message in
                 Text(message)
             }
+            .confirmsForgettingDownloads($pendingForget, message: { user in
+                dependencies.messageWithDownloadWarning(
+                    "", scope: .profile(serverID: user.serverID, userID: user.id))
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }, perform: { user in
+                user.id == activeSessionUserID ? commitSignOutOfCurrentProfile() : commitForget(user)
+            })
             .onAppear {
                 reloadProfiles()
                 showRejectionNoticeIfAny()
@@ -133,7 +154,7 @@ struct LaunchProfilePickerView: View {
                     }
                 )
             }
-            .fullScreenCover(isPresented: $showAddServerFlow) {
+            .fullScreenCoverCompat(isPresented: $showAddServerFlow) {
                 ServerDiscoveryView(addMode: true) {
                     showAddServerFlow = false
                 }
@@ -292,6 +313,11 @@ struct LaunchProfilePickerView: View {
         // changed, and waving the last active card through is the one way in that lock is for.
         // Legitimate exits stay open, their own card is a normal free select, and the pad offers
         // recovery.
+        // Chooser: the viewer opened this to look, and staying who they are costs nothing.
+        if context == .chooser, user.id == activeSessionUserID {
+            onFinished?()
+            return
+        }
         if context == .reprompt, user.id == activeSessionUserID {
             guard dependencies.parentalGateRequired(forActivatingUserID: user.id,
                                                     serverID: server.id) else {
@@ -429,9 +455,22 @@ struct LaunchProfilePickerView: View {
 
     private func signOutOfCurrentProfile() {
         guard dependencies.activeServer?.id == server.id else { return }
-        dependencies.signOutOfActiveProfile()
-        reloadProfiles()
-        onFinished?()
+        // Same question the forget paths ask when the profile has downloads (audit review R-W2-2).
+        if let current = rememberedUsers.first(where: { $0.id == activeSessionUserID }),
+           DownloadCleanup.usage(.profile(serverID: server.id, userID: current.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = current
+            return
+        }
+        commitSignOutOfCurrentProfile()
+    }
+
+    private func commitSignOutOfCurrentProfile() {
+        guard dependencies.activeServer?.id == server.id else { return }
+        Task {
+            await dependencies.signOutOfActiveProfileAndPurgeDownloads()
+            reloadProfiles()
+            onFinished?()
+        }
     }
 
     private func forget(_ user: RememberedUser) {
@@ -450,11 +489,21 @@ struct LaunchProfilePickerView: View {
     }
 
     private func performForget(_ user: RememberedUser) {
-        do {
-            try dependencies.forgetUser(id: user.id, serverID: server.id)
-            reloadProfiles()
-        } catch {
-            switchError = ErrorText.user(for: error)
+        if DownloadCleanup.usage(.profile(serverID: server.id, userID: user.id), store: dependencies.downloadStore).items > 0 {
+            pendingForget = user
+            return
+        }
+        commitForget(user)
+    }
+
+    private func commitForget(_ user: RememberedUser) {
+        Task {
+            do {
+                try await dependencies.forgetUserAndPurgeDownloads(id: user.id, serverID: server.id)
+                reloadProfiles()
+            } catch {
+                switchError = ErrorText.user(for: error)
+            }
         }
     }
 }
@@ -538,20 +587,10 @@ struct RememberedProfileCard: View {
     }
 
     private var avatar: some View {
-        ZStack {
-            if let url = profileImageURL {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle
-                }
-                .frame(width: diameter, height: diameter)
-                .clipShape(Circle())
-            } else {
-                initialsCircle
-                    .frame(width: diameter, height: diameter)
-            }
-        }
+        ProfileAvatar(
+            name: user.name, url: profileImageURL, diameter: diameter,
+            font: .system(size: 52, weight: .semibold, design: .rounded)
+        )
         .overlay(
             // Green idle ring on the active profile; suppressed when focused (focus-tint ring takes over).
             Circle()
@@ -580,33 +619,31 @@ struct RememberedProfileCard: View {
         .focusResponse(.card, isFocused: isFocused)
     }
 
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 52, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let parts = user.name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(user.name.prefix(2)).uppercased()
-    }
-
     private var profileImageURL: URL? {
         // Against the card's own server: switchServer returns before it writes jellyfinClient.baseURL
         // when the target has no token slot on this device, which is exactly when this picker opens,
         // so the active client can still be pointing at the previous server (Sodalite#119).
-        dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.imageTag,
-            baseURL: dependencies.preferredURL(for: server),
-            token: user.token
-        )
+        dependencies.profileAvatarURL(userID: user.id, tag: user.imageTag, baseURL: dependencies.preferredURL(for: server))
     }
+}
+
+/// iOS: centred while it fits, scrollable once it does not. The picker is a fixed column, and in phone
+/// landscape it is taller than the screen, so it was clipped at the top and the bottom.
+private struct ScrollsWhenTooTall: ViewModifier {
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        GeometryReader { geo in
+            ScrollView(.vertical) {
+                content.frame(maxWidth: .infinity, minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        #else
+        content
+        #endif
+    }
+}
+
+private extension View {
+    func scrollsWhenTooTall() -> some View { modifier(ScrollsWhenTooTall()) }
 }

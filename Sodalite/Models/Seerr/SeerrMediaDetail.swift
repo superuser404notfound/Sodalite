@@ -46,6 +46,9 @@ struct SeerrTVDetail: Codable, Sendable {
     let watchProviders: [SeerrWatchProviderRegion]?
     let contentRatings: SeerrContentRatings?
     let externalIds: SeerrExternalIds?
+    /// TMDB's next scheduled episode, nil once a show has nothing announced. Feeds the Upcoming row
+    /// for series whose Jellyfin library lists no future episode (Sodalite#198).
+    let nextEpisodeToAir: SeerrEpisode?
 
     var displayYear: String? {
         guard let firstAirDate, firstAirDate.count >= 4 else { return nil }
@@ -145,6 +148,17 @@ struct SeerrReleases: Codable, Sendable, Equatable {
 /// Rotten Tomatoes rating from `/movie/{id}/ratings` (or `/tv/...`); `criticsScore` is the Tomatometer (0-100), fresh/rotten splits at 60 (matches Jellyfin badge). The endpoint also returns criticsRating/audienceScore/audienceRating/url, which are intentionally not decoded since only the Tomatometer is surfaced.
 struct SeerrRTRating: Codable, Sendable, Equatable {
     let criticsScore: Int?
+}
+
+/// IMDb score from `/movie/{id}/ratingscombined`, which Seerr reads through Radarr's public IMDb proxy. `criticsScore` is the IMDb user rating (0-10) despite the name. Movies only: Seerr has no IMDb source for series.
+struct SeerrIMDbRating: Codable, Sendable, Equatable {
+    let criticsScore: Double?
+}
+
+/// Everything the ratings endpoints return. A movie reads `/ratingscombined` (RT and IMDb), a series `/ratings` (RT only), so `imdb` is always nil for a series.
+struct SeerrRatings: Codable, Sendable, Equatable {
+    let rt: SeerrRTRating?
+    let imdb: SeerrIMDbRating?
 }
 
 struct SeerrContentRatings: Codable, Sendable, Equatable {

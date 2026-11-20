@@ -66,7 +66,7 @@ struct LibrarySortSheet: View {
                 .fill(isFocused ? tintColor : Color.Theme.surface)
         )
         .foregroundStyle(isFocused ? Color.black : Color.primary)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focusedKey, equals: key)
         .stableTap(isFocused: isFocused) {
             onSelect(selection.toggled(to: key))

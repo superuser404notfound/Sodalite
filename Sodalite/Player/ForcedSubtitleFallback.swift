@@ -69,18 +69,14 @@ enum ForcedSubtitleFallback {
     /// tracks (signs/songs/commentary) are curated subsets that do not carry the disc's forced set.
     private static func isCueFilterCandidate(_ stream: MediaStream) -> Bool {
         guard stream.isExternal != true, !isForcedTrack(stream) else { return false }
-        let codec = stream.codec?.lowercased() ?? ""
-        let isBitmap = ["pgs", "hdmv", "dvb_sub", "dvbsub", "dvd_sub", "dvdsub", "vobsub", "xsub"]
-            .contains(where: { codec.contains($0) })
-        guard isBitmap else { return false }
-        let title = stream.title?.lowercased() ?? ""
-        return !["signs", "songs", "music", "musik", "commentary"].contains(where: { title.contains($0) })
+        guard PlayerViewModel.isBitmapSubtitle(stream) else { return false }
+        return !TrackDisplayFormatter.title(
+            stream.title, hasAnyWordOf: ["signs", "songs", "music", "musik", "commentary"])
     }
 
     /// Full beats SDH: the plain track mirrors the disc's authored forced set most closely.
     private static func cueFilterRank(_ stream: MediaStream) -> Int {
-        let title = stream.title?.lowercased() ?? ""
-        return ["sdh", "cc", "hearing"].contains(where: { title.contains($0) }) ? 1 : 0
+        return TrackDisplayFormatter.title(stream.title, hasAnyWordOf: ["sdh", "cc", "hearing"]) ? 1 : 0
     }
 
     private static func isLanguageUnknown(_ language: String?) -> Bool {

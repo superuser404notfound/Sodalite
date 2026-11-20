@@ -11,6 +11,14 @@ enum SidebarMetrics {
     static let itemVerticalPadding: CGFloat = 14
     static let horizontalPadding: CGFloat = 20
     static let cornerRadius: CGFloat = 16
+    /// The glass panel behind the rail: room above the first row and below the last, and corners
+    /// that keep the collapsed rail a pill (its rows' own focus pills sit inside with `cornerRadius`).
+    static let panelVerticalPadding: CGFloat = 16
+    /// Glass on either side of the rows, so a focused row's white pill sits inside the panel instead
+    /// of running into its edge (seen on device). Added around the rows rather than taken from them:
+    /// the expanded row width is what the longest German label needs.
+    static let panelHorizontalPadding: CGFloat = 10
+    static let panelCornerRadius: CGFloat = 32
 
     /// The collapsed row is square around its icon: the same padding on all four sides, so the
     /// focus pill reads as a tile rather than a stretched capsule, and the rail costs the content
@@ -56,8 +64,8 @@ enum SidebarMetrics {
 
     static var collapsedWidth: CGFloat { iconColumn + itemHorizontalPadding(isExpanded: false) * 2 }
 
-    /// Everything the rail occupies on the leading edge: its own inset plus its collapsed width.
-    static var railSlot: CGFloat { railLeadingInset + collapsedWidth }
+    /// Everything the rail occupies on the leading edge: its own inset plus its collapsed panel.
+    static var railSlot: CGFloat { railLeadingInset + panelWidth(isExpanded: false) }
 
     /// What is left for the label once the icon column and the paddings have taken their share.
     static var labelWidthBudget: CGFloat {
@@ -69,6 +77,8 @@ enum SidebarMetrics {
 
     /// Matches the scrim in `menuPresentation`, the app's other "a panel arrives" curve.
     static let expandDuration: Double = 0.35
+    /// How far a page slides while it fades on a tab switch, towards the side its row sits on.
+    static let pageSlide: CGFloat = 60
 
     static var itemHeight: CGFloat { iconSize + itemVerticalPadding * 2 }
     static var itemSpacing: CGFloat { rowPitch - itemHeight }
@@ -79,6 +89,11 @@ enum SidebarMetrics {
 
     static func width(isExpanded: Bool) -> CGFloat {
         isExpanded ? expandedWidth : collapsedWidth
+    }
+
+    /// The glass panel: the rows plus the panel's own padding on either side.
+    static func panelWidth(isExpanded: Bool) -> CGFloat {
+        width(isExpanded: isExpanded) + panelHorizontalPadding * 2
     }
 
     /// What the centred block occupies, so a caller can check it against the title-safe band.

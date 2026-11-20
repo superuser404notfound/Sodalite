@@ -19,7 +19,7 @@ struct WatchStatsView: View {
             }
             .screenContentInset()
         }
-        .navigationDestination(item: $selectedItem) { item in
+        .detailDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
         }
         .task {

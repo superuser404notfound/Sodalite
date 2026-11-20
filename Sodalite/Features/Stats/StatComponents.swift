@@ -26,12 +26,12 @@ struct StatTile: View {
         .padding(.vertical, hSizeClass == .compact ? 16 : 28)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(.white.opacity(focused ? 0.12 : 0.05))
+                .fill(focused ? Color.Theme.focusFill : Color.white.opacity(0.05))
         )
         .focusStroke(cornerRadius: 16, isFocused: focused)
         .focusResponse(.tile.flat, isFocused: focused)
         #if os(tvOS)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         #endif
     }

@@ -19,8 +19,14 @@ struct AppRouter: View {
     @State private var launchPickerServer: JellyfinServer?
 
     /// ContinuousClock (keeps counting through device sleep) instant of the last .background
-    /// entry; consumed on return to .active by consumeBackgroundInstant (issue #41).
+    /// entry; consumed on return to .active by consumeBackgroundInstant (issue #41). On tvOS the
+    /// .inactive entry stamps it too: the screensaver never reaches .background.
     @State private var lastBackgroundedAt: ContinuousClock.Instant?
+    /// Whether the trip stamped above reached .background, or only the screensaver's .inactive.
+    @State private var tripReachedBackground = false
+    /// Set while a due reprompt waits for the paused player or my-requests panel it closed to leave
+    /// the screen.
+    @State private var repromptAwaitsDismissal = false
     /// Non-nil while the who's-watching cover is up: which server's profiles it offers and why it was
     /// raised (the periodic reprompt for the active server, or a switch to a server this device holds
     /// no resumable session for, Sodalite#74).
@@ -42,6 +48,8 @@ struct AppRouter: View {
 
     /// Drives the WhatsNew fullScreenCover after the splash on a release-boundary launch; dismiss callback stamps the version seen.
     @State private var showWhatsNew = false
+    /// A reprompt that came due while What's New was up; armed once it closes (R-LIFECYCLE-8).
+    @State private var repromptDeferredByWhatsNew: (at: ContinuousClock.Instant, reachedBackground: Bool)?
 
     /// Last requestContentReload this view answered. `.task(id:)` re-fires with the same id on every
     /// reappear, and re-running the session refresh on each modal dismissal would be pointless traffic.
@@ -64,8 +72,23 @@ struct AppRouter: View {
         "\(appState.activeServer?.id ?? "none")|\(appState.activeUser?.id ?? "none")"
     }
 
-    /// Edge-triggered active flag: keys a `.task` so the monitor refreshes on foreground, not on every phase change.
-    private var scenePhaseIsActive: Bool { scenePhase == .active }
+    /// A background launch (BGAppRefresh, a silent push) must not spend its budget on the foreground
+    /// refresh; the real foreground runs it from `didBecomeActive`.
+    private var launchIsInForeground: Bool {
+        #if os(macOS)
+        true
+        #else
+        UIApplication.shared.applicationState == .active
+        #endif
+    }
+
+    private var launchPickerStillKnown: Bool {
+        guard let server = launchPickerServer else { return true }
+        return dependencies.listKnownServers().contains { $0.id == server.id }
+    }
+
+    /// Set by the first foreground run, so the launch run after the restore does not repeat it.
+    @State private var didRunForegroundWork = false
 
     /// False while something is presented above the router and hosts the PIN cover itself: the
     /// profile picker here, or a `parentalGateHost()` surface such as the iOS Settings sheet.
@@ -76,7 +99,16 @@ struct AppRouter: View {
     /// True while the who's-watching reprompt is up. A deep link or Continue Watching request waits
     /// behind it and resolves for whoever it lets in: it used to drop the cover, and the link that
     /// opened the app became a way past an entry-locked profile's only gate.
-    private var repromptHolds: Bool { profileCover?.context == .reprompt }
+    private var repromptHolds: Bool { profileCover?.context == .reprompt || repromptAwaitsDismissal }
+
+    /// A profile picker or PIN entry is up or may come due. The my-requests panel waits behind it,
+    /// because its events belong to whoever it lets in, and steps aside unread when one comes due over
+    /// it. A time away not yet weighed counts, so the panel neither stays up under the tvOS
+    /// screensaver nor shows on return ahead of the reprompt decision.
+    private var profileLocked: Bool {
+        profileCover != nil || repromptAwaitsDismissal || lastBackgroundedAt != nil
+            || dependencies.parentalGate.activeRequest != nil
+    }
 
     private struct PendingLink: Equatable {
         let itemID: String?
@@ -95,11 +127,18 @@ struct AppRouter: View {
             monitor: dependencies.pendingRequestsMonitor,
             preferences: dependencies.seerrNotificationPreferences,
             jellyfinServerID: dependencies.activeServer?.id,
-            jellyfinUserID: dependencies.activeUserID
+            jellyfinUserID: dependencies.activeUserID,
+            syncBadge: { await dependencies.syncAppIconBadge() }
         )
         #else
         await dependencies.pendingRequestsMonitor.refresh()
         #endif
+    }
+
+    /// Who the Seerr connection belongs to, nil when there is none.
+    private var seerrIdentityKey: String? {
+        guard appState.isSeerrConnected else { return nil }
+        return "\(appState.activeSeerrProfile?.serverID ?? ""):\(appState.activeSeerrProfile?.userID ?? ""):\(appState.activeSeerrUser?.id ?? 0)"
     }
 
     var body: some View {
@@ -151,28 +190,22 @@ struct AppRouter: View {
         .animation(.easeOut(duration: 0.4), value: appState.isLoading)
         .animation(.easeInOut(duration: 0.2), value: appState.isResolvingDeepLink)
         .animation(.easeInOut(duration: 0.2), value: appState.isLocalNetworkDenied)
-        // Keep the Catalog pending-requests badge fresh: recompute when the app comes forward, when the
-        // Seerr connection flips, and on the admin-queue change signal. iOS/iPadOS badge; inert on tvOS.
-        .task(id: scenePhaseIsActive) {
-            if scenePhaseIsActive {
-                #if os(iOS)
-                await recheckLocalNetworkAccess()
-                #endif
-                await refreshPending()
-                await sweepOrphanedLiveStreams()
-                await dependencies.cloudSync?.fetchNow()
-                #if os(iOS)
-                dependencies.scheduleRouteResolve()
-                #endif
-            }
+        // Trakt follows the active profile; a connected one syncs right away (rate-limited inside).
+        // onChange, not .task(id:): a task restarts whenever the router reappears under the player.
+        .onChange(of: appState.profileKey, initial: true) { _, key in
+            dependencies.trakt.activate(profile: key)
+            dependencies.trakt.sync()
         }
-        .task(id: appState.isSeerrConnected) {
-            if appState.isSeerrConnected {
-                await refreshPending()
+        // Keyed on who is connected, not on the flag: a switch between two Seerr profiles keeps the flag true.
+        // onChange, not .task(id:), for the same reason as the Trakt hook above.
+        .onChange(of: seerrIdentityKey, initial: true) { _, identity in
+            if identity != nil, appState.isSeerrConnected {
+                Task { await refreshPending() }
             } else {
                 dependencies.pendingRequestsMonitor.reset()
             }
         }
+        .myRequestsPresentation(profileLocked: profileLocked)
         .onReceive(NotificationCenter.default.publisher(for: .seerrPendingRequestsShouldRefresh)) { _ in
             Task { await refreshPending() }
         }
@@ -184,32 +217,49 @@ struct AppRouter: View {
             // routes to discovery before the first cloud-sync fetch lands. Re-run
             // the restore when synced data arrives so the profile picker appears
             // without an app relaunch.
-            guard !appState.isAuthenticated else { return }
+            guard CloudArrivalRestorePolicy.shouldRerunRestore(
+                isAuthenticated: appState.isAuthenticated, launchPickerShown: launchPickerServer != nil,
+                launchPickerServerStillKnown: launchPickerStillKnown,
+                hasKnownServers: true)
+            else { return }
             guard !appState.isLoading else {
                 cloudDataArrivedDuringRestore = true
                 return
             }
             Task { await restoreSession() }
         }
-        #if os(iOS)
-        .onChange(of: scenePhase) { _, phase in
-            // Queue the next background poll when leaving the foreground, only while opted in.
-            if phase == .background, dependencies.seerrNotificationPreferences.notifyPendingRequests {
-                PendingRequestsBackgroundRefresh.schedule()
-            }
+        // The lifecycle runs off UIApplication's notifications, not scenePhase: a player (or any UIKit
+        // fullScreen modal) over the router makes it disappear, and a disappeared view gets no
+        // .task(id: scenePhase) or .onChange(of: scenePhase) at all, while .onReceive still fires.
+        // Driven by scenePhase, the shield went up on the way out and never came down (Sodalite#237).
+        #if os(macOS)
+        .task(id: scenePhase) { handleLifecycle(scenePhase) }
+        #else
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            handleLifecycle(.inactive)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            // Synchronous on the way out, so the shield is in the snapshot the system takes next.
+            raisePrivacyShieldIfRepromptPossible()
+            handleLifecycle(.background)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            handleLifecycle(.active)
         }
         #endif
         .task {
             guard !hasRestored else { return }
             hasRestored = true
             await restoreSession()
+            if !didRunForegroundWork, launchIsInForeground { runForegroundWork() }
         }
         .task {
-            // The change callback re-resolves the route on a Wi-Fi handoff, which is an iOS
-            // concern. The monitor itself runs on both: NetworkPathSnapshot is what tells an
+            // The change callback re-resolves the route on a Wi-Fi handoff, which a phone or a Mac
+            // has and an Apple TV does not, and takes back what the old network proved (audit
+            // NET-201). The monitor itself runs everywhere: NetworkPathSnapshot is what tells an
             // unreachable server apart from a device with no network at all (Sodalite#122).
-            #if os(iOS)
-            pathObserver.onPathChange = { dependencies.scheduleRouteResolve() }
+            #if os(iOS) || os(macOS)
+            pathObserver.onPathChange = { dependencies.networkPathDidSettle() }
             #endif
             pathObserver.start()
         }
@@ -250,13 +300,6 @@ struct AppRouter: View {
                 // of its own server sheet.
                 launchPickerServer = server
             }
-        }
-        .task(id: scenePhase) {
-            if scenePhase == .background {
-                lastBackgroundedAt = ContinuousClock().now
-            }
-            guard scenePhase == .active else { return }
-            consumeBackgroundInstant()
         }
         .task(id: appState.serverDidSwitch) {
             guard appState.serverDidSwitch > 0 else { return }
@@ -316,7 +359,7 @@ struct AppRouter: View {
         }
         // The same cover every other detail page opens in, so a deep-linked page closes from the same
         // corner, hides its close while a page is pushed, and can host the music player (Sodalite#142).
-        .detailCover(item: $deepLinkPresentation) { presentation in
+        .detailCoverModal(item: $deepLinkPresentation) { presentation in
             DetailRouterView(item: presentation.item, autoPlay: presentation.autoPlay)
         }
         // The router's own player cover, for a track started where nothing is presented above it
@@ -324,7 +367,7 @@ struct AppRouter: View {
         // via `nowPlayingCoverHost()`, because a cover cannot stack on a cover from the same hosting
         // controller, and BOTH shells are one such controller (Sodalite#140, re-measured in #110
         // round 3: the top bar is no exception).
-        .fullScreenCover(isPresented: Binding(
+        .fullScreenCoverCompat(isPresented: Binding(
             get: { nowPlaying.isPresented && nowPlaying.routerPresents },
             set: { if !$0 { nowPlaying.dismiss() } }
         )) {
@@ -338,11 +381,15 @@ struct AppRouter: View {
                 dependencies.musicPlaybackCoordinator.stop()
             }
         }
-        .fullScreenCover(isPresented: $showWhatsNew) {
+        .fullScreenCoverCompat(isPresented: $showWhatsNew) {
             if let entry = Changelog.latest {
                 WhatsNewView(entry: entry) {
                     ChangelogPreferences.markCurrentSeen()
                     showWhatsNew = false
+                    if let trip = repromptDeferredByWhatsNew {
+                        repromptDeferredByWhatsNew = nil
+                        maybeRequestProfileReprompt(backgroundedAt: trip.at, reachedBackground: trip.reachedBackground)
+                    }
                 }
                 .themedPresentationBackground()
             }
@@ -350,7 +397,7 @@ struct AppRouter: View {
         // The router hosts the PIN cover for everything that lives at its own level. A surface
         // presented above it (the iOS Settings sheet) registers with the gate and hosts its own,
         // because a cover cannot stack on a sheet from the same hosting controller.
-        .fullScreenCover(item: Binding(
+        .fullScreenCoverCompat(item: Binding(
             get: { routerOwnsTheGate ? dependencies.parentalGate.activeRequest : nil },
             set: { if $0 == nil { dependencies.parentalGate.resolve(false) } }
         )) { request in
@@ -359,7 +406,7 @@ struct AppRouter: View {
             }
             .pausesAppBackgroundMotion()
         }
-        .fullScreenCover(item: $profileCover) { cover in
+        .fullScreenCoverCompat(item: $profileCover) { cover in
             LaunchProfilePickerView(
                 server: cover.server,
                 context: cover.context,
@@ -369,9 +416,13 @@ struct AppRouter: View {
             // Menu would close the reprompt as "continue as current" without the entry lock's PIN.
             // The picker routes that press through its gated select instead.
             .interactiveDismissDisabled(cover.context == .reprompt)
+            #if !os(macOS)
+            // Held past the cover's slide-in, so the page it closed never shows.
+            .onAppear { PrivacyShield.lower(after: .milliseconds(400)) }
+            #endif
             // The AppRouter-level PIN cover can't stack on this cover (one cover per host view),
             // so the gate presents from inside while this one is up.
-            .fullScreenCover(item: Binding(
+            .fullScreenCoverCompat(item: Binding(
                 get: { dependencies.parentalGate.activeRequest },
                 set: { if $0 == nil { dependencies.parentalGate.resolve(false) } }
             )) { request in
@@ -380,6 +431,15 @@ struct AppRouter: View {
                 }
                 .pausesAppBackgroundMotion()
             }
+        }
+        // iOS profile badge: the picker as a cover, opened on purpose (context .chooser). Never over
+        // a sibling cover, the same rule the reprompt follows.
+        .onChange(of: appState.requestProfilePicker) { _, requested in
+            guard requested else { return }
+            appState.requestProfilePicker = false
+            guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew,
+                  let server = appState.activeServer else { return }
+            profileCover = ProfileCoverRequest(server: server, context: .chooser)
         }
         .onChange(of: appState.isLoading) { _, isLoading in
             // Splash finished: fire What's-New on a release-boundary crossing. isAuthenticated lets the prefs layer tell a fresh install (don't pester) from a pre-Changelog upgrade (0.3.2 and earlier never wrote lastSeenVersion).
@@ -418,6 +478,7 @@ struct AppRouter: View {
         guard !Task.isCancelled else { return }
         appState.requestContinueWatching = false
         if let item = response?.items.first {
+            appState.pendingDeepLinkServerID = nil
             appState.pendingDeepLinkItemID = item.id
         }
     }
@@ -442,6 +503,7 @@ struct AppRouter: View {
     private func resolvePendingDeepLink() async {
         guard let id = appState.pendingDeepLinkItemID else {
             appState.pendingDeepLinkAutoPlay = false
+            appState.pendingDeepLinkServerID = nil
             appState.isResolvingDeepLink = false
             return
         }
@@ -456,11 +518,18 @@ struct AppRouter: View {
             // Couldn't restore in time: drop the pending link + overlay so the user can interact with picker/discovery.
             appState.pendingDeepLinkItemID = nil
             appState.pendingDeepLinkAutoPlay = false
+            appState.pendingDeepLinkServerID = nil
             appState.isResolvingDeepLink = false
             return
         }
         // The pending id stays: this task re-fires when the reprompt closes, for the profile it let in.
         guard !holdForReprompt() else { return }
+        if appState.isMyRequestsPanelPresented {
+            // Same host: the detail cover cannot land until the panel's own dismissal has finished.
+            appState.isMyRequestsPanelPresented = false
+            try? await Task.sleep(for: .milliseconds(450))
+            guard !Task.isCancelled else { return }
+        }
         // Dismiss any active player before the new sheet (TopShelf often fires over a backgrounded paused player, else its modal stays on top of the new cover). Two-step: (1) bump requestPlayerDismissal so detail views flip showPlayer (keeps the binding path consistent on return); (2) walk the modal chain to dismiss PlayerHostController directly, since binding-driven dismiss proved unreliable across scene-foreground.
         // A deep link is deliberate navigation: drop a server-switch cover (abandon the pending
         // switch) and cancel any PIN challenge started from it, else its continuation later runs a
@@ -476,10 +545,7 @@ struct AppRouter: View {
         // Let UIKit finish the dismiss before the new fullScreenCover, else it races and SwiftUI warns "presenting from a VC that is being dismissed" or the modal never lands.
         try? await Task.sleep(for: .milliseconds(250))
 
-        let item = try? await dependencies.jellyfinItemService.getItemDetail(
-            userID: user.id,
-            itemID: id
-        )
+        let item = await fetchDeepLinkItem(id: id, serverID: appState.pendingDeepLinkServerID, activeUserID: user.id)
         guard !Task.isCancelled else { return }
         deepLinkPresentation = item.map {
             DeepLinkPresentation(item: $0, autoPlay: appState.pendingDeepLinkAutoPlay)
@@ -488,20 +554,106 @@ struct AppRouter: View {
         try? await Task.sleep(for: .milliseconds(300))
         appState.isResolvingDeepLink = false
         appState.pendingDeepLinkAutoPlay = false
+        appState.pendingDeepLinkServerID = nil
         appState.pendingDeepLinkItemID = nil
     }
 
-    /// Consumed on every .active entry (a player dismissal re-fires the scenePhase task while still
-    /// .active, and must not re-prompt), and by a deep link that got here first: the URL and the
+    /// An item from another server of a combined shelf is asked of that server and keeps its id, so
+    /// the detail page plays it and reports progress there (Sodalite#218). A server that is no
+    /// longer a secondary is either the active one by now, which then answers, or one Combine left
+    /// since the shelf drew it, which the active server knows nothing of: that link opens nothing,
+    /// as one to an item deleted since does.
+    private func fetchDeepLinkItem(id: String, serverID: String?, activeUserID: String) async -> JellyfinItem? {
+        let registry = dependencies.sessionRegistry
+        guard let serverID, let session = registry.secondary(serverID: serverID) else {
+            if let serverID, serverID != registry.active.server?.id {
+                LogTap.shared.note("[deeplink] server \(serverID.prefix(8)) is not combined any more, asking the active one")
+            }
+            return try? await dependencies.jellyfinItemService.getItemDetail(userID: activeUserID, itemID: id)
+        }
+        var item = try? await session.itemService.getItemDetail(userID: session.userID, itemID: id)
+        if item != nil, item?.serverID == nil { item?.serverID = serverID }
+        return item
+    }
+
+    private func handleLifecycle(_ phase: ScenePhase) {
+        if phase == .background {
+            #if os(tvOS)
+            if lastBackgroundedAt == nil { lastBackgroundedAt = ContinuousClock().now }
+            TopShelfRefresher.refreshBeforeSuspension()
+            #else
+            lastBackgroundedAt = ContinuousClock().now
+            #endif
+            tripReachedBackground = true
+            #if os(iOS)
+            // Queue the next background poll when leaving the foreground, only while opted in.
+            if dependencies.seerrNotificationPreferences.notifyPendingRequests {
+                PendingRequestsBackgroundRefresh.schedule()
+            }
+            #endif
+        }
+        #if os(tvOS)
+        if phase == .inactive, lastBackgroundedAt == nil {
+            lastBackgroundedAt = ContinuousClock().now
+            tripReachedBackground = false
+        }
+        #endif
+        guard phase == .active else { return }
+        runForegroundWork()
+        consumeBackgroundInstant()
+        #if !os(macOS)
+        // A due reprompt lowers it once the picker is up, see the profile cover. The late lower
+        // is the backstop for a cover that never lands, which would leave the app unseeable.
+        if !repromptHolds { PrivacyShield.lower() } else { PrivacyShield.lower(after: .seconds(3)) }
+        #endif
+    }
+
+    /// What a return to the front refreshes: the Catalog badge, Trakt, CloudKit, the live-stream sweep and
+    /// (iOS) the route. It runs off the UIApplication notification like the rest of `handleLifecycle`.
+    /// A `.task(id: scenePhase)` re-ran all of it on every player dismissal and stayed silent for a
+    /// foreground with the player up (SHELL-204).
+    private func runForegroundWork() {
+        didRunForegroundWork = true
+        Task { @MainActor in
+            #if os(iOS)
+            await recheckLocalNetworkAccess()
+            #endif
+            dependencies.trakt.sync()
+            await refreshPending()
+            await sweepOrphanedLiveStreams()
+            await dependencies.cloudSync?.fetchNow()
+            #if os(iOS)
+            dependencies.scheduleRouteResolve()
+            #endif
+        }
+    }
+
+    /// Consumed on every .active entry and by a deep link that got here first: the URL and the
     /// phase change arrive in either order, and the link must not be resolved ahead of the reprompt
     /// the same return to the app is due.
     private func consumeBackgroundInstant() {
         let backgroundedAt = lastBackgroundedAt
+        let reachedBackground = tripReachedBackground
         lastBackgroundedAt = nil
+        tripReachedBackground = false
         // Skip until the initial restore has run, so a cold launch does not re-prompt on top of it.
         guard hasRestored else { return }
-        maybeRequestProfileReprompt(backgroundedAt: backgroundedAt)
+        maybeRequestProfileReprompt(backgroundedAt: backgroundedAt, reachedBackground: reachedBackground)
     }
+
+    #if !os(macOS)
+    private func raisePrivacyShieldIfRepromptPossible() {
+        guard hasRestored, let server = appState.activeServer else { return }
+        let possible = ProfileRepromptPolicy.canReprompt(
+            interval: dependencies.authPreferences.profileReprompt,
+            launchBehavior: dependencies.authPreferences.launchBehavior,
+            isAuthenticated: appState.isAuthenticated,
+            rememberedCount: dependencies.listRememberedUsers(serverID: server.id).count
+        )
+        guard possible else { return }
+        PrivacyShield.raise(isSupporter: dependencies.storeKitService.isSupporter)
+    }
+    #endif
 
     /// Whether a deep link or Continue Watching request has to wait for the reprompt.
     private func holdForReprompt() -> Bool {
@@ -510,12 +662,12 @@ struct AppRouter: View {
     }
 
     /// Only decides whether to arm the cover; `consumeBackgroundInstant` owns the instant.
-    private func maybeRequestProfileReprompt(backgroundedAt: ContinuousClock.Instant?) {
+    private func maybeRequestProfileReprompt(backgroundedAt: ContinuousClock.Instant?, reachedBackground: Bool) {
         guard let backgroundedAt else { return }
-        // Never arm over a sibling cover (one fullScreenCover per host view). A deep link in flight
-        // does not stop it, it waits behind it.
-        guard deepLinkPresentation == nil, !nowPlaying.isPresented, !showWhatsNew, profileCover == nil
-        else { return }
+        // Never arm over a sibling cover (one fullScreenCover per host view). Detail covers, the
+        // music player, the player and a dismissable profile cover are closed first below instead of
+        // skipping, else the instant is spent and the next viewer lands in this profile (SHELL-202).
+        guard profileCover?.context != .reprompt, !repromptAwaitsDismissal else { return }
         guard let server = appState.activeServer else { return }
         let should = ProfileRepromptPolicy.shouldReprompt(
             elapsed: backgroundedAt.duration(to: ContinuousClock().now),
@@ -523,10 +675,67 @@ struct AppRouter: View {
             launchBehavior: dependencies.authPreferences.launchBehavior,
             isAuthenticated: appState.isAuthenticated,
             rememberedCount: dependencies.listRememberedUsers(serverID: server.id).count,
-            isPlayerActive: PlayerModalPresence.isPlayerActive,
-            tvUserChanged: false
+            isPlaybackRunning: PlayerModalPresence.isPlaybackRunning,
+            tvUserChanged: false,
+            wasBackgrounded: reachedBackground
         )
-        if should { profileCover = ProfileCoverRequest(server: server, context: .reprompt) }
+        guard should else { return }
+        if showWhatsNew {
+            repromptDeferredByWhatsNew = (backgroundedAt, reachedBackground)
+            return
+        }
+        let playerUp = PlayerModalPresence.isPlayerActive
+        let panelUp = appState.isMyRequestsPanelPresented
+        let plan = ProfileRepromptPolicy.coverPlan(
+            playerUp: playerUp, panelUp: panelUp,
+            detailCoverUp: deepLinkPresentation != nil || !nowPlaying.routerPresents,
+            musicPlayerUp: nowPlaying.isPresented, whatsNewUp: showWhatsNew,
+            repromptCoverUp: profileCover?.context == .reprompt,
+            otherProfileCoverUp: profileCover != nil && profileCover?.context != .reprompt,
+            awaitsDismissal: repromptAwaitsDismissal)
+        guard case .closeThenArm(let closePlayer, let closeRouterCovers, let closeProfileCover) = plan else {
+            if plan == .armNow { profileCover = ProfileCoverRequest(server: server, context: .reprompt) }
+            return
+        }
+        // Setting this closes the panel unread through `profileLocked`.
+        repromptAwaitsDismissal = true
+        if closeProfileCover {
+            profileCover = nil
+            if dependencies.parentalGate.activeRequest != nil {
+                dependencies.parentalGate.resolve(false)
+            }
+        }
+        if closePlayer {
+            // A paused player left open would hand the next viewer this profile's title and library.
+            // Closed the way a deep link closes it, so the stop report saves the position.
+            appState.requestPlayerDismissal &+= 1
+            PlayerModalDismisser.dismissActive(logPrefix: "[Reprompt]")
+        }
+        Task { @MainActor in
+            // Same settles as the deep-link path: a cover presented mid-dismiss never lands, and the
+            // player has to be gone before the cover under it is dismissed (R-LIFECYCLE-2).
+            if closePlayer { try? await Task.sleep(for: .milliseconds(250)) }
+            if closeRouterCovers {
+                deepLinkPresentation = nil
+                nowPlaying.dismiss()
+                NotificationCenter.default.post(name: .closeDetailCoversForReprompt, object: nil)
+            }
+            if closeRouterCovers || panelUp || closeProfileCover {
+                try? await Task.sleep(for: .milliseconds(450))
+            } else {
+                try? await Task.sleep(for: .milliseconds(250))
+            }
+            repromptAwaitsDismissal = false
+            guard profileCover == nil, deepLinkPresentation == nil, !nowPlaying.isPresented,
+                  let server = appState.activeServer
+            else {
+                #if !os(macOS)
+                PrivacyShield.lower()
+                #endif
+                return
+            }
+            profileCover = ProfileCoverRequest(server: server, context: .reprompt)
+        }
     }
 
     private func restoreSession() async {
@@ -560,7 +769,10 @@ struct AppRouter: View {
 
         if cloudDataArrivedDuringRestore {
             cloudDataArrivedDuringRestore = false
-            if !appState.isAuthenticated, !dependencies.listKnownServers().isEmpty {
+            if CloudArrivalRestorePolicy.shouldRerunRestore(
+                isAuthenticated: appState.isAuthenticated, launchPickerShown: launchPickerServer != nil,
+                launchPickerServerStillKnown: launchPickerStillKnown,
+                hasKnownServers: !dependencies.listKnownServers().isEmpty) {
                 await restoreSession()
             }
         }
@@ -569,9 +781,16 @@ struct AppRouter: View {
     /// Close live streams an earlier run left open on the server (#147). Cheap when there is nothing
     /// to do: the ledger is a local read, and a run with no leftovers makes no request at all.
     private func sweepOrphanedLiveStreams() async {
-        guard appState.isAuthenticated, let userID = dependencies.activeUserID else { return }
-        await LiveTunerLedger.shared.sweep(
-            userID: userID, using: dependencies.jellyfinPlaybackService)
+        guard appState.isAuthenticated else { return }
+        var targets: [(userID: String, service: JellyfinPlaybackServiceProtocol)] = []
+        if let userID = dependencies.activeUserID {
+            targets.append((userID, dependencies.jellyfinPlaybackService))
+        }
+        // A tuner opened on a secondary Combine server sits under that server's user id.
+        for session in dependencies.sessionRegistry.participants where !session.isActive && !session.userID.isEmpty {
+            targets.append((session.userID, session.playbackService))
+        }
+        await LiveTunerLedger.shared.sweep(targets: targets)
     }
 
     private func performRestore() async {

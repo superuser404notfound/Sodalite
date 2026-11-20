@@ -1,6 +1,7 @@
 import CloudKit
 import Foundation
 import Observation
+import Security
 
 enum CloudSyncStatus: Equatable {
     case disabled
@@ -80,7 +81,6 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     /// The in-flight (or last) engine start, so callers that need a live engine can
     /// await it instead of no-opping while it is still coming up.
     private var startTask: Task<Void, Never>?
-    private var debounceTasks: [CloudSyncStoreKey: Task<Void, Never>] = [:]
     /// Last snapshot uploaded or applied per store, to skip observation echoes.
     private var lastSettingsSnapshot: [CloudSyncStoreKey: SettingsSyncPayload] = [:]
     /// Last server payload queued or applied per server id. A session restore re-saves the server and
@@ -146,6 +146,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
             observeWhileOff()
             return
         }
+        guard Self.isEntitledForCloudKit else {
+            status = .disabled
+            LogTap.shared.note("[CloudSync] not started, this build carries no iCloud container entitlement")
+            return
+        }
         guard engine == nil, !startInFlight else { return }
         startInFlight = true
         removeObservers()
@@ -160,6 +165,32 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         if !isHealthy { status = .syncing }
         startTask = Task { await startEngine() }
     }
+
+    /// Whether this build may reach CloudKit at all.
+    ///
+    /// `CKContainer(identifier:)` does not fail when the entitlement is missing, it traps, so the
+    /// check has to come before the container is ever constructed, and a build without the
+    /// entitlement dies on launch rather than reporting sync as unavailable. Measured on the Mac
+    /// target: an unsigned local build aborts inside `CKContainer.__allocating_init` before a
+    /// window appears.
+    ///
+    /// macOS only, because asking is macOS only: `SecTaskCreateFromSelf` is not public API on iOS
+    /// or tvOS, and the alternative there is reading a provisioning profile that a simulator build
+    /// does not have. It is also where the question arises, since a Mac app can be signed locally
+    /// with no entitlements at all, while an iOS or tvOS build that reaches a device or a simulator
+    /// was signed with them.
+    private static let isEntitledForCloudKit: Bool = {
+        #if os(macOS)
+        guard let task = SecTaskCreateFromSelf(nil),
+              let containers = SecTaskCopyValueForEntitlement(
+                  task, "com.apple.developer.icloud-container-identifiers" as CFString, nil
+              ) as? [String]
+        else { return false }
+        return containers.contains(containerID)
+        #else
+        return true
+        #endif
+    }()
 
     private var isHealthy: Bool {
         if case .active = status { return true }
@@ -236,8 +267,6 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         engine = nil
         database = nil
         startInFlight = false
-        for task in debounceTasks.values { task.cancel() }
-        debounceTasks = [:]
         // A delete queued under one account must not block adoption of the same
         // record name under the next account.
         recentLocalDeletes = []
@@ -426,6 +455,9 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         guard let engine else { return }
         do {
             try await engine.fetchChanges()
+            // One line per fetch: a fetch that brings nothing logs nothing else, which reads the
+            // same as a fetch that never ran.
+            LogTap.shared.note("[CloudSync] fetch done")
             // A fetch that changed nothing posts no event, so an earlier fetch failure would
             // otherwise stay on the status row. A latched upload rejection survives this.
             if case .error = status { settleActive() }
@@ -562,9 +594,17 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     }
 
     func markSettingsDirty(_ key: CloudSyncStoreKey) {
+        markSettingsDirty(key, profile: nil)
+    }
+
+    /// `profile` is the one an edit to a legacy playback/appearance record was made in. It is kept
+    /// with the pending save, because the record is built when the engine asks for it, possibly after
+    /// a profile switch (audit SYNC-203). nil builds from whichever profile is active at that time.
+    func markSettingsDirty(_ key: CloudSyncStoreKey, profile: ProfileKey?) {
         guard preferences.tracksLocalEdits else { return }
         let name = CloudSyncRecordName.settings(key)
         preferences.setLocalStamp(preferences.nextStamp(), for: name)
+        preferences.setLegacyRecordProfile(key.isProfileBacked ? profile : nil, for: name)
         addPendingSave(recordName: name)
     }
 
@@ -698,6 +738,10 @@ final class CloudSyncService: CloudSyncServiceProtocol {
     /// adoption the zone is about to lose, uploads included, so the zone goes directly; the
     /// confirmation is the consent. A failure has to reach the status row: "Off" alone read as done.
     private func deleteZoneWhileOff() async {
+        guard Self.isEntitledForCloudKit else {
+            status = .disabled
+            return
+        }
         status = .syncing
         let container = CKContainer(identifier: Self.containerID)
         do {
@@ -827,13 +871,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         }
     }
 
+    /// Stamps and queues at the edit, not after a delay: an app killed inside a debounce window made
+    /// the next launch seed its snapshot from the edited store, and the edit never went up (audit
+    /// SYNC-202). The profile records have worked this way since they were added.
     private func scheduleSettingsUpload(_ key: CloudSyncStoreKey, profile: ProfileKey? = nil) {
-        debounceTasks[key]?.cancel()
-        debounceTasks[key] = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            self?.uploadSettingsIfChanged(key, profile: profile)
-        }
+        uploadSettingsIfChanged(key, profile: profile)
     }
 
     /// Internal for tests.
@@ -844,7 +886,7 @@ final class CloudSyncService: CloudSyncServiceProtocol {
             : dependencies.collectSettingsPayload(key, stamp: .distantPast)
         if lastSettingsSnapshot[key] == snapshot { return }
         lastSettingsSnapshot[key] = snapshot
-        markSettingsDirty(key)
+        markSettingsDirty(key, profile: profile)
     }
 
     /// Internal for tests. Takes the profile the edit was made in, never the active one.
@@ -897,13 +939,28 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         return CloudSyncForwardCompat.merged(local: encoded, carrying: preferences.carriedFields(for: recordName))
     }
 
-    private func encodeLocalPayload(recordName: String, stamp: Date) -> Data? {
+    /// The legacy playback/appearance record is built from the profile its edit was made in, and
+    /// never from a copy that was not edited (nil drops the save).
+    private func settingsPayload(_ key: CloudSyncStoreKey, recordName: String, stamp: Date) -> SettingsSyncPayload? {
+        guard key.isProfileBacked, let profile = preferences.legacyRecordProfile(for: recordName) else {
+            return dependencies.collectSettingsPayload(key, stamp: stamp)
+        }
+        let kind: ProfileRecordKind = key == .playback ? .playback : .appearance
+        guard !dependencies.profileSettings.isProvisional(profile, kind) else {
+            LogTap.shared.note("[CloudSync] \(profile.fingerprint) \(kind.rawValue) is a local copy, legacy record not built")
+            return nil
+        }
+        return dependencies.collectSettingsPayload(key, stamp: stamp, profile: profile)
+    }
+
+    /// Internal for tests.
+    func encodeLocalPayload(recordName: String, stamp: Date) -> Data? {
         if let serverID = CloudSyncRecordName.serverID(fromRecordName: recordName) {
             guard let payload = dependencies.collectServerPayload(serverID: serverID, stamp: stamp) else { return nil }
             return try? JSONEncoder().encode(payload)
         }
         if let key = CloudSyncRecordName.storeKey(fromRecordName: recordName) {
-            return try? dependencies.collectSettingsPayload(key, stamp: stamp).encoded()
+            return try? settingsPayload(key, recordName: recordName, stamp: stamp)?.encoded()
         }
         if case let (kind, key)? = CloudSyncRecordName.profileRecord(fromRecordName: recordName) {
             return try? dependencies.collectProfilePayload(kind, key: key, stamp: stamp)?.encoded()
@@ -928,7 +985,8 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 .map(CloudSyncForwardCompat.storedPropertyNames(of:))
         }
         if let key = CloudSyncRecordName.storeKey(fromRecordName: recordName) {
-            return dependencies.collectSettingsPayload(key, stamp: .distantPast).knownFields
+            return (settingsPayload(key, recordName: recordName, stamp: .distantPast)
+                ?? dependencies.collectSettingsPayload(key, stamp: .distantPast)).knownFields
         }
         if case let (kind, key)? = CloudSyncRecordName.profileRecord(fromRecordName: recordName) {
             return dependencies.collectProfilePayload(kind, key: key, stamp: .distantPast)?.knownFields
@@ -1011,8 +1069,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applyProfilePayload(cloud, key: profile)
                 lastProfileSnapshot[name] = dependencies.collectProfilePayload(kind, key: profile, stamp: .distantPast)
                 preferences.setLocalStamp(cloud.updatedAt, for: name)
-            } else if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
-                addPendingSave(recordName: name)
+            } else {
+                Self.noteLocalKept(name, local: localStamp, cloud: cloud.updatedAt)
+                if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
+                    addPendingSave(recordName: name)
+                }
             }
         } else if let key = CloudSyncRecordName.storeKey(fromRecordName: name) {
             guard let cloud = decodeOrSkip(name, "settings", { try SettingsSyncPayload.decode(data, key: key) }) else {
@@ -1044,7 +1105,9 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applySettingsPayload(.spoilerReveals(merged))
                 lastSettingsSnapshot[key] = dependencies.collectSettingsPayload(key, stamp: .distantPast)
                 preferences.setLocalStamp(merged.updatedAt, for: name)
-                if merged.entries != cloudReveals.entries { addPendingSave(recordName: name) }
+                if merged.entries != cloudReveals.entries || merged.hiddenAt != (cloudReveals.hiddenAt ?? [:]) {
+                    addPendingSave(recordName: name)
+                }
                 return
             }
             // Sodalite#50 follow-up: series rules are per entry as well, and "never veil this show"
@@ -1074,8 +1137,11 @@ final class CloudSyncService: CloudSyncServiceProtocol {
                 dependencies.applySettingsPayload(cloud)
                 lastSettingsSnapshot[key] = dependencies.collectSettingsPayload(key, stamp: .distantPast)
                 preferences.setLocalStamp(cloud.updatedAt, for: name)
-            } else if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
-                addPendingSave(recordName: name)
+            } else {
+                Self.noteLocalKept(name, local: localStamp, cloud: cloud.updatedAt)
+                if CloudSyncMerge.remoteWins(localUpdatedAt: cloud.updatedAt, remoteUpdatedAt: localStamp) {
+                    addPendingSave(recordName: name)
+                }
             }
         } else if name == CloudSyncRecordName.securitySingleton {
             guard let cloud = decodeOrSkip(name, "security", { try JSONDecoder().decode(SecuritySyncPayload.self, from: data) }) else {
@@ -1093,10 +1159,19 @@ final class CloudSyncService: CloudSyncServiceProtocol {
         }
     }
 
+    /// A fetched record that loses last-writer-wins changes nothing here, so without this line a
+    /// device that keeps its own copy looks exactly like one that never received the record.
+    private static func noteLocalKept(_ name: String, local: Date, cloud: Date) {
+        let verdict = local == cloud ? "tie" : "local newer, re-uploading"
+        LogTap.shared.note(
+            "[CloudSync] kept local \(name) (\(verdict)): local \(local.timeIntervalSince1970) cloud \(cloud.timeIntervalSince1970)"
+        )
+    }
+
     /// A server record can move the default-server pin, which lives in the auth store, so the auth
-    /// snapshot is re-baselined or the debounced observer reads the apply as a local edit two seconds
-    /// later and uploads it back. Only when nothing was pending, though: an auth edit still inside
-    /// its debounce is already in the store, and re-baselining over it meant it never went up.
+    /// snapshot is re-baselined or the observer reads the apply as a local edit and uploads it back.
+    /// Only when nothing was pending, though: an auth edit the observer has not seen yet is already
+    /// in the store, and re-baselining over it meant it never went up.
     private func preservingPendingAuthEdit(_ apply: () -> Void) {
         let before = dependencies.collectSettingsPayload(.auth, stamp: .distantPast)
         let nothingPending = lastSettingsSnapshot[.auth] == before

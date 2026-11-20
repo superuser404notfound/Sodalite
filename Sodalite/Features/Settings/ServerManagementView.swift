@@ -12,6 +12,9 @@ struct ServerManagementView: View {
     @State private var pendingRemoval: JellyfinServer?
     /// Non-nil while the switch-failed alert is up: the reason, already run through ErrorText.
     @State private var switchFailure: String?
+    /// Combine servers for the active profile, and a tick that redraws the per-server rows (Sodalite#85).
+    @State private var combining = false
+    @State private var combineTick = 0
     #if os(iOS)
     @State private var editingURLsFor: JellyfinServer?
     #endif
@@ -48,13 +51,17 @@ struct ServerManagementView: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
 
+                if servers.count > 1 {
+                    combineSection
+                }
+
                 AddServerSettingsRow(onTap: { showAddServerFlow = true })
                     .padding(.top, 16)
             }
             .screenContentInset()
         }
         .onAppear(perform: load)
-        .fullScreenCover(isPresented: $showAddServerFlow) {
+        .fullScreenCoverCompat(isPresented: $showAddServerFlow) {
             ServerDiscoveryView(addMode: true, onCompletion: {
                 showAddServerFlow = false
                 load()
@@ -69,7 +76,8 @@ struct ServerManagementView: View {
                 externalPlaceholder: "multiServer.urls.external.placeholder",
                 initialInternalURL: server.internalURL,
                 initialExternalURL: server.externalURL,
-                resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                resolve: ServerAddressResolution.jellyfin(
+                    dependencies.serverDiscoveryService, expectedServerID: server.id),
                 onSave: { internalURL, externalURL in
                     try? dependencies.updateServerURLs(
                         serverID: server.id,
@@ -94,7 +102,8 @@ struct ServerManagementView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: { server in
-            Text("multiServer.remove.confirm.message \(server.name)", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "multiServer.remove.confirm.message \(server.name)"), scope: .server(server.id)))
         }
         // The reason, not a fixed line: ServerSwitchError already distinguishes "no longer saved on
         // this device" from "no sign-in saved", and discarding that left the one screen that could
@@ -116,7 +125,86 @@ struct ServerManagementView: View {
         }
     }
 
+    @ViewBuilder
+    private var combineSection: some View {
+        Text("settings.combineServers.section", bundle: .main)
+            .font(.title3)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .padding(.top, 24)
+            .padding(.bottom, 4)
+
+        ValuePickerRow(
+            icon: "square.stack.3d.up",
+            title: "settings.combineServers.title",
+            subtitle: "settings.combineServers.subtitle",
+            options: [false, true],
+            selection: Binding(
+                get: { combining },
+                set: { newValue in
+                    dependencies.setCombiningServers(newValue)
+                    combining = newValue
+                }
+            ),
+            label: onOffLabel
+        )
+
+        if combining {
+            ForEach(servers.filter { $0.id != activeID }) { server in
+                combinedServerRow(server)
+            }
+            .id(combineTick)
+            Text("settings.combineServers.footer", bundle: .main)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+        }
+    }
+
+    @ViewBuilder
+    private func combinedServerRow(_ server: JellyfinServer) -> some View {
+        switch dependencies.combinedServerStatus(server) {
+        case .contributes(let name), .excluded(let name):
+            ValuePickerRow(
+                icon: "server.rack",
+                title: LocalizedStringKey(server.name),
+                subtitle: LocalizedStringKey(String(
+                    format: String(localized: "settings.combineServers.server.as", defaultValue: "As %@"), name
+                )),
+                options: [false, true],
+                selection: Binding(
+                    get: {
+                        if case .contributes = dependencies.combinedServerStatus(server) { return true }
+                        return false
+                    },
+                    set: { newValue in
+                        dependencies.setServer(server.id, combined: newValue)
+                        combineTick &+= 1
+                    }
+                ),
+                label: onOffLabel
+            )
+        case .noSession:
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: server.name)
+                    .font(.headline)
+                Text("settings.combineServers.server.noSession", bundle: .main)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 8)
+        case .active:
+            EmptyView()
+        }
+    }
+
+    private func onOffLabel(_ on: Bool) -> String {
+        on ? String(localized: "common.on", defaultValue: "On")
+           : String(localized: "common.off", defaultValue: "Off")
+    }
+
     private func load() {
+        combining = dependencies.isCombiningServers()
         servers = dependencies.listKnownServers()
         activeID = dependencies.activeServer?.id
         defaultID = dependencies.authPreferences.defaultServerID
@@ -147,7 +235,9 @@ struct ServerManagementView: View {
     }
 
     private func remove(_ server: JellyfinServer) {
-        try? dependencies.removeServer(id: server.id)
+        // Purge only once the removal worked (audit review R-W2-6).
+        guard (try? dependencies.removeServer(id: server.id)) != nil else { load(); return }
+        Task { await dependencies.purgeDownloads(.server(server.id)) }
         load()
     }
 }
@@ -188,9 +278,7 @@ private struct ServerManagementRow: View {
                     badges
                 }
                 #endif
-                Text(server.url.host() ?? server.url.absoluteString)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                address
                 Text("multiServer.row.userCount \(userCount)", bundle: .main)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -234,7 +322,7 @@ private struct ServerManagementRow: View {
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .focusStroke(RoundedRectangle(cornerRadius: 14, style: .continuous), isFocused: focused)
         .focusResponse(.row, isFocused: focused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         // The hold belongs to the menu below: without this the row switched servers on the way into
         // its own context menu, which is why an inactive row never showed one (Sodalite#75).
@@ -296,59 +384,60 @@ private struct ServerManagementRow: View {
         if isDefault {
             StatusPill("multiServer.row.default")
         }
-        #if os(iOS)
-        if isActive, let route = dependencies.activeJellyfinRoute {
-            StatusPill(route == .internal ? "multiServer.route.internal" : "multiServer.route.external",
-                       tone: .neutral)
-        }
-        #endif
+    }
+
+    /// The address the row names is the one in use: the live route for the active server, the
+    /// last-known route for the others. `server.url` is always the internal slot when one is set, so
+    /// a phone on cellular showed the home IP under an External tag (Sodalite#225).
+    private var shownRoute: ServerRoute? {
+        isActive ? dependencies.activeJellyfinRoute : nil
+    }
+
+    private var shownURL: URL {
+        if let shownRoute, let url = server.url(for: shownRoute) { return url }
+        return dependencies.preferredURL(for: server)
     }
 
     @ViewBuilder
+    private var address: some View {
+        HStack(spacing: 6) {
+            #if os(iOS)
+            // Labels the address itself rather than sitting among the pills, where a grey
+            // External next to Active and Default read as a switched-off state (Sodalite#225).
+            if let shownRoute {
+                Text(shownRoute == .internal ? "multiServer.route.internal" : "multiServer.route.external",
+                     bundle: .main)
+                    .fontWeight(.semibold)
+                    .fixedSize()
+                Text(verbatim: "·")
+                    .fixedSize()
+            }
+            #endif
+            // One line, cut in the middle: a long reverse-proxy host keeps its first label and its
+            // domain, which are the two parts that tell the addresses apart.
+            Text(verbatim: shownURL.host() ?? shownURL.absoluteString)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+    }
+
     private func avatarCircle(for user: RememberedUser) -> some View {
         // Against THIS row's server, not the active one: the list draws every known server's
         // profiles, and the shared image service answers for whichever is active (Sodalite#119).
-        let url = dependencies.jellyfinImageService.userProfileImageURL(
-            userID: user.id,
-            tag: user.imageTag,
-            baseURL: dependencies.preferredURL(for: server),
-            token: user.token
+        ProfileAvatar(
+            name: user.name,
+            url: dependencies.profileAvatarURL(userID: user.id, tag: user.imageTag,
+                                               baseURL: dependencies.preferredURL(for: server)),
+            diameter: 40,
+            font: .caption.bold()
         )
-        ZStack {
-            if let url {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsFallback(for: user)
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-            } else {
-                initialsFallback(for: user)
-            }
-        }
         .overlay(
             Circle()
                 .strokeBorder(Color.white.opacity(0.4), lineWidth: 2)
         )
-    }
-
-    private func initialsFallback(for user: RememberedUser) -> some View {
-        let initials: String = {
-            let parts = user.name.split(separator: " ")
-            if parts.count >= 2 {
-                return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-            }
-            return String(user.name.prefix(2)).uppercased()
-        }()
-        return ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-                .frame(width: 40, height: 40)
-            Text(initials)
-                .font(.caption.bold())
-                .foregroundStyle(.primary)
-        }
     }
 }
 
@@ -371,7 +460,7 @@ private struct AddServerSettingsRow: View {
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .focusStroke(RoundedRectangle(cornerRadius: 14, style: .continuous), isFocused: focused)
         .focusResponse(.row, isFocused: focused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         .stableTap(isFocused: focused, perform: onTap)
     }

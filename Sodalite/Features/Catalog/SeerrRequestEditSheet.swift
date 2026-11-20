@@ -13,6 +13,8 @@ final class SeerrRequestEditModel {
     var isLoading: Bool = true
     var loadError: String?
     var isSaving: Bool = false
+    /// A server change is waiting for its profiles and folders.
+    private(set) var isLoadingDetails = false
 
     private let request: SeerrRequest
     private let configService: SeerrServiceConfigServiceProtocol
@@ -24,6 +26,15 @@ final class SeerrRequestEditModel {
     private var seededProfileID: Int?
     private var seededRootFolder: String?
     private var didSeed = false
+    /// Bumped by every load, so an answer that arrives after a newer request was made is dropped.
+    private var detailsToken = 0
+
+    /// Save is only safe once the pickers hold the request's own values: before that the body would
+    /// carry empty fields, and Seerr assigns every field it is sent, so they would be cleared (CAT-203).
+    var isReady: Bool { didSeed && loadError == nil && !isLoading && !isLoadingDetails }
+
+    /// The body to send, or nil while ``isReady`` is false.
+    var updateBody: SeerrRequestUpdateBody? { isReady ? buildUpdateBody() : nil }
 
     init(request: SeerrRequest, configService: SeerrServiceConfigServiceProtocol) {
         self.request = request
@@ -36,6 +47,8 @@ final class SeerrRequestEditModel {
     func bootstrap() async {
         isLoading = true
         loadError = nil
+        detailsToken += 1
+        let token = detailsToken
         defer { isLoading = false }
         do {
             if request.type == .movie {
@@ -47,8 +60,9 @@ final class SeerrRequestEditModel {
                 serverID = Self.initialServerID(for: request, in: servers)
             }
             if let activeID = serverID {
-                try await loadDetails(forServerID: activeID)
+                try await loadDetails(forServerID: activeID, token: token)
             }
+            guard token == detailsToken else { return }
             if !didSeed {
                 didSeed = true
                 seededServerID = serverID
@@ -70,21 +84,28 @@ final class SeerrRequestEditModel {
             ?? servers.first?.id
     }
 
+    /// Cycling the picker fast starts several of these; only the newest one may fill the lists (CAT-208).
     func selectServer(_ id: Int) async {
         serverID = id
         profileID = nil
         rootFolder = nil
+        detailsToken += 1
+        let token = detailsToken
+        isLoadingDetails = true
+        defer { if token == detailsToken { isLoadingDetails = false } }
         do {
-            try await loadDetails(forServerID: id)
+            try await loadDetails(forServerID: id, token: token)
+            if token == detailsToken { loadError = nil }
         } catch {
-            loadError = ErrorText.user(for: error)
+            if token == detailsToken { loadError = ErrorText.user(for: error) }
         }
     }
 
-    private func loadDetails(forServerID id: Int) async throws {
+    private func loadDetails(forServerID id: Int, token: Int) async throws {
         let details: SeerrServiceDetails = request.type == .movie
             ? try await configService.radarrDetails(serverID: id)
             : try await configService.sonarrDetails(serverID: id)
+        guard token == detailsToken else { return }
         profiles = details.profiles
         rootFolders = details.rootFolders
         let onOwnServer = id == (seededServerID ?? Self.initialServerID(for: request, in: servers))
@@ -271,7 +292,7 @@ struct SeerrRequestEditSheet: View {
                 isLoading: model.isSaving,
                 action: { Task { await save(model: model) } }
             )
-            .disabled(model.isSaving || model.serverID == nil || isSeasonSelectionInvalid(model: model))
+            .disabled(model.isSaving || !model.isReady || isSeasonSelectionInvalid(model: model))
         }
     }
 
@@ -306,7 +327,7 @@ struct SeerrRequestEditSheet: View {
     private func save(model: SeerrRequestEditModel) async {
         model.isSaving = true
         defer { model.isSaving = false }
-        let body = model.buildUpdateBody()
+        guard let body = model.updateBody else { return }
         let updated = await viewModel.updateRequest(request, body: body)
         if updated != nil {
             dismiss()
@@ -342,7 +363,7 @@ private struct EditPickerRow<Option: Identifiable & Equatable>: View {
                           : AnyShapeStyle(Color.Theme.restFill))
             )
             .focusStroke(cornerRadius: 16, isFocused: focused)
-            .focusable(!options.isEmpty)
+            .focusableSurface(!options.isEmpty)
             .focused($focused)
             #if os(tvOS)
             .onMoveCommand { direction in

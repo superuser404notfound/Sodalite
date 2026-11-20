@@ -9,17 +9,17 @@ struct ExternalSubtitleView: View {
     var body: some View {
         ZStack {
             Color.clear
-            if !viewModel.subtitleCues.isEmpty || !viewModel.secondarySubtitleCues.isEmpty {
+            if !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
                 SubtitleOverlayView(
                     cues: viewModel.subtitleCues,
                     currentTime: viewModel.subtitleTime,
                     maxCueDuration: viewModel.subtitleMaxCueDuration,
-                    secondaryCues: viewModel.secondarySubtitleCues,
+                    secondaryCues: viewModel.shownSecondarySubtitleCues,
                     secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                     fontSize: viewModel.preferences.subtitleFontSize,
                     textColor: viewModel.preferences.subtitleColor,
                     background: viewModel.preferences.subtitleBackground,
-                    delaySeconds: viewModel.preferences.subtitleDelaySeconds,
+                    delaySeconds: viewModel.effectiveSubtitleDelay,
                     verticalPosition: viewModel.preferences.subtitleVerticalPosition,
                     font: viewModel.preferences.subtitleFont,
                     weight: viewModel.preferences.subtitleWeight,
@@ -27,8 +27,10 @@ struct ExternalSubtitleView: View {
                     assRenderer: nil,
                     assReloadSignal: viewModel.assReloadSignal,
                     activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                    secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                     hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
-                    videoSize: viewModel.videoSize
+                    videoSize: viewModel.videoSize,
+                    pixelAspect: viewModel.videoPixelAspect
                     // No pictureMode: the external window pins its layer to .resizeAspect
                     // (ExternalSubtitleWindowController), so the picture there is aspect-fit
                     // whatever the device screen is set to, and the overlay's default matches it.

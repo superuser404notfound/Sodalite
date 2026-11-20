@@ -2,7 +2,8 @@ import Foundation
 
 /// Sodalite#50. Decides whether an item's synopsis and still are veiled. A pure value so the
 /// whole matrix is unit-testable; the environment reads live in `spoilerVeil`.
-struct SpoilerPolicy: Sendable, Equatable {
+/// Nonisolated because the player's title lines are, and they need the title decision.
+nonisolated struct SpoilerPolicy: Sendable, Equatable {
     var enabled: Bool
     var hideEpisodes: Bool
     var hideMovies: Bool
@@ -13,6 +14,10 @@ struct SpoilerPolicy: Sendable, Equatable {
     /// Shared with `SpoilerSeriesRules` by COW like `revealedKeys`. Defaulted so the memberwise
     /// init keeps working for callers that predate it.
     var seriesOverrides: [String: Bool] = [:]
+    /// Robius (Discord, 2026-10-08). Off by default: for most shows the name tells nothing, and
+    /// for a game show it names who wins. Rides whatever decides the episode is veiled, so a
+    /// per-series rule can switch it on for one show while the global switch stays off.
+    var hideEpisodeTitles: Bool = false
 
     /// What is being covered. Not every veiled item veils both.
     enum Surface: Sendable {
@@ -20,6 +25,8 @@ struct SpoilerPolicy: Sendable, Equatable {
         case text
         /// Stills, posters, backdrops.
         case artwork
+        /// An episode's own name. The series name and the S/E numbers are never covered.
+        case title
     }
 
     static let disabled = SpoilerPolicy(
@@ -28,7 +35,8 @@ struct SpoilerPolicy: Sendable, Equatable {
         hideMovies: false,
         userID: "",
         revealedKeys: [],
-        seriesOverrides: [:]
+        seriesOverrides: [:],
+        hideEpisodeTitles: false
     )
 
     /// Per item, deliberately unlike `TrackSelectionMemory.scopeKey`, which folds episodes under
@@ -81,13 +89,38 @@ struct SpoilerPolicy: Sendable, Equatable {
         switch surface {
         case .text: return true
         case .artwork: return item.type == .episode
+        case .title: return item.type == .episode && hideEpisodeTitles
         }
+    }
+
+    /// The episode's name, or nil while `.title` veils it. Feed this to `EpisodeMetadataFormatter`
+    /// in place of `item.name`, so the line keeps its series name and numbers and only loses the name.
+    func visibleTitle(of item: JellyfinItem) -> String? {
+        isHidden(item, surface: .title) ? nil : item.name
+    }
+
+    /// For a line that shows the name on its own: a veiled name becomes "Episode 12", never a blank line.
+    func displayName(of item: JellyfinItem) -> String {
+        if let title = visibleTitle(of: item) { return title }
+        if let number = item.indexNumber { return String(localized: "spoiler.episodeNumber \(number)") }
+        return String(localized: "spoiler.episode")
     }
 
     /// The base decision, before any surface narrows it further. A per-series rule replaces the
     /// global default; it deliberately does NOT replace the reveal rules below, or a watched
     /// episode would stay blurred forever and Continue Watching would be a wall of blur again.
     func isHidden(_ item: JellyfinItem) -> Bool {
+        isVeiledByRules(item) && !revealedKeys.contains(key(for: item))
+    }
+
+    /// Sodalite#222. Visible only because the user revealed it by hand, so hiding it again would
+    /// veil it. Watched and started items never qualify, they stay visible whatever the reveals say.
+    func isManuallyRevealed(_ item: JellyfinItem) -> Bool {
+        revealedKeys.contains(key(for: item)) && isVeiledByRules(item)
+    }
+
+    /// Everything in the decision but the manual reveal.
+    private func isVeiledByRules(_ item: JellyfinItem) -> Bool {
         switch seriesOverride(for: item) {
         case .some(false):
             return false
@@ -111,7 +144,7 @@ struct SpoilerPolicy: Sendable, Equatable {
         // this the one row users look at most would be a wall of blur.
         if (item.userData?.playedPercentage ?? 0) > 0 { return false }
         if hasWatchedChild(item) { return false }
-        return !revealedKeys.contains(key(for: item))
+        return true
     }
 
     /// Same "started reveals" intent one level up: a season carries no played percentage (Jellyfin
@@ -123,5 +156,23 @@ struct SpoilerPolicy: Sendable, Equatable {
             return false
         }
         return unplayed < total
+    }
+}
+
+extension SpoilerPolicy {
+    /// What the Top Shelf extension needs of this policy, this profile's rules and reveals only.
+    /// Off unless the title switch is on, so the mirror stays empty for everyone else.
+    var topShelfTitleVeil: TopShelfTitleVeil {
+        guard hideEpisodeTitles else { return .off }
+        let userPrefix = "\(userID)|"
+        let rules = Dictionary(uniqueKeysWithValues: seriesOverrides.compactMap { key, veils in
+            key.hasPrefix(userPrefix) ? (String(key.dropFirst(userPrefix.count)), veils) : nil
+        })
+        let revealed = Set(revealedKeys.compactMap { key in
+            key.hasPrefix(userPrefix) ? String(key.dropFirst(userPrefix.count)) : nil
+        })
+        return TopShelfTitleVeil(hidesByDefault: seriesDefaultIsHidden,
+                                 seriesRules: rules,
+                                 revealedItemIDs: revealed)
     }
 }

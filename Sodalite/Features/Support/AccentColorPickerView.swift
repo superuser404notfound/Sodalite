@@ -182,7 +182,7 @@ private enum AccentCategoryChip {
     }
 }
 
-#if os(iOS)
+#if !os(tvOS)
 private struct AccentCategoryChipStyle: ButtonStyle {
     let selected: Bool
 
@@ -230,7 +230,7 @@ private struct AccentCategoryButton: View {
             )
             .focusStroke(cornerRadius: AccentCategoryChip.cornerRadius, isFocused: focused)
             .focusResponse(.chip, isFocused: focused)
-            .focusable(true)
+            .focusableSurface(true)
             .focused($focused)
             .stableTap(isFocused: focused, perform: action)
             .accessibilityElement(children: .combine)
@@ -301,7 +301,7 @@ private struct AccentPresetTile: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(.white.opacity(focused ? 0.12 : 0.05))
+                .fill(focused ? Color.Theme.focusFill : Color.white.opacity(0.05))
         )
         .overlay {
             RoundedRectangle(cornerRadius: 18)

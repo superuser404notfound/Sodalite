@@ -7,6 +7,9 @@ struct LoginView: View {
     @State private var showQuickConnect = false
     @State private var showSuccess = false
     #if os(iOS)
+    @FocusState private var focusedField: Field?
+    #endif
+    #if os(iOS)
     @Environment(\.appearanceTheme) private var appearanceTheme
     @State private var promptServer: JellyfinServer?
     @State private var showAddURLDialog = false
@@ -68,7 +71,8 @@ struct LoginView: View {
                 AddSecondURLSheet(
                     slot: slot,
                     knownURL: server.url,
-                    resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                    resolve: ServerAddressResolution.jellyfin(
+                        dependencies.serverDiscoveryService, expectedServerID: server.id),
                     onSave: { newURL in
                         let merged = server.urls(filling: slot, with: newURL)
                         try? dependencies.updateServerURLs(
@@ -135,6 +139,23 @@ struct LoginView: View {
     #endif
 
     private var loginContent: some View {
+        Group {
+            #if os(iOS)
+            touchLoginContent
+            #elseif os(tvOS)
+            tvLoginContent
+            #else
+            focusLoginContent
+            #endif
+        }
+        .onChange(of: viewModel?.loginSucceeded) { _, succeeded in
+            if succeeded == true {
+                showSuccessAndFinalize()
+            }
+        }
+    }
+
+    private var focusLoginContent: some View {
         VStack(spacing: 40) {
             Spacer()
 
@@ -163,54 +184,183 @@ struct LoginView: View {
             Spacer()
         }
         .padding()
-        .onChange(of: viewModel?.loginSucceeded) { _, succeeded in
-            if succeeded == true {
-                showSuccessAndFinalize()
+    }
+
+    #if os(tvOS)
+    private var tvLoginContent: some View {
+        TVOnboardingLayout(
+            title: Text(verbatim: preSelectedUser?.name ?? server.name),
+            subtitle: Text("auth.login.subtitle")
+        ) {
+            if let preSelectedUser {
+                userAvatar(for: preSelectedUser, diameter: 140)
+            } else {
+                TVOnboardingLogo()
+            }
+        } content: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    tvQuickConnect(vm: vm)
+                } else {
+                    // Username already in the title when picked from the user grid.
+                    if preSelectedUser == nil {
+                        TextField(String(localized: "auth.login.username"), text: Bindable(vm).username)
+                            .verbatimTextEntry()
+                    }
+                    SecureField(String(localized: "auth.login.password"), text: Bindable(vm).password)
+
+                    if let error = vm.errorMessage {
+                        TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+                    }
+
+                    TVOnboardingPrimaryButton(title: "auth.login.signIn", isLoading: vm.isLoading) {
+                        Task { await vm.login() }
+                    }
+                    .disabled(vm.isLoading || vm.username.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .padding(.top, 8)
+
+                    // Equal to Sign In here, not a link under it: typing a password with the remote
+                    // is the slow way in, confirming a code on the phone the quick one.
+                    TVOnboardingPillButton(title: "auth.login.quickConnect") {
+                        showQuickConnect = true
+                        Task { await vm.startQuickConnect() }
+                    }
+                }
             }
         }
     }
 
+    private func tvQuickConnect(vm: LoginViewModel) -> some View {
+        VStack(spacing: 24) {
+            QuickConnectCodeView(vm: vm, style: .tv)
+            .frame(maxWidth: .infinity)
+            .padding(36)
+            .background(Color.Theme.restFill, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(Color.Theme.panelEdge, lineWidth: 1)
+            }
+
+            if let error = vm.errorMessage {
+                TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+            }
+
+            TVOnboardingPillButton(title: "auth.quickConnect.cancel") {
+                vm.stopQuickConnect()
+                showQuickConnect = false
+            }
+        }
+    }
+    #endif
+
+    #if os(iOS)
+    private enum Field { case username, password }
+
+    private var touchLoginContent: some View {
+        OnboardingScaffold(
+            title: Text(verbatim: preSelectedUser?.name ?? server.name),
+            subtitle: Text("auth.login.subtitle")
+        ) {
+            if let preSelectedUser {
+                userAvatar(for: preSelectedUser, diameter: 112)
+            } else {
+                OnboardingLogo()
+            }
+        } content: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    touchQuickConnect(vm: vm)
+                } else {
+                    touchCredentials(vm: vm)
+                }
+                if let error = vm.errorMessage {
+                    OnboardingFootnote(text: Text(verbatim: error), isError: true)
+                }
+            }
+        } actions: {
+            if let vm = viewModel {
+                if showQuickConnect {
+                    OnboardingSecondaryButton(title: "auth.quickConnect.cancel") {
+                        vm.stopQuickConnect()
+                        showQuickConnect = false
+                    }
+                } else {
+                    OnboardingPrimaryButton(title: "auth.login.signIn", isLoading: vm.isLoading) {
+                        Task { await vm.login() }
+                    }
+                    .disabled(!canSignIn(vm) && !vm.isLoading)
+                    OnboardingSecondaryButton(title: "auth.login.quickConnect") {
+                        focusedField = nil
+                        showQuickConnect = true
+                        Task { await vm.startQuickConnect() }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            focusedField = preSelectedUser == nil ? .username : .password
+        }
+    }
+
+    private func canSignIn(_ vm: LoginViewModel) -> Bool {
+        !vm.isLoading && !vm.username.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func touchCredentials(vm: LoginViewModel) -> some View {
+        OnboardingCard {
+            // Username already in the title when picked from the user grid.
+            if preSelectedUser == nil {
+                HStack(spacing: 12) {
+                    Image(systemName: "person")
+                        .foregroundStyle(.tint)
+                        .frame(width: 26)
+                    TextField(String(localized: "auth.login.username"), text: Bindable(vm).username)
+                        .verbatimTextEntry()
+                        .textContentType(.username)
+                        .submitLabel(.next)
+                        .focused($focusedField, equals: .username)
+                        .onSubmit { focusedField = .password }
+                }
+                .padding(16)
+                OnboardingCardDivider(leadingInset: 54)
+            }
+            HStack(spacing: 12) {
+                Image(systemName: "lock")
+                    .foregroundStyle(.tint)
+                    .frame(width: 26)
+                SecureField(String(localized: "auth.login.password"), text: Bindable(vm).password)
+                    .textContentType(.password)
+                    .submitLabel(.go)
+                    .focused($focusedField, equals: .password)
+                    .onSubmit {
+                        guard canSignIn(vm) else { return }
+                        Task { await vm.login() }
+                    }
+            }
+            .padding(16)
+        }
+    }
+
+    private func touchQuickConnect(vm: LoginViewModel) -> some View {
+        OnboardingCard {
+            QuickConnectCodeView(vm: vm, style: .touch)
+            .frame(maxWidth: .infinity)
+            .padding(20)
+        }
+    }
+    #endif
+
     // Identical composition to the UserPicker card so the transition reads as "same user, now enter password".
     @ViewBuilder
-    private func userAvatar(for user: JellyfinUser) -> some View {
+    private func userAvatar(for user: JellyfinUser, diameter: CGFloat = 140) -> some View {
         // On the server being signed in to and without a token, like the picker card: the live
         // session's host and token belong to another server.
         let url = viewModel.flatMap { vm in
             vm.signInClient.baseURL.flatMap { base in
-                dependencies.jellyfinImageService.userProfileImageURL(
-                    userID: user.id, tag: user.primaryImageTag, baseURL: base, token: nil)
+                dependencies.profileAvatarURL(userID: user.id, tag: user.primaryImageTag, baseURL: base)
             }
         }
-        ZStack {
-            if let url {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle(for: user.name)
-                }
-                .frame(width: 140, height: 140)
-                .clipShape(Circle())
-            } else {
-                initialsCircle(for: user.name)
-                    .frame(width: 140, height: 140)
-            }
-        }
-    }
-
-    private func initialsCircle(for name: String) -> some View {
-        let parts = name.split(separator: " ")
-        let initials: String = {
-            if parts.count >= 2 {
-                return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-            }
-            return String(name.prefix(2)).uppercased()
-        }()
-        return ZStack {
-            Circle().fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 44, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
+        ProfileAvatar(name: user.name, url: url, diameter: diameter)
     }
 
     private var successOverlay: some View {
@@ -232,8 +382,7 @@ struct LoginView: View {
             // Username already shown above when picked from the user-grid.
             if preSelectedUser == nil {
                 TextField(String(localized: "auth.login.username"), text: Bindable(vm).username)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
+                    .verbatimTextEntry()
             }
 
             SecureField(String(localized: "auth.login.password"), text: Bindable(vm).password)
@@ -280,31 +429,7 @@ struct LoginView: View {
     @ViewBuilder
     private func quickConnectSection(vm: LoginViewModel) -> some View {
         VStack(spacing: 20) {
-            Text("auth.quickConnect.title")
-                .font(.title3)
-
-            if let code = vm.quickConnectCode {
-                Text("auth.quickConnect.instruction")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-
-                Text(code)
-                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                    .padding()
-
-                if vm.isPollingQuickConnect {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                        Text("auth.quickConnect.waiting")
-                            .foregroundStyle(.secondary)
-                    }
-                } else if vm.isLoading {
-                    ProgressView()
-                }
-            } else {
-                ProgressView()
-            }
+            QuickConnectCodeView(vm: vm, style: .desktop)
 
             if let error = vm.errorMessage {
                 Text(error)
@@ -390,5 +515,66 @@ struct LoginView: View {
             forJellyfinUserID: userID,
             jellyfinServerID: serverID
         )
+    }
+}
+
+/// The code, the hint and the waiting line of a Quick Connect attempt. The three platforms differ in
+/// sizes and in the box around it, not in what it shows (ASD-R202).
+private struct QuickConnectCodeView: View {
+    struct Style {
+        let spacing: CGFloat
+        let title: Font
+        let instruction: Font
+        let codeSize: CGFloat
+        let waitingSpacing: CGFloat
+        let selectable: Bool
+        let codePadding: Bool
+
+        static let tv = Style(spacing: 20, title: .headline, instruction: .callout, codeSize: 88,
+                              waitingSpacing: 12, selectable: false, codePadding: false)
+        static let touch = Style(spacing: 14, title: .headline, instruction: .subheadline, codeSize: 44,
+                                 waitingSpacing: 8, selectable: true, codePadding: false)
+        static let desktop = Style(spacing: 20, title: .title3, instruction: .body, codeSize: 48,
+                                   waitingSpacing: 8, selectable: false, codePadding: true)
+    }
+
+    let vm: LoginViewModel
+    let style: Style
+
+    var body: some View {
+        VStack(spacing: style.spacing) {
+            Text("auth.quickConnect.title")
+                .font(style.title)
+            if let code = vm.quickConnectCode {
+                Text("auth.quickConnect.instruction")
+                    .font(style.instruction)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                codeText(code)
+                if vm.isPollingQuickConnect {
+                    HStack(spacing: style.waitingSpacing) {
+                        ProgressView()
+                        Text("auth.quickConnect.waiting")
+                            .font(style.instruction)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if vm.isLoading {
+                    ProgressView()
+                }
+            } else {
+                ProgressView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func codeText(_ code: String) -> some View {
+        let text = Text(code).font(.system(size: style.codeSize, weight: .bold, design: .monospaced))
+        let padded = style.codePadding ? AnyView(text.padding()) : AnyView(text)
+        #if os(tvOS)
+        padded
+        #else
+        if style.selectable { padded.textSelection(.enabled) } else { padded }
+        #endif
     }
 }

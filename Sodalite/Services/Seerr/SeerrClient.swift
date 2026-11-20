@@ -10,6 +10,13 @@ final class SeerrClient {
     }
     /// Set by `DependencyContainer`, so the cookie reaches the log redactors.
     var onSessionCookieSet: ((String) -> Void)?
+    /// The Seerr server `baseURL` belongs to, for the trust check of a LAN address.
+    var serverID: String?
+    /// Holds a request to a LAN address until the container can say whether this network is one
+    /// Seerr may be trusted on, and refuses it otherwise. Seerr cannot be asked who it is, so the
+    /// sync alone was not enough: Catalog kept sending the cookie after a network change (audit
+    /// review R-ROUTE-23). Set by `DependencyContainer` on the live client only.
+    var routeHold: (@MainActor (_ current: () -> URL?) async throws -> URL)?
 
     private let decoder: JSONDecoder
 
@@ -27,11 +34,7 @@ final class SeerrClient {
         responseType: T.Type
     ) async throws -> T {
         let (data, _) = try await send(endpoint)
-        do {
-            return try decoder.decode(T.self, from: data)
-        } catch {
-            throw APIError.decodingError(error)
-        }
+        return try await decode(responseType, from: data)
     }
 
     func request(endpoint: APIEndpoint) async throws {
@@ -43,9 +46,10 @@ final class SeerrClient {
         try await send(endpoint)
     }
 
-    func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+    /// Off the main actor (audit NET-204): a Catalog detail response is 60 to 150 KB.
+    func decode<T: Decodable>(_ type: T.Type, from data: Data) async throws -> T {
         do {
-            return try decoder.decode(T.self, from: data)
+            return try await HTTPClient.decodeValue(from: data, using: decoder)
         } catch {
             throw APIError.decodingError(error)
         }
@@ -56,19 +60,17 @@ final class SeerrClient {
         responseType: T.Type
     ) async throws -> (T, HTTPURLResponse) {
         let (data, response) = try await send(endpoint)
-        do {
-            let value = try decoder.decode(T.self, from: data)
-            return (value, response)
-        } catch {
-            throw APIError.decodingError(error)
-        }
+        return (try await decode(responseType, from: data), response)
     }
 
     /// The one path every call takes. A 401 on the cookie this client still holds says Seerr no longer
-    /// knows the session, which no retry can fix, so it is announced for the Catalog to re-check the
-    /// session. A cookie swapped during the request (profile switch) belongs to someone else's verdict.
+    /// knows the session, which no retry can fix, so it is announced for the app-wide re-check
+    /// (`SeerrSessionRejectionHandler`). A cookie swapped during the request (profile switch) belongs to someone else's verdict.
     private func send(_ endpoint: APIEndpoint) async throws -> (Data, HTTPURLResponse) {
-        guard let baseURL else { throw APIError.invalidURL }
+        guard var baseURL else { throw APIError.invalidURL }
+        if let routeHold, RouteGate.needsProof(baseURL) {
+            baseURL = try await routeHold { self.baseURL }
+        }
         let sentCookie = endpoint.requiresAuth ? sessionCookie : nil
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         do {

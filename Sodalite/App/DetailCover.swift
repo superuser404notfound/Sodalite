@@ -4,13 +4,102 @@ extension View {
     /// Presents a full-screen detail as a cover (over the tab bar) instead of a NavigationStack push. The cover covers the tab bar WITHOUT ever removing it, so tvOS never re-templates the bar's icons gray on return (the tvOS 26 system bug that a `.toolbar(.hidden)` push triggers). Each cover hosts its own NavigationStack so the detail's deeper navigation (detail -> detail, -> person) still pushes normally.
     ///
     /// A static themed background sits behind the stack. Detail views draw their own full-screen backdrop over it, while backdrop-less pages show the selected theme.
+    ///
+    /// On the Mac and on iOS it is a push onto the enclosing NavigationStack instead. A window has no
+    /// tab bar to keep on screen, and a sheet there is a modal panel floating over the window, which
+    /// is the wrong shape for browsing: the toolbar's back button, the back gesture and Cmd-[ all
+    /// expect a stack. iOS does not have the gray-icon bug either, and a cover there takes away the
+    /// edge-swipe back that every other app's detail page answers to.
+    @ViewBuilder
     func detailCover<Item: Identifiable, Content: View>(
+        item: Binding<Item?>,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        #if os(macOS) || os(iOS)
+        modifier(DetailPushPresenter(item: item, destination: content))
+        #else
+        detailCoverModal(item: item, content: content)
+        #endif
+    }
+
+    /// Always a cover (a sheet on the Mac), for a presenter that sits above every NavigationStack and
+    /// so has nothing to push onto: the router's deep links.
+    func detailCoverModal<Item: Identifiable, Content: View>(
         item: Binding<Item?>,
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View {
         modifier(DetailCoverPresenter(item: item, coverContent: content))
     }
+
+    /// For a screen that is sometimes a cover's page and sometimes straight in a tab's stack (a
+    /// library grid, Watch Stats): pushes inside a cover, opens a cover of its own otherwise.
+    ///
+    /// tvOS only differs. A detail pushed into a sidebar tab other than Home keeps the rail's slot
+    /// beside it, because the tab's stack starts there and clips (Sodalite#215), so it has to sit
+    /// above the shell the way every other detail does. Inside a cover the stack already runs from
+    /// the screen edge, and a push keeps the cover's back arrow.
+    func detailDestination<Item: Identifiable & Hashable, Content: View>(
+        item: Binding<Item?>,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        modifier(DetailDestinationPresenter(item: item, destination: content))
+    }
 }
+
+private struct DetailDestinationPresenter<Item: Identifiable & Hashable, Destination: View>: ViewModifier {
+    @Environment(\.detailCoverStack) private var coverStack
+    @Binding var item: Item?
+    @ViewBuilder let destination: (Item) -> Destination
+
+    func body(content: Content) -> some View {
+        #if os(tvOS)
+        if coverStack == nil {
+            content.detailCoverModal(item: $item, content: destination)
+        } else {
+            push(content)
+        }
+        #else
+        push(content)
+        #endif
+    }
+
+    private func push(_ content: Content) -> some View {
+        content.navigationDestination(item: $item) { value in
+            destination(value)
+                .detailCoverPush()
+        }
+    }
+}
+
+#if os(macOS) || os(iOS)
+/// `navigationDestination(item:)` wants a Hashable item and these are only Identifiable, so the push
+/// is driven by presence instead. The pushed value is held here rather than read back from the
+/// binding: a pop clears the binding before the page has finished sliding out, and a destination
+/// read from it would blank mid-animation.
+private struct DetailPushPresenter<Item: Identifiable, Destination: View>: ViewModifier {
+    @Binding var item: Item?
+    @ViewBuilder let destination: (Item) -> Destination
+
+    @State private var pushed: Item?
+
+    func body(content: Content) -> some View {
+        content
+            .navigationDestination(isPresented: Binding(
+                get: { item != nil },
+                set: { if !$0 { item = nil } }
+            )) {
+                if let value = item ?? pushed {
+                    destination(value)
+                        .themedStaticBackground()
+                        .detailCoverPush()
+                }
+            }
+            .onChange(of: item?.id, initial: true) { _, _ in
+                if let item { pushed = item }
+            }
+    }
+}
+#endif
 
 /// Presents one detail cover, and owns its claim on the fullscreen music player.
 ///
@@ -26,11 +115,14 @@ private struct DetailCoverPresenter<Item: Identifiable, CoverContent: View>: Vie
 
     func body(content: Content) -> some View {
         content
-            .fullScreenCover(item: $item) { value in
+            .fullScreenCoverCompat(item: $item) { value in
                 DetailCoverHost(dismiss: { item = nil }) {
                     coverContent(value)
                 }
                 .nowPlayingCoverHost(nowPlayingHost)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .closeDetailCoversForReprompt)) { _ in
+                if item != nil { item = nil }
             }
             .onChange(of: item == nil) { _, coverIsGone in
                 if coverIsGone {
@@ -66,20 +158,13 @@ private struct DetailCoverHost<Content: View>: View {
         #else
         .themedStaticBackground()
         #endif
-        #if os(iOS)
-        // tvOS dismisses via the Menu button; iOS needs a touch close (a fullScreenCover
+        #if !os(tvOS)
+        // tvOS dismisses via the Menu button; everywhere else needs a close control (a cover
         // has no swipe-to-dismiss), else detail / program-info covers are a dead end.
         // Top-trailing glass circle (matching the settings gear) so it never sits on the
         // leading page title.
         .overlay(alignment: .topTrailing) {
-            Button(action: dismiss) {
-                Image(systemName: "xmark")
-                    .font(.title3.weight(.semibold))
-                    .padding(12)
-                    .glassEffect(.regular, in: Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
+            GlassCloseButton(action: dismiss)
             .padding(.trailing, 16)
             .padding(.top, 8)
             // Hidden, not removed: the stack's own back arrow is the way out of a pushed page,

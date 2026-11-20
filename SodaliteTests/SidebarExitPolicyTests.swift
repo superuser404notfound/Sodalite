@@ -9,7 +9,7 @@ struct SidebarExitPolicyTests {
     @Test("Menu in the content goes to the rail rather than out of the app")
     func fromContent() {
         for tab in AppTab.allCases {
-            #expect(SidebarExitPolicy.next(focusIsInRail: false, selectedTab: tab) == .focusRail)
+            #expect(SidebarExitPolicy.next(focusIsInRail: false, selectedTab: .app(tab)) == .focusRail)
         }
     }
 
@@ -17,6 +17,8 @@ struct SidebarExitPolicyTests {
     func fromRail() {
         #expect(SidebarExitPolicy.next(focusIsInRail: true, selectedTab: .settings) == .selectHome)
         #expect(SidebarExitPolicy.next(focusIsInRail: true, selectedTab: .music) == .selectHome)
+        let pinned = PinnedLibraryTab(library: JellyfinLibrary(id: "m", name: "Movies", collectionType: "movies", imageTags: nil))
+        #expect(SidebarExitPolicy.next(focusIsInRail: true, selectedTab: .library(pinned)) == .selectHome)
     }
 
     @Test("Menu in the rail on Home is the only way out of the app")

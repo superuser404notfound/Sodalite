@@ -5,14 +5,17 @@ struct SearchView: View {
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
+    @Environment(\.shellBarInset) private var shellBarInset
+    @Environment(\.shellPageFocusRequest) private var pageFocusRequest
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
     /// The edge the section headings and their rows share with every other tab (Sodalite#140).
     private var leadingInset: CGFloat { metrics.rowLeading(shellPaysLeading: shellPaysLeading) }
     @State private var viewModel: SearchViewModel?
+    @State private var prefetchTask: Task<Void, Never>?
     @State private var destination: Destination?
-    #if os(tvOS)
-    @FocusState private var clearFocused: Bool
-    #endif
+    /// Drives the iOS bar's Cancel button: the keyboard covers the tab bar, so without it Return was
+    /// the only way out of the field (Sodalite#208).
+    @State private var isSearchFieldEditing = false
 
     private var seerrBrowsingEnabled: Bool {
         SeerrSurfacePolicy.browsingEnabled(
@@ -25,12 +28,15 @@ struct SearchView: View {
     /// where only the last one attached ever presents, and the older path dies without a warning.
     private enum Destination: Identifiable {
         case library(JellyfinItem)
+        /// A result's Play: its detail page, straight into the player.
+        case play(JellyfinItem, fromBeginning: Bool)
         case catalog(SeerrMedia)
         case person(PersonRoute)
 
         var id: String {
             switch self {
             case .library(let item): "library-\(item.id)"
+            case .play(let item, let fromBeginning): "play-\(item.id)-\(fromBeginning)"
             case .catalog(let media): "catalog-\(media.stableKey)"
             case .person(let route): "person-\(route.id)"
             }
@@ -40,24 +46,52 @@ struct SearchView: View {
     var body: some View {
         ThemeNavigationStack {
             VStack(spacing: 0) {
-                searchBar
-
+                #if os(tvOS)
+                // SwiftUI's own search, not a UISearchContainerViewController in a representable: on
+                // tvOS 26 the system keyboard cannot move inside a SwiftUI host. Its keys move through
+                // focus guides of their own, and the host leaves layout guides out of what it hands
+                // the focus engine, so every press failed and focus stayed on the first key, with the
+                // linear and the grid layout alike (measured in the tvOS 26.5 simulator, also with a
+                // bare container in a UIHostingController; tvOS 27 fixed it). `.searchable` is not
+                // affected on either version.
                 if let vm = viewModel {
-                    if vm.jellyfinResults.isEmpty && vm.seerrResults.isEmpty && vm.peopleResults.isEmpty {
-                        emptyState(vm: vm)
-                    } else {
-                        resultsView(vm: vm)
-                    }
+                    resultsArea(vm: vm)
+                        .searchable(
+                            text: Bindable(vm).query,
+                            prompt: Text(String(localized: "search.placeholder", defaultValue: "Search"))
+                        )
+                        .autocorrectionDisabled()
+                        .focusSection()
+                        .onChange(of: vm.query) { _, _ in
+                            vm.scheduleSearch()
+                        }
                 } else {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+                #else
+                searchBar
+
+                if let vm = viewModel {
+                    resultsArea(vm: vm)
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                #endif
             }
+            .reservesShellChrome()
+            // Below the cover, so a detail page's own rows do not ask this host for a second one.
+            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+                destination = .play(item, fromBeginning: fromBeginning)
+            })
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $destination) { destination in
                 switch destination {
                 case .library(let item):
                     DetailRouterView(item: item)
+                case .play(let item, let fromBeginning):
+                    DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: fromBeginning)
                 case .catalog(let media):
                     CatalogDetailView(media: media)
                 case .person(let route):
@@ -69,7 +103,24 @@ struct SearchView: View {
                 }
             }
         }
+        #if os(tvOS)
+        // The bar's room as real padding, so the search starts below it. A safe-area inset outside
+        // the stack never reaches the UIKit search, and the one ThemeNavigationStack gives its root
+        // would only push the results down, so it is zeroed here.
+        .environment(\.shellBarInset, 0)
+        .padding(.top, shellBarInset)
+        #endif
         .onAppear(perform: bootstrap)
+        #if os(iOS)
+        .onChange(of: appState.requestSearchFieldFocus) { _, _ in
+            isSearchFieldEditing = true
+        }
+        #endif
+        // Who takes part changed (Combine servers, a server muted or back): the next search uses it (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            guard let vm = viewModel, let userID = appState.activeUser?.id else { return }
+            vm.sources = dependencies.searchSources(activeUserID: userID)
+        }
         // Reactive Seerr hookup: bootstrap captures the flag once, so hitting Search before restoreSession finishes the Seerr part would pin a nil service for the session. Re-sync on change keeps the catalog half live, and it follows the Catalog tab's visibility too (Sodalite#62).
         .onChange(of: seerrBrowsingEnabled) { _, enabled in
             viewModel?.seerrSearchService = enabled ? dependencies.seerrSearchService : nil
@@ -83,15 +134,16 @@ struct SearchView: View {
             bootstrap()
         }
         // Pre-warm the poster cache on results-change so first focus doesn't pay round-trip + decode. Bounded-concurrency prefetch so it doesn't starve foreground bandwidth.
-        .onChange(of: viewModel?.jellyfinResults) { _, _ in
+        // One handler on a combined key: a search sets all three lists in one pass, and three
+        // handlers started three prefetches of the same URLs (BRW-203).
+        .onChange(of: searchPosterKey) { _, _ in
             prefetchSearchPosters()
         }
-        .onChange(of: viewModel?.seerrResults) { _, _ in
-            prefetchSearchPosters()
-        }
-        .onChange(of: viewModel?.peopleResults) { _, _ in
-            prefetchSearchPosters()
-        }
+    }
+
+    private var searchPosterKey: [String] {
+        guard let vm = viewModel else { return [] }
+        return vm.jellyfinResults.map(\.originKey) + vm.seerrResults.map(\.stableKey) + vm.peopleResults.map { "p\($0.id)" }
     }
 
     /// Hand current result poster URLs to `ImageCache.prefetch`; cached URLs are skipped, so only new posters pay network on each results-change.
@@ -119,53 +171,58 @@ struct SearchView: View {
             }
         }
         guard !urls.isEmpty else { return }
-        let token = dependencies.jellyfinClient.accessToken
-        let host = dependencies.jellyfinClient.baseURL?.host
-        Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, authToken: token, jellyfinHost: host)
+        let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
+        // The cancelled run releases its URL claims as it drains; waiting for it keeps the
+        // replacement from skipping them (audit review R-BROWSE-1).
+        let previous = prefetchTask
+        previous?.cancel()
+        prefetchTask = Task.detached(priority: .utility) {
+            await previous?.value
+            await ImageCache.prefetch(urls, auth: auth)
         }
     }
 
-    /// Inline UIKit UITextField bar: SwiftUI TextField routes focus unreliably on tvOS (silently skipped); .searchable() adds a 1-2s rebuild per tab-switch. UITextField routes reliably with no switch-lag.
+    #if !os(tvOS)
+    /// Inline UIKit UITextField bar for iOS. tvOS uses `.searchable`, whose keyboard sits on the
+    /// page, so its results stay visible while typing.
     @ViewBuilder
     private var searchBar: some View {
         if let vm = viewModel {
             HStack(spacing: 14) {
-                Image(systemName: "magnifyingglass")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 14) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                SearchTextField(
-                    text: Bindable(vm).query,
-                    placeholder: String(localized: "search.placeholder", defaultValue: "Search")
+                    searchField(vm: vm)
+                        .frame(maxWidth: .infinity, maxHeight: 42)
+                        .onChange(of: vm.query) { _, _ in
+                            vm.scheduleSearch()
+                        }
+
+                    if vm.isSearching {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+                .padding(.horizontal, 26)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.Theme.restFill)
                 )
-                .frame(maxWidth: .infinity, maxHeight: 42)
-                .onChange(of: vm.query) { _, _ in
-                    vm.scheduleSearch()
-                }
 
-                if vm.isSearching {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                }
-
-                #if os(tvOS)
-                // iOS gets UIKit's own clear button inside the field (SearchTextField); tvOS has no
-                // pointer to hit it with, so the clear lives beside the field as a focusable target.
-                // It stays mounted while focused even after the query empties: dropping the focused
-                // view mid-tap hands the focus back to the engine's geometric pick, which lands
-                // anywhere but here.
-                if !vm.query.isEmpty || clearFocused {
-                    clearButton(vm: vm)
+                #if os(iOS)
+                if isSearchFieldEditing {
+                    // Only drops the keyboard: the field's own clear button already empties the query.
+                    Button("common.cancel") {
+                        isSearchFieldEditing = false
+                    }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
                 #endif
             }
-            .padding(.horizontal, 26)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.Theme.restFill)
-            )
+            .animation(.snappy, value: isSearchFieldEditing)
             .padding(.leading, metrics.screenLeading(shellPaysLeading: shellPaysLeading))
             .padding(.trailing, metrics.screenHInset)
             .padding(.top, 38)
@@ -173,56 +230,80 @@ struct SearchView: View {
         }
     }
 
-    #if os(tvOS)
-    /// Focusable clear, mirroring ValuePickerRow's focus chrome (tinted fill + ring, never a white
-    /// system pill). Activated through stableTap so focus drift in the last frames of a click can't
-    /// wipe the query from a neighbour's press.
-    private func clearButton(vm: SearchViewModel) -> some View {
-        Image(systemName: "xmark.circle.fill")
-            .font(.title3)
-            .foregroundStyle(clearFocused ? AnyShapeStyle(.tint) : AnyShapeStyle(Color.white.opacity(0.5)))
-            .padding(12)
-            .background(
-                Circle().fill(clearFocused ? AnyShapeStyle(.tint.opacity(0.18)) : AnyShapeStyle(Color.clear))
-            )
-            .focusStroke(Circle(), isFocused: clearFocused)
-            .focusResponse(.chip, isFocused: clearFocused)
-            .focusable()
-            .focused($clearFocused)
-            .stableTap(isFocused: clearFocused) {
-                // scheduleSearch runs off the query's own onChange, which clears the results.
-                vm.query = ""
-            }
-            .accessibilityLabel(Text("search.clear"))
+    @ViewBuilder
+    private func searchField(vm: SearchViewModel) -> some View {
+        let placeholder = String(localized: "search.placeholder", defaultValue: "Search")
+        #if os(iOS)
+        SearchTextField(text: Bindable(vm).query, isEditing: $isSearchFieldEditing, placeholder: placeholder)
+        #else
+        SearchTextField(text: Bindable(vm).query, placeholder: placeholder)
+        #endif
     }
     #endif
 
     @ViewBuilder
+    private func resultsArea(vm: SearchViewModel) -> some View {
+        let isEmpty = vm.jellyfinResults.isEmpty && vm.seerrResults.isEmpty && vm.peopleResults.isEmpty
+        #if os(tvOS)
+        // One scroll view for hits and empty states alike. Once the results host shows a scroll view,
+        // UISearchController moves the field and keys into a container that scrolls with it, and when
+        // the scroll view goes away again it lays the field out from the top of the screen, ignoring
+        // the safe area: the field slid behind the top bar and the line above the keys (measured on an
+        // Apple TV: field at y=0 instead of 157 after the hits gave way to an empty state).
+        ScrollView(.vertical, showsIndicators: false) {
+            if isEmpty {
+                emptyState(vm: vm)
+                    .containerRelativeFrame(.vertical)
+            } else {
+                resultsStack(vm: vm)
+            }
+        }
+        .scrollDismissesKeyboard(.immediately)
+        .drivesShellBar()
+        .background(SearchKeyboardFocuser(request: pageFocusRequest))
+        #else
+        if isEmpty {
+            emptyState(vm: vm)
+        } else {
+            resultsView(vm: vm)
+        }
+        #endif
+    }
+
+    #if !os(tvOS)
     private func resultsView(vm: SearchViewModel) -> some View {
         ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(alignment: .leading, spacing: 40) {
-                if !vm.jellyfinResults.isEmpty {
-                    librarySection(items: vm.jellyfinResults)
-                }
-                // People sit between the two title rows: what the library already owns stays on top,
-                // and the person leads into the catalog titles they belong to.
-                if !vm.peopleResults.isEmpty {
-                    peopleSection(people: vm.peopleResults)
-                }
-                if !vm.seerrResults.isEmpty {
-                    catalogSection(items: vm.seerrResults)
-                }
-                if vm.isSearching {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    .padding(.vertical, 40)
-                }
-            }
-            .padding(.vertical, 20)
+            resultsStack(vm: vm)
         }
+        // Scrolling the hits is the other way out of the keyboard, and it keeps the query.
+        .scrollDismissesKeyboard(.immediately)
+        .drivesShellBar()
+    }
+    #endif
+
+    private func resultsStack(vm: SearchViewModel) -> some View {
+        LazyVStack(alignment: .leading, spacing: 40) {
+            if !vm.jellyfinResults.isEmpty {
+                librarySection(items: vm.jellyfinResults)
+            }
+            // People sit between the two title rows: what the library already owns stays on top,
+            // and the person leads into the catalog titles they belong to.
+            if !vm.peopleResults.isEmpty {
+                peopleSection(people: vm.peopleResults)
+            }
+            if !vm.seerrResults.isEmpty {
+                catalogSection(items: vm.seerrResults)
+            }
+            if vm.isSearching {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, 40)
+            }
+        }
+        .padding(.vertical, 20)
     }
 
     private func librarySection(items: [JellyfinItem]) -> some View {
@@ -234,13 +315,14 @@ struct SearchView: View {
             RowScrollView(leading: leadingInset, trailing: 50, vertical: 20) {
                 LazyHStack(spacing: 30) {
                     ForEach(items) { item in
-                        FocusableCard {
+                        FocusableCard(opensMenuOnHold: true) {
                             destination = .library(item)
                         } content: { isFocused in
                             MediaCard(
                                 item: item,
                                 imageURL: dependencies.jellyfinImageService.imageURL(
                                     itemID: item.id,
+                                    serverID: item.serverID,
                                     imageType: .primary,
                                     tag: item.imageTags?.primary,
                                     maxWidth: ImageWidth.card
@@ -249,6 +331,7 @@ struct SearchView: View {
                                 isFocused: isFocused
                             )
                         }
+                        .mediaContextMenu(for: item) { destination = .library($0) }
                     }
                 }
                 .enrichesPosterBadges(items)
@@ -376,7 +459,48 @@ struct SearchView: View {
         viewModel = SearchViewModel(
             itemService: dependencies.jellyfinItemService,
             seerrSearchService: seerrBrowsingEnabled ? dependencies.seerrSearchService : nil,
-            userID: userID
+            userID: userID,
+            sources: dependencies.searchSources(activeUserID: userID)
         )
     }
 }
+
+#if os(tvOS)
+/// Hands focus to the search keyboard when a click on the top bar asks the page for it. SwiftUI has
+/// no way to do that on tvOS (`searchFocused` is unavailable there) and the shell's focus reset only
+/// reaches SwiftUI views, so a click on the Search tab left focus on the tab. This view sits in the
+/// results, which `.searchable` hosts inside its UISearchContainerViewController, so the container
+/// is up its responder chain.
+private struct SearchKeyboardFocuser: UIViewRepresentable {
+    let request: Int
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        guard context.coordinator.handled != request else { return }
+        context.coordinator.handled = request
+        DispatchQueue.main.async {
+            var responder: UIResponder? = view
+            while let current = responder, !(current is UISearchContainerViewController) {
+                responder = current.next
+            }
+            guard let container = responder as? UISearchContainerViewController,
+                  let system = UIFocusSystem.focusSystem(for: container) else { return }
+            system.requestFocusUpdate(to: container.searchController)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(handled: request)
+    }
+
+    final class Coordinator {
+        var handled: Int
+        init(handled: Int) { self.handled = handled }
+    }
+}
+#endif

@@ -3,6 +3,17 @@ import AetherEngine
 
 extension PlayerViewModel {
 
+    /// Sodalite#81: every position the server would get also lands in the manifest, online or not.
+    func recordLocalProgress(positionTicks: Int64, played: Bool) {
+        guard let local = localDownload, let store = downloadStore, positionTicks > 0 || played else { return }
+        let now = Date()
+        try? store.update(itemID: local.id) {
+            $0.progress.positionTicks = played ? 0 : positionTicks
+            $0.progress.played = $0.progress.played || played
+            $0.progress.lastPlayed = now
+        }
+    }
+
     /// Position in Jellyfin ticks from playbackTime (survives player.stop(),
     /// unlike player.currentTime). Falls back to resumePositionTicks only when
     /// playbackTime == 0; NOT max(ticks, resumePositionTicks), which clamped a
@@ -34,10 +45,25 @@ extension PlayerViewModel {
         )
     }
 
+    /// Trakt sees the same session the server does: start, pause and stop, never live TV.
+    func traktScrobble(_ action: TraktEndpoint.ScrobbleAction, positionTicks: Int64) {
+        guard !isLiveSession else { return }
+        if action == .stop {
+            guard traktScrobbleState?.itemID == item.id else { return }
+            traktScrobbleState = nil
+        } else {
+            traktScrobbleState = (item.id, action == .start)
+        }
+        let trakt = DependencyContainer.shared.trakt
+        trakt.scrobble(action, item: item, positionTicks: positionTicks)
+        if action == .stop { trakt.syncAfterPlayback() }
+    }
+
     func reportStart() async {
         guard !hasReportedStart else { return }
         hasReportedStart = true
         let ticks = currentPositionTicks
+        traktScrobble(.start, positionTicks: ticks)
         let report = PlaybackStartReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,
@@ -57,9 +83,19 @@ extension PlayerViewModel {
         }
     }
 
-    func reportProgress() async {
+    /// `whileHeld` is for the one report that belongs to the suspension itself, the position sent on
+    /// the way out (`progressReportsHeldForSuspension`).
+    /// `allowsZero` is for the restart, whose whole point is to move the resume point to 0.
+    func reportProgress(whileHeld: Bool = false, allowsZero: Bool = false) async {
+        // The item is the movie while a pre-roll plays, and nothing about the movie happened yet.
+        guard !isPlayingPreroll else { return }
+        guard whileHeld || !progressReportsHeldForSuspension || isPlaying else { return }
         let ticks = currentPositionTicks
-        guard ticks > 0 else { return } // Don't report position 0
+        guard ticks > 0 || allowsZero else { return } // Don't report position 0
+        recordLocalProgress(positionTicks: ticks, played: false)
+        if hasReportedStart, let state = traktScrobbleState, state.itemID == item.id, state.playing != isPlaying {
+            traktScrobble(isPlaying ? .start : .pause, positionTicks: ticks)
+        }
         let report = PlaybackProgressReport(
             itemId: item.id,
             mediaSourceId: mediaSourceID,
@@ -80,34 +116,28 @@ extension PlayerViewModel {
         }
     }
 
-    func reportStop(positionTicks: Int64? = nil, liveStreamID: String? = nil) async {
-        // positionTicks override lets stopPlayback() capture position BEFORE
-        // killing the engine (stop audio first, no trailing buffer on dismiss).
-        // liveStreamID closes a dead tuner on retune (belt-and-braces with
-        // the explicit closeLiveStream).
-        let ticks = positionTicks ?? completionAwarePositionTicks
-        let report = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: ticks,
-            liveStreamId: liveStreamID
-        )
+    /// Sends one stop report and tells the rest of the app about it. Every session close ends here
+    /// (audit PCORE-R201), so the notification shape and the shelf refresh cannot drift again.
+    @MainActor static func deliverStop(
+        _ report: PlaybackStopReport, seriesID: String?, serverID: String?,
+        service: JellyfinPlaybackServiceProtocol, refreshesShelf: Bool = true
+    ) async {
         do {
-            try await playbackService.reportPlaybackStopped(report)
+            try await service.reportPlaybackStopped(report)
             // Payload lets detail/Home patch this item's resume position in
-            // place, race-free, instead of re-fetching (issue #24).
-            NotificationCenter.default.post(
-                name: .playbackProgressDidChange,
-                object: nil,
-                userInfo: [
-                    PlaybackProgressKey.itemID: item.id,
-                    PlaybackProgressKey.positionTicks: ticks
-                ]
-            )
+            // place, race-free, instead of re-fetching (issue #24). The series and server ids let Home
+            // bring a hidden show back and name the right server on a combined Home.
+            var userInfo: [String: Any] = [
+                PlaybackProgressKey.itemID: report.itemId,
+                PlaybackProgressKey.positionTicks: report.positionTicks
+            ]
+            userInfo[PlaybackProgressKey.seriesID] = seriesID
+            userInfo[PlaybackProgressKey.serverID] = serverID
+            NotificationCenter.default.post(name: .playbackProgressDidChange, object: nil, userInfo: userInfo)
             // Inside the do: a failed report means the server never learned the new
             // position, so the shelf has nothing new to fetch.
-            TopShelfRefresher.invalidate()
+            // Not at an auto-advance seam: Home defers its reload there on purpose (#12).
+            if refreshesShelf { TopShelfRefresher.invalidate() }
         } catch {
             #if DEBUG
             print("[SessionReport] Stop FAILED: \(error)")
@@ -130,6 +160,8 @@ extension PlayerViewModel {
                 guard !Task.isCancelled else { return }
                 // Re-resolved per tick, so the timer never keeps a dismissed view model alive.
                 guard let self, !self.isTearingDown else { return }
+                // A scheduled night mode switches by the hour, mid-film included (AetherEngine#923).
+                self.applyAudioShaping()
                 await self.reportProgress()
             }
         }
@@ -147,5 +179,27 @@ extension PlayerViewModel {
     func stopProgressReporting() {
         progressTimer?.cancel()
         progressTimer = nil
+    }
+
+    /// Sodalite#184: asks the server whether another client played this item while the session was
+    /// suspended. nil when there is no answer in time: a television that just woke may not have its
+    /// network back yet, and the viewer is looking at the player while this runs.
+    func serverMovedOnWhileSuspended(since suspendedAt: Date, positionTicks: Int64) async -> Bool? {
+        guard let service = itemService as? UserItemDataServing else { return nil }
+        let itemID = item.id
+        let userID = userID
+        let server = await withTaskGroup(of: UserItemData?.self) { group in
+            group.addTask { try? await service.userData(itemID: itemID, userID: userID) }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(5))
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        guard let server else { return nil }
+        return SuspendedSessionReturn.serverMovedOn(server: server, suspendedAt: suspendedAt,
+                                                    positionTicks: positionTicks)
     }
 }

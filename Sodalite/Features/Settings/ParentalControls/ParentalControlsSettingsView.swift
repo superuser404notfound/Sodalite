@@ -25,7 +25,7 @@ struct ParentalControlsSettingsView: View {
             .screenContentInset()
         }
         .onAppear(perform: reload)
-        .fullScreenCover(item: $setupTarget) { target in
+        .fullScreenCoverCompat(item: $setupTarget) { target in
             PINEntryView(mode: .setup(target)) { _ in
                 setupTarget = nil
                 reload()

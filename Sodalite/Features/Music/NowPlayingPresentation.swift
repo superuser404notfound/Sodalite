@@ -72,7 +72,7 @@ private struct NowPlayingCoverHost: ViewModifier {
     func body(content: Content) -> some View {
         let presentation = dependencies.musicPlaybackCoordinator.nowPlayingPresentation
         content
-            .fullScreenCover(isPresented: Binding(
+            .fullScreenCoverCompat(isPresented: Binding(
                 get: { presentation.isPresented && presentation.presents(token) },
                 set: { if !$0 { presentation.dismiss() } }
             )) {

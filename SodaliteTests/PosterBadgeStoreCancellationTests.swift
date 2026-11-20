@@ -27,7 +27,7 @@ struct PosterBadgeStoreCancellationTests {
             do {
                 try await Task.sleep(for: .milliseconds(200))
             } catch {
-                lock.withLock { _cancelledSeries.insert(seriesID) }
+                _ = lock.withLock { _cancelledSeries.insert(seriesID) }
                 throw error
             }
             return JellyfinItemsResponse(items: [], totalRecordCount: 0)
@@ -38,13 +38,12 @@ struct PosterBadgeStoreCancellationTests {
         func getResumeItems(userID: String, mediaType: String, limit: Int) async throws -> JellyfinItemsResponse { throw Unused() }
         func getNextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool) async throws -> JellyfinItemsResponse { throw Unused() }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     @Test("cancelling enrich stops the series chain instead of running every sample to completion")
     func cancellingStopsTheSeriesChain() async {
         let service = SlowSeriesService()
-        let store = PosterBadgeStore(library: service, isEnabled: { true })
+        let store = PosterBadgeStore(route: { _ in (service, "u1") }, isEnabled: { true })
         let seriesItems = (1...4).map { JellyfinItem(seriesStub: "s\($0)", name: "s\($0)") }
 
         let task = Task { await store.enrich(userID: "u1", seriesItems) }

@@ -39,6 +39,7 @@ struct ContentLogoTitle<Fallback: View>: View {
     @ViewBuilder let fallback: () -> Fallback
 
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSession
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.displayScale) private var displayScale
@@ -90,6 +91,7 @@ struct ContentLogoTitle<Fallback: View>: View {
         let box = tier.requestPixels(scale: pixelScale)
         return dependencies.jellyfinImageService.imageURL(
             itemID: itemID,
+            serverID: serverSession?.server?.id,
             imageType: .logo,
             maxWidth: box.width,
             maxHeight: box.height
@@ -110,6 +112,9 @@ struct ContentLogoTitle<Fallback: View>: View {
         AsyncCachedImage(
             url: logoURL,
             onLoadFailed: { loadFailed = $0 },
+            // The margin baked into the PNG differs from logo to logo; trimmed, the budget and the
+            // bottom-leading slot both apply to the ink (Sodalite#192).
+            trimsTransparentMargin: true,
             // sizedContent, not onImageLoaded: the mark's own size arrives WITH the mark, out of one
             // state, so there is no pass where an image is on screen and its aspect is not known yet.
             // Through the callback there was, and every first open drew the mark square (Sodalite#97).
@@ -169,6 +174,9 @@ struct ContentLogoTitle<Fallback: View>: View {
 struct DetailHeroLogo: View {
     let viewModel: DetailViewModel
 
+    @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
+
     var body: some View {
         ContentLogoTitle(
             itemID: viewModel.item.id,
@@ -177,7 +185,7 @@ struct DetailHeroLogo: View {
                 hasFullDetail: viewModel.hasFullDetail
             )
         ) {
-            Text(viewModel.item.name)
+            Text(dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: viewModel.item))
                 .font(.largeTitle)
                 .fontWeight(.bold)
         }

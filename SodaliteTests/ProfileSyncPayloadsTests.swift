@@ -45,6 +45,8 @@ struct ProfileSyncPayloadsTests {
         let look = AppearancePreferences(store: defaults, scope: "s:a", device: device)
         look.hiddenTabs = [.catalog]
         look.navigationStyle = .sidebar
+        look.uprightArtwork = .poster
+        look.showPosterRating = true
 
         let data = try ProfileSyncPayload.playback(ProfilePlaybackPayload(collecting: source, stamp: .now)).encoded()
         let lookData = try ProfileSyncPayload.appearance(ProfileAppearancePayload(collecting: look, stamp: .now)).encoded()
@@ -61,6 +63,12 @@ struct ProfileSyncPayloadsTests {
         #expect(target.nextEpisodeCountdownAnchor == .end)
         #expect(targetLook.hiddenTabs == [.catalog])
         #expect(targetLook.navigationStyle == .sidebar)
+        #expect(targetLook.uprightArtwork == .poster)
+        #expect(targetLook.showPosterRating)
+    }
+
+    @Test func theUprightArtworkDefaultsToTheBackdrop() {
+        #expect(AppearancePreferences(store: scratch("uprightDefault")).uprightArtwork == .backdrop)
     }
 
     /// The keys each profile record carried when it first shipped (aca3e7a7, 2026-09-17). A record
@@ -137,6 +145,45 @@ struct ProfileSyncPayloadsTests {
 
         #expect(!store.touchpadScrubbing)
         #expect(store.skipForwardSeconds == 45)
+    }
+
+    @Test func aRecordWithoutTheCardSwitchKeepsTheLocalValue() {
+        let store = PlaybackPreferences(store: scratch("noCardSwitch"))
+        store.showNextEpisodeCard = false
+        var payload = ProfilePlaybackPayload(collecting: store, stamp: .now)
+        payload.showNextEpisodeCard = nil
+
+        payload.apply(to: store)
+
+        #expect(!store.showNextEpisodeCard)
+    }
+
+    @Test func theRatingPromptSwitchTravelsAndAnOlderRecordKeepsIt() {
+        let source = PlaybackPreferences(store: scratch("ratingPromptSource"))
+        source.askForRatingAfterMovie = false
+        let target = PlaybackPreferences(store: scratch("ratingPromptTarget"))
+        ProfilePlaybackPayload(collecting: source, stamp: .now).apply(to: target)
+        #expect(!target.askForRatingAfterMovie)
+
+        var older = ProfilePlaybackPayload(collecting: source, stamp: .now)
+        older.askForRatingAfterMovie = nil
+        target.askForRatingAfterMovie = true
+        older.apply(to: target)
+        #expect(target.askForRatingAfterMovie)
+    }
+
+    @Test func theVersionOrderTravelsAndAnOlderRecordKeepsIt() {
+        let source = PlaybackPreferences(store: scratch("versionOrderSource"))
+        source.versionOrder = .server
+        let target = PlaybackPreferences(store: scratch("versionOrderTarget"))
+        ProfilePlaybackPayload(collecting: source, stamp: .now).apply(to: target)
+        #expect(target.versionOrder == .server)
+
+        var older = ProfilePlaybackPayload(collecting: source, stamp: .now)
+        older.versionOrder = nil
+        target.versionOrder = .quality
+        older.apply(to: target)
+        #expect(target.versionOrder == .quality)
     }
 
     @Test func aDecodeFailureNamesTheKeyAndNoValue() {

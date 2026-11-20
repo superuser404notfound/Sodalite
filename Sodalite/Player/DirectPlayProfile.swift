@@ -10,13 +10,17 @@ import AetherEngine
 @MainActor
 enum DirectPlayProfile {
 
-    static func current() -> [String: Any] {
+    /// The VOD profile. `maxStreamingBitrate` is the viewer's rung (Sodalite#87); nil keeps the
+    /// direct-play ceiling.
+    static func current(maxStreamingBitrate: Int? = nil) -> [String: Any] {
         #if DEBUG
         let caps = AetherEngine.displayCapabilities
         print("[Profile] Display: HDR=\(caps.supportsHDR) DV=\(caps.supportsDolbyVision) HDR10=\(caps.supportsHDR10) HLG=\(caps.supportsHLG)")
         #endif
-        return baseProfile()
+        return baseProfile(maxStreamingBitrate: maxStreamingBitrate)
     }
+
+    static let directPlayCeilingBitrate = 200_000_000
 
     /// Live stream-copy ceiling: kept at the VOD direct-play ceiling so any
     /// broadcast H.264/HEVC stays under it and Jellyfin copies the bitstream.
@@ -30,6 +34,20 @@ enum DirectPlayProfile {
     /// target, so probing at the 200 Mbps ceiling makes the server answer
     /// HTTP 500 (device-verified on "Infomercial"). 12 Mbps = sane 1080p H.264.
     static let liveReencodeCapBitrate = 12_000_000
+
+    /// Sodalite#81: what a download asks for. The cap is the rung; a source above it comes back as a
+    /// PROGRESSIVE mp4 transcode. Context stays Streaming on purpose: Jellyfin matches transcoding
+    /// profiles by the request's context (PlaybackInfo's is Streaming), and only a Streaming mp4 is
+    /// written with `frag_keyframe+empty_moov`, which a file served while ffmpeg still writes it
+    /// needs. Audio is AAC alone so the one track a transcode keeps plays on every output.
+    static func downloadProfile(maxStreamingBitrate: Int?) -> [String: Any] {
+        var profile = baseProfile(maxStreamingBitrate: maxStreamingBitrate)
+        profile["TranscodingProfiles"] = [
+            ["Type": "Video", "Container": "mp4", "Protocol": "http",
+             "VideoCodec": "hevc,h264", "AudioCodec": "aac", "Context": "Streaming"],
+        ] as [[String: Any]]
+        return profile
+    }
 
     /// Live TV profile. Protocol=http/Container=ts: progressive MPEG-TS (not
     /// HLS) consumed by AetherEngine's AVIOReader; engine demuxes + dispatches
@@ -61,10 +79,10 @@ enum DirectPlayProfile {
 
     // MARK: - Base profile
 
-    static func baseProfile() -> [String: Any] {
+    static func baseProfile(maxStreamingBitrate: Int? = nil) -> [String: Any] {
         [
-            "MaxStreamingBitrate": 200_000_000,
-            "MaxStaticBitrate": 200_000_000,
+            "MaxStreamingBitrate": maxStreamingBitrate ?? directPlayCeilingBitrate,
+            "MaxStaticBitrate": directPlayCeilingBitrate,
             "MusicStreamingTranscodingBitrate": 384_000,
 
             // VideoCodec list mirrors what FFmpegBuild compiles a decoder for,
@@ -87,11 +105,15 @@ enum DirectPlayProfile {
             // (Sorenson Spark) and the VP6 family below, plus Nellymoser,
             // ADPCM-SWF, Speex and FLV's G.711 / big-endian PCM, close it.
             // Requested in the Discord.
+            // FFmpegBuild 3.8.0 (FFmpegBuild#7) adds the 2000s tail on the same terms:
+            // RealMedia (rm / rmvb, RealVideo 1-4 with every RealAudio), the 3GP of a
+            // feature phone (h263 with AMR), Theora and DVD LPCM.
+            // DirectPlayProfileLegacyFormatTests pins that.
             "DirectPlayProfiles": [
                 [
-                    "Container": "mp4,m4v,mov,mkv,matroska,avi,mpegts,ts,m2ts,mts,3gp,3g2,vob,ogg,webm,flv,asf,wmv",
+                    "Container": "mp4,m4v,mov,mkv,matroska,avi,mpegts,ts,m2ts,mts,3gp,3g2,vob,ogg,ogv,webm,flv,asf,wmv,rm,rmvb",
                     "Type": "Video",
-                    "VideoCodec": "h264,hevc,av1,vp9,vp8,mpeg4,mpeg2video,vc1,qtrle,msmpeg4v1,msmpeg4v2,msmpeg4v3,wmv1,wmv2,wmv3,flv1,flv,vp6,vp6f,vp6a",
+                    "VideoCodec": "h264,hevc,av1,vp9,vp8,mpeg4,mpeg2video,vc1,qtrle,msmpeg4v1,msmpeg4v2,msmpeg4v3,wmv1,wmv2,wmv3,flv1,flv,vp6,vp6f,vp6a,rv10,rv20,rv30,rv40,h263,theora",
                     // DTS spelled every way Jellyfin reports it (dts/dca/dts-hd
                     // vary by build) so it won't transcode DTS-HD MA over a
                     // string mismatch. mp2 pairs with MPEG-2 (broadcast/VOB).
@@ -105,7 +127,7 @@ enum DirectPlayProfile {
                     // unsigned 8-bit and G.711 A-law / mu-law. AudioCodecCompat
                     // already routed those ids to the bridge, but no decoder was
                     // compiled in before 3.2.0, so the bridge had nothing to open.
-                    "AudioCodec": "aac,aac_latm,ac3,eac3,mp3,mp2,flac,opus,vorbis,alac,truehd,mlp,dts,dca,dts-hd,dtshd,pcm_s16le,pcm_s24le,pcm_f32le,pcm_s16be,pcm_u8,pcm_alaw,pcm_mulaw,pcm_bluray,wmav1,wmav2,wmapro,wmalossless,wmavoice,nellymoser,adpcm_swf,speex",
+                    "AudioCodec": "aac,aac_latm,ac3,eac3,mp3,mp2,flac,opus,vorbis,alac,truehd,mlp,dts,dca,dts-hd,dtshd,pcm_s16le,pcm_s24le,pcm_f32le,pcm_s16be,pcm_u8,pcm_alaw,pcm_mulaw,pcm_bluray,wmav1,wmav2,wmapro,wmalossless,wmavoice,nellymoser,adpcm_swf,speex,cook,atrac3,sipr,ralf,ra_144,ra_288,amr_nb,amr_wb,pcm_dvd",
                 ],
                 [
                     "Container": "mp3,aac,m4a,m4b,flac,alac,wav,opus,ogg",
@@ -113,14 +135,19 @@ enum DirectPlayProfile {
                 ],
             ] as [[String: Any]],
 
-            // Fallback: progressive MP4 over HTTP (not HLS): engine's custom
-            // AVIO/URLSession context doesn't support HLS playlists.
+            // A transcode is Jellyfin HLS, played by AVPlayer through the engine's nativeRemoteHLS
+            // route, so a seek fetches segments instead of restarting a progressive encode. fMP4, not
+            // TS: AVFoundation plays HEVC over HLS only in fMP4. av1 and vp9 are left out because
+            // AVPlayer, which plays this route, does not decode them over HLS on every device
+            // (Sodalite#87). HEVC first: Jellyfin encodes the first listed codec the server may encode
+            // and moves hevc to the end itself when HEVC encoding is off, so this buys the better picture
+            // per bit at the low rungs where allowed and changes nothing elsewhere.
             "TranscodingProfiles": [
                 [
                     "Type": "Video",
                     "Container": "mp4",
-                    "Protocol": "http",
-                    "VideoCodec": "h264,hevc,av1,vp9",
+                    "Protocol": "hls",
+                    "VideoCodec": "hevc,h264",
                     "AudioCodec": "aac,ac3,eac3",
                     "Context": "Streaming",
                 ],

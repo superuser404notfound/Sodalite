@@ -36,9 +36,28 @@ enum SharedSessionMirror {
         #endif
     }
 
+    /// The other servers of a combined Home (Sodalite#218), in a slot of their own so the many
+    /// writers of the active session's slot need not know about them. Written only on a change,
+    /// since every route probe lands here; nil or no secondaries removes the slot.
+    static func writeParticipants(_ participants: ShelfParticipants?) {
+        #if !os(tvOS)
+        delete(account: ShelfParticipants.slot)
+        #else
+        let wanted = participants.flatMap { $0.secondaries.isEmpty ? nil : $0 }
+        guard wanted != ShelfParticipants.read() else { return }
+        if let wanted, let data = try? JSONEncoder().encode(wanted) {
+            save(data, account: ShelfParticipants.slot)
+        } else {
+            delete(account: ShelfParticipants.slot)
+        }
+        TopShelfRefresher.invalidate()
+        #endif
+    }
+
     static func clear() {
         let slot = KeychainKeys.sharedSession
         delete(account: slot)
+        delete(account: ShelfParticipants.slot)
         // The extension's own identity check already refuses a foreign cache; this is the
         // tidy-up so a logged-out device carries no library titles in its container.
         TopShelfCachePolicy.delete()
@@ -72,22 +91,29 @@ enum SharedSessionMirror {
         TopShelfRefresher.invalidate()
     }
 
+    /// Updates in place and adds only when there is nothing to update. Delete-then-add left a
+    /// window with no slot at all, and every launch rewrites it during session restore, which is
+    /// exactly when tvOS tends to ask the extension for a fresh shelf.
     private static func save(_ data: Data, account: String) {
-        delete(account: account)
-        var query: [String: Any] = [
+        var match: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecValueData as String: data,
-            // ThisDeviceOnly, matching KeychainService: this is the same access token, and the reader
-            // is an extension on this very device. Without the suffix the item is backup-eligible and
-            // the token restores onto a different device, which is more reach than the Top Shelf needs.
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ]
         if let group = resolvedAccessGroup {
-            query[kSecAttrAccessGroup as String] = group
+            match[kSecAttrAccessGroup as String] = group
         }
-        let status = SecItemAdd(query as CFDictionary, nil)
+        // ThisDeviceOnly, matching KeychainService: this is the same access token, and the reader
+        // is an extension on this very device. Without the suffix the item is backup-eligible and
+        // the token restores onto a different device, which is more reach than the Top Shelf needs.
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+        var status = SecItemUpdate(match as CFDictionary, attributes as CFDictionary)
+        if status == errSecItemNotFound {
+            status = SecItemAdd(match.merging(attributes) { _, new in new } as CFDictionary, nil)
+        }
         if status != errSecSuccess {
             log.error("SharedSessionMirror.save failed: status=\(status, privacy: .public) account=\(account, privacy: .public)")
         }
@@ -105,29 +131,51 @@ enum SharedSessionMirror {
         SecItemDelete(query as CFDictionary)
     }
 
-    /// Materializes `<TeamID>.de.superuser404.Sodalite.shared` at runtime ($(AppIdentifierPrefix) expands only at codesign). Cribs the team prefix off any visible keychain item; if none exist (fresh install pre-login) drops the access group and lets the OS pick the first entitled one. Caches only a SUCCESSFUL probe: a `static let` would pin the nil fallback forever after an empty-keychain probe, so writes/deletes could target different groups and strand a stale TopShelf session after logout.
+    /// Materializes `<TeamID>.de.superuser404.Sodalite.shared` at runtime ($(AppIdentifierPrefix) expands only at codesign). Cribs the team prefix off any visible keychain item, and on an empty keychain off a throwaway item added to the default group. Without that second step a fresh install wrote the mirror with no access group, which lands it in the FIRST entitled group (the app's private one) where the extension cannot see it. Caches only a successful probe.
     private static var cachedAccessGroup: String?
     private static var resolvedAccessGroup: String? {
         if let cachedAccessGroup { return cachedAccessGroup }
+        guard let prefix = teamPrefix() else {
+            log.notice("SharedSessionMirror could not probe team prefix; falling back to default group")
+            return nil
+        }
+        let resolved = prefix + "de.superuser404.Sodalite.shared"
+        cachedAccessGroup = resolved
+        return resolved
+    }
+
+    private static func teamPrefix() -> String? {
         let probe: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnAttributes as String: true,
         ]
         var item: AnyObject?
-        let status = SecItemCopyMatching(probe as CFDictionary, &item)
-        guard status == errSecSuccess,
-              let attrs = item as? [String: Any],
+        if SecItemCopyMatching(probe as CFDictionary, &item) == errSecSuccess,
+           let prefix = prefix(of: item) {
+            return prefix
+        }
+
+        let marker: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service + ".probe",
+            kSecAttrAccount as String: "teamPrefix",
+        ]
+        defer { SecItemDelete(marker as CFDictionary) }
+        var added: AnyObject?
+        var add = marker
+        add[kSecReturnAttributes as String] = true
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        guard SecItemAdd(add as CFDictionary, &added) == errSecSuccess else { return nil }
+        return prefix(of: added)
+    }
+
+    private static func prefix(of item: AnyObject?) -> String? {
+        guard let attrs = item as? [String: Any],
               let group = attrs[kSecAttrAccessGroup as String] as? String,
               let dot = group.firstIndex(of: ".")
-        else {
-            log.notice("SharedSessionMirror could not probe team prefix; falling back to default group")
-            return nil
-        }
-        let prefix = String(group[..<group.index(after: dot)])
-        let resolved = prefix + "de.superuser404.Sodalite.shared"
-        cachedAccessGroup = resolved
-        return resolved
+        else { return nil }
+        return String(group[..<group.index(after: dot)])
     }
 
     private static let log = Logger(subsystem: "de.superuser404.Sodalite", category: "TopShelfMirror")

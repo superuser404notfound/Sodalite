@@ -28,25 +28,36 @@ enum JellyfinEndpoint: APIEndpoint {
     case itemDetail(userID: String, itemID: String)
     /// GET LocalTrailers: bare BaseItemDto array (not the {Items:[...]} envelope); each is a playable item with its own id.
     case localTrailers(userID: String, itemID: String)
+    /// GET SpecialFeatures: bare array like LocalTrailers. The server already filters to the displayable extra types, trailers and theme media excluded.
+    case specialFeatures(userID: String, itemID: String)
+    /// GET Intros (Sodalite#244): the pre-rolls an intro provider such as the Local Intros plugin hands
+    /// out for this item, in the `{Items, TotalRecordCount}` envelope. Empty without such a plugin.
+    case intros(userID: String, itemID: String)
+    /// GET ThemeSongs (Sodalite#219): `{Items, TotalRecordCount, OwnerId}`. InheritFromParent lets a season or an
+    /// episode's series stub play the series' song. Empty when the item has none.
+    case themeSongs(userID: String, itemID: String)
     case resumeItems(userID: String, mediaType: String, limit: Int)
     case nextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool)
     case latestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int)
+    case upcoming(userID: String, limit: Int)
     case seasons(seriesID: String, userID: String)
     case episodes(seriesID: String, seasonID: String, userID: String)
     case similarItems(itemID: String, userID: String, limit: Int)
+    /// GET /Playlists/{id}/Items: the playlist in its stored (manual) order. /Items?ParentId= gives
+    /// no ordering guarantee for a playlist.
+    case playlistItems(playlistID: String, userID: String, startIndex: Int, limit: Int)
     /// GET /Persons by name. People are their own item namespace, so a person is not reachable
     /// through the /Items search; this is the only way to a Jellyfin person id from a name.
     case persons(userID: String, searchTerm: String, limit: Int)
     /// DELETE /Items/{itemID}; Jellyfin cascades series→seasons→episodes server-side, called once per item.
     case deleteItem(itemID: String)
 
-    // Genres & Studios
+    // Genres
     case genres(userID: String)
-    case studios(userID: String)
 
     // PlaybackInfo body is the DeviceProfile dict (DirectPlayProfile [String: Any]) bridged through JSONValue for the Encodable body path.
     case playbackInfo(itemID: String, userID: String, payload: JSONValue)
-    case livePlaybackInfo(itemID: String, userID: String, maxStreamingBitrate: Int, payload: JSONValue)
+    case livePlaybackInfo(itemID: String, userID: String, maxStreamingBitrate: Int, payload: JSONValue, autoOpen: Bool)
     case sessionPlaying(report: PlaybackStartReport)
     case sessionProgress(report: PlaybackProgressReport)
     case sessionStopped(report: PlaybackStopReport)
@@ -57,10 +68,13 @@ enum JellyfinEndpoint: APIEndpoint {
 
     // Played
     case markPlayed(userID: String, itemID: String)
+    /// Sodalite#81: read and write one item's UserData, so offline progress can be handed back.
+    case userItemData(itemID: String, userID: String)
+    case updateUserItemData(itemID: String, userID: String, payload: JSONValue)
+    /// Sets the user's 0 to 10 rating to nil. The UserData POST cannot: it only writes fields that
+    /// arrive with a value.
+    case clearUserRating(itemID: String, userID: String)
     case unmarkPlayed(userID: String, itemID: String)
-
-    // Search
-    case searchHints(userID: String, query: String, limit: Int)
 
     // Intro/Outro markers (Jellyfin 10.10+ native, or intro-skipper plugin on older servers)
     case mediaSegments(itemID: String)
@@ -74,6 +88,9 @@ enum JellyfinEndpoint: APIEndpoint {
     // Live TV
     case liveTvChannels(userID: String, startIndex: Int, limit: Int, filter: GuideFilter)
     case liveTvPrograms(channelIDs: [String], userID: String, minEndDate: Date, maxStartDate: Date)
+    /// Programs across the whole line-up, slim (no images): the guide's genre list, genre matches (#182) and category matches (#201).
+    case liveTvProgramIndex(userID: String, window: GuideProgramWindow, genres: String?,
+                            category: GuideFilter.Category?, startIndex: Int, limit: Int)
     case liveTvRecommendedPrograms(userID: String, category: LiveProgramCategory, limit: Int)
     case liveTvGuideInfo
     case closeLiveStream(liveStreamID: String)
@@ -118,27 +135,35 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/Items/\(itemID)"
         case .localTrailers(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)/LocalTrailers"
+        case .intros(let userID, let itemID):
+            "/Users/\(userID)/Items/\(itemID)/Intros"
+        case .specialFeatures(let userID, let itemID):
+            "/Users/\(userID)/Items/\(itemID)/SpecialFeatures"
+        case .themeSongs(_, let itemID):
+            "/Items/\(itemID)/ThemeSongs"
         case .resumeItems(let userID, _, _):
             "/Users/\(userID)/Items/Resume"
         case .nextUp:
             "/Shows/NextUp"
         case .latestMedia(let userID, _, _, _):
             "/Users/\(userID)/Items/Latest"
+        case .upcoming:
+            "/Shows/Upcoming"
         case .seasons(let seriesID, _):
             "/Shows/\(seriesID)/Seasons"
         case .episodes(let seriesID, _, _):
             "/Shows/\(seriesID)/Episodes"
         case .similarItems(let itemID, _, _):
             "/Items/\(itemID)/Similar"
+        case .playlistItems(let playlistID, _, _, _):
+            "/Playlists/\(playlistID)/Items"
         case .persons:
             "/Persons"
         case .deleteItem(let itemID):
             "/Items/\(itemID)"
         case .genres:
             "/Genres"
-        case .studios:
-            "/Studios"
-        case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _):
+        case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _, _):
             "/Items/\(itemID)/PlaybackInfo"
         case .sessionPlaying:
             "/Sessions/Playing"
@@ -152,10 +177,12 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/\(userID)/FavoriteItems/\(itemID)"
         case .markPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
+        case .userItemData(let itemID, _), .updateUserItemData(let itemID, _, _):
+            "/UserItems/\(itemID)/UserData"
+        case .clearUserRating(let itemID, _):
+            "/UserItems/\(itemID)/Rating"
         case .unmarkPlayed(let userID, let itemID):
             "/Users/\(userID)/PlayedItems/\(itemID)"
-        case .searchHints:
-            "/Search/Hints"
         case .mediaSegments(let itemID):
             "/MediaSegments/\(itemID)"
         case .remoteSearchSubtitles(let itemID, let language):
@@ -166,7 +193,7 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Items/\(itemID)/RemoteSearch/Subtitles/\(subtitleID.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? subtitleID)"
         case .liveTvChannels:
             "/LiveTv/Channels"
-        case .liveTvPrograms:
+        case .liveTvPrograms, .liveTvProgramIndex:
             "/LiveTv/Programs"
         case .liveTvRecommendedPrograms:
             "/LiveTv/Programs/Recommended"
@@ -210,20 +237,22 @@ enum JellyfinEndpoint: APIEndpoint {
     var method: HTTPMethod {
         switch self {
         case .authenticateByName, .quickConnectInitiate, .quickConnectAuthenticate, .markFavorite,
-             .markPlayed, .sessionLogout,
+             .markPlayed, .sessionLogout, .updateUserItemData,
              .playbackInfo, .livePlaybackInfo,
              .sessionPlaying, .sessionProgress, .sessionStopped,
              .closeLiveStream,
              .createLiveTvTimer, .createLiveTvSeriesTimer,
              .downloadRemoteSubtitle:
             .post
-        case .unmarkFavorite, .unmarkPlayed, .deleteItem, .stopActiveEncodings,
+        case .unmarkFavorite, .unmarkPlayed, .clearUserRating, .deleteItem, .stopActiveEncodings,
              .deleteLiveTvTimer, .deleteLiveTvSeriesTimer, .deleteSubtitle:
             .delete
         default:
             .get
         }
     }
+
+    static let livePlaybackInfoTimeout: TimeInterval = 60
 
     /// 90s for fire-and-forget session writes: a 30s drop on a slow CDN origin loses the position and strands a stale resume point (Sodalite#12). Everything else keeps 30s.
     var timeoutInterval: TimeInterval? {
@@ -232,7 +261,7 @@ enum JellyfinEndpoint: APIEndpoint {
             return 90
         case .playbackInfo, .livePlaybackInfo:
             // 60s (its old URLSession.shared ceiling); live AutoOpenLiveStream probes the tuner server-side and slow IPTV tuners exceed 30s.
-            return 60
+            return Self.livePlaybackInfoTimeout
         default:
             return nil
         }
@@ -240,17 +269,21 @@ enum JellyfinEndpoint: APIEndpoint {
 
     var queryItems: [URLQueryItem]? {
         switch self {
+        case .userItemData(_, let userID), .updateUserItemData(_, let userID, _), .clearUserRating(_, let userID):
+            return [URLQueryItem(name: "userId", value: userID)]
+
         case .quickConnectCheck(let secret):
             return [URLQueryItem(name: "secret", value: secret)]
 
         case .playbackInfo(_, let userID, _):
             return [URLQueryItem(name: "UserId", value: userID)]
 
-        case .livePlaybackInfo(_, let userID, let maxStreamingBitrate, _):
+        case .livePlaybackInfo(_, let userID, let maxStreamingBitrate, _, let autoOpen):
             // AutoOpenLiveStream probes the tuner (known codecs → DirectStream/copy, real LiveStreamId); IsPlayback marks a real play; MaxStreamingBitrate caps a transcode fallback.
+            // Without it nothing is opened or probed, and an M3U channel still answers with its provider URL in Path (#204).
             return [
                 URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "AutoOpenLiveStream", value: "true"),
+                URLQueryItem(name: "AutoOpenLiveStream", value: autoOpen ? "true" : "false"),
                 URLQueryItem(name: "IsPlayback", value: "true"),
                 URLQueryItem(name: "StartTimeTicks", value: "0"),
                 URLQueryItem(name: "MaxStreamingBitrate", value: String(maxStreamingBitrate)),
@@ -259,11 +292,17 @@ enum JellyfinEndpoint: APIEndpoint {
         case .items(_, let query):
             return query.toQueryItems()
 
-        case .localTrailers(let userID, _):
+        case .localTrailers(let userID, _), .specialFeatures(let userID, _), .intros(let userID, _):
             // UserId for user data; detailFields so trailers arrive with MediaSources/Chapters like a playable detail item.
             return [
                 URLQueryItem(name: "UserId", value: userID),
                 URLQueryItem(name: "Fields", value: Self.detailFields),
+            ]
+
+        case .themeSongs(let userID, _):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "InheritFromParent", value: "true"),
             ]
 
         case .itemDetail:
@@ -295,6 +334,13 @@ enum JellyfinEndpoint: APIEndpoint {
                 items.append(URLQueryItem(name: "SeriesId", value: seriesID))
             }
             return items
+
+        case .upcoming(let userID, let limit):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "Limit", value: String(limit)),
+                URLQueryItem(name: "Fields", value: Self.homeRowFields),
+            ]
 
         case .latestMedia(_, let parentID, let includeItemTypes, let limit):
             var items = [
@@ -329,6 +375,15 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "Fields", value: Self.episodeListFields),
             ]
 
+        case .playlistItems(_, let userID, let startIndex, let limit):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "StartIndex", value: String(startIndex)),
+                URLQueryItem(name: "Limit", value: String(limit)),
+                // detailFields: the playlist's Play and Shuffle buttons enqueue these items directly.
+                URLQueryItem(name: "Fields", value: Self.detailFields),
+            ]
+
         case .similarItems(_, let userID, let limit):
             return [
                 URLQueryItem(name: "UserId", value: userID),
@@ -351,26 +406,13 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "SortOrder", value: "Ascending"),
             ]
 
-        case .studios(let userID):
-            return [
-                URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "SortBy", value: "SortName"),
-                URLQueryItem(name: "SortOrder", value: "Ascending"),
-            ]
-
-        case .searchHints(let userID, let query, let limit):
-            return [
-                URLQueryItem(name: "UserId", value: userID),
-                URLQueryItem(name: "SearchTerm", value: query),
-                URLQueryItem(name: "Limit", value: String(limit)),
-            ]
-
         case .mediaSegments:
-            // Intro + Recap (skip button) + Outro (early next-episode overlay). Repeated same-name items bind ASP.NET's list parameter.
+            // Intro + Recap + Commercial (skip button) + Outro (early next-episode overlay). Repeated same-name items bind ASP.NET's list parameter.
             return [
                 URLQueryItem(name: "includeSegmentTypes", value: "Intro"),
                 URLQueryItem(name: "includeSegmentTypes", value: "Outro"),
                 URLQueryItem(name: "includeSegmentTypes", value: "Recap"),
+                URLQueryItem(name: "includeSegmentTypes", value: "Commercial"),
             ]
 
         case .liveTvChannels(let userID, let startIndex, let limit, let filter):
@@ -396,21 +438,55 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "MaxStartDate", value: iso.string(from: maxStart)),
                 URLQueryItem(name: "SortBy", value: "StartDate"),
                 URLQueryItem(name: "EnableImages", value: "true"),
-                URLQueryItem(name: "Fields", value: "Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle"),
+                // Genres: the guide dims programs outside an active genre filter (#182).
+                URLQueryItem(name: "Fields", value: "Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle,Genres"),
             ]
 
-        case .liveTvRecommendedPrograms(let userID, let category, let limit):
-            let flag: URLQueryItem = switch category {
-            case .airing: URLQueryItem(name: "IsAiring", value: "true")
-            case .series: URLQueryItem(name: "IsSeries", value: "true")
-            case .movies: URLQueryItem(name: "IsMovie", value: "true")
-            case .sports: URLQueryItem(name: "IsSports", value: "true")
-            case .kids:   URLQueryItem(name: "IsKids", value: "true")
-            case .news:   URLQueryItem(name: "IsNews", value: "true")
+        case .liveTvProgramIndex(let userID, let window, let genres, let category, let startIndex, let limit):
+            var items = [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "StartIndex", value: String(startIndex)),
+                URLQueryItem(name: "Limit", value: String(limit)),
+                // A stable order is what makes StartIndex paging safe.
+                URLQueryItem(name: "SortBy", value: "StartDate,SortName"),
+                URLQueryItem(name: "EnableImages", value: "false"),
+                URLQueryItem(name: "EnableUserData", value: "false"),
+                URLQueryItem(name: "EnableTotalRecordCount", value: "false"),
+                URLQueryItem(name: "Fields", value: "Genres"),
+            ]
+            switch window {
+            case .airing:
+                items.append(URLQueryItem(name: "IsAiring", value: "true"))
+            case .range(let start, let end):
+                let iso = ISO8601DateFormatter()
+                items.append(URLQueryItem(name: "MinEndDate", value: iso.string(from: start)))
+                items.append(URLQueryItem(name: "MaxStartDate", value: iso.string(from: end)))
             }
+            if let genres { items.append(URLQueryItem(name: "Genres", value: genres)) }
+            if let category { items.append(URLQueryItem(name: category.queryName, value: "true")) }
+            return items
+
+        case .liveTvRecommendedPrograms(let userID, let category, let limit):
+            let flags: [URLQueryItem] = switch category {
+            case .airing: [URLQueryItem(name: "IsAiring", value: "true")]
+            // Same exclusions as jellyfin-web's Episodes row, so a sports broadcast flagged as a series stays in Sports.
+            case .series: [
+                URLQueryItem(name: "IsSeries", value: "true"),
+                URLQueryItem(name: "IsMovie", value: "false"),
+                URLQueryItem(name: "IsSports", value: "false"),
+                URLQueryItem(name: "IsKids", value: "false"),
+                URLQueryItem(name: "IsNews", value: "false"),
+            ]
+            case .movies: [URLQueryItem(name: "IsMovie", value: "true")]
+            case .sports: [URLQueryItem(name: "IsSports", value: "true")]
+            case .kids:   [URLQueryItem(name: "IsKids", value: "true")]
+            case .news:   [URLQueryItem(name: "IsNews", value: "true")]
+            }
+            // Without IsAiring the server runs a plain program query with no time filter, so rows led with programs that ended since the last guide refresh (#170).
+            let upcoming = category == .airing ? [] : [URLQueryItem(name: "HasAired", value: "false")]
             return [
                 URLQueryItem(name: "UserId", value: userID),
-                flag,
+            ] + flags + upcoming + [
                 URLQueryItem(name: "EnableImages", value: "true"),
                 // ChannelInfo populates ChannelName so the card subtitle + synthesized JellyfinChannel have a name without a channel fetch.
                 URLQueryItem(name: "Fields", value: "ChannelInfo,Overview,SeriesName,ParentIndexNumber,IndexNumber,EpisodeTitle"),
@@ -456,7 +532,9 @@ enum JellyfinEndpoint: APIEndpoint {
             AuthenticateBody(username: username, pw: password)
         case .quickConnectAuthenticate(let secret):
             QuickConnectAuthBody(secret: secret)
-        case .playbackInfo(_, _, let payload), .livePlaybackInfo(_, _, _, let payload):
+        case .playbackInfo(_, _, let payload), .livePlaybackInfo(_, _, _, let payload, _):
+            payload
+        case .updateUserItemData(_, _, let payload):
             payload
         case .sessionPlaying(let report):
             report
@@ -487,12 +565,13 @@ enum JellyfinEndpoint: APIEndpoint {
     /// `ItemQuery` fell back to for any caller that left `fields` nil, which is how four grid queries
     /// ended up asking a large library for cast lists and chapter arrays no cell renders. There is no
     /// fallback any more: `ItemQuery.fields` has no default and every call site picks its set.
-    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,Trickplay"
+    nonisolated static let detailFields = "Overview,Genres,People,Studios,MediaStreams,MediaSources,CommunityRating,CriticRating,OfficialRating,ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,ProviderIds,Chapters,LocalTrailerCount,SpecialFeatureCount,RemoteTrailers,Trickplay,PrimaryImageAspectRatio"
 
     /// Season bar: ChildCount (episode count per season) without defaultFields' heavy arrays. Name/index/watched are base/UserData fields.
     /// It must be `ChildCount`, NOT `ItemCounts`: Jellyfin's DtoService fills a Season's ChildCount only under `ItemFields.ChildCount`; `ItemCounts` sets it on the ItemsByName path (people/genres/studios) and leaves a Season's nil. With the wrong field every season read as zero episodes, which the catalog's Jellyfin ground-truth reconcile scores as "deleted".
     /// Overview rides along for the season synopsis box: a per-season text field, not one of defaultFields' heavy arrays, so the round-trip stays cheap.
-    static let seasonListFields = "ChildCount,Overview"
+    /// SpecialFeatureCount gates the season's own extras row (Sodalite#243): one count per season, and the extras themselves are fetched only for a season that has some.
+    static let seasonListFields = "ChildCount,Overview,SpecialFeatureCount"
 
     /// Episode list: only synopsis + thumbnail; name/index/runtime/watched are base/UserData. Heavy per-episode arrays omitted, episode detail pulls them lazily on open.
     static let episodeListFields = "Overview,ImageTags"
@@ -507,7 +586,9 @@ enum JellyfinEndpoint: APIEndpoint {
     /// BaseItem row, unlike MediaStreams which costs a GetStaticMediaSources call per item. They
     /// stay in the set whether or not the badge setting is on, because grid and precompute write
     /// the same FilterCache keys and two writers of one key must not carry different field sets.
-    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height"
+    /// `DateCreated`, `SortName` and `ProviderIds` are what a combined Home sorts and deduplicates by
+    /// (Sodalite#85), small enough to ride on every card.
+    nonisolated static let homeRowFields = "ImageTags,BackdropImageTags,ParentBackdropImageTags,SeriesPrimaryImageTag,Width,Height,DateCreated,SortName,ProviderIds,PrimaryImageAspectRatio"
 
     /// Music browse rows: image tags + album/artist linkage; IndexNumber/ParentIndexNumber/RunTimeTicks/ProductionYear come back without an explicit Fields request.
     nonisolated static let musicListFields = "ImageTags,Artists,AlbumArtist,AlbumId,AlbumPrimaryImageTag"
@@ -543,6 +624,9 @@ struct ItemQuery: Sendable {
     /// `IsMissing=false` does not cover them (see above), so the clamp and the `isVirtual` filter
     /// are separate nets rather than alternatives.
     var maxPremiereDate: Date?
+    /// `MinPremiereDate=`: lower bound on the air date. The Upcoming row asks for episodes from
+    /// yesterday on, which is the query `/Shows/Upcoming` runs on the server, minus its fixed sort.
+    var minPremiereDate: Date?
     /// Jellyfin `Fields=`, deliberately without a default. It used to be optional with a
     /// `fields ?? defaultFields` fallback, so a caller that simply did not think about it silently
     /// asked for the detail-screen set; four grid queries did exactly that (Sodalite#68). Pick one:
@@ -554,6 +638,13 @@ struct ItemQuery: Sendable {
     /// config decides (Sodalite#44). Only the My Media library grids pass nil; home rows, search and
     /// shuffle stay flat, else a freshly added movie hides behind a collection tile.
     var collapseBoxSetItems: Bool? = false
+    /// `Recursive`: false lists only the parent's direct children, which is how a folder-browsed
+    /// library walks its tree one level per screen (Sodalite#180).
+    var recursive = true
+    /// `NameLessThan` / `NameStartsWithOrGreater`: with `Limit=0` the count is the slot a letter
+    /// starts at, which is how the alphabet rail jumps without loading the gap (Sodalite#86).
+    var nameLessThan: String?
+    var nameStartsWithOrGreater: String?
 
     /// Fixed-format UTC: the server parses this, it is not display text, so no locale-aware formatter.
     private static let premiereDateFormatter = ISO8601DateFormatter()
@@ -573,6 +664,10 @@ struct ItemQuery: Sendable {
         if let limit { items.append(URLQueryItem(name: "Limit", value: String(limit))) }
         if let startIndex { items.append(URLQueryItem(name: "StartIndex", value: String(startIndex))) }
         if let searchTerm { items.append(URLQueryItem(name: "SearchTerm", value: searchTerm)) }
+        if let nameLessThan { items.append(URLQueryItem(name: "NameLessThan", value: nameLessThan)) }
+        if let nameStartsWithOrGreater {
+            items.append(URLQueryItem(name: "NameStartsWithOrGreater", value: nameStartsWithOrGreater))
+        }
         if let genres {
             items.append(URLQueryItem(name: "Genres", value: genres.joined(separator: "|")))
         }
@@ -590,6 +685,11 @@ struct ItemQuery: Sendable {
             items.append(URLQueryItem(name: "PersonIds", value: personIDs.joined(separator: ",")))
         }
         if let isMissing { items.append(URLQueryItem(name: "IsMissing", value: String(isMissing))) }
+        if let minPremiereDate {
+            items.append(
+                URLQueryItem(name: "MinPremiereDate", value: Self.premiereDateFormatter.string(from: minPremiereDate))
+            )
+        }
         if let maxPremiereDate {
             items.append(
                 URLQueryItem(name: "MaxPremiereDate", value: Self.premiereDateFormatter.string(from: maxPremiereDate))
@@ -597,7 +697,7 @@ struct ItemQuery: Sendable {
         }
 
         items.append(URLQueryItem(name: "Fields", value: fields))
-        items.append(URLQueryItem(name: "Recursive", value: "true"))
+        items.append(URLQueryItem(name: "Recursive", value: String(recursive)))
         // Omitted entirely when nil: Jellyfin only consults its own grouping config while the param is absent (an explicit false overrides the admin's setting). The Collections row uses a dedicated BoxSet query, unaffected either way.
         if let collapseBoxSetItems {
             items.append(URLQueryItem(name: "CollapseBoxSetItems", value: String(collapseBoxSetItems)))

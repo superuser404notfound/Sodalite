@@ -117,7 +117,9 @@ struct CloudSyncForwardCompatTests {
                 liveBufferDepth: "ninetyMinutes", autoplayCountdown: true,
                 forceDolbyVisionOnNonDVDisplay: true, touchpadScrubbing: true,
                 nextEpisodeCountdownAnchor: "end",
-                skipForwardSeconds: 30, skipBackwardSeconds: 10
+                skipForwardSeconds: 30, skipBackwardSeconds: 10,
+                showNextEpisodeCard: false,
+                askForRatingAfterMovie: false
             ))
         case .appearance:
             return .appearance(AppearanceSettingsPayload(
@@ -138,7 +140,7 @@ struct CloudSyncForwardCompatTests {
         case .trackMemory:
             return .trackMemory(TrackMemoryPayload(updatedAt: stamp, entries: [:]))
         case .spoilerReveals:
-            return .spoilerReveals(SpoilerRevealPayload(updatedAt: stamp, entries: [:]))
+            return .spoilerReveals(SpoilerRevealPayload(updatedAt: stamp, entries: [:], hiddenAt: [:]))
         case .spoilerSeriesRules:
             return .spoilerSeriesRules(SpoilerSeriesRulesPayload(updatedAt: stamp, entries: [:]))
         }

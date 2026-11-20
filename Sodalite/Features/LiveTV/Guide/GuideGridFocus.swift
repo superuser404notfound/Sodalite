@@ -1,3 +1,5 @@
+#if !os(macOS)
+// The guide grid is a UICollectionView driven by the focus engine. macOS has neither, and the Mac draws the channel lineup instead (GuideView).
 import UIKit
 import SwiftUI
 
@@ -19,6 +21,8 @@ extension GuideGridViewController {
     func collectionView(_ collectionView: UICollectionView,
                         shouldUpdateFocusIn context: UICollectionViewFocusUpdateContext) -> Bool {
         guard collectionView === gridView, let next = context.nextFocusedIndexPath else { return true }
+        focusMoveIsVertical = next == pendingFocusRedirect
+            || context.focusHeading.contains(.up) || context.focusHeading.contains(.down)
         if next == pendingFocusRedirect { return true }
         guard let previous = context.previouslyFocusedIndexPath,
               next.section != previous.section,
@@ -31,24 +35,88 @@ extension GuideGridViewController {
             // The engine already picked the anchored cell; drop the stale redirect so the async
             // re-run cannot yank focus back to an older row.
             pendingFocusRedirect = nil
+            // Otherwise silent, which hid a landing hours off the anchor in a capture (Sodalite#221).
+            if !landedCoversAnchor(next) { focusLog("landed off anchor", previous: previous, next: next) }
             return true
         }
         if let last = lastVetoedMove, last.previous == previous, last.next == next {
+            // tvOS offers a vetoed move again a few milliseconds later, before the redirect has
+            // run (measured in the simulator, Sodalite#221). That is not a failed redirect yet.
+            if redirectInFlight { return false }
             // Second time we are offered this exact move: the redirect did not take. Vetoing again
             // leaves focus with nowhere to go at all, which is worse than an unanchored move.
+            focusLog("accepted engine pick", previous: previous, next: next)
             lastVetoedMove = nil
             pendingFocusRedirect = nil
             return true
         }
         lastVetoedMove = (previous, next)
-        materialize(section: next.section, item: desired)
-        pendingFocusRedirect = IndexPath(item: desired, section: next.section)
+        let target = IndexPath(item: desired, section: next.section)
+        focusLog("veto", previous: previous, next: next, target: target)
+        redirectFocus(to: target, from: previous)
+        return false
+    }
+
+    private func landedCoversAnchor(_ path: IndexPath) -> Bool {
+        guard path.section < rows.count else { return true }
+        let row = rows[path.section]
+        guard !row.programs.isEmpty else { return true }
+        return GuideRowMath.index(covering: model.anchorTime,
+                                  in: row.programs.map(\.guideTimeRange)) == path.item
+    }
+
+    /// Serve `target` on the next turn of the run loop. Used for a vetoed vertical move and for a
+    /// focused row whose schedule arrived under it.
+    func redirectFocus(to target: IndexPath, from previous: IndexPath) {
+        materialize(section: target.section, item: target.item)
+        pendingFocusRedirect = target
+        redirectInFlight = true
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.pendingFocusRedirect != nil else { return }
+            guard let self else { return }
+            self.redirectInFlight = false
+            guard self.pendingFocusRedirect != nil else { return }
+            // The remembered index path outranks indexPathForPreferredFocusedView while focus is
+            // inside the grid: with it on, this update re-resolved to the cell focus was already
+            // on and every redirect was refused (simulator, Sodalite#221).
+            self.gridView.remembersLastFocusedIndexPath = false
             self.gridView.setNeedsFocusUpdate()
             self.gridView.updateFocusIfNeeded()
+            self.gridView.remembersLastFocusedIndexPath = true
+            // A landing clears the redirect, so one still standing here is one the engine refused.
+            if self.pendingFocusRedirect == target {
+                self.focusLog("redirect did not take", previous: previous, next: target)
+            }
         }
-        return false
+    }
+
+    /// Sodalite#221: a fast swipe lands on rows whose schedule is still loading, drawn as hourly
+    /// placeholders. When the programs arrive the reload puts focus back on the same item NUMBER,
+    /// which is now a different program, usually an earlier one. Aim it at the anchor again.
+    ///
+    /// The completion can run before tvOS has put focus back, and then there is no focused cell to
+    /// re-aim (classicjazz's build 11 capture had early landings and not one `reload re-aim`). So
+    /// the focused row is noted before the reload, and its landing is caught in didUpdateFocusIn.
+    func refocusAfterReload(of sections: IndexSet) {
+        guard let focused = focusedGridIndexPath(), sections.contains(focused.section) else { return }
+        awaitedReloadLanding = nil
+        guard let desired = anchoredItemIndex(section: focused.section) else { return }
+        guard desired != focused.item else {
+            // Same cell, new content: the hero still describes the placeholder.
+            updateHero(section: focused.section, item: focused.item)
+            return
+        }
+        let target = IndexPath(item: desired, section: focused.section)
+        focusLog("reload re-aim", previous: focused, next: target)
+        redirectFocus(to: target, from: focused)
+    }
+
+    func noteFocusedRowReloading(_ sections: IndexSet) {
+        guard let focused = focusedGridIndexPath(), sections.contains(focused.section) else { return }
+        awaitedReloadLanding = (focused.section, Date().addingTimeInterval(1))
+    }
+
+    private func focusedGridIndexPath() -> IndexPath? {
+        gridView.indexPathsForVisibleItems.first { gridView.cellForItem(at: $0)?.isFocused == true }
     }
 
     /// Force the collection view to create the cell the redirect is about to name. The anchor time
@@ -91,13 +159,19 @@ extension GuideGridViewController {
             // already scrolled the ruler to show the chip, and scrollViewDidScroll copies that
             // offset to the grid. Scrolling here as well would fight it.
             guard indexPath.item < slots.count else { return }
-            model.anchorTime = slots[indexPath.item]
+            model.anchor = .at(slots[indexPath.item])
             return
         }
 
         if collectionView === columnView {
+            // Scrolling the column moves the rows under the grid's remembered cell, and that
+            // memory outranks every other answer, so Right jumped back to the row the user left
+            // the grid from. Off while the column holds focus, Right picks the cell beside the
+            // focused channel instead.
+            gridView.remembersLastFocusedIndexPath = false
             // The column is where the restore actually lands, so it releases the chrome as well.
             onGridFocused?()
+            model.didEnterGrid = true
             if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
             guard indexPath.item < rows.count else { return }
             model.anchorChannelID = rows[indexPath.item].channel.id
@@ -106,18 +180,27 @@ extension GuideGridViewController {
         }
 
         guard collectionView === gridView else { return }
+        gridView.remembersLastFocusedIndexPath = true
         onGridFocused?()
+        model.didEnterGrid = true
         if correctRestoreLanding(in: collectionView, landed: indexPath) { return }
+        let servedRedirect = indexPath == pendingFocusRedirect
+        if servedRedirect, let previous = context.previouslyFocusedIndexPath {
+            focusLog("redirect served", previous: previous, next: indexPath)
+        }
         // Focus actually moved, so the redirect is healthy: clear the hatch so it only fires on a
         // genuinely repeated (failed) proposal.
         pendingFocusRedirect = nil
         lastVetoedMove = nil
         guard indexPath.section < rows.count else { return }
+        if reaimHeadlessLanding(at: indexPath, context: context, servedRedirect: servedRedirect) {
+            return
+        }
         model.anchorChannelID = rows[indexPath.section].channel.id
         updateHero(section: indexPath.section, item: indexPath.item)
 
-        let vertical = context.focusHeading.contains(.up) || context.focusHeading.contains(.down)
-        if vertical || context.previouslyFocusedIndexPath == nil {
+        if !Self.moveSetsAnchor(heading: context.focusHeading, servedRedirect: servedRedirect,
+                                cameFromGrid: context.previouslyFocusedIndexPath != nil) {
             // Vertical moves keep the time position, so focus can land on a program that only just
             // reaches into the viewport. The focus engine does not scroll for that, and the result
             // is a rounded stub hugging the channel column while the hero describes a program the
@@ -125,14 +208,106 @@ extension GuideGridViewController {
             ensureFocusedCellVisible(section: indexPath.section, item: indexPath.item)
             return
         }
-        // Horizontal focus: re-anchor on the cell's VISIBLE midpoint, so a three-hour block
-        // anchors where the user is looking, not at its possibly off-screen centre.
-        let (x, width) = programXWidth(section: indexPath.section, item: indexPath.item)
-        let visibleMin = max(x, gridView.contentOffset.x)
-        let visibleMax = min(x + width, gridView.contentOffset.x + gridView.bounds.width)
-        let anchorX = visibleMax > visibleMin ? (visibleMin + visibleMax) / 2 : x + width / 2
-        model.anchorTime = model.axis.date(atX: anchorX)
+        // Horizontal focus picks the time. From the cell's geometry rather than the program, so
+        // the placeholder segments of a channel without EPG data answer the same way.
+        let (x, _) = programXWidth(section: indexPath.section, item: indexPath.item)
+        model.anchor = .focused(start: model.axis.date(atX: x),
+                                visibleStart: model.axis.date(atX: gridView.contentOffset.x),
+                                now: Date())
     }
+
+    /// Sodalite#221: a landing with no direction inside the grid is tvOS putting focus back, most
+    /// often after a row's schedule reloaded under it. It returns to the same item NUMBER, which is
+    /// now another program, and shouldUpdateFocusIn lets it through because only Up and Down are
+    /// checked there. Nothing is logged then either, which is how the early landings in the build 11
+    /// capture showed up with no line at all.
+    private func reaimHeadlessLanding(at indexPath: IndexPath,
+                                      context: UICollectionViewFocusUpdateContext,
+                                      servedRedirect: Bool) -> Bool {
+        let awaited = awaitedReloadLanding.map { $0.section == indexPath.section && Date() < $0.deadline }
+            ?? false
+        if awaited { awaitedReloadLanding = nil }
+        guard Self.headinglessLandingReaims(heading: context.focusHeading,
+                                            servedRedirect: servedRedirect,
+                                            cameFromGrid: context.previouslyFocusedIndexPath != nil,
+                                            awaitedReload: awaited),
+              let desired = anchoredItemIndex(section: indexPath.section),
+              desired != indexPath.item
+        else { return false }
+        let target = IndexPath(item: desired, section: indexPath.section)
+        focusLog("headingless re-aim", previous: indexPath, next: target)
+        redirectFocus(to: target, from: indexPath)
+        return true
+    }
+
+    /// Kept apart so the rule can be tested without a focus engine. Any direction is a user move and
+    /// is handled elsewhere; the served redirect is the re-aim itself. Coming in from outside the
+    /// grid (closing a sheet, the ruler, the column) is left alone unless it is the awaited reload.
+    static func headinglessLandingReaims(heading: UIFocusHeading, servedRedirect: Bool,
+                                         cameFromGrid: Bool, awaitedReload: Bool) -> Bool {
+        guard !servedRedirect else { return false }
+        let directions: UIFocusHeading = [.up, .down, .left, .right]
+        guard heading.intersection(directions).isEmpty else { return false }
+        return cameFromGrid || awaitedReload
+    }
+
+    /// Sodalite#221: only a Left or Right move picks a time. The served redirect of a vertical move
+    /// is a programmatic update and carries no heading at all, so testing for Up/Down let it through
+    /// as horizontal: it re-anchored on the start of whatever long block covered the picked time,
+    /// and every such row pulled the time earlier. Any other headingless update says nothing about
+    /// time either.
+    static func moveSetsAnchor(heading: UIFocusHeading, servedRedirect: Bool,
+                               cameFromGrid: Bool) -> Bool {
+        guard cameFromGrid, !servedRedirect else { return false }
+        if heading.contains(.up) || heading.contains(.down) { return false }
+        return heading.contains(.left) || heading.contains(.right)
+    }
+
+    /// One line per veto, redirect and accepted engine pick, so a landing off the anchor can be
+    /// read back from Settings > Diagnostic Log without a Mac (Sodalite#221).
+    func focusLog(_ event: String, previous: IndexPath, next: IndexPath, target: IndexPath? = nil) {
+        // With seconds: EPG times that carry them decide which of two programs covers a minute.
+        let time = { (date: Date?) in date?.formatted(date: .omitted, time: .standard) ?? "?" }
+        func cell(_ path: IndexPath) -> String {
+            guard path.section < rows.count else { return "r\(path.section)" }
+            let programs = rows[path.section].programs
+            guard path.item < programs.count else { return "r\(path.section) slot \(path.item)" }
+            let program = programs[path.item]
+            let kind = program.isSynthesized ? " gap" : ""
+            return "r\(path.section)\(kind) \(time(program.startDate))-\(time(program.endDate))"
+        }
+        let anchor: String
+        switch model.anchor {
+        case .live: anchor = "live"
+        case .at(let date): anchor = "at \(time(date))"
+        }
+        var line = "[guide] \(event): \(cell(previous)) -> \(cell(next))"
+        if let target { line += " => \(cell(target))" }
+        LogTap.shared.note(line + ", anchor \(anchor)")
+    }
+
+    /// Sodalite#221: until focus first reaches the grid, the hero describes what the first channel
+    /// airs and the first landing aims at that channel, instead of "Select a program" and a cell
+    /// picked by position. Re-run on every row change, because row 0 arrives without its programs
+    /// and a filter switch can replace it.
+    func seedFirstVisit() {
+        guard !model.didEnterGrid, let first = rows.first else { return }
+        model.anchorChannelID = first.channel.id
+        updateHero(section: 0, item: nil)
+    }
+
+    #if os(tvOS)
+    /// Sodalite#221: on a vertical move the focus engine scrolls the landed cell fully into view,
+    /// and for a long program that is a sideways jump of an hour or more, after which the screen no
+    /// longer shows the time the anchor holds. Focus-driven scrolling asks here for its target, so
+    /// the x stays put; a cell that ends up barely visible is still handled by
+    /// ensureFocusedCellVisible.
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint,
+                                   targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        guard scrollView === gridView, focusMoveIsVertical else { return }
+        targetContentOffset.pointee.x = scrollView.contentOffset.x
+    }
+    #endif
 
     /// Scroll so the focused program is actually readable. The decision lives in `GuideRowMath` so
     /// it can be tested without a collection view.
@@ -178,8 +353,7 @@ extension GuideGridViewController {
         if let item, item < row.programs.count {
             model.setHero(program: row.programs[item], channel: row.channel)
         } else {
-            let airing = row.programs.first { $0.isAiring(at: Date()) }
-            model.setHero(program: airing ?? row.channel.currentProgram, channel: row.channel)
+            model.setHero(program: row.airing ?? row.channel.currentProgram, channel: row.channel)
         }
     }
 
@@ -189,13 +363,14 @@ extension GuideGridViewController {
         if collectionView === columnView {
             guard indexPath.item < rows.count else { return }
             let row = rows[indexPath.item]
-            onPlayChannel(row.channel, row.programs.first { $0.isAiring(at: Date()) })
+            onPlayChannel(row.channel, row.airing)
             return
         }
         guard collectionView === gridView, indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
-        guard !row.programs.isEmpty, indexPath.item < row.programs.count else {
-            // A channel with no EPG data: there is nothing to schedule, so select plays it.
+        guard !row.programs.isEmpty, indexPath.item < row.programs.count,
+              !isGap(row, item: indexPath.item) else {
+            // No EPG data here: there is nothing to schedule, so select plays the channel.
             onPlayChannel(row.channel, nil)
             return
         }
@@ -250,6 +425,7 @@ extension GuideGridViewController {
               indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
         let program = row.programs.isEmpty || indexPath.item >= row.programs.count
+            || isGap(row, item: indexPath.item)
             ? synthesizedProgram(for: row.channel)
             : row.programs[indexPath.item]
         onSelect(row.channel, program)
@@ -268,3 +444,4 @@ extension GuideGridViewController {
         #endif
     }
 }
+#endif

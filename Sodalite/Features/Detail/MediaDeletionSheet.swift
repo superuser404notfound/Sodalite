@@ -320,7 +320,7 @@ private struct BoolPillRow: View {
         )
         .focusStroke(cornerRadius: 16, isFocused: focused)
         .focusResponse(.inline.withShadow(opacity: 0.25, radius: 10, y: 5), isFocused: focused)
-        .focusable(!disabled)
+        .focusableSurface(!disabled)
         .focused($focused)
         .disabled(disabled)
         .opacity(disabled ? 0.4 : 1.0)

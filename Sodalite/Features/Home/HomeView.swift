@@ -6,7 +6,14 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel: HomeViewModel?
     @State private var selectedItem: JellyfinItem?
+    /// The hero's Play: the same detail page as a click on it, told to start playing once it is ready.
+    @State private var heroPlayItem: JellyfinItem?
+    /// A card menu's Play from Beginning rides the same route, told to start at zero.
+    @State private var heroPlayFromBeginning = false
+    @Environment(\.shellLeadingSlot) private var shellLeadingSlot
     @State private var selectedFilter: FilterDestination?
+    /// A Trakt list entry the server does not have, opened on its Seerr page.
+    @State private var selectedCatalogMedia: SeerrMedia?
 
     /// Spinner accent: HomeView's NavigationStack resets the inherited TabView tint to white, so re-apply the effective tint to match the Live TV spinner.
     private var spinnerTint: Color {
@@ -20,6 +27,8 @@ struct HomeView: View {
 
     /// Debounce for the focus-left-rows → scroll-to-top, cancelled/respawned on focus change; without it transient nils between row transitions trigger spurious scroll-to-top snaps.
     @State private var scrollResetTask: Task<Void, Never>?
+    /// Set by a card's hold: the focus leaving the top row next is its context menu, not the tab bar.
+    @State private var focusLeavesForMenu = false
 
     /// Same latch for requestContentReload, and for the same reason: without it every reappear would
     /// reload the whole feed on a signal that was already answered.
@@ -28,10 +37,58 @@ struct HomeView: View {
     /// Presents the single-field sheet that fills the server's empty URL slot (iOS only; tvOS has
     /// no URL editor).
     @State private var showAddURLSheet = false
+    /// The running poster prefetch; each row that lands replaces it instead of stacking another (BRW-203).
+    @State private var prefetchTask: Task<Void, Never>?
 
-    /// True while something is presented over Home: a detail page or a filtered grid. Home is not
-    /// the screen then, which is what the two refresh observers below ask about.
-    private var isCovered: Bool { selectedItem != nil || selectedFilter != nil }
+    /// The card whose show a menu asked to wipe; the alert below confirms before anything is sent.
+    @State private var historyRemovalItem: JellyfinItem?
+    /// Set when the server refused the removal: the viewer confirmed a destructive step, so a silent
+    /// failure would read as done.
+    @State private var historyRemovalError: String?
+
+    /// True while something is presented over Home: a detail page or a filtered grid.
+    private var isCovered: Bool { selectedItem != nil || selectedFilter != nil || selectedCatalogMedia != nil }
+
+    @Environment(\.shellPageIsShown) private var pageIsShown
+
+    /// Home is not the screen: covered, playing from a card, or (tvOS) another tab page on top.
+    /// Every reload gate and the banner read this one value (audit BRW-201, BRW-R205).
+    private var homeIsHidden: Bool {
+        HomeVisibility.isHidden(covered: isCovered, heroPlayActive: heroPlayItem != nil, pageShown: pageIsShown,
+                                playerPresented: playerCoverUp)
+    }
+
+    /// Any player modal over the app, whoever presented it (audit FR-BRW-1).
+    @State private var playerCoverUp = PlayerModalPresence.isPlayerCoverUp
+
+    private struct TraktRowsTrigger: Equatable {
+        let lists: TraktListsSnapshot
+        let connected: Bool
+        let includesCatalog: Bool
+        let hasViewModel: Bool
+    }
+
+    private var traktRowsTrigger: TraktRowsTrigger {
+        TraktRowsTrigger(
+            lists: dependencies.trakt.lists,
+            connected: dependencies.trakt.isConnected,
+            includesCatalog: SeerrSurfacePolicy.browsingEnabled(appState: appState,
+                                                                appearance: dependencies.appearancePreferences),
+            hasViewModel: viewModel != nil
+        )
+    }
+
+    private func refreshTraktRows(_ trigger: TraktRowsTrigger) async {
+        guard let vm = viewModel else { return }
+        let trakt = dependencies.trakt
+        guard trigger.connected, !(trigger.lists.watchlist.isEmpty && trigger.lists.lists.isEmpty) else {
+            vm.traktRows = []
+            return
+        }
+        guard let index = try? await trakt.libraryIndex() else { return }
+        vm.traktRows = TraktHomeRows.build(snapshot: trigger.lists, index: index,
+                                           includeCatalog: trigger.includesCatalog)
+    }
 
     var body: some View {
         ThemeNavigationStack {
@@ -42,7 +99,8 @@ struct HomeView: View {
                             state: state,
                             serverName: appState.activeServer?.name ?? "",
                             onAddExternalAddress: addExternalAddressAction(for: state),
-                            onRetry: { await retry(vm: vm) }
+                            onRetry: { await retry(vm: vm) },
+                            onOpenDownloads: dependencies.downloadStore.items.isEmpty ? nil : { appState.requestedTab = .downloads }
                         )
                     } else if vm.isLoading {
                         ProgressView()
@@ -56,10 +114,31 @@ struct HomeView: View {
                         .tint(spinnerTint)
                 }
             }
+            // Home runs full width under the sidebar rail and makes room for it here; the banner's
+            // art reaches back under it (SidebarShell.fullBleedTabs). Starting at the screen edge
+            // puts the page inside tvOS's 80 pt overscan margin, and the NavigationStack hands that
+            // margin to this root view, which then sat 80 pt further in on top of the slot. Only
+            // here does ignoring it take (measured in a harness: on the shell's side of the stack,
+            // and as scroll content margins, it changed nothing).
+            .padding(.leading, shellLeadingSlot)
+            .ignoresSafeArea(.container, edges: shellLeadingSlot > 0 ? .leading : [])
+            // The cards' Play (menu and remote button) takes the same autoplay route as the hero's.
+            // Below the covers, so a detail page's own rows do not ask this host for a second one.
+            .environment(\.playMediaItem, PlayMediaItemAction { item, fromBeginning in
+                heroPlayFromBeginning = fromBeginning
+                heroPlayItem = item
+            })
             // Full-screen cover (over the tab bar) instead of a push: the bar is never hidden/removed, so it is never re-templated gray on return (tvOS 26). See detailCover.
             .detailCover(item: $selectedItem) { item in
                 DetailRouterView(item: item)
             }
+            .detailCover(item: $selectedCatalogMedia) { media in
+                CatalogDetailView(media: media)
+            }
+            .detailCover(item: $heroPlayItem) { item in
+                DetailRouterView(item: item, autoPlay: true, autoPlayFromBeginning: heroPlayFromBeginning)
+            }
+            .environment(\.cardMenuWillOpen) { focusLeavesForMenu = true }
             .detailCover(item: $selectedFilter) { filter in
                 FilteredGridView(
                     title: filter.title,
@@ -68,8 +147,11 @@ struct HomeView: View {
                     smartProviderRegion: filter.smartProviderRegion,
                     cacheScope: filter.cacheScope,
                     sortScope: filter.sortScope,
-                    hidesAudioPlaylists: filter.hidesAudioPlaylists
+                    hidesAudioPlaylists: filter.hidesAudioPlaylists,
+                    sources: filter.sources
                 )
+                // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
+                .environment(\.serverSession, filter.serverID.map { dependencies.sessionRegistry.session(forServerID: $0) })
             }
         }
         .onAppear {
@@ -80,8 +162,11 @@ struct HomeView: View {
                     imageService: dependencies.jellyfinImageService,
                     discoverService: dependencies.seerrDiscoverService,
                     userID: userID,
-                    serverID: appState.activeServer?.id ?? userID
+                    serverID: appState.activeServer?.id ?? userID,
+                    sources: dependencies.homeSources(activeUserID: userID)
                 )
+                attachCallbacks(to: viewModel)
+                viewModel?.isHidden = homeIsHidden
                 Task { await viewModel?.loadContent() }
             } else {
                 // Pick up new server-side content on the way back to the tab; the view model owns
@@ -101,26 +186,34 @@ struct HomeView: View {
         // observer below picks it up when the cover goes.
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
-            Task { await viewModel?.refreshIfStale(trigger: .foreground, covered: isCovered) }
+            Task { await viewModel?.refreshIfStale(trigger: .foreground, covered: homeIsHidden) }
         }
+        .task(id: traktRowsTrigger) { await refreshTraktRows(traktRowsTrigger) }
         // Home becoming the screen again. A cover dismiss fires no `onAppear` either (measured,
         // iOS 26.5), so this is the other half of the same gate: what the user changed behind the
         // cover already arrives by notification, what passed in the meantime does not.
-        .onChange(of: isCovered) { _, covered in
-            guard !covered else { return }
+        // Also the way back to a kept tvOS tab page, where `onAppear` never fires again (BRW-204).
+        .onChange(of: homeIsHidden) { _, hidden in
+            viewModel?.isHidden = hidden
+            guard !hidden else { return }
             Task { await viewModel?.refreshIfStale(trigger: .coverDismissed) }
         }
+        .modifier(PlayerCoverTracker(isUp: $playerCoverUp))
         .onReceive(NotificationCenter.default.publisher(for: .homeConfigDidChange)) { _ in
             viewModel?.reloadConfig()
-            viewModel?.scheduleConfigReload()
+            if homeIsHidden {
+                viewModel?.markDirty()
+            } else {
+                viewModel?.scheduleConfigReload()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeFavoritesDidChange)) { _ in
             // While something covers Home (detail/player), mark it stale instead of reloading now:
             // a fan-out landing on the shared limiter next to a player rebuilding its pipeline is the
             // class of burst that starves a stream (Sodalite#12, Audit 2026-09-25 BROWSE-1). The
-            // `isCovered` observer above does the one reload once Home is the screen again.
+            // `homeIsHidden` observer above does the one reload once Home is the screen again.
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -129,7 +222,7 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .homePlayedDidChange)) { _ in
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -145,29 +238,40 @@ struct HomeView: View {
             // regress the bar (issue #24).
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            let seriesID = note.userInfo?[PlaybackProgressKey.seriesID] as? String
+            let serverID = note.userInfo?[PlaybackProgressKey.serverID] as? String
             Task { @MainActor in
+                // Watching a dropped show again is the way back for it.
+                if let seriesID, let vm = viewModel {
+                    DroppedSeriesStore.restore("\(serverID ?? vm.serverID)|\(seriesID)", scope: vm.homeScope)
+                }
                 if let itemID, let ticks {
                     viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
                 }
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                     return
                 }
-                await viewModel?.loadContent()
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
+                // Coalesced: the offline progress sync and a binge both post in bursts (BRW-207).
+                viewModel?.scheduleReload(applying: itemID.flatMap { id in ticks.map { (id, $0) } })
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .libraryItemDidReplace)) { _ in
             // Continue Watching is holding the id the library just replaced; reload so the row points at
-            // the new item instead of failing playback on the corpse.
-            Task { await viewModel?.loadContent() }
+            // the new item instead of failing playback on the corpse. Posted with the player up, so
+            // a reload waits for Home to be the screen again.
+            Task { @MainActor in
+                if homeIsHidden {
+                    viewModel?.markDirty()
+                } else {
+                    await viewModel?.loadContent()
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .homeItemDidDelete)) { _ in
             // Reload so the deleted item drops out immediately instead of lingering until the next stale refresh.
             Task { @MainActor in
-                if isCovered {
+                if homeIsHidden {
                     viewModel?.markDirty()
                 } else {
                     await viewModel?.loadContent()
@@ -185,9 +289,20 @@ struct HomeView: View {
                 imageService: dependencies.jellyfinImageService,
                 discoverService: dependencies.seerrDiscoverService,
                 userID: userID,
-                serverID: appState.activeServer?.id ?? userID
+                serverID: appState.activeServer?.id ?? userID,
+                sources: dependencies.homeSources(activeUserID: userID)
             )
+            attachCallbacks(to: viewModel)
+            viewModel?.isHidden = homeIsHidden
             Task { await viewModel?.loadContent() }
+        }
+        // The participating servers changed (Combine servers switched, a server added or muted):
+        // repaint from that set's cached feed, then fetch (Sodalite#85).
+        .onChange(of: dependencies.sessionRegistry.participantsRevision) { _, _ in
+            guard let userID = appState.activeUser?.id, let vm = viewModel else { return }
+            let sources = dependencies.homeSources(activeUserID: userID)
+            guard vm.acceptsSources(sources) else { return }
+            Task { await vm.updateSources(sources) }
         }
         // No serverDidSwitch handler here: TabRootView is `.id(appState.activeServer?.id)`, so a
         // switch tears this whole view down and `.onAppear` above builds a fresh view model on the
@@ -215,6 +330,47 @@ struct HomeView: View {
         }
         // The fix for an off-network server, offered where the failure is (Sodalite#122).
         .addExternalAddressSheet(isPresented: $showAddURLSheet)
+        .alert(
+            "home.removeShowHistory.confirm.title",
+            isPresented: Binding(
+                get: { historyRemovalItem != nil },
+                set: { if !$0 { historyRemovalItem = nil } }
+            ),
+            presenting: historyRemovalItem
+        ) { item in
+            Button("home.removeShowHistory.confirm.action", role: .destructive) { removeSeriesHistory(of: item) }
+            Button("common.cancel", role: .cancel) {}
+        } message: { item in
+            Text("home.removeShowHistory.confirm.message \(item.seriesName ?? item.name)")
+        }
+        .alert(
+            "home.removeShowHistory.failed.title",
+            isPresented: Binding(
+                get: { historyRemovalError != nil },
+                set: { if !$0 { historyRemovalError = nil } }
+            ),
+            presenting: historyRemovalError
+        ) { _ in
+            Button("common.ok", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
+    }
+
+    /// Unplayed on the series is the server's own cascade: every episode loses its played mark,
+    /// play count, last-played date and resume position, which is all the history Jellyfin keeps.
+    private func removeSeriesHistory(of item: JellyfinItem) {
+        guard let seriesID = item.seriesId else { return }
+        let session = dependencies.sessionRegistry.session(for: item)
+        Task {
+            do {
+                try await session.itemService.setPlayed(userID: session.userID, itemID: seriesID, isPlayed: false)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                TopShelfRefresher.invalidate()
+            } catch {
+                historyRemovalError = ErrorText.user(for: error)
+            }
+        }
     }
 
     /// What Home shows instead of content, or nil to keep loading or keep showing rows.
@@ -245,6 +401,14 @@ struct HomeView: View {
         )
     }
 
+    private func attachCallbacks(to vm: HomeViewModel?) {
+        vm?.onUnauthorized = { [registry = dependencies.sessionRegistry] in registry.mute(serverID: $0) }
+        vm?.nextAiringLookup = { @MainActor [appState, dependencies] tmdbID in
+            guard appState.isSeerrConnected else { throw SeerrLookupUnavailable() }
+            return try await dependencies.seerrMediaService.tvDetail(tmdbID: tmdbID).nextEpisodeToAir
+        }
+    }
+
     /// Retry re-probes before it re-fetches, else the reload would run against the same stale
     /// verdict and paint this screen straight back.
     ///
@@ -270,27 +434,39 @@ struct HomeView: View {
         )
     }
 
-    /// Hand the loaded rows' artwork URLs to `ImageCache.prefetch` so first focus doesn't pay round-trip + decode. Mirrors `SearchView.prefetchSearchPosters`: cached URLs are skipped and the fan-out is bounded, so it never starves foreground fetches. Reuses `vm.imageURL` so prefetched URLs match exactly what the cards request.
+    /// Hand the head of each row's artwork to `ImageCache.prefetch` so first focus doesn't pay round-trip + decode. Only the head, and only up to half the cache: the whole page was several times the budget and evicted the cards on screen (Sodalite#212, see `HomePrefetchPlan`). Reuses `vm.imageURL` so prefetched URLs match exactly what the cards request.
     private func prefetchHomePosters(_ vm: HomeViewModel) {
-        var urls: [URL] = []
-        for row in vm.rows {
+        let rows: [[URL]] = vm.rows.map { row in
             let cwImage = row.type.usesBackdrop
                 ? dependencies.appearancePreferences.continueWatchingImage
                 : .still
-            for item in row.items {
+            return row.items.prefix(HomePrefetchPlan.headPerRow).compactMap { item in
                 let spoilerSafe = needsSpoilerSafeArtwork(item, cwImage: cwImage)
-                if let url = vm.imageURL(
+                return vm.imageURL(
                     for: item, rowType: row.type, cwImage: cwImage, spoilerSafe: spoilerSafe
-                ) {
-                    urls.append(url)
-                }
+                )
             }
         }
+        let limit = ImageCache.prefetchLimit(costLimit: ImageCache.shared.costLimit)
+        let urls = HomePrefetchPlan.urls(rows: rows, limit: limit)
         guard !urls.isEmpty else { return }
-        let token = dependencies.jellyfinClient.accessToken
-        let host = dependencies.jellyfinClient.baseURL?.host
-        Task.detached(priority: .utility) {
-            await ImageCache.prefetch(urls, authToken: token, jellyfinHost: host)
+        let auth = ImageAuth.snapshot(dependencies.sessionRegistry)
+        // The cancelled run releases its URL claims as it drains; waiting for it keeps the
+        // replacement from skipping them (audit review R-BROWSE-1).
+        let previous = prefetchTask
+        previous?.cancel()
+        prefetchTask = Task.detached(priority: .utility) {
+            await previous?.value
+            let warmed = await ImageCache.prefetch(urls, auth: auth)
+            let evicted = ImageCache.shared.takeEvictionCount()
+            if warmed > 0 || evicted > 0 {
+                LogTap.shared.note(
+                    "[ImageCache] home prefetch warmed \(warmed) of \(urls.count) (limit \(limit),"
+                        + " budget \(ImageCache.shared.costLimit / 1_000_000) MB),"
+                        + " resident \(ImageCache.shared.residentBytes / 1_000_000) MB,"
+                        + " evicted \(evicted) since last"
+                )
+            }
         }
     }
 
@@ -299,24 +475,63 @@ struct HomeView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 // Invisible zero-height scroll-to-top anchor for when focus leaves the rows.
                 Color.clear.frame(height: 0).id("top")
+                HomeHeroCarousel(
+                    items: vm.heroItems,
+                    backdropURL: vm.heroBackdropURL(for:),
+                    tallBackdropURL: vm.heroTallBackdropURL(for:),
+                    posterURL: vm.heroPosterURL(for:),
+                    onOpen: { selectedItem = $0 },
+                    onPlay: {
+                        heroPlayFromBeginning = false
+                        heroPlayItem = $0
+                    },
+                    isCovered: homeIsHidden
+                )
                 LazyVStack(alignment: .leading, spacing: 40) {
+                    if !vm.unreachableServerNames.isEmpty {
+                        CombinedHomeNotice(serverNames: vm.unreachableServerNames)
+                    }
                     ForEach(Array(vm.orderedSections().enumerated()), id: \.element.id) { idx, section in
                     switch section {
+                    case .media(let row) where row.type == .upcoming:
+                        UpcomingRow(
+                            items: row.items,
+                            imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
+                            onItemSelected: { item in
+                                if item.type == .movie {
+                                    selectedItem = item
+                                    return
+                                }
+                                // The episode has no page of its own yet, so the card opens its show.
+                                guard let seriesID = item.seriesId else { return }
+                                var series = JellyfinItem(seriesStub: seriesID, name: item.seriesName ?? "")
+                                series.serverID = item.serverID
+                                selectedItem = series
+                            },
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) },
+                            verbatimTitle: vm.customTitle(forRow: row.id)
+                        )
+                        .focused($focusedRowIndex, equals: idx)
+
                     case .media(let row):
                         let cwImage = row.type.usesBackdrop
                             ? dependencies.appearancePreferences.continueWatchingImage
                             : .still
+                        let rowStyle = ArtworkShape.style(for: row.items, default: row.type.cardStyle)
                         HorizontalMediaRow(
                             title: row.type.localizedTitle,
-                            verbatimTitle: row.type == .libraryLatest
+                            verbatimTitle: vm.customTitle(forRow: row.id)
+                                ?? (row.isCollectionShelf
+                                ? [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
+                                : row.type == .libraryLatest
                                 ? String(
                                     format: String(
                                         localized: "home.libraryLatest.format",
                                         defaultValue: "Latest in %@"
                                     ),
-                                    row.libraryName ?? ""
+                                    [row.libraryName ?? "", vm.serverLabel(forRow: row)].compactMap { $0 }.joined(separator: " · ")
                                 )
-                                : nil,
+                                : nil),
                             items: row.items,
                             imageURLProvider: {
                                 vm.imageURL(
@@ -336,14 +551,26 @@ struct HomeView: View {
                                 }
                                 : nil,
                             onItemSelected: { selectedItem = $0 },
-                            cardStyle: row.type.cardStyle,
-                            showsSeriesArtwork: cwImage != .still
+                            cardStyle: rowStyle,
+                            showsSeriesArtwork: cwImage != .still,
+                            itemLabel: { vm.serverLabel(forItem: $0, in: row) },
+                            onShowAll: showAllFilter(for: row).map { filter in { selectedFilter = filter } }
                         )
+                        .environment(\.dropSeries, row.type == .continueWatching || row.type == .nextUp
+                            ? DropSeriesAction { item in
+                                DroppedSeriesStore.drop(item, fallbackServerID: vm.serverID, scope: vm.homeScope)
+                                withAnimation(.easeInOut(duration: 0.25)) { vm.removeDroppedSeries() }
+                            }
+                            : nil)
+                        .environment(\.removeSeriesHistory, row.type == .continueWatching || row.type == .nextUp
+                            ? DropSeriesAction { historyRemovalItem = $0 }
+                            : nil)
                         .focused($focusedRowIndex, equals: idx)
 
                     case .tags(let tagRow):
                         TagRow(
                             title: tagRow.type.localizedTitle,
+                            verbatimTitle: vm.customTitle(forRow: tagRow.id),
                             tags: tagRow.tags,
                             onTagSelected: { tagData in
                                 selectedFilter = makeFilter(for: tagData, type: tagRow.type)
@@ -360,6 +587,7 @@ struct HomeView: View {
                         if !visibleProviders.isEmpty {
                             CatalogProviderRow(
                                 titleKey: HomeRowType.discoverProviders.localizedTitle,
+                                verbatimTitle: vm.customTitle(forRow: HomeRowType.discoverProviders.rawValue),
                                 providers: visibleProviders,
                                 onSelect: { provider in
                                     selectedFilter = makeJellyfinFilter(for: provider)
@@ -371,10 +599,28 @@ struct HomeView: View {
                             .focused($focusedRowIndex, equals: idx)
                         }
 
+                    case .trakt(let row):
+                        TraktHomeRow(
+                            row: row.type == .traktWatchlist
+                                ? TraktHomeRowData(
+                                    type: row.type,
+                                    id: row.id,
+                                    listName: vm.customTitle(forRow: row.type.rawValue),
+                                    entries: row.entries
+                                )
+                                : row,
+                            imageURLProvider: { vm.imageURL(for: $0, rowType: row.type) },
+                            onItemSelected: { selectedItem = $0 },
+                            onCatalogSelected: { selectedCatalogMedia = $0 }
+                        )
+                        .focused($focusedRowIndex, equals: idx)
+
                     case .libraries(let libraries):
                         LibraryRow(
                             titleKey: HomeRowType.myMedia.localizedTitle,
+                            verbatimTitle: vm.customTitle(forRow: HomeRowType.myMedia.rawValue),
                             libraries: libraries,
+                            label: { vm.serverLabel(forLibrary: $0) },
                             onSelect: { library in
                                 selectedFilter = makeLibraryFilter(for: library)
                             }
@@ -385,11 +631,26 @@ struct HomeView: View {
                 }
                 .padding(.vertical, 40)
             }
+            .drivesShellBar()
+            .scrollsUnderShellChrome()
+            #if os(tvOS)
+            // The banner's art reaches past the scroll view's left edge, under the sidebar rail. The
+            // rows clip themselves, so nothing else spills.
+            .scrollClipDisabled()
+            // tvOS only: the move it answers is the focus engine handing Up to the tab bar. On the Mac
+            // the hero rebuilds its buttons on every page, focus left the first row each time, and
+            // the page jumped back to the top while someone was scrolling it.
             .onChange(of: focusedRowIndex) { oldValue, newValue in
                 // Scroll to top only on a real top-row → tab-bar arrival, gated two ways:
                 // 1. oldValue == 0: the focus engine routes Up to the tab bar only from the top row; a row-N→nil (N>0) is a transient between LazyVStack row materializations, not a tab-bar arrival.
                 // 2. 200ms debounce: even a legit row-0→tab-bar transition (and a down-scroll past row 0) passes through nil for a beat; 200ms outlasts those transients but still feels immediate.
                 scrollResetTask?.cancel()
+                // 3. A card's context menu takes focus off the row the same way; scrolling then
+                //    slid the page down under the lifted card, which read as the card jumping up.
+                if focusLeavesForMenu {
+                    focusLeavesForMenu = false
+                    if newValue == nil { return }
+                }
                 guard newValue == nil, oldValue == 0 else { return }
                 scrollResetTask = Task { @MainActor in
                     try? await Task.sleep(for: .milliseconds(200))
@@ -399,12 +660,25 @@ struct HomeView: View {
                     }
                 }
             }
+            #endif
         }
     }
 
     /// Pairs a tile key with the session; nil before a user is resolved, which leaves the grid uncached rather than caching under a guess.
     private func cacheScope(_ key: String) -> FilterCacheScope? {
         appState.cacheIdentity.map { FilterCacheScope(key: key, identity: $0) }
+    }
+
+    /// A genre or provider tile's cache slot: the combined one when servers are combined, so the
+    /// grid and the precompute that pre-warms it agree on one slot (Sodalite#85).
+    private func homeTileScope(_ key: String) -> FilterCacheScope? {
+        guard let vm = viewModel, vm.sources.count > 1 else { return cacheScope(key) }
+        return FilterCacheScope(key: key, identity: vm.feedIdentity)
+    }
+
+    private var combinedSources: [HomeSource]? {
+        guard let sources = viewModel?.sources, sources.count > 1 else { return nil }
+        return sources
     }
 
     private func makeJellyfinFilter(for provider: CatalogProvider) -> FilterDestination {
@@ -425,7 +699,58 @@ struct HomeView: View {
             ),
             smartProviderID: provider.tmdbWatchProviderID,
             smartProviderRegion: region,
-            cacheScope: cacheScope(FilterCacheKey.Home.provider(id: provider.id, region: region))
+            cacheScope: homeTileScope(FilterCacheKey.Home.provider(id: provider.id, region: region)),
+            sources: combinedSources
+        )
+    }
+
+    /// The full list behind a capped "All Movies" / "All Series" row; nil while the row is not full,
+    /// since it then already shows everything there is.
+    private func showAllFilter(for row: HomeRowData) -> FilterDestination? {
+        if row.isCollectionShelf { return collectionShelfFilter(for: row) }
+        guard row.type == .allMovies || row.type == .allSeries,
+              row.items.count >= HomeMerger.limit(for: row.type, mergedContinueWatching: false) else { return nil }
+        return allItemsFilter(row.type == .allMovies ? .movie : .series)
+    }
+
+    /// Every movie or every series on every combined server, alphabetical. The grid behind both the
+    /// rows' Show All and My Media's "All" tiles (Sodalite#240), so the two share one cache slot and
+    /// one remembered sort.
+    private func allItemsFilter(_ type: ItemType) -> FilterDestination {
+        let rowType: HomeRowType = type == .movie ? .allMovies : .allSeries
+        return FilterDestination(
+            title: String(localized: type == .movie ? "home.allMovies" : "home.allSeries"),
+            query: ItemQuery(
+                includeItemTypes: [type],
+                sortBy: "SortName",
+                sortOrder: "Ascending",
+                limit: 50,
+                fields: JellyfinEndpoint.homeRowFields
+            ),
+            cacheScope: homeTileScope(FilterCacheKey.Home.row(rowType.rawValue)),
+            sortScope: sortScopeID.map { LibrarySortScope.homeRow(rowType.rawValue, scope: $0) },
+            sources: combinedSources
+        )
+    }
+
+    /// A shelf that filled its fetch has more folders behind it: the whole library, in the same
+    /// one-level, server-ordered shape the row asked for.
+    private func collectionShelfFilter(for row: HomeRowData) -> FilterDestination? {
+        guard let libraryID = row.libraryID,
+              row.items.count >= HomeViewModel.collectionShelfQuery(libraryID: libraryID).limit ?? 0
+        else { return nil }
+        let library = JellyfinLibrary(
+            id: libraryID, name: row.libraryName ?? "", collectionType: "boxsets", imageTags: nil, serverID: row.serverID
+        )
+        return FilterDestination(
+            title: library.name,
+            query: HomeViewModel.collectionShelfQuery(libraryID: libraryID, limit: 50),
+            cacheScope: FilterCacheScope(
+                key: FilterCacheKey.Home.row(row.id),
+                identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                    ?? CacheIdentity(serverID: "", userID: "")
+            ),
+            serverID: viewModel?.sources.first(where: { $0.serverID == row.serverID && !$0.isActive })?.serverID
         )
     }
 
@@ -442,38 +767,30 @@ struct HomeView: View {
                 fields: JellyfinEndpoint.homeRowFields
             ),
             // Without a cache scope FilteredGridView.init falls to the empty-state branch with isLoading=true on every visit (the brief flash on opening a genre tile). Tag name is a stable enough key, once the session is in the scope: "Action" is the same name on every server.
-            cacheScope: cacheScope(FilterCacheKey.Home.genre(name: tag.name)),
-            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) }
+            cacheScope: homeTileScope(FilterCacheKey.Home.genre(name: tag.name)),
+            sortScope: sortScopeID.map { LibrarySortScope.genre(name: tag.name, scope: $0) },
+            sources: combinedSources
         )
     }
 
     private func makeLibraryFilter(for library: JellyfinLibrary) -> FilterDestination {
-        // My Media tile browses one library in the shared grid; parentID scopes it, types match the library.
-        let types = MyMediaLibraries.itemTypes(for: library.libraryType)
-        // Collapsing box sets inside the box-set view is meaningless, and a virtual view takes no parentID.
-        let isVirtualView = MyMediaLibraries.isVirtualView(library.libraryType)
-        // The only grids that defer to the server's "Group movies into collections" (Sodalite#44). Note the server itself skips collapsing once the grid's watch-status filter adds IsPlayed, so Watched/Unwatched stay flat.
+        if let type = MyMediaLibraries.aggregateType(library) { return allItemsFilter(type) }
         let grouping = HomeRowConfig.collectionGrouping(scope: appState.profileKey?.storageScope ?? "")
-        var query = ItemQuery(
-            parentID: isVirtualView ? nil : library.id,
-            includeItemTypes: types,
-            sortBy: "SortName",
-            sortOrder: "Ascending",
-            limit: 200,
-            // A grid cell renders name/year/index/series/watched plus the poster; People,
-            // MediaStreams, MediaSources, Chapters and Trickplay were fetched, decoded and cached
-            // for every tile and never read (Sodalite#68).
-            fields: JellyfinEndpoint.homeRowFields
+        let query = MyMediaLibraries.gridQuery(
+            for: library, grouping: grouping,
+            scopesCollections: MyMediaLibraries.scopesCollections(library, among: viewModel?.myMediaLibraries ?? [])
         )
-        if !isVirtualView {
-            query.collapseBoxSetItems = grouping.queryValue
-        }
         return FilterDestination(
             title: library.name,
             query: query,
-            cacheScope: cacheScope(FilterCacheKey.Home.library(id: library.id, grouping: grouping)),
+            cacheScope: FilterCacheScope(
+                key: FilterCacheKey.Home.library(id: library.id, grouping: grouping),
+                identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                    ?? CacheIdentity(serverID: "", userID: "")
+            ),
             sortScope: sortScopeID.map { LibrarySortScope.library(id: library.id, scope: $0) },
-            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType)
+            hidesAudioPlaylists: MyMediaLibraries.hidesAudioPlaylists(library.libraryType),
+            serverID: viewModel?.sources.first(where: { $0.serverID == library.serverID && !$0.isActive })?.serverID
         )
     }
 
@@ -498,21 +815,51 @@ struct FilterDestination: Identifiable, Hashable {
     var sortScope: LibrarySortScope?
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).
     var hidesAudioPlaylists = false
+    /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
+    var serverID: String? = nil
+    /// A combined Home's servers for a genre or provider tile; the grid pages through all of them.
+    var sources: [HomeSource]? = nil
+
+    // Identity is the per-instance id; the sources carry services, which have no equality.
+    static func == (lhs: FilterDestination, rhs: FilterDestination) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-extension ItemQuery: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(parentID)
-        hasher.combine(sortBy)
-        hasher.combine(genres)
-        hasher.combine(studioNames)
-    }
 
-    static func == (lhs: ItemQuery, rhs: ItemQuery) -> Bool {
-        lhs.parentID == rhs.parentID &&
-        lhs.sortBy == rhs.sortBy &&
-        lhs.genres == rhs.genres &&
-        lhs.studioNames == rhs.studioNames &&
-        lhs.isFavorite == rhs.isFavorite
+/// One quiet line above the shelf naming the servers that did not answer this round (Sodalite#85).
+private struct CombinedHomeNotice: View {
+    let serverNames: [String]
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
+    private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
+
+    var body: some View {
+        Text(String(
+            format: String(localized: "home.serverUnreachable.format", defaultValue: "%@ is not reachable right now"),
+            serverNames.formatted(.list(type: .and))
+        ))
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))
+        .padding(.trailing, metrics.rowInset)
+    }
+}
+
+/// Keeps `HomeView.playerCoverUp` current from the player presence notification (audit FR-BRW-1).
+private struct PlayerCoverTracker: ViewModifier {
+    @Binding var isUp: Bool
+
+    func body(content: Content) -> some View {
+        content.onReceive(NotificationCenter.default.publisher(for: .playerModalPresenceDidChange)) { _ in
+            isUp = PlayerModalPresence.isPlayerCoverUp
+            // The modal chain can still list the player in its didDisappear; look once more.
+            if isUp {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    isUp = PlayerModalPresence.isPlayerCoverUp
+                }
+            }
+        }
     }
 }

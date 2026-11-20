@@ -1,7 +1,11 @@
 import Foundation
 import AVFoundation
-import UIKit
 import AetherEngine
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 /// System Now Playing wiring via `AVPlayerItem.externalMetadata`. AVKit's internal Now Playing session (from `showsPlaybackControls = true`) reads title/description/artwork from externalMetadata and publishes to MPNowPlayingInfoCenter; the host VC suppresses visible chrome (`playbackControlsIncludeTransportBar/InfoViews = false`) but keeps AVKit's backend for privileged features (AirPods auto-detect, Enhance Dialogue, Reduce Loud Sounds, synchronized Atmos).
 ///
@@ -32,26 +36,32 @@ extension PlayerViewModel {
 
     /// Async-fetch the primary image and re-stage externalMetadata with artwork; engine writes to the live item, AVKit re-reads on the next publish tick. Failures leave title-only metadata in place.
     func refreshExternalMetadataWithArtwork() async {
+        // The engine is process-wide and keeps staged metadata across loads, so a cover that lands after
+        // the session moved on would be shown for the next item (audit PCORE-206).
+        let generation = sessionGeneration
         guard let url = primaryImageURL() else {
             LogTap.shared.note("[NowPlaying] artwork: no URL for item id=\(item.id)")
             return
         }
         LogTap.shared.note("[NowPlaying] artwork: GET \(url.absoluteString)")
-        let request = URLRequest(url: url, timeoutInterval: 5.0)
+        let request = ImageCache.request(for: url, auth: nil, timeout: 5)
         guard case .whole(let data) = await ImageFetch.load(request) else {
             LogTap.shared.note("[NowPlaying] artwork: no whole payload")
             return
         }
         LogTap.shared.note("[NowPlaying] artwork: bytes=\(data.count)")
-        guard let image = UIImage(data: data),
-              let jpeg = image.jpegData(compressionQuality: 0.85) else {
+        guard let jpeg = await Self.nowPlayingJPEG(from: data) else {
             LogTap.shared.note("[NowPlaying] artwork: decode/re-encode failed")
             return
         }
-        await MainActor.run {
-            let items = self.buildExternalMetadataItems(artworkData: jpeg)
-            self.player.setExternalMetadata(items)
-        }
+        guard generation == sessionGeneration, !isTearingDown else { return }
+        player.setExternalMetadata(buildExternalMetadataItems(artworkData: jpeg))
+    }
+
+    /// Full decode plus JPEG encode of the cover (about 1.4 MP for a portrait poster), off the main actor
+    /// (audit PCORE-207; Sodalite#212 explains why `@concurrent` and not just `nonisolated`).
+    @concurrent nonisolated static func nowPlayingJPEG(from data: Data) async -> Data? {
+        PlatformImage(data: data)?.jpegData(compressionQuality: 0.85)
     }
 
     // MARK: - External metadata builder
@@ -78,8 +88,8 @@ extension PlayerViewModel {
         guard item.type == .episode else { return item.name }
         let label = EpisodeMetadataFormatter.label(season: item.parentIndexNumber,
                                                    episode: item.indexNumber,
-                                                   title: item.name)
-        return label.isEmpty ? item.name : label
+                                                   title: spoilerPolicy.visibleTitle(of: item))
+        return label.isEmpty ? spoilerPolicy.displayName(of: item) : label
     }
 
     /// Series name for the second Now-Playing line. Episodes only;

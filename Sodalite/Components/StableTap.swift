@@ -1,6 +1,10 @@
 import SwiftUI
 
 /// Focusable-row activation gated on focus stability. Siri Remote finger drift in the last frames of a click can shift focus to a neighbour and activate the wrong tile; this drops presses until focus has been steady for `stableFocusWindow`. 80 ms is below human reaction to a focus shift (~200 ms) so it filters drift without latency on deliberate clicks. Caller still owns `.focusable`/`.focused` and styling.
+///
+/// Never on a view that also carries `.onMoveCommand`: there the long press saw about one Select press in
+/// five on tvOS 26 (measured on `ValuePickerRow`, 2026-10-21), while the same gesture on rows without it
+/// caught every press. Such a view is a `Button` with its own focus-age check, as `ValuePickerRow` is.
 struct StableTapModifier: ViewModifier {
     let isFocused: Bool
     /// Set on a row that also answers a hold (a `.contextMenu`). The press then decides on RELEASE and
@@ -8,6 +12,8 @@ struct StableTapModifier: ViewModifier {
     /// on the way into its own menu (Sodalite#75). Off elsewhere: a row with nothing to disambiguate
     /// from keeps firing on the press itself, which is what makes the shell feel immediate.
     var longPressOpensMenu: Bool = false
+    /// Called when a hold reaches the limit, just before the menu takes focus.
+    var onHold: (() -> Void)? = nil
     let action: () -> Void
 
     /// Minimum steady-focus time (s) before a press fires; drop to 0.06 if 80 ms feels sluggish.
@@ -23,6 +29,10 @@ struct StableTapModifier: ViewModifier {
     /// Stability is judged when the press STARTS. Judging it at release would count the hold itself as
     /// steadiness and wave through exactly the drift this guards against.
     @State private var pressBeganOnStableFocus = false
+    /// Set when the hold reached the limit. The gesture ends right there, and the end it reports measures
+    /// against our own start stamp, which arrives a frame after the gesture's: that difference read a
+    /// completed hold as a 0.39 s click often enough to open the row instead of its menu.
+    @State private var holdReachedLimit = false
 
     func body(content: Content) -> some View {
         let tracked = content
@@ -36,22 +46,28 @@ struct StableTapModifier: ViewModifier {
         return Group {
             if longPressOpensMenu {
                 tracked.onLongPressGesture(minimumDuration: Self.clickHoldLimit) {
-                    // Reaching the limit is the menu's press, not the row's. Nothing to do here: the
-                    // release below sees the duration and stays out of the way.
+                    holdReachedLimit = true
+                    onHold?()
                 } onPressingChanged: { pressing in
                     if pressing {
                         pressStartedAt = Date()
                         pressBeganOnStableFocus = isFocusStable(at: Date())
+                        holdReachedLimit = false
                     } else {
-                        let started = pressStartedAt
+                        guard let started = pressStartedAt else { return }
                         pressStartedAt = nil
-                        guard let started,
-                              Self.isClick(
-                                beganOnStableFocus: pressBeganOnStableFocus,
-                                pressDuration: Date().timeIntervalSince(started)
-                              )
-                        else { return }
-                        action()
+                        let duration = Date().timeIntervalSince(started)
+                        let beganOnStableFocus = pressBeganOnStableFocus
+                        // A completed hold reports its end and its completion in either order; the
+                        // decision waits for both.
+                        Task { @MainActor in
+                            guard Self.isClick(
+                                beganOnStableFocus: beganOnStableFocus,
+                                pressDuration: duration,
+                                holdReachedLimit: holdReachedLimit
+                            ) else { return }
+                            action()
+                        }
                     }
                 }
             } else {
@@ -77,9 +93,14 @@ struct StableTapModifier: ViewModifier {
     }
 
     /// Whether a finished press activates the row: it has to have started on steady focus and to have
-    /// ended before the menu's hold claims it.
-    static func isClick(beganOnStableFocus: Bool, pressDuration: TimeInterval) -> Bool {
-        beganOnStableFocus && pressDuration < clickHoldLimit
+    /// ended before the menu's hold claims it. A hold the gesture saw complete never counts, whatever the
+    /// measured duration says.
+    static func isClick(
+        beganOnStableFocus: Bool,
+        pressDuration: TimeInterval,
+        holdReachedLimit: Bool = false
+    ) -> Bool {
+        beganOnStableFocus && !holdReachedLimit && pressDuration < clickHoldLimit
     }
 }
 
@@ -89,11 +110,13 @@ extension View {
     func stableTap(
         isFocused: Bool,
         longPressOpensMenu: Bool = false,
+        onHold: (() -> Void)? = nil,
         perform action: @escaping () -> Void
     ) -> some View {
         modifier(StableTapModifier(
             isFocused: isFocused,
             longPressOpensMenu: longPressOpensMenu,
+            onHold: onHold,
             action: action
         ))
     }

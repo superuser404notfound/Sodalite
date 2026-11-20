@@ -11,7 +11,6 @@ struct CatalogView: View {
     @State private var selectedMedia: SeerrMedia?
     @State private var selectedFilter: CatalogFilter?
     @State private var selectedSection: Section = .discover
-    @State private var isRevalidatingSeerr = false
 
     private enum Section: Hashable {
         case discover, myRequests, allRequests
@@ -54,6 +53,7 @@ struct CatalogView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .reservesShellChrome()
             // Present details as a full-screen cover (over the tab bar) instead of a push, so the bar is never hidden/removed and thus never re-templated gray on return (the tvOS 26 system bug). See detailCover.
             .detailCover(item: $selectedMedia) { media in
                 CatalogDetailView(media: media)
@@ -93,9 +93,6 @@ struct CatalogView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .seerrSessionRejected)) { _ in
-            Task { await revalidateSeerrSession() }
-        }
         .onChange(of: appState.activeUser?.id) { _, _ in
             // Profile switch: cached Seerr state (permission-scoped discover, prior-user My Requests) is stale; reset so bootstrap() rebuilds once Seerr reconnects.
             viewModel = nil
@@ -128,21 +125,6 @@ struct CatalogView: View {
             viewModel = vm
             Task { await vm.loadDiscover() }
         }
-    }
-
-    /// A 401 means the session may be gone (idle past Seerr's 30-day store TTL, or its user or session
-    /// table removed), and every Retry would repeat it. The launch's own probe decides: a rejected cookie
-    /// disconnects, which puts this tab on "Set up Seerr" and closes any detail cover above it.
-    private func revalidateSeerrSession() async {
-        guard appState.isSeerrConnected, !isRevalidatingSeerr else { return }
-        isRevalidatingSeerr = true
-        defer { isRevalidatingSeerr = false }
-        await dependencies.applySeerrSession(
-            forJellyfinUserID: appState.activeUser?.id,
-            jellyfinServerID: appState.activeServer?.id,
-            allowLegacyFallback: true,
-            keepsSessionOnTransientFailure: true
-        )
     }
 
     private var notConnectedState: some View {

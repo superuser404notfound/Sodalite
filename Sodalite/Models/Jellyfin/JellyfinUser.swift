@@ -29,6 +29,8 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
         var blockedTags: [String]? = nil
         var allowedTags: [String]? = nil
         var blockUnratedItems: [String]? = nil
+        var enableVideoPlaybackTranscoding: Bool? = nil
+        var enableAudioPlaybackTranscoding: Bool? = nil
 
         enum CodingKeys: String, CodingKey {
             case isAdministrator = "IsAdministrator"
@@ -39,6 +41,24 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
             case blockedTags = "BlockedTags"
             case allowedTags = "AllowedTags"
             case blockUnratedItems = "BlockUnratedItems"
+            case enableVideoPlaybackTranscoding = "EnableVideoPlaybackTranscoding"
+            case enableAudioPlaybackTranscoding = "EnableAudioPlaybackTranscoding"
+        }
+
+        /// Every field is optional on the wire: a server that omits one (seen in TestFlight feedback for
+        /// `EnableContentDeletion`) must not fail the whole login decode. A missing grant reads as not granted.
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            isAdministrator = try c.decodeIfPresent(Bool.self, forKey: .isAdministrator) ?? false
+            enableContentDeletion = try c.decodeIfPresent(Bool.self, forKey: .enableContentDeletion) ?? false
+            enableLiveTvManagement = try c.decodeIfPresent(Bool.self, forKey: .enableLiveTvManagement)
+            enableAllFolders = try c.decodeIfPresent(Bool.self, forKey: .enableAllFolders)
+            maxParentalRating = try c.decodeIfPresent(Int.self, forKey: .maxParentalRating)
+            blockedTags = try c.decodeIfPresent([String].self, forKey: .blockedTags)
+            allowedTags = try c.decodeIfPresent([String].self, forKey: .allowedTags)
+            blockUnratedItems = try c.decodeIfPresent([String].self, forKey: .blockUnratedItems)
+            enableVideoPlaybackTranscoding = try c.decodeIfPresent(Bool.self, forKey: .enableVideoPlaybackTranscoding)
+            enableAudioPlaybackTranscoding = try c.decodeIfPresent(Bool.self, forKey: .enableAudioPlaybackTranscoding)
         }
     }
 
@@ -52,6 +72,21 @@ struct JellyfinUser: Codable, Sendable, Identifiable, Equatable {
     /// administrator shortcut. False while the policy is unloaded, like `canDeleteContent`.
     var canManageLiveTv: Bool {
         policy?.enableLiveTvManagement == true
+    }
+
+    /// Jellyfin's `EnableVideoPlaybackTranscoding`. Without it the server still hands out a transcode
+    /// URL for a capped request, but copies the video, so no bitrate cap is ever applied (Sodalite#202).
+    /// True while the policy is unloaded: that is the server default, and the rungs were offered before.
+    var canTranscodeVideo: Bool {
+        policy?.enableVideoPlaybackTranscoding != false
+    }
+
+    /// Jellyfin's `EnableAudioPlaybackTranscoding`. Without it the server still names
+    /// AudioCodecNotSupported and hands out a TranscodingUrl, but `TryStreamCopy` copies the audio, so
+    /// a live channel whose sound only the server can decode plays silent (Sodalite#100).
+    /// True while the policy is unloaded, like `canTranscodeVideo`.
+    var canTranscodeAudio: Bool {
+        policy?.enableAudioPlaybackTranscoding != false
     }
 
     /// Nothing in the policy keeps library items from this user: every folder, no rating ceiling, no tag

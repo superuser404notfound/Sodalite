@@ -41,7 +41,7 @@ final class PersonDetailViewModel {
     private(set) var errorMessage: String?
     private(set) var filmographyState: FilmographyState = .loaded
 
-    /// What the page can say about the TMDB half. `hidden` is Seerr switched off for browsing:
+    /// What the page can say about the TMDB half. `hidden` is Seerr not connected:
     /// there is no filmography to be missing, so the heading goes rather than claiming the person
     /// has no titles. `unavailable` is Seerr switched on and unable to deliver, which the page says
     /// out loud instead of reading like an app that cannot show a filmography at all (Sodalite#143).

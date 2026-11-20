@@ -4,6 +4,9 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     // Declaration order = default display order for fresh installs / Reset (defaultConfig uses allCases.enumerated()); existing users keep their saved order.
     case continueWatching
     case nextUp
+    /// Announced episodes of the shows the profile is caught up on (Sodalite#198). Off by default:
+    /// it needs a metadata plugin that lists unaired episodes, or Seerr.
+    case upcoming
     case myMedia
     case favorites
     case favoriteEpisodes
@@ -12,6 +15,10 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Ordered by release/air date, unlike every Latest row above (those order by DateCreated).
     case recentlyReleasedMovies
     case recentlyReleasedShows
+    /// The connected Trakt account's watchlist. Renders nothing without a Trakt connection.
+    case traktWatchlist
+    /// One row per personal Trakt list.
+    case traktLists
     case discoverProviders
     case collections
     case playlists
@@ -32,7 +39,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         // drops empty rows), so the default costs users who have none exactly one query each and
         // saves the rest a trip through Customize Home (mikepaggi, Sodalite#73).
         case .continueWatching, .nextUp, .myMedia, .favorites, .favoriteEpisodes, .latestMovies,
-             .latestShows, .discoverProviders, .genres, .collections, .playlists:
+             .latestShows, .discoverProviders, .genres, .collections, .playlists,
+             .traktWatchlist, .traktLists:
             true
         default:
             false
@@ -41,7 +49,7 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
 
     var cardStyle: MediaCardStyle {
         switch self {
-        case .continueWatching, .nextUp, .favoriteEpisodes:
+        case .continueWatching, .nextUp, .upcoming, .favoriteEpisodes:
             .landscape
         default:
             .poster
@@ -70,10 +78,14 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Row not sourced from Jellyfin (today only Discover/Jellyseerr): hardcoded provider list, pushes a Seerr-backed grid, not FilteredGridView.
     var isDiscoverProviderRow: Bool { self == .discoverProviders }
 
+    /// Built from the Trakt snapshot by `TraktHomeRows`, never by the Jellyfin fan-out.
+    var isTraktRow: Bool { self == .traktWatchlist || self == .traktLists }
+
     var localizedTitle: LocalizedStringKey {
         switch self {
         case .continueWatching: "home.continueWatching"
         case .nextUp: "home.nextUp"
+        case .upcoming: "home.upcoming"
         case .latestMovies: "home.latestMovies"
         case .latestShows: "home.latestShows"
         case .recentlyReleasedMovies: "home.recentlyReleasedMovies"
@@ -89,6 +101,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         case .collections: "home.collections"
         case .playlists: "home.playlists"
         case .discoverProviders: "home.discoverProviders"
+        case .traktWatchlist: "home.traktWatchlist"
+        case .traktLists: "home.traktLists"
         case .myMedia: "home.myMedia"
         case .libraryLatest: "home.latestMovies"
         }
@@ -98,6 +112,7 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         switch self {
         case .continueWatching: "play.circle"
         case .nextUp: "forward"
+        case .upcoming: "calendar.badge.plus"
         case .latestMovies: "film"
         case .latestShows: "tv"
         case .recentlyReleasedMovies: "calendar"
@@ -113,6 +128,8 @@ enum HomeRowType: String, Codable, Sendable, CaseIterable, Identifiable {
         case .collections: "rectangle.stack.fill"
         case .playlists: "list.and.film"
         case .discoverProviders: "tv.badge.wifi"
+        case .traktWatchlist: "bookmark"
+        case .traktLists: "list.bullet.rectangle"
         case .myMedia: "rectangle.grid.2x2"
         case .libraryLatest: "film"
         }
@@ -128,11 +145,27 @@ struct HomeRowConfig: Codable, Sendable, Identifiable, Equatable {
     var libraryName: String?
     /// `.libraryLatest` collectionType ("movies"/"tvshows"); drives which item type the Latest query asks for.
     var collectionType: String?
+    /// The user's own heading for the row, set in Customize Home. nil keeps the built-in title.
+    var customTitle: String? = nil
+
+    /// Every row but the Trakt lists, which are several rows that each carry their list's own name.
+    var isRenamable: Bool { type != .traktLists }
+
+    /// Trimmed and capped; an empty entry means "back to the built-in title".
+    static func sanitizedTitle(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : String(trimmed.prefix(maxCustomTitleLength))
+    }
+
+    static let maxCustomTitleLength = 60
 
     /// Customize-list icon; `.libraryLatest` derives from collectionType so TV libraries don't get the "film" fallback (Sodalite#15).
     var systemImage: String {
         if type == .libraryLatest, collectionType == "tvshows" {
             return "tv"
+        }
+        if type == .libraryLatest, collectionType == "boxsets" {
+            return HomeRowType.collections.systemImage
         }
         return type.systemImage
     }
@@ -157,14 +190,18 @@ struct HomeRowConfig: Codable, Sendable, Identifiable, Equatable {
 }
 
 extension HomeRowConfig {
-    /// Library types that get their own per-library "Latest" row.
-    static let perLibraryLatestTypes: Set<String> = ["movies", "tvshows"]
+    /// Library types that get their own per-library row. A `boxsets` library's row is not a Latest
+    /// row but the library's own folders in the server's order: a server that groups its collections
+    /// into several such libraries (one per shelf) means each to be a shelf of its own, and the
+    /// aggregated Collections row would pour all of them into one.
+    static let perLibraryLatestTypes: Set<String> = ["movies", "tvshows", "boxsets"]
 
     /// The aggregated row a per-library row splits its library out of.
     static func aggregatedLatestRow(forCollectionType collectionType: String?) -> HomeRowType? {
         switch collectionType {
         case "movies": .latestMovies
         case "tvshows": .latestShows
+        case "boxsets": .collections
         default: nil
         }
     }
@@ -176,9 +213,13 @@ extension HomeRowConfig {
     /// tiles under the library's name (device report, 2026-08-23). A row that loses that reason
     /// (second library removed, or it predates this rule) is retired, and if the user had it on,
     /// the aggregated row is switched on in its place rather than leaving them one shelf short.
+    ///
+    /// `isFreshInstall` (nothing stored for the scope yet) lays the result out with
+    /// `applyingSplitDefault`, the same rule Reset applies, so the two still land on one page.
     static func reconciled(
         stored: [HomeRowConfig],
-        libraries: [JellyfinLibrary]
+        libraries: [JellyfinLibrary],
+        isFreshInstall: Bool = false
     ) -> [HomeRowConfig] {
         let latestLibs = libraries.filter {
             perLibraryLatestTypes.contains($0.collectionType ?? "")
@@ -191,6 +232,7 @@ extension HomeRowConfig {
         )
         let splitLibs = latestLibs.filter { splitTypes.contains($0.collectionType ?? "") }
         let splitIDs = Set(splitLibs.map(\.id))
+        let hadCollectionRows = stored.contains { $0.type == .libraryLatest && $0.collectionType == "boxsets" }
 
         var retiredEnabledTypes: Set<String> = []
         var result = stored.filter { config in
@@ -251,10 +293,47 @@ extension HomeRowConfig {
             result[index].isEnabled = true
         }
 
+        if isFreshInstall { return applyingSplitDefault(result) }
+        // Collection shelves arrive split even on a saved layout, the first time they appear, while
+        // the user has Collections on: the one aggregated row is the layout the server did NOT ask
+        // for, and finding the fix behind Reset is not a reasonable ask. Latest rows stay opt-in.
+        let collectionsOn = result.contains { $0.type == .collections && $0.isEnabled }
+        if !hadCollectionRows, collectionsOn,
+           result.contains(where: { $0.type == .libraryLatest && $0.collectionType == "boxsets" }) {
+            return applyingSplitDefault(result, only: ["boxsets"])
+        }
         return result
     }
 
-    /// Reset static rows to default order/enabled state; keep discovered `.libraryLatest` rows (at the end, disabled) so they don't vanish before the next reconcile.
+    /// The default for a type with several libraries: each library gets its own "Latest in X" row,
+    /// standing where the aggregated row stood, and the aggregated row goes off. Mixing a second
+    /// library into one shelf is what hid a TMDB Trending library inside Latest Movies (Discord,
+    /// 2026-10-16). Only a fresh install and Reset apply it; a saved layout keeps its rows.
+    static func applyingSplitDefault(_ configs: [HomeRowConfig], only types: Set<String>? = nil) -> [HomeRowConfig] {
+        let perLibrary = configs.filter { $0.type == .libraryLatest }
+        let splitTypes = Dictionary(grouping: perLibrary) { $0.collectionType ?? "" }
+            .filter { $0.value.count > 1 && (types?.contains($0.key) ?? true) }
+            .keys
+        guard !splitTypes.isEmpty else { return configs }
+
+        var ordered = configs.sorted { $0.sortOrder < $1.sortOrder }
+        for collectionType in splitTypes.sorted() {
+            guard let aggregate = aggregatedLatestRow(forCollectionType: collectionType) else { continue }
+            let isSplitRow = { (config: HomeRowConfig) in
+                config.type == .libraryLatest && config.collectionType == collectionType
+            }
+            var split = ordered.filter(isSplitRow)
+            ordered.removeAll(where: isSplitRow)
+            guard let anchor = ordered.firstIndex(where: { $0.type == aggregate }) else { continue }
+            ordered[anchor].isEnabled = false
+            for index in split.indices { split[index].isEnabled = true }
+            ordered.insert(contentsOf: split, at: anchor + 1)
+        }
+        for index in ordered.indices { ordered[index].sortOrder = index }
+        return ordered
+    }
+
+    /// Reset static rows to default order/enabled state and keep the discovered `.libraryLatest` rows, laid out by `applyingSplitDefault` exactly as a fresh install lays them out.
     static func resetToDefault(current: [HomeRowConfig]) -> [HomeRowConfig] {
         var result = defaultConfig()
         var order = result.count
@@ -271,6 +350,6 @@ extension HomeRowConfig {
             )
             order += 1
         }
-        return result
+        return applyingSplitDefault(result)
     }
 }

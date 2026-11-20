@@ -71,6 +71,14 @@ extension Color {
         /// outlining the card.
         static let panelEdge = Color.white.opacity(0.12)
 
+        // MARK: Text
+
+        /// Quiet text over content that can move behind it, at the level `.secondary` draws on the
+        /// app's dark page. tvOS renders `.secondary` with a plus-lighter blend, so it takes on
+        /// whatever passes under it (vanishing over white, flickering under a scrolling grid's focus
+        /// shadows) and only Reduce Transparency stops that (Sodalite#206). Opaque on purpose.
+        static let quietLabel = Color(white: 0.5)
+
         // MARK: Scrims
         //
         // Flat, full-surface dims only. Not shadows, not gradient stops.

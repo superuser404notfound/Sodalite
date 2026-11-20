@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct SeerrSettingsView: View {
     @Environment(\.appState) private var appState
@@ -8,6 +9,7 @@ struct SeerrSettingsView: View {
     @State private var isDiscovering = false
     @State private var discoveredServer: SeerrServer?
     @State private var serverVersion: String?
+    @State private var serverSettings: SeerrPublicSettings?
     @State private var discoveryError: String?
 
     @State private var useJellyfinCredentials = true
@@ -86,9 +88,7 @@ struct SeerrSettingsView: View {
                 text: $serverAddressText
             )
             .textContentType(.URL)
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .keyboardType(.URL)
+            .verbatimTextEntry(.url)
 
             if let jellyfinHost = appState.activeServer?.url.host {
                 Button {
@@ -153,6 +153,7 @@ struct SeerrSettingsView: View {
             Button {
                 discoveredServer = nil
                 serverVersion = nil
+                serverSettings = nil
                 loginError = nil
                 passwordText = ""
             } label: {
@@ -178,26 +179,27 @@ struct SeerrSettingsView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            if hasJellyfinUser {
+            if hasJellyfinUser && acceptsJellyfinLogin {
                 jellyfinToggle
             }
 
             VStack(spacing: 12) {
                 if !isUsernameHidden {
                     TextField(
-                        String(localized: "auth.login.username", defaultValue: "Username"),
+                        usesJellyfinProfile
+                            ? String(localized: "auth.login.username", defaultValue: "Username")
+                            : String(localized: "settings.seerr.usernameOrEmail", defaultValue: "Username or email"),
                         text: $usernameText
                     )
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .disabled(useJellyfinCredentials && hasJellyfinUser)
-                    .opacity(useJellyfinCredentials && hasJellyfinUser ? 0.6 : 1.0)
+                    .verbatimTextEntry()
+                    .disabled(usesJellyfinProfile)
+                    .opacity(usesJellyfinProfile ? 0.6 : 1.0)
                 }
 
                 if isPasswordHidden {
                     passwordCachedNote
                 } else {
-                    if useJellyfinCredentials && hasJellyfinUser && cachedJellyfinPassword == nil {
+                    if usesJellyfinProfile && cachedJellyfinPassword == nil {
                         passwordNeededNote
                     }
                     SecureField(
@@ -342,6 +344,8 @@ struct SeerrSettingsView: View {
                     .fill(.white.opacity(0.05))
             )
 
+            myRequestsToggle
+
             #if os(iOS)
             // Admins can approve requests, so only they benefit from a pending-approval notification.
             if appState.activeSeerrUser?.canManageRequests == true {
@@ -450,14 +454,57 @@ struct SeerrSettingsView: View {
             if let serverID = dependencies.activeServer?.id, let userID = dependencies.activeUserID {
                 prefs.setLastSeenPendingCount(count, jellyfinServerID: serverID, jellyfinUserID: userID)
             }
-            await PendingRequestsNotifier.setBadgeCount(count)
+            await dependencies.syncAppIconBadge()
         } else {
             prefs.notifyPendingRequests = false
             PendingRequestsBackgroundRefresh.cancel()
-            await PendingRequestsNotifier.setBadgeCount(0)
+            await dependencies.syncAppIconBadge()
         }
     }
     #endif
+
+    @State private var myRequestsDenied = false
+
+    /// Per profile; the setter also refreshes so switching on records a fresh baseline right away.
+    private var myRequestsBinding: Binding<Bool> {
+        Binding(
+            get: {
+                guard let scope = dependencies.myRequestsScope else { return true }
+                return dependencies.seerrNotificationPreferences.notifyMyRequests(scope: scope)
+            },
+            set: { enabled in
+                dependencies.myRequestsWatcher.setEnabled(enabled)
+                Task {
+                    if enabled { await dependencies.myRequestsWatcher.refresh() }
+                    await dependencies.syncAppIconBadge()
+                }
+            }
+        )
+    }
+
+    private var myRequestsToggle: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ValuePickerRow(
+                icon: "bell",
+                title: "catalog.notify.mine.toggle.title",
+                subtitle: "catalog.notify.mine.toggle.subtitle",
+                options: [true, false],
+                selection: myRequestsBinding,
+                label: { $0
+                    ? String(localized: "common.on", defaultValue: "On")
+                    : String(localized: "common.off", defaultValue: "Off") }
+            )
+            if myRequestsDenied {
+                Text("catalog.notify.mine.denied.hint")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .task {
+            myRequestsDenied = await MyRequestsNotifier.authorizationStatus() == .denied
+        }
+    }
 
     private var successOverlay: some View {
         VStack(spacing: 24) {
@@ -482,12 +529,21 @@ struct SeerrSettingsView: View {
         appState.activeUser != nil
     }
 
+    /// A Plex-backed Seerr answers /auth/jellyfin with HTTP 500, so its sign-in takes typed credentials only (Sodalite#214).
+    private var acceptsJellyfinLogin: Bool {
+        serverSettings?.acceptsJellyfinLogin ?? true
+    }
+
+    private var usesJellyfinProfile: Bool {
+        useJellyfinCredentials && hasJellyfinUser && acceptsJellyfinLogin
+    }
+
     private var isUsernameHidden: Bool {
-        useJellyfinCredentials && hasJellyfinUser
+        usesJellyfinProfile
     }
 
     private var isPasswordHidden: Bool {
-        useJellyfinCredentials && hasJellyfinUser && cachedJellyfinPassword != nil
+        usesJellyfinProfile && cachedJellyfinPassword != nil
     }
 
     private var canSubmit: Bool {
@@ -520,6 +576,11 @@ struct SeerrSettingsView: View {
         case .success(let url, let info):
             let server = SeerrServer(url: url)
             dependencies.seerrClient.baseURL = url
+            dependencies.seerrClient.serverID = server.id
+            serverSettings = try? await dependencies.seerrAuthService.publicSettings()
+            if serverSettings?.acceptsJellyfinLogin == false, usernameText == appState.activeUser?.name {
+                usernameText = ""
+            }
             discoveredServer = server
             serverVersion = info.version
         case .failure(let error):
@@ -529,6 +590,11 @@ struct SeerrSettingsView: View {
 
     private func login() async {
         guard let server = discoveredServer else { return }
+        // The profile this sign-in is for, before any await: a switch while it runs must not move
+        // the cookie or the connected state to the next profile (audit SYNC-204).
+        let profile = dependencies.activeProfileRef()
+        let jellyfinUserID = appState.activeUser?.id
+        let jellyfinServerID = appState.activeServer?.id
 
         isLoggingIn = true
         loginError = nil
@@ -543,21 +609,35 @@ struct SeerrSettingsView: View {
         }()
 
         do {
-            let user = try await dependencies.seerrAuthService.loginWithJellyfin(
-                username: username,
-                password: password
-            )
+            let auth = dependencies.seerrAuthService
+            let user = usesJellyfinProfile
+                ? try await auth.loginWithJellyfin(username: username, password: password)
+                : try await auth.loginWithTypedCredentials(
+                    identifier: username,
+                    password: password,
+                    settings: serverSettings
+                )
+            guard dependencies.isActiveProfile(profile) else {
+                // The login response replaced the cookie the switch restored for the new profile.
+                // Put that profile's own session back instead of leaving it signed out (audit review R-W2-3).
+                if let userID = appState.activeUser?.id, let serverID = appState.activeServer?.id,
+                   dependencies.restoreSeerrSession(forJellyfinUserID: userID, jellyfinServerID: serverID) != nil {
+                    return
+                }
+                dependencies.seerrClient.sessionCookie = nil
+                return
+            }
             // Tie the Seerr session to the active Jellyfin profile (per-profile cookie) so switchToUser can restore it.
             // What comes back may carry the URL slot this sign-in did not know (Sodalite#45).
             let connected = try dependencies.saveSeerrSession(
                 server: server,
-                forJellyfinUserID: appState.activeUser?.id,
-                jellyfinServerID: appState.activeServer?.id
+                forJellyfinUserID: jellyfinUserID,
+                jellyfinServerID: jellyfinServerID
             )
 
             // The password just typed here is the Jellyfin one, so keep it: this screen is the only
             // one that asks for it again, and without this it would ask on every reconnect.
-            if useJellyfinCredentials, hasJellyfinUser, !passwordText.isEmpty,
+            if usesJellyfinProfile, !passwordText.isEmpty,
                await dependencies.adoptJellyfinPassword(username: username, password: password) {
                 cachedJellyfinPassword = password
             }
@@ -566,7 +646,11 @@ struct SeerrSettingsView: View {
             showSuccess = true
 
             try? await Task.sleep(for: .seconds(1.5))
-            appState.setSeerrConnected(server: connected, user: user)
+            guard dependencies.isActiveProfile(profile) else {
+                showSuccess = false
+                return
+            }
+            appState.setSeerrConnected(server: connected, user: user, for: profile)
             dependencies.scheduleRouteResolve()
             showSuccess = false
         } catch {
@@ -596,6 +680,7 @@ struct SeerrSettingsView: View {
         appState.disconnectSeerr()
         discoveredServer = nil
         serverVersion = nil
+        serverSettings = nil
         serverAddressText = ""
         passwordText = ""
     }

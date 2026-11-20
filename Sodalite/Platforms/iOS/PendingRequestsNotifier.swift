@@ -20,17 +20,12 @@ enum PendingRequestsNotifier {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "catalog.notify.pending.title", defaultValue: "Requests awaiting approval")
         content.body = String(localized: "catalog.notify.pending.body", defaultValue: "New requests are waiting for your approval.")
-        content.badge = NSNumber(value: count)
         let request = UNNotificationRequest(
             identifier: "seerr.pendingRequests",
             content: content,
             trigger: nil
         )
         try? await UNUserNotificationCenter.current().add(request)
-    }
-
-    static func setBadgeCount(_ count: Int) async {
-        try? await UNUserNotificationCenter.current().setBadgeCount(count)
     }
 
     /// Install the delegate so notifications also present as a banner while the app is foregrounded
@@ -50,25 +45,66 @@ private final class ForegroundPresentationDelegate: NSObject, UNUserNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .list, .sound, .badge]
     }
+
+    /// A tapped my-request banner carries the Jellyfin item to open.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        guard let itemID = response.notification.request.content.userInfo["itemID"] as? String else { return }
+        await MainActor.run {
+            NotificationCenter.default.post(name: .myRequestNotificationOpened, object: nil, userInfo: ["itemID": itemID])
+        }
+    }
 }
 
 /// Orchestrates a monitor refresh with its notification side effects: keeps the app-icon badge in
 /// sync with the live count and fires a local notification when the count rose since the last-seen
 /// value. Foreground and background both funnel through here so the behavior is identical.
 enum PendingRequestsSync {
+    /// One refresh at a time: a background handler and the router both start one when Seerr connects,
+    /// and two racing on the same baseline notified twice (R-LIFECYCLE-5). A late caller waits for
+    /// the running one and leaves, since it has just done the same work.
+    @MainActor private static var running = false
+    @MainActor private static var waiters: [CheckedContinuation<Void, Never>] = []
+
     @MainActor
     static func refreshAndSync(
         monitor: PendingRequestsMonitor,
         preferences: SeerrNotificationPreferences,
         jellyfinServerID: String?,
-        jellyfinUserID: String?
+        jellyfinUserID: String?,
+        syncBadge: @MainActor () async -> Void
+    ) async {
+        if running {
+            await withCheckedContinuation { waiters.append($0) }
+            return
+        }
+        running = true
+        await runRefresh(monitor: monitor, preferences: preferences, jellyfinServerID: jellyfinServerID,
+                         jellyfinUserID: jellyfinUserID, syncBadge: syncBadge)
+        running = false
+        let pending = waiters
+        waiters = []
+        pending.forEach { $0.resume() }
+    }
+
+    @MainActor
+    private static func runRefresh(
+        monitor: PendingRequestsMonitor,
+        preferences: SeerrNotificationPreferences,
+        jellyfinServerID: String?,
+        jellyfinUserID: String?,
+        syncBadge: @MainActor () async -> Void
     ) async {
         await monitor.refresh()
-        // Notifications off: the tab badge (monitor) still updated above; leave the app-icon badge alone.
-        guard preferences.notifyPendingRequests, let count = monitor.pendingApprovalCount else { return }
+        guard preferences.notifyPendingRequests, let count = monitor.pendingApprovalCount else {
+            await syncBadge()
+            return
+        }
         // No resolvable profile means no baseline this count can be compared against; the badge still tracks it.
         guard let jellyfinServerID, let jellyfinUserID else {
-            await PendingRequestsNotifier.setBadgeCount(count)
+            await syncBadge()
             return
         }
         let lastSeen = preferences.lastSeenPendingCount(
@@ -78,7 +114,7 @@ enum PendingRequestsSync {
         if PendingRequestsMonitor.shouldNotify(current: count, lastSeen: lastSeen) {
             await PendingRequestsNotifier.notifyPendingIncrease(count: count)
         }
-        await PendingRequestsNotifier.setBadgeCount(count)
+        await syncBadge()
         preferences.setLastSeenPendingCount(
             count,
             jellyfinServerID: jellyfinServerID,

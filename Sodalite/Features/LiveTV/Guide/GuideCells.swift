@@ -1,3 +1,5 @@
+#if !os(macOS)
+// The guide grid is a UICollectionView driven by the focus engine. macOS has neither, and the Mac draws the channel lineup instead (GuideView).
 import SwiftUI
 import UIKit
 
@@ -16,6 +18,8 @@ struct GuideProgramCellContent: View {
     let title: String
     let isAiring: Bool
     let hasTimer: Bool
+    /// Outside an active genre filter (#182). Focus lifts it back, the focused block is read.
+    var isDimmed: Bool = false
     let isFocused: Bool
     let tint: Color
 
@@ -39,6 +43,7 @@ struct GuideProgramCellContent: View {
                 .strokeBorder(isAiring ? tint : Color.Theme.panelEdge,
                               lineWidth: isAiring ? 2 : 1)
         )
+        .opacity(isDimmed && !isFocused ? 0.35 : 1)
         .padding(EdgeInsets(top: 4, leading: 2, bottom: 4, trailing: 2))
         // A three-minute program is a cell a few points wide. Clipping beats letting the label push
         // the block's own geometry around.
@@ -210,14 +215,14 @@ final class GuideProgramCell: UICollectionViewCell {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func configure(title: String, isAiring: Bool, hasTimer: Bool, tint: Color,
+    func configure(title: String, isAiring: Bool, hasTimer: Bool, isDimmed: Bool = false, tint: Color,
                    dependencies: DependencyContainer, theme: ResolvedAppearanceTheme) {
         // configurationUpdateHandler reruns on every state change, which is how the focus fill
         // tracks without a manual didUpdateFocus override.
         configurationUpdateHandler = { cell, state in
             cell.contentConfiguration = UIHostingConfiguration {
                 GuideProgramCellContent(
-                    title: title, isAiring: isAiring, hasTimer: hasTimer,
+                    title: title, isAiring: isAiring, hasTimer: hasTimer, isDimmed: isDimmed,
                     isFocused: state.isFocused, tint: tint)
                     .guideCellEnvironment(dependencies, theme)
             }
@@ -287,3 +292,4 @@ final class GuideGridLineView: UICollectionReusableView {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
+#endif

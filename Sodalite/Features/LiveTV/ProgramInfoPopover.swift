@@ -16,6 +16,7 @@ struct ProgramInfoPopover: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appState) private var appState
+    @Environment(\.liveTVPolicy) private var liveTVPolicy
     @Environment(\.horizontalSizeClass) private var hSizeClass
     /// Local mirror for snappy feedback; the view model is source of truth and persists.
     @State private var isFavorite: Bool = false
@@ -95,15 +96,8 @@ struct ProgramInfoPopover: View {
         }
     }
 
-    /// Builds the episode-identity label with cascading priority:
-    /// episodeTitle > seriesName > S/E numbers alone.
-    var episodeLabel: String? {
-        EpisodeMetadataFormatter.programLabel(season: program.parentIndexNumber,
-                                              episode: program.indexNumber,
-                                              episodeTitle: program.episodeTitle,
-                                              seriesName: program.seriesName,
-                                              header: program.name)
-    }
+    /// Episode title > series name > S/E numbers alone, and a movie's year where none apply.
+    var episodeLabel: String? { program.identityLabel }
 
     @ViewBuilder
     private func actionButtons(at now: Date) -> some View {
@@ -124,7 +118,7 @@ struct ProgramInfoPopover: View {
         // Record affordances only for future / currently airing programs, and only for a profile the
         // server lets manage recordings (it refuses the rest, after the button already flipped).
         if let end = program.endDate, end > now, !program.isSynthesized,
-           appState.activeUser?.canManageLiveTv == true {
+           (liveTVPolicy?.canManageLiveTv ?? (appState.activeUser?.canManageLiveTv == true)) {
             PopoverActionButton(
                 title: isRecording ? "livetv.cancelRecording" : "livetv.record",
                 systemImage: isRecording ? "stop.circle" : "record.circle",
@@ -172,7 +166,7 @@ private struct PopoverActionButton: View {
                 Capsule().strokeBorder(accent, lineWidth: focused ? 0 : 2)
             )
             .focusResponse(.chip, isFocused: focused)
-            .focusable()
+            .focusableSurface()
             .focused($focused)
             .stableTap(isFocused: focused) { action() }
     }

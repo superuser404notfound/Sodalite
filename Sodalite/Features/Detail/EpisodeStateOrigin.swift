@@ -7,16 +7,16 @@ import Foundation
 /// Watching, Next Up, Search or Top Shelf arrives with the page already in the episode state: that
 /// is the ground state of the page, not a step taken on it. Intercepting Menu there put a series
 /// page the viewer never asked for between them and Home, one press more than before (device,
-/// 2026-09-14). Only a move made ON the page puts a state behind the current one, and there are
-/// three writers of `selectedEpisode` that are not such a move (the opening deep link, an in-place
-/// item replacement, and the enrichment round trip), which is exactly why this is named rather than
-/// left as an assignment next to each of them.
+/// 2026-09-14). Only a move made ON the page (the strip, the Show Episode button) puts a state
+/// behind the current one, and there are three writers of `selectedEpisode` that are not such a
+/// move (the opening deep link, an in-place item replacement, and the enrichment round trip), which
+/// is exactly why this is named rather than left as an assignment next to each of them.
 struct EpisodeStateOrigin: Equatable {
     /// False on a page that opened straight into the episode state.
     private(set) var hasSeriesStateBehind = false
 
-    /// The viewer opened an episode from the strip, on either platform.
-    mutating func openedFromStrip() {
+    /// The viewer opened an episode from the series state: the strip, or the Show Episode button.
+    mutating func openedFromSeries() {
         hasSeriesStateBehind = true
     }
 

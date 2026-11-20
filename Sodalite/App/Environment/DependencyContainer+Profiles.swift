@@ -41,9 +41,10 @@ extension DependencyContainer {
     /// a stored password mints a fresh token (that key is scoped to this profile, so a password
     /// there is by definition theirs), and only when that fails too is the profile dropped.
     ///
-    /// A refusal is only ever read off a 401. Anything else, a re-login that fails on the transport
-    /// included, leaves every credential where it is: a device that cannot reach its server has not
-    /// learned anything about which profiles the server still has.
+    /// A refusal is only ever read off a 401, and only from an address that answers as this server.
+    /// Anything else, a re-login that fails on the transport included, leaves every credential where
+    /// it is: a device that cannot reach its server has not learned anything about which profiles
+    /// the server still has.
     func checkActiveSession() async -> SessionCheck {
         guard let server = activeServer,
               let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)),
@@ -58,6 +59,19 @@ extension DependencyContainer {
             let user = try await jellyfinAuthService.getCurrentUser()
             return isActiveProfile(profile) ? .valid(user) : superseded
         } catch APIError.unauthorized {
+            guard isActiveProfile(profile) else { return superseded }
+            // Read after the request: it waited in the route gate, and the pass may have moved the
+            // address it was finally sent to (audit final review FR-NET-3).
+            let askedURL = jellyfinClient.baseURL
+            // A refusal is only the server's when the address it came from is this server: on
+            // another network the home LAN address may be a stranger's Jellyfin, and it would get
+            // the stored password next, then the profile would be dropped on every device (audit
+            // NET-202).
+            guard await jellyfinRefusalCounts(at: askedURL, server: server) else {
+                guard isActiveProfile(profile) else { return superseded }
+                sessionNote("a refusal for \(server.name) came from \(askedURL?.host() ?? "?"), which did not answer as that server; keeping the profile.")
+                return .unreachable(APIError.serverUnreachable)
+            }
             guard isActiveProfile(profile) else { return superseded }
             if let recovered = await reauthenticateWithStoredPassword(server: server, userID: userID) {
                 sessionNote("token for \(recovered.name) on \(server.name) was refused, the stored password minted a fresh one.")
@@ -102,6 +116,8 @@ extension DependencyContainer {
     /// that were filled under its token. Deliberately does no routing, so the paths that are already
     /// inside AppRouter's switch probe do not re-key it out from under themselves.
     func dropActiveProfile(serverID: String, userID: String) {
+        // Background music is scoped to the session, and this one is over.
+        stopSessionScopedMusic()
         try? forgetUser(id: userID, serverID: serverID)
 
         try? keychainService.delete(for: KeychainKeys.accessToken(serverID: serverID))
@@ -117,11 +133,6 @@ extension DependencyContainer {
         // the profile is gone. Only its own entries: the other profiles on this server keep theirs.
         FilterCache.shared.evict(identity: CacheIdentity(serverID: serverID, userID: userID))
         ImageCache.shared.clear()
-
-        // Background music is scoped to the session, and this one is over.
-        if musicPlaybackCoordinator.currentItem != nil {
-            musicPlaybackCoordinator.stop()
-        }
     }
 
     /// Removes the profile the session is signed in as and re-routes.
@@ -163,6 +174,15 @@ extension DependencyContainer {
         do {
             try await revoke(client)
         } catch APIError.unauthorized {
+            // Only this server's 401 means the token is already gone; from anybody else it means
+            // nothing was revoked, and removing the profile would leave a live token behind
+            // (audit review R-ROUTE-4).
+            if verifiesServerIdentity {
+                guard let url = client.baseURL, await jellyfinIdentity(url, server.id) == .matches else {
+                    sessionNote("a refusal of \(user.name)'s token came from an address that did not answer as \(server.name); nothing removed.")
+                    throw APIError.serverUnreachable
+                }
+            }
             sessionNote("\(server.name) had already dropped the token of \(user.name).")
         }
         sessionNote("revoked the token of \(user.name) on \(server.name), removing the profile on every device.")

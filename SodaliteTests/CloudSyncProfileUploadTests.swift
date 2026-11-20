@@ -50,7 +50,8 @@ struct CloudSyncProfileUploadTests {
 
         service.uploadProfileIfChanged(.appearance, alice)
 
-        #expect(prefs.drainPendingChanges().saves == [CloudSyncRecordName.profile(.appearance, alice)])
+        // The legacy record for 1.0 builds goes out with the edit now, built from alice (audit SYNC-202, SYNC-203).
+        #expect(prefs.drainPendingChanges().saves == [CloudSyncRecordName.profile(.appearance, alice), CloudSyncRecordName.settings(.appearance)])
     }
 
     @Test func anUnchangedProfileIsNotUploadedTwice() {
@@ -92,7 +93,7 @@ struct CloudSyncProfileUploadTests {
         container.profileSettings.settings(for: alice).playback.autoSkipIntro.toggle()
         service.uploadProfileIfChanged(.playback, alice)
 
-        #expect(prefs.drainPendingChanges().saves == [CloudSyncRecordName.profile(.playback, alice)])
+        #expect(prefs.drainPendingChanges().saves == [CloudSyncRecordName.profile(.playback, alice), CloudSyncRecordName.settings(.playback)])
     }
 
     @Test func aZoneRecreationStillReuploadsEditedProfiles() {
@@ -147,7 +148,7 @@ struct CloudSyncProfileUploadTests {
 
         let name = CloudSyncRecordName.profile(.playback, alice)
         #expect(prefs.localStamp(for: name) != nil)
-        #expect(prefs.drainPendingChanges().saves == [name])
+        #expect(prefs.drainPendingChanges().saves == [name, CloudSyncRecordName.settings(.playback)])
     }
 
     @Test func aConfirmedSaveLeavesTheOutbox() {

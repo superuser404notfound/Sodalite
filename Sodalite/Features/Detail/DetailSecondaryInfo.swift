@@ -36,7 +36,8 @@ struct PersonRoute: Identifiable, Hashable {
 func jellyfinCastMembers(
     from people: [PersonInfo],
     imageService: JellyfinImageService,
-    imageWidth: Int
+    imageWidth: Int,
+    serverID: String? = nil
 ) -> [CastMember] {
     people.prefix(15).map { person in
         CastMember(
@@ -46,7 +47,8 @@ func jellyfinCastMembers(
             imageURL: imageService.personImageURL(
                 personID: person.id,
                 tag: person.primaryImageTag,
-                maxWidth: imageWidth
+                maxWidth: imageWidth,
+                serverID: serverID
             ),
             personID: nil,
             jellyfinPersonID: person.id
@@ -67,9 +69,20 @@ struct DetailActionRow<Content: View>: View {
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
+    /// Every iOS width wraps, not just compact: a Pro Max in landscape reports a REGULAR width, and
+    /// there an unwrapped HStack of a long resume label plus ten secondaries outgrew the screen,
+    /// widened the whole page and clipped it on both sides. FlowLayout keeps one line while it fits.
+    private var wraps: Bool {
+        #if os(iOS)
+        true
+        #else
+        hSizeClass == .compact
+        #endif
+    }
+
     var body: some View {
         Group {
-            if hSizeClass == .compact {
+            if wraps {
                 FlowLayout(alignment: alignment, spacing: spacing, balanced: balanced) {
                     content()
                 }

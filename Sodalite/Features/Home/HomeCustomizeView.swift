@@ -9,6 +9,16 @@ struct HomeCustomizeView: View {
     @State private var mergeCWNextUp = false
     @State private var rewatchNextUp = false
     @State private var collectionGrouping: CollectionGrouping = .system
+    @State private var heroMode: HomeHeroMode = .default
+    /// Libraries left out of the banner, by `JellyfinLibrary.originKey` (Sodalite#238).
+    @State private var heroExcluded: Set<String> = []
+    /// My Media's libraries across every combined server, and their order and hidden flags (Sodalite#85).
+    @State private var libraries: [JellyfinLibrary] = []
+    @State private var librarySources: [HomeSource] = []
+    @State private var layout = LibraryLayout(entries: [])
+    @State private var movingLibrary: String?
+    @State private var droppedSeries: [DroppedSeries] = []
+    @State private var renaming: HomeRowRenameTarget?
 
     private var scope: String {
         appState.profileKey?.storageScope ?? ""
@@ -21,20 +31,38 @@ struct HomeCustomizeView: View {
         ScrollView {
             VStack(spacing: 28) {
                 header
+                heroRow
+                heroLibrarySection
                 mergeRowToggle
                 rewatchRowToggle
                 collectionGroupingRow
                 rowList
+                librarySection
+                droppedSeriesSection
             }
             .padding(.vertical, 40)
         }
         .hidesNavigationBarChrome()
         .hidesShellTabBar()
+        .menuPresentation(item: $renaming) { target in
+            if let config = configs.first(where: { $0.id == target.id }) {
+                HomeRowRenameSheet(
+                    originalTitle: originalTitle(config),
+                    customTitle: config.customTitle
+                ) { title in
+                    rename(id: target.id, to: title)
+                }
+            }
+        }
         .onAppear {
             configs = HomeRowConfig.loadFromStorage(scope: scope)
             mergeCWNextUp = HomeRowConfig.mergeContinueWatchingNextUp(scope: scope)
             rewatchNextUp = HomeRowConfig.enableRewatchingNextUp(scope: scope)
             collectionGrouping = HomeRowConfig.collectionGrouping(scope: scope)
+            heroMode = HomeHeroMode.stored(scope: scope)
+            heroExcluded = HomeHeroLibraries.excluded(scope: scope)
+            layout = LibraryLayout.load(scope: scope)
+            droppedSeries = DroppedSeriesStore.load(scope: scope)
             // Per-library rows are otherwise discovered only on Home load, so Customize showed a stale list right after a server add/switch. Reconcile here too.
             Task { await reconcileLibraries() }
         }
@@ -43,12 +71,21 @@ struct HomeCustomizeView: View {
     /// Fold new per-library rows into the config, mirroring HomeViewModel. Additive (keeps toggles/order); persists only on success so a transient failure can't wipe the dynamic rows.
     private func reconcileLibraries() async {
         let scope = self.scope
-        guard let userID = appState.activeUser?.id,
-              let libraries = try? await dependencies.jellyfinLibraryService.getLibraries(userID: userID),
+        guard let userID = appState.activeUser?.id else { return }
+        let sources = dependencies.homeSources(activeUserID: userID)
+        guard let result = await CustomizeLibraryList.fetch(sources, secondaryDeadline: .seconds(4)),
               // `configs` were loaded for this scope; a switch during the fetch must not save them into the next.
               scope == self.scope
         else { return }
-        let reconciled = HomeRowConfig.reconciled(stored: configs, libraries: libraries)
+        librarySources = sources
+        libraries = MyMediaLibraries.tiles(result.libraries)
+        // A server missing from the list would retire its per-library rows for good.
+        guard result.complete else { return }
+        let reconciled = HomeRowConfig.reconciled(
+            stored: configs,
+            libraries: result.libraries,
+            isFreshInstall: !HomeRowConfig.hasStoredConfig(scope: scope)
+        )
         if reconciled != configs {
             configs = reconciled
             HomeRowConfig.saveToStorage(reconciled, scope: scope)
@@ -75,9 +112,12 @@ struct HomeCustomizeView: View {
 
             FocusableTile(action: {
                 movingID = nil
+                movingLibrary = nil
                 withAnimation(.easeInOut(duration: 0.25)) {
                     configs = HomeRowConfig.resetToDefault(current: configs)
+                    layout = LibraryLayout(entries: [])
                 }
+                LibraryLayout.reset(scope: scope)
                 save()
             }) { isFocused in
                 Label("home.customize.resetDefaults", systemImage: "arrow.counterclockwise")
@@ -93,6 +133,99 @@ struct HomeCustomizeView: View {
         .padding(.horizontal, hInset)
     }
 
+    // MARK: - Banner
+
+    /// What the banner at the top of Home shows, or Off. First because the banner is the first thing on Home.
+    private var heroRow: some View {
+        ValuePickerRow(
+            icon: "rectangle.topthird.inset.filled",
+            title: "home.customize.hero",
+            subtitle: "home.customize.hero.subtitle",
+            options: HomeHeroMode.allCases,
+            selection: Binding(
+                get: { heroMode },
+                set: { newValue in
+                    movingID = nil
+                    movingLibrary = nil
+                    heroMode = newValue
+                    HomeHeroMode.setStored(newValue, scope: scope)
+                    NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
+                }
+            ),
+            label: { $0.localizedLabel }
+        )
+        .padding(.horizontal, hInset)
+    }
+
+    private var heroLibraries: [JellyfinLibrary] {
+        HomeHeroLibraries.eligible(layout.ordered(libraries, fallbackServerID: activeServerID))
+    }
+
+    /// Which libraries feed the banner. Hidden while the banner is off, and while there is only one
+    /// library to pick, since leaving that out would just be Off with extra steps.
+    @ViewBuilder
+    private var heroLibrarySection: some View {
+        if heroMode != .off, heroLibraries.count > 1 {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("home.customize.heroLibraries.description")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, hInset)
+                    .padding(.bottom, 4)
+                ForEach(heroLibraries, id: \.originKey) { library in
+                    heroLibraryRow(library)
+                }
+            }
+        }
+    }
+
+    private func heroLibraryRow(_ library: JellyfinLibrary) -> some View {
+        let isOn = !heroExcluded.contains(libraryKey(library))
+        return HStack(spacing: 16) {
+            FocusableTile(action: { toggleHeroLibrary(library) }) { isFocused in
+                tileShell(isFocused: isFocused, isMoving: false, isEnabled: isOn) {
+                    Image(systemName: MyMediaLibraries.aggregateType(library).map { $0 == .movie ? HomeRowType.allMovies.systemImage : HomeRowType.allSeries.systemImage }
+                        ?? Self.libraryIcon(library.collectionType))
+                        .font(.title3)
+                        .frame(width: 44)
+                        .foregroundStyle(isOn ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
+                    Text(library.name)
+                        .font(.body)
+                        .foregroundStyle(isOn ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                        .lineLimit(1)
+                    if let label = CustomizeLibraryList.serverLabel(for: library, in: libraries, sources: librarySources) {
+                        Text(label)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(Color.Theme.restFill))
+                    }
+                }
+            }
+            RowToggleButton(isOn: isOn) { toggleHeroLibrary(library) }
+        }
+        .padding(.horizontal, hInset)
+    }
+
+    /// The last library left on stays on: a banner with nothing to draw from is what Off is for.
+    private func toggleHeroLibrary(_ library: JellyfinLibrary) {
+        movingID = nil
+        movingLibrary = nil
+        let key = libraryKey(library)
+        var next = heroExcluded
+        if next.contains(key) {
+            next.remove(key)
+        } else {
+            let remaining = heroLibraries.filter { !next.contains(libraryKey($0)) }
+            guard remaining.count > 1 else { return }
+            next.insert(key)
+        }
+        withAnimation(.easeInOut(duration: 0.2)) { heroExcluded = next }
+        HomeHeroLibraries.setExcluded(next, scope: scope)
+        NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
+    }
+
     // MARK: - Merge toggle
 
     /// Combined row toggle: folds Next Up into Continue Watching. Here not Appearance because it changes which rows exist. ValuePickerRow (left/right), not a tap-toggle, per app convention.
@@ -106,6 +239,7 @@ struct HomeCustomizeView: View {
                 get: { mergeCWNextUp },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     withAnimation(.easeInOut(duration: 0.25)) {
                         mergeCWNextUp = newValue
                     }
@@ -135,6 +269,7 @@ struct HomeCustomizeView: View {
                 get: { rewatchNextUp },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     rewatchNextUp = newValue
                     HomeRowConfig.setEnableRewatchingNextUp(newValue, scope: scope)
                     NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
@@ -162,6 +297,7 @@ struct HomeCustomizeView: View {
                 get: { collectionGrouping },
                 set: { newValue in
                     movingID = nil
+                    movingLibrary = nil
                     collectionGrouping = newValue
                     HomeRowConfig.setCollectionGrouping(newValue, scope: scope)
                     // The grids cache per mode, so no stale shape survives; Home still reloads for the My Media tiles.
@@ -217,8 +353,17 @@ struct HomeCustomizeView: View {
                 rowBody(config, isFocused: isFocused, isEnabled: true)
             }
 
+            if config.isRenamable {
+                RowRenameButton {
+                    movingID = nil
+                    movingLibrary = nil
+                    renaming = HomeRowRenameTarget(id: config.id)
+                }
+            }
+
             RowToggleButton(isOn: true) {
                 movingID = nil
+                movingLibrary = nil
                 toggle(id: config.id)
             }
         }
@@ -242,9 +387,8 @@ struct HomeCustomizeView: View {
     }
 
     /// Shared left side of a row: icon, label and the "moving" indicator.
-    @ViewBuilder
     private func rowBody(_ config: HomeRowConfig, isFocused: Bool, isEnabled: Bool) -> some View {
-        HStack(spacing: 20) {
+        tileShell(isFocused: isFocused, isMoving: movingID == config.id, isEnabled: isEnabled) {
             Image(systemName: config.systemImage)
                 .font(.title3)
                 .frame(width: 44)
@@ -253,10 +397,19 @@ struct HomeCustomizeView: View {
             rowLabel(config)
                 .font(.body)
                 .foregroundStyle(isEnabled ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+        }
+    }
+
+    /// The tile every reorderable entry shares: rows and libraries alike.
+    private func tileShell<Leading: View>(
+        isFocused: Bool, isMoving: Bool, isEnabled: Bool, @ViewBuilder leading: () -> Leading
+    ) -> some View {
+        HStack(spacing: 20) {
+            leading()
 
             Spacer()
 
-            if movingID == config.id {
+            if isMoving {
                 Text("home.customize.moving")
                     .font(.caption)
                     .foregroundStyle(.tint)
@@ -266,11 +419,11 @@ struct HomeCustomizeView: View {
         .padding(.horizontal, 20)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(tileBackground(isFocused: isFocused, isMoving: movingID == config.id, isEnabled: isEnabled))
+                .fill(tileBackground(isFocused: isFocused, isMoving: isMoving, isEnabled: isEnabled))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(movingID == config.id ? AnyShapeStyle(.tint.opacity(0.6)) : AnyShapeStyle(Color.clear), lineWidth: 2)
+                .stroke(isMoving ? AnyShapeStyle(.tint.opacity(0.6)) : AnyShapeStyle(Color.clear), lineWidth: 2)
         )
         // When focused and picked up, this opaque stroke dominates the thinner move ring above.
         .focusStroke(cornerRadius: 12, isFocused: isFocused)
@@ -289,30 +442,64 @@ struct HomeCustomizeView: View {
         configs
             .filter(\.isEnabled)
             .filter { !(mergeCWNextUp && $0.type == .nextUp) }
+            .filter { !hidesWithItsLibrary($0) && !hidesWithoutTrakt($0) }
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
     private var disabledRows: [HomeRowConfig] {
-        configs.filter { !$0.isEnabled && !(mergeCWNextUp && $0.type == .nextUp) }
+        configs.filter {
+            !$0.isEnabled && !(mergeCWNextUp && $0.type == .nextUp) && !hidesWithItsLibrary($0)
+                && !hidesWithoutTrakt($0)
+        }
     }
 
+    /// A build without a Trakt app has no way to fill these rows, so they are not offered.
+    private func hidesWithoutTrakt(_ config: HomeRowConfig) -> Bool {
+        config.type.isTraktRow && !TraktConfig.isAvailable
+    }
+
+    /// A "Latest in X" row leaves the list while its library is hidden, and comes back as it was.
+    private func hidesWithItsLibrary(_ config: HomeRowConfig) -> Bool {
+        guard config.type == .libraryLatest, let id = config.libraryID else { return false }
+        return layout.hidesLatestRow(libraryID: id)
+    }
+
+    /// The custom title leads; the built-in one stays beside it so the row is still recognisable.
     @ViewBuilder
     private func rowLabel(_ config: HomeRowConfig) -> some View {
-        if config.type == .libraryLatest {
-            Text(
+        if let customTitle = config.customTitle {
+            HStack(spacing: 12) {
+                Text(verbatim: customTitle)
+                    .lineLimit(1)
+                originalTitle(config)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        } else {
+            originalTitle(config)
+        }
+    }
+
+    private func originalTitle(_ config: HomeRowConfig) -> Text {
+        if config.type == .libraryLatest, config.collectionType == "boxsets" {
+            return Text(verbatim: config.libraryName ?? "")
+        } else if config.type == .libraryLatest {
+            return Text(
                 String(
                     format: String(localized: "home.libraryLatest.format", defaultValue: "Latest in %@"),
                     config.libraryName ?? ""
                 )
             )
         } else {
-            Text(config.type.localizedTitle)
+            return Text(config.type.localizedTitle)
         }
     }
 
     // MARK: - Actions
 
     private func handleRowTap(_ id: String, at index: Int) {
+        movingLibrary = nil
         if let moving = movingID {
             if moving != id {
                 withAnimation(.easeInOut(duration: 0.25)) {
@@ -321,6 +508,7 @@ struct HomeCustomizeView: View {
             }
             withAnimation(.easeInOut(duration: 0.2)) {
                 movingID = nil
+                movingLibrary = nil
             }
         } else {
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -343,6 +531,7 @@ struct HomeCustomizeView: View {
     }
 
     private func toggle(id: String) {
+        movingLibrary = nil
         guard let index = configs.firstIndex(where: { $0.id == id }) else { return }
         withAnimation(.easeInOut(duration: 0.25)) {
             configs[index].isEnabled.toggle()
@@ -354,8 +543,180 @@ struct HomeCustomizeView: View {
         save()
     }
 
+    private func rename(id: String, to title: String?) {
+        guard let index = configs.firstIndex(where: { $0.id == id }),
+              configs[index].customTitle != title
+        else { return }
+        configs[index].customTitle = title
+        save()
+    }
+
     private func save() {
         HomeRowConfig.saveToStorage(configs, scope: scope)
+        NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
+    }
+
+    // MARK: - Libraries (Sodalite#85)
+
+    private var activeServerID: String { appState.activeServer?.id ?? "" }
+
+    private func libraryKey(_ library: JellyfinLibrary) -> String {
+        "\(library.serverID ?? activeServerID)|\(library.id)"
+    }
+
+    private var visibleLibraries: [JellyfinLibrary] { layout.visible(libraries, fallbackServerID: activeServerID) }
+
+    private var hiddenLibraries: [JellyfinLibrary] {
+        layout.ordered(libraries, fallbackServerID: activeServerID)
+            .filter { layout.isHidden($0, fallbackServerID: activeServerID) }
+    }
+
+    @ViewBuilder
+    private var librarySection: some View {
+        if !libraries.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("home.myMedia")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("home.customize.libraries.description")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, hInset)
+                .padding(.top, 28)
+                .padding(.bottom, 10)
+
+                ForEach(Array(visibleLibraries.enumerated()), id: \.element.originKey) { index, library in
+                    libraryRow(library, isVisible: true) { handleLibraryTap(library, at: index) }
+                }
+                if !hiddenLibraries.isEmpty {
+                    inactiveDivider
+                    ForEach(hiddenLibraries, id: \.originKey) { library in
+                        libraryRow(library, isVisible: false) { toggleLibrary(library) }
+                    }
+                }
+            }
+        }
+    }
+
+    private func libraryRow(_ library: JellyfinLibrary, isVisible: Bool, onTap: @escaping () -> Void) -> some View {
+        let isMoving = movingLibrary == libraryKey(library)
+        return HStack(spacing: 16) {
+            FocusableTile(isHighlighted: isMoving, action: onTap) { isFocused in
+                tileShell(isFocused: isFocused, isMoving: isMoving, isEnabled: isVisible) {
+                    Image(systemName: MyMediaLibraries.aggregateType(library).map { $0 == .movie ? HomeRowType.allMovies.systemImage : HomeRowType.allSeries.systemImage }
+                        ?? Self.libraryIcon(library.collectionType))
+                        .font(.title3)
+                        .frame(width: 44)
+                        .foregroundStyle(isVisible ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
+                    Text(library.name)
+                        .font(.body)
+                        .foregroundStyle(isVisible ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                        .lineLimit(1)
+                    if let label = CustomizeLibraryList.serverLabel(for: library, in: libraries, sources: librarySources) {
+                        Text(label)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(Color.Theme.restFill))
+                    }
+                }
+            }
+            RowToggleButton(isOn: isVisible) { toggleLibrary(library) }
+        }
+        .padding(.horizontal, hInset)
+    }
+
+    private static func libraryIcon(_ collectionType: String?) -> String {
+        switch collectionType {
+        case "movies": "film"
+        case "tvshows": "tv"
+        case "boxsets": "rectangle.stack"
+        case "playlists": "list.bullet"
+        case "homevideos": "video"
+        default: "folder"
+        }
+    }
+
+    private func handleLibraryTap(_ library: JellyfinLibrary, at index: Int) {
+        movingID = nil
+        let key = libraryKey(library)
+        if let moving = movingLibrary {
+            if moving != key, let picked = libraries.first(where: { libraryKey($0) == moving }) {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    layout = layout.moving(picked, toIndexAmongVisible: index, in: libraries, fallbackServerID: activeServerID)
+                }
+                saveLayout()
+            }
+            withAnimation(.easeInOut(duration: 0.2)) { movingLibrary = nil }
+        } else {
+            withAnimation(.easeInOut(duration: 0.2)) { movingLibrary = key }
+        }
+    }
+
+    private func toggleLibrary(_ library: JellyfinLibrary) {
+        movingID = nil
+        movingLibrary = nil
+        withAnimation(.easeInOut(duration: 0.25)) {
+            layout = layout.toggling(library, in: libraries, fallbackServerID: activeServerID)
+        }
+        saveLayout()
+    }
+
+    // MARK: - Hidden shows
+
+    /// The shows dropped from a card's menu, each a click away from coming back.
+    @ViewBuilder
+    private var droppedSeriesSection: some View {
+        if !droppedSeries.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("home.customize.hiddenShows")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("home.customize.hiddenShows.description")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, hInset)
+                .padding(.top, 28)
+                .padding(.bottom, 10)
+
+                ForEach(droppedSeries) { series in
+                    HStack(spacing: 16) {
+                        FocusableTile(action: { restore(series) }) { isFocused in
+                            tileShell(isFocused: isFocused, isMoving: false, isEnabled: false) {
+                                Image(systemName: "tv")
+                                    .font(.title3)
+                                    .frame(width: 44)
+                                    .foregroundStyle(.tertiary)
+                                Text(series.name)
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        RowToggleButton(isOn: false) { restore(series) }
+                    }
+                    .padding(.horizontal, hInset)
+                }
+            }
+        }
+    }
+
+    private func restore(_ series: DroppedSeries) {
+        movingID = nil
+        movingLibrary = nil
+        DroppedSeriesStore.restore(series.id, scope: scope)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            droppedSeries = DroppedSeriesStore.load(scope: scope)
+        }
+    }
+
+    private func saveLayout() {
+        layout.save(scope: scope)
         NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
     }
 }
@@ -371,7 +732,7 @@ struct FocusableTile<Content: View>: View {
 
     var body: some View {
         content(isFocused)
-            .focusable()
+            .focusableSurface()
             .focused($isFocused)
             .focusResponse(.inline, isFocused: isFocused)
             .stableTap(isFocused: isFocused) { action() }
@@ -411,7 +772,7 @@ struct RowToggleButton: View {
         .focusStroke(Capsule(), isFocused: focused)
         .focusResponse(.chip, isFocused: focused)
         .animation(.easeInOut(duration: 0.15), value: isOn)
-        .focusable()
+        .focusableSurface()
         .focused($focused)
         .stableTap(isFocused: focused) { action() }
     }
@@ -427,12 +788,45 @@ struct RowToggleButton: View {
     }
 }
 
+/// Opens the rename panel for its row. Icon only: it sits between the row and its On switch.
+struct RowRenameButton: View {
+    let action: () -> Void
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    @FocusState private var focused: Bool
+
+    private var isCompact: Bool { hSizeClass == .compact }
+
+    var body: some View {
+        Image(systemName: "pencil")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(focused ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+            .frame(minWidth: isCompact ? 24 : 40)
+            .padding(.horizontal, isCompact ? 10 : 14)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(focused ? Color.Theme.focusFill : Color.Theme.restFill))
+            .focusStroke(Capsule(), isFocused: focused)
+            .focusResponse(.chip, isFocused: focused)
+            .accessibilityLabel(Text("home.customize.rename"))
+            .focusableSurface()
+            .focused($focused)
+            .stableTap(isFocused: focused) { action() }
+    }
+}
+
 // MARK: - Storage
 
 extension HomeRowConfig {
     private static let legacyKey = "homeRowConfigs"
     private static func storageKey(scope: String) -> String {
         "homeRowConfigs.\(scope)"
+    }
+
+    /// False until the scope's rows are first saved, which the first reconcile with the server's
+    /// libraries does. Mirrors the legacy fallback in `loadFromStorage`.
+    static func hasStoredConfig(scope: String) -> Bool {
+        UserDefaults.standard.data(forKey: storageKey(scope: scope)) != nil
+            || UserDefaults.standard.data(forKey: legacyKey) != nil
     }
 
     static func loadFromStorage(scope: String) -> [HomeRowConfig] {
@@ -464,7 +858,8 @@ extension HomeRowConfig {
                     sortOrder: sortOrder,
                     libraryID: libraryID,
                     libraryName: item["libraryName"] as? String,
-                    collectionType: item["collectionType"] as? String
+                    collectionType: item["collectionType"] as? String,
+                    customTitle: (item["customTitle"] as? String).flatMap(sanitizedTitle)
                 )
             )
         }

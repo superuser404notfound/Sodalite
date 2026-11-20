@@ -52,7 +52,7 @@ struct TrackRow: View {
         )
         .focusStroke(cornerRadius: 16, isFocused: focused)
         .focusResponse(.row, isFocused: focused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         .stableTap(isFocused: focused) {
             onSelect()

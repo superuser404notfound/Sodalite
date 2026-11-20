@@ -54,6 +54,8 @@ nonisolated final class LogExportServer: @unchecked Sendable {
     /// How long a peer gets to send its whole request head, however it paces the bytes: the receive
     /// timeout alone restarts with every byte, so a slow drip held a worker without end.
     static let requestHeadDeadline: TimeInterval = 5
+    /// Pause after an accept error that is not a plain retry.
+    static let acceptBackoff: TimeInterval = 0.25
 
     private var listenFd: Int32 = -1
     private var clientFds = Set<Int32>()
@@ -207,6 +209,7 @@ nonisolated final class LogExportServer: @unchecked Sendable {
     // MARK: - Accepting
 
     private func acceptLoop() {
+        var consecutiveFailures = 0
         while true {
             lock.lock()
             let stopping = shouldStop
@@ -227,9 +230,16 @@ nonisolated final class LogExportServer: @unchecked Sendable {
                 // check at the top of the loop is what exits.
                 if error == EBADF || error == EINVAL { return }
                 if error == EINTR || error == EAGAIN || error == ECONNABORTED { continue }
-                LogTap.shared.note("[LogExport] accept failed errno=\(error)")
+                // EMFILE and ENFILE keep failing at once until a descriptor frees up, so without a pause
+                // this loop spun a core and filled the log (audit PTD-206). Logged once per streak.
+                consecutiveFailures += 1
+                if consecutiveFailures == 1 {
+                    LogTap.shared.note("[LogExport] accept failed errno=\(error), backing off")
+                }
+                Thread.sleep(forTimeInterval: Self.acceptBackoff)
                 continue
             }
+            consecutiveFailures = 0
 
             lock.lock()
             let full = clientFds.count >= Self.maximumConnections

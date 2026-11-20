@@ -16,6 +16,7 @@ struct StatusPill: View {
 
     private let title: LocalizedStringKey
     private let tone: Tone
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     init(_ title: LocalizedStringKey, tone: Tone = .accent) {
         self.title = title
@@ -32,16 +33,19 @@ struct StatusPill: View {
             .fixedSize()
     }
 
+    /// The accent pill is the accent itself, solid, labelled in its paired foreground like every
+    /// other accent-filled shape (Sodalite#166). A tint wash under fixed white read as a muddied
+    /// accent, and white is only legible on the darker presets.
     private var foreground: AnyShapeStyle {
         switch tone {
-        case .accent: AnyShapeStyle(Color.white)
+        case .accent: AnyShapeStyle(appearanceTheme.palette.foreground.color)
         case .neutral: AnyShapeStyle(.secondary)
         }
     }
 
     private var background: AnyShapeStyle {
         switch tone {
-        case .accent: AnyShapeStyle(.tint.opacity(0.35))
+        case .accent: AnyShapeStyle(appearanceTheme.palette.control.color)
         case .neutral: AnyShapeStyle(.secondary.opacity(0.15))
         }
     }

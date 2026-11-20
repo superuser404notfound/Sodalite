@@ -166,13 +166,17 @@ struct EpisodeLandscapeCard: View {
     /// Same reason as isPlayed; also the only feedback the context-menu favorite toggle has.
     var isFavorite: Bool = false
 
-    /// The viewer's own mark-watched from this session, which is a different fact from `isPlayed`
-    /// and the only one that may hide the resume indicator (`DetailViewModel.wasMarkedPlayedInSession`).
+    /// The viewer's own watched or unwatched mark from this session, which is a different fact from
+    /// `isPlayed` and the only one that may hide the resume indicator (`DetailViewModel.wasMarkedPlayedInSession`).
     var justMarkedPlayed: Bool = false
 
     @Environment(\.appearanceTheme) private var appearanceTheme
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    private var spoilerPolicy: SpoilerPolicy {
+        dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+    }
     private var cardSize: CGSize {
         LayoutMetrics.current(hSizeClass)
             .tileSize(cardScale: dependencies.appearancePreferences.cardScale)
@@ -244,17 +248,23 @@ struct EpisodeLandscapeCard: View {
                             .foregroundStyle(.tint)
                             .fontWeight(.semibold)
                     }
-                    Text(episode.name)
-                        .font(.caption)
-                        .lineLimit(1)
+                    // A veiled name next to its own number token says nothing, so it draws nothing.
+                    if let title = spoilerPolicy.visibleTitle(of: episode) {
+                        Text(title)
+                            .font(.caption)
+                            .lineLimit(1)
+                    } else if token.isEmpty {
+                        Text(spoilerPolicy.displayName(of: episode))
+                            .font(.caption)
+                            .lineLimit(1)
+                    }
                 }
 
                 if let runtime = episode.runTimeTicks {
-                    // A started episode carries its remaining time on the artwork, so the total
-                    // would be a second number on one card saying something else (Sodalite#99).
-                    // Blank, not absent: the strip keeps even card heights that way, the same
-                    // reason MediaCard always renders its subtitle slot.
-                    Text(remainingLabel == nil ? runtime.ticksToDisplay : " ")
+                    // The total stays on a started episode too (Sodalite#193): the badge on the
+                    // artwork is the time left, this line is the episode's length, and the badge
+                    // drops out where the locale's label does not fit beside the track.
+                    Text(runtime.ticksToDurationDisplay)
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -276,7 +286,7 @@ struct EpisodeLandscapeCard: View {
 
     private var remainingLabel: String? {
         guard !justMarkedPlayed else { return nil }
-        return episode.resumeRemainingTicks?.ticksToCompactDisplay
+        return episode.resumeRemainingTicks?.ticksToDurationDisplay
     }
 
     private var stroke: EpisodeCardStroke {
@@ -352,7 +362,7 @@ struct EpisodeSynopsisBox: View {
             )
             .focusStroke(cornerRadius: 12, isFocused: isFocused)
             .focusResponse(.inline, isFocused: isFocused)
-            .focusable(hasText)
+            .focusableSurface(hasText)
             .focused($isFocused)
             .stableTap(isFocused: isFocused) {
                 guard hasText else { return }
@@ -364,7 +374,7 @@ struct EpisodeSynopsisBox: View {
                 }
                 showFullText = true
             }
-            .fullScreenCover(isPresented: $showFullText) {
+            .fullScreenCoverCompat(isPresented: $showFullText) {
                 TextOverlay(text: text, isPresented: $showFullText)
             }
     }

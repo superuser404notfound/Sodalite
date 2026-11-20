@@ -16,6 +16,10 @@ struct ArtworkTile<Fallback: View>: View {
     let title: String?
     let artworkURL: URL?
     let size: CGSize
+    /// A server name pinned to the top corner (Sodalite#240). Outside `fallback` on purpose: the
+    /// label in there is gone once the artwork loads, and library artwork usually carries the
+    /// library's name, so two servers' "Movies" tiles looked identical.
+    var serverBadge: String? = nil
     let action: () -> Void
     @ViewBuilder let fallback: () -> Fallback
 
@@ -49,6 +53,10 @@ struct ArtworkTile<Fallback: View>: View {
 
                     ArtworkTileLabel(title: title)
                 }
+
+                if let serverBadge {
+                    ArtworkTileServerBadge(name: serverBadge)
+                }
             }
             .frame(width: size.width, height: size.height)
             .clipShape(RoundedRectangle(cornerRadius: ArtworkCorner.radius))
@@ -80,6 +88,24 @@ struct ArtworkTileLabel: View {
             .lineLimit(2)
             .padding(20)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+    }
+}
+
+/// The server a tile comes from, in the corner opposite the library icon.
+struct ArtworkTileServerBadge: View {
+    let name: String
+
+    var body: some View {
+        Label(name, systemImage: "server.rack")
+            .font(.caption)
+            .fontWeight(.semibold)
+            .lineLimit(1)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(Color.Theme.scrimHeavy))
+            .padding(16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
 }
 

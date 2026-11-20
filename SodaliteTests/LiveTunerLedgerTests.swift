@@ -193,6 +193,22 @@ struct LiveTunerLedgerTests {
         #expect(LiveTunerLedger(defaults: defaults).orphans(userID: "user-1").count == 1)
     }
 
+    /// Audit PHOST-208: a channel played from a secondary Combine server is recorded under that
+    /// server's user id and has to be closed through that server's own service.
+    @Test func eachServersLeftoversAreClosedThroughThatServersService() async {
+        let defaults = scratchDefaults()
+        LiveTunerLedger(defaults: defaults).remember(record(user: "user-1", key: "stream-a"))
+        LiveTunerLedger(defaults: defaults).remember(record(user: "user-2", item: "channel-2", key: "stream-b"))
+        let first = SweepMockService()
+        let second = SweepMockService()
+
+        await LiveTunerLedger(defaults: defaults).sweep(targets: [("user-1", first), ("user-2", second)])
+
+        #expect(first.closedLiveStreams == ["stream-a"])
+        #expect(second.closedLiveStreams == ["stream-b"])
+        #expect(LiveTunerLedger(defaults: defaults).orphans(userID: "user-2").isEmpty)
+    }
+
     @Test func aRunWithNothingStrandedAsksTheServerNothing() async {
         let service = SweepMockService()
         await LiveTunerLedger(defaults: scratchDefaults()).sweep(userID: "user-1", using: service)
@@ -248,7 +264,7 @@ private final class SweepMockService: JellyfinPlaybackServiceProtocol, @unchecke
 
     private struct NotUsed: Error {}
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse { throw NotUsed() }
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
     func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
     func getSeasons(seriesID: String, userID: String) async throws -> [JellyfinItem] { [] }

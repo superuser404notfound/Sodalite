@@ -76,3 +76,56 @@ struct SeerrSessionRejectionTests {
         #expect(count == 0)
     }
 }
+
+/// Audit 2026-11-17 CAT-205. The re-check lives in a handler that exists from launch, not in a tab page.
+@MainActor
+struct SeerrSessionRejectionHandlerTests {
+
+    /// Polls with a sleep and a bound, so a regression fails the test instead of hanging it.
+    private func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0..<200 where !condition() { try? await Task.sleep(for: .milliseconds(10)) }
+    }
+
+    @Test func aRejectionTriggersOneRevalidationAtATime() async {
+        let state = RevalidationState()
+        let handler = SeerrSessionRejectionHandler(
+            isConnected: { true },
+            revalidate: {
+                state.runs += 1
+                for _ in 0..<200 where !state.open { try? await Task.sleep(for: .milliseconds(10)) }
+            })
+
+        let first = Task { await handler.handleRejection() }
+        await waitUntil { state.runs == 1 }
+        await handler.handleRejection()
+        #expect(state.runs == 1)
+
+        state.open = true
+        await first.value
+        await handler.handleRejection()
+        #expect(state.runs == 2)
+    }
+
+    @Test func aRejectionWithoutASeerrConnectionDoesNothing() async {
+        var runs = 0
+        let handler = SeerrSessionRejectionHandler(isConnected: { false }, revalidate: { runs += 1 })
+        await handler.handleRejection()
+        #expect(runs == 0)
+    }
+
+    @Test func thePostedNotificationReachesTheHandler() async {
+        var runs = 0
+        let handler = SeerrSessionRejectionHandler(isConnected: { true }, revalidate: { runs += 1 })
+        handler.start()
+        NotificationCenter.default.post(name: .seerrSessionRejected, object: nil)
+        await waitUntil { runs >= 1 }
+        #expect(runs >= 1)
+    }
+}
+
+/// Counts revalidations and holds the first one open, without captured mutable vars.
+@MainActor
+private final class RevalidationState {
+    var runs = 0
+    var open = false
+}

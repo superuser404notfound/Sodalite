@@ -48,7 +48,7 @@ protocol SeerrRequestServiceProtocol: Sendable {
         tags: [Int]?
     ) async throws -> SeerrRequest
 
-    func myRequests(userID: Int, take: Int, skip: Int) async throws -> SeerrRequestsResult
+    func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult
 
     /// Admin queue (all users, status-filtered); needs MANAGE_REQUESTS/ADMIN in `SeerrUser.permissions`. A revoked permission surfaces 403 as `APIError.unauthorized`.
     func allRequests(
@@ -62,6 +62,9 @@ protocol SeerrRequestServiceProtocol: Sendable {
 
     @discardableResult
     func declineRequest(requestID: Int) async throws -> SeerrRequest
+
+    @discardableResult
+    func retryRequest(requestID: Int) async throws -> SeerrRequest
 
     func deleteRequest(requestID: Int) async throws
 
@@ -107,7 +110,7 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
             throw SeerrRequestError.noSeasonsAvailable
         }
         do {
-            return try client.decode(SeerrRequest.self, from: data)
+            return try await client.decode(SeerrRequest.self, from: data)
         } catch {
             // Field-debuggable via the Support log: a 2xx that is neither a request object nor a {message} error body is otherwise invisible.
             LogTap.shared.note(
@@ -117,10 +120,10 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
                 "[seerr] createRequest body: \(String(decoding: data.prefix(4096), as: UTF8.self))"
             )
             // Unknown 2xx error variant: show the server's own message over a generic decode failure.
-            if let message = (try? client.decode(SeerrErrorBody.self, from: data))?.message {
+            if let message = (try? await client.decode(SeerrErrorBody.self, from: data))?.message {
                 throw SeerrRequestError.serverRejected(message: message)
             }
-            if let probe = try? client.decode(SeerrDiscardedRequestProbe.self, from: data),
+            if let probe = try? await client.decode(SeerrDiscardedRequestProbe.self, from: data),
                probe.id == nil, probe.type != nil, probe.media != nil {
                 throw SeerrRequestError.requestDiscarded
             }
@@ -128,9 +131,9 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
         }
     }
 
-    func myRequests(userID: Int, take: Int = 50, skip: Int = 0) async throws -> SeerrRequestsResult {
+    func myRequests(userID: Int, take: Int = 50, skip: Int = 0, sort: SeerrRequestSort = .added) async throws -> SeerrRequestsResult {
         try await client.request(
-            endpoint: SeerrEndpoint.myRequests(userID: userID, take: take, skip: skip),
+            endpoint: SeerrEndpoint.myRequests(userID: userID, take: take, skip: skip, sort: sort),
             responseType: SeerrRequestsResult.self
         )
     }
@@ -158,6 +161,14 @@ final class SeerrRequestService: SeerrRequestServiceProtocol {
     func declineRequest(requestID: Int) async throws -> SeerrRequest {
         try await client.request(
             endpoint: SeerrEndpoint.declineRequest(requestID: requestID),
+            responseType: SeerrRequest.self
+        )
+    }
+
+    @discardableResult
+    func retryRequest(requestID: Int) async throws -> SeerrRequest {
+        try await client.request(
+            endpoint: SeerrEndpoint.retryRequest(requestID: requestID),
             responseType: SeerrRequest.self
         )
     }

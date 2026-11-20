@@ -1,3 +1,8 @@
+#if !os(macOS)
+// The UIKit modal player. macOS presents the same view model from SwiftUI instead, see
+// Platforms/macOS/MacPlayerLauncher.swift, because every reason this is a presented
+// UIViewController (Menu interception, the focus engine, a scene's modal chain) is a reason
+// that does not exist on a Mac.
 import SwiftUI
 import UIKit
 
@@ -27,6 +32,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     var preferredMediaSourceID: String?
     /// Shuffle / play queue; empty = single-item playback.
     var playQueue: [JellyfinItem] = []
+    /// Sodalite#81: the downloaded file to play instead of the server's; nil streams.
+    var localDownload: DownloadedItem?
+    /// Where a local session writes its progress, and where the next downloaded episode is looked up.
+    var downloadStore: DownloadStore?
     /// Read here, on the SwiftUI side, because a UIHostingController inside the UIKit modal starts
     /// from a BLANK environment: every `\.appearanceTheme` read below it silently falls back to
     /// `ResolvedAppearanceTheme.default`, which is system blue.
@@ -36,7 +45,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     /// environment left to read it from (Sodalite#126).
     @Environment(\.appState) private var appState
 
-    private var serverName: String { appState.activeServer?.name ?? "" }
+    /// The server the item plays from, which in a combined Home need not be the active one (Sodalite#85).
+    @Environment(\.serverSession) private var serverSession
+
+    private var serverName: String { serverSession?.server?.name ?? appState.activeServer?.name ?? "" }
 
     /// The reader is handed over, not the value: a server that dies forty minutes into a session is
     /// exactly the case the player needs this for.
@@ -66,11 +78,14 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                     itemService: itemService,
                     trackMemory: trackMemory,
                     spoilerPolicy: spoilerPolicy,
+                    canTranscodeVideo: appState.canTranscodeVideo(on: serverSession),
                     cachedPlaybackInfo: cachedPlaybackInfo,
                     preferredMediaSourceID: preferredMediaSourceID,
                     playQueue: playQueue,
                     serverName: serverName,
-                    serverReachability: reachability
+                    serverReachability: reachability,
+                    localDownload: localDownload,
+                    downloadStore: downloadStore
                 )
                 let playerVC = PlayerHostController(
                     viewModel: vm,
@@ -90,7 +105,7 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                 // Engage the orientation mode BEFORE presenting: the system validates the player VC's
                 // supportedInterfaceOrientations against the app's allowed set at present time, so in
                 // locked mode the delegate must already permit landscape or it throws "no common orientation".
-                PlayerOrientation.engage(locked: preferences.playerRotationLocked, session: playerVC.orientationSession)
+                PlayerOrientation.engage(locked: preferences.appliesRotationLock, session: playerVC.orientationSession)
                 #endif
                 return playerVC
             }
@@ -111,8 +126,10 @@ struct PlayerLauncher: UIViewControllerRepresentable {
 /// is presented from the scene's top-most settled view controller instead and
 /// tracked here for teardown.
 final class PlayerLauncherHostVC: UIViewController {
-    /// Guards the live-player present retry loop against duplicate launches.
-    var pendingLivePresent = false
+    #if os(tvOS)
+    /// Sodalite#175: the live multiview session presented from this host, until it closes or hands a player back.
+    var multiview: LiveMultiviewCoordinator?
+    #endif
     /// A launch is in flight (waiting for a free presentation context). Blocks
     /// `updateUIViewController` from starting a second one, which would
     /// re-request PlaybackInfo (#31).
@@ -208,6 +225,15 @@ final class PlayerLauncherHostVC: UIViewController {
         let window = (view.window?.windowScene ?? activeWindowScene())?
             .windows.first(where: { $0.isKeyWindow })
             ?? view.window
+        return Self.settledTopPresenter(in: window)
+    }
+
+    /// The one "is the chain settled" test, shared with the PiP restore: the top-most controller of
+    /// `window`, nil while anything presents, dismisses or transitions, or when a player is already on top.
+    static func settledTopPresenter(
+        in window: UIWindow?,
+        countsAsPlayer: (UIViewController) -> Bool = { PlayerLauncherHostVC.isPlayer($0) }
+    ) -> UIViewController? {
         guard var top = window?.rootViewController else { return nil }
         if top.transitionCoordinator != nil { return nil }
         while let presented = top.presentedViewController {
@@ -217,7 +243,7 @@ final class PlayerLauncherHostVC: UIViewController {
             top = presented
         }
         // A player is already up here -- don't stack a second one.
-        if top is PlayerHostController { return nil }
+        if countsAsPlayer(top) { return nil }
         return top
     }
 
@@ -228,10 +254,18 @@ final class PlayerLauncherHostVC: UIViewController {
             ?? view.window
         var vc = window?.rootViewController
         while let current = vc {
-            if current is PlayerHostController { return true }
+            if Self.isPlayer(current) { return true }
             vc = current.presentedViewController
         }
         return false
+    }
+
+    /// A multiview grid counts as the one player on screen.
+    static func isPlayer(_ controller: UIViewController) -> Bool {
+        #if os(tvOS)
+        if controller is MultiviewHostController { return true }
+        #endif
+        return controller is PlayerHostController
     }
 
     private func activeWindowScene() -> UIWindowScene? {
@@ -241,3 +275,4 @@ final class PlayerLauncherHostVC: UIViewController {
             ?? UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
     }
 }
+#endif

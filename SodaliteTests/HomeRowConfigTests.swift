@@ -3,9 +3,9 @@ import Foundation
 @testable import Sodalite
 
 /// A fresh install and the Customize "Reset to default" button must land on the same home page.
-/// Both flows share `defaultConfig()`, but reconciliation used to apply an adaptive multi-library
-/// default (aggregated Latest off, per-library rows on) that reset never reproduced, so the two
-/// diverged on multi-library servers. These tests pin the parity contract.
+/// Both used to diverge on multi-library servers because only reconciliation applied the
+/// per-library default; now both go through `applyingSplitDefault`. These tests pin that parity,
+/// and that a saved layout never gets the default applied behind its back.
 @MainActor
 struct HomeRowConfigTests {
     private func library(_ id: String, _ name: String, _ type: String) -> JellyfinLibrary {
@@ -20,7 +20,9 @@ struct HomeRowConfigTests {
             library("m2", "Movies B", "movies"),
             library("t1", "Shows", "tvshows"),
         ]
-        let fresh = HomeRowConfig.reconciled(stored: HomeRowConfig.defaultConfig(), libraries: libraries)
+        let fresh = HomeRowConfig.reconciled(
+            stored: HomeRowConfig.defaultConfig(), libraries: libraries, isFreshInstall: true
+        )
         let reset = HomeRowConfig.resetToDefault(current: fresh)
         #expect(fresh == reset)
     }
@@ -28,32 +30,77 @@ struct HomeRowConfigTests {
     /// Single-library servers were already consistent; guard against regressing that.
     @Test func freshInstallMatchesResetOnSingleLibraryServer() {
         let libraries = [library("m1", "Movies", "movies")]
-        let fresh = HomeRowConfig.reconciled(stored: HomeRowConfig.defaultConfig(), libraries: libraries)
+        let fresh = HomeRowConfig.reconciled(
+            stored: HomeRowConfig.defaultConfig(), libraries: libraries, isFreshInstall: true
+        )
         let reset = HomeRowConfig.resetToDefault(current: fresh)
         #expect(fresh == reset)
     }
 
-    /// The aggregated Latest rows stay enabled and per-library rows stay opt-in (disabled) even on
-    /// a multi-library server, matching the reset-to-default baseline. Two libraries per type,
-    /// because a type with a single library gets no per-library row at all
-    /// (`PerLibraryRowRedundancyTests`).
-    @Test func perLibraryRowsAreDisabledByDefault() {
+    /// A type with several libraries opens on one row per library, standing where the aggregated
+    /// row stood; the aggregated row goes off. A type with one library keeps the aggregated row.
+    @Test func freshInstallSplitsATypeWithSeveralLibraries() {
+        let libraries = [
+            library("m1", "Movies", "movies"),
+            library("m2", "TMDB Trending", "movies"),
+            library("t1", "Shows", "tvshows"),
+        ]
+        let fresh = HomeRowConfig.reconciled(
+            stored: HomeRowConfig.defaultConfig(), libraries: libraries, isFreshInstall: true
+        )
+        let ordered = fresh.sorted { $0.sortOrder < $1.sortOrder }
+
+        #expect(fresh.first { $0.type == .latestMovies }?.isEnabled == false)
+        #expect(fresh.first { $0.type == .latestShows }?.isEnabled == true)
+        let perLibrary = fresh.filter { $0.type == .libraryLatest }
+        #expect(perLibrary.map(\.libraryID) == ["m1", "m2"])
+        #expect(perLibrary.allSatisfy { $0.isEnabled })
+
+        let anchor = ordered.firstIndex { $0.type == .latestMovies }!
+        #expect(ordered[anchor + 1].libraryID == "m1")
+        #expect(ordered[anchor + 2].libraryID == "m2")
+        #expect(ordered[anchor + 3].type == .latestShows)
+        #expect(ordered.map(\.sortOrder) == Array(0..<ordered.count))
+    }
+
+    /// One movies and one shows library split nothing: the page is the plain default.
+    @Test func freshInstallWithOneLibraryPerTypeKeepsTheAggregates() {
+        let libraries = [library("m1", "Movies", "movies"), library("t1", "Shows", "tvshows")]
+        let fresh = HomeRowConfig.reconciled(
+            stored: HomeRowConfig.defaultConfig(), libraries: libraries, isFreshInstall: true
+        )
+        #expect(fresh == HomeRowConfig.defaultConfig())
+    }
+
+    /// A saved layout that meets a second library gets the new row switched off, so nothing on an
+    /// existing Home moves.
+    @Test func savedLayoutGetsNewPerLibraryRowsDisabled() {
         let libraries = [
             library("m1", "Movies A", "movies"),
             library("m2", "Movies B", "movies"),
             library("t1", "Shows A", "tvshows"),
             library("t2", "Shows B", "tvshows"),
         ]
-        let fresh = HomeRowConfig.reconciled(stored: HomeRowConfig.defaultConfig(), libraries: libraries)
+        let saved = HomeRowConfig.reconciled(stored: HomeRowConfig.defaultConfig(), libraries: libraries)
 
-        let latestMovies = fresh.first { $0.type == .latestMovies }
-        let latestShows = fresh.first { $0.type == .latestShows }
-        #expect(latestMovies?.isEnabled == true)
-        #expect(latestShows?.isEnabled == true)
-
-        let perLibrary = fresh.filter { $0.type == .libraryLatest }
+        #expect(saved.first { $0.type == .latestMovies }?.isEnabled == true)
+        #expect(saved.first { $0.type == .latestShows }?.isEnabled == true)
+        let perLibrary = saved.filter { $0.type == .libraryLatest }
         #expect(perLibrary.count == 4)
         #expect(perLibrary.allSatisfy { !$0.isEnabled })
+    }
+
+    /// The fresh layout is saved by its first reconcile, and every later load reconciles it as a
+    /// saved layout; that pass must leave it alone.
+    @Test func freshLayoutIsStableOnTheNextReconcile() {
+        let libraries = [
+            library("m1", "Movies A", "movies"),
+            library("m2", "Movies B", "movies"),
+        ]
+        let fresh = HomeRowConfig.reconciled(
+            stored: HomeRowConfig.defaultConfig(), libraries: libraries, isFreshInstall: true
+        )
+        #expect(HomeRowConfig.reconciled(stored: fresh, libraries: libraries) == fresh)
     }
 
     /// Vanished libraries drop their per-library row; surviving ones keep their user toggle. Three

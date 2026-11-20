@@ -16,9 +16,8 @@ nonisolated private let log = ShelfLog(category: "ResumeBar")
 /// budget for left the accent capsule standing beside the white system bar inside one row, at two
 /// different resolutions, with the seam moving on every refresh (Sodalite#128).
 ///
-/// It lives in `Shared/` because the app runs it too: doing this work when the app has a reason to
-/// (a setting changed, a title finished) is what keeps it off the path of someone looking at the
-/// shelf, where it used to hold the row back until it finished.
+/// It lives in `Shared/` because both processes read the result, but only the app renders: the
+/// extension's 25 MB ceiling does not hold a composite at the cell's width (see `existing`).
 enum ResumeBarArtwork {
 
     /// One cell's input. Neutral on purpose: the extension and the app each have their own
@@ -66,7 +65,10 @@ enum ResumeBarArtwork {
             return [:]
         }
 
-        let candidates = cells.map { cell in
+        // One file per item. A repeated id would leave `covered` short of `candidates` for good,
+        // and the all-or-nothing check below would then drop the artwork on every pass.
+        var seen = Set<String>()
+        let candidates = cells.filter { seen.insert($0.itemID).inserted }.map { cell in
             Candidate(cell: cell,
                       destination: directory.appendingPathComponent(name(for: cell, accent: accent)))
         }
@@ -83,15 +85,9 @@ enum ResumeBarArtwork {
             return [:]
         }
 
-        var covered: [String: URL] = [:]
-        var pending: [Candidate] = []
-        for candidate in candidates {
-            if FileManager.default.fileExists(atPath: candidate.destination.path) {
-                covered[candidate.cell.itemID] = candidate.destination
-            } else {
-                pending.append(candidate)
-            }
-        }
+        let found = split(candidates)
+        var covered = found.covered
+        let pending = found.pending
 
         if !pending.isEmpty {
             covered.merge(await render(pending, accent: accent)) { current, _ in current }
@@ -102,6 +98,45 @@ enum ResumeBarArtwork {
             return [:]
         }
         return covered
+    }
+
+    /// The extension's side: the artwork the app has already rendered, all or nothing, and never a
+    /// download, a composite or a sweep.
+    ///
+    /// tvOS gives a Top Shelf extension a hard 25 MB footprint, and a composite at the cell's width
+    /// holds two 5.8 MB bitmaps on top of the decoder's own buffer and the process itself. On the
+    /// living room box every pass that had to composite was killed for it
+    /// (`JETSAM_REASON_MEMORY_PERPROCESSLIMIT`, seven times on 2026-10-04), and a killed extension
+    /// answers nothing, so the shelf stayed empty instead of falling back. Whatever is missing here is
+    /// the app's to render: the caller shows remote artwork with the system bar until it has.
+    nonisolated static func existing(cells: [Cell], accent: UInt32) -> [String: URL] {
+        guard let directory = containerDirectory() else { return [:] }
+        var seen = Set<String>()
+        let candidates = cells.filter { seen.insert($0.itemID).inserted }.map { cell in
+            Candidate(cell: cell,
+                      destination: directory.appendingPathComponent(name(for: cell, accent: accent)))
+        }
+        guard !candidates.isEmpty, candidates.count <= maxCells else { return [:] }
+        let (covered, pending) = split(candidates)
+        guard pending.isEmpty else {
+            log.notice("\(pending.count) of \(candidates.count) cells not rendered yet; "
+                       + "shelf keeps the remote artwork until the app renders them")
+            return [:]
+        }
+        return covered
+    }
+
+    nonisolated private static func split(_ candidates: [Candidate]) -> (covered: [String: URL], pending: [Candidate]) {
+        var covered: [String: URL] = [:]
+        var pending: [Candidate] = []
+        for candidate in candidates {
+            if FileManager.default.fileExists(atPath: candidate.destination.path) {
+                covered[candidate.cell.itemID] = candidate.destination
+            } else {
+                pending.append(candidate)
+            }
+        }
+        return (covered, pending)
     }
 
     /// The accent rides in the name only for a cell that draws a bar. Without this an accent change
@@ -120,9 +155,9 @@ enum ResumeBarArtwork {
         let destination: URL
     }
 
-    nonisolated private struct Download: Sendable {
-        let url: URL
-        let data: Data?
+    nonisolated private enum Event: Sendable {
+        case downloaded(URL, Data?)
+        case deadline
     }
 
     /// Downloads overlap, compositing stays serial: the network is what makes a pass slow, and
@@ -132,41 +167,62 @@ enum ResumeBarArtwork {
     /// of a show points at the same show-level artwork, so a shelf with four episodes of one series
     /// asked for the same file four times; the cells still differ, because each burns in its own
     /// resume bar.
+    ///
+    /// The deadline is a timer in the group, not a clock check between results. A check only runs
+    /// when a download returns, so a stalled request held the pass (and with it the extension's
+    /// answer) for its full timeout on top of the budget, per stalled slot.
     nonisolated private static func render(_ pending: [Candidate], accent: UInt32) async -> [String: URL] {
-        let started = Date()
         var done: [String: URL] = [:]
         let sources = Dictionary(grouping: pending, by: { $0.cell.remote })
         let urls = Array(sources.keys)
 
-        await withTaskGroup(of: Download.self) { group in
+        await withTaskGroup(of: Event.self) { group in
+            group.addTask {
+                try? await Task.sleep(for: .seconds(deadline))
+                return .deadline
+            }
             var next = 0
-            while next < urls.count, next < maxConcurrentDownloads {
+            var inFlight = 0
+            while next < urls.count, inFlight < maxConcurrentDownloads {
                 let url = urls[next]
-                group.addTask { Download(url: url, data: await download(url)) }
+                group.addTask { .downloaded(url, await download(url)) }
                 next += 1
+                inFlight += 1
             }
 
-            while let outcome = await group.next() {
-                guard Date().timeIntervalSince(started) < deadline else {
+            while inFlight > 0, let event = await group.next() {
+                switch event {
+                case .deadline:
                     log.notice("artwork pass hit its deadline with \(pending.count - done.count) cells left")
                     group.cancelAll()
-                    continue
-                }
-                if next < urls.count {
-                    let url = urls[next]
-                    group.addTask { Download(url: url, data: await download(url)) }
-                    next += 1
-                }
-                guard let data = outcome.data else { continue }
-                for candidate in sources[outcome.url] ?? [] where persist(data, for: candidate, accent: accent) {
-                    done[candidate.cell.itemID] = candidate.destination
+                    return
+                case let .downloaded(url, data):
+                    inFlight -= 1
+                    if next < urls.count {
+                        let url = urls[next]
+                        group.addTask { .downloaded(url, await download(url)) }
+                        next += 1
+                        inFlight += 1
+                    }
+                    guard let data else { continue }
+                    for candidate in sources[url] ?? [] where persist(data, for: candidate, accent: accent) {
+                        done[candidate.cell.itemID] = candidate.destination
+                    }
                 }
             }
+            // Wakes the timer, which the group would otherwise wait out.
+            group.cancelAll()
         }
         // The one number a pass cannot reason about from here. A composite holds two bitmaps of
         // `maxPixelSize`, so that width trades sharpness against a hard ceiling, and the headroom
         // left at the end is what says whether there is room to go on.
+        // Only the extension's host platforms have a per-process footprint to report: the figure is
+        // the jetsam headroom, and a Mac process has no such ceiling to count down from.
+        #if os(tvOS) || os(iOS)
         log.info("composited \(done.count) cells, \(os_proc_available_memory() / 1_048_576)MB left")
+        #else
+        log.info("composited \(done.count) cells")
+        #endif
         return done
     }
 

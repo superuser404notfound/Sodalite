@@ -11,21 +11,26 @@ struct GuideFilterTests {
         items.first(where: { $0.name == name })?.value
     }
 
-    @Test("the default filter asks for TV channels and nothing else")
+    /// Jellyfin drops `Type` on /LiveTv/Channels and answers the category flags from channel tags
+    /// no channel carries (#201). Sending them changed nothing but the reader's expectations.
+    @Test("the default filter sends nothing, kind and category are narrowed on the client")
     func defaultFilter() {
-        let items = GuideFilter.default.queryItems
-        #expect(value(items, "Type") == "TV")
-        #expect(value(items, "IsFavorite") == nil)
-        #expect(items.count == 1)
+        #expect(GuideFilter.default.queryItems.isEmpty)
         #expect(GuideFilter.default.isDefault)
+        var filter = GuideFilter.default
+        filter.kind = .radio
+        filter.category = .sports
+        #expect(filter.queryItems.isEmpty)
     }
 
-    /// The Live TV tab gate asks "does this server have channels at all". Restricting that probe to
-    /// Type=TV would hide the whole tab from a server whose tuners are radio only.
-    @Test("the any filter sends no Type at all")
+    /// The Live TV tab gate asks "does this server have channels at all". Narrowing that probe to
+    /// TV would hide the whole tab from a server whose tuners are radio only.
+    @Test("the any filter admits every kind")
     func anyFilter() {
         #expect(GuideFilter.any.queryItems.isEmpty)
         #expect(!GuideFilter.any.isDefault)
+        #expect(GuideFilter.any.admits(kindOf: channel(type: "Radio")))
+        #expect(GuideFilter.any.admits(kindOf: channel(type: "TV")))
     }
 
     @Test("favorites only adds IsFavorite")
@@ -33,10 +38,11 @@ struct GuideFilterTests {
         var filter = GuideFilter.default
         filter.favoritesOnly = true
         #expect(value(filter.queryItems, "IsFavorite") == "true")
+        #expect(filter.queryItems.count == 1)
         #expect(!filter.isDefault)
     }
 
-    @Test("each category maps to the parameter Jellyfin actually reads")
+    @Test("each category maps to the program flag Jellyfin actually reads")
     func categoryNames() {
         #expect(GuideFilter.Category.sports.queryName == "IsSports")
         #expect(GuideFilter.Category.kids.queryName == "IsKids")
@@ -44,27 +50,28 @@ struct GuideFilterTests {
         #expect(GuideFilter.Category.movies.queryName == "IsMovie")
     }
 
-    @Test("only the selected category is sent, never a second one")
-    func singleCategory() {
+    /// The M3U tuner never sets a type, and Jellyfin files such a channel as TV.
+    @Test("kind follows ChannelType, a channel without one is TV")
+    func kindNarrowing() {
         var filter = GuideFilter.default
-        filter.category = .kids
-        let items = filter.queryItems
-        #expect(value(items, "IsKids") == "true")
-        for other in GuideFilter.Category.allCases where other != .kids {
-            #expect(value(items, other.queryName) == nil)
-        }
+        #expect(filter.admits(kindOf: channel(type: "TV")))
+        #expect(filter.admits(kindOf: channel(type: nil)))
+        #expect(!filter.admits(kindOf: channel(type: "Radio")))
+        filter.kind = .radio
+        #expect(filter.admits(kindOf: channel(type: "Radio")))
+        #expect(!filter.admits(kindOf: channel(type: nil)))
     }
 
-    @Test("favorites, category and kind combine in one query")
-    func combined() {
-        var filter = GuideFilter.default
-        filter.favoritesOnly = true
-        filter.category = .sports
-        filter.kind = .radio
-        let items = filter.queryItems
-        #expect(value(items, "Type") == "Radio")
-        #expect(value(items, "IsFavorite") == "true")
-        #expect(value(items, "IsSports") == "true")
+    @Test("ChannelType decodes off the channel list")
+    func channelTypeDecodes() throws {
+        let json = #"{"Id":"c1","Name":"Radio 1","ChannelType":"Radio"}"#
+        let decoded = try JSONDecoder().decode(JellyfinChannel.self, from: Data(json.utf8))
+        #expect(decoded.kind == .radio)
+    }
+
+    private func channel(type: String?) -> JellyfinChannel {
+        JellyfinChannel(id: "c", name: "c", channelNumber: nil, imageTags: nil,
+                        currentProgram: nil, userData: nil, channelType: type)
     }
 
     @Test("the endpoint merges filter items into the channel query")
@@ -75,7 +82,7 @@ struct GuideFilterTests {
             userID: "u1", startIndex: 0, limit: 200, filter: filter)
         let items = endpoint.queryItems ?? []
         #expect(value(items, "IsFavorite") == "true")
-        #expect(value(items, "Type") == "TV")
+        #expect(value(items, "Type") == nil)
         // The base items the guide has always relied on must survive the merge.
         #expect(value(items, "AddCurrentProgram") == "true")
         #expect(value(items, "EnableFavoriteSorting") == "true")

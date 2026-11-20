@@ -1,3 +1,5 @@
+#if !os(macOS)
+// The guide grid is a UICollectionView driven by the focus engine. macOS has neither, and the Mac draws the channel lineup instead (GuideView).
 import UIKit
 
 /// Per-program geometry, supplied by the view controller from `GuideViewModel`.
@@ -104,3 +106,4 @@ final class GuideGridLayout: UICollectionViewLayout {
         return attributes
     }
 }
+#endif

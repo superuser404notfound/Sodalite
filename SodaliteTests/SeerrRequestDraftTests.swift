@@ -74,9 +74,10 @@ struct SeerrRequestDraftTests {
             let json = #"{"id": 1, "status": 1, "type": "tv"}"#
             return try JSONDecoder().decode(SeerrRequest.self, from: Data(json.utf8))
         }
-        func myRequests(userID: Int, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
+        func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult { throw Boom() }
         func allRequests(filter: SeerrRequestFilter, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
         func approveRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
+        func retryRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func declineRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func deleteRequest(requestID: Int) async throws { throw Boom() }
         func updateRequest(requestID: Int, body: SeerrRequestUpdateBody) async throws -> SeerrRequest { throw Boom() }
@@ -308,6 +309,37 @@ struct SeerrRequestDraftTests {
         let options = await resolvedOptions(config)
         #expect(options.serverIDPayload == 3)
         #expect(options.profileIDPayload == nil)
+    }
+
+    private func taggedConfig(_ activeTags: [Int]) -> ConfigSpy {
+        let config = defaultConfig()
+        config.servers = [SeerrServiceServer(
+            id: 3, name: "Sonarr", isDefault: true, is4k: false,
+            activeProfileId: 7, activeDirectory: "/tv", activeLanguageProfileId: 9,
+            activeTags: activeTags
+        )]
+        return config
+    }
+
+    /// Seerr puts the instance's default tags on every request, so the picker has to open with them
+    /// ticked instead of reading "None" (Sodalite#228). Left alone they stay out of the body, which
+    /// keeps Seerr's Override Rules free to add theirs.
+    @Test func theInstanceDefaultTagsOpenTickedAndAreNotSent() async {
+        let options = await resolvedOptions(taggedConfig([2]))
+        #expect(options.tagIDs == [2])
+        #expect(options.tagsPayload == nil)
+    }
+
+    @Test func changedTagsAreSent() async {
+        let options = await resolvedOptions(taggedConfig([2]))
+        options.tagIDs.insert(1)
+        #expect(options.tagsPayload == [1, 2])
+    }
+
+    /// A default tag deleted in Sonarr would tick no row, so it does not count.
+    @Test func aDefaultTagTheInstanceNoLongerHasIsDropped() async {
+        let options = await resolvedOptions(taggedConfig([2, 99]))
+        #expect(options.tagIDs == [2])
     }
 
     /// Older Jellyseerr has no tags field, so "no tags" has to be absent, not an empty array.

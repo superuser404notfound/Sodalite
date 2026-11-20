@@ -22,4 +22,29 @@ enum ProviderMatchMerging {
     nonisolated static func tmdbKey(type: ItemType, tmdbID: Int) -> String {
         "\(type == .series ? "tv" : "movie")-\(tmdbID)"
     }
+
+    /// The all-library scan the TMDB augment matches against, 10 000 titles with only the id and image
+    /// tags read off it (Sodalite#68: `detailFields` over a whole library was the biggest request the
+    /// app could issue). One definition for the grid, the provider precompute and the combined fetch
+    /// (BRW-R203). `watchFilter` is the grid's Jellyfin filter, nil for none.
+    nonisolated static func libraryScanQuery(watchFilter: String? = nil) -> ItemQuery {
+        var query = ItemQuery(
+            includeItemTypes: [.movie, .series],
+            sortBy: "SortName",
+            sortOrder: "Ascending",
+            limit: 10000,
+            fields: JellyfinEndpoint.homeRowFields + ",ProviderIds"
+        )
+        if let watchFilter { query.filters = [watchFilter] }
+        return query
+    }
+
+    /// Items by `tmdbKey`; items without a TMDB id are left out.
+    nonisolated static func tmdbMap(_ items: [JellyfinItem]) -> [String: JellyfinItem] {
+        var map: [String: JellyfinItem] = [:]
+        for item in items {
+            if let id = item.tmdbID { map[tmdbKey(type: item.type, tmdbID: id)] = item }
+        }
+        return map
+    }
 }

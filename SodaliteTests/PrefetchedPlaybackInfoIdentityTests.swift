@@ -53,7 +53,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
             )
         }
 
-        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse {
+        func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse {
             throw NotUsed()
         }
         func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
@@ -94,7 +94,6 @@ struct PrefetchedPlaybackInfoIdentityTests {
         func getResumeItems(userID: String, mediaType: String, limit: Int) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     /// Every member throws: the scenarios below never load detail, and `refreshResumePosition` treats a
@@ -102,11 +101,15 @@ struct PrefetchedPlaybackInfoIdentityTests {
     final class MockItemService: JellyfinItemServiceProtocol, @unchecked Sendable {
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem { throw NotUsed() }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse { throw NotUsed() }
+        func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
+        func setRating(userID: String, itemID: String, rating: Double?) async throws {}
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse { throw NotUsed() }
         func findByTmdbID(userID: String, tmdbID: Int, searchTerm: String?) async throws -> JellyfinItem? { nil }
         func findByProviderIDs(
@@ -144,8 +147,8 @@ struct PrefetchedPlaybackInfoIdentityTests {
         vm.prefetchPlaybackInfo(for: "e5")
         await awaitPrefetch(vm)
 
-        #expect(vm.cachedPlaybackInfo?.matching("e5")?.mediaSources.first?.id == "e5")
-        #expect(vm.cachedPlaybackInfo?.matching("e6") == nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e5", quality: .original)?.mediaSources.first?.id == "e5")
+        #expect(vm.cachedPlaybackInfo?.matching("e6", quality: .original) == nil)
     }
 
     /// The reported failure: watched past the played threshold, so leaving the player rolls Next Up to
@@ -164,7 +167,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
 
         #expect(vm.currentEpisodeID == "e6")
         // What the launcher hands the player for the play target it now shows.
-        #expect(vm.cachedPlaybackInfo?.matching("e6") == nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e6", quality: .original) == nil)
     }
 
     /// The other half of the same rule: a replaced item is a new file, so the response prefetched for
@@ -189,7 +192,7 @@ struct PrefetchedPlaybackInfoIdentityTests {
 
         vm.prefetchPlaybackInfo(for: "e5")
         await awaitPrefetch(vm)
-        #expect(vm.cachedPlaybackInfo?.matching("e5") != nil)
+        #expect(vm.cachedPlaybackInfo?.matching("e5", quality: .original) != nil)
 
         vm.prefetchPlaybackInfo(for: "e6")
         #expect(vm.cachedPlaybackInfo == nil)

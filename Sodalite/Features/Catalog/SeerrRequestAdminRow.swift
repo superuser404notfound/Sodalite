@@ -201,7 +201,7 @@ private struct AdminActionButton: View {
         )
         .focusStroke(cornerRadius: 12, isFocused: focused)
         .focusResponse(.chip, isFocused: focused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         .stableTap(isFocused: focused) { action() }
         .accessibilityLabel(Text(title))

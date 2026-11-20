@@ -25,51 +25,63 @@ extension PlayerViewModel {
         guard item.seriesId != nil else { return }
 
         hasFetchedNextEpisode = true
+        // Sodalite#81: while the server answers it names the successor, as for any session, and a
+        // downloaded one then plays from the device. Offline only a downloaded immediate successor
+        // continues a local session.
+        if isLocalSession, serverReachability() != .reachable {
+            if let store = downloadStore,
+               let local = Self.nextDownloadedEpisode(
+                   after: item, in: store.items.values.filter { store.completedItem($0.id) != nil }) {
+                nextEpisode = local.snapshot.item
+            }
+            return
+        }
         Task { await fetchNextEpisode() }
     }
+
+    static func nextDownloadedEpisode(after item: JellyfinItem, in pool: [DownloadedItem]) -> DownloadedItem? {
+        guard let series = item.seriesId, let season = item.parentIndexNumber, let index = item.indexNumber else { return nil }
+        // Only the IMMEDIATE successor: with E1 and E5 downloaded, E1 must not skip to E5. Without a
+        // server nothing says whether a season has more episodes, so a season boundary is never
+        // crossed offline; online the server names the successor and it plays from the device when
+        // it is downloaded (see resetSessionState).
+        return pool.first {
+            $0.snapshot.item.seriesId == series && $0.snapshot.item.parentIndexNumber == season
+                && $0.snapshot.item.indexNumber == index + 1
+        }
+    }
+
 
     private func fetchNextEpisode() async {
         guard let seriesID = item.seriesId else { return }
 
         // Snapshot identifiers up front in case `item` mutates mid-await.
+        let current = item
         let currentID = item.id
-        let currentIndex = item.indexNumber
-        let currentSeasonID = item.seasonId
 
-        // Strict physical ordering, deliberately NOT Jellyfin's NextUp: NextUp returns the next *unwatched* episode series-wide, skipping partly-watched seasons (S1E5 -> S3E1 over a partial S2). Auto-advance must move to the physically next episode.
-        guard let currentSeasonID, let currentIndex else { return }
+        // Strict physical ordering, see EpisodeSuccession.
+        guard let currentSeasonID = item.seasonId, item.indexNumber != nil else { return }
 
         do {
-            // 1. Next episode in the current season: lowest indexNumber strictly greater than the current one.
             let episodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: currentSeasonID, userID: userID
             )
-            if let candidate = episodes
-                .filter({ $0.id != currentID })
-                .filter({ ($0.indexNumber ?? -1) > currentIndex })
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }) {
+            if let candidate = EpisodeSuccession.next(after: current, in: episodes) {
                 // Episode may have been switched via the picker mid-fetch; a stale result would seed the OLD episode's successor.
                 guard item.id == currentID else { return }
                 nextEpisode = candidate
                 return
             }
 
-            // 2. End of season: roll over to the first episode of the next season by indexNumber. Lowest season index strictly greater than current skips Specials (season 0), so a finale advances to S2E1, not Specials.
             let seasons = try await playbackService.getSeasons(
                 seriesID: seriesID, userID: userID
             )
-            guard let currentSeasonIndex = seasons
-                .first(where: { $0.id == currentSeasonID })?.indexNumber,
-                  let nextSeason = seasons
-                .filter({ ($0.indexNumber ?? -1) > currentSeasonIndex })
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) })
-            else { return }
+            guard let nextSeason = EpisodeSuccession.season(after: currentSeasonID, in: seasons) else { return }
 
             let nextSeasonEpisodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: nextSeason.id, userID: userID
             )
-            if let firstEpisode = nextSeasonEpisodes
-                .min(by: { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }) {
+            if let firstEpisode = EpisodeSuccession.first(in: nextSeasonEpisodes) {
                 guard item.id == currentID else { return }
                 nextEpisode = firstEpisode
             }
@@ -102,15 +114,21 @@ extension PlayerViewModel {
         Task { [weak self] in await self?.warmSuccessor(next) }
     }
 
-    private func warmSuccessor(_ next: JellyfinItem) async {
+    func warmSuccessor(_ next: JellyfinItem) async {
+        // A downloaded successor needs no PlaybackInfo and no stream to warm.
+        if downloadStore?.completedItem(next.id) != nil { return }
+        // Read once, before the await: a rung picked while this is in flight must not relabel a
+        // response fetched at the old cap.
+        let quality = effectiveStreamingQuality
         guard let info = try? await playbackService.getPlaybackInfo(
-            itemID: next.id, userID: userID, profile: DirectPlayProfile.current()
+            itemID: next.id, userID: userID,
+            profile: DirectPlayProfile.current(maxStreamingBitrate: quality.maxStreamingBitrate)
         ) else { return }
         // Minutes pass at most, but the successor can still move underneath this: an episode picked
         // from the season list replaces it, and a response naming the old one would then put its
         // source id under the new item's path, which the server answers with a 400 (Sodalite#71).
         guard nextEpisode?.id == next.id else { return }
-        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, response: info)
+        cachedPlaybackInfo = PrefetchedPlaybackInfo(itemID: next.id, quality: quality, response: info)
         guard let source = PlaybackStreamSelection.defaultSource(in: info) else { return }
         await PlaybackStreamSelection.warm(itemID: next.id, source: source, using: playbackService)
     }
@@ -168,9 +186,22 @@ extension PlayerViewModel {
             LogTap.shared.note("[NextEp] countdown_fired")
             // New task: calling playNextEpisode() directly would let a nextEpisodeTimer cancel propagate into player.load (CancellationError).
             Task { @MainActor [weak self] in
-                await self?.playNextEpisode()
+                await self?.advanceAfterCountdown()
             }
         }
+    }
+
+    /// A countdown that ran out while the app was suspended or still asking the server what happened
+    /// meanwhile (#184) must not advance: the stop it would send for the old episode is the stale
+    /// write the hold exists to prevent. The card stays up and the viewer decides (audit final
+    /// review FR-PLR-3). A session that kept playing in PiP or on background audio is the newest
+    /// writer and advances as before.
+    func advanceAfterCountdown() async {
+        if isAwaitingBackgroundReload || (progressReportsHeldForSuspension && !playedWhileReportsHeld) {
+            LogTap.shared.note("[NextEp] countdown_held: session is suspended, not advancing")
+            return
+        }
+        await playNextEpisode()
     }
 
     func playNextEpisode() async {
@@ -195,45 +226,40 @@ extension PlayerViewModel {
         stopProgressReporting()
         cancellables.removeAll()
 
-        // Fire-and-forget stop report: reportStop's 30s URLRequest timeout would otherwise stall the transition behind a hidden, spinner-less overlay on a server hiccup.
-        let stopReport = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: completionAwarePositionTicks,
-            liveStreamId: nil
-        )
-        let svc = playbackService
-        Task {
-            do {
-                try await svc.reportPlaybackStopped(stopReport)
-                NotificationCenter.default.post(
-                    name: .playbackProgressDidChange,
-                    object: nil,
-                    userInfo: [
-                        PlaybackProgressKey.itemID: stopReport.itemId,
-                        PlaybackProgressKey.positionTicks: stopReport.positionTicks
-                    ]
-                )
-                LogTap.shared.note("[NextEp] report_stop_done (background)")
-            } catch {
-                LogTap.shared.note("[NextEp] report_stop_failed (background): \(error.localizedDescription)")
-            }
-        }
+        // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks, refreshesShelf: false)()
 
         // Do NOT call player.stop(): a full stop tears down the native AVPlayer, and AVKit fails to re-register its Now-Playing session against a swapped player, blanking the CC widget (issue #15). engine.load(newURL) reloads in place, preserving the AVPlayer across the seam.
         LogTap.shared.note("[NextEp] reload_in_place (no engine stop)")
 
-        resetSessionState(switchingTo: next)
+        resetSessionState(.itemSwitch(to: next))
 
         LogTap.shared.note("[NextEp] start_playback_enter id=\(item.id)")
         await startPlayback()
         LogTap.shared.note("[NextEp] start_playback_exit error=\(errorMessage ?? "nil") isPlaying=\(isPlaying)")
     }
 
-    /// Shared per-session reset for both episode-switch paths (auto-advance + season picker). Single owner on purpose: the two inline copies had drifted once (a stray player.stop() in the picker path, breaking the issue-#15 AVPlayer-reuse design).
-    private func resetSessionState(switchingTo newItem: JellyfinItem) {
+    /// How much of the per-session state a reset wipes.
+    enum SessionResetScope {
+        /// The player moves to another item (auto-advance, queue, season picker).
+        case itemSwitch(to: JellyfinItem)
+        /// The same item loads again from a stopped engine (outage retry, rung switch, item recovery).
+        case sameItemReload
+    }
+
+    /// The one place per-session state is cleared. Every path that starts another session on this view
+    /// model (both episode switches, the outage retry, the rung switch, the item recovery) calls it, so a
+    /// field cannot be wiped by one path and forgotten by another (audit PCORE-R202). A new per-session
+    /// field goes here, and into `SessionResetTests`. The item switch deliberately keeps the engine, the
+    /// play queue, `isInputLocked`, the picker's season list (issue #15) and `prerollsConsumed`.
+    func resetSessionState(_ scope: SessionResetScope) {
+        resetTrackState(clearsStreams: scope.isItemSwitch)
+        // The engine comes back at 1.0x; the speed badge must match it instead of the prior session's rate.
+        activeSpeedIndex = 2
+        guard case .itemSwitch(let newItem) = scope else { return }
+
         item = newItem
+        localDownload = downloadStore?.completedItem(newItem.id)
         // Single choke point for every in-session item switch (auto-advance, queue, season picker), so
         // the detail view behind the player can follow along and backing out lands on the episode that
         // was actually watched instead of the one that was started.
@@ -242,32 +268,19 @@ extension PlayerViewModel {
             object: nil,
             userInfo: [PlayerItemSwitchKey.item: newItem]
         )
+        advanceSessionGeneration()
         startFromBeginning = true
         // A response the successor warm fetched for THIS item is the one thing worth carrying across
         // the switch: it is exactly what the seam would otherwise ask the server for again while the
         // viewer waits on a black screen. Anything naming another item still goes, for the reason
         // `startPlayback` states where it reads this.
-        if cachedPlaybackInfo?.matching(newItem.id) == nil {
+        if cachedPlaybackInfo?.matching(newItem.id, quality: effectiveStreamingQuality) == nil {
             cachedPlaybackInfo = nil
         }
+        resetUpscaleOverride()
         errorMessage = nil
         videoFormat = .sdr
         clearVideoFormatAnnouncement()
-        subtitleCues = []
-        subtitleStreams = []
-        externalEngineTrackIDs = [:]
-        activeSubtitleIndex = nil
-        activeAudioIndex = nil
-        // The in-place AVPlayer reload (issue #15) resumes the next item at 1.0x; reset to the
-        // 1.0x index so the speed badge/picker match the engine instead of the prior episode's rate.
-        activeSpeedIndex = 2
-        // This path bypasses teardown() for AVPlayer reuse (issue #15), so deactivate explicitly: stale ASS script and subtitle-search overlay would otherwise survive onto the next episode.
-        deactivateASSRendering()
-        dismissSubtitleSearch()
-        subtitleDeleteState = .hidden
-        activeSubtitleCodec = nil
-        // Silent forced fallback is per-item (streams + audio language); the next load re-resolves it.
-        forcedSubtitleFallback = .none
         didAttemptReplacedItemRecovery = false
         nextEpisode = nil
         hasFetchedNextEpisode = false
@@ -276,8 +289,11 @@ extension PlayerViewModel {
         nextEpisodeOverlayDismissed = false
         nextEpisodeCountdown = 10
         isCountdownActive = false
+        lastPlaybackTimeForNextEpisode = 0
         hasReportedStart = false
         hasStartedPlaying = false
+        // The carry belongs to the file it was taken from (audit final review FR-PLR-2).
+        pendingSessionCarry = nil
         showControls = false
         isScrubbing = false
         controlsFocus = .progressBar
@@ -285,14 +301,42 @@ extension PlayerViewModel {
         progress = 0
         playbackTime = 0
         resumePositionTicks = 0
+        resumeOverrideSeconds = nil
+        outageResumeSeconds = nil
+        serverConfirmedUnreachable = false
         introSegment = nil
         outroSegment = nil
         recapSegment = nil
+        commercialSegments = []
         activeSkipSegment = nil
         didAutoSkipCurrentIntro = false
         didAutoSkipCurrentRecap = false
         didAutoSkipCurrentOutro = false
+        autoSkippedCommercialStarts = []
         didSkipCurrentSegment = nil
+    }
+
+    /// What the engine drops on every load, mirrored on the view-model side: both subtitle picks, their
+    /// cues and the overlay state that draws them. `clearsStreams` is for a different item, whose
+    /// stream list is not this one's; a reload of the same item re-reads it from PlaybackInfo anyway.
+    func resetTrackState(clearsStreams: Bool) {
+        if clearsStreams {
+            subtitleStreams = []
+            externalEngineTrackIDs = [:]
+            activeAudioIndex = nil
+        }
+        cancelSubtitleLoad()
+        subtitleCues = []
+        activeSubtitleIndex = nil
+        activeSubtitleCodec = nil
+        secondarySubtitleCues = []
+        activeSecondarySubtitleIndex = nil
+        // Silent forced fallback is per-item (streams + audio language); the next load re-resolves it.
+        forcedSubtitleFallback = .none
+        // This path bypasses teardown() for AVPlayer reuse (issue #15), so deactivate explicitly: stale ASS script and subtitle-search overlay would otherwise survive onto the next episode.
+        deactivateASSRendering()
+        dismissSubtitleSearch()
+        subtitleDeleteState = .hidden
     }
 
     func cancelNextEpisode() {
@@ -364,35 +408,19 @@ extension PlayerViewModel {
         stopProgressReporting()
         cancellables.removeAll()
 
-        // Fire-and-forget stop report (mirrors playNextEpisode): reportStop's 30s timeout would leave the picker row unresponsive on a slow CDN (DrHurt #12).
-        let stopReport = PlaybackStopReport(
-            itemId: item.id,
-            mediaSourceId: mediaSourceID,
-            playSessionId: playSessionID,
-            positionTicks: completionAwarePositionTicks,
-            liveStreamId: nil
-        )
-        let svc = playbackService
-        Task {
-            do {
-                try await svc.reportPlaybackStopped(stopReport)
-                NotificationCenter.default.post(
-                    name: .playbackProgressDidChange,
-                    object: nil,
-                    userInfo: [
-                        PlaybackProgressKey.itemID: stopReport.itemId,
-                        PlaybackProgressKey.positionTicks: stopReport.positionTicks
-                    ]
-                )
-                LogTap.shared.note("[SeasonPicker] report_stop_done (background)")
-            } catch {
-                LogTap.shared.note("[SeasonPicker] report_stop_failed (background): \(error.localizedDescription)")
-            }
-        }
+        // The shared close: Trakt stop, notification, shelf refresh and encode kill, fire-and-forget so a slow server cannot stall the switch (DrHurt #12).
+        makeServerSessionClose(positionTicks: completionAwarePositionTicks, refreshesShelf: false)()
 
         // No player.stop() (mirrors playNextEpisode): engine.load(newURL) reloads in place so AVKit's Now-Playing session survives the seam (issue #15).
-        resetSessionState(switchingTo: target)
+        resetSessionState(.itemSwitch(to: target))
 
         await startPlayback()
+    }
+}
+
+extension PlayerViewModel.SessionResetScope {
+    var isItemSwitch: Bool {
+        if case .itemSwitch = self { return true }
+        return false
     }
 }

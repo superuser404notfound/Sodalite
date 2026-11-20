@@ -53,7 +53,8 @@ final class LogTap: ObservableObject {
     // 300: holds a full HLS-wrapper session start (init.mp4 dump + m3u8 bodies + per-request logs) through the eventual AVPlayer failure; the previous 80 rolled the init.mp4 summary off before the failure landed.
     private let maxLines = 300
 
-    private nonisolated init() {}
+    /// Internal, not private, so a test can own a buffer that nothing else in the process writes into.
+    nonisolated init() {}
 
     /// Append one line to the buffer. Safe to call from any thread.
     ///
@@ -133,6 +134,8 @@ final class LogTap: ObservableObject {
         if enabled {
             startFileSink()
         } else {
+            // Audit R-REDACTION-6: no descriptor stays open on a file nobody writes to.
+            fileQueue.async { closeSinkHandle() }
             LogTap.shared.note("[LogTap] file sink off; the file on disk is left where it is")
         }
     }
@@ -143,6 +146,7 @@ final class LogTap: ObservableObject {
         fileSinkEnabled = false
         let urls = persistedLogURLs
         fileQueue.async {
+            closeSinkHandle()
             for url in urls { try? FileManager.default.removeItem(at: url) }
         }
     }
@@ -193,35 +197,64 @@ final class LogTap: ObservableObject {
     /// Shelf lines in `importShelfLines`). No-op when the sink is off.
     nonisolated static func appendPreformattedLinesToFileSink(_ lines: [String]) {
         guard fileSinkEnabled, let url = fileSinkURL, let rotated = rotatedFileSinkURL else { return }
+        // Audit PTD-207: the queue used to be unbounded, so a stalled disk grew it without limit.
+        guard fileBacklog.admit(lines.count) else { return }
         fileQueue.async {
+            let dropped = fileBacklog.takeDropped()
+            if dropped > 0 {
+                append("\(LogTimestamp.stamp())  [LogTap] file sink was behind, dropped \(dropped) lines",
+                       to: url, rotatingTo: rotated, segmentBytes: fileSegmentBytes)
+            }
             for line in lines {
                 append(line, to: url, rotatingTo: rotated, segmentBytes: fileSegmentBytes)
             }
+            fileBacklog.finish(lines.count)
         }
+    }
+
+    /// Lines queued for the file but not written yet. Past the limit a line is dropped and counted, and
+    /// the next batch that gets through writes one line saying how many.
+    nonisolated static let fileBacklog = FileSinkBacklog(limit: 4096)
+
+    /// The one open handle of the sink. Only touched on `fileQueue`.
+    private nonisolated static let sinkHandle = SinkHandle()
+    private nonisolated static let sinkLock = NSLock()
+
+    private nonisolated static func closeSinkHandle() {
+        sinkLock.lock()
+        sinkHandle.close()
+        sinkLock.unlock()
+    }
+
+    /// Returns once every line queued so far has been written. For tests.
+    nonisolated static func flushFileSink() {
+        fileQueue.sync {}
     }
 
     /// Synchronous and static so the rotation can be tested against a small segment. Only ever called
     /// on `fileQueue`, which is what makes the check-then-rename below race free.
     ///
-    /// The marker is written straight to the new file rather than through `note(_:)`, which would come
-    /// back here on the queue this is already running on.
+    /// The handle stays open between lines (audit PTD-207: open, seek and close per line is three
+    /// syscalls on every log line of a live session). The marker is written straight to the new file
+    /// rather than through `note(_:)`, which would come back here on the queue this is already running on.
     nonisolated static func append(_ line: String, to url: URL, rotatingTo rotated: URL, segmentBytes: Int) {
-        guard var handle = try? FileHandle(forWritingTo: url) else { return }
-        defer { try? handle.close() }
+        let sink = sinkHandle
+        // Production calls arrive on `fileQueue`; tests call this from their own threads.
+        sinkLock.lock()
+        defer { sinkLock.unlock() }
+        guard sink.open(url) else { return }
         var text = line + "\n"
-        let end = (try? handle.seekToEnd()) ?? 0
-        if end >= UInt64(segmentBytes) {
-            try? handle.close()
+        if sink.size >= UInt64(segmentBytes) {
+            sink.close()
             let manager = FileManager.default
             try? manager.removeItem(at: rotated)
             guard (try? manager.moveItem(at: url, to: rotated)) != nil else { return }
             manager.createFile(atPath: url.path, contents: nil)
-            guard let fresh = try? FileHandle(forWritingTo: url) else { return }
-            handle = fresh
+            guard sink.open(url) else { return }
             text = "\(LogTimestamp.stamp())  [LogTap] file sink rotated, earlier lines are in "
                 + "\(rotated.lastPathComponent)\n" + text
         }
-        try? handle.write(contentsOf: Data(text.utf8))
+        sink.write(Data(text.utf8))
     }
 
     /// Moves what the Top Shelf extension logged in its own process into the buffer (see `ShelfLog`).
@@ -282,5 +315,104 @@ final class LogTap: ObservableObject {
                 self?.sequenceNumber = 0
             }
         }
+    }
+}
+
+/// Counts lines waiting for the file queue. `admit` refuses a batch that would pass the limit.
+nonisolated final class FileSinkBacklog: @unchecked Sendable {
+    private let limit: Int
+    private let lock = NSLock()
+    private var pending = 0
+    private var dropped = 0
+
+    init(limit: Int) { self.limit = limit }
+
+    func admit(_ count: Int) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        // A batch that alone exceeds the limit still goes through when nothing is queued.
+        if pending > 0, pending + count > limit {
+            dropped += count
+            return false
+        }
+        pending += count
+        return true
+    }
+
+    func finish(_ count: Int) {
+        lock.lock()
+        pending -= count
+        lock.unlock()
+    }
+
+    func takeDropped() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        let value = dropped
+        dropped = 0
+        return value
+    }
+}
+
+/// A write handle kept open for the sink, with the size it has reached. Not thread safe on its own,
+/// `LogTap.sinkLock` serialises every call.
+nonisolated final class SinkHandle: @unchecked Sendable {
+    private var handle: FileHandle?
+    private var url: URL?
+    private var identity: (device: dev_t, inode: ino_t)?
+    private(set) var size: UInt64 = 0
+    private(set) var opens = 0
+    private var writesSinceCheck = 0
+    static let checkInterval = 64
+
+    /// True when a handle for `target` is ready. Reopens when the target changed, and every
+    /// `checkInterval` writes checks that the path still names the file we hold: the system may purge
+    /// Caches, and a file removed and recreated at the same path is a different file (audit
+    /// R-REDACTION-6), which an existence check would not notice.
+    func open(_ target: URL) -> Bool {
+        if handle != nil, url == target {
+            writesSinceCheck += 1
+            if writesSinceCheck < Self.checkInterval { return true }
+            writesSinceCheck = 0
+            if pathStillNamesOpenFile(target) { return true }
+        }
+        close()
+        guard let fresh = try? FileHandle(forWritingTo: target) else { return false }
+        size = (try? fresh.seekToEnd()) ?? 0
+        handle = fresh
+        url = target
+        identity = Self.identity(ofDescriptor: fresh.fileDescriptor)
+        opens += 1
+        return true
+    }
+
+    private func pathStillNamesOpenFile(_ target: URL) -> Bool {
+        var info = stat()
+        guard stat(target.path, &info) == 0, let identity else { return false }
+        return info.st_dev == identity.device && info.st_ino == identity.inode
+    }
+
+    private static func identity(ofDescriptor fd: Int32) -> (device: dev_t, inode: ino_t)? {
+        var info = stat()
+        guard fstat(fd, &info) == 0 else { return nil }
+        return (info.st_dev, info.st_ino)
+    }
+
+    func write(_ data: Data) {
+        guard let handle else { return }
+        if (try? handle.write(contentsOf: data)) != nil {
+            size += UInt64(data.count)
+        } else {
+            close()
+        }
+    }
+
+    func close() {
+        try? handle?.close()
+        handle = nil
+        url = nil
+        identity = nil
+        size = 0
+        writesSinceCheck = 0
     }
 }

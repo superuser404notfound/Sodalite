@@ -69,7 +69,7 @@ struct LiveProgramsView: View {
                                     tint: tint,
                                     imageURLProvider: { program in
                                         dependencies.jellyfinImageService.imageURL(
-                                            itemID: program.id, imageType: .primary,
+                                            itemID: program.id, serverID: program.serverID, imageType: .primary,
                                             tag: program.primaryImageTag, maxWidth: ImageWidth.wideCard)
                                     },
                                     onSelect: { program in
@@ -84,6 +84,7 @@ struct LiveProgramsView: View {
                     }
                     .padding(.vertical, hSizeClass == .compact ? 16 : 40)
                 }
+                .drivesShellBar()
                 #if os(iOS)
                 .refreshable { await model.refresh() }
                 #endif

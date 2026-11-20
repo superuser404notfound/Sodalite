@@ -46,7 +46,7 @@ struct SeerrSeasonRow: View {
                       : AnyShapeStyle(Color.Theme.restFill))
         )
         .focusStroke(cornerRadius: 14, isFocused: focused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($focused)
         .stableTap(isFocused: focused) { toggle() }
         .animation(.easeInOut(duration: 0.15), value: focused)
@@ -73,6 +73,7 @@ extension SeerrMediaStatus {
         case .pending: "catalog.seasons.pendingApproval"
         case .partiallyAvailable: "catalog.status.partiallyAvailable"
         case .deleted: "catalog.status.removed"
+        case .failed: "catalog.requestStatus.failed"
         case .unknown: "catalog.status.unknown"
         }
     }

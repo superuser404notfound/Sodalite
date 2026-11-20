@@ -54,6 +54,12 @@ struct ColorThemeTests {
         expectSame(Color.Theme.scrimHeavy, Color.black.opacity(0.85), "scrimHeavy")
     }
 
+    @Test("the quiet label is opaque, at the level .secondary draws on the dark page")
+    func quietLabel() {
+        expectSame(Color.Theme.quietLabel, Color(white: 0.5), "quietLabel")
+        #expect(components(Color.Theme.quietLabel).alpha == 1)
+    }
+
     /// The content edge outlines a thumbnail or a swatch against a page it cannot predict; the panel
     /// edge outlines a surface whose own darkness already does most of that work. Rendered over
     /// eight cases, the content edge is the one that has to survive a dark subject on a dark page,

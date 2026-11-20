@@ -10,6 +10,9 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
     let currentProgram: JellyfinProgram?
     /// Present when the channel list is fetched with `EnableUserData=true`.
     let userData: ChannelUserData?
+    var serverID: String? = nil
+    /// Jellyfin's `ChannelType` ("TV" / "Radio"), filled on every channel without a `Fields` entry.
+    var channelType: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -18,6 +21,8 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
         case imageTags = "ImageTags"
         case currentProgram = "CurrentProgram"
         case userData = "UserData"
+        case serverID = "ServerId"
+        case channelType = "ChannelType"
     }
 
     /// Primary image tag, used to build the channel-logo URL.
@@ -25,6 +30,29 @@ struct JellyfinChannel: Codable, Sendable, Identifiable, Equatable {
 
     /// Server-side favorite flag (nil when UserData wasn't requested).
     var isFavorite: Bool { userData?.isFavorite ?? false }
+
+    /// A channel without a type is TV: the M3U tuner never sets one, and Jellyfin defaults it so.
+    var kind: GuideFilter.ChannelKind {
+        channelType.flatMap(GuideFilter.ChannelKind.init(rawValue:)) ?? .tv
+    }
+}
+
+extension JellyfinChannel {
+    /// Same XMLTV over-escaping as program text (#182): the name is display-only, so it is decoded
+    /// here once rather than on every surface that draws it.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try c.decode(String.self, forKey: .id),
+            name: try c.decode(String.self, forKey: .name).epgDisplayText,
+            channelNumber: try c.decodeIfPresent(String.self, forKey: .channelNumber),
+            imageTags: try c.decodeIfPresent([String: String].self, forKey: .imageTags),
+            // A bad nested program must not cost the channel its place in the guide.
+            currentProgram: try? c.decodeIfPresent(JellyfinProgram.self, forKey: .currentProgram),
+            userData: try c.decodeIfPresent(ChannelUserData.self, forKey: .userData),
+            serverID: try c.decodeIfPresent(String.self, forKey: .serverID),
+            channelType: try c.decodeIfPresent(String.self, forKey: .channelType))
+    }
 }
 
 /// Channel `UserData` slice the guide reads; favorites use the same UserData.IsFavorite as regular items.
@@ -65,9 +93,14 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
     let timerId: String?
     /// Set when a series timer covers this program.
     let seriesTimerId: String?
+    /// The film's year for a movie; for anything else Jellyfin derives it from the original air
+    /// date, which identifies nothing on a guide entry, so only `movieYear` reads it.
+    var productionYear: Int? = nil
+    var serverID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
+        case serverID = "ServerId"
         case channelId = "ChannelId"
         case channelName = "ChannelName"
         case name = "Name"
@@ -88,9 +121,24 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
         case episodeTitle = "EpisodeTitle"
         case timerId = "TimerId"
         case seriesTimerId = "SeriesTimerId"
+        case productionYear = "ProductionYear"
     }
 
     var primaryImageTag: String? { imageTags?["Primary"] }
+
+    /// Sodalite#159: the line a stored movie draws under its title.
+    var movieYear: Int? { isMovie == true ? productionYear : nil }
+
+    /// The identity line both guide surfaces draw under the program name: the episode cascade, and
+    /// for a movie, which has none, its year.
+    var identityLabel: String? {
+        EpisodeMetadataFormatter.programLabel(season: parentIndexNumber,
+                                              episode: indexNumber,
+                                              episodeTitle: episodeTitle,
+                                              seriesName: seriesName,
+                                              header: name)
+            ?? movieYear.map { String($0) }
+    }
 
     /// Guide placeholder for channels without EPG data ("live-<channelID>"); id doesn't exist server-side, so don't offer record affordances.
     var isSynthesized: Bool { id.hasPrefix("live-") }
@@ -99,6 +147,42 @@ struct JellyfinProgram: Codable, Sendable, Identifiable, Equatable {
     func isAiring(at now: Date) -> Bool {
         guard let start = startDate, let end = endDate else { return false }
         return now >= start && now < end
+    }
+}
+
+extension JellyfinProgram {
+    /// Decodes the XML entities over-escaping XMLTV feeds leave in the text ("Food &amp; Cooking",
+    /// #182) once, here, so no surface has to remember to. Genres stay raw: the guide sends them back
+    /// as `Genres`, which the server matches against the stored, still-escaped value.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        func text(_ key: CodingKeys) throws -> String? {
+            try c.decodeIfPresent(String.self, forKey: key)?.epgDisplayText
+        }
+        self.init(
+            id: try c.decode(String.self, forKey: .id),
+            channelId: try c.decodeIfPresent(String.self, forKey: .channelId),
+            channelName: try text(.channelName),
+            name: try c.decode(String.self, forKey: .name).epgDisplayText,
+            overview: try text(.overview),
+            startDate: try c.decodeIfPresent(Date.self, forKey: .startDate),
+            endDate: try c.decodeIfPresent(Date.self, forKey: .endDate),
+            genres: try c.decodeIfPresent([String].self, forKey: .genres),
+            imageTags: try c.decodeIfPresent([String: String].self, forKey: .imageTags),
+            isLive: try c.decodeIfPresent(Bool.self, forKey: .isLive),
+            isNews: try c.decodeIfPresent(Bool.self, forKey: .isNews),
+            isMovie: try c.decodeIfPresent(Bool.self, forKey: .isMovie),
+            isSeries: try c.decodeIfPresent(Bool.self, forKey: .isSeries),
+            isKids: try c.decodeIfPresent(Bool.self, forKey: .isKids),
+            isSports: try c.decodeIfPresent(Bool.self, forKey: .isSports),
+            seriesName: try text(.seriesName),
+            parentIndexNumber: try c.decodeIfPresent(Int.self, forKey: .parentIndexNumber),
+            indexNumber: try c.decodeIfPresent(Int.self, forKey: .indexNumber),
+            episodeTitle: try text(.episodeTitle),
+            timerId: try c.decodeIfPresent(String.self, forKey: .timerId),
+            seriesTimerId: try c.decodeIfPresent(String.self, forKey: .seriesTimerId),
+            productionYear: try c.decodeIfPresent(Int.self, forKey: .productionYear),
+            serverID: try c.decodeIfPresent(String.self, forKey: .serverID))
     }
 }
 
@@ -118,6 +202,24 @@ struct JellyfinGuideInfo: Codable, Sendable, Equatable {
 struct LiveTvChannelsResponse: Codable, Sendable {
     let items: [JellyfinChannel]
     let totalRecordCount: Int?
+    /// Elements `LossyList` threw away. Pagers count them, or a page that lost one reads as the last (audit FR-DAT-1).
+    var dropped = 0
+    var pageCount: Int { items.count + dropped }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let list = try c.decode(LossyList<JellyfinChannel>.self, forKey: .items)
+        items = list.elements
+        dropped = list.dropped
+        totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
+        JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
+    }
+
+    init(items: [JellyfinChannel], totalRecordCount: Int?, dropped: Int = 0) {
+        self.items = items
+        self.dropped = dropped
+        self.totalRecordCount = totalRecordCount
+    }
 
     enum CodingKeys: String, CodingKey {
         case items = "Items"
@@ -128,6 +230,24 @@ struct LiveTvChannelsResponse: Codable, Sendable {
 struct LiveTvProgramsResponse: Codable, Sendable {
     let items: [JellyfinProgram]
     let totalRecordCount: Int?
+    /// Elements `LossyList` threw away. Pagers count them, or a page that lost one reads as the last (audit FR-DAT-1).
+    var dropped = 0
+    var pageCount: Int { items.count + dropped }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let list = try c.decode(LossyList<JellyfinProgram>.self, forKey: .items)
+        items = list.elements
+        dropped = list.dropped
+        totalRecordCount = try c.decodeIfPresent(Int.self, forKey: .totalRecordCount)
+        JellyfinDecodeReport.droppedElements(list.dropped, of: list.dropped + list.elements.count)
+    }
+
+    init(items: [JellyfinProgram], totalRecordCount: Int?, dropped: Int = 0) {
+        self.items = items
+        self.dropped = dropped
+        self.totalRecordCount = totalRecordCount
+    }
 
     enum CodingKeys: String, CodingKey {
         case items = "Items"
@@ -208,6 +328,64 @@ struct LiveTvSeriesTimersResponse: Codable, Sendable {
     }
 }
 
+/// Parses the ISO 8601 shapes Jellyfin and Seerr send: `...T10:00:00Z` with no fraction or with 1 to 7
+/// fractional digits. Two immutable parse styles shared by every decode, where the old decoder built
+/// a DateFormatter per date: 152 ms against 3 ms for a 500-program page (audit NET-203).
+nonisolated enum ISODateParser {
+    private static let fractional = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
+    private static let plain = Date.ISO8601FormatStyle()
+    // "+02:00" offsets, which the two above do not read.
+    private static let fractionalColon = Date.ISO8601FormatStyle(timeZoneSeparator: .colon, includingFractionalSeconds: true)
+    private static let plainColon = Date.ISO8601FormatStyle(timeZoneSeparator: .colon)
+
+    static func parse(_ raw: String) -> Date? {
+        parseZoned(raw) ?? (hasZone(raw) ? nil : parseZoned(raw + "Z"))
+    }
+
+    private static func parseZoned(_ raw: String) -> Date? {
+        if let date = try? fractional.parse(raw) { return date }
+        if let date = try? plain.parse(raw) { return date }
+        if let date = try? fractionalColon.parse(raw) { return date }
+        return try? plainColon.parse(raw)
+    }
+
+    /// Zone designator after the time part: `Z`, `+hh:mm`, `-hhmm`. The old Live TV parser read a
+    /// zoneless stamp as UTC, so that shape gets a "Z" (audit FR-DAT-2).
+    private static func hasZone(_ raw: String) -> Bool {
+        guard let t = raw.firstIndex(where: { $0 == "T" || $0 == "t" }) else { return true }
+        return raw[t...].contains(where: { $0 == "Z" || $0 == "z" || $0 == "+" || $0 == "-" })
+    }
+}
+
+/// Decodes a list one element at a time, so an entry that fails (an EPG program with no title) is
+/// dropped and the rest of the page survives (audit NET-206). The generic twin of `FailableJellyfinItem`.
+struct LossyList<Element: Decodable>: Decodable {
+    let elements: [Element]
+    let dropped: Int
+
+    init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var kept: [Element] = []
+        var dropped = 0
+        while !container.isAtEnd {
+            if let element = try? container.decode(Element.self) {
+                kept.append(element)
+            } else {
+                dropped += 1
+                // A failed decode leaves the cursor on the element; step over it. If even that
+                // throws, the cursor cannot move and the loop would never end (audit review R-W2-4).
+                do { _ = try container.decode(DiscardedValue.self) } catch { break }
+            }
+        }
+        elements = kept
+        self.dropped = dropped
+    }
+
+    private struct DiscardedValue: Decodable {
+        init(from decoder: Decoder) throws {}
+    }
+}
+
 extension JSONDecoder {
     /// Lenient ISO parse: Jellyfin timestamps carry up to 7 fractional digits + `Z`, which `.iso8601` (max 3) rejects.
     static let jellyfinLiveTv: JSONDecoder = {
@@ -215,16 +393,7 @@ extension JSONDecoder {
         decoder.dateDecodingStrategy = .custom { dec in
             let container = try dec.singleValueContainer()
             let raw = try container.decode(String.self)
-            // Per-call DateFormatter: shared instance would race on `dateFormat` across overlapping Live TV requests.
-            let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = TimeZone(identifier: "UTC")
-            for fmt in ["yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'",
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                        "yyyy-MM-dd'T'HH:mm:ss'Z'"] {
-                formatter.dateFormat = fmt
-                if let date = formatter.date(from: raw) { return date }
-            }
+            if let date = ISODateParser.parse(raw) { return date }
             throw DecodingError.dataCorruptedError(
                 in: container, debugDescription: "Unparseable date: \(raw)")
         }

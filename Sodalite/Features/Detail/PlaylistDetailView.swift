@@ -3,6 +3,10 @@ import SwiftUI
 struct PlaylistDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @State private var viewModel: DetailViewModel?
@@ -10,6 +14,8 @@ struct PlaylistDetailView: View {
     @State private var showPlayer = false
     @State private var playItem: JellyfinItem?
     @State private var playQueue: [JellyfinItem] = []
+    /// Play and Shuffle start every entry from the top; a picked row resumes it (Sodalite#213).
+    @State private var playFromBeginning = true
     /// Value-based focus, keyed by item id, same shape as CollectionDetailView.
     @FocusState private var focusedItemID: String?
     /// Target for the up-move correction below the fold (Sodalite#53 follow-up).
@@ -45,17 +51,17 @@ struct PlaylistDetailView: View {
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
                     item: showPlayer ? playItem : nil,
-                    startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    startFromBeginning: playFromBeginning,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: nil,
                     preferredMediaSourceID: nil,
                     playQueue: playQueue
@@ -65,6 +71,11 @@ struct PlaylistDetailView: View {
         }
         .onChange(of: appState.requestPlayerDismissal) { _, _ in
             if showPlayer { showPlayer = false }
+        }
+        // The rows' menu marks watched in place; their checkmarks come from this list.
+        .onReceive(NotificationCenter.default.publisher(for: .homePlayedDidChange)) { _ in
+            guard let vm = viewModel else { return }
+            Task { await vm.loadPlaylistItems() }
         }
         .navigationDestination(item: $selectedItem) { item in
             DetailRouterView(item: item)
@@ -81,13 +92,13 @@ struct PlaylistDetailView: View {
             #endif
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    playbackService: dependencies.jellyfinPlaybackService
+                    playbackService: session.playbackService
                 )
                 Task {
                     await viewModel?.loadFullDetail()
@@ -102,8 +113,8 @@ struct PlaylistDetailView: View {
     }
 
     /// A playlist can hold the same item twice (an imported .m3u, or one built before the server's
-    /// own add-dedupe), so ForEach's id can't be the bare item id (`ParentId=` entries differ only
-    /// by `PlaylistItemId`, which the model doesn't carry). Disambiguates only a REPEATED id, by the
+    /// own add-dedupe), so ForEach's id can't be the bare item id (entries differ only by
+    /// `PlaylistItemId`, which the model doesn't carry). Disambiguates only a REPEATED id, by the
     /// order it appears, so the common case (no duplicates) keeps pure content identity: an edit
     /// elsewhere in the list doesn't reflow every row the way a position-qualified id would (Audit
     /// 2026-09-25 BROWSE-8).
@@ -209,6 +220,7 @@ struct PlaylistDetailView: View {
                 guard let first = queue.first else { return }
                 playItem = first
                 playQueue = queue
+                playFromBeginning = true
                 showPlayer = true
             }
         )
@@ -225,6 +237,7 @@ struct PlaylistDetailView: View {
                 guard let first = queue.first else { return }
                 playItem = first
                 playQueue = queue
+                playFromBeginning = true
                 showPlayer = true
             }
         )
@@ -234,6 +247,18 @@ struct PlaylistDetailView: View {
             systemImage: vm.isFavorite ? "heart.fill" : "heart",
             action: { Task { await vm.toggleFavorite() } }
         )
+    }
+
+    /// A picked row plays and the playlist carries on behind it (Sodalite#213), the way Jellyfin's
+    /// web client answers it; the detail page moved into the row's menu. Resolved by row id at call
+    /// time: `PlayMediaItemAction` compares equal, so a captured index would outlive a reorder.
+    private func play(fromRow rowID: String, vm: DetailViewModel, fromBeginning: Bool) {
+        let items = videoItems(vm)
+        guard let start = Self.uniqueRowIDs(for: items).firstIndex(of: rowID) else { return }
+        playItem = items[start]
+        playQueue = Array(items[start...])
+        playFromBeginning = fromBeginning
+        showPlayer = true
     }
 
     // MARK: - Playlist Items (vertical list)
@@ -254,8 +279,12 @@ struct PlaylistDetailView: View {
                     CollectionItemRow(
                         item: media,
                         imageURL: dependencies.jellyfinImageService.posterURL(for: media, maxWidth: ImageWidth.thumbnail),
-                        onSelect: { selectedItem = media }
+                        onSelect: { play(fromRow: rowID, vm: vm, fromBeginning: false) }
                     )
+                    .mediaContextMenu(for: media, open: { selectedItem = $0 })
+                    .environment(\.playMediaItem, PlayMediaItemAction { _, fromBeginning in
+                        play(fromRow: rowID, vm: vm, fromBeginning: fromBeginning)
+                    })
                     .focused($focusedItemID, equals: rowID)
                     .onFocusMoveUp(active: correctsUpMove && index == 0) {
                         playButtonFocused = true

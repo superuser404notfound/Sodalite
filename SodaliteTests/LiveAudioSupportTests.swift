@@ -135,6 +135,16 @@ struct LiveAudioSupportTests {
         #expect(message != ErrorText.unexpected)
     }
 
+    /// The permission refusal points at the fix, so it must not read as the hopeless one.
+    @Test("the permission refusal names the format and differs from the hopeless one")
+    func permissionRefusalNamesTheFormat() {
+        let message = ErrorText.user(for: PlayerEngineError.liveAudioNeedsServerTranscoding(codec: "AC-4"))
+        #expect(message.contains("AC-4"))
+        #expect(!message.contains("%@"))
+        #expect(message != ErrorText.user(for: PlayerEngineError.liveAudioUnsupported(codec: "AC-4")))
+        #expect(PlayerEngineError.liveAudioNeedsServerTranscoding(codec: "AC-4").isLiveAudioRefusal)
+    }
+
     @Test("both display names survive the round trip", arguments: [
         LiveAudioSupport.UnplayableCodec.ac4, .mpegH,
     ])

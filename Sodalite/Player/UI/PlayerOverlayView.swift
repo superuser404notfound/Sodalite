@@ -1,3 +1,7 @@
+#if !os(macOS)
+// Player chrome for the UIKit host: it is display-only by construction, because
+// PlayerHostController owns every press and moves a cursor through it. macOS has its own
+// transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 import AetherEngine
 
@@ -18,23 +22,41 @@ struct PlayerOverlayView: View {
             // intrinsic size and would otherwise collapse to 0x0 and receive no touches.
             // Removed entirely while the child lock is engaged so no swipe/tap reaches playback.
             if !viewModel.isInputLocked {
-                PlayerGestureCatcher(viewModel: viewModel)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
+                if let fold {
+                    FoldRegion(rect: fold.videoArea) {
+                        PlayerGestureCatcher(viewModel: viewModel)
+                    }
+                } else {
+                    PlayerGestureCatcher(viewModel: viewModel)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .ignoresSafeArea()
+                }
             }
             #endif
 
             // Subtitle rendering (incl. the ~10 Hz subtitleTime clock) is observed inside SubtitleLayer,
             // not here, so this top-level overlay body does not re-evaluate its whole ZStack every tick
             // while subtitles are active. (perf: observation altitude)
+            #if os(iOS)
+            if let fold {
+                // The picture-bound cues follow the picture into the upright half; the text lines
+                // are drawn by the panel below the fold.
+                FoldRegion(rect: fold.videoArea) {
+                    SubtitleLayer(viewModel: viewModel, role: .pictureBound)
+                }
+            } else {
+                SubtitleLayer(viewModel: viewModel)
+            }
+            #else
             SubtitleLayer(viewModel: viewModel)
+            #endif
 
             #if os(iOS)
             // Sodalite#156: the picture is on a receiver or an external display, so this screen has
             // nothing to show but what is running and where. Below the spinner and the error screen,
             // which both still speak for the session, and below the transport, which still drives it.
             if let destination = viewModel.externalPlaybackDestination {
-                let lines = PlayerTitleLines(item: viewModel.item)
+                let lines = PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy)
                 ExternalPlaybackBackdrop(
                     destination: destination,
                     title: lines.header,
@@ -47,10 +69,21 @@ struct PlayerOverlayView: View {
             }
             #endif
 
-            if viewModel.isLoading {
+            #if os(iOS)
+            if viewModel.isLoading, let fold {
+                FoldRegion(rect: fold.videoArea) {
+                    ZStack {
+                        viewModel.spinnerKeepsPicture ? Color.Theme.scrim : Color.black
+                        ProgressView().tint(tintColor)
+                    }
+                }
+                .transition(.opacity)
+            }
+            #endif
+            if viewModel.isLoading, fold == nil {
                 // Inner ZStack + whole-stack ignoresSafeArea so the spinner shares the backdrop's coord space; centering on Color.black's layout bounds (which respect safe-area) drifted the spinner top-half when an outgoing next-episode card shifted the parent's insets.
                 ZStack {
-                    Color.black
+                    viewModel.spinnerKeepsPicture ? Color.Theme.scrim : Color.black
                     ProgressView()
                         // ProgressView doesn't reliably inherit the overlay's `.tint(...)` on tvOS (falls back to white); set it explicitly.
                         .tint(tintColor)
@@ -58,6 +91,21 @@ struct PlayerOverlayView: View {
                 .ignoresSafeArea()
                 .transition(.opacity)
             }
+
+            #if os(iOS)
+            // AetherEngine#1070: AirPlay plays the sound, but this title's picture stays here. Shown whether
+            // the controls are up or not, because the viewer is looking at a black TV.
+            if viewModel.airPlayPictureStaysLocal, viewModel.errorMessage == nil {
+                VStack {
+                    AirPlayPictureBanner(canMove: viewModel.airPlayPictureCanMoveToReceiver) {
+                        viewModel.showPictureOnAirPlayReceiver()
+                    }
+                    .padding(.top, 40)
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
+            #endif
 
             // Sits above the spinner layer and above the running picture alike: the reader is fighting the
             // source either way, and a stall that leaves the picture running no longer raises a spinner at
@@ -117,10 +165,34 @@ struct PlayerOverlayView: View {
                 .transition(.opacity)
             }
 
-            if viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked {
+            #if os(tvOS)
+            tvOSControlScrims
+            #endif
+
+            #if os(tvOS)
+            // Sodalite#168: its own container, so leaving can run on the scrim's clock without the
+            // subtitles and the skip pill, which also follow showControls, changing speed. Measured:
+            // under only the parent's animation the removal was a one-frame cut, which next to the
+            // slow scrim read as the controls snapping away. Appearing keeps the quick 0.3 s.
+            ZStack {
+                if controlsOverlayVisible {
+                    controlsOverlay
+                }
+            }
+            .animation(controlsOverlayVisible
+                       ? .easeInOut(duration: 0.3)
+                       : .linear(duration: ControlScrimLayer.fadeOutDuration),
+                       value: controlsOverlayVisible)
+            #else
+            if let fold {
+                if viewModel.errorMessage == nil, !viewModel.isInputLocked {
+                    foldedControlsPanel(fold)
+                }
+            } else if controlsOverlayVisible {
                 // iOS swipe hints live INSIDE controlsOverlay's absolute-geometry wrapper (Sodalite#15 portrait clip).
                 controlsOverlay
             }
+            #endif
 
             // Stats-for-nerds panel mounted above the controls overlay so it stays readable when the transport's auto-hide fires.
             if viewModel.showStatsOverlay && viewModel.errorMessage == nil {
@@ -142,9 +214,13 @@ struct PlayerOverlayView: View {
 
             topRightInfoColumn
 
+            #if os(tvOS)
+            liveZapBannerLayer
+            #endif
+
             // Floating skip hint (intro or recap), only while controls are hidden; once they open, the skip action is a focusable button inside TransportBar instead.
             if let skipSegment = viewModel.activeSkipSegment,
-               !viewModel.showControls,
+               !viewModel.showControls || fold != nil,
                viewModel.errorMessage == nil,
                !viewModel.showNextEpisodeOverlay {
                 segmentSkipOverlay(label: skipSegment.kind.buttonLabel)
@@ -268,16 +344,22 @@ struct PlayerOverlayView: View {
             .transition(.opacity)
     }
 
+    private var gestures: PlayerControlsLayout { viewModel.preferences.playerControls }
+
     private var swipeHintsRow: some View {
         HStack {
             // Sodalite#156: the brightness swipe stands down while the picture is elsewhere, so its
             // affordance goes with it. The volume one stays, it still reaches an AirPlay 2 receiver.
-            if ExternalPlaybackPresentation.localPictureControlsApply(
+            if gestures.isVisible(.brightnessSwipe, in: .gestures),
+               ExternalPlaybackPresentation.localPictureControlsApply(
                 destination: viewModel.externalPlaybackDestination) {
                 swipeHint(icon: "sun.max.fill")
             }
             Spacer()
-            swipeHint(icon: "speaker.wave.2.fill")
+            // A swipe switched off in Player Controls (Sodalite#194) takes its hint with it.
+            if gestures.isVisible(.volumeSwipe, in: .gestures) {
+                swipeHint(icon: "speaker.wave.2.fill")
+            }
         }
     }
 
@@ -299,7 +381,26 @@ struct PlayerOverlayView: View {
     }
     #endif
 
+    @ViewBuilder
     private func segmentSkipOverlay(label: String) -> some View {
+        #if os(iOS)
+        if let fold {
+            FoldRegion(rect: fold.videoArea) {
+                skipSegmentHint(label: label)
+                    .padding(.trailing, PlayerPillMetrics.current.marginX)
+                    .padding(.bottom, 16)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+            }
+            .transition(.opacity)
+        } else {
+            floatingSegmentSkipOverlay(label: label)
+        }
+        #else
+        floatingSegmentSkipOverlay(label: label)
+        #endif
+    }
+
+    private func floatingSegmentSkipOverlay(label: String) -> some View {
         VStack {
             Spacer()
             HStack {
@@ -353,8 +454,13 @@ struct PlayerOverlayView: View {
         let marginX = metrics.marginX
         #if os(iOS)
         // The skip pill's anchor, except that the prompt stays put with the touch controls up, so it
-        // lifts clear of them instead of hiding the way the skip pill does.
-        let marginY: CGFloat = viewModel.showControls ? 150 : metrics.marginY
+        // lifts clear of them instead of hiding the way the skip pill does. Folded, the controls are
+        // below the fold for good and the prompt sits at the bottom of the picture instead.
+        let marginY: CGFloat = if let fold {
+            screen.height - fold.videoArea.maxY + 16
+        } else {
+            viewModel.showControls ? 150 : metrics.marginY
+        }
         #else
         // On tvOS this only renders with the transport hidden, so there is no open-transport margin
         // to dodge; the prompt is a TransportBar button then.
@@ -411,7 +517,7 @@ struct PlayerOverlayView: View {
     private func nextEpisodeMetadata(for episode: JellyfinItem) -> String? {
         let token = EpisodeMetadataFormatter.seasonEpisode(
             season: episode.parentIndexNumber, episode: episode.indexNumber)
-        let name = episode.name
+        let name = viewModel.spoilerPolicy.visibleTitle(of: episode) ?? ""
         if name.isEmpty { return token.isEmpty ? nil : token }
         return token.isEmpty ? name : "\(token) · \(name)"
     }
@@ -473,6 +579,62 @@ struct PlayerOverlayView: View {
         }
         return remoteViewArtworkURL
     }
+
+    /// The folded iPhone Duo split, unless the picture is not on this screen at all (AirPlay, an external
+    /// display), where there is nothing to move above the fold.
+    private var fold: FoldLayout? {
+        #if os(iOS)
+        viewModel.externalPlaybackDestination == nil ? viewModel.foldLayout : nil
+        #else
+        nil
+        #endif
+    }
+
+    #if os(iOS)
+    /// Below the fold of a standing iPhone Duo: the subtitle lines right under the fold, then the touch
+    /// controls for good (nothing auto-hides, the picture above stays clear), with the channel lineup
+    /// between top bar and transport during Live TV.
+    private func foldedControlsPanel(_ fold: FoldLayout) -> some View {
+        let (_, insets) = Self.windowGeometry(fallback: fold.panelArea.size)
+        // From the bottom of the picture down, fold band included: the presentation does not paint
+        // the band on its own, and the page under the player showed through it.
+        let gap = fold.panelArea.minY - fold.videoArea.maxY
+        let area = CGRect(x: fold.panelArea.minX, y: fold.videoArea.maxY,
+                          width: fold.panelArea.width, height: fold.panelArea.maxY - fold.videoArea.maxY)
+        return FoldRegion(rect: area) {
+            ZStack {
+                Color.black
+                VStack(spacing: 0) {
+                    // Right under the fold, the closest the lines can get to the picture. Reserved only
+                    // while a track is on, so the controls do not jump with every cue.
+                    if viewModel.activeSubtitleIndex != nil || viewModel.activeSecondarySubtitleIndex != nil {
+                        SubtitleLayer(viewModel: viewModel, role: .textStackOnly)
+                            .frame(height: Self.foldedSubtitleBandHeight)
+                    }
+                    PlayerTouchControls(
+                        viewModel: viewModel,
+                        onDismiss: onDismiss,
+                        tintColor: tintColor,
+                        episodeImageURL: { episodeThumbnailURL(for: $0) },
+                        chapterThumbnail: { await viewModel.chapterThumbnail(forIndex: $0) },
+                        // Live TV: the lineup to tap through, where the remote would zap.
+                        centerContent: viewModel.isLiveSession
+                            ? AnyView(FoldedChannelStrip(viewModel: viewModel).padding(.vertical, 8))
+                            : nil
+                    )
+                }
+                .padding(.top, gap)
+                .padding(.leading, insets.left)
+                .padding(.trailing, insets.right)
+                .padding(.bottom, insets.bottom)
+            }
+        }
+        .transition(.opacity)
+    }
+    #endif
+
+    /// Two lines of text at the phone's subtitle size, with air.
+    static let foldedSubtitleBandHeight: CGFloat = 64
 
     @ViewBuilder
     private var controlsOverlay: some View {
@@ -578,32 +740,44 @@ struct PlayerOverlayView: View {
     static func controlScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.34 }
     static func titleScrimHeight(playerHeight: CGFloat) -> CGFloat { playerHeight * 0.22 }
 
+    private var controlsOverlayVisible: Bool {
+        viewModel.showControls && !viewModel.isLoading && viewModel.errorMessage == nil && !viewModel.isInputLocked
+    }
+
+    #if os(tvOS)
+    /// Sodalite#168: the scrims fade on their own clock, linear over 0.5 s both ways (0.7 s out was tried and felt long on device).
+    ///
+    /// With Match Frame Rate on, tvOS draws the interface at the content's 23.976 Hz, and the
+    /// controls' 0.3 s ease-in-out left the scrim about 7 frames, up to 21% opacity per frame at
+    /// its 0.88 edge mid-fade: a band that large visibly steps. Linear at these lengths keeps every
+    /// step near 7%, which is below what the old fade managed at 60 Hz, so one value
+    /// serves every refresh rate. The scrims therefore stay mounted and only change opacity; inside
+    /// the controls' insert/remove they could never outlast the 0.3 s transition.
+    ///
+    /// The cost: on appear the controls are fully in while the scrim is about 60% of the way there.
+    private var tvOSControlScrims: some View {
+        let screen = UIApplication.shared.connectedScenes
+            .lazy.compactMap { $0 as? UIWindowScene }
+            .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
+        return ControlScrimLayer(visible: controlsOverlayVisible)
+            .frame(width: screen.width, height: screen.height)
+            .position(x: screen.width / 2, y: screen.height / 2)
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+    #endif
+
     private var tvOSControlsOverlay: some View {
         // Pin to scene-screen bounds (same fix as the next-episode card): an audio-track switch reloads AVKit and transiently collapses its container frame, so a Spacer/alignment-anchored controls block jumps up while fading. Absolute screen-sized frame + center position removes the dependency on the churning AVKit parent.
         let screen = UIApplication.shared.connectedScenes
             .lazy.compactMap { $0 as? UIWindowScene }
             .first?.screen.bounds.size ?? CGSize(width: 1920, height: 1080)
         return ZStack {
-            VStack {
-                Spacer()
-                LinearGradient(stops: Self.controlScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.controlScrimHeight(playerHeight: screen.height))
-            }
-            .ignoresSafeArea()
-
-            VStack {
-                LinearGradient(stops: Self.titleScrimStops,
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: Self.titleScrimHeight(playerHeight: screen.height))
-                Spacer()
-            }
-            .ignoresSafeArea()
-
             // Title (top left); HDR + Speed badges live in topRightInfoColumn so the speed badge can persist after the transport hides.
             VStack {
                 HStack(alignment: .top) {
-                    PlayerTitleOverlay(item: viewModel.item)
+                    PlayerTitleOverlay(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy)
                     Spacer()
                 }
                 Spacer()
@@ -643,11 +817,11 @@ struct PlayerOverlayView: View {
                     durationSeconds: viewModel.player.duration,
                     chapterThumbnail: { await viewModel.chapterThumbnail(forIndex: $0) },
                     pictureMode: viewModel.pictureMode,
-                    showsInfoButton: viewModel.preferences.showStatsForNerds,
-                    showsPiPButton: viewModel.isPiPAvailable,
+                    controlsOrder: viewModel.transportFocusOrder,
                     isPiPEnabled: viewModel.isPiPPossible,
                     isStatsOverlayOpen: viewModel.showStatsOverlay,
-                    previewImage: viewModel.scrubPreview.previewImage
+                    previewImage: viewModel.scrubPreview.previewImage,
+                    previewView: viewModel.scrubPreview.showsPreviewView ? viewModel.scrubPreview.previewView : nil
                 )
                 }
             }
@@ -694,6 +868,28 @@ private extension PlayerOverlayView {
         .allowsHitTesting(false)
     }
 }
+
+#if os(tvOS)
+private extension PlayerOverlayView {
+    /// Sodalite#173: top left, where the transport title sits. A zap hides the controls, so the two do not meet.
+    var liveZapBannerLayer: some View {
+        VStack {
+            HStack {
+                if let banner = viewModel.zapBanner {
+                    LiveZapBannerView(banner: banner)
+                        .transition(.opacity)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 80)
+            .padding(.top, 68)
+            Spacer()
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.zapBanner)
+        .allowsHitTesting(false)
+    }
+}
+#endif
 
 // MARK: - Speed Badge
 
@@ -754,37 +950,62 @@ struct VideoFormatBadge: View {
 /// playback with subtitles off establishes no per-tick dependency. (perf: observation altitude)
 private struct SubtitleLayer: View {
     let viewModel: PlayerViewModel
+    var role: SubtitleOverlayView.Role = .all
 
     var body: some View {
         // AE#227: while the native rendition renders the subtitles (PiP, AirPlay, external display), AVKit
         // owns them; drawing here as well double-draws on the device and on the way back from the route.
         // Keep the styled ASS layer mounted even while the cue array is momentarily empty (seek resets); libass already holds the assembled script.
         if !viewModel.nativeSubtitleRenderingActive,
-           viewModel.assRenderer != nil || !viewModel.subtitleCues.isEmpty || !viewModel.secondarySubtitleCues.isEmpty {
+           viewModel.assRenderer != nil || !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
             SubtitleOverlayView(
                 cues: viewModel.subtitleCues,
                 currentTime: viewModel.subtitleTime,
                 maxCueDuration: viewModel.subtitleMaxCueDuration,
-                secondaryCues: viewModel.secondarySubtitleCues,
+                secondaryCues: viewModel.shownSecondarySubtitleCues,
                 secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                 fontSize: viewModel.preferences.subtitleFontSize,
                 textColor: viewModel.preferences.subtitleColor,
                 background: viewModel.preferences.subtitleBackground,
-                delaySeconds: viewModel.preferences.subtitleDelaySeconds,
+                delaySeconds: viewModel.effectiveSubtitleDelay,
                 verticalPosition: viewModel.preferences.subtitleVerticalPosition,
                 font: viewModel.preferences.subtitleFont,
                 weight: viewModel.preferences.subtitleWeight,
-                controlsVisible: viewModel.showControls,
+                // Folded, the controls are below the fold and never cover the picture.
+                controlsVisible: role == .all && viewModel.showControls,
                 assRenderer: viewModel.assRenderer,
                 assReloadSignal: viewModel.assReloadSignal,
                 activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                 hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                 videoSize: viewModel.videoSize,
-                pictureMode: viewModel.pictureMode
+                pixelAspect: viewModel.videoPixelAspect,
+                pictureMode: viewModel.pictureMode,
+                role: role
             )
         }
     }
 }
+
+#if os(iOS)
+/// Pins its content to a rect in the player's screen coordinates (the host is a full-screen modal, so
+/// screen and hosting view share one space). Absolute for the same reason `controlsOverlay` is: the
+/// SwiftUI safe area inside AVKit is not to be trusted, so nothing here leans on it.
+struct FoldRegion<Content: View>: View {
+    let rect: CGRect
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GeometryReader { geo in
+            let allotted = geo.frame(in: .global)
+            content
+                .frame(width: rect.width, height: rect.height)
+                .clipped()
+                .position(x: rect.midX - allotted.minX, y: rect.midY - allotted.minY)
+        }
+    }
+}
+#endif
 
 /// The "source is not delivering" pill. Deliberately small and non-modal: on the loopback path the picture
 /// usually keeps running out of the segment cache while the reader reconnects, and covering that with a
@@ -802,6 +1023,34 @@ private struct ConnectionNoticeChip: View {
         .background(.black.opacity(0.65), in: Capsule())
     }
 }
+
+#if os(iOS)
+/// The picture of this title cannot follow AirPlay (AetherEngine#1070). With `canMove` the engine can switch
+/// the title to a route the receiver plays itself, once the viewer says the device is a TV.
+private struct AirPlayPictureBanner: View {
+    let canMove: Bool
+    let onShowOnTV: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "airplayvideo")
+            Text("player.airplay.pictureStaysLocal")
+                .fixedSize(horizontal: false, vertical: true)
+            if canMove {
+                Button("player.airplay.showOnTV", action: onShowOnTV)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+        }
+        .font(.callout)
+        .foregroundStyle(.white)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(Color.Theme.scrimHeavy, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 20)
+    }
+}
+#endif
 
 /// One error-screen action.
 ///
@@ -842,3 +1091,4 @@ private struct ErrorActionButton: View {
             .padding(.vertical, 12)
     }
 }
+#endif

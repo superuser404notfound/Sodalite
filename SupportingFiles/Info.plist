@@ -21,21 +21,35 @@
 	<string>Sodalite reaches Jellyfin and AetherEngine media servers on your local network. Required for direct play of media from a server in your home.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Trakt app id, from the TRAKT_CLIENT_ID build setting in project.yml. Public by design (the
+	     device sign-in takes no client secret). Empty hides Trakt in the app. -->
+	<key>TraktClientID</key>
+	<string>$(TRAKT_CLIENT_ID)</string>
+	<!-- Sodalite#232: lets AVKit use the full wide area when the Apple TV is set to a wide
+	     system aspect ratio (constant-image-height / anamorphic projectors) instead of a centered
+	     16:9 region. Undocumented key, no API or entitlement behind it; no effect on iOS. -->
+	<key>AVSupportsExtendedAspectRatiosForContentPlayback</key>
+	<true/>
 	<!-- Shared by both app targets; this file wins over any INFOPLIST_KEY_UIBackgroundModes.
 	     audio: tvOS otherwise kills the audio session on backgrounding and pauses playback
 	     the moment the user leaves the app, even with a live PiP window.
 	     remote-notification: CKSyncEngine receives remote changes through silent CloudKit
 	     pushes; without this mode they are never delivered and cloud sync only ever fetches
-	     when the app foregrounds. -->
+	     when the app foregrounds.
+	     processing: Sodalite#81, the continued-processing task that shows download progress
+	     in the Dynamic Island (iOS). -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>processing</string>
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>de.superuser404.Sodalite.pendingRequestsRefresh</string>
+		<string>de.superuser404.Sodalite.myRequestsRefresh</string>
+		<string>de.superuser404.Sodalite.downloads.progress</string>
 	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
@@ -59,6 +73,25 @@
 	     Inert on iOS, where there is no remote to coalesce; this file is shared by both app targets. -->
 	<key>GCSupportsMultipleMicroGamepads</key>
 	<true/>
+	<!-- Sodalite#189: declares the wired external display role. Without it iPadOS 27 never connects a
+	     windowExternalDisplayNonInteractive scene for the app on its own and mirrors the device screen;
+	     measured on an iPad mini 6, the scene only appeared once an AVPlayer was attached (AVKit asks for
+	     it), so the software path, which has no AVPlayer, stayed mirrored. Inert on tvOS. -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleExternalDisplayNonInteractive</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>External Display</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AtkinsonHyperlegible-Regular.ttf</string>

@@ -35,6 +35,30 @@ struct JellyfinUserPolicyTests {
         #expect(try user(policy: nil).seesWholeLibrary == false)
         #expect(try user(policy: "").seesWholeLibrary == false)
     }
+
+    // MARK: - canTranscodeAudio (Sodalite#100)
+
+    /// Without the grant Jellyfin copies the audio under any TranscodingUrl (`TryStreamCopy`).
+    @Test func audioTranscodingFollowsThePolicy() throws {
+        #expect(try user(policy: #", "EnableAudioPlaybackTranscoding": false"#).canTranscodeAudio == false)
+        #expect(try user(policy: #", "EnableAudioPlaybackTranscoding": true"#).canTranscodeAudio)
+        #expect(try user(policy: nil).canTranscodeAudio)
+        #expect(try user(policy: "").canTranscodeAudio)
+    }
+
+    // MARK: - canTranscodeVideo (Sodalite#202)
+
+    /// Without the grant Jellyfin copies the video under every rung, so no cap is ever applied.
+    @Test func videoTranscodingFollowsThePolicy() throws {
+        #expect(try user(policy: #", "EnableVideoPlaybackTranscoding": false"#).canTranscodeVideo == false)
+        #expect(try user(policy: #", "EnableVideoPlaybackTranscoding": true"#).canTranscodeVideo)
+    }
+
+    /// Unknown is the server default, so the rungs stay offered until the policy says otherwise.
+    @Test func anUnknownPolicyMayTranscodeVideo() throws {
+        #expect(try user(policy: nil).canTranscodeVideo)
+        #expect(try user(policy: "").canTranscodeVideo)
+    }
 }
 
 extension JellyfinUserPolicyTests {
@@ -47,5 +71,19 @@ extension JellyfinUserPolicyTests {
         #expect(try user(policy: #", "EnableLiveTvManagement": false"#).canManageLiveTv == false)
         #expect(try user(policy: "").canManageLiveTv == false)
         #expect(try user(policy: nil).canManageLiveTv == false)
+    }
+}
+
+extension JellyfinUserPolicyTests {
+
+    // MARK: - Sparse Policy blocks (TestFlight feedback 2026-10-21)
+
+    /// A server that leaves a grant out of Policy must still let the user log in; the grant reads as withheld.
+    @Test func aPolicyMissingItsGrantsStillDecodes() throws {
+        let json = #"{"Id": "u", "Name": "N", "ServerId": "s", "Policy": {"EnableAllFolders": true}}"#
+        let u = try JSONDecoder().decode(JellyfinUser.self, from: Data(json.utf8))
+        #expect(u.policy?.isAdministrator == false)
+        #expect(u.canDeleteContent == false)
+        #expect(u.policy?.enableAllFolders == true)
     }
 }

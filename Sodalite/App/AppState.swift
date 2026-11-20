@@ -14,6 +14,10 @@ final class AppState {
 
     var activeSeerrServer: SeerrServer?
     var activeSeerrUser: SeerrUser?
+    /// The Jellyfin profile the Seerr session was connected for. A profile switch moves the active
+    /// profile at once and the Seerr user only after its own sync, so anything asking whose requests
+    /// these are compares the two.
+    private(set) var activeSeerrProfile: ProfileRef?
 
     /// `sodalite://item/{id}` id set by onOpenURL (usually TopShelf); AppRouter clears it after presenting so a repeat tap re-fires. The deep-link signal field.
     var pendingDeepLinkItemID: String?
@@ -21,8 +25,17 @@ final class AppState {
     /// Set with pendingDeepLinkItemID when the link was the TopShelf's playAction. AppRouter forwards it into DetailRouterView, which starts playback once. Cleared with the id.
     var pendingDeepLinkAutoPlay = false
 
+    /// Set with pendingDeepLinkItemID when the item lives on another server of a combined shelf (Sodalite#218). Cleared with the id.
+    var pendingDeepLinkServerID: String?
+
     /// Flipped by ContinueWatchingIntent; AppRouter fetches the latest Resume item then routes via pendingDeepLinkItemID. Separate because the intent runs before the target item is known.
     var requestContinueWatching: Bool = false
+
+    /// Sodalite#81: a screen asks the tab root to switch tabs (the unreachable screen's "Go to Downloads"). TabRootView consumes and clears it.
+    var requestedTab: AppTab?
+
+    /// iOS: the profile badge asks the router for the profile picker. AppRouter consumes and clears it.
+    var requestProfilePicker = false
 
     /// Bumped by DependencyContainer after a server switch; consumers (Home) observe via `.task(id:)` to clear caches + reload. Int (not Date) so back-to-back switches always change the value.
     var serverDidSwitch: Int = 0
@@ -40,8 +53,16 @@ final class AppState {
     /// Bumped by the deep-link path to dismiss a presented player before the new sheet, else a TopShelf tap brings the app forward with the stale player on top. Detail views driving a PlayerLauncher clear showPlayer on change.
     var requestPlayerDismissal: Int = 0
 
+    /// iOS: the Search tab was tapped while it was already open, which puts the cursor in the
+    /// search field the way the Apple TV app does (Sodalite#209). SearchView observes the bump.
+    var requestSearchFieldFocus: Int = 0
+
     /// True while a deep-link is in flight; AppRouter overlays a loading view so the prior detail view doesn't flash.
     var isResolvingDeepLink: Bool = false
+
+    /// The my-requests panel, a cover on AppRouter's host like the deep-link, What's New and profile
+    /// covers; those check it so two covers never race for the same host.
+    var isMyRequestsPanelPresented = false
 
     /// True while this device withholds Local Network access, which makes every LAN server
     /// unreachable from this app alone while the same address still works in Safari (Sodalite#92).
@@ -105,6 +126,13 @@ final class AppState {
         )
     }
 
+    /// Whether a session on `session` may transcode video (Sodalite#202), by the policy of the account
+    /// that server knows. The server default (allowed) while that policy has not loaded.
+    func canTranscodeVideo(on session: ServerSession?) -> Bool {
+        guard let session, !session.isActive else { return activeUser?.canTranscodeVideo ?? true }
+        return session.user?.canTranscodeVideo ?? true
+    }
+
     /// Replaces activeServer with a fresh copy (applies an updated version after a server upgrade). id guard so a racing switch doesn't apply another server's data.
     func updateActiveServer(_ server: JellyfinServer) {
         guard activeServer?.id == server.id else { return }
@@ -123,16 +151,19 @@ final class AppState {
         isAuthenticated = false
         activeSeerrServer = nil
         activeSeerrUser = nil
+        activeSeerrProfile = nil
     }
 
-    func setSeerrConnected(server: SeerrServer, user: SeerrUser) {
+    func setSeerrConnected(server: SeerrServer, user: SeerrUser, for profile: ProfileRef?) {
         activeSeerrServer = server
         activeSeerrUser = user
+        activeSeerrProfile = profile
     }
 
     func disconnectSeerr() {
         activeSeerrServer = nil
         activeSeerrUser = nil
+        activeSeerrProfile = nil
     }
 }
 

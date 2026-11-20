@@ -53,7 +53,6 @@ struct HomeLibraryFanOutTests {
             throw Unused()
         }
         func getGenres(userID: String) async throws -> [NamedItem] { note("genres"); return [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { note("studios"); return [] }
     }
 
     /// A fresh server id per test: loadContent persists a reconciled config, and these must not

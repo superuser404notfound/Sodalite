@@ -16,6 +16,62 @@ nonisolated protocol KeychainServiceProtocol: Sendable {
 nonisolated final class KeychainService: KeychainServiceProtocol {
     private let service: String
 
+    /// What each item held when this process last read or wrote it, `.some(nil)` for "not there".
+    /// Every SecItem call is an IPC round trip to securityd, and `DependencyContainer.activeUserID`
+    /// alone makes three of them, from view bodies on the main thread. Nothing outside this class
+    /// writes these items (the Top Shelf mirror has its own), so every change passes through here.
+    /// Shared by all instances, because the container and the certificate-pin store each build one
+    /// and the container's `deleteAll` also clears the pins. A failed read is never stored.
+    private static let cacheLock = NSLock()
+    /// Keyed by `service` + NUL + `account`. A String key, not a small Hashable struct: the first use
+    /// of a dictionary over a type of our own makes the runtime look up that conformance, and on the
+    /// launch path that lookup cost about 500 ms in a tvOS simulator trace.
+    nonisolated(unsafe) private static var cache: [String: Data?] = [:]
+    /// Bumped by every save and delete. A read only stores what it found if nothing changed while it
+    /// was talking to securityd, so it can never put an old value over one a write just stored.
+    nonisolated(unsafe) private static var changes = 0
+
+    private func cacheKey(_ account: String) -> String {
+        service + "\u{0}" + account
+    }
+
+    private func cached(_ key: String) -> (value: Data??, changes: Int) {
+        Self.cacheLock.lock()
+        defer { Self.cacheLock.unlock() }
+        return (Self.cache[cacheKey(key)], Self.changes)
+    }
+
+    /// For a read: stored only if no write happened since `changes` was taken.
+    private func rememberRead(_ data: Data?, for key: String, changes: Int) {
+        Self.cacheLock.lock()
+        if Self.changes == changes { Self.cache[cacheKey(key)] = .some(data) }
+        Self.cacheLock.unlock()
+    }
+
+    private func remember(_ data: Data?, for key: String) {
+        Self.cacheLock.lock()
+        Self.changes += 1
+        Self.cache[cacheKey(key)] = .some(data)
+        Self.cacheLock.unlock()
+    }
+
+    private func forget(_ key: String) {
+        Self.cacheLock.lock()
+        Self.changes += 1
+        Self.cache[cacheKey(key)] = nil
+        Self.cacheLock.unlock()
+    }
+
+    /// Drops this service's entries. Called on both sides of a `deleteAll`, so a read that ran
+    /// during the delete cannot leave a value behind.
+    private func forgetService() {
+        let prefix = service + "\u{0}"
+        Self.cacheLock.lock()
+        Self.changes += 1
+        Self.cache = Self.cache.filter { !$0.key.hasPrefix(prefix) }
+        Self.cacheLock.unlock()
+    }
+
     /// nonisolated so the certificate-pin store can be built before the main actor exists for it:
     /// `ServerTrustDelegate.shared` is read by the first `URLSession` this app makes, which is a
     /// default argument of `DependencyContainer.init`. Nothing here touches shared state.
@@ -35,8 +91,13 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         let update: [String: Any] = [
             kSecValueData as String: data,
         ]
+        // Unknown until the write has an outcome, so a failure cannot leave the old value cached.
+        forget(key)
         let updateStatus = SecItemUpdate(query as CFDictionary, update as CFDictionary)
-        if updateStatus == errSecSuccess { return }
+        if updateStatus == errSecSuccess {
+            remember(data, for: key)
+            return
+        }
         guard updateStatus == errSecItemNotFound else {
             throw KeychainError.saveFailed(updateStatus)
         }
@@ -49,6 +110,7 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
         guard status == errSecSuccess else {
             throw KeychainError.saveFailed(status)
         }
+        remember(data, for: key)
     }
 
     func save(_ string: String, for key: String) throws {
@@ -59,6 +121,8 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
     }
 
     func loadData(for key: String) throws -> Data? {
+        let lookup = cached(key)
+        if let known = lookup.value { return known }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -72,8 +136,11 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
 
         switch status {
         case errSecSuccess:
-            return result as? Data
+            let data = result as? Data
+            rememberRead(data, for: key, changes: lookup.changes)
+            return data
         case errSecItemNotFound:
+            rememberRead(nil, for: key, changes: lookup.changes)
             return nil
         default:
             throw KeychainError.loadFailed(status)
@@ -92,10 +159,12 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
             kSecAttrAccount as String: key,
         ]
 
+        forget(key)
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)
         }
+        remember(nil, for: key)
     }
 
     func deleteAll() throws {
@@ -104,6 +173,8 @@ nonisolated final class KeychainService: KeychainServiceProtocol {
             kSecAttrService as String: service,
         ]
 
+        forgetService()
+        defer { forgetService() }
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.deleteFailed(status)

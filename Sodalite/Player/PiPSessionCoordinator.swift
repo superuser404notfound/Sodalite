@@ -126,16 +126,8 @@ final class PiPSessionCoordinator {
             .first { $0.activationState == .foregroundActive }
             ?? UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
         let window = scene?.windows.first(where: { $0.isKeyWindow }) ?? scene?.windows.first
-        guard var top = window?.rootViewController else { return nil }
-        if top.transitionCoordinator != nil { return nil }
-        while let presented = top.presentedViewController {
-            if presented.isBeingDismissed || presented.isBeingPresented || presented.transitionCoordinator != nil {
-                return nil
-            }
-            top = presented
-        }
-        if top is PlayerHostController { return nil }
-        return top
+        // A multiview grid on top is a surface to restore over, not a second player.
+        return PlayerLauncherHostVC.settledTopPresenter(in: window) { $0 is PlayerHostController }
     }
 }
 #endif

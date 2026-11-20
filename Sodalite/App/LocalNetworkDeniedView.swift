@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 // iOS and iPadOS only, measured rather than assumed: tvOS 26.6 has no Local Network privacy at all.
 // Its Settings > General > Privacy & Security lists Location, Tracking, Photos, Bluetooth,
@@ -7,6 +6,7 @@ import UIKit
 // such string either. So on tvOS this screen could never be right, and the probe behind it could
 // only ever be a false alarm that costs two seconds before the real error appears.
 #if os(iOS)
+import UIKit
 
 /// What the app says when this device is withholding Local Network access (Sodalite#92).
 ///
@@ -95,6 +95,10 @@ struct LocalNetworkDeniedView: View {
                 }
                 .buttonStyle(SettingsTileButtonStyle())
                 .disabled(isRetrying)
+
+                // The overlay covers Settings, so without this the log that says why it is up is
+                // out of reach exactly while it is up.
+                DiagnosticLogLink(style: .inline)
             }
 
             Spacer()

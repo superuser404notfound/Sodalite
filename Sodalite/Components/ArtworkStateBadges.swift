@@ -6,10 +6,12 @@ import SwiftUI
 /// `checkmark.circle.fill` cuts its check OUT of the disc, so under a single fill the check is not
 /// drawn at all, it is the poster showing through a hole. On bright art that reads white by luck,
 /// on busy or dark art the shape breaks up or disappears (Sodalite#89). Palette rendering paints
-/// the glyph white and the disc in the tint, which is what every comparable client does, and a soft
+/// the glyph in the accent's own foreground and the disc in the tint, and a soft
 /// shadow gives the disc an edge on bright stills. It was the only overlay on the artwork with no
 /// contrast treatment at all: the pills opposite sit on a scrim with a hairline, and the resume bar
-/// keeps an opaque track for the same reason.
+/// keeps an opaque track for the same reason. A white glyph was only legible on the dark accents:
+/// on Silver it was white on near-white (Sodalite#207), so it takes `palette.foreground` like every
+/// other glyph drawn on the accent.
 ///
 /// Sized off the tier's poster width like those pills, not off the card it sits on, so a landscape
 /// card wears the same badge as the poster beside it, it tracks the card-scale setting, and it stops
@@ -20,6 +22,8 @@ struct ArtworkStateBadges: View {
     /// The tier's poster width, not this card's width.
     let posterWidth: CGFloat
     var scale: CGFloat = 1
+
+    @Environment(\.appearanceTheme) private var appearanceTheme
 
     private var diameter: CGFloat { PosterBadgeMetrics.checkDiameter(posterWidth: posterWidth, scale: scale) }
     private var inset: CGFloat { PosterBadgeMetrics.checkInset(posterWidth: posterWidth, scale: scale) }
@@ -32,8 +36,8 @@ struct ArtworkStateBadges: View {
                     badge("heart.fill")
                 }
                 if isPlayed {
-                    // Two styles, so the symbol renders as a palette: white check, tinted disc.
-                    badge("checkmark.circle.fill", glyph: .white)
+                    // Two styles, so the symbol renders as a palette: legible check, tinted disc.
+                    badge("checkmark.circle.fill", glyph: appearanceTheme.palette.foreground.color)
                 }
             }
             .padding(inset)

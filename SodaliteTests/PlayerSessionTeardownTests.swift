@@ -100,49 +100,178 @@ final class RecordingPlaybackService: JellyfinPlaybackServiceProtocol, @unchecke
     private let lock = NSLock()
     private var _stoppedReports: [PlaybackStopReport] = []
     private var _killedEncodings: [String] = []
+    private var _closedLiveStreams: [String] = []
+    private var _events: [String] = []
     private var _playbackInfoRequests: [String] = []
+    private var _livePlaybackInfoRequests: [String] = []
+    private var _unopenedLivePlaybackInfoRequests: [String] = []
+    private var _requestedCaps: [Int?] = []
+    private var _requestedAudioIndexes: [Int?] = []
+    private var _requestedMediaSourceIDs: [String?] = []
+    /// A TranscodingUrl the server answers with while the request pins no source, to stand in for a
+    /// server that picked and burns in a subtitle of its own.
+    var transcodingURLWhenUnpinned: String?
+    /// Item ids whose PlaybackInfo answers only after a short delay, so a test can act in between.
+    var delayedItemIDs: Set<String> = []
     /// Item ids whose PlaybackInfo never answers (until the caller's task is cancelled).
     var hangingItemIDs: Set<String> = []
+    /// Item ids whose PlaybackInfo answers late and ignores cancellation, like a request already on
+    /// the wire when the session is torn down.
+    var uncancellableDelayItemIDs: Set<String> = []
+    /// Live tuner answers by item id; an item without one fails its live PlaybackInfo.
+    var liveStreamIDs: [String: String] = [:]
+    /// Holds an item's live PlaybackInfo before it answers: each request takes the next gate, the last
+    /// one holds every request after it.
+    var liveAnswerGates: [String: [TestGate]] = [:]
+    /// Holds every stop report at this gate before recording it, so a test can act while one is on the wire.
+    var stopReportGate: TestGate?
 
     var stoppedReports: [PlaybackStopReport] { lock.withLock { _stoppedReports } }
     var killedEncodings: [String] { lock.withLock { _killedEncodings } }
+    var closedLiveStreams: [String] { lock.withLock { _closedLiveStreams } }
+    /// Every stop, kill and close in the order the service saw them.
+    var events: [String] { lock.withLock { _events } }
     var playbackInfoRequests: [String] { lock.withLock { _playbackInfoRequests } }
+    /// Every live tuner open (live PlaybackInfo), by item id.
+    var livePlaybackInfoRequests: [String] { lock.withLock { _livePlaybackInfoRequests } }
+    /// Every unopened live PlaybackInfo (#204), by item id. Opens nothing, so it is not a tuner open.
+    var unopenedLivePlaybackInfoRequests: [String] { lock.withLock { _unopenedLivePlaybackInfoRequests } }
+    /// The Path an unopened live PlaybackInfo answers with, by item id; none answers without one.
+    var unopenedPaths: [String: String] = [:]
+    /// The `MaxStreamingBitrate` of every PlaybackInfo profile, in request order (Sodalite#87).
+    var requestedCaps: [Int?] { lock.withLock { _requestedCaps } }
+    var requestedAudioIndexes: [Int?] { lock.withLock { _requestedAudioIndexes } }
+    var requestedMediaSourceIDs: [String?] { lock.withLock { _requestedMediaSourceIDs } }
 
     var baseURL: URL? { nil }
     var deviceID: String { "device" }
 
     func reportPlaybackStopped(_ report: PlaybackStopReport) async throws {
-        lock.withLock { _stoppedReports.append(report) }
+        await stopReportGate?.pass()
+        lock.withLock {
+            _stoppedReports.append(report)
+            _events.append("stop:\(report.liveStreamId ?? "-")")
+        }
     }
     func stopActiveEncodings(playSessionID: String) async throws {
-        lock.withLock { _killedEncodings.append(playSessionID) }
+        lock.withLock {
+            _killedEncodings.append(playSessionID)
+            _events.append("kill:\(playSessionID)")
+        }
     }
     func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?) async throws -> PlaybackInfoResponse {
-        lock.withLock { _playbackInfoRequests.append(itemID) }
+        try await getPlaybackInfo(itemID: itemID, userID: userID, profile: profile,
+                                  mediaSourceID: nil, audioStreamIndex: nil)
+    }
+    func getPlaybackInfo(itemID: String, userID: String, profile: [String: Any]?,
+                         mediaSourceID: String?, audioStreamIndex: Int?) async throws -> PlaybackInfoResponse {
+        let cap = profile?["MaxStreamingBitrate"] as? Int
+        lock.withLock {
+            _playbackInfoRequests.append(itemID)
+            _requestedCaps.append(cap)
+            _requestedAudioIndexes.append(audioStreamIndex)
+            _requestedMediaSourceIDs.append(mediaSourceID)
+        }
+        if delayedItemIDs.contains(itemID) {
+            try await Task.sleep(for: .milliseconds(150))
+        }
+        if uncancellableDelayItemIDs.contains(itemID) {
+            await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.15) { done.resume() }
+            }
+        }
         if hangingItemIDs.contains(itemID) {
             try await Task.sleep(for: .seconds(60))
         }
+        let transcoding = mediaSourceID == nil ? transcodingURLWhenUnpinned.map { #","TranscodingUrl":"\#($0)""# } ?? "" : ""
         return try JSONDecoder().decode(
             PlaybackInfoResponse.self,
-            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"flac"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"flac"\#(transcoding)}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
         )
     }
 
     private struct NotUsed: Error {}
-    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool) async throws -> PlaybackInfoResponse { throw NotUsed() }
+    func getLivePlaybackInfo(itemID: String, userID: String, profile: [String: Any]?, maxStreamingBitrate: Int, enableDirectPlay: Bool, autoOpenLiveStream: Bool) async throws -> PlaybackInfoResponse {
+        guard autoOpenLiveStream else {
+            lock.withLock { _unopenedLivePlaybackInfoRequests.append(itemID) }
+            let path = unopenedPaths[itemID].map { #","Path":"\#($0)""# } ?? ""
+            return try JSONDecoder().decode(
+                PlaybackInfoResponse.self,
+                from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)"\#(path)}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+            )
+        }
+        lock.withLock {
+            _livePlaybackInfoRequests.append(itemID)
+            _events.append("open:\(itemID)")
+        }
+        guard let liveStreamID = liveStreamIDs[itemID] else { throw NotUsed() }
+        // Ignores cancellation, like a request Jellyfin is already probing the tuner for.
+        let gate = lock.withLock { () -> TestGate? in
+            guard var gates = liveAnswerGates[itemID], let next = gates.first else { return nil }
+            if gates.count > 1 { gates.removeFirst() }
+            liveAnswerGates[itemID] = gates
+            return next
+        }
+        await gate?.pass()
+        return try JSONDecoder().decode(
+            PlaybackInfoResponse.self,
+            from: Data(#"{"MediaSources":[{"Id":"src-\#(itemID)","Container":"ts","LiveStreamId":"\#(liveStreamID)"}],"PlaySessionId":"ps-\#(itemID)"}"#.utf8)
+        )
+    }
     func reportPlaybackStart(_ report: PlaybackStartReport) async throws {}
-    func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {}
-    func closeLiveStream(liveStreamID: String) async throws {}
+    private var _progressReports = 0
+    var progressReports: Int { lock.withLock { _progressReports } }
+    func reportPlaybackProgress(_ report: PlaybackProgressReport) async throws {
+        lock.withLock { _progressReports += 1 }
+    }
+    func closeLiveStream(liveStreamID: String) async throws {
+        lock.withLock {
+            _closedLiveStreams.append(liveStreamID)
+            _events.append("close:\(liveStreamID)")
+        }
+    }
     func getSessions() async throws -> [JellyfinSessionInfo] { [] }
     func getSeasons(seriesID: String, userID: String) async throws -> [JellyfinItem] { [] }
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> [JellyfinItem] { [] }
-    func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments { throw NotUsed() }
-    func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
+    /// Holds `getEpisodeSegments` at this gate and then answers with an intro, so a test can switch
+    /// items while a fetch is in flight. Without a gate the call fails, as before.
+    var episodeSegmentsGate: TestGate?
+    func getEpisodeSegments(itemID: String) async throws -> EpisodeSegments {
+        guard let gate = episodeSegmentsGate else { throw NotUsed() }
+        await gate.pass()
+        let intro = try JSONDecoder().decode(MediaSegment.self, from: Data(
+            #"{"Id":"s","ItemId":"\#(itemID)","Type":"Intro","StartTicks":0,"EndTicks":300000000}"#.utf8))
+        return EpisodeSegments(items: [intro])
+    }
+    /// Stream URLs by item id, for tests that need the engine to really open something; nil for the rest.
+    var streamURLs: [String: URL] = [:]
+    func buildStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? {
+        streamURLs[itemID]
+    }
+
+    /// Sodalite#244: canned pre-rolls by item id, an error to throw instead, and a gate the request waits at.
+    var introsByItem: [String: [JellyfinItem]] = [:]
+    var introsError: Error?
+    var introsGate: TestGate?
+    private var _introRequests: [String] = []
+    var introRequests: [String] { lock.withLock { _introRequests } }
+    func getIntros(itemID: String, userID: String) async throws -> [JellyfinItem] {
+        lock.withLock { _introRequests.append(itemID) }
+        if let introsGate { await introsGate.pass() }
+        try Task.checkCancellation()
+        if let introsError { throw introsError }
+        return introsByItem[itemID] ?? []
+    }
     func buildAudioStreamURL(itemID: String, mediaSourceID: String, container: String?, isStatic: Bool) -> URL? { nil }
     func buildSubtitleURL(itemID: String, mediaSourceID: String, streamIndex: Int, format: String) -> URL? { nil }
     func buildChapterImageURL(itemID: String, chapterIndex: Int, imageTag: String, maxWidth: Int) -> URL? { nil }
     func buildTrickplayTileURL(itemID: String, width: Int, tileIndex: Int) -> URL? { nil }
-    func searchRemoteSubtitles(itemID: String, language: String) async throws -> [RemoteSubtitleInfo] { [] }
+    /// Holds `searchRemoteSubtitles` at this gate (each call passes it once) before answering `[]`.
+    var searchGate: TestGate?
+    func searchRemoteSubtitles(itemID: String, language: String) async throws -> [RemoteSubtitleInfo] {
+        await searchGate?.pass()
+        return []
+    }
     func downloadRemoteSubtitle(itemID: String, subtitleID: String) async throws {}
     func deleteSubtitle(itemID: String, index: Int) async throws {}
     func buildTranscodeURL(relativePath: String) -> URL? { nil }

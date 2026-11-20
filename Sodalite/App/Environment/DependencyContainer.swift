@@ -1,5 +1,6 @@
 import Foundation
 import AetherEngine
+import AVFoundation
 
 @MainActor
 @Observable
@@ -13,8 +14,16 @@ final class DependencyContainer {
         // the shared AVAudioSession when playback ends. Without it, an E-AC-3/Atmos bitstream-passthrough
         // route leaves the HDMI sink looping the last MAT frame after the player is gone.
         engine.deactivatesAudioSessionOnStop = true
+        // Sodalite#220: the software host has no AVPlayer, so AVKit publishes no Now Playing for it and
+        // headphone or Control Center play/pause would land nowhere. The native path stays with AVKit.
+        engine.ownsSoftwareNowPlaying = true
+        // AetherEngine#1041: music Now Playing (card, clock and transport commands) on both audio hosts.
+        // The music coordinator only stages the track's identity and the queue's next/previous.
+        engine.ownsAudioNowPlaying = true
+        engine.maximumSubtitleOffsetSeconds = SubtitleOffset.maximumShift
         return engine
     }()
+    @MainActor static let multiviewEnginePool = MultiviewEnginePool(primary: playerEngine)
     let keychainService: KeychainServiceProtocol
     let httpClient: HTTPClientProtocol
     /// Seerr's own client, kept so the caches screen can reach the handle it holds on the shared response store.
@@ -35,6 +44,8 @@ final class DependencyContainer {
     let jellyfinItemService: JellyfinItemServiceProtocol
     let jellyfinImageService: JellyfinImageService
     let jellyfinPlaybackService: JellyfinPlaybackServiceProtocol
+    /// Every Jellyfin session held at once; the active one wraps `jellyfinClient` (Sodalite#85).
+    let sessionRegistry: ServerSessionRegistry
     /// Per-profile playback and appearance settings plus the shared device values. The two
     /// properties below resolve to the active profile, so a view that reads them follows a switch.
     let profileSettings: ProfileSettingsRegistry
@@ -50,11 +61,39 @@ final class DependencyContainer {
     /// Sodalite#79. One store for the whole app so a title enriched in a Home row is already known
     /// when the same title shows up in a grid.
     let posterBadgeStore: PosterBadgeStore
+    /// The active profile's Trakt connection. Lazy because it needs the finished container as its
+    /// session store.
+    @ObservationIgnored @MainActor lazy var trakt: TraktService = {
+        let service = TraktService(
+            clientID: TraktConfig.clientID, store: self,
+            libraryService: jellyfinLibraryService, itemService: jellyfinItemService)
+        service.secondaryLibrary = { [weak self] serverID in
+            self?.sessionRegistry.secondary(serverID: serverID).map { ($0.libraryService, $0.userID) }
+        }
+        return service
+    }()
+    /// Re-checks the Seerr session after any 401, started from `SodaliteApp.init` (CAT-205).
+    @ObservationIgnored @MainActor lazy var seerrRejectionHandler = SeerrSessionRejectionHandler(
+        isConnected: { [weak self] in self?.appState?.isSeerrConnected ?? false },
+        revalidate: { [weak self] in await self?.revalidateSeerrSessionAfterRejection() })
     /// AE#579. The detail page's HDR10+ answer, which no Jellyfin field carries.
     let hdr10PlusProbeStore: HDR10PlusProbeStore
     let authPreferences: AuthPreferences
     let parentalControlsPreferences: ParentalControlsPreferences
     let parentalGate: ParentalGate
+    /// Sodalite#81. The on-disk truth of the downloads; empty on tvOS, where nothing downloads.
+    let downloadStore = DownloadStore(paths: DownloadPaths(root: DownloadPaths.defaultRoot()))
+    let downloadPreferences: DownloadPreferences
+    /// Nil on tvOS, where nothing downloads. Created last in init because its backend reads the
+    /// session through the container.
+    private(set) var downloadManager: DownloadManager?
+    #if os(iOS)
+    /// Sodalite#81: the Dynamic Island / Lock Screen progress of running downloads.
+    private(set) var downloadActivity: DownloadProgressActivity?
+    #endif
+    /// The progress sync in flight, so a second trigger joins it instead of racing it.
+    var downloadSyncTask: Task<Void, Never>?
+    var downloadSyncRunID = UUID()
 
     let seerrClient: SeerrClient
     let seerrServerDiscoveryService: SeerrServerDiscoveryServiceProtocol
@@ -70,11 +109,15 @@ final class DependencyContainer {
     let seerrNotificationPreferences: SeerrNotificationPreferences
     /// Count of requests pending approval (admin only); feeds the Catalog tab badge + background refresh.
     let pendingRequestsMonitor: PendingRequestsMonitor
+    /// Changes to the active profile's own Seerr requests (every user); feeds the badge and the hint panel.
+    let myRequestsWatcher: MyRequestsWatcher
 
     /// File-deletion service fronting Jellyfin + Seerr; gated on JellyfinUser.canDeleteContent.
     let mediaDeletionService: any MediaDeletionServiceProtocol
 
     let musicPlaybackCoordinator: MusicPlaybackCoordinator
+    /// Sodalite#219, the detail pages' theme song.
+    let themeSongPlayer: ThemeSongPlayer
 
     /// Back-reference so switchServer / removeServer can bump serverDidSwitch. Weak: AppState does not own the container.
     weak var appState: AppState?
@@ -102,17 +145,37 @@ final class DependencyContainer {
     /// When each server was added and when its URL slots were last edited, which is what a removal
     /// tombstone and a URL edit have to outrank a stale republish with.
     let serverSyncMetadata: ServerSyncMetadataStore
-    /// How a Jellyfin address is asked whether it answers AS the server with this id. A stored
-    /// closure so the sign-in route can be tested without a network; the app never replaces it.
-    var jellyfinProbe: @Sendable (URL, String) async -> Bool = {
-        await ServerProbe.jellyfin($0, expectedServerID: $1)
+    /// When each server was last made active here, which orders a combined Home's secondaries.
+    let serverActivation: ServerActivationStore
+    let combinedServers: CombinedServersPreferences
+    /// How a Jellyfin address is asked whether it answers AS the server with this id, and whether
+    /// it is ready. Stored closures so routes can be tested without a network; the app never
+    /// replaces them. `jellyfinIdentity` is the patient identity half alone (audit review R-ROUTE-1).
+    var jellyfinAnswer: @Sendable (URL, String) async -> ServerProbe.Answer = {
+        await ServerProbe.jellyfinAnswer($0, expectedServerID: $1)
     }
+    var jellyfinIdentity: @Sendable (URL, String) async -> ServerProbe.Identity = {
+        await ServerProbe.identity($0, expectedServerID: $1)
+    }
+    /// Where the device stands, a seam so the "is this the server's network" questions are testable.
+    var currentPathReading: @Sendable () -> NetworkPathSnapshot.Reading? = { NetworkPathSnapshot.shared.current }
+    /// The sign-in clients alive right now, so a network change takes back their proofs too.
+    var signInClients: [SignInClientEntry] = []
+    /// Passes started and not yet returned, so the recheck watch can wait for one instead of
+    /// cancelling it (audit review R-ROUTE-21).
+    var routePassesRunning = 0
     var activeJellyfinRoute: ServerRoute?
     /// Jellyfin's internal address answered its identity probe in the last resolve, which is what
     /// lets Seerr use its own internal address (`ServerRouteResolver.seerrSlots`).
     var isOnVerifiedHomeNetwork = false
     var activeSeerrRoute: ServerRoute?
     var routeResolveTask: Task<Void, Never>?
+    /// Moves whenever the live client changes session, so a route pass that started for the
+    /// previous one writes nothing (audit SHELL-201).
+    var routeGeneration: UInt64 = 0
+    /// The address the Top Shelf mirror was last written with for this session, so a pass that
+    /// changes nothing does not rewrite the shared keychain item.
+    var mirroredSessionURL: URL?
     /// One re-measure at a time after a transport failure, and the moment it last ran (Sodalite#126).
     var transportRecheckTask: Task<Void, Never>?
     var lastTransportRecheck: ContinuousClock.Instant?
@@ -145,9 +208,15 @@ final class DependencyContainer {
     ) {
         self.serverRouteStore = ServerRouteStore(defaults: defaults)
         self.serverSyncMetadata = ServerSyncMetadataStore(defaults: defaults)
+        self.serverActivation = ServerActivationStore(defaults: defaults)
+        self.combinedServers = CombinedServersPreferences(defaults: defaults)
         self.keychainService = keychainService
         self.httpClient = httpClient
-        self.jellyfinClient = JellyfinClient(httpClient: httpClient)
+        // A test double reaches no network, so it has no address to prove (audit NET-201).
+        let verifiesServerIdentity = httpClient is HTTPClient
+        let liveClient = JellyfinClient(httpClient: httpClient)
+        liveClient.routeGate = RouteGate(isEnforced: verifiesServerIdentity)
+        self.jellyfinClient = liveClient
         // Both discovery services share ONE client of their own: a probe the user is watching a
         // spinner for must not queue behind Home's fan-out or Catalog's rows, and the transport
         // timing that says which phase ate a capped probe belongs on discovery only (Sodalite#82).
@@ -162,15 +231,21 @@ final class DependencyContainer {
             libraryService: jellyfinLibraryService
         )
         self.jellyfinItemService = JellyfinItemService(client: jellyfinClient)
-        self.jellyfinImageService = JellyfinImageService(
-            baseURLProvider: { [weak jellyfinClient] in
-                jellyfinClient?.baseURL
-            },
-            accessTokenProvider: { [weak jellyfinClient] in
-                jellyfinClient?.accessToken
-            }
-        )
         self.jellyfinPlaybackService = JellyfinPlaybackService(client: jellyfinClient)
+        let sessionRegistry = ServerSessionRegistry(
+            activeClient: jellyfinClient,
+            httpClient: httpClient,
+            libraryService: jellyfinLibraryService,
+            itemService: jellyfinItemService,
+            playbackService: jellyfinPlaybackService,
+            liveTvService: jellyfinLiveTvService,
+            musicService: jellyfinMusicService
+        )
+        sessionRegistry.verifiesServerIdentity = verifiesServerIdentity
+        self.sessionRegistry = sessionRegistry
+        self.jellyfinImageService = JellyfinImageService(endpoint: { [weak sessionRegistry] serverID in
+            sessionRegistry?.endpoint(forServerID: serverID)
+        })
         let profileSettings = ProfileSettingsRegistry(defaults: defaults)
         self.profileSettings = profileSettings
         self.trackSelectionMemory = TrackSelectionMemory(store: defaults)
@@ -178,16 +253,21 @@ final class DependencyContainer {
         self.spoilerRevealMemory = SpoilerRevealMemory(store: defaults)
         self.spoilerSeriesRules = SpoilerSeriesRules(store: defaults)
         self.storeKitService = StoreKitService()
+        let libraryService = self.jellyfinLibraryService
         self.posterBadgeStore = PosterBadgeStore(
-            library: self.jellyfinLibraryService,
+            route: { [weak sessionRegistry] serverID in
+                guard let session = sessionRegistry?.session(forServerID: serverID), !session.isActive
+                else { return (libraryService, nil) }
+                return (session.libraryService, session.userID)
+            },
             isEnabled: { profileSettings.current.appearance.showPosterBadges }
         )
         // Static=true, so the probe always opens the original file and never a transcode.
         let playbackService = self.jellyfinPlaybackService
         self.hdr10PlusProbeStore = HDR10PlusProbeStore(
-            streamURL: { itemID, sourceID, container in
-                playbackService.buildStreamURL(
-                    itemID: itemID, mediaSourceID: sourceID, container: container, isStatic: true)
+            streamURL: { [weak sessionRegistry] item, sourceID, container in
+                (sessionRegistry?.session(for: item).playbackService ?? playbackService).buildStreamURL(
+                    itemID: item.id, mediaSourceID: sourceID, container: container, isStatic: true)
             },
             isEnabled: { profileSettings.current.appearance.showDetailBadges }
         )
@@ -199,6 +279,7 @@ final class DependencyContainer {
         )
         self.parentalControlsPreferences = ParentalControlsPreferences(store: defaults)
         self.parentalGate = ParentalGate()
+        self.downloadPreferences = DownloadPreferences(store: defaults)
 
         // Seerr gets its OWN HTTPClient so Catalog browsing doesn't compete with the Home fan-out for the same 6 in-flight permits against a tarpitted Jellyfin CDN (see HTTPClient inFlightLimiter).
         let seerrHTTPClient = HTTPClient()
@@ -216,6 +297,7 @@ final class DependencyContainer {
 
         self.seerrNotificationPreferences = SeerrNotificationPreferences(defaults: defaults)
         self.pendingRequestsMonitor = PendingRequestsMonitor()
+        self.myRequestsWatcher = MyRequestsWatcher(preferences: seerrNotificationPreferences)
 
         self.mediaDeletionService = MediaDeletionService(
             jellyfinItems: self.jellyfinItemService,
@@ -237,8 +319,37 @@ final class DependencyContainer {
                 guard let serverID = try? capturedKeychain.loadString(for: KeychainKeys.activeServerID)
                 else { return nil }
                 return try? capturedKeychain.loadString(for: KeychainKeys.userID(serverID: serverID))
+            },
+            secondaryRoute: { [weak sessionRegistry] item in
+                guard let session = sessionRegistry?.resolve(serverID: item.serverID), !session.isActive else { return nil }
+                return (session.playbackService, session.userID)
+            },
+            isRoutable: { [weak sessionRegistry] item in
+                sessionRegistry?.resolve(serverID: item.serverID) != nil
             }
         )
+
+        let capturedSettings = profileSettings
+        musicPlaybackCoordinator.normalizationModeProvider = { [weak capturedSettings] in
+            capturedSettings?.current.playback.musicNormalization ?? .off
+        }
+        musicPlaybackCoordinator.skipSecondsProvider = { [weak capturedSettings] direction in
+            capturedSettings?.current.playback.skipSeconds(direction: direction) ?? 10
+        }
+        self.themeSongPlayer = ThemeSongPlayer(
+            output: AVThemeSongOutput(),
+            isEnabled: { [weak capturedSettings] in capturedSettings?.current.playback.playThemeSongs ?? false },
+            isBlocked: {
+                if PlayerModalPresence.isPlayerActive { return true }
+                if !ThemeSongPlayer.isQuiet(DependencyContainer.playerEngine.state) { return true }
+                #if os(iOS)
+                // Starting would stop the music another app is playing.
+                if AVAudioSession.sharedInstance().isOtherAudioPlaying { return true }
+                #endif
+                return false
+            }
+        )
+        themeSongPlayer.observe(engine: DependencyContainer.playerEngine)
 
         // Idempotent, and cheap once the legacy entries are gone (one miss per known server).
         migrateLegacyJellyfinPasswords()
@@ -251,25 +362,56 @@ final class DependencyContainer {
         // Sodalite#126, and last because it captures self. The Jellyfin client alone: a Seerr
         // timeout says nothing about which Jellyfin address answers. Concrete client only, since
         // the hook is a real-transport concern and a mock has no verdict to keep honest.
-        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] in
-            Task { @MainActor in self?.noteServerDidNotServe() }
+        (httpClient as? HTTPClient)?.onServerDidNotServe = { [weak self] baseURL in
+            Task { @MainActor in self?.noteServerDidNotServe(baseURL: baseURL) }
         }
 
         // Every credential the session holds is named to both log redactors as it arrives, so a line
         // carrying it in an encoding no key matcher knows still loses it (audit DIAG-1).
         jellyfinClient.onAccessTokenSet = { LogSecrets.register($0) }
         seerrClient.onSessionCookieSet = { LogSecrets.registerCookie($0) }
+        musicPlaybackCoordinator.bindActiveReporter = { [weak self] in self?.boundPlaybackReporter() ?? { nil } }
+
+        sessionRegistry.onSessionsChanged = { [weak sessionRegistry] in
+            SharedSessionMirror.writeParticipants(sessionRegistry?.shelfParticipants)
+        }
+
+        observeRouteProofInvalidations()
+        installSeerrRouteHold()
 
         // Last, because the closures capture self and the migration reads the keychain through it.
         profileSettings.activeKey = { [weak self] in self?.appState?.profileKey }
         profileSettings.isApplyingCloudChanges = { [weak self] in self?.isApplyingCloudChanges ?? false }
         profileSettings.migrateIfNeeded(profiles: profileKeysOnThisDevice())
         profileSettings.markEarlierMigrationSeedsIfNeeded()
+
+        #if !os(tvOS)
+        let manager = makeDownloadManager()
+        downloadManager = manager
+        #endif
+        #if os(iOS)
+        downloadActivity = DownloadProgressActivity(store: downloadStore, liveProgress: { [weak manager] in
+            manager?.liveProgress ?? [:]
+        }, pause: { [weak manager] ids in
+            await manager?.pause(itemIDs: ids)
+        })
+        #endif
     }
 
     /// Trims the filter cache to its identity limit off the main actor (synchronous directory IO),
     /// keeping the session being switched to. Doubles as the filename-format migration: it deletes
     /// what the previous format wrote wherever it runs.
+    /// Background music belongs to the session it started in. Every path that changes who is signed
+    /// in stops it first, synchronously, so no later hop can see the new identity (audit LTM-201).
+    func stopSessionScopedMusic() {
+        if musicPlaybackCoordinator.currentItem != nil {
+            musicPlaybackCoordinator.stop()
+        }
+        // The segments the last player kept for a Resume (AE#1095) belong to this identity. The next
+        // one could never reuse them (its token makes a different URL), they would only hold disk.
+        AetherEngine.discardRetainedSessionCache()
+    }
+
     private func trimFilterCache(keeping survivor: CacheIdentity?) {
         Task.detached(priority: .utility) {
             FilterCache.shared.migrateAndTrim(keeping: survivor)
@@ -282,12 +424,88 @@ final class DependencyContainer {
         pendingRequestsMonitor.isEligible = { [weak self] in
             guard let self, let user = self.appState?.activeSeerrUser else { return false }
             return (self.appState?.isSeerrConnected ?? false) && user.canManageRequests
+                && self.appState?.activeSeerrProfile == self.activeProfileRef()
+        }
+        pendingRequestsMonitor.identity = { [weak self] in
+            guard let self, let appState = self.appState, let user = appState.activeSeerrUser,
+                  let profile = appState.activeSeerrProfile, profile == self.activeProfileRef()
+            else { return nil }
+            return "\(profile.serverID):\(profile.userID):\(user.id)"
         }
         pendingRequestsMonitor.fetchPendingCount = { [weak self] in
             guard let self else { return 0 }
             let result = try await self.seerrRequestService.allRequests(filter: .pending, take: 0, skip: 0)
             return result.pageInfo.results
         }
+    }
+
+    /// Scope of the per-profile my-requests state, the same `serverID_userID` the pending baseline uses.
+    var myRequestsScope: String? {
+        guard let serverID = activeServer?.id, let userID = activeUserID else { return nil }
+        return "\(serverID)_\(userID)"
+    }
+
+    /// The Seerr user whose requests belong to the active profile. Nil while a profile switch still
+    /// holds the previous profile's Seerr session, which would otherwise file that user's requests
+    /// under the profile switched to.
+    var myRequestsSeerrUserID: Int? {
+        guard let appState, appState.isSeerrConnected, appState.activeSeerrProfile == activeProfileRef() else { return nil }
+        return appState.activeSeerrUser?.id
+    }
+
+    /// Connect the my-requests watcher to the live session. Called once from SodaliteApp.init next to
+    /// `wirePendingRequestsMonitor()`.
+    func wireMyRequestsWatcher() {
+        let watcher = myRequestsWatcher
+        watcher.scope = { [weak self] in self?.myRequestsScope }
+        watcher.selfSeerrID = { [weak self] in self?.myRequestsSeerrUserID }
+        watcher.fetchRequests = { [weak self] userID in
+            guard let self else { return [] }
+            return try await self.seerrRequestService.myRequests(userID: userID, take: 50, skip: 0, sort: .modified).results
+        }
+        watcher.lookupMedia = { [weak self] type, tmdbID in
+            guard let self else { return MyRequestsMediaLookup(availableSeasons: []) }
+            switch type {
+            case .tv:
+                let detail = try await self.seerrMediaService.tvDetail(tmdbID: tmdbID)
+                let seasons = (detail.mediaInfo?.seasons ?? []).filter { $0.status == .available }.map(\.seasonNumber)
+                return MyRequestsMediaLookup(
+                    title: detail.name,
+                    posterPath: detail.posterPath,
+                    jellyfinItemID: detail.mediaInfo?.jellyfinMediaId,
+                    availableSeasons: Set(seasons)
+                )
+            default:
+                let detail = try await self.seerrMediaService.movieDetail(tmdbID: tmdbID)
+                return MyRequestsMediaLookup(
+                    title: detail.title,
+                    posterPath: detail.posterPath,
+                    jellyfinItemID: detail.mediaInfo?.jellyfinMediaId,
+                    availableSeasons: []
+                )
+            }
+        }
+        watcher.onNewEvents = { [weak self] events in
+            #if os(iOS)
+            await MyRequestsNotifier.post(events)
+            #endif
+            await self?.syncAppIconBadge()
+        }
+    }
+
+    /// Writes the app-icon badge from both Seerr sources; see `AppIconBadge`.
+    func syncAppIconBadge() async {
+        #if os(iOS)
+        let adminOn = seerrNotificationPreferences.notifyPendingRequests
+        #else
+        let adminOn = false
+        #endif
+        let count = AppIconBadge.count(
+            pendingApproval: pendingRequestsMonitor.pendingApprovalCount,
+            adminNotificationsOn: adminOn,
+            unseenMine: myRequestsWatcher.isEnabled ? myRequestsWatcher.unseenEvents.count : 0
+        )
+        await AppIconBadge.apply(count)
     }
 
     /// Probes the active server's session for AppRouter's post-switch routing. Returns the user when
@@ -309,17 +527,6 @@ final class DependencyContainer {
         }
     }
 
-    /// Gates the Live TV tab: does the active server expose any Live TV channels? False on any error.
-    func serverHasLiveTV(userID: String) async -> Bool {
-        do {
-            let response = try await jellyfinLiveTvService.getChannels(
-                userID: userID, startIndex: 0, limit: 1, filter: .any)
-            return !response.items.isEmpty
-        } catch {
-            return false
-        }
-    }
-
     /// Silent `try?`: a missing/unreadable keychain entry means no session to restore (app falls back to login); no recovery path benefits from the underlying error.
     func restoreSession() -> Bool {
         guard let server = activeServer else {
@@ -332,19 +539,14 @@ final class DependencyContainer {
             return false
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
 
-        // Re-project SharedSessionMirror every cold launch so TopShelf stays in lockstep even if a prior version never wrote it or the shelf's bucket was wiped.
-        if let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        }
-        scheduleRouteResolve()
+        // The route pass re-projects SharedSessionMirror once the address has proved itself, which
+        // keeps TopShelf in lockstep even if a prior version never wrote it.
+        serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
+        liveRouteDidChange()
         return true
     }
 
@@ -354,6 +556,9 @@ final class DependencyContainer {
         token: String,
         password: String? = nil
     ) throws {
+        if activeSessionIdentity() != CacheIdentity(serverID: server.id, userID: user.id) {
+            stopSessionScopedMusic()
+        }
         try addServer(server)
         try keychainService.save(server.id, for: KeychainKeys.activeServerID)
         try keychainService.save(token, for: KeychainKeys.accessToken(serverID: server.id))
@@ -374,15 +579,11 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: user.id,
-            accessToken: token
-        )
+        // The route pass writes the new session once its address has proved itself; until then the
+        // shelf must not keep showing the previous one.
+        SharedSessionMirror.clear()
 
         // Upsert into remembered-profiles so the user can later switch profiles without re-auth.
         try rememberUser(
@@ -395,9 +596,10 @@ final class DependencyContainer {
             )
         )
 
-
+        serverActivation.stamp(serverID: server.id)
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     // MARK: - Known Servers
@@ -470,11 +672,12 @@ final class DependencyContainer {
         if !isApplyingCloudChanges, updated != current {
             serverSyncMetadata.noteURLsChanged(serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
         appState?.updateActiveServer(updated)
         if activeServer?.id == serverID {
             jellyfinClient.baseURL = preferredURL(for: updated)
-            scheduleRouteResolve()
+            liveRouteDidChange()
         }
     }
 
@@ -517,7 +720,8 @@ final class DependencyContainer {
             hideMovies: appearancePreferences.spoilerHideMovies,
             userID: userID ?? "",
             revealedKeys: spoilerRevealMemory.revealedKeys,
-            seriesOverrides: spoilerSeriesRules.overrides
+            seriesOverrides: spoilerSeriesRules.overrides,
+            hideEpisodeTitles: appearancePreferences.spoilerHideEpisodeTitles
         )
     }
 
@@ -585,6 +789,20 @@ final class DependencyContainer {
         return candidate
     }
 
+    /// The session a secondary server contributes to a combined Home: the same pick a switch to it
+    /// would make, this device's own token slot first, else the resumable profile (Sodalite#85).
+    /// Unlike a switch, nobody is asked for the Guardian PIN here, so a profile that would cost it
+    /// stays out whichever way its token is stored.
+    func secondaryCredential(serverID: String) -> SessionCredential? {
+        if let token = try? keychainService.loadString(for: KeychainKeys.accessToken(serverID: serverID)),
+           let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID)),
+           !token.isEmpty {
+            guard !parentalGateRequired(forActivatingUserID: userID, serverID: serverID) else { return nil }
+            return SessionCredential(userID: userID, token: token)
+        }
+        return resumableProfile(serverID: serverID).map { SessionCredential(userID: $0.id, token: $0.token) }
+    }
+
     /// Switches the active server: sets the pointer, loads the cached token, reconfigures JellyfinClient, rewrites SharedSessionMirror, bumps serverDidSwitch. Seerr is left to the caller's restore path. Throws .unknown (not in knownServers) or .missingToken (caller routes to the target's profile picker). Both throws land before the first write, so a switch that cannot complete leaves no half-switched session behind.
     func switchServer(to serverID: String) throws {
         guard let server = listKnownServers().first(where: { $0.id == serverID }) else {
@@ -611,11 +829,9 @@ final class DependencyContainer {
         // activeSessionIdentity onChange only catches the completed setAuthenticated, which lags the async
         // probe on a server switch, so the previous server's track would keep playing. Covers removeServer's
         // active-server promotion (it calls this).
-        Task { @MainActor in
-            if self.musicPlaybackCoordinator.currentItem != nil {
-                self.musicPlaybackCoordinator.stop()
-            }
-        }
+        // Synchronous, and the stop report is built from a snapshot of the session as it is right now,
+        // so the token swap that follows in this same turn cannot redirect it (R-W2-1).
+        stopSessionScopedMusic()
 
         if let resumable {
             sessionNote("switch to \(label(for: server)): no token slot here, resuming remembered profile \(resumable.name).")
@@ -633,8 +849,6 @@ final class DependencyContainer {
         let previousServerID = try? keychainService.loadString(for: KeychainKeys.activeServerID)
         sessionNote("switch \(previousServerID.map { String($0.prefix(8)) } ?? "none") -> \(label(for: server)) on this device's own token.")
         try keychainService.save(serverID, for: KeychainKeys.activeServerID)
-
-        let sessionURL = preferredURL(for: server)
 
         let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: serverID))
 
@@ -663,20 +877,14 @@ final class DependencyContainer {
             try? keychainService.delete(for: KeychainKeys.activeUserImageTag)
         }
 
-        jellyfinClient.baseURL = sessionURL
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = token
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
-        if let userID {
-            SharedSessionMirror.write(
-                serverURL: sessionURL,
-                userID: userID,
-                accessToken: token
-            )
-        } else {
-            SharedSessionMirror.clear()
-        }
-
-        scheduleRouteResolve()
+        serverActivation.stamp(serverID: serverID)
+        refreshSessionRegistry()
+        liveRouteDidChange()
 
         // Seerr (per server+user) is left to the caller's post-switch restore path so callers can route to a picker first when userID is nil.
         Task { @MainActor in
@@ -696,6 +904,7 @@ final class DependencyContainer {
         try? keychainService.delete(for: KeychainKeys.rememberedUsers(serverID: serverID))
         // The removal markers go with the server, else re-adding it later holds its profiles out again.
         try? keychainService.delete(for: KeychainKeys.forgottenUsers(serverID: serverID))
+        serverActivation.forget(serverID: serverID)
         // Every profile on the box, not just the active one: the whole server is going.
         FilterCache.shared.evict(serverID: serverID)
         profileSettings.forgetProfiles(onServer: serverID)
@@ -729,24 +938,24 @@ final class DependencyContainer {
                     // The stop switchServer would have done on its way through: the picker route leaves
                     // appState.activeServer standing, so activeSessionIdentity never moves and the
                     // deleted server's track would play on under the successor's picker.
-                    Task { @MainActor in
-                        if self.musicPlaybackCoordinator.currentItem != nil {
-                            self.musicPlaybackCoordinator.stop()
-                        }
-                    }
+                    stopSessionScopedMusic()
                     jellyfinClient.baseURL = preferredURL(for: successor)
                     jellyfinClient.accessToken = nil
                     SharedSessionMirror.clear()
+                    liveRouteDidChange()
                 }
             } else {
                 sessionNote("removed the last server; no session left on this device.")
+                stopSessionScopedMusic()
                 try? keychainService.delete(for: KeychainKeys.activeServerID)
                 jellyfinClient.baseURL = nil
                 jellyfinClient.accessToken = nil
                 SharedSessionMirror.clear()
+                liveRouteDidChange()
             }
         }
 
+        refreshSessionRegistry()
 
         // Only signal when the ACTIVE server was removed; an inactive removal's bump would needlessly cancel probes + force a Home reload.
         if activeID == serverID, !signalAlreadyScheduled {
@@ -800,6 +1009,7 @@ final class DependencyContainer {
         var forgotten = listForgottenUsers(serverID: user.serverID)
         forgotten.removeValue(forKey: user.id)
         setForgottenUsers(forgotten, serverID: user.serverID)
+        refreshSessionRegistry()
         cloudSyncMarkServer(user.serverID)
     }
 
@@ -824,6 +1034,7 @@ final class DependencyContainer {
     /// so a removal that arrives from another device leaves no credentials behind either.
     func purgeUserCredentials(id: String, serverID: String) {
         forgetRememberedSeerr(forJellyfinUserID: id, jellyfinServerID: serverID)
+        purgeTraktSession(for: ProfileKey(serverID: serverID, userID: id))
         try? keychainService.delete(for: KeychainKeys.jellyfinPassword(serverID: serverID, userID: id))
         // Same reason: a remembered live upstream carries the IPTV provider's credentials in its path.
         liveDirectStreamMemory.forgetAll(userID: id)
@@ -872,6 +1083,7 @@ final class DependencyContainer {
         if authPreferences.defaultUserID(serverID: serverID) == id {
             authPreferences.setDefaultUserID(nil, serverID: serverID)
         }
+        refreshSessionRegistry()
         cloudSyncMarkServer(serverID)
     }
 
@@ -879,6 +1091,10 @@ final class DependencyContainer {
     func switchToUser(_ remembered: RememberedUser, server: JellyfinServer) throws {
         let previousIdentity = activeSessionIdentity()
         sessionNote("profile -> \(remembered.name) on \(label(for: server)).")
+        // Before the token swaps: AppRouter's identity onChange runs a render later (audit LTM-201).
+        if previousIdentity != CacheIdentity(serverID: server.id, userID: remembered.id) {
+            stopSessionScopedMusic()
+        }
         try addServer(server)
         try keychainService.save(server.id, for: KeychainKeys.activeServerID)
         try keychainService.save(
@@ -911,20 +1127,17 @@ final class DependencyContainer {
             )
         }
 
-        let sessionURL = preferredURL(for: server)
-        jellyfinClient.baseURL = sessionURL
+        serverActivation.stamp(serverID: server.id)
+        jellyfinClient.baseURL = preferredURL(for: server)
         jellyfinClient.accessToken = remembered.token
-
-        SharedSessionMirror.write(
-            serverURL: sessionURL,
-            userID: remembered.id,
-            accessToken: remembered.token
-        )
+        // Written by the route pass once the address has proved itself (audit NET-201).
+        SharedSessionMirror.clear()
 
         // Seerr left to the caller's restoreSeerrSession(forJellyfinUserID:jellyfinServerID:) so each profile picks up its own session, or lands on the empty state.
 
+        refreshSessionRegistry()
         cloudSyncMarkServer(server.id)
-        scheduleRouteResolve()
+        liveRouteDidChange()
     }
 
     /// Re-stamps the server's own name for a (server, user) onto both stores that cache it: the global activeUserName entry and the server's remembered profile. Called once /Users/Me has spoken, so a rename (or a name inherited from another server by an install predating the per-server name resolution) heals instead of surviving every launch.
@@ -1054,7 +1267,8 @@ final class DependencyContainer {
                   for: KeychainKeys.jellyfinPassword(serverID: serverID, userID: userID)
               )) == nil,
               let auth = try? await jellyfinAuthService.login(username: username, password: password),
-              auth.user.id == userID
+              auth.user.id == userID,
+              isActiveProfile(ProfileRef(serverID: serverID, userID: userID))
         else { return false }
         try? saveSession(server: server, user: auth.user, token: auth.accessToken, password: password)
         return true
@@ -1117,6 +1331,7 @@ final class DependencyContainer {
     }
 
     func clearSession() throws {
+        stopSessionScopedMusic()
         // Full logout is local-only per spec; disabling cloud sync first means the
         // per-server deletes below never mark (else a device-local logout would
         // propagate as a server deletion to every other synced device).
@@ -1143,6 +1358,8 @@ final class DependencyContainer {
 
         jellyfinClient.baseURL = nil
         jellyfinClient.accessToken = nil
+        refreshSessionRegistry()
+        liveRouteDidChange()
 
         SharedSessionMirror.clearAll()
 
@@ -1483,6 +1700,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
         seerrClient.sessionCookie = cookie
         return server
     }
@@ -1517,6 +1735,7 @@ final class DependencyContainer {
             jellyfinServerID: jellyfinServerID
         ).map { rediscovered.fillingEmptyURLSlots(fromKnown: $0) } ?? rediscovered
         seerrClient.baseURL = preferredSeerrURL(for: server)
+        seerrClient.serverID = server.id
 
         if let jellyfinUserID, let jellyfinServerID, let cookie = seerrClient.sessionCookie {
             // Profile-scoped persistence. The global (pre-0.3.0) entry is NOT refreshed here: rewriting it kept the legacy fallback live and let a scopeless profile inherit whoever last logged in. Global keys are read-only legacy now (see syncSeerrSession).
@@ -1578,6 +1797,7 @@ final class DependencyContainer {
         }
 
         seerrClient.baseURL = preferredSeerrURL(for: updated)
+        seerrClient.serverID = updated.id
         appState?.updateActiveSeerrServer(updated)
         scheduleRouteResolve()
     }
@@ -1597,6 +1817,7 @@ final class DependencyContainer {
             return nil
         }
         seerrClient.baseURL = preferredSeerrURL(for: remembered.seerrServer)
+        seerrClient.serverID = remembered.seerrServer.id
         seerrClient.sessionCookie = remembered.cookie
         return remembered.seerrServer
     }
@@ -1617,6 +1838,7 @@ final class DependencyContainer {
     /// Drops the in-memory Seerr identity without touching keychain. Used on tvOS-user change: the previous user's persisted session must survive, but the live client must stop acting as them immediately.
     func detachSeerrClient() {
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1628,6 +1850,7 @@ final class DependencyContainer {
         try keychainService.delete(for: KeychainKeys.seerrServer)
 
         seerrClient.baseURL = nil
+        seerrClient.serverID = nil
         seerrClient.sessionCookie = nil
     }
 
@@ -1656,8 +1879,26 @@ final class DependencyContainer {
             return .notConfigured
         }
 
+        // Which Seerr slot the cookie may go to depends on whether Jellyfin's LAN address proved
+        // this is the home network, and the launch pass is still finding out (audit NET-201). At
+        // home that takes tens of milliseconds.
+        if verifiesServerIdentity {
+            await jellyfinClient.routeGate?.waitUntilSettled()
+            guard generation == seerrSyncGeneration, !Task.isCancelled else { return .transientFailure }
+            seerrClient.baseURL = preferredSeerrURL(for: server)
+            // A LAN-only Seerr off the proved home network may be anybody's: the cookie stays here
+            // and the session is kept for a later try (audit review R-ROUTE-8).
+            guard seerrMayTrust(seerrClient.baseURL, seerrID: server.id) else { return .transientFailure }
+        }
+        let askedURL = seerrClient.baseURL
+
         do {
             let user = try await seerrAuthService.currentUser()
+            // Where a LAN Seerr answered is what lets it be trusted there later without a Jellyfin
+            // LAN slot to prove home with (audit review R-ROUTE-25).
+            if let askedURL, RouteGate.needsProof(askedURL), let subnets = currentPathReading()?.subnets {
+                ServerHomeNetworks.record(subnets, serverID: seerrRouteKey(server.id))
+            }
 
             // Legacy bridge: persist a globally-restored session as a scoped copy, then retire the global entry (else a DIFFERENT scopeless profile inherits this cookie at a later cold launch).
             if scopedServer == nil, let jellyfinUserID, let jellyfinServerID {
@@ -1674,6 +1915,12 @@ final class DependencyContainer {
             }
             return .connected(server: server, user: user)
         } catch let error as APIError where error.isUnauthorized {
+            // Whatever sits at a LAN address on somebody else's network is not this Seerr refusing
+            // the cookie (audit NET-202).
+            guard seerrRefusalCounts(at: askedURL, seerrID: server.id) else {
+                sessionNote("Seerr refused the session at \(askedURL?.host() ?? "?"), an address not proved to be this Seerr here; keeping it.")
+                return .transientFailure
+            }
             // Cookie rejected: drop the entry (scoped copy only when that was probed, leaving other profiles untouched).
             if scopedServer != nil, let jellyfinUserID, let jellyfinServerID {
                 forgetRememberedSeerr(
@@ -1719,7 +1966,7 @@ final class DependencyContainer {
         guard generation == seerrSyncGeneration, isActiveProfile(profile) else { return }
         switch outcome {
         case .connected(let server, let user):
-            appState?.setSeerrConnected(server: server, user: user)
+            appState?.setSeerrConnected(server: server, user: user, for: profile)
             scheduleRouteResolve()
         case .transientFailure where keepsSessionOnTransientFailure:
             break

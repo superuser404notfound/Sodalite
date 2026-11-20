@@ -24,8 +24,8 @@ enum ImagePayload {
         guard data.count >= 16 else { return false }
 
         switch format(of: data) {
-        case .png: return tail(of: data).contains(subsequence: Self.pngEndChunk)
-        case .jpeg: return tail(of: data).contains(subsequence: Self.jpegEndOfImage)
+        case .png: return tail(of: data, window: pngTailWindow).contains(subsequence: Self.pngEndChunk)
+        case .jpeg: return tail(of: data, window: min(jpegTailWindow, data.count / 2)).contains(subsequence: Self.jpegEndOfImage)
         case .gif: return data.last == 0x3B
         case .webP: return riffLengthIsSatisfied(data)
         case .unknown: return true
@@ -59,9 +59,16 @@ enum ImagePayload {
     /// `FF 00`, so it means the end of the file and nothing else.
     nonisolated private static let jpegEndOfImage: [UInt8] = [0xFF, 0xD9]
 
-    /// Enough tail to cover an encoder that pads after the end marker, short enough that a cut file
-    /// cannot reach back into a place where the pattern could occur by chance.
-    nonisolated private static func tail(of data: Data) -> [UInt8] { Array(data.suffix(64)) }
+    /// How far back from the end the marker is looked for. Some files carry XMP, a thumbnail or a
+    /// vendor block after it, and Jellyfin serves the original when no resize is needed, so 64 bytes
+    /// refused whole images for good (audit CMP-205). A PNG chunk of twelve fixed bytes cannot turn up
+    /// by chance, so its window is wide. A JPEG's `FF D9` also ends an embedded EXIF thumbnail near
+    /// the head, so its window stays short enough that a cut file does not reach one, and for a small
+    /// file it is only the back half (audit review R-W2-5).
+    nonisolated private static let pngTailWindow = 64 * 1024
+    nonisolated private static let jpegTailWindow = 16 * 1024
+
+    nonisolated private static func tail(of data: Data, window: Int) -> [UInt8] { Array(data.suffix(window)) }
 
     /// A RIFF container states its own payload length in bytes 4..<8, little-endian, counting from
     /// byte 8. Anything shorter than that is a file that stopped early.
@@ -75,8 +82,14 @@ enum ImagePayload {
 private extension Array where Element == UInt8 {
     nonisolated func contains(subsequence pattern: [UInt8]) -> Bool {
         guard pattern.count <= count else { return false }
-        for start in 0...(count - pattern.count) where Array(self[start..<start + pattern.count]) == pattern {
-            return true
+        let first = pattern[0]
+        for start in 0...(count - pattern.count) where self[start] == first {
+            var matches = true
+            for offset in 1..<pattern.count where self[start + offset] != pattern[offset] {
+                matches = false
+                break
+            }
+            if matches { return true }
         }
         return false
     }
@@ -108,23 +121,48 @@ enum ImageFetch {
         case transientFailure
     }
 
-    /// The first pass reads the HTTP cache like any other request. Every later one bypasses it: the
-    /// only reason there IS a later one is that the last answer was half a file, and that is exactly
-    /// what the cache would hand back.
-    nonisolated static func cachePolicy(forAttempt attempt: Int) -> URLRequest.CachePolicy {
-        attempt == 0 ? .useProtocolCachePolicy : .reloadIgnoringLocalCacheData
+    /// Every pass after the first bypasses the HTTP cache: the only reason there IS a later one is
+    /// that the last answer was half a file, and that is exactly what the cache would hand back.
+    ///
+    /// A first pass for a Jellyfin URL that names its image `tag` takes a stored copy as it is. The
+    /// tag is the image's content hash, so a new picture is a new URL and the stored one can never
+    /// be stale. The server's own headers say otherwise: `Cache-Control: public` with no `max-age`
+    /// and a `Last-Modified` from when the resize was written, so URLSession's heuristic gave a
+    /// fresh resize almost no lifetime, and every image evicted from `ImageCache` came back by a
+    /// round trip to the server rather than from the disk it was on (Sodalite#212). A payload that
+    /// stopped short is dropped from the cache when it is refused, so this cannot latch one.
+    nonisolated static func cachePolicy(forAttempt attempt: Int, url: URL?) -> URLRequest.CachePolicy {
+        guard attempt == 0 else { return .reloadIgnoringLocalCacheData }
+        return isContentAddressed(url) ? .returnCacheDataElseLoad : .useProtocolCachePolicy
     }
+
+    nonisolated static func isContentAddressed(_ url: URL?) -> Bool {
+        guard let url,
+              url.path.contains("/Images/"),
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        else { return false }
+        return items.contains { $0.name == "tag" && !($0.value ?? "").isEmpty }
+    }
+
+    /// Above URLSession's default of six, so the prefetch, which takes half of them, cannot hold
+    /// back the cards on screen (Sodalite#212).
+    nonisolated static let connectionsPerHost = 8
 
     /// Artwork's own session, because `URLSession.shared` cannot carry a delegate and this is where
     /// every image in the app is fetched. Its cache is its own for the same reason: `forget()` has to
     /// be able to drop the entry this session wrote, and the shared cache is no longer the one that
-    /// holds it. Sized like the shared default it replaces, which is what the retry ladder above was
-    /// measured against.
+    /// holds it.
+    ///
+    /// The disk half is what an image evicted from `ImageCache` comes back from without asking the
+    /// server to resize it again. At 40 MB, the size of the shared default this replaced, it held
+    /// fewer of Home's encoded cards than the decoded cache did, so an eviction went all the way to
+    /// the server (Sodalite#212). `Library/Caches` is purgeable, and Settings > Cached Data shows it.
     nonisolated static let session: URLSession = {
         let config = URLSessionConfiguration.default
+        config.httpMaximumConnectionsPerHost = connectionsPerHost
         config.urlCache = URLCache(
             memoryCapacity: 8 * 1024 * 1024,
-            diskCapacity: 40 * 1024 * 1024,
+            diskCapacity: 200 * 1024 * 1024,
             diskPath: "sodalite-image-cache"
         )
         return URLSession(
@@ -132,8 +170,8 @@ enum ImageFetch {
     }()
 
     /// Bytes of artwork on disk, and the way to drop them, for the Settings screen that shows what
-    /// Sodalite keeps on this device (Sodalite#117). The decoded images in `ImageCache` sit in an
-    /// `NSCache`, which reports no size at all, so they carry no figure and are only cleared.
+    /// Sodalite keeps on this device (Sodalite#117). The decoded images in `ImageCache` are memory,
+    /// not something the device keeps, so they carry no figure and are only cleared.
     nonisolated static var cacheDiskUsage: Int {
         session.configuration.urlCache?.currentDiskUsage ?? 0
     }
@@ -144,7 +182,7 @@ enum ImageFetch {
 
     nonisolated static func load(_ request: URLRequest, attempt: Int = 0) async -> Outcome {
         var request = request
-        request.cachePolicy = cachePolicy(forAttempt: attempt)
+        request.cachePolicy = cachePolicy(forAttempt: attempt, url: request.url)
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse,

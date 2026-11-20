@@ -23,6 +23,10 @@ struct PersonDetailView: View {
 
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -303,32 +307,23 @@ struct PersonDetailView: View {
         }
         guard let id = profile?.jellyfinPersonID else { return nil }
         return dependencies.jellyfinImageService.personImageURL(
-            personID: id, tag: profile?.jellyfinImageTag, maxWidth: ImageWidth.avatar
+            personID: id, tag: profile?.jellyfinImageTag, maxWidth: ImageWidth.avatar, serverID: session.server?.id
         )
     }
 
-    private func initials(_ profile: PersonProfile?) -> String {
-        let parts = displayName(profile).split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(displayName(profile).prefix(2)).uppercased()
-    }
+    private func initials(_ profile: PersonProfile?) -> String { displayName(profile).profileInitials }
 
     // MARK: - Actions
 
     private func bootstrap() async {
         guard viewModel == nil else { return }
         let vm = PersonDetailViewModel(
-            itemService: dependencies.jellyfinItemService,
+            itemService: session.itemService,
             mediaService: dependencies.seerrMediaService,
             searchService: dependencies.seerrSearchService,
-            // Follows the Catalog tab: with it hidden, the filmography would be the same catalog one level deeper (Sodalite#62).
-            isSeerrConnected: SeerrSurfacePolicy.browsingEnabled(
-                appState: appState,
-                appearance: dependencies.appearancePreferences
-            ),
-            userID: appState.activeUser?.id
+            // Deliberately not tied to the Catalog tab: hiding it silently dropped the filmography, which read as a missing feature (Sodalite#143).
+            isSeerrConnected: appState.isSeerrConnected,
+            userID: sessionUserID
         )
         viewModel = vm
         await reload()
@@ -348,8 +343,8 @@ struct PersonDetailView: View {
         Task {
             let status = media.mediaInfo?.status
             if status == .available || status == .partiallyAvailable,
-               let userID = appState.activeUser?.id,
-               let item = try? await dependencies.jellyfinItemService.findByTmdbID(
+               let userID = sessionUserID,
+               let item = try? await session.itemService.findByTmdbID(
                    userID: userID, tmdbID: media.id, searchTerm: media.displayTitle
                ) {
                 navigateToJellyfinItem = item

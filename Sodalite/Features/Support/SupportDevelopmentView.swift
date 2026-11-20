@@ -409,7 +409,6 @@ private struct TipJarRow: View {
                     Text(product.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -469,7 +468,6 @@ private struct SupporterPackRow: View {
                     Text(statusSubtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
 
                 Spacer()

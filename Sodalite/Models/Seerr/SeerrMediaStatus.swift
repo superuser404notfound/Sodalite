@@ -8,12 +8,15 @@ enum SeerrMediaStatus: Int, Codable, Sendable {
     case available = 5
     /// The server's own DELETED. Jellyseerr stamps it on the media AND every season when `DELETE /media/{id}/file` removes the title from Radarr/Sonarr, which is exactly what Sodalite's delete flow calls. Decoding it as `.unknown` made the season fall through to the still-approved request and read as "downloading" forever. Doubles as the sentinel the Jellyfin ground-truth reconcile writes when a Seerr-"available" title is absent from the library. BLOCKLISTED (6) stays `.unknown`, it is a state of its own and no UI shows it.
     case deleted = 7
+    /// Client-only, the server has no such value. Jellyseerr leaves the media on PROCESSING when the Radarr/Sonarr handover fails and marks only the request FAILED, so `SeerrSeasonStatusResolver` writes this when a failed request is all that is left behind the pipeline state (Sodalite#210).
+    case failed = 1000
 
     // Lenient decode: newer Seerr may add states; an unknown int would abort the whole /movie|/tv decode, so fall back to `.unknown`.
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let raw = try container.decode(Int.self)
-        self = SeerrMediaStatus(rawValue: raw) ?? .unknown
+        // `.failed` is the client's own verdict, never something the server can say.
+        self = raw == Self.failed.rawValue ? .unknown : SeerrMediaStatus(rawValue: raw) ?? .unknown
     }
 
     var localizationKey: String {
@@ -24,6 +27,7 @@ enum SeerrMediaStatus: Int, Codable, Sendable {
         case .partiallyAvailable: "catalog.status.partiallyAvailable"
         case .available: "catalog.status.available"
         case .deleted: "catalog.status.removed"
+        case .failed: "catalog.requestStatus.failed"
         }
     }
 
@@ -35,6 +39,7 @@ enum SeerrMediaStatus: Int, Codable, Sendable {
         case .partiallyAvailable: "circle.lefthalf.filled"
         case .available: "checkmark.circle.fill"
         case .deleted: "trash"
+        case .failed: "exclamationmark.triangle"
         }
     }
 
@@ -46,6 +51,7 @@ enum SeerrMediaStatus: Int, Codable, Sendable {
         case .partiallyAvailable: .teal
         case .available: .green
         case .deleted: .gray
+        case .failed: .red
         }
     }
 }

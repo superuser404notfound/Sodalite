@@ -58,9 +58,22 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     /// an audio playlist apart from a video one (see `isAudioPlaylist`). `var` with a default so
     /// the hand-written inits below stay untouched.
     var mediaType: String?
+    /// Jellyfin `ServerId`, on every BaseItemDto. nil on items cached before it was decoded, which
+    /// resolve against the active server (Sodalite#85).
+    var serverID: String?
+    /// Jellyfin `DateCreated` (card field set), the sort key a combined Home's Latest rows merge by.
+    var dateCreated: String?
+    /// Jellyfin `PrimaryImageAspectRatio` (card field set): the shape of the item's primary image,
+    /// and so the card a server means it to be drawn as (see `ArtworkShape`).
+    var primaryImageAspectRatio: Double?
     let childCount: Int?
     /// Local trailer count (requires LocalTrailerCount in Fields); gates the detail Trailer button. nil if unrequested.
     let localTrailerCount: Int?
+    /// Extras from the item's extras/clips/featurettes folders (requires SpecialFeatureCount in Fields); gates the detail Extras row. nil if unrequested.
+    let specialFeatureCount: Int?
+    /// Trailer links from the metadata provider (requires RemoteTrailers in Fields), Sodalite#195. `var`
+    /// with a default so the hand-written inits below stay untouched.
+    var remoteTrailers: [RemoteTrailer]?
     let seriesPrimaryImageTag: String?
     let providerIds: [String: String]?
     /// nil unless the fetch requested `Fields=Chapters`; `[]` is the server answering "none". `var`
@@ -73,6 +86,11 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     let artists: [String]?
     let albumId: String?
     let albumPrimaryImageTag: String?
+    /// Sodalite#242: gain in dB that brings this track, and its album, to the server's loudness
+    /// reference (-18 LUFS after Jellyfin's LUFS scan, or the file's own ReplayGain tags). nil when the
+    /// library was never scanned. Jellyfin sends both on every audio item without a `Fields` entry.
+    var normalizationGain: Double?
+    var albumNormalizationGain: Double?
 
     /// Display line for a track: the per-track artists if present,
     /// otherwise the album artist. nil when neither is set.
@@ -82,7 +100,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     }
 
     /// TMDB id (correlates with Seerr). Key is case-sensitive ("Tmdb"); older scanners wrote "tmdb", so check both.
-    var tmdbID: Int? {
+    nonisolated var tmdbID: Int? {
         guard let ids = providerIds else { return nil }
         let raw = ids["Tmdb"] ?? ids["tmdb"] ?? ids["TMDB"]
         return raw.flatMap(Int.init)
@@ -176,8 +194,13 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case recursiveItemCount = "RecursiveItemCount"
         case locationType = "LocationType"
         case mediaType = "MediaType"
+        case serverID = "ServerId"
+        case dateCreated = "DateCreated"
+        case primaryImageAspectRatio = "PrimaryImageAspectRatio"
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
+        case specialFeatureCount = "SpecialFeatureCount"
+        case remoteTrailers = "RemoteTrailers"
         case seriesPrimaryImageTag = "SeriesPrimaryImageTag"
         case providerIds = "ProviderIds"
         case chapters = "Chapters"
@@ -186,6 +209,8 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case artists = "Artists"
         case albumId = "AlbumId"
         case albumPrimaryImageTag = "AlbumPrimaryImageTag"
+        case normalizationGain = "NormalizationGain"
+        case albumNormalizationGain = "AlbumNormalizationGain"
     }
 
     init(seriesStub id: String, name: String) {
@@ -221,6 +246,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         self.collectionType = nil
         self.childCount = nil
         self.localTrailerCount = nil
+        self.specialFeatureCount = nil
         self.seriesPrimaryImageTag = nil
         self.providerIds = nil
         self.chapters = nil
@@ -229,6 +255,56 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         self.artists = nil
         self.albumId = nil
         self.albumPrimaryImageTag = nil
+    }
+
+    /// An announced episode the library does not list, built from Seerr's `nextEpisodeToAir` for the
+    /// Upcoming row (Sodalite#198). Virtual like the server's own unaired entries, so nothing tries
+    /// to play it, and it carries the series' artwork tags because it has none of its own. The id is
+    /// namespaced under the series so it can never collide with a real item.
+    nonisolated init(upcomingEpisodeOf series: JellyfinItem, seasonNumber: Int?, episodeNumber: Int, name: String?, airDate: String) {
+        self.id = "upcoming:\(series.id):\(seasonNumber ?? 0):\(episodeNumber)"
+        self.name = name ?? ""
+        self.sortName = nil
+        self.originalTitle = nil
+        self.overview = nil
+        self.type = .episode
+        self.seriesName = series.name
+        self.seriesId = series.id
+        self.seasonId = nil
+        self.parentIndexNumber = seasonNumber
+        self.indexNumber = episodeNumber
+        self.productionYear = nil
+        self.communityRating = nil
+        self.criticRating = nil
+        self.officialRating = nil
+        self.runTimeTicks = nil
+        self.premiereDate = airDate
+        self.endDate = nil
+        self.status = nil
+        self.genres = nil
+        self.taglines = nil
+        self.imageTags = nil
+        self.backdropImageTags = nil
+        self.parentBackdropImageTags = series.backdropImageTags
+        self.userData = nil
+        self.mediaStreams = nil
+        self.mediaSources = nil
+        self.people = nil
+        self.studios = nil
+        self.collectionType = nil
+        self.childCount = nil
+        self.localTrailerCount = nil
+        self.specialFeatureCount = nil
+        self.seriesPrimaryImageTag = series.imageTags?.primary
+        self.providerIds = nil
+        self.chapters = nil
+        self.trickplay = nil
+        self.albumArtist = nil
+        self.artists = nil
+        self.albumId = nil
+        self.albumPrimaryImageTag = nil
+        self.locationType = "Virtual"
+        self.serverID = series.serverID
     }
 
     /// Live-channel item so PlayerViewModel works unchanged for live playback; display name prefers the current program's title.
@@ -249,14 +325,17 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         // (NOVA, and every sports broadcast) lost the programme name entirely: `name` above has
         // already been overwritten with the episode title, and the `?? program?.name` fallback
         // there is unreachable in exactly that case.
-        self.seriesName = program?.seriesName ?? program?.name
+        // A movie keeps no header of its own, so it takes the branch a stored movie does: its name
+        // over its year.
+        let isMovie = program?.isMovie == true
+        self.seriesName = isMovie ? program?.seriesName : program?.seriesName ?? program?.name
         self.seriesId = nil
         self.seasonId = nil
         // Both halves or neither: a lone "S4" beside a programme name identifies nothing, and the
         // guide already refuses to draw one (`EpisodeMetadataFormatter.programLabel`).
         self.parentIndexNumber = program?.indexNumber == nil ? nil : program?.parentIndexNumber
         self.indexNumber = program?.parentIndexNumber == nil ? nil : program?.indexNumber
-        self.productionYear = nil
+        self.productionYear = program?.movieYear
         self.communityRating = nil
         self.criticRating = nil
         self.officialRating = nil
@@ -277,6 +356,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         self.collectionType = nil
         self.childCount = nil
         self.localTrailerCount = nil
+        self.specialFeatureCount = nil
         self.seriesPrimaryImageTag = nil
         self.providerIds = nil
         self.chapters = nil
@@ -290,6 +370,13 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     /// Jellyfin's `MaxResumePct` default: past it the server counts the item as watched and stores no
     /// resume position at all.
     static let playedThresholdPercent: Double = 90
+
+    /// Whether a stop at `ticks` is past the point the server counts as watched. Nil runtime says
+    /// nothing, so it is not a finish.
+    func isFinished(byStopAt ticks: Int64) -> Bool {
+        guard let total = runTimeTicks, total > 0 else { return false }
+        return Double(ticks) / Double(total) * 100 >= Self.playedThresholdPercent
+    }
 
     /// Patch resume position in place after playback stops (issue #24): sets ticks + recomputes playedPercentage, no server round-trip. Creates userData if none.
     mutating func setResumePosition(_ ticks: Int64) {
@@ -342,6 +429,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    /// Identity across servers: two servers can, in principle, mint the same id.
+    var originKey: String { "\(serverID ?? "")|\(id)" }
 }
 
 enum ItemType: String, Codable, Sendable {
@@ -356,6 +446,8 @@ enum ItemType: String, Codable, Sendable {
     case folder = "Folder"
     case playlist = "Playlist"
     case tvChannel = "TvChannel"
+    /// A file in a home-video library (and an extra); Jellyfin gives it no richer type (Sodalite#180).
+    case video = "Video"
     case unknown
 
     init(from decoder: Decoder) throws {
@@ -431,6 +523,9 @@ struct UserItemData: Codable, Sendable, Equatable {
     let playedPercentage: Double?
     /// ISO-8601 last-play timestamp; kept raw (model convention) and unparsed (recency ordering is server-side via SortBy=DatePlayed).
     let lastPlayedDate: String?
+    /// The viewer's own 0 to 10 rating. Jellyfin stores it per user and derives `Likes` from it
+    /// (6.5 and up), and its web client never shows it; tools like Scrob read and write the same field.
+    var rating: Double? = nil
 
     enum CodingKeys: String, CodingKey {
         case playbackPositionTicks = "PlaybackPositionTicks"
@@ -440,6 +535,7 @@ struct UserItemData: Codable, Sendable, Equatable {
         case unplayedItemCount = "UnplayedItemCount"
         case playedPercentage = "PlayedPercentage"
         case lastPlayedDate = "LastPlayedDate"
+        case rating = "Rating"
     }
 
     /// Copy with resume position (and, if known, played percentage) replaced; in-memory patch after playback stops (issue #24). `played` defaults to keep-current, the watched-threshold patch passes it.
@@ -451,7 +547,8 @@ struct UserItemData: Codable, Sendable, Equatable {
             played: newPlayed ?? played,
             unplayedItemCount: unplayedItemCount,
             playedPercentage: pct,
-            lastPlayedDate: lastPlayedDate
+            lastPlayedDate: lastPlayedDate,
+            rating: rating
         )
     }
 }
@@ -476,6 +573,12 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
     let profile: String?
     let bitRate: Int?
     let dvProfile: Int?
+    /// Jellyfin's ffprobe verdict on the field order. A `var` with a default so the memberwise
+    /// init in tests and previews keeps compiling without it.
+    var isInterlaced: Bool? = nil
+    /// Jellyfin 10.9+: the SDH flag. Handed to the engine so a sidecar's native rendition is marked
+    /// SDH in AVKit's menu (PiP, AirPlay).
+    var isHearingImpaired: Bool? = nil
 
     var id: Int { index }
 
@@ -499,6 +602,8 @@ struct MediaStream: Codable, Sendable, Equatable, Identifiable {
         case profile = "Profile"
         case bitRate = "BitRate"
         case dvProfile = "DvProfile"
+        case isInterlaced = "IsInterlaced"
+        case isHearingImpaired = "IsHearingImpaired"
     }
 }
 
@@ -527,6 +632,17 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
     let supportsDirectStream: Bool?
     let supportsTranscoding: Bool?
     let mediaStreams: [MediaStream]?
+    /// `MediaSourceType`: Default, Grouping or Placeholder.
+    let type: String?
+    /// Jellyfin's `VideoType`, see `DiscFolder`.
+    let videoType: String?
+
+    /// A stand-in for versions the server resolves later. AIOMetadata's emulated Jellyfin lists two
+    /// of them on every item ("Streams load when played", "Load the stream list") and swaps the real
+    /// ones in when the item is fetched asking for `MediaSources`.
+    var isPlaceholder: Bool { type == "Placeholder" }
+
+    var isDiscFolder: Bool { DiscFolder.matches(videoType: videoType) }
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -539,10 +655,35 @@ struct MediaSource: Codable, Sendable, Equatable, Identifiable {
         case supportsDirectStream = "SupportsDirectStream"
         case supportsTranscoding = "SupportsTranscoding"
         case mediaStreams = "MediaStreams"
+        case type = "Type"
+        case videoType = "VideoType"
+    }
+}
+
+/// A Blu-ray (BDMV) or DVD (VIDEO_TS) folder, which Jellyfin reports through `VideoType` (Sodalite#185).
+///
+/// The server has no single file to hand over for one. It refuses direct play, and it answers even a
+/// `Static=true` stream request by starting ffmpeg, so every request that expects the original bytes
+/// (scrub stills, the HDR10+ probe) costs the server an encode session instead.
+enum DiscFolder {
+    static func matches(videoType: String?) -> Bool {
+        videoType == "BluRay" || videoType == "Dvd"
     }
 }
 
 extension JellyfinItem {
+    /// The versions a viewer can choose between. Placeholders are no version.
+    var selectableMediaSources: [MediaSource] {
+        mediaSources?.filter { !$0.isPlaceholder } ?? []
+    }
+
+    /// Whether the item still lacks its per-file detail: a slim list entry carries neither streams
+    /// nor sources, and one that carries only placeholders has not been resolved yet.
+    var awaitsMediaDetail: Bool {
+        guard let sources = mediaSources else { return mediaStreams == nil }
+        return !sources.isEmpty && sources.allSatisfy(\.isPlaceholder)
+    }
+
     /// The `MediaSource` actually playing, resolved from the engine-picked id (`PlayerViewModel.mediaSourceID`).
     /// Multi-version items carry several `mediaSources`; consumers that show per-version detail (Stats overlay,
     /// issue #37) must reflect the picked version, not the primary/first one. Falls back to the first source when

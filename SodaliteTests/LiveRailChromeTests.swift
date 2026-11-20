@@ -63,7 +63,7 @@ struct LiveRailChromeTests {
     }
 
     @Test func aHoldReadoutFitsInsideItsRow() {
-        #expect(size(SeekReadoutView(readout: .hold(rate: 96, direction: 1))).height
+        #expect(size(SeekReadoutView(readout: .hold(rate: 64, direction: 1))).height
                 <= LiveRailLabels.defaultRowHeight)
     }
 
@@ -116,5 +116,14 @@ struct LiveRailChromeTests {
                 == .commitScrub(thenPlay: true))
         #expect(PlayerHostController.playPausePress(isScrubbing: false, isPlaying: true) == .toggle)
         #expect(PlayerHostController.playPausePress(isScrubbing: false, isPlaying: false) == .toggle)
+    }
+
+    /// Up and Down change the channel on live, so the click is what opens the bar there, and the
+    /// second click pauses. VOD keeps the click as play/pause.
+    @Test func aLiveClickOpensTheBarBeforeItPauses() {
+        #expect(PlayerHostController.hiddenControlsSelect(isLive: true, controlsVisible: false) == .showControls)
+        #expect(PlayerHostController.hiddenControlsSelect(isLive: true, controlsVisible: true) == .togglePlayback)
+        #expect(PlayerHostController.hiddenControlsSelect(isLive: false, controlsVisible: false) == .togglePlayback)
+        #expect(PlayerHostController.hiddenControlsSelect(isLive: false, controlsVisible: true) == .togglePlayback)
     }
 }

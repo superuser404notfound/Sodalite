@@ -6,11 +6,19 @@ protocol JellyfinItemServiceProtocol: MovieCatalogQuerying {
     func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem
     /// Local trailers; bare array response (not the {Items:[...]} envelope), possibly empty.
     func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem]
+    /// Extras (clips, featurettes, deleted scenes, ...); bare array response, possibly empty.
+    func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem]
     func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse
     func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse
     func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse
+    /// One page of a playlist in its stored order.
+    func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse
     func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws
     func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws
+    /// The viewer's own rating, 0 to 10; nil clears it.
+    func setRating(userID: String, itemID: String, rating: Double?) async throws
+    /// Forgets the resume position, which takes the item out of Continue Watching; played state stays.
+    func clearPlaybackPosition(userID: String, itemID: String) async throws
     /// Resolves a library item by TMDB id; first verified match or nil. `searchTerm` narrows the candidate set (see findByProviderIDs).
     func findByTmdbID(userID: String, tmdbID: Int, searchTerm: String?) async throws -> JellyfinItem?
     /// People matching a name, carrying ProviderIds so the caller can tell same-named people apart. People live in their own namespace, so an /Items search never returns them.
@@ -40,6 +48,14 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
         return response.elements
     }
 
+    func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] {
+        let response: LossyJellyfinItems = try await client.request(
+            endpoint: JellyfinEndpoint.specialFeatures(userID: userID, itemID: itemID),
+            responseType: LossyJellyfinItems.self
+        )
+        return response.elements
+    }
+
     func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse {
         try await client.request(
             endpoint: JellyfinEndpoint.seasons(seriesID: seriesID, userID: userID),
@@ -57,6 +73,14 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
     func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse {
         try await client.request(
             endpoint: JellyfinEndpoint.similarItems(itemID: itemID, userID: userID, limit: limit),
+            responseType: JellyfinItemsResponse.self
+        )
+    }
+
+    func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse {
+        try await client.request(
+            endpoint: JellyfinEndpoint.playlistItems(
+                playlistID: playlistID, userID: userID, startIndex: startIndex, limit: limit),
             responseType: JellyfinItemsResponse.self
         )
     }
@@ -136,7 +160,38 @@ final class JellyfinItemService: JellyfinItemServiceProtocol {
         try await client.request(endpoint: endpoint)
     }
 
+    func setRating(userID: String, itemID: String, rating: Double?) async throws {
+        guard let rating else {
+            try await client.request(endpoint: JellyfinEndpoint.clearUserRating(itemID: itemID, userID: userID))
+            return
+        }
+        // Rating alone: the server writes only the fields present, so played state, position and
+        // favorite stay as they are. Not `/Rating?likes=`, which stores a like as a 10 and a dislike as a 1.
+        let payload = try JSONValue(jsonObject: ["Rating": min(10, max(0, rating))])
+        try await client.request(endpoint: JellyfinEndpoint.updateUserItemData(itemID: itemID, userID: userID, payload: payload))
+    }
+
+    func clearPlaybackPosition(userID: String, itemID: String) async throws {
+        let payload = try JSONValue(jsonObject: ["PlaybackPositionTicks": 0])
+        try await client.request(endpoint: JellyfinEndpoint.updateUserItemData(itemID: itemID, userID: userID, payload: payload))
+    }
+
     func deleteItem(itemID: String) async throws {
         try await client.request(endpoint: JellyfinEndpoint.deleteItem(itemID: itemID))
+    }
+}
+
+extension JellyfinItemService: UserItemDataServing {
+    func userData(itemID: String, userID: String) async throws -> UserItemData {
+        try await client.request(endpoint: JellyfinEndpoint.userItemData(itemID: itemID, userID: userID), responseType: UserItemData.self)
+    }
+
+    func updateUserData(itemID: String, userID: String, positionTicks: Int64, played: Bool, lastPlayed: Date) async throws {
+        let payload = try JSONValue(jsonObject: [
+            "PlaybackPositionTicks": positionTicks,
+            "Played": played,
+            "LastPlayedDate": JellyfinDate.format(lastPlayed),
+        ])
+        try await client.request(endpoint: JellyfinEndpoint.updateUserItemData(itemID: itemID, userID: userID, payload: payload))
     }
 }

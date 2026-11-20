@@ -3,6 +3,8 @@ import Foundation
 enum SeerrEndpoint: APIEndpoint {
     case status
     case authJellyfin(body: SeerrJellyfinAuthBody)
+    case authLocal(body: SeerrLocalAuthBody)
+    case publicSettings
     case authMe
     case authLogout
 
@@ -31,14 +33,15 @@ enum SeerrEndpoint: APIEndpoint {
     case movieSimilar(tmdbID: Int, page: Int)
     case tvRecommendations(tmdbID: Int, page: Int)
     case tvSimilar(tmdbID: Int, page: Int)
-    /// GET /api/v1/movie|tv/{id}/ratings: Rotten Tomatoes scores.
+    /// GET /api/v1/movie/{id}/ratingscombined: Rotten Tomatoes and IMDb, keyed `rt` / `imdb`.
     case movieRatings(tmdbID: Int)
+    /// GET /api/v1/tv/{id}/ratings: Rotten Tomatoes only, the bare RT object.
     case tvRatings(tmdbID: Int)
     case discoverMoviesByWatchProvider(providerID: Int, region: String, page: Int)
     case discoverTVByWatchProvider(providerID: Int, region: String, page: Int)
 
     case createRequest(body: SeerrCreateRequestBody)
-    case myRequests(userID: Int, take: Int, skip: Int)
+    case myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort)
 
     /// GET /api/v1/request, all users' requests; needs MANAGE_REQUESTS or ADMIN.
     case allRequests(filter: SeerrRequestFilter, take: Int, skip: Int)
@@ -46,6 +49,8 @@ enum SeerrEndpoint: APIEndpoint {
     case approveRequest(requestID: Int)
     /// POST decline: pending → declined; same response shape as approve.
     case declineRequest(requestID: Int)
+    /// POST retry: failed → approved, hands the request to Radarr/Sonarr again; 409 unless failed, 403 without MANAGE_REQUESTS.
+    case retryRequest(requestID: Int)
     /// DELETE the request entry; does not delete an already-downloaded file.
     case deleteRequest(requestID: Int)
     /// PUT to modify server/profile/root-folder/seasons; partial body, only changed fields.
@@ -63,6 +68,8 @@ enum SeerrEndpoint: APIEndpoint {
         switch self {
         case .status: "/api/v1/status"
         case .authJellyfin: "/api/v1/auth/jellyfin"
+        case .authLocal: "/api/v1/auth/local"
+        case .publicSettings: "/api/v1/settings/public"
         case .authMe: "/api/v1/auth/me"
         case .authLogout: "/api/v1/auth/logout"
         case .discoverTrending: "/api/v1/discover/trending"
@@ -87,7 +94,7 @@ enum SeerrEndpoint: APIEndpoint {
         case .movieSimilar(let id, _): "/api/v1/movie/\(id)/similar"
         case .tvRecommendations(let id, _): "/api/v1/tv/\(id)/recommendations"
         case .tvSimilar(let id, _): "/api/v1/tv/\(id)/similar"
-        case .movieRatings(let id): "/api/v1/movie/\(id)/ratings"
+        case .movieRatings(let id): "/api/v1/movie/\(id)/ratingscombined"
         case .tvRatings(let id): "/api/v1/tv/\(id)/ratings"
         case .discoverMoviesByWatchProvider: "/api/v1/discover/movies"
         case .discoverTVByWatchProvider: "/api/v1/discover/tv"
@@ -96,6 +103,7 @@ enum SeerrEndpoint: APIEndpoint {
         case .allRequests: "/api/v1/request"
         case .approveRequest(let id): "/api/v1/request/\(id)/approve"
         case .declineRequest(let id): "/api/v1/request/\(id)/decline"
+        case .retryRequest(let id): "/api/v1/request/\(id)/retry"
         case .deleteRequest(let id): "/api/v1/request/\(id)"
         case .updateRequest(let id, _): "/api/v1/request/\(id)"
         case .radarrServers: "/api/v1/service/radarr"
@@ -108,10 +116,10 @@ enum SeerrEndpoint: APIEndpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .authJellyfin, .createRequest: .post
+        case .authJellyfin, .authLocal, .createRequest: .post
         case .authLogout: .post
         case .mediaFileDelete, .deleteRequest: .delete
-        case .approveRequest, .declineRequest: .post
+        case .approveRequest, .declineRequest, .retryRequest: .post
         case .updateRequest: .put
         default: .get
         }
@@ -146,12 +154,12 @@ enum SeerrEndpoint: APIEndpoint {
                 URLQueryItem(name: "page", value: String(page)),
             ]
 
-        case .myRequests(let userID, let take, let skip):
+        case .myRequests(let userID, let take, let skip, let sort):
             return [
                 URLQueryItem(name: "take", value: String(take)),
                 URLQueryItem(name: "skip", value: String(skip)),
                 URLQueryItem(name: "filter", value: "all"),
-                URLQueryItem(name: "sort", value: "added"),
+                URLQueryItem(name: "sort", value: sort.rawValue),
                 // requestedBy takes an integer user ID; "me" silently matched zero requests.
                 URLQueryItem(name: "requestedBy", value: String(userID)),
             ]
@@ -182,6 +190,7 @@ enum SeerrEndpoint: APIEndpoint {
     var body: (any Encodable & Sendable)? {
         switch self {
         case .authJellyfin(let body): body
+        case .authLocal(let body): body
         case .createRequest(let body): body
         case .updateRequest(_, let body): body
         default: nil
@@ -190,7 +199,7 @@ enum SeerrEndpoint: APIEndpoint {
 
     var requiresAuth: Bool {
         switch self {
-        case .status, .authJellyfin: false
+        case .status, .authJellyfin, .authLocal, .publicSettings: false
         default: true
         }
     }

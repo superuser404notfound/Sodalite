@@ -137,6 +137,45 @@ struct SkipBackSubtitleWindowTests {
         #expect(!SkipBackSubtitleWindow.shouldClose(state: nil, playhead: 100))
     }
 
+    // MARK: - The last line finishes (Sodalite#178)
+
+    private func cue(_ id: Int, _ start: Double, _ end: Double) -> SubtitleCue {
+        SubtitleCue(id: id, startTime: start, endTime: end, body: .text("line \(id)"))
+    }
+
+    @Test("the line on screen at the window's end runs to its own end")
+    func lineOnScreenFinishes() {
+        let cues = [cue(1, 95, 97), cue(2, 99.5, 102.5)]
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: cues, subtitleTime: 100, delay: 0) == 102.5)
+    }
+
+    @Test("nothing on screen closes at once")
+    func noLineClosesNow() {
+        let cues = [cue(1, 95, 97), cue(2, 101, 103)]
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: cues, subtitleTime: 100, delay: 0) == nil)
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: [], subtitleTime: 100, delay: 0) == nil)
+    }
+
+    @Test("the linger stops where the next line would start")
+    func lingerNeverShowsANewLine() {
+        let cues = [cue(1, 99, 103), cue(2, 101, 104)]
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: cues, subtitleTime: 100, delay: 0) == 101)
+    }
+
+    @Test("a bitmap cue without a real end is bounded")
+    func openEndedCueIsBounded() {
+        let cues = [cue(1, 99, 400)]
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: cues, subtitleTime: 100, delay: 0)
+                == 100 + SkipBackSubtitleWindow.maximumLinger)
+    }
+
+    @Test("the subtitle delay shifts the lookup and the end the way the overlay does")
+    func delayIsApplied() {
+        // With a 2 s delay the overlay shows at clock 100 what is timed at 98.
+        let cues = [cue(1, 97, 99), cue(2, 99.5, 101)]
+        #expect(SkipBackSubtitleWindow.lingerEnd(cues: cues, subtitleTime: 100, delay: 2) == 101)
+    }
+
     // MARK: - Track resolution
 
     @Test("the preferred subtitle language wins")
@@ -184,6 +223,31 @@ struct SkipBackSubtitleWindowTests {
                        stream(index: 3, codec: "subrip", lang: "en")]
         #expect(SkipBackSubtitleWindow.resolveTrack(
             streams: streams, preferredSubtitleLanguage: nil, audioLanguage: "en") == 3)
+    }
+
+    /// The reporter's file: a full DVD bitmap track next to an SDH text one.
+    @Test("SDH text beats a full bitmap track for the read-back")
+    func sdhTextBeatsFullBitmap() {
+        let streams = [stream(index: 2, codec: "dvdsub", lang: "eng", title: "English - DVDSUB"),
+                       stream(index: 3, codec: "subrip", lang: "eng", title: "English (CC) - SUBRIP")]
+        #expect(SkipBackSubtitleWindow.resolveTrack(
+            streams: streams, preferredSubtitleLanguage: nil, audioLanguage: "eng") == 3)
+    }
+
+    @Test("a full bitmap track still beats forced text")
+    func fullBitmapBeatsForcedText() {
+        let streams = [stream(index: 2, codec: "subrip", lang: "en", forced: true),
+                       stream(index: 3, codec: "hdmv_pgs_subtitle", lang: "en")]
+        #expect(SkipBackSubtitleWindow.resolveTrack(
+            streams: streams, preferredSubtitleLanguage: nil, audioLanguage: "en") == 3)
+    }
+
+    /// The muted window and the live automatic pick keep the ranking the load-time pick uses.
+    @Test("the shared lookup keeps the automatic ranking by default")
+    func sharedLookupKeepsAutomaticRanking() {
+        let streams = [stream(index: 2, codec: "dvdsub", lang: "eng"),
+                       stream(index: 3, codec: "subrip", lang: "eng", title: "English (CC)")]
+        #expect(SkipBackSubtitleWindow.bestSubtitle(streams: streams, language: "eng") == 2)
     }
 
     // MARK: - Track resolution on live

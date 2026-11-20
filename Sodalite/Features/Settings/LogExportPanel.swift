@@ -162,7 +162,7 @@ struct LogExportPanelContent: View {
     @ViewBuilder
     private var qrCode: some View {
         if let image = Self.qrImage(for: url) {
-            Image(uiImage: image)
+            Image(platformImage: image)
                 // Nearest neighbour: a QR module is a hard square, and smoothing its edges is what
                 // makes a code fail to scan from across a room.
                 .interpolation(.none)
@@ -202,7 +202,7 @@ struct LogExportPanelContent: View {
         .frame(minHeight: 160)
     }
 
-    private static func qrImage(for url: URL) -> UIImage? {
+    private static func qrImage(for url: URL) -> PlatformImage? {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(url.absoluteString.utf8)
         // M corrects a quarter of the code. The next level up grows the module count, which on a
@@ -212,7 +212,7 @@ struct LogExportPanelContent: View {
         guard let output = filter.outputImage else { return nil }
         let scaled = output.transformed(by: CGAffineTransform(scaleX: 12, y: 12))
         guard let cgImage = CIContext().createCGImage(scaled, from: scaled.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
+        return PlatformImage.wrapping(cgImage, size: scaled.extent.size)
     }
 }
 #endif

@@ -31,6 +31,27 @@ final class AppearancePreferences {
         }
     }
 
+    // MARK: - Upright artwork
+
+    /// What the 4:5 hero on an upright iPhone shows (Home's banner, the detail pages). The backdrop
+    /// by default: most posters carry the title printed at the foot, under the logo and the facts.
+    enum UprightArtwork: String, CaseIterable, Identifiable, Sendable {
+        case backdrop
+        case poster
+
+        var id: String { rawValue }
+
+        /// Literal keys/defaults so `String(localized:defaultValue:)` compile-time-literal requirement holds.
+        var title: String {
+            switch self {
+            case .backdrop:
+                String(localized: "settings.appearance.uprightArtwork.backdrop", defaultValue: "Backdrop")
+            case .poster:
+                String(localized: "settings.appearance.uprightArtwork.poster", defaultValue: "Poster")
+            }
+        }
+    }
+
     // MARK: - Navigation style
 
     /// Sodalite#140. tvOS only: the shell navigates either from the bar across the top or from the
@@ -62,18 +83,23 @@ final class AppearancePreferences {
         static let backgroundStyle = "appearance.backgroundStyle"
         static let showContentLogos = "appearance.showContentLogos"
         static let continueWatchingImage = "appearance.continueWatchingImage"
+        static let uprightArtwork = "appearance.uprightArtwork"
         static let largeCards = "appearance.largeCards"
         static let nowPlayingUsesSeriesPoster = "appearance.nowPlayingUsesSeriesPoster"
         static let spoilerProtectionEnabled = "appearance.spoilerProtection"
         static let spoilerHideEpisodes = "appearance.spoilerHideEpisodes"
         static let spoilerHideMovies = "appearance.spoilerHideMovies"
+        static let spoilerHideEpisodeTitles = "appearance.spoilerHideEpisodeTitles"
         static let hiddenTabs = "appearance.hiddenTabs"
         static let hiddenTabsFromNewerBuilds = "appearance.hiddenTabs.newerBuilds"
         static let navigationStyle = "appearance.navigationStyle"
+        static let pinnedLibraryTabs = "appearance.pinnedLibraryTabs"
+        static let tabOrder = "appearance.tabOrder"
         static let showPosterBadges = "appearance.showPosterBadges"
         static let showDetailBadges = "appearance.showDetailBadges"
         static let showLibraryNames = "appearance.showLibraryNames"
         static let showPosterProgress = "appearance.showPosterProgress"
+        static let showPosterRating = "appearance.showPosterRating"
         static let showCommunityRating = "appearance.showCommunityRating"
         static let showCriticRating = "appearance.showCriticRating"
         static let showTagline = "appearance.showTagline"
@@ -101,6 +127,10 @@ final class AppearancePreferences {
         didSet { store.set(continueWatchingImage.rawValue, forKey: Keys.continueWatchingImage) }
     }
 
+    var uprightArtwork: UprightArtwork {
+        didSet { store.set(uprightArtwork.rawValue, forKey: Keys.uprightArtwork) }
+    }
+
     var largeCards: Bool {
         didSet { store.set(largeCards, forKey: Keys.largeCards) }
     }
@@ -121,6 +151,12 @@ final class AppearancePreferences {
 
     var spoilerHideMovies: Bool {
         didSet { store.set(spoilerHideMovies, forKey: Keys.spoilerHideMovies) }
+    }
+
+    /// Unlike the two above, this one also acts while protection is off: it rides a per-series
+    /// "always hide" rule, which is how a single game show gets its names covered.
+    var spoilerHideEpisodeTitles: Bool {
+        didSet { store.set(spoilerHideEpisodeTitles, forKey: Keys.spoilerHideEpisodeTitles) }
     }
 
     /// Device value, see DevicePreferences.
@@ -166,6 +202,13 @@ final class AppearancePreferences {
         didSet { store.set(showPosterProgress, forKey: Keys.showPosterProgress) }
     }
 
+    /// The viewer's own rating (Sodalite#48) as a star pill at the top of the poster corner. Off by
+    /// default: most cards carry none, and the corner belongs to the copy's facts first. Costs no
+    /// request, the rating rides in the UserData every card query already fetches.
+    var showPosterRating: Bool {
+        didSet { store.set(showPosterRating, forKey: Keys.showPosterRating) }
+    }
+
     /// Sodalite#127. The star score a community voted on (Jellyfin's CommunityRating, TMDB's vote
     /// average in the catalog). On by default; two switches rather than one because the two scores
     /// come from different places and someone may object to only one of them.
@@ -198,23 +241,36 @@ final class AppearancePreferences {
         didSet { store.set(navigationStyle.rawValue, forKey: Keys.navigationStyle) }
     }
 
+    /// Libraries pinned as tabs of their own, in bar order. Read only by the tvOS shell, and
+    /// committed by the settings screen on the way out for the same reason as `navigationStyle`.
+    var pinnedLibraryTabs: [PinnedLibraryTab] {
+        didSet { store.set(try? JSONEncoder().encode(pinnedLibraryTabs), forKey: Keys.pinnedLibraryTabs) }
+    }
+
+    /// One assignment, and none for an unchanged list, so a commit rebuilds the bar at most once.
+    func setPinnedLibraryTabs(_ tabs: [PinnedLibraryTab]) {
+        guard tabs != pinnedLibraryTabs else { return }
+        pinnedLibraryTabs = tabs
+    }
+
+    /// Sodalite#235. The viewer's tab order as `TabOrder` keys, empty for the default order. Kept
+    /// verbatim, keys this build does not know included, so it syncs back unchanged.
+    var tabOrder: [String] {
+        didSet { store.set(tabOrder.isEmpty ? nil : tabOrder, forKey: Keys.tabOrder) }
+    }
+
+    /// Same rule as the pins: one assignment, none for an unchanged order.
+    func setTabOrder(_ order: [String]) {
+        guard order != tabOrder else { return }
+        tabOrder = order
+    }
+
     var cardScale: CGFloat {
         largeCards ? Self.largeCardScale : 1.0
     }
 
     func isTabHidden(_ tab: AppTab) -> Bool {
         hiddenTabs.contains(tab)
-    }
-
-    func setTab(_ tab: AppTab, hidden: Bool) {
-        guard tab.isHideable else { return }
-        var next = hiddenTabs
-        if hidden {
-            next.insert(tab)
-        } else {
-            next.remove(tab)
-        }
-        setHiddenTabs(next)
     }
 
     /// Hidden tabs a synced record named that this build does not have. Kept and written back with
@@ -270,20 +326,27 @@ final class AppearancePreferences {
         self.showContentLogos = store.object(forKey: Keys.showContentLogos) as? Bool ?? true
         self.continueWatchingImage = store.string(forKey: Keys.continueWatchingImage)
             .flatMap(ContinueWatchingImage.init(rawValue:)) ?? .still
+        self.uprightArtwork = store.string(forKey: Keys.uprightArtwork)
+            .flatMap(UprightArtwork.init(rawValue:)) ?? .backdrop
         self.largeCards = store.object(forKey: Keys.largeCards) as? Bool ?? false
         self.nowPlayingUsesSeriesPoster = store.object(forKey: Keys.nowPlayingUsesSeriesPoster) as? Bool ?? false
         self.spoilerProtectionEnabled = store.object(forKey: Keys.spoilerProtectionEnabled) as? Bool ?? false
         self.spoilerHideEpisodes = store.object(forKey: Keys.spoilerHideEpisodes) as? Bool ?? true
         self.spoilerHideMovies = store.object(forKey: Keys.spoilerHideMovies) as? Bool ?? false
+        self.spoilerHideEpisodeTitles = store.object(forKey: Keys.spoilerHideEpisodeTitles) as? Bool ?? false
         self.showPosterBadges = store.object(forKey: Keys.showPosterBadges) as? Bool ?? false
         self.showDetailBadges = store.object(forKey: Keys.showDetailBadges) as? Bool ?? true
         self.showLibraryNames = store.object(forKey: Keys.showLibraryNames) as? Bool ?? false
         self.showPosterProgress = store.object(forKey: Keys.showPosterProgress) as? Bool ?? false
+        self.showPosterRating = store.object(forKey: Keys.showPosterRating) as? Bool ?? false
         self.showCommunityRating = store.object(forKey: Keys.showCommunityRating) as? Bool ?? true
         self.showCriticRating = store.object(forKey: Keys.showCriticRating) as? Bool ?? true
         self.showTagline = store.object(forKey: Keys.showTagline) as? Bool ?? true
         self.navigationStyle = store.string(forKey: Keys.navigationStyle)
             .flatMap(NavigationStyle.init(rawValue:)) ?? .topBar
+        self.pinnedLibraryTabs = (store.object(forKey: Keys.pinnedLibraryTabs) as? Data)
+            .flatMap { try? JSONDecoder().decode([PinnedLibraryTab].self, from: $0) } ?? []
+        self.tabOrder = store.array(forKey: Keys.tabOrder) as? [String] ?? []
         let storedTabs = store.array(forKey: Keys.hiddenTabs) as? [String] ?? []
         // A tab a newer build hid that this build has since learned: it joins the known ones, or it
         // would show here while still being published as hidden. Written straight to the defaults,

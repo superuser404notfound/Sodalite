@@ -7,7 +7,21 @@ import AetherEngine
 /// Parses SRT (SubRip) and WebVTT subtitle files into timed cues.
 enum SRTParser {
 
-    static func parse(_ content: String) -> [SubtitleCue] {
+    nonisolated private static let tagPattern = try! NSRegularExpression(pattern: "<[^>]+>")
+    nonisolated private static let assOverridePattern = try! NSRegularExpression(pattern: #"\{\\[^}]*\}"#)
+
+    nonisolated private static func stripMarkup(_ text: String) -> String {
+        var result = text
+        for regex in [tagPattern, assOverridePattern] {
+            result = regex.stringByReplacingMatches(
+                in: result, range: NSRange(result.startIndex..., in: result), withTemplate: "")
+        }
+        return result
+    }
+
+    /// `@concurrent`: a 2,500 cue file took some 27 ms of regex work on a Mac, more on an Apple TV,
+    /// and this was called on the main actor (audit PUI-204). The patterns compile once.
+    @concurrent nonisolated static func parse(_ content: String) async -> [SubtitleCue] {
         var cues: [SubtitleCue] = []
         let blocks = content
             .replacingOccurrences(of: "\r\n", with: "\n")
@@ -34,9 +48,7 @@ enum SRTParser {
 
             // `{\...}` is an ASS override block: Jellyfin's ASS-to-SRT conversion (ffmpeg srtenc) keeps
             // `{\an8}` and friends for non-bottom placement. A brace without the backslash is text.
-            let cleanText = text
-                .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-                .replacingOccurrences(of: #"\{\\[^}]*\}"#, with: "", options: .regularExpression)
+            let cleanText = stripMarkup(text)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !cleanText.isEmpty else { continue }
 
@@ -52,7 +64,7 @@ enum SRTParser {
     }
 
     /// Parse a timing line like "00:01:23,456 --> 00:01:26,789"
-    private static func parseTimingLine(_ line: String) -> (Double, Double)? {
+    nonisolated private static func parseTimingLine(_ line: String) -> (Double, Double)? {
         let parts = line.components(separatedBy: "-->")
         guard parts.count == 2 else { return nil }
 
@@ -64,7 +76,7 @@ enum SRTParser {
     }
 
     /// Parse a timestamp like "00:01:23,456" or "00:01:23.456" to seconds.
-    private static func parseTimestamp(_ ts: String) -> Double? {
+    nonisolated private static func parseTimestamp(_ ts: String) -> Double? {
         // Drop WebVTT position metadata trailing the timestamp.
         let clean = ts.components(separatedBy: " ").first ?? ts
 

@@ -27,11 +27,13 @@ import SwiftUI
     /// none and the fetch that failed alike.
     var canPlay: Bool { !songs.isEmpty }
 
+    /// The album's own server answers, in a combined setup too (Sodalite#85).
     func load(album: JellyfinItem, using dependencies: DependencyContainer) async {
-        await load(albumID: album.id, service: dependencies.jellyfinMusicService, userID: dependencies.activeUserID)
+        let route = dependencies.musicRoute(for: album)
+        await load(albumID: album.id, service: route.service, userID: route.userID, serverID: album.serverID)
     }
 
-    func load(albumID: String, service: JellyfinMusicServiceProtocol, userID: String?) async {
+    func load(albumID: String, service: JellyfinMusicServiceProtocol, userID: String?, serverID: String? = nil) async {
         guard let userID else {
             LogTap.shared.note("[music] songs: no active user, nothing requested")
             return
@@ -39,7 +41,8 @@ import SwiftUI
         isLoading = true
         defer { isLoading = false }
         do {
-            let fetched = try await service.getSongs(userID: userID, albumID: albumID)
+            let fetched = MusicHomeViewModel.stamped(
+                try await service.getSongs(userID: userID, albumID: albumID), serverID: serverID)
             songs = fetched
             errorMessage = nil
             hasResolved = true

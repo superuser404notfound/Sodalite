@@ -181,7 +181,7 @@ private struct Paragraph: View {
             // a 180pt profile card gets from 1.05. A tile's 1.03 would move it by 13.5pt (#130).
             .scaleEffect(isFocused ? 1.01 : 1.0)
             .animation(FocusResponse.settle, value: isFocused)
-            .focusable()
+            .focusableSurface()
             .focused($isFocused)
     }
 }

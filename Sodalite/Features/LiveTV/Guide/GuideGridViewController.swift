@@ -1,3 +1,5 @@
+#if !os(macOS)
+// The guide grid is a UICollectionView driven by the focus engine. macOS has neither, and the Mac draws the channel lineup instead (GuideView).
 import UIKit
 import SwiftUI
 import Observation
@@ -18,6 +20,11 @@ final class GuideGridViewController: UIViewController,
         /// The layout asks for this per cell, so deriving it from dates on every call would be the
         /// same walk repeated for every visible column.
         let spans: [(x: CGFloat, width: CGFloat)]
+
+        /// What airs now, never a gap placeholder: that one has no program to hand the player.
+        var airing: JellyfinProgram? {
+            programs.first { !$0.isSynthesized && $0.isAiring(at: Date()) }
+        }
     }
 
     let model: GuideViewModel
@@ -26,6 +33,14 @@ final class GuideGridViewController: UIViewController,
     var isActive: Bool = true {
         didSet { view.isUserInteractionEnabled = isActive }
     }
+
+    /// False while the page is hidden (another tab, another Live TV segment). Both stay mounted, so
+    /// `viewDidDisappear` never fires for them and the now-line timer used to run all session
+    /// (audit LTM-207). Turning it back on catches the window up once.
+    var runsClock: Bool = true {
+        didSet { if runsClock != oldValue { syncClock() } }
+    }
+    private var isAppeared = false
 
     let dependencies: DependencyContainer
     let theme: ResolvedAppearanceTheme
@@ -60,11 +75,20 @@ final class GuideGridViewController: UIViewController,
     var isSyncingScroll = false
     /// One-shot focus redirect, served by the focus extension.
     var pendingFocusRedirect: IndexPath?
+    /// The focus move in flight is Up or Down (or the redirect serving one), so the scroll it
+    /// triggers must not move the grid sideways.
+    var focusMoveIsVertical = false
     /// Last vetoed (previous, next) pair. The same proposal arriving twice means the redirect did
     /// not take, and re-vetoing it strands focus with no way out in ANY direction. Accept the
     /// engine's pick instead. The old guide had this hatch; the rebuild dropped it on the theory
     /// that a time anchor always materializes its target, and Vincent's Apple TV disagreed.
     var lastVetoedMove: (previous: IndexPath, next: IndexPath)?
+    /// Between a veto and the run of its redirect. A repeat of the vetoed move inside that window
+    /// is the engine asking twice, not the redirect failing, so the hatch above stays shut.
+    var redirectInFlight = false
+    /// A focused row whose schedule reloaded while no cell held focus yet (tvOS puts it back a
+    /// moment after the batch completes). Its landing is re-aimed in didUpdateFocusIn instead.
+    var awaitedReloadLanding: (section: Int, deadline: Date)?
 
     private var nowLineTimer: Timer?
     /// Set when the window wanted to move while the guide held focus. Reloading out from under a
@@ -176,6 +200,7 @@ final class GuideGridViewController: UIViewController,
 
 
         rebuildRows()
+        seedFirstVisit()
         gridView.reloadData()
         columnView.reloadData()
         rulerView.reloadData()
@@ -183,6 +208,7 @@ final class GuideGridViewController: UIViewController,
         observeRows()
         observeFavorites()
         observeTimerState()
+        observeGenreFilter()
         observeScrollRequests()
         installGestures()
 
@@ -197,6 +223,7 @@ final class GuideGridViewController: UIViewController,
     /// The one route that does not wait for focus to move: coming back from suspension the screen
     /// is being re-established and focus with it, so there is no settled focus to disturb.
     @objc private func appDidBecomeActive() {
+        guard runsClock else { return }
         refreshAxisIfNeeded(deferWhileFocused: false)
         refreshNow()
     }
@@ -209,25 +236,37 @@ final class GuideGridViewController: UIViewController,
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refreshNow()
-        startNowLineTimer()
+        isAppeared = true
+        syncClock()
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        nowLineTimer?.invalidate()
-        nowLineTimer = nil
+        isAppeared = false
+        syncClock()
+    }
+
+    private func syncClock() {
+        if runsClock && isAppeared {
+            refreshNow()
+            startNowLineTimer()
+        } else {
+            nowLineTimer?.invalidate()
+            nowLineTimer = nil
+        }
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Inset by the per-side safe area so the column and the programs clear the Dynamic Island
-        // and the rounded corners in landscape. The window's insets, not the controller's: the
-        // hosting SwiftUI view ignores the safe area horizontally, which zeroes ours.
+        // and the rounded corners in landscape. Both sets of insets, because each misses one case:
+        // the hosting SwiftUI view ignores the safe area horizontally, which zeroes the
+        // controller's own for the Dynamic Island, and the iPad sidebar only shows up in the
+        // controller's own (280 pt), never in the window's, so the channel column sat under it.
         #if os(iOS)
-        let safe = view.window?.safeAreaInsets ?? view.safeAreaInsets
-        let leftInset = safe.left
-        let rightInset = safe.right
+        let window = view.window?.safeAreaInsets ?? .zero
+        let leftInset = max(window.left, view.safeAreaInsets.left)
+        let rightInset = max(window.right, view.safeAreaInsets.right)
         #else
         let leftInset: CGFloat = 0
         let rightInset: CGFloat = 0
@@ -447,6 +486,19 @@ final class GuideGridViewController: UIViewController,
         }
     }
 
+    /// Genre selection separately: a genre that adds no channel still changes which cells are dimmed.
+    private func observeGenreFilter() {
+        withObservationTracking {
+            _ = model.genres.filter
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.reloadVisibleCells()
+                self.observeGenreFilter()
+            }
+        }
+    }
+
     /// Jumps requested by the controls or a category snap, which the grid did not initiate.
     private func observeScrollRequests() {
         withObservationTracking {
@@ -466,6 +518,7 @@ final class GuideGridViewController: UIViewController,
     private func applyRowChange() {
         let old = rows
         rebuildRows()
+        seedFirstVisit()
         guard !old.isEmpty, isPrefix(old, of: rows) else {
             gridView.reloadData()
             columnView.reloadData()
@@ -477,10 +530,13 @@ final class GuideGridViewController: UIViewController,
         }
         let appended = rows.count > old.count ? IndexSet(integersIn: old.count..<rows.count) : IndexSet()
         guard !changed.isEmpty || !appended.isEmpty else { return }
+        noteFocusedRowReloading(changed)
         UIView.performWithoutAnimation {
             gridView.performBatchUpdates {
                 if !changed.isEmpty { gridView.reloadSections(changed) }
                 if !appended.isEmpty { gridView.insertSections(appended) }
+            } completion: { [weak self] _ in
+                self?.refocusAfterReload(of: changed)
             }
             if !appended.isEmpty {
                 columnView.insertItems(at: appended.map { IndexPath(item: $0, section: 0) })
@@ -490,9 +546,22 @@ final class GuideGridViewController: UIViewController,
 
     private func rebuildRows() {
         rows = model.channels.map { channel in
-            let programs = model.programs(for: channel.id)
+            let programs = withGapPlaceholders(model.programs(for: channel.id), channel: channel)
             return Row(channel: channel, programs: programs,
                        spans: GuideRowMath.spans(programs.map(\.guideTimeRange), axis: model.axis))
+        }
+    }
+
+    /// The row's programs with placeholder entries where the EPG says nothing for half an hour or
+    /// more (`GuideRowMath.entriesFillingGaps`), so a vertical move always has a cell at the anchor.
+    private func withGapPlaceholders(_ programs: [JellyfinProgram],
+                                     channel: JellyfinChannel) -> [JellyfinProgram] {
+        GuideRowMath.entriesFillingGaps(programs.map(\.guideTimeRange), axis: model.axis,
+                                        segmentMinutes: Self.placeholderMinutes).map { entry in
+            switch entry {
+            case .program(let index): programs[index]
+            case .gap(let range): gapProgram(for: channel, range: range)
+            }
         }
     }
 
@@ -600,13 +669,14 @@ final class GuideGridViewController: UIViewController,
             let index = Int(minutes / Double(Self.placeholderMinutes))
             return min(max(0, index), placeholderCount - 1)
         }
-        return model.programIndex(coveringOrNearest: model.anchorTime, in: row.channel.id)
+        return GuideRowMath.index(coveringOrNearest: model.anchorTime,
+                                  in: row.programs.map(\.guideTimeRange))
     }
 
     private func configure(_ cell: GuideProgramCell, at indexPath: IndexPath) {
         guard indexPath.section < rows.count else { return }
         let row = rows[indexPath.section]
-        if row.programs.isEmpty {
+        if row.programs.isEmpty || isGap(row, item: indexPath.item) {
             cell.configure(title: NSLocalizedString("livetv.noProgramInfo", comment: ""),
                            isAiring: false, hasTimer: false, tint: tint,
                            dependencies: dependencies, theme: theme)
@@ -617,6 +687,7 @@ final class GuideGridViewController: UIViewController,
         cell.configure(title: program.name,
                        isAiring: program.isAiring(at: Date()),
                        hasTimer: model.timers.hasTimer(programID: program.id),
+                       isDimmed: model.genres.isOutside(program),
                        tint: tint, dependencies: dependencies, theme: theme)
     }
 
@@ -624,7 +695,7 @@ final class GuideGridViewController: UIViewController,
         guard indexPath.item < rows.count else { return }
         let channel = rows[indexPath.item].channel
         let logoURL = dependencies.jellyfinImageService.imageURL(
-            itemID: channel.id, imageType: .primary,
+            itemID: channel.id, serverID: channel.serverID, imageType: .primary,
             tag: channel.primaryImageTag, maxHeight: Int(metrics.channelLogoSize * 2))
         cell.configure(name: channel.name, number: channel.channelNumber, logoURL: logoURL,
                        isFavorite: model.timers.isFavorite(channel.id), tint: tint,
@@ -659,6 +730,22 @@ final class GuideGridViewController: UIViewController,
         return formatter
     }()
 
+    func isGap(_ row: Row, item: Int) -> Bool {
+        item < row.programs.count && row.programs[item].isSynthesized
+    }
+
+    /// Placeholder for a stretch of a row the EPG does not cover. The "live-" id prefix marks it
+    /// `isSynthesized`, so the hero and the program popover treat it like the one below.
+    private func gapProgram(for channel: JellyfinChannel, range: GuideTimeRange) -> JellyfinProgram {
+        JellyfinProgram(
+            id: "live-\(channel.id)-\(Int(range.start.timeIntervalSince1970))", channelId: channel.id,
+            channelName: channel.name, name: NSLocalizedString("livetv.noProgramInfo", comment: ""),
+            overview: nil, startDate: range.start, endDate: range.end, genres: nil, imageTags: nil,
+            isLive: nil, isNews: nil, isMovie: nil, isSeries: nil,
+            isKids: nil, isSports: nil, seriesName: nil, parentIndexNumber: nil,
+            indexNumber: nil, episodeTitle: nil, timerId: nil, seriesTimerId: nil)
+    }
+
     /// Placeholder program for a channel with no EPG data. The id does not exist server-side, so
     /// `isSynthesized` keeps the record affordances hidden.
     func synthesizedProgram(for channel: JellyfinChannel) -> JellyfinProgram {
@@ -683,7 +770,7 @@ final class GuideGridViewController: UIViewController,
             super.pressesBegan(presses, with: event)
             return
         }
-        onPlayChannel(row.channel, row.programs.first { $0.isAiring(at: Date()) })
+        onPlayChannel(row.channel, row.airing)
     }
     #endif
 }
@@ -703,11 +790,14 @@ struct GuideGridContainer: UIViewControllerRepresentable {
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appearanceTheme) private var appearanceTheme
+    @Environment(\.shellPageIsShown) private var pageIsShown
 
     func makeUIViewController(context: Context) -> GuideGridViewController {
-        GuideGridViewController(
+        let controller = GuideGridViewController(
             model: model, tint: tint, dependencies: dependencies, theme: appearanceTheme,
             onSelect: onSelect, onPlayChannel: onPlayChannel, onToggleFavorite: onToggleFavorite)
+        controller.runsClock = isActive && pageIsShown
+        return controller
     }
 
     func updateUIViewController(_ controller: GuideGridViewController, context: Context) {
@@ -717,6 +807,8 @@ struct GuideGridContainer: UIViewControllerRepresentable {
         // subtree from the tvOS focus engine, and without it the hidden guide stays focusable
         // behind the other segments.
         if controller.isActive != isActive { controller.isActive = isActive }
+        let runsClock = isActive && pageIsShown
+        if controller.runsClock != runsClock { controller.runsClock = runsClock }
         if controller.lastFocusRequest != focusRequest {
             controller.lastFocusRequest = focusRequest
             // Not on the first pass: 0 is the initial value, and taking focus at launch would pull it
@@ -729,3 +821,4 @@ struct GuideGridContainer: UIViewControllerRepresentable {
         }
     }
 }
+#endif

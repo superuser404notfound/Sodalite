@@ -6,6 +6,24 @@ import AetherEngine
 /// Audio: "Deutsch · Dolby Digital 5.1", subtitle: "Englisch".
 enum TrackDisplayFormatter {
 
+    /// Title words that mark a subtitle track as more than the plain full-dialogue one. The one list
+    /// behind the stream dedupe and both labels (audit PUI-R202).
+    static let subtitleDescriptorWords: Set<String> = [
+        "sdh", "commentary", "cc", "signs", "songs", "full", "hearing", "forced", "musik", "music",
+    ]
+
+    /// Whole-word match on a track title. A substring match put "cc" into "Occitan".
+    static func title(_ title: String?, hasAnyWordOf words: some Collection<String>) -> Bool {
+        guard let title, !title.isEmpty else { return false }
+        return title.lowercased()
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .contains { words.contains(String($0)) }
+    }
+
+    static func hasSubtitleDescriptor(_ title: String?) -> Bool {
+        Self.title(title, hasAnyWordOf: subtitleDescriptorWords)
+    }
+
     static func audioDisplayName(for track: TrackInfo) -> String {
         var parts: [String] = []
 
@@ -17,11 +35,19 @@ enum TrackDisplayFormatter {
         // Atmos", not "Dolby Digital+ 5.1"), matching other Atmos UIs.
         if track.isAtmos {
             parts.append("Dolby Atmos")
+        } else if isTrueHDAtmos(track) {
+            parts.append("Dolby TrueHD Atmos")
+        } else if isDTSX(track) {
+            parts.append("DTS:X")
         } else {
-            let quality = audioQuality(codec: track.codec, channels: track.channels)
+            let quality = audioQuality(for: track)
             if !quality.isEmpty {
                 parts.append(quality)
             }
+        }
+
+        if track.isVisualImpaired {
+            parts.append(String(localized: "player.track.audioDescription", defaultValue: "Audio Description"))
         }
 
         if parts.isEmpty {
@@ -45,13 +71,9 @@ enum TrackDisplayFormatter {
 
         var descriptors: [String] = []
         if stream.isForced == true { descriptors.append("Forced") }
-        if let title = stream.title, !title.isEmpty {
-            let lower = title.lowercased()
-            let useful = ["sdh", "commentary", "cc", "signs", "songs", "full", "hearing", "forced", "musik", "music"]
-            if useful.contains(where: { lower.contains($0) }) {
-                if let lang { return "\(lang) (\(title))" }
-                return title
-            }
+        if let title = stream.title, hasSubtitleDescriptor(title) {
+            if let lang { return "\(lang) (\(title))" }
+            return title
         }
         if !descriptors.isEmpty, let lang {
             return "\(lang) (\(descriptors.joined(separator: ", ")))"
@@ -71,8 +93,28 @@ enum TrackDisplayFormatter {
     static func shortName(for track: TrackInfo) -> String {
         if let lang = languageName(for: track) { return lang }
         if track.isAtmos { return "Dolby Atmos" }
-        let quality = audioQuality(codec: track.codec, channels: track.channels)
+        if isTrueHDAtmos(track) { return "Dolby TrueHD Atmos" }
+        if isDTSX(track) { return "DTS:X" }
+        let quality = audioQuality(for: track)
         return quality.isEmpty ? track.name : quality
+    }
+
+    /// AetherEngine#731: `TrackInfo.isAtmos` answers for E-AC-3 JOC only. A TrueHD Atmos track is told by
+    /// the profile FFmpeg reads off its major sync, the same test `MediaBadges` applies to the server's
+    /// stream profile, and with the heights setting on it is the track that keeps them.
+    static func isTrueHDAtmos(_ track: TrackInfo) -> Bool {
+        track.codec.lowercased() == "truehd"
+            && (track.profile?.localizedCaseInsensitiveContains("Dolby Atmos") ?? false)
+    }
+
+    /// AetherEngine#744: DTS:X keeps its heights the same way. The engine's flag covers the profile
+    /// FFmpeg reads and a track the engine's DTS:X decoder confirmed while it played, which FFmpeg labels plain DTS-HD MA.
+    static func isDTSX(_ track: TrackInfo) -> Bool {
+        track.isDTSX
+    }
+
+    private static func isDTS(_ codec: String) -> Bool {
+        ["dca", "dts"].contains(codec.lowercased())
     }
 
     // MARK: - Private
@@ -99,9 +141,9 @@ enum TrackDisplayFormatter {
         return code.uppercased()
     }
 
-    private static func audioQuality(codec: String, channels: Int) -> String {
-        let codecDisplay = codecDisplayName(codec)
-        let channelDisplay = channelLayout(channels)
+    private static func audioQuality(for track: TrackInfo) -> String {
+        let codecDisplay = isDTS(track.codec) ? dtsDisplayName(profile: track.profile) : codecDisplayName(track.codec)
+        let channelDisplay = channelLayout(track.channels)
 
         if !codecDisplay.isEmpty && !channelDisplay.isEmpty {
             return "\(codecDisplay) \(channelDisplay)"
@@ -126,6 +168,13 @@ enum TrackDisplayFormatter {
         }
     }
 
+    /// The DTS family shares one codec, so the profile is what says which member a track is.
+    private static func dtsDisplayName(profile: String?) -> String {
+        guard let profile else { return "DTS" }
+        for name in ["DTS-HD MA", "DTS-HD HRA"] where profile.hasPrefix(name) { return name }
+        return "DTS"
+    }
+
     private static func channelLayout(_ channels: Int) -> String {
         switch channels {
         case 1: return "Mono"
@@ -148,12 +197,7 @@ enum TrackDisplayFormatter {
                 return nil
             }
         }
-        let useful = ["forced", "sdh", "commentary", "cc", "signs", "songs", "full", "hearing"]
-        let lower = title.lowercased()
-        if useful.contains(where: { lower.contains($0) }) {
-            return title
-        }
-        return nil
+        return hasSubtitleDescriptor(title) ? title : nil
     }
 }
 

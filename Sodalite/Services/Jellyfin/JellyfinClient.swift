@@ -13,6 +13,29 @@ final class JellyfinClient {
     }
     /// Set by `DependencyContainer` on the live client only, so the token reaches the log redactors.
     var onAccessTokenSet: ((String) -> Void)?
+    /// Holds requests back from a LAN address that has not proved it is this session's server
+    /// (audit NET-201). nil on a sign-in client, whose route is resolved before it sends anything.
+    var routeGate: RouteGate?
+    /// Set on a client that reports for a session that may already be over (a stop, a track's
+    /// progress): the address follows this source instead of `baseURL`, and the request is dropped
+    /// when the check says the session is no longer the live one. The token it carries is its own.
+    var baseURLSource: (() -> URL?)?
+    var sessionIsStillCurrent: (() -> Bool)?
+    /// A sign-in client's route probe while it runs, so the screens share one (audit review R-ROUTE-24).
+    var pendingRouteResolve: Task<URL, Never>?
+
+    /// `accessToken` for a URL built on the spot (image `api_key`, a download's header), or nil
+    /// while the address has not proved itself, so such a URL goes out without it.
+    var verifiedAccessToken: String? {
+        guard let baseURL, routeGate?.allows(baseURL) ?? true else { return nil }
+        return accessToken
+    }
+
+    /// `baseURL` once credentials may go there, nil before.
+    var verifiedBaseURL: URL? {
+        guard let baseURL, routeGate?.allows(baseURL) ?? true else { return nil }
+        return baseURL
+    }
 
     init(httpClient: HTTPClientProtocol = HTTPClient()) {
         self.httpClient = httpClient
@@ -24,7 +47,7 @@ final class JellyfinClient {
         endpoint: APIEndpoint,
         responseType: T.Type
     ) async throws -> T {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         return try await httpClient.request(
             baseURL: baseURL,
@@ -40,12 +63,13 @@ final class JellyfinClient {
         responseType: T.Type,
         decoder: JSONDecoder
     ) async throws -> T {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         let (data, _) = try await httpClient.requestData(
             baseURL: baseURL, endpoint: endpoint, headers: headers)
         do {
-            return try decoder.decode(T.self, from: data)
+            // Off the main actor, like HTTPClient.request (audit NET-204).
+            return try await HTTPClient.decodeValue(from: data, using: decoder)
         } catch {
             // Mirror HTTPClient.request: localized message instead of raw DecodingError.
             throw APIError.decodingError(error)
@@ -53,13 +77,34 @@ final class JellyfinClient {
     }
 
     func request(endpoint: APIEndpoint) async throws {
-        guard let baseURL else { throw APIError.invalidURL }
+        let baseURL = try await admittedBaseURL()
         let headers = buildHeaders(requiresAuth: endpoint.requiresAuth)
         try await httpClient.request(
             baseURL: baseURL,
             endpoint: endpoint,
             headers: headers
         )
+    }
+
+    /// Every request waits here, the unauthenticated ones included: the stored-password login is one
+    /// of them.
+    func admittedBaseURL() async throws -> URL {
+        let current: () -> URL? = { self.baseURLSource?() ?? self.baseURL }
+        let url: URL
+        if let routeGate {
+            url = try await routeGate.admit(current)
+        } else {
+            guard let baseURL = current() else { throw APIError.invalidURL }
+            url = baseURL
+        }
+        if let sessionIsStillCurrent, !sessionIsStillCurrent() { throw CancellationError() }
+        return url
+    }
+
+    /// The header for a request built on the spot, like `verifiedAccessToken` it carries the token
+    /// only while the address has proved itself (audit final review FR-NET-5).
+    var verifiedAuthHeader: String {
+        buildMediaBrowserHeader(includeToken: verifiedAccessToken != nil)
     }
 
     func buildAuthHeader() -> String {

@@ -3,6 +3,10 @@ import SwiftUI
 struct MovieDetailView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.serverSession) private var serverSessionOverride
+    /// The item's own server in a combined Home, the active one otherwise (Sodalite#85).
+    private var session: ServerSession { .forDetail(serverSessionOverride, dependencies) }
+    private var sessionUserID: String? { session.detailUserID(appState: appState) }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -12,13 +16,30 @@ struct MovieDetailView: View {
     @State private var navigateToPerson: PersonRoute?
     /// Catalog similar row target; the series page has carried the same destination since the Seerr request button.
     @State private var navigateToSeerrRequest: SeerrMedia?
+    @State private var popAfterSheetDismiss = false
     @State private var showPlayer = false
     @State private var playFromBeginning = false
+    /// Sodalite#81: the item whose download rung is being asked for.
+    @State private var downloadTarget: DownloadTarget?
+    /// Sodalite#81: one launch that streams a downloaded item instead of playing the file.
+    @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
+    @State private var ratingPrompt: RatingPrompt?
+    /// The film just played to its end unrated; the prompt goes up once the player has closed.
+    @State private var ratingPromptAfterPlayer: RatingPrompt?
     /// Which version the page describes and Play starts; the viewer sets it from the version button (Sodalite#139).
-    @State private var versionSelection = VersionSelection()
-    @State private var showTrailer = false
-    @State private var trailerItem: JellyfinItem?
+    @State private var versionPick = VersionSelection()
+    /// The pick under the profile's version order, read fresh so a changed setting applies at once.
+    private var versionSelection: VersionSelection {
+        versionPick.ordered(dependencies.playbackPreferences.versionOrder)
+    }
+    @State private var showExtra = false
+    /// The local trailer or an Extras card (Sodalite#179); both are distinct server items played from the start.
+    @State private var extraItem: JellyfinItem?
+    #if !os(tvOS)
+    /// Sodalite#195: the remote trailer playing in YouTube's embedded player.
+    @State private var youTubeTrailer: YouTubeTrailer?
+    #endif
     @State private var isPresentingDeleteSheet: Bool = false
     @State private var isPresentingMoreDetails = false
     @FocusState private var playButtonFocused: Bool
@@ -38,7 +59,14 @@ struct MovieDetailView: View {
     let item: JellyfinItem
     /// TopShelf playAction: fire the primary play action once, as soon as full detail has settled.
     var autoPlay: Bool = false
+    var autoPlayFromBeginning: Bool = false
+    /// The version to stand on when the page opens: a version picked from another server's copy
+    /// moves the whole page here, and the pick comes along (Sodalite#240).
+    var initialSourceID: String? = nil
     @State private var didAutoPlay = false
+    /// The same film on the other combined servers, listed in the version menu (Sodalite#240).
+    @State private var twins: [ServerTwin] = []
+    @Environment(\.switchToServerTwin) private var switchToServerTwin
 
     /// Whether this page offers deletion at all, and the item's own `CanDelete` is the whole answer
     /// wherever the server sent it (Sodalite#146). Jellyfin computes that field for THIS user from
@@ -48,6 +76,7 @@ struct MovieDetailView: View {
     /// account granted deletion on one library. The policy remains the fallback for a response
     /// without the field, read from AppState.activeUser so a profile switch updates visibility.
     private func canDelete(_ item: JellyfinItem) -> Bool {
+        guard session.allowsDelete else { return false }
         if let serverAnswer = item.canDelete { return serverAnswer }
         return appState.activeUser?.canDeleteContent == true
     }
@@ -55,6 +84,13 @@ struct MovieDetailView: View {
     /// Seerr service for the catalog similar row, nil while the Catalog tab is hidden: switching it off is a parental measure (Sodalite#62), so the catalog has to be gone here as well, exactly as in Search and on person pages.
     private var catalogSimilarService: SeerrMediaServiceProtocol? {
         dependencies.appearancePreferences.isTabHidden(.catalog) ? nil : dependencies.seerrMediaService
+    }
+
+    /// Seerr service for the TMDB / IMDb / RT scores, nil without a Seerr connection or with both rating switches off.
+    private var ratingsService: SeerrMediaServiceProtocol? {
+        let prefs = dependencies.appearancePreferences
+        guard appState.isSeerrConnected, prefs.showCommunityRating || prefs.showCriticRating else { return nil }
+        return dependencies.seerrMediaService
     }
 
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
@@ -92,38 +128,46 @@ struct MovieDetailView: View {
         // bar; the backdrop keeps its own .ignoresSafeArea() to stay full-bleed. tvOS/iPad full-bleed.
         .ignoresSafeArea(when: !isPhonePortrait)
         .hidesToolbarBackground()
+        .downloadRungDialog(target: $downloadTarget)
+        .onChange(of: showPlayer) { _, isShowing in
+            if !isShowing { streamFromServer = false }
+        }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $showPlayer,
-                    item: showPlayer ? (viewModel?.item ?? item) : nil,
-                    startFromBeginning: playFromBeginning,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    item: showPlayer ? (viewModel.map { $0.resolvedForPlayback($0.item) } ?? item) : nil,
+                    // A session mark means the server dropped the position; a download's own progress
+                    // does not know that (audit review R-DET-2).
+                    startFromBeginning: playFromBeginning || (viewModel?.wasMarkedPlayedInSession(viewModel?.item ?? item) ?? false),
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item)
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item),
+                    localDownload: streamFromServer ? nil : dependencies.downloadStore.completedItem((viewModel?.item ?? item).id),
+                    downloadStore: dependencies.downloadStore
                 )
                 .allowsHitTesting(false)
             }
         }
         .overlay {
-            if let userID = appState.activeUser?.id {
+            if let userID = sessionUserID {
                 PlayerLauncher(
-                    isPresented: $showTrailer,
-                    item: showTrailer ? trailerItem : nil,
+                    isPresented: $showExtra,
+                    item: showExtra ? extraItem : nil,
                     startFromBeginning: true,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
-                    spoilerPolicy: dependencies.spoilerPolicy(userID: userID),
-                    // Trailer is a distinct server item; the movie's
-                    // cached PlaybackInfo does not apply to it.
+                    spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
+                    // Trailers and extras are distinct server items; the movie's
+                    // cached PlaybackInfo does not apply to them.
                     cachedPlaybackInfo: nil
                 )
                 .allowsHitTesting(false)
@@ -140,7 +184,7 @@ struct MovieDetailView: View {
         .task(id: viewModel?.hasFullDetail) {
             guard autoPlay, !didAutoPlay, viewModel?.hasFullDetail == true else { return }
             didAutoPlay = true
-            requestPlay(fromBeginning: false)
+            requestPlay(fromBeginning: autoPlayFromBeginning)
         }
         // AE#579. After the detail round trip, because the media sources it needs arrive with it,
         // and again when the viewer picks another version.
@@ -150,21 +194,35 @@ struct MovieDetailView: View {
                 item: item,
                 sourceID: versionSelection.preferredSourceID(for: item))
         }
+        #if !os(tvOS)
+        .sheet(item: $youTubeTrailer) { YouTubeTrailerSheet(trailer: $0) }
+        #endif
+        .task(id: twinLookupKey) {
+            guard let item = viewModel?.item, viewModel?.hasFullDetail == true else { return }
+            twins = await ServerTwins.find(for: item, pageServerID: session.server?.id, on: twinSources)
+        }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
                 sources: choice.sources,
                 tintColor: dependencies.appearancePreferences.effectiveTint(
                     isSupporter: dependencies.storeKitService.isSupporter
                 ),
-                selectedID: choice.selectedID
+                selectedID: choice.selectedID,
+                order: dependencies.playbackPreferences.versionOrder,
+                serverName: choice.serverName,
+                twins: choice.twins,
+                onSelectTwin: { twin, source in
+                    versionChoice = nil
+                    switchToServerTwin?(twin, source)
+                }
             ) { source in
-                versionSelection.choose(source, for: choice.item)
+                versionPick.choose(source, for: choice.item)
                 versionChoice = nil
             }
         }
-        .onChange(of: showTrailer) { _, isPlaying in
+        .onChange(of: showExtra) { _, isPlaying in
             if !isPlaying {
-                trailerItem = nil
+                extraItem = nil
                 deferOnMain(by: 0.1) { playButtonFocused = true }
             }
         }
@@ -173,7 +231,20 @@ struct MovieDetailView: View {
                 deferOnMain(by: 0.1) {
                     playButtonFocused = true
                 }
+                if let prompt = ratingPromptAfterPlayer {
+                    ratingPromptAfterPlayer = nil
+                    // After the cover's dismissal has run, or the panel presents on a page still covered.
+                    deferOnMain(by: 0.6) { ratingPrompt = prompt }
+                }
             }
+        }
+        // Sodalite#48: a film played to its end, not stopped early, is the moment to ask.
+        .onReceive(NotificationCenter.default.publisher(for: .playbackDidReachEnd)) { note in
+            guard let itemID = note.userInfo?[PlaybackEndKey.itemID] as? String,
+                  let vm = viewModel, itemID == vm.item.id, vm.item.type == .movie,
+                  vm.rating == nil,
+                  dependencies.playbackPreferences.askForRatingAfterMovie else { return }
+            ratingPromptAfterPlayer = RatingPrompt(itemID: itemID, title: vm.item.name)
         }
         // The player continued on the item that replaced this one (a Radarr upgrade rewrote the file, so
         // the library minted a new id). Swap it in, else this screen keeps describing the file that is
@@ -188,14 +259,9 @@ struct MovieDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: .playbackProgressDidChange)) { note in
             let itemID = note.userInfo?[PlaybackProgressKey.itemID] as? String
             let ticks = note.userInfo?[PlaybackProgressKey.positionTicks] as? Int64
+            let seriesID = note.userInfo?[PlaybackProgressKey.seriesID] as? String
             Task { @MainActor in
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
-                await viewModel?.refreshResumePosition()
-                if let itemID, let ticks {
-                    viewModel?.applyPlaybackPosition(itemID: itemID, ticks: ticks)
-                }
+                await viewModel?.handlePlaybackStop(itemID: itemID, ticks: ticks, seriesID: seriesID)
             }
         }
         // AppRouter bumps this on every deep-link arrival so a TopShelf tap on a different item tears down the active player session and surfaces the new detail sheet cleanly.
@@ -237,25 +303,43 @@ struct MovieDetailView: View {
                 .detailCoverPush()
         }
         .onAppear {
-            if viewModel == nil, let userID = appState.activeUser?.id {
+            if let initialSourceID, viewModel == nil {
+                versionPick.choose(sourceID: initialSourceID, forItemID: item.id)
+            }
+            if viewModel == nil, let userID = sessionUserID {
                 viewModel = DetailViewModel(
                     item: item,
-                    itemService: dependencies.jellyfinItemService,
+                    itemService: session.itemService,
                     imageService: dependencies.jellyfinImageService,
                     userID: userID,
-                    libraryService: dependencies.jellyfinLibraryService,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    seerrMediaService: catalogSimilarService
+                    libraryService: session.libraryService,
+                    playbackService: session.playbackService,
+                    seerrMediaService: catalogSimilarService,
+                    ratingsService: ratingsService,
+                    streamingQuality: { [dependencies] in dependencies.playbackPreferences.defaultStreamingQuality() }
                 )
+                viewModel?.trakt = dependencies.trakt
                 Task { await viewModel?.loadFullDetail() }
             }
             // Open the animation gate once the cover's present transition has settled.
             deferOnMain(by: 0.35) { didSettleIn = true }
         }
+        .menuPresentation(item: $ratingPrompt) { prompt in
+            RatingPickerSheet(
+                rating: viewModel?.rating,
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                ),
+                title: prompt.title
+            ) { value in
+                ratingPrompt = nil
+                Task { await viewModel?.setRating(value) }
+            }
+        }
         .menuPresentation(isPresented: $isPresentingMoreDetails, panel: .plain) {
             if let vm = viewModel {
                 DetailMoreOverlay(
-                    title: vm.item.name,
+                    title: dependencies.spoilerPolicy(userID: appState.activeUser?.id).displayName(of: vm.item),
                     // Veiled stays veiled: the reader is not a way around the spoiler rule, and the
                     // box below the fold is where it gets lifted.
                     synopsis: SpoilerReveal.isHidden(vm.item, dependencies: dependencies, appState: appState)
@@ -269,7 +353,12 @@ struct MovieDetailView: View {
                 )
             }
         }
-        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain) {
+        .menuPresentation(isPresented: $isPresentingDeleteSheet, panel: .plain, onDismiss: {
+            if popAfterSheetDismiss {
+                popAfterSheetDismiss = false
+                dismiss()
+            }
+        }) {
             if let vm = viewModel {
                 let popDetail = dismiss
                 MediaDeletionSheet(
@@ -279,30 +368,21 @@ struct MovieDetailView: View {
                         title: vm.item.name
                     ),
                     onConfirm: { request in
-                        do {
+                        let outcome = await DetailDeletion.run(
+                            serverID: appState.activeServer?.id,
+                            cascadedToArrStack: request.cascadeToArrStack,
+                            popsWhenRemoved: true,
+                            pop: { popDetail() }
+                        ) {
                             try await dependencies.mediaDeletionService.deleteMovie(
                                 itemID: vm.item.id,
                                 tmdbID: vm.item.tmdbID,
                                 cascadeToArrStack: request.cascadeToArrStack
                             )
-                            // Drop the on-disk filter cache so Library/Home rows don't keep showing the deleted movie until natural eviction. Every profile on this server, not just the active one: the file is gone for all of them.
-                            if let serverID = appState.activeServer?.id {
-                                FilterCache.shared.evict(serverID: serverID)
-                            }
-                            NotificationCenter.default.post(name: .homeItemDidDelete, object: nil)
-                            // The cascade also cleared the title's open Seerr requests, so the request lists are stale.
-                            if request.cascadeToArrStack {
-                                NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
-                            }
-                            // Pop after the sheet's success-toast hold.
-                            Task { @MainActor in
-                                try? await Task.sleep(for: .milliseconds(1100))
-                                popDetail()
-                            }
-                            return .success
-                        } catch {
-                            return .from(error)
                         }
+                        // Partial: the item is gone, the warning stays up, the page follows the sheet out.
+                        if case .partialSuccess = outcome { popAfterSheetDismiss = true }
+                        return outcome
                     }
                 )
             }
@@ -321,6 +401,8 @@ struct MovieDetailView: View {
             DetailContentOverlay(
                 heroImageURL: vm.backdropURL(for: vm.item),
                 heroPosterURL: vm.heroPosterURL(for: vm.item),
+                heroTallImageURL: vm.backdropURL(for: vm.item, maxWidth: ImageWidth.tallHero),
+                portraitHero: vm.item.type == .movie,
                 hero: {
                 DetailHeroLogo(viewModel: vm)
             }, primary: {
@@ -328,6 +410,7 @@ struct MovieDetailView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     glassPanel(vm: vm)
                     actionButtonRow(vm: vm)
+                    if isPhonePortrait { heroSynopsis(vm: vm) }
                 // Sodalite#146 round 2. A page whose ONLY content below the fold is this one
                 // non-focusable line has no business having a fold at all, and the difference is not
                 // cosmetic. With the line down there the block measures ~30 pt, the trailing chrome
@@ -359,7 +442,8 @@ struct MovieDetailView: View {
                     let cast = jellyfinCastMembers(
                         from: people,
                         imageService: dependencies.jellyfinImageService,
-                        imageWidth: metrics.castImageWidth
+                        imageWidth: metrics.castImageWidth,
+                        serverID: vm.item.serverID
                     )
                     MediaCastRow(
                         members: cast,
@@ -372,6 +456,11 @@ struct MovieDetailView: View {
                     }
                 }
 
+                if vm.hasTrailersOrExtras {
+                    extrasRow(vm: vm)
+                        .onFocusMoveUp(active: !hasCast) { playButtonFocused = true }
+                }
+
                 if !vm.similarItems.isEmpty {
                     HorizontalMediaRow(
                         title: "detail.similar",
@@ -380,7 +469,7 @@ struct MovieDetailView: View {
                         onItemSelected: { navigateToItem = $0 },
                         cardStyle: .poster
                     )
-                    .onFocusMoveUp(active: !hasCast) { playButtonFocused = true }
+                    .onFocusMoveUp(active: !hasCast && !vm.hasTrailersOrExtras) { playButtonFocused = true }
                 }
 
                 // Same split the search screen teaches: what the server has on top, what it would have
@@ -391,7 +480,9 @@ struct MovieDetailView: View {
                         items: vm.catalogSimilar,
                         onItemSelected: { navigateToSeerrRequest = $0 }
                     )
-                    .onFocusMoveUp(active: !hasCast && vm.similarItems.isEmpty) { playButtonFocused = true }
+                    .onFocusMoveUp(active: !hasCast && !vm.hasTrailersOrExtras && vm.similarItems.isEmpty) {
+                        playButtonFocused = true
+                    }
                 }
 
                 // Sodalite#146, after Infuse: one non-focusable line closing the page with what the
@@ -409,7 +500,8 @@ struct MovieDetailView: View {
     // MARK: - Glass Panel
 
     private func glassPanel(vm: DetailViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        // Centred on the upright iPhone, like the logo above it and the buttons below.
+        VStack(alignment: isPhonePortrait ? .center : .leading, spacing: 16) {
             // Title/logo lives in the hero slot (see DetailContentOverlay); panel opens into the metadata row.
             if vm.item.type == .episode, let series = vm.item.seriesName {
                 Text(episodeSubtitle(vm: vm, seriesName: series))
@@ -427,32 +519,59 @@ struct MovieDetailView: View {
                 // there, and four of them on the metadata line pushed it past the screen edge and
                 // dragged the studios line out with it (measured on the iPhone, 2026-09-14).
                 if isPhonePortrait {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ItemMetadataRow(item: vm.item)
+                    VStack(spacing: 8) {
+                        ItemMetadataRow(item: vm.item, externalRatings: vm.externalRatings, awaitingExternalRatings: vm.isAwaitingExternalRatings)
                         let pills = formatBadgePills(vm: vm)
                         if !pills.isEmpty {
                             FormatBadgeRow(pills: pills)
                         }
                     }
                 } else {
-                    ItemMetadataRow(item: vm.item, badges: formatBadges(vm: vm))
+                    // One line where it fits. Where it does not (the iPhone Duo's inner display
+                    // upright, 669 pt) the pills were squeezed to slivers with their letters stacked,
+                    // so they move to a line of their own, as in portrait.
+                    ViewThatFits(in: .horizontal) {
+                        ItemMetadataRow(
+                            item: vm.item,
+                            badges: formatBadges(vm: vm),
+                            externalRatings: vm.externalRatings,
+                            awaitingExternalRatings: vm.isAwaitingExternalRatings
+                        )
+                        VStack(alignment: .leading, spacing: 8) {
+                            ItemMetadataRow(item: vm.item, externalRatings: vm.externalRatings, awaitingExternalRatings: vm.isAwaitingExternalRatings)
+                            let pills = formatBadgePills(vm: vm)
+                            if !pills.isEmpty {
+                                FormatBadgeRow(pills: pills)
+                            }
+                        }
+                    }
                 }
             }
 
             // Sodalite#146: the plot belongs in the viewport the viewer actually meets. The box
             // below the fold keeps the full text; this is the teaser that decides whether they
-            // scroll to it.
-            DetailHeroSynopsis(
-                text: vm.item.overview,
-                isPending: !vm.hasFullDetail,
-                spoilerItem: vm.item
-            )
+            // scroll to it. The upright iPhone has it under the buttons instead.
+            if !isPhonePortrait { heroSynopsis(vm: vm) }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(isPhonePortrait ? 16 : 30)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
+        .frame(maxWidth: .infinity, alignment: isPhonePortrait ? .center : .leading)
+        // The upright iPhone draws no panel (Blexbi): its column sits on the page's own ground
+        // under the poster, not over the backdrop, so the glass only boxed the text in.
+        .padding(isPhonePortrait ? 0 : 30)
+        .background {
+            if !isPhonePortrait {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+            }
+        }
+    }
+
+    private func heroSynopsis(vm: DetailViewModel) -> some View {
+        DetailHeroSynopsis(
+            text: vm.item.overview,
+            isPending: !vm.hasFullDetail,
+            spoilerItem: vm.item,
+            onTap: { openMoreDetails(vm: vm) },
+            expandsInPlace: isPhonePortrait
         )
     }
 
@@ -482,6 +601,34 @@ struct MovieDetailView: View {
     /// because a page can render from a slim item that carries no media sources at all: the id only
     /// appears once the detail round trip has landed, and that is the moment there is something to
     /// ask about.
+    /// Once per fetched item, and only while servers are combined.
+    private var twinLookupKey: String {
+        guard viewModel?.hasFullDetail == true, let item = viewModel?.item else { return "" }
+        return "\(item.originKey)|\(dependencies.sessionRegistry.participantsRevision)"
+    }
+
+    /// Every combined server but this page's own, with the account that reads each one.
+    private var twinSources: [TwinSource] {
+        let participants = dependencies.sessionRegistry.participants
+        guard participants.count > 1 else { return [] }
+        return participants.compactMap { participant in
+            guard let server = participant.server,
+                  let userID = participant.isActive ? appState.activeUser?.id : participant.userID
+            else { return nil }
+            return TwinSource(serverID: server.id, serverName: server.name, userID: userID, itemService: participant.itemService)
+        }
+    }
+
+    /// The version in force, and its server once other servers' copies are on offer, since the
+    /// same "4K" can then mean either one.
+    private func versionButtonSubtitle(vm: DetailViewModel) -> String? {
+        let sources = vm.item.selectableMediaSources
+        let source = versionSelection.resolvedSource(for: vm.item)
+        let label = sources.count > 1 ? source.map(sources.distinguishingLabel) : source?.resolutionLabel
+        guard !twins.isEmpty, let name = session.server?.name else { return label }
+        return [name, label].compactMap { $0 }.joined(separator: " · ")
+    }
+
     private var hdr10PlusProbeKey: String {
         guard let item = viewModel?.item else { return "-" }
         let source = item.effectiveMediaSource(id: versionSelection.preferredSourceID(for: item))
@@ -496,6 +643,15 @@ struct MovieDetailView: View {
             sourceID: versionSelection.preferredSourceID(for: vm.item))
     }
 
+    /// The More Details button's action, shared with a tap on the panel's synopsis teaser.
+    private func openMoreDetails(vm: DetailViewModel) {
+        if isSynopsisVeiled(vm: vm) {
+            SpoilerReveal.reveal(vm.item, dependencies: dependencies, appState: appState)
+        } else {
+            isPresentingMoreDetails = true
+        }
+    }
+
     private func isSynopsisVeiled(vm: DetailViewModel) -> Bool {
         SpoilerReveal.isHidden(vm.item, dependencies: dependencies, appState: appState)
     }
@@ -505,7 +661,28 @@ struct MovieDetailView: View {
     /// Whether anything below the fold is a section rather than the closing caption line. It decides
     /// where that line is drawn, and through it whether the page is scrollable at all.
     private func hasBelowFoldSections(vm: DetailViewModel) -> Bool {
-        !(vm.item.people?.isEmpty ?? true) || !vm.similarItems.isEmpty || !vm.catalogSimilar.isEmpty
+        !(vm.item.people?.isEmpty ?? true) || vm.hasTrailersOrExtras
+            || !vm.similarItems.isEmpty || !vm.catalogSimilar.isEmpty
+    }
+
+    /// Sodalite#179 and #195. Frame grabs are 16:9; an extra without one borrows the page's own backdrop.
+    private func extrasRow(vm: DetailViewModel) -> some View {
+        TrailersAndExtrasRow(
+            localTrailers: vm.localTrailers,
+            youTubeTrailers: vm.remoteTrailers,
+            extras: vm.specialFeatures,
+            imageURLProvider: { dependencies.jellyfinImageService.episodeThumbnailURL(for: $0) },
+            fallbackURLProvider: { _ in vm.backdropURL(for: vm.item) },
+            onItemSelected: { extra in
+                extraItem = extra
+                showExtra = true
+            },
+            onYouTubeSelected: { trailer in
+                #if !os(tvOS)
+                youTubeTrailer = trailer
+                #endif
+            }
+        )
     }
 
     private func techFacts(vm: DetailViewModel) -> TechFacts {
@@ -558,25 +735,38 @@ struct MovieDetailView: View {
         )
         .focused($focusedAction, equals: .play)
         .focused($playButtonFocused)
+        #if os(iOS)
+        .contextMenu {
+            if dependencies.downloadStore.completedItem(vm.item.id) != nil {
+                Button("downloads.action.streamFromServer", systemImage: "network") {
+                    streamFromServer = true
+                    requestPlay(fromBeginning: false)
+                }
+            }
+        }
+        #endif
     }
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
-            // First after Play, and always labelled: this is a play decision, and a version button
-            // that collapses to a bare glyph hides the one thing it is there to say. Only a
-            // multi-source item grows it, so its presence answers "does this have more than one
-            // version" before it is ever pressed (Sodalite#139).
-            if VersionSelection.isOffered(for: vm.item), let sources = vm.item.mediaSources {
+            // First after Play: this is a play decision. Only a multi-source item grows it, so its
+            // presence answers "does this have more than one version" before it is ever pressed
+            // (Sodalite#139). Its label is the part of the version's name the others do not share,
+            // since the shared start is what a truncation keeps (Sodalite#172).
+            if VersionSelection.isOffered(for: vm.item) || !twins.isEmpty {
+                let sources = vm.item.selectableMediaSources
                 GlassActionButton(
                     title: "detail.version.button",
                     systemImage: "film.stack",
-                    subtitle: versionSelection.resolvedSource(for: vm.item)?.versionLabel,
-                    alwaysShowsLabel: true,
+                    subtitle: versionButtonSubtitle(vm: vm),
+                    alwaysShowsLabel: VersionSelection.labelStaysOpen,
                     action: {
                         versionChoice = VersionPickerChoice(
                             item: vm.item,
                             sources: sources,
-                            selectedID: versionSelection.resolvedSource(for: vm.item)?.id
+                            selectedID: versionSelection.resolvedSource(for: vm.item)?.id,
+                            serverName: session.server?.name,
+                            twins: twins
                         )
                     }
                 )
@@ -594,15 +784,21 @@ struct MovieDetailView: View {
                 .focused($focusedAction, equals: .replay)
             }
 
-            if vm.hasLocalTrailer {
+            if vm.hasTrailer {
                 GlassActionButton(
                     title: "detail.trailer",
                     systemImage: "play.rectangle",
                     action: {
+                        #if !os(tvOS)
+                        if let remote = vm.remoteTrailer {
+                            youTubeTrailer = remote
+                            return
+                        }
+                        #endif
                         Task {
                             if let trailer = await vm.loadTrailer() {
-                                trailerItem = trailer
-                                showTrailer = true
+                                extraItem = trailer
+                                showExtra = true
                             }
                         }
                     }
@@ -642,6 +838,24 @@ struct MovieDetailView: View {
             )
             .focused($focusedAction, equals: .watched)
 
+            // Sodalite#48: the viewer's own score, Jellyfin's UserData.Rating, so Scrob and the like see it.
+            GlassActionButton(
+                title: vm.rating == nil ? "detail.rate" : "detail.rating",
+                systemImage: vm.rating == nil ? "star" : "star.fill",
+                subtitle: vm.rating.map(RatingPickerSheet.label),
+                action: { ratingPrompt = RatingPrompt(itemID: vm.item.id) }
+            )
+            .focused($focusedAction, equals: .rating)
+
+            if vm.item.type == .movie, dependencies.trakt.isConnected {
+                TraktWatchlistButton(item: vm.item)
+                    .focused($focusedAction, equals: .traktWatchlist)
+            }
+
+            #if os(iOS)
+            DownloadActionButton(item: vm.item, sourceID: versionSelection.preferredSourceID(for: vm.item), target: $downloadTarget)
+            #endif
+
             // Last of the informational controls, and the page's only route to the full synopsis
             // and the technical detail (Sodalite#146).
             GlassActionButton(
@@ -656,11 +870,7 @@ struct MovieDetailView: View {
                     // per-SERIES rule, and two identical glyphs in one row would be a one-off reveal
                     // and a standing setting wearing the same face. Circular, so it reads as this
                     // button in another state rather than as a different control.
-                    if isSynopsisVeiled(vm: vm) {
-                        SpoilerReveal.reveal(vm.item, dependencies: dependencies, appState: appState)
-                    } else {
-                        isPresentingMoreDetails = true
-                    }
+                    openMoreDetails(vm: vm)
                 }
             )
             .focused($focusedAction, equals: .moreDetails)
@@ -680,19 +890,18 @@ struct MovieDetailView: View {
     // MARK: - Helpers
 
     private func hasProgress(vm: DetailViewModel) -> Bool {
-        if let ticks = vm.item.userData?.playbackPositionTicks, ticks > 0 { return true }
-        return false
+        vm.effectiveState(of: vm.item).positionTicks > 0
     }
 
     /// Sodalite#146: the label is the state. A finished title used to read "Play", which is true and
     /// says nothing; naming the replay is what tells the viewer they have seen this without their
     /// having to find the watched check in the row below.
     private func playButtonTitle(vm: DetailViewModel) -> LocalizedStringKey {
-        switch PlayActionState.resolve(positionTicks: vm.item.userData?.playbackPositionTicks,
-                                       isPlayed: vm.isPlayed) {
-        case .fresh: "detail.play"
-        case .resume: "detail.resume"
-        case .again: "detail.playAgain"
+        let state = vm.effectiveState(of: vm.item)
+        switch PlayActionState.resolve(positionTicks: state.positionTicks, isPlayed: state.isPlayed) {
+        case .fresh: return "detail.play"
+        case .resume: return "detail.resume"
+        case .again: return "detail.playAgain"
         }
     }
 
@@ -701,13 +910,14 @@ struct MovieDetailView: View {
     /// Sodalite#99, so a timestamp here was the one place answering a different question. No "left"
     /// wrapper for the same reason the cards carry none: the bar says what the number counts.
     private func resumeRemaining(vm: DetailViewModel) -> String? {
-        vm.item.resumeRemainingTicks?.ticksToCompactDisplay
+        guard vm.effectiveState(of: vm.item).positionTicks > 0 else { return nil }
+        return vm.item.resumeRemainingTicks?.ticksToDurationDisplay
     }
 
     /// 0…1 progress for the play button's overlay; nil when fresh or no run-time metadata.
     private func playProgressFraction(vm: DetailViewModel) -> Double? {
-        guard let ticks = vm.item.userData?.playbackPositionTicks, ticks > 0,
-              let total = vm.item.runTimeTicks, total > 0 else {
+        let ticks = vm.effectiveState(of: vm.item).positionTicks
+        guard ticks > 0, let total = vm.item.runTimeTicks, total > 0 else {
             return nil
         }
         return min(1.0, max(0.0, Double(ticks) / Double(total)))

@@ -29,7 +29,7 @@ struct ItemQueryFieldSetTests {
     @Test func cardFieldSetCarriesNoDetailOnlyField() {
         let card = Set(JellyfinEndpoint.homeRowFields.split(separator: ",").map(String.init))
         let detailOnly = ["People", "MediaStreams", "MediaSources", "Chapters", "Trickplay",
-                          "LocalTrailerCount", "Studios", "Overview"]
+                          "LocalTrailerCount", "RemoteTrailers", "Studios", "Overview"]
         for field in detailOnly {
             #expect(!card.contains(field), "homeRowFields must not carry \(field)")
         }
@@ -77,7 +77,6 @@ struct ShuffleQueueFieldsTests {
         }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     @Test func shuffleOverridesASlimGridFieldSet() async {

@@ -13,6 +13,9 @@ struct SettingsView: View {
     @State private var showResetConfirm = false
     /// Latches the buttons while the reset runs; deleting the iCloud copy is a round trip.
     @State private var isResetting = false
+    /// False while a sub-settings page is pushed over the root, so the gear sheet's swipe-down
+    /// cannot throw away the whole stack from three levels deep.
+    @State private var isAtRoot = true
 
     var body: some View {
         ThemeNavigationStack {
@@ -27,6 +30,7 @@ struct SettingsView: View {
                 }
                 .screenContentInset()
             }
+            .drivesShellBar()
             #if os(iOS)
             // The sheet has a swipe-down grabber, but an explicit close matches the gear that
             // opened it (and the detail cover). Pinned outside the ScrollView so it never scrolls;
@@ -36,8 +40,13 @@ struct SettingsView: View {
                     closeButton(onClose)
                 }
             }
+            .onAppear { isAtRoot = true }
+            .onDisappear { isAtRoot = false }
             #endif
         }
+        #if os(iOS)
+        .interactiveDismissDisabled(onClose != nil && !isAtRoot)
+        #endif
         // Both session actions ask first. Log Out reads far milder than it is: it does not just end
         // this session, it drops every server, profile and saved login on the device.
         .alert(
@@ -49,7 +58,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.logout.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.logout.confirm.message"), scope: .everything))
         }
         .alert(
             Text("settings.reset.confirm.title", bundle: .main),
@@ -67,7 +77,8 @@ struct SettingsView: View {
             }
             Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("settings.reset.confirm.message", bundle: .main)
+            Text(verbatim: dependencies.messageWithDownloadWarning(
+                String(localized: "settings.reset.confirm.message"), scope: .everything))
         }
         // Settings is the only surface showing server version; refresh on appear so an upgrade since login is picked up.
         .task {
@@ -79,14 +90,7 @@ struct SettingsView: View {
 
     #if os(iOS)
     private func closeButton(_ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark")
-                .font(.title3.weight(.semibold))
-                .padding(12)
-                .glassEffect(.regular, in: Circle())
-                .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
+        GlassCloseButton(action: action)
         .padding(.trailing, 16)
         .padding(.top, 8)
     }
@@ -135,48 +139,24 @@ struct SettingsView: View {
     }
 
     /// Loads from the server when `primaryImageTag` is set, else initials.
-    @ViewBuilder
     private var avatar: some View {
-        if let user = appState.activeUser,
-           let url = dependencies.jellyfinImageService.userProfileImageURL(
-               userID: user.id,
-               tag: user.primaryImageTag
-           ) {
-            AsyncCachedImage(url: url) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                initialsCircle
+        ProfileAvatar(
+            name: appState.activeUser?.name ?? "",
+            url: appState.activeUser.flatMap {
+                dependencies.activeProfileAvatarURL(userID: $0.id, tag: $0.primaryImageTag)
             }
-            .clipShape(Circle())
-        } else {
-            initialsCircle
-        }
-    }
-
-    private var initialsCircle: some View {
-        ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
-            Text(initials)
-                .font(.system(size: 44, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-    }
-
-    private var initials: String {
-        let name = appState.activeUser?.name ?? ""
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
+        )
     }
 
     // MARK: - Settings List
 
     private var settingsList: some View {
-        // Ordered by reach frequency: Profile, Home, Playback, Appearance (supporter-gated), iCloud Sync, Seerr, Support.
-        VStack(spacing: 4) {
+        // Grouped by what a tile is about rather than by how often it is opened: the account and its
+        // services, what playback does, what the screens look like, the app itself, then the tools
+        // for when something is wrong.
+        VStack(alignment: .leading, spacing: 4) {
+            SettingsSectionHeader("settings.section.account", topPadding: 0)
+
             GatedSettingsTile(
                 icon: "person.2",
                 title: "settings.profile.title",
@@ -185,16 +165,6 @@ struct SettingsView: View {
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
                 ProfileSettingsView()
-            }
-
-            GatedSettingsTile(
-                icon: "server.rack",
-                title: "multiServer.settings.entry.title",
-                subtitle: "multiServer.settings.entry.subtitle",
-                reason: .serverManagement,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                ServerManagementView()
             }
 
             GatedSettingsTile(
@@ -211,6 +181,89 @@ struct SettingsView: View {
                 ParentalControlsSettingsView()
             }
 
+            GatedSettingsTile(
+                icon: "server.rack",
+                title: "multiServer.settings.entry.title",
+                subtitle: "multiServer.settings.entry.subtitle",
+                reason: .serverManagement,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                ServerManagementView()
+            }
+
+            GatedSettingsTile(
+                icon: "tray.and.arrow.down",
+                title: "settings.seerr.title",
+                subtitle: seerrSubtitle,
+                reason: .openParentalSettings,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                SeerrSettingsView()
+            }
+
+            if dependencies.trakt.isAvailable {
+                GatedSettingsTile(
+                    icon: "arrow.triangle.2.circlepath",
+                    title: "settings.trakt.title",
+                    subtitle: traktSubtitle,
+                    reason: .openParentalSettings,
+                    requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+                ) {
+                    TraktSettingsView()
+                }
+            }
+
+            GatedSettingsTile(
+                icon: "icloud",
+                title: "settings.cloudSync.title",
+                subtitle: "settings.cloudSync.subtitle",
+                reason: .serverManagement,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                CloudSyncSettingsView()
+            }
+
+            SettingsSectionHeader("settings.section.playback")
+
+            SettingsTile(
+                icon: "play.circle",
+                title: "settings.playback.title",
+                subtitle: "settings.playback.subtitle"
+            ) {
+                PlaybackSettingsView()
+            }
+
+            // The Mac player has its own transport, which this screen does not arrange.
+            #if !os(macOS)
+            SettingsTile(
+                icon: "slider.horizontal.below.rectangle",
+                title: "settings.playerControls.title",
+                subtitle: "settings.playerControls.subtitle"
+            ) {
+                PlayerControlsSettingsView()
+            }
+            #endif
+
+            #if os(iOS)
+            SettingsTile(
+                icon: "arrow.down.circle",
+                title: "settings.downloads.title",
+                subtitle: "settings.downloads.subtitle"
+            ) {
+                DownloadSettingsView()
+            }
+            #endif
+
+            SettingsSectionHeader("settings.section.interface")
+
+            SettingsTile(
+                icon: "paintpalette",
+                title: "settings.appearance.title",
+                subtitle: "settings.appearance.subtitle.short"
+            ) {
+                AppearanceSettingsView()
+            }
+
             SettingsTile(
                 icon: "square.grid.2x2",
                 title: "settings.home.customize",
@@ -224,59 +277,14 @@ struct SettingsView: View {
             GatedSettingsTile(
                 icon: "rectangle.3.group",
                 title: "settings.tabs.title",
-                subtitle: "settings.tabs.subtitle.short",
+                subtitle: "settings.tabs.subtitle.order",
                 reason: .openParentalSettings,
                 requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
             ) {
                 TabVisibilitySettingsView()
             }
 
-            SettingsTile(
-                icon: "play.circle",
-                title: "settings.playback.title",
-                subtitle: "settings.playback.subtitle"
-            ) {
-                PlaybackSettingsView()
-            }
-
-            SettingsTile(
-                icon: "paintpalette",
-                title: "settings.appearance.title",
-                subtitle: "settings.appearance.subtitle.short"
-            ) {
-                AppearanceSettingsView()
-            }
-
-            GatedSettingsTile(
-                icon: "icloud",
-                title: "settings.cloudSync.title",
-                subtitle: "settings.cloudSync.subtitle",
-                reason: .serverManagement,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                CloudSyncSettingsView()
-            }
-
-            GatedSettingsTile(
-                icon: "tray.and.arrow.down",
-                title: "settings.seerr.title",
-                subtitle: seerrSubtitle,
-                reason: .openParentalSettings,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                SeerrSettingsView()
-            }
-
-            // Gated: Support hosts the IAP purchase flow, off-limits to a kid on a protected profile.
-            GatedSettingsTile(
-                icon: "heart",
-                title: "settings.support.title",
-                subtitle: "settings.support.subtitle",
-                reason: .openParentalSettings,
-                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
-            ) {
-                SupportDevelopmentView()
-            }
+            SettingsSectionHeader(verbatim: "Sodalite")
 
             SettingsTile(
                 icon: "chart.bar.xaxis",
@@ -294,6 +302,17 @@ struct SettingsView: View {
                 ChangelogListView()
             }
 
+            // Gated: Support hosts the IAP purchase flow, off-limits to a kid on a protected profile.
+            GatedSettingsTile(
+                icon: "heart",
+                title: "settings.support.title",
+                subtitle: "settings.support.subtitle",
+                reason: .openParentalSettings,
+                requiresPIN: { dependencies.parentalGateRequiredForSessionAction() }
+            ) {
+                SupportDevelopmentView()
+            }
+
             SettingsTile(
                 icon: "doc.text",
                 title: "settings.licenses.title",
@@ -301,6 +320,8 @@ struct SettingsView: View {
             ) {
                 LicensesView()
             }
+
+            SettingsSectionHeader("settings.section.troubleshooting")
 
             SettingsTile(
                 icon: "text.alignleft",
@@ -318,6 +339,10 @@ struct SettingsView: View {
                 CachedDataView()
             }
         }
+    }
+
+    private var traktSubtitle: LocalizedStringKey {
+        dependencies.trakt.isConnected ? "settings.trakt.subtitle.connected" : "settings.trakt.subtitle.notConnected"
     }
 
     private var seerrSubtitle: LocalizedStringKey {
@@ -444,9 +469,14 @@ struct SettingsView: View {
     }
 
     private func finishLogout() {
-        try? dependencies.clearSession()
-        dependencies.clearSessionResidue()
-        appState.logout()
+        // Log Out drops every server and profile on the device, so every download goes with them;
+        // awaited first, while the session can still tell the server to stop a running transcode.
+        Task {
+            await dependencies.purgeDownloads(.everything)
+            try? dependencies.clearSession()
+            dependencies.clearSessionResidue()
+            appState.logout()
+        }
     }
 
     // MARK: - Reset
@@ -489,6 +519,36 @@ struct SettingsView: View {
     }
 }
 
+// MARK: - Section Header
+
+/// Group title over a run of settings rows or tiles. `topPadding` is 0 where the container's own
+/// spacing already separates the groups, or above the first group on a screen.
+struct SettingsSectionHeader: View {
+    private let text: Text
+    private let topPadding: CGFloat
+
+    init(_ key: LocalizedStringKey, topPadding: CGFloat = 24) {
+        text = Text(key)
+        self.topPadding = topPadding
+    }
+
+    /// For a name that is not translated.
+    init(verbatim: String, topPadding: CGFloat = 24) {
+        text = Text(verbatim: verbatim)
+        self.topPadding = topPadding
+    }
+
+    var body: some View {
+        text
+            .font(.title3)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .padding(.top, topPadding)
+            .padding(.bottom, 4)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
 // MARK: - Settings Tile
 
 struct SettingsTile<Destination: View>: View {
@@ -518,7 +578,6 @@ struct SettingsTile<Destination: View>: View {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -551,7 +610,7 @@ struct GatedSettingsTile<Destination: View>: View {
                 Image(systemName: icon).font(.title2).frame(width: 56, alignment: .center).foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.body).fontWeight(.medium)
-                    Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)

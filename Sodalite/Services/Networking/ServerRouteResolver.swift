@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Picks the live URL for a server, and says whether it answered.
 ///
@@ -122,6 +123,31 @@ enum ServerProbe {
         await responds(at: base.appending(path: jellyfinReadinessPath))
     }
 
+    /// What one address said about itself, in two halves that answer different questions.
+    struct Answer: Sendable, Equatable {
+        /// Is this the server the session belongs to? The only half that decides whether
+        /// credentials may go there (`RouteGate`, audit review R-ROUTE-1).
+        let identity: Identity
+        /// Readiness as well: the half that picks a route and feeds the verdict.
+        let isReady: Bool
+
+        static let ready = Answer(identity: .matches, isReady: true)
+        static let silent = Answer(identity: .noAnswer, isReady: false)
+    }
+
+    enum Identity: Sendable, Equatable {
+        case matches
+        /// Answered `System/Info/Public` as some other server: whoever is there now is not ours.
+        case otherServer
+        /// No usable answer in time. Says nothing about who is there, so it takes no proof back.
+        case noAnswer
+    }
+
+    /// The identity half has more patience than the route half: a LAN server that is slow to
+    /// answer (busy with a scan, Wi-Fi still associating) must not lose its requests to the cap
+    /// that is there to pick between two slots quickly.
+    static let identityPatience: TimeInterval = 8
+
     /// Readiness plus identity, for a probe whose winner becomes the session's address.
     ///
     /// Readiness alone crowned any host that answered, 401 and 404 included, so on another network
@@ -130,13 +156,74 @@ enum ServerProbe {
     /// slot now only counts when `System/Info/Public` names the server this session belongs to.
     /// A server stored without an id (discovery tolerates one) has nothing to compare against.
     static func jellyfin(_ base: URL, expectedServerID: String) async -> Bool {
-        guard !expectedServerID.isEmpty else { return await jellyfin(base) }
-        async let ready = jellyfin(base)
-        guard let (data, response) = await fetch(base.appending(path: "System/Info/Public")),
-              (200...299).contains(response.statusCode),
-              identifies(data, as: expectedServerID)
-        else { return false }
-        return await ready
+        await jellyfinAnswer(base, expectedServerID: expectedServerID).isReady
+    }
+
+    static func jellyfinAnswer(_ base: URL, expectedServerID: String) async -> Answer {
+        async let ready = outcome(at: base.appending(path: jellyfinReadinessPath))
+        var identity = Identity.matches
+        var failure: String?
+        if !expectedServerID.isEmpty {
+            let judged = judge(await outcome(at: base.appending(path: "System/Info/Public")),
+                               expectedServerID: expectedServerID)
+            identity = judged.0
+            failure = judged.1
+        }
+        if failure == nil, identity == .matches {
+            switch await ready {
+            case .failed(let reason): failure = "\(jellyfinReadinessPath) \(reason)"
+            case .answered(_, let response) where !answers(statusCode: response.statusCode):
+                failure = "\(jellyfinReadinessPath) HTTP \(response.statusCode)"
+            case .answered: break
+            }
+        }
+        noteProbeFailure(failure, host: base.host() ?? "?")
+        return Answer(identity: identity, isReady: identity == .matches && failure == nil)
+    }
+
+    /// The identity half alone, with `timeout` instead of the route probe's two second cap.
+    static func identity(_ base: URL, expectedServerID: String, timeout: TimeInterval = identityPatience) async -> Identity {
+        guard !expectedServerID.isEmpty else { return .matches }
+        let judged = judge(
+            await outcome(at: base.appending(path: "System/Info/Public"), timeout: timeout),
+            expectedServerID: expectedServerID)
+        let identity = judged.0
+        if let failure = judged.1 { LogTap.shared.note("[network] identity check of \(base.host() ?? "?") failed: \(failure)") }
+        return identity
+    }
+
+    private static func judge(_ outcome: ProbeOutcome, expectedServerID: String) -> (Identity, String?) {
+        switch outcome {
+        case .failed(let reason):
+            return (.noAnswer, "System/Info/Public \(reason)")
+        case .answered(_, let response) where !(200...299).contains(response.statusCode):
+            return (.noAnswer, "System/Info/Public HTTP \(response.statusCode)")
+        case .answered(let data, _) where !identifies(data, as: expectedServerID):
+            return (.otherServer, "answers as server \(answeredID(data)), session expects \(expectedServerID.prefix(8))")
+        case .answered:
+            return (.matches, nil)
+        }
+    }
+
+    /// Why the last identity probe of each host failed, so a failure that keeps repeating is logged
+    /// once (Sodalite#199). The verdict line names only the host, and a working server that the
+    /// strip calls unreachable leaves three suspects that look the same from outside: an identity
+    /// that does not match, a readiness endpoint answering 5xx, and the two second cap.
+    private static let lastFailures = OSAllocatedUnfairLock(initialState: [String: String]())
+
+    private static func noteProbeFailure(_ failure: String?, host: String) {
+        let isNew = lastFailures.withLock { failures in
+            defer { failures[host] = failure }
+            return failure != nil && failures[host] != failure
+        }
+        if isNew, let failure {
+            LogTap.shared.note("[network] probe of \(host) failed: \(failure)")
+        }
+    }
+
+    private static func answeredID(_ body: Data) -> String {
+        let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
+        return (object?["Id"] as? String).map { String($0.prefix(8)) } ?? "(no Id)"
     }
 
     /// Whether a `System/Info/Public` body names this server. Jellyfin writes the id as 32 hex
@@ -148,7 +235,11 @@ enum ServerProbe {
         return normalizedServerID(id) == normalizedServerID(expectedServerID)
     }
 
-    private static func normalizedServerID(_ id: String) -> String {
+    nonisolated static func isSameServer(_ id: String, _ other: String) -> Bool {
+        normalizedServerID(id) == normalizedServerID(other)
+    }
+
+    nonisolated private static func normalizedServerID(_ id: String) -> String {
         id.replacingOccurrences(of: "-", with: "").lowercased()
     }
 
@@ -162,6 +253,17 @@ enum ServerProbe {
     }
 
     private static func fetch(_ url: URL) async -> (Data, HTTPURLResponse)? {
+        guard case .answered(let data, let response) = await outcome(at: url) else { return nil }
+        return (data, response)
+    }
+
+    /// Not an `Error`: the reason is a log line, never a viewer's.
+    private enum ProbeOutcome {
+        case answered(Data, HTTPURLResponse)
+        case failed(String)
+    }
+
+    private static func outcome(at url: URL, timeout: TimeInterval = timeout) async -> ProbeOutcome {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
         config.timeoutIntervalForResource = timeout
@@ -169,10 +271,17 @@ enum ServerProbe {
         let session = URLSession(
             configuration: config, delegate: ServerTrustDelegate.shared, delegateQueue: nil)
         defer { session.invalidateAndCancel() }
-        guard let (data, response) = try? await session.data(from: url),
-              let http = response as? HTTPURLResponse
-        else { return nil }
-        return (data, http)
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard let http = response as? HTTPURLResponse else {
+                return .failed("no HTTP response")
+            }
+            return .answered(data, http)
+        } catch let error as URLError {
+            return .failed("no answer (URLError \(error.code.rawValue))")
+        } catch {
+            return .failed("no answer (\(type(of: error)))")
+        }
     }
 }
 

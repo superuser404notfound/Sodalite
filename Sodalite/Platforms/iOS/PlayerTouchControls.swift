@@ -11,13 +11,16 @@ struct PlayerTouchControls: View {
     let tintColor: Color
     var episodeImageURL: (JellyfinItem) -> URL? = { _ in nil }
     var chapterThumbnail: (Int) async -> CGImage? = { _ in nil }
+    /// Drawn between the top bar and the bottom block. Only the folded iPhone Duo panel fills it (with
+    /// the subtitle lines); over the picture that space stays empty so the picture shows through.
+    var centerContent: AnyView? = nil
 
     @State private var activePicker: PickerKind?
     @Environment(\.horizontalSizeClass) private var hSizeClass
     private var isPad: Bool { hSizeClass == .regular }
 
     private enum PickerKind: Identifiable {
-        case audio, subtitle, secondarySubtitle, speed, picture, episodes, chapters
+        case audio, subtitle, secondarySubtitle, quality, speed, picture, episodes, chapters
         var id: Int { hashValue }
     }
 
@@ -47,7 +50,12 @@ struct PlayerTouchControls: View {
         ZStack {
             VStack(spacing: 0) {
                 topBar
-                Spacer()
+                if let centerContent {
+                    centerContent
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    Spacer()
+                }
                 bottomBlock
             }
             // FIXED width instead of horizontal padding (Sodalite#15 portrait clip): inside AVKit,
@@ -69,6 +77,7 @@ struct PlayerTouchControls: View {
         .foregroundStyle(.white)
         // Keep the controls up while a picker is open; re-arm the auto-hide when it closes.
         .onChange(of: activePicker) { _, newValue in
+            viewModel.audioPanelOpen = newValue == .audio
             if newValue == nil { viewModel.scheduleControlsHide() }
             else { viewModel.cancelControlsHide() }
         }
@@ -113,20 +122,35 @@ struct PlayerTouchControls: View {
             // won its row and crushed whatever shared it).
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 12) {
-                    if PlayerOrientation.isPhone {
-                        rotationLockButton
+                    // The viewer's arrangement (Sodalite#194); the iPad has no rotation lock to show.
+                    ForEach(controls.visibleControls(in: .topBar), id: \.self) { control in
+                        topBarButton(control)
                     }
-                    childLockButton
-                    // Auto-PiP (swipe-Home) is AVKit's own; no manual button (a custom AVPictureInPictureController
-                    // breaks AVKit's auto-PiP and can't survive backgrounding). AirPlay button for discoverability.
-                    AirPlayRouteButton(tint: .white)
-                        .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
                 }
                 if viewModel.videoFormat != .sdr {
                     VideoFormatBadge(format: viewModel.videoFormat, compact: true)
                 }
             }
+        }
+    }
+
+    private var controls: PlayerControlsLayout { viewModel.preferences.playerControls }
+
+    @ViewBuilder
+    private func topBarButton(_ control: PlayerControl) -> some View {
+        switch control {
+        case .rotationLock where PlayerOrientation.isPhone:
+            rotationLockButton
+        case .childLock:
+            childLockButton
+        case .airPlay:
+            // Auto-PiP (swipe-Home) is AVKit's own; no manual button (a custom AVPictureInPictureController
+            // breaks AVKit's auto-PiP and can't survive backgrounding). AirPlay button for discoverability.
+            AirPlayRouteButton(tint: .white)
+                .frame(width: 44, height: 44)
+                .background(.ultraThinMaterial, in: Circle())
+        default:
+            EmptyView()
         }
     }
 
@@ -175,7 +199,7 @@ struct PlayerTouchControls: View {
         .accessibilityLabel(Text("player.lock.engage"))
     }
 
-    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item) }
+    private var titleLines: PlayerTitleLines { PlayerTitleLines(item: viewModel.item, spoilerPolicy: viewModel.spoilerPolicy) }
 
     private var titleText: String { titleLines.header }
 
@@ -196,7 +220,10 @@ struct PlayerTouchControls: View {
 
             iconRow
 
-            scrubber
+            // A pre-roll plays under the movie's item: its scrubber and times would be the movie's (Sodalite#244).
+            if !viewModel.isPlayingPreroll {
+                scrubber
+            }
 
             // Sodalite#104: the same programme framing the ten-foot bar carries, in the type scale
             // this one already gives its two time slots. Both read one implementation.
@@ -212,6 +239,7 @@ struct PlayerTouchControls: View {
                 // since the tune and a permanent -00:00 (Sodalite#104).
                 Text(viewModel.isLiveSession ? viewModel.livePositionLabel : viewModel.currentTime)
                     .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
+                    .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 Spacer()
                 Button { viewModel.togglePlayPause() } label: {
                     Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
@@ -227,6 +255,7 @@ struct PlayerTouchControls: View {
                 } else {
                     Text(viewModel.remainingTime)
                         .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
+                        .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 }
             }
         }
@@ -239,43 +268,59 @@ struct PlayerTouchControls: View {
     // icon under a full row. Landscape and iPad still measure to a single row.
     private var iconRow: some View {
         FlowLayout(alignment: .center, spacing: isPad ? 28 : 20, balanced: true) {
-            if viewModel.isLiveSession {
-                if !viewModel.isAtLiveEdge {
-                    returnToLiveButton
-                }
-            } else {
-                iconButton("arrow.counterclockwise") { viewModel.restartFromBeginning() }
-                    .accessibilityLabel(Text("player.restart"))
+            // The prompts lead, outside the viewer's arrangement, as on tvOS (Sodalite#194).
+            if viewModel.isLiveSession && !viewModel.isAtLiveEdge {
+                returnToLiveButton
             }
             if viewModel.activeSkipSegment != nil {
                 iconButton("forward.end.fill") { viewModel.skipActiveSegment() }
             }
-            if viewModel.seasonEpisodes.count > 1 {
-                iconButton("list.bullet") { activePicker = .episodes }
-            }
-            // Gated on chapter data alone (it used to vanish on any series episode), and on a split-bar
-            // glyph so it never reads as the episode list it can now stand next to.
-            if viewModel.chapters.count > 1 {
-                iconButton("rectangle.split.3x1") { activePicker = .chapters }
-            }
-            if !viewModel.displayAudioTracks.isEmpty {
-                iconButton("speaker.wave.2") { activePicker = .audio }
-            }
-            if !viewModel.displaySubtitleStreams.isEmpty || viewModel.supportsSubtitleSearch {
-                iconButton("captions.bubble") { activePicker = .subtitle }
-            }
-            iconButton("gauge.with.needle") { activePicker = .speed }
-            // Sodalite#156: picture mode sets videoGravity on this device's layer, which nobody is
-            // looking at while the picture plays on a receiver or an external display.
-            if ExternalPlaybackPresentation.localPictureControlsApply(
-                destination: viewModel.externalPlaybackDestination) {
-                iconButton(pictureIcon) { activePicker = .picture }
-            }
-            if viewModel.preferences.showStatsForNerds {
-                iconButton("info.circle", active: viewModel.showStatsOverlay) {
-                    viewModel.showStatsOverlay.toggle()
+            // One list for both session kinds: the touch bar has never had a live row of its own.
+            // None of them during a pre-roll: tracks, chapters, quality and Restart all act on the movie.
+            if !viewModel.isPlayingPreroll {
+                ForEach(controls.visibleControls(in: .transport), id: \.self) { control in
+                    iconRowButton(control)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func iconRowButton(_ control: PlayerControl) -> some View {
+        switch control {
+        case .restart where !viewModel.isLiveSession:
+            iconButton("arrow.counterclockwise") { viewModel.restartFromBeginning() }
+                .accessibilityLabel(Text("player.restart"))
+        case .episodes where viewModel.seasonEpisodes.count > 1:
+            iconButton("list.bullet") { activePicker = .episodes }
+        // Gated on chapter data alone (it used to vanish on any series episode), and on a split-bar
+        // glyph so it never reads as the episode list it can now stand next to.
+        case .chapters where viewModel.chapters.count > 1:
+            iconButton("rectangle.split.3x1") { activePicker = .chapters }
+        case .audio where !viewModel.displayAudioTracks.isEmpty:
+            iconButton("speaker.wave.2") { activePicker = .audio }
+        case .subtitles where !viewModel.displaySubtitleStreams.isEmpty || viewModel.supportsSubtitleSearch:
+            iconButton("captions.bubble") { activePicker = .subtitle }
+        case .quality where viewModel.supportsQualityChoice:
+            iconButton("dial.medium") { activePicker = .quality }
+        case .speed:
+            iconButton("gauge.with.needle") { activePicker = .speed }
+        // Sodalite#156: picture mode sets videoGravity on this device's layer, which nobody is
+        // looking at while the picture plays on a receiver or an external display.
+        case .picture where ExternalPlaybackPresentation.localPictureControlsApply(
+            destination: viewModel.externalPlaybackDestination):
+            iconButton(pictureIcon) { activePicker = .picture }
+        case .upscaling where viewModel.upscaleToggleState != nil:
+            iconButton(viewModel.upscaleChipIcon, active: viewModel.upscaleToggleState != .off) {
+                viewModel.toggleUpscaling()
+            }
+            .accessibilityLabel(Text(viewModel.upscaleChipLabel))
+        case .stats:
+            iconButton("info.circle", active: viewModel.showStatsOverlay) {
+                viewModel.showStatsOverlay.toggle()
+            }
+        default:
+            EmptyView()
         }
     }
 
@@ -406,42 +451,46 @@ struct PlayerTouchControls: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(panelRows.enumerated()), id: \.offset) { _, row in
-                        HStack(spacing: 0) {
-                            Button {
-                                if let submenu = row.opensSubmenu {
-                                    activePicker = submenu
-                                } else {
-                                    row.action()
-                                    activePicker = nil
-                                }
-                            } label: {
-                                HStack(spacing: 12) {
-                                    thumbnail(for: row)
-                                    Text(row.label)
-                                        .foregroundStyle(row.isActive ? tint : .white)
-                                        .lineLimit(1)
-                                    Spacer()
-                                    if row.isActive {
-                                        Image(systemName: "checkmark").foregroundStyle(tint)
-                                    }
-                                }
-                                .padding(.horizontal, 14)
-                                .frame(height: rowHeight)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-
-                            if let deleteIndex = row.deleteStreamIndex {
+                        if let step = row.stepper {
+                            stepperRow(row, step: step, height: rowHeight)
+                        } else {
+                            HStack(spacing: 0) {
                                 Button {
-                                    activePicker = nil
-                                    viewModel.requestSubtitleDeletion(streamIndex: deleteIndex)
+                                    if let submenu = row.opensSubmenu {
+                                        activePicker = submenu
+                                    } else {
+                                        row.action()
+                                        activePicker = nil
+                                    }
                                 } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundStyle(Color.Theme.destructive)
-                                        .frame(width: 44, height: rowHeight)
-                                        .contentShape(Rectangle())
+                                    HStack(spacing: 12) {
+                                        thumbnail(for: row)
+                                        Text(row.label)
+                                            .foregroundStyle(row.isActive ? tint : .white)
+                                            .lineLimit(1)
+                                        Spacer()
+                                        if row.isActive {
+                                            Image(systemName: "checkmark").foregroundStyle(tint)
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .frame(height: rowHeight)
+                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+
+                                if let deleteIndex = row.deleteStreamIndex {
+                                    Button {
+                                        activePicker = nil
+                                        viewModel.requestSubtitleDeletion(streamIndex: deleteIndex)
+                                    } label: {
+                                        Image(systemName: "trash")
+                                            .foregroundStyle(Color.Theme.destructive)
+                                            .frame(width: 44, height: rowHeight)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
                     }
@@ -455,6 +504,33 @@ struct PlayerTouchControls: View {
             .padding(.bottom, isPad ? 150 : 120)
         }
         .transition(.opacity)
+    }
+
+    private func stepperRow(_ row: PickerRow, step: @escaping (Int) -> Void, height: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            stepButton("minus", steps: -1, step: step, height: height)
+            Button(action: row.action) {
+                Text(row.label)
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, minHeight: height)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            stepButton("plus", steps: 1, step: step, height: height)
+        }
+    }
+
+    private func stepButton(_ symbol: String, steps: Int, step: @escaping (Int) -> Void,
+                            height: CGFloat) -> some View {
+        Button { step(steps) } label: {
+            Image(systemName: symbol)
+                .foregroundStyle(tint)
+                .frame(width: 52, height: height)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -482,16 +558,27 @@ struct PlayerTouchControls: View {
         var opensSubmenu: PickerKind? = nil
         /// Non-nil on a deletable (external/downloaded) subtitle row: shows a trailing trash button.
         var deleteStreamIndex: Int? = nil
+        /// A stepper row (subtitle timing, the audio shaping settings): minus and plus call this with
+        /// -1 / +1, the label runs `action`, the panel stays.
+        var stepper: ((Int) -> Void)? = nil
         let action: () -> Void
     }
 
     private func rows(for picker: PickerKind) -> [PickerRow] {
         switch picker {
         case .audio:
-            return viewModel.displayAudioTracks.map { track in
-                PickerRow(label: TrackDisplayFormatter.audioDisplayName(for: track),
-                          isActive: track.id == viewModel.activeAudioIndex) {
-                    viewModel.selectAudioTrack(id: track.id, userInitiated: true)
+            return viewModel.audioMenuRows.map { row in
+                switch row {
+                case .track(let id):
+                    return PickerRow(label: viewModel.audioMenuLabel(for: row),
+                                     isActive: id == viewModel.activeAudioIndex) {
+                        viewModel.selectAudioTrack(id: id, userInitiated: true)
+                    }
+                case .speakers, .dialogue, .nightMode, .delay:
+                    return PickerRow(label: viewModel.audioMenuLabel(for: row), isActive: false,
+                                     stepper: { viewModel.stepAudioSetting(row, by: $0) }) {
+                        viewModel.cycleAudioSetting(row)
+                    }
                 }
             }
         case .subtitle:
@@ -521,6 +608,15 @@ struct PlayerTouchControls: View {
                     viewModel.selectSubtitleTrack(id: stream.index, userInitiated: true)
                 }
             }
+            if viewModel.supportsSubtitleOffset {
+                rows.append(PickerRow(
+                    label: String(format: String(localized: "player.subtitle.offset.value", defaultValue: "Timing: %@"),
+                                  PlaybackSettingsView.formatSubtitleDelay(viewModel.itemSubtitleOffset)),
+                    isActive: false,
+                    stepper: { viewModel.stepSubtitleOffset(by: $0) }) {
+                    viewModel.setSubtitleOffset(0)
+                })
+            }
             if viewModel.supportsSubtitleSearch {
                 rows.append(PickerRow(label: String(localized: "player.subtitle.searchOnline", defaultValue: "Search online..."), isActive: false) {
                     viewModel.presentSubtitleSearch()
@@ -541,6 +637,14 @@ struct PlayerTouchControls: View {
                 }
             }
             return rows
+        case .quality:
+            return viewModel.pickerQualities.map { quality in
+                let title = String(localized: String.LocalizationValue(quality.titleKey))
+                let label = viewModel.qualityPickerHint(quality).map { "\(title) · \($0)" } ?? title
+                return PickerRow(label: label, isActive: quality == viewModel.displayedStreamingQuality) {
+                    viewModel.selectStreamingQuality(quality)
+                }
+            }
         case .speed:
             return PlayerViewModel.speedOptions.indices.map { idx in
                 PickerRow(label: TransportBar.speedLabel(for: idx),
@@ -557,7 +661,7 @@ struct PlayerTouchControls: View {
             }
         case .episodes:
             return viewModel.seasonEpisodes.enumerated().map { idx, ep in
-                PickerRow(label: ep.name, isActive: ep.id == viewModel.item.id, imageURL: episodeImageURL(ep)) {
+                PickerRow(label: viewModel.spoilerPolicy.displayName(of: ep), isActive: ep.id == viewModel.item.id, imageURL: episodeImageURL(ep)) {
                     Task { await viewModel.selectEpisode(at: idx) }
                 }
             }

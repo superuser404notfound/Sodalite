@@ -1,3 +1,5 @@
+#if !os(macOS)
+// A focusable UIKit surface for the Siri Remote and the touch screen. The Mac scrubs with the pointer, on the SwiftUI slider the bar already draws.
 import SwiftUI
 import UIKit
 
@@ -134,3 +136,4 @@ final class ScrubInputView: UIView {
         handler?.focusChanged(context.nextFocusedView === self)
     }
 }
+#endif

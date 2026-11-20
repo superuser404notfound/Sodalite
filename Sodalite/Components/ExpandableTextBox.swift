@@ -42,12 +42,12 @@ struct ExpandableTextBox: View {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(.ultraThinMaterial)
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isFocused ? .white.opacity(0.1) : .clear)
+                        .fill(isFocused ? Color.Theme.focusFill : .clear)
                 }
             )
             .focusStroke(cornerRadius: 16, isFocused: isFocused)
             .focusResponse(.inline, isFocused: isFocused)
-            .focusable()
+            .focusableSurface()
             .focused($isFocused)
             .stableTap(isFocused: isFocused) {
                 // Sodalite#50: same two-step as EpisodeSynopsisBox, uncover first, expand second.
@@ -71,7 +71,7 @@ struct ExpandableTextBox: View {
             // The box can leave the tree while it holds focus (the series page rebuilds it per
             // episode); without this the caller would keep its buttons suppressed for good.
             .onDisappear { onFocusChanged?(false) }
-            .fullScreenCover(isPresented: $showFullText) {
+            .fullScreenCoverCompat(isPresented: $showFullText) {
                 TextOverlay(text: text, isPresented: $showFullText)
             }
     }
@@ -80,6 +80,8 @@ struct ExpandableTextBox: View {
 struct TextOverlay: View {
     let text: String
     @Binding var isPresented: Bool
+
+    @Environment(\.horizontalSizeClass) private var hSizeClass
 
     var body: some View {
         ZStack {
@@ -99,12 +101,18 @@ struct TextOverlay: View {
                 .frame(maxWidth: 1200)
             }
             #else
+            // A tap anywhere closes the reader: the text is not selectable, and the bare glyph
+            // that used to be the only way out had to be hit to the point (reported on the iPhone).
             ScrollView {
                 Text(text)
                     .font(.body)
                     .foregroundStyle(.primary)
-                    .padding(60)
+                    .padding(.horizontal, hSizeClass == .compact ? 24 : 60)
+                    .padding(.vertical, 60)
                     .frame(maxWidth: 1200)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture { isPresented = false }
             }
 
             VStack {
@@ -113,12 +121,16 @@ struct TextOverlay: View {
                     Button {
                         isPresented = false
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .frame(width: 44, height: 44)
+                            .glassEffect(.regular.interactive(), in: .circle)
                     }
                     .buttonStyle(.plain)
-                    .padding(40)
+                    .accessibilityLabel(Text("common.done"))
+                    .padding(.trailing, 16)
+                    .padding(.top, 8)
                 }
                 Spacer()
             }
@@ -151,7 +163,7 @@ private struct FocusableTextBlock: View {
                     .fill(isFocused ? Color.Theme.focusFill : .clear)
             )
             .animation(.easeInOut(duration: 0.2), value: isFocused)
-            .focusable()
+            .focusableSurface()
             .focused($isFocused)
     }
 }

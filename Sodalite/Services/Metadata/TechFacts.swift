@@ -91,7 +91,7 @@ struct TechFacts: Equatable {
         if let video {
             var rows: [Row] = []
             if let w = video.width, let h = video.height {
-                rows.append(Row(id: "resolution", label: .key("detail.tech.resolution"), value: "\(w)×\(h)"))
+                rows.append(Row(id: "resolution", label: .key("detail.tech.resolution"), value: "\(w)×\(h)\(video.isInterlaced == true ? "i" : "")"))
             }
             if let codec = video.codec?.uppercased() {
                 let profile = video.profile ?? ""
@@ -100,7 +100,7 @@ struct TechFacts: Equatable {
             }
             if let fps = video.realFrameRate ?? video.averageFrameRate {
                 rows.append(Row(id: "framerate", label: .key("detail.tech.framerate"),
-                                value: String(format: "%.2g fps", fps)))
+                                value: FrameRateFormat.fps(fps)))
             }
             if let range = dynamicRangeLabel(video) {
                 rows.append(Row(id: "dynamicRange", label: .key("detail.tech.dynamicRange"), value: range))
@@ -230,16 +230,19 @@ struct TechFacts: Equatable {
     // MARK: - Formatters
 
     /// Matches the player stats overlay: DV P<profile>, then VideoRangeType, falling back to the raw
-    /// VideoRange string.
+    /// VideoRange string. A DV file with an HDR10+ base layer names both (Sodalite#211).
     static func dynamicRangeLabel(_ video: MediaStream) -> String? {
-        if let dv = video.dvProfile {
-            return "Dolby Vision P\(dv)"
-        }
-        switch video.videoRangeType?.uppercased() {
+        let range = video.videoRangeType?.uppercased()
+        let dolbyVision = video.dvProfile.map { "Dolby Vision P\($0)" } ?? "Dolby Vision"
+        switch range {
+        case "DOVIWITHHDR10PLUS", "DOVIWITHELHDR10PLUS":
+            return "\(dolbyVision) + HDR10+"
+        case _ where video.dvProfile != nil:
+            return dolbyVision
         case "HDR10":     return "HDR10"
         case "HDR10PLUS": return "HDR10+"
         case "HLG":       return "HLG"
-        case "DOVI", "DOVIWITHHDR10", "DOVIWITHHLG", "DOVIWITHSDR":
+        case "DOVI", "DOVIWITHHDR10", "DOVIWITHHLG", "DOVIWITHSDR", "DOVIWITHEL":
             return "Dolby Vision"
         case "SDR":       return "SDR"
         default:          return video.videoRange

@@ -134,6 +134,7 @@ struct CatalogDiscoverView: View {
                     }
                     .padding(.vertical, 40)
                 }
+                .drivesShellBar()
             }
         }
     }

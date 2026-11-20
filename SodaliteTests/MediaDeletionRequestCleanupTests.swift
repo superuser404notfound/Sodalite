@@ -12,11 +12,15 @@ struct MediaDeletionRequestCleanupTests {
         var throwOnDelete = false
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem { throw Boom() }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse { throw Boom() }
         func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse { throw Boom() }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse { throw Boom() }
+        func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse { throw Boom() }
         func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
+        func setRating(userID: String, itemID: String, rating: Double?) async throws {}
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse { throw Boom() }
         func findByTmdbID(userID: String, tmdbID: Int, searchTerm: String?) async throws -> JellyfinItem? { nil }
         func findByProviderIDs(userID: String, tmdbID: Int?, tvdbID: Int?, imdbID: String?, includeItemTypes: [ItemType], searchTerm: String?) async throws -> JellyfinItem? { nil }
@@ -38,7 +42,7 @@ struct MediaDeletionRequestCleanupTests {
         func collection(collectionID: Int) async throws -> SeerrCollection { throw Boom() }
         func recommendations(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia] { [] }
         func similar(mediaType: SeerrMediaType, tmdbID: Int) async throws -> [SeerrMedia] { [] }
-        func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRTRating { throw Boom() }
+        func ratings(mediaType: SeerrMediaType, tmdbID: Int) async throws -> SeerrRatings { throw Boom() }
         func personDetail(tmdbID: Int) async throws -> SeerrPersonDetail { throw Boom() }
         func personCredits(tmdbID: Int) async throws -> SeerrPersonCredits { throw Boom() }
         func removeMovieFromRadarr(tmdbID: Int) async throws -> Bool { removedFromArr.append(tmdbID); return true }
@@ -49,9 +53,10 @@ struct MediaDeletionRequestCleanupTests {
         var deleted: [Int] = []
         var throwOnDelete = false
         func createRequest(mediaType: SeerrMediaType, tmdbID: Int, seasons: [Int]?, serverID: Int?, profileID: Int?, rootFolder: String?, languageProfileID: Int?, tags: [Int]?) async throws -> SeerrRequest { throw Boom() }
-        func myRequests(userID: Int, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
+        func myRequests(userID: Int, take: Int, skip: Int, sort: SeerrRequestSort) async throws -> SeerrRequestsResult { throw Boom() }
         func allRequests(filter: SeerrRequestFilter, take: Int, skip: Int) async throws -> SeerrRequestsResult { throw Boom() }
         func approveRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
+        func retryRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func declineRequest(requestID: Int) async throws -> SeerrRequest { throw Boom() }
         func deleteRequest(requestID: Int) async throws {
             if throwOnDelete { throw Boom() }

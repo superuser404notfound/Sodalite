@@ -8,7 +8,32 @@ struct ServerAddressEntryView: View {
     var addMode: Bool = false
     var onCompletion: (() -> Void)? = nil
 
+    @FocusState private var addressFocused: Bool
+
     var body: some View {
+        screen
+            .onAppear {
+                if viewModel == nil {
+                    viewModel = ServerAddressEntryViewModel(
+                        discoveryService: dependencies.serverDiscoveryService,
+                        trustStore: dependencies.serverTrustStore
+                    )
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var screen: some View {
+        #if os(iOS)
+        touchScreen
+        #elseif os(tvOS)
+        tvScreen
+        #else
+        focusScreen
+        #endif
+    }
+
+    private var focusScreen: some View {
         VStack(spacing: 40) {
             Spacer()
 
@@ -37,8 +62,7 @@ struct ServerAddressEntryView: View {
                         // Unguarded: both modifiers exist on tvOS (15.0 / 13.0), and without them
                         // the on-screen keyboard keeps UIKit's .sentences default and opens on
                         // shift, which is wrong for every address and credential field we have.
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
+                        .verbatimTextEntry(.url)
 
                     if let error = vm.errorMessage {
                         Text(error)
@@ -72,33 +96,120 @@ struct ServerAddressEntryView: View {
                     }
                 }
                 .frame(maxWidth: 500)
-                .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
-                    CertificateTrustSheet(
-                        pending: pending,
-                        serverAddress: vm.serverAddress,
-                        onTrust: { Task { await vm.trustPendingCertificate() } },
-                        onCancel: { vm.pendingTrust = nil }
-                    )
-                }
-                .navigationDestination(isPresented: Bindable(vm).showLogin) {
-                    if let server = vm.discoveredServer {
-                        UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
-                            .themedNavigationDestination()
-                    }
-                }
+                .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
             }
 
             Spacer()
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            if viewModel == nil {
-                viewModel = ServerAddressEntryViewModel(
-                    discoveryService: dependencies.serverDiscoveryService,
-                    trustStore: dependencies.serverTrustStore
-                )
+    }
+
+    #if os(iOS)
+    private var canConnect: Bool {
+        guard let vm = viewModel else { return false }
+        return !vm.isLoading && !vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var touchScreen: some View {
+        OnboardingScaffold(
+            title: Text("auth.server.title"),
+            subtitle: Text("auth.server.subtitle")
+        ) {
+            if let vm = viewModel {
+                OnboardingCard {
+                    HStack(spacing: 12) {
+                        Image(systemName: "globe")
+                            .foregroundStyle(.tint)
+                            .frame(width: 26)
+                        TextField(String(localized: "auth.server.placeholder"), text: Bindable(vm).serverAddress)
+                            .autocorrectionDisabled()
+                            .verbatimTextEntry(.url)
+                            .submitLabel(.go)
+                            .focused($addressFocused)
+                            .onSubmit {
+                                guard canConnect else { return }
+                                Task { await vm.connectToServer() }
+                            }
+                    }
+                    .padding(16)
+                }
+                .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
+
+                if let error = vm.errorMessage {
+                    OnboardingFootnote(text: Text(verbatim: error), isError: true)
+                    DiagnosticLogLink(style: .inline)
+                }
+            }
+        } actions: {
+            OnboardingPrimaryButton(title: "auth.server.connect", isLoading: viewModel?.isLoading ?? false) {
+                guard let vm = viewModel else { return }
+                Task { await vm.connectToServer() }
+            }
+            .disabled(!canConnect && viewModel?.isLoading != true)
+        }
+        .onAppear { addressFocused = true }
+    }
+    #endif
+
+    #if os(tvOS)
+    private var tvScreen: some View {
+        TVOnboardingLayout(
+            title: Text("auth.server.title"),
+            subtitle: Text("auth.server.subtitle")
+        ) {
+            if let vm = viewModel {
+                TextField(String(localized: "auth.server.placeholder"), text: Bindable(vm).serverAddress)
+                    .autocorrectionDisabled()
+                    .verbatimTextEntry(.url)
+                    .submitLabel(.go)
+                    .onSubmit {
+                        guard !vm.isLoading, !vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                        Task { await vm.connectToServer() }
+                    }
+                    .modifier(TrustAndLoginDestination(vm: vm, addMode: addMode, onCompletion: onCompletion))
+
+                if let error = vm.errorMessage {
+                    TVOnboardingFootnote(text: Text(verbatim: error), isError: true)
+                }
+
+                TVOnboardingPrimaryButton(title: "auth.server.connect", isLoading: vm.isLoading) {
+                    Task { await vm.connectToServer() }
+                }
+                .disabled(vm.isLoading || vm.serverAddress.trimmingCharacters(in: .whitespaces).isEmpty)
+                .padding(.top, 8)
+
+                if vm.errorMessage != nil {
+                    DiagnosticLogLink(style: .inline)
+                }
             }
         }
+    }
+    #endif
+}
+
+/// The certificate question and the step to the user picker, which every variant of the screen
+/// answers the same way (ASD-R202).
+private struct TrustAndLoginDestination: ViewModifier {
+    let vm: ServerAddressEntryViewModel
+    let addMode: Bool
+    let onCompletion: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        content
+            .menuPresentation(item: Bindable(vm).pendingTrust) { pending in
+                CertificateTrustSheet(
+                    pending: pending,
+                    serverAddress: vm.serverAddress,
+                    onTrust: { Task { await vm.trustPendingCertificate() } },
+                    onCancel: { vm.pendingTrust = nil }
+                )
+            }
+            .navigationDestination(isPresented: Bindable(vm).showLogin) {
+                if let server = vm.discoveredServer {
+                    UserPickerView(server: server, addMode: addMode, onCompletion: onCompletion)
+                        .themedNavigationDestination()
+                }
+            }
     }
 }

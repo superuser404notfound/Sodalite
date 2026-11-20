@@ -14,20 +14,36 @@ import Foundation
 /// it is the default the client plays" (`BaseItem.GetMediaSources`), but which file became the item
 /// is an accident of which one the scanner met first, not a statement about quality. On a 4K Apple
 /// TV, a merged 4K version that only plays after a detour through a menu is a 4K version nobody
-/// watches.
+/// watches. A profile that orders its versions on the server on purpose (a language first) can
+/// switch this to the server's order in Settings, and then the page stands on the server's first.
 struct VersionSelection: Equatable {
     private var targetID: String?
     private var chosenID: String?
+    var order: VersionOrder = .quality
 
-    /// The id playback must prefer: the pick while it still holds, the best version otherwise. Nil
+    init(order: VersionOrder = .quality) {
+        self.order = order
+    }
+
+    /// The same pick under another order: the views keep the pick in state and take the order from
+    /// the profile on every read, so a changed setting needs no sync step.
+    func ordered(_ order: VersionOrder) -> VersionSelection {
+        var copy = self
+        copy.order = order
+        return copy
+    }
+
+    /// The id playback must prefer: the pick while it still holds, the first version in `order` otherwise. Nil
     /// only where there is nothing to choose, so a single-source item keeps the exact path it had
     /// before any of this existed.
     func preferredSourceID(for item: JellyfinItem?) -> String? {
-        guard let item, let sources = item.mediaSources, sources.count > 1 else { return nil }
+        guard let item else { return nil }
+        let sources = item.selectableMediaSources
+        guard sources.count > 1 else { return nil }
         if targetID == item.id, let chosenID, sources.contains(where: { $0.id == chosenID }) {
             return chosenID
         }
-        return sources.rankedByQuality().first?.id
+        return sources.ordered(order).first?.id
     }
 
     /// The source the page describes, which is by construction the one Play starts.
@@ -36,13 +52,29 @@ struct VersionSelection: Equatable {
     }
 
     mutating func choose(_ source: MediaSource, for item: JellyfinItem) {
-        targetID = item.id
-        chosenID = source.id
+        choose(sourceID: source.id, forItemID: item.id)
     }
 
-    /// Two sources are what makes a choice; one, or a slim item whose query never asked for
-    /// `MediaSources`, gets no button.
+    /// The pick by ids, for a page that opens on a version chosen elsewhere (Sodalite#240).
+    mutating func choose(sourceID: String, forItemID itemID: String) {
+        targetID = itemID
+        chosenID = sourceID
+    }
+
+    /// Whether the version pill keeps its label at rest. On tvOS it collapses with the rest of the
+    /// row and opens on focus (Sodalite#172); a touch screen has no focus to open it on, so there it
+    /// would never say which version is in force (Sodalite#139).
+    static var labelStaysOpen: Bool {
+        #if os(tvOS)
+        false
+        #else
+        true
+        #endif
+    }
+
+    /// Two sources are what makes a choice; one, a slim item whose query never asked for
+    /// `MediaSources`, or one still carrying placeholders, gets no button.
     static func isOffered(for item: JellyfinItem) -> Bool {
-        (item.mediaSources?.count ?? 0) > 1
+        item.selectableMediaSources.count > 1
     }
 }

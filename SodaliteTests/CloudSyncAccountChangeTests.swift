@@ -75,6 +75,25 @@ struct CloudSyncAccountChangeTests {
         #expect(prefs.drainPendingChanges().saves == [CloudSyncRecordName.settings(.seerrNotifications)])
     }
 
+    /// Audit 2026-11-17 SYNC-202: the stamp and the outbox entry used to wait two seconds behind a
+    /// debounce. An app killed inside that window seeded its next snapshot from the edited store, and
+    /// the edit never went up. Nothing here waits for a timer, so a few turns of the run loop are all
+    /// it takes for the edit to be on disk.
+    @Test func anEditIsStampedAndQueuedWithoutWaitingForADebounce() async {
+        let (container, service, prefs) = setUp("noDebounce")
+        service.setEnabled(false)
+        _ = prefs.drainPendingChanges()
+        let name = CloudSyncRecordName.settings(.seerrNotifications)
+        let before = prefs.localStamp(for: name)
+
+        container.seerrNotificationPreferences.notifyPendingRequests.toggle()
+        for _ in 0..<10 { await Task.yield() }
+
+        #expect(prefs.localStamp(for: name) != before)
+        #expect(prefs.drainPendingChanges().saves == [name])
+        withExtendedLifetime(container) {}
+    }
+
     /// The log after the settings fix still showed one server record going up on every launch: the
     /// restore re-saves the server and its profile, and every save marked the record.
     @Test func aRestoreThatChangesNothingDoesNotUploadTheServer() throws {

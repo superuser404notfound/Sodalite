@@ -92,11 +92,10 @@ struct PosterBadgeStoreTests {
         }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private func store(_ library: LibraryFake, enabled: Bool = true) -> PosterBadgeStore {
-        PosterBadgeStore(library: library, isEnabled: { enabled })
+        PosterBadgeStore(route: { _ in (library, "u1") }, isEnabled: { enabled })
     }
 
     // MARK: - The free half
@@ -128,6 +127,18 @@ struct PosterBadgeStoreTests {
         #expect(library.queries.count == 1)
         #expect(library.queries.first?.ids == ["m1", "m2", "m3"])
         #expect(library.queries.first?.fields == "MediaStreams")
+    }
+
+    @Test("the same title twice in one pass is asked once and does not trap (Sodalite#86)")
+    func duplicateItemsAreAskedOnce() async throws {
+        let library = LibraryFake()
+        library.respond = { _ in try Self.response(ids: ["m1"]) }
+        let store = store(library)
+
+        await store.enrich(userID: "u1", [try Self.item(id: "m1", type: "Movie"),
+                            try Self.item(id: "m1", type: "Movie")])
+
+        #expect(library.queries.first?.ids == ["m1"])
     }
 
     @Test("a grid full of movies is split so no single URL carries every id")

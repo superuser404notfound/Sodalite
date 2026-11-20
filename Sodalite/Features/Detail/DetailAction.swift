@@ -20,6 +20,8 @@ enum DetailAction: Hashable {
     case trailer
     case favorite
     case watched
+    case rating
+    case traktWatchlist
     case spoiler
     case goToShow
     case request

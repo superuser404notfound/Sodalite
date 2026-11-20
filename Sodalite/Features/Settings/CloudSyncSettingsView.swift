@@ -122,7 +122,6 @@ struct CloudSyncSettingsView: View {
                 Text(statusText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(3)
             }
             Spacer()
         }
@@ -187,7 +186,6 @@ struct CloudSyncSettingsView: View {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
                 }
                 Spacer()
             }

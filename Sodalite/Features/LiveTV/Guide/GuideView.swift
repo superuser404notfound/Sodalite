@@ -1,3 +1,6 @@
+#if !os(macOS)
+// The guide canvas is a UICollectionView (GuideGridContainer). The Mac shows
+// ChannelListView instead, which is the same answer the phone gets for the same reason.
 import SwiftUI
 
 /// Bundles channel and program so the action cover receives both atomically. With two separate
@@ -44,6 +47,12 @@ struct GuideView: View {
 
     @Environment(\.shellPaysLeadingInset) private var shellPaysLeading
 
+    private func watchLive(_ context: LivePlaybackContext) {
+        var stamped = context
+        stamped.zapFilter = model.filter.zapLineup
+        onWatchLive?(stamped)
+    }
+
     var body: some View {
         content
             .task { await model.load() }
@@ -52,7 +61,7 @@ struct GuideView: View {
             .detailCover(item: $selection) { selected in
                 ProgramInfoPopover(
                     program: selected.program, channel: selected.channel, tint: tint,
-                    onWatchLive: onWatchLive,
+                    onWatchLive: onWatchLive == nil ? nil : { watchLive($0) },
                     channelIsFavorite: model.timers.isFavorite(selected.channel.id),
                     onToggleFavorite: { model.timers.toggleFavorite(channelID: selected.channel.id) },
                     hasTimer: model.timers.effectiveTimerState(for: selected.program).timerId != nil,
@@ -113,7 +122,7 @@ struct GuideView: View {
     @ViewBuilder
     private var canvas: some View {
         if model.channels.isEmpty {
-            if model.channelsComplete {
+            if model.channelsComplete && !model.genres.isResolving && !model.categories.isResolving {
                 // A filter or a search that matched nothing, not a failure. Naming the cause beats
                 // an empty grid that reads as a broken server, and the chips stay reachable above.
                 ContentUnavailableView("livetv.guide.empty.filtered",
@@ -121,7 +130,7 @@ struct GuideView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 // Still fetching. isLoadingChannels is not the test: it stays false while the
-                // guide-info and radio probes run ahead of the first channel page.
+                // guide-info request runs ahead of the first channel page.
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -137,7 +146,7 @@ struct GuideView: View {
                 onPlayChannel: { channel, program in
                     // LivePlaybackContext.program is optional: a channel with no EPG data simply
                     // launches without program metadata.
-                    onWatchLive?(LivePlaybackContext(channel: channel, program: program))
+                    watchLive(LivePlaybackContext(channel: channel, program: program))
                 },
                 onToggleFavorite: { channel in
                     model.timers.toggleFavorite(channelID: channel.id)
@@ -151,3 +160,4 @@ struct GuideView: View {
         }
     }
 }
+#endif

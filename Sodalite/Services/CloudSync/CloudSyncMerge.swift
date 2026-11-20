@@ -144,11 +144,16 @@ enum CloudSyncMerge {
     /// Sodalite#46. Union by scope key, newest entry per key wins. Eviction deliberately
     /// does not propagate: an evicted entry coming back from the cloud is less harmful
     /// than a lost selection. The cap is re-applied so both devices converge on one set.
+    /// Field-wise on the subtitle offset: a 1.0 device rewrites a movie's entry without the field, and
+    /// the newer entry must not erase an offset set on a newer build (audit SYNC-205).
     static func unionTrackMemory(local: TrackMemoryPayload, cloud: TrackMemoryPayload) -> TrackMemoryPayload {
         var byKey = local.entries
         for (key, entry) in cloud.entries {
-            if let existing = byKey[key], existing.updatedAt >= entry.updatedAt { continue }
-            byKey[key] = entry
+            guard let existing = byKey[key] else { byKey[key] = entry; continue }
+            var winner = existing.updatedAt >= entry.updatedAt ? existing : entry
+            let loser = existing.updatedAt >= entry.updatedAt ? entry : existing
+            if winner.subtitleOffset == nil { winner.subtitleOffset = loser.subtitleOffset }
+            byKey[key] = winner
         }
         return TrackMemoryPayload(
             updatedAt: max(local.updatedAt, cloud.updatedAt),
@@ -159,16 +164,25 @@ enum CloudSyncMerge {
     /// Sodalite#50. Union by reveal key, later reveal wins. Same shape as unionTrackMemory:
     /// eviction deliberately does not propagate, and the cap is re-applied so both devices
     /// converge on one set.
+    /// Sodalite#222: the hides union the same way, so a hide and a reveal on two devices both
+    /// survive and the newer one decides.
     static func unionSpoilerReveals(local: SpoilerRevealPayload, cloud: SpoilerRevealPayload) -> SpoilerRevealPayload {
-        var byKey = local.entries
-        for (key, revealedAt) in cloud.entries {
-            if let existing = byKey[key], existing >= revealedAt { continue }
-            byKey[key] = revealedAt
-        }
+        let entries = SpoilerRevealMemory.capped(newestPerKey(local.entries, cloud.entries))
+        let hidden = newestPerKey(local.hiddenAt ?? [:], cloud.hiddenAt ?? [:])
         return SpoilerRevealPayload(
             updatedAt: max(local.updatedAt, cloud.updatedAt),
-            entries: SpoilerRevealMemory.capped(byKey)
+            entries: entries,
+            hiddenAt: SpoilerRevealMemory.prunedHides(hidden, entries: entries)
         )
+    }
+
+    private static func newestPerKey(_ local: [String: Date], _ cloud: [String: Date]) -> [String: Date] {
+        var byKey = local
+        for (key, date) in cloud {
+            if let existing = byKey[key], existing >= date { continue }
+            byKey[key] = date
+        }
+        return byKey
     }
 
     /// Sodalite#50 follow-up. Per key, newest entry wins, `standard` included: the tombstone has to

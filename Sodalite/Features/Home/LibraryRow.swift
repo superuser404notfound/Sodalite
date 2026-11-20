@@ -3,7 +3,11 @@ import SwiftUI
 /// "My Media" row: one tile per video library, opening it in the shared FilteredGridView.
 struct LibraryRow: View {
     let titleKey: LocalizedStringKey
+    /// A heading the user typed, shown as is instead of `titleKey`.
+    var verbatimTitle: String? = nil
     let libraries: [JellyfinLibrary]
+    /// A suffix for the tile name, the server's when two servers share a library name (Sodalite#85).
+    var label: (JellyfinLibrary) -> String? = { _ in nil }
     let onSelect: (JellyfinLibrary) -> Void
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -12,7 +16,7 @@ struct LibraryRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(titleKey)
+            (verbatimTitle.map { Text(verbatim: $0) } ?? Text(titleKey))
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.leading, metrics.rowLeading(shellPaysLeading: shellPaysLeading))
@@ -24,8 +28,8 @@ struct LibraryRow: View {
                 vertical: metrics.rowVerticalPadding
             ) {
                 LazyHStack(spacing: metrics.itemSpacing) {
-                    ForEach(libraries) { library in
-                        LibraryTile(library: library) {
+                    ForEach(libraries, id: \.originKey) { library in
+                        LibraryTile(library: library, label: label(library)) {
                             onSelect(library)
                         }
                     }
@@ -38,7 +42,11 @@ struct LibraryRow: View {
 
 private struct LibraryTile: View {
     let library: JellyfinLibrary
+    let label: String?
     let action: () -> Void
+
+    /// The server is in the corner badge, so the name stays the library's own.
+    private var name: String { library.name }
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -58,9 +66,10 @@ private struct LibraryTile: View {
 
     var body: some View {
         ArtworkTile(
-            title: drawsNameOverArtwork ? library.name : nil,
+            title: drawsNameOverArtwork ? name : nil,
             artworkURL: dependencies.jellyfinImageService.libraryArtworkURL(for: library),
             size: size,
+            serverBadge: label,
             action: action
         ) {
             ZStack {
@@ -68,7 +77,7 @@ private struct LibraryTile: View {
 
                 // The icon sits in the corner rather than above the name, which on a compact tile
                 // would overlap it.
-                Image(systemName: symbol(for: library.libraryType))
+                Image(systemName: symbol(for: library))
                     .font(.system(size: size.height * 0.22))
                     .foregroundStyle(.tint)
                     .padding(20)
@@ -77,15 +86,20 @@ private struct LibraryTile: View {
                 // Only when the tile above is unlabelled, else ArtworkTile draws a second copy of
                 // the name right on top of this one.
                 if !drawsNameOverArtwork {
-                    ArtworkTileLabel(title: library.name)
+                    ArtworkTileLabel(title: name)
                 }
             }
         }
-        .accessibilityLabel(library.name)
+        .accessibilityLabel([library.name, label].compactMap { $0 }.joined(separator: ", "))
     }
 
-    private func symbol(for type: LibraryType) -> String {
-        switch type {
+    private func symbol(for library: JellyfinLibrary) -> String {
+        switch MyMediaLibraries.aggregateType(library) {
+        case .movie: return HomeRowType.allMovies.systemImage
+        case .series: return HomeRowType.allSeries.systemImage
+        default: break
+        }
+        return switch library.libraryType {
         case .movies: "film"
         case .tvshows: "tv"
         case .homevideos: "video"

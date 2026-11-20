@@ -1,0 +1,147 @@
+import Foundation
+import Observation
+
+/// Every Jellyfin session the app holds at once: the active one plus, in a combined Home, up to
+/// four more (Sodalite#85). Mode off leaves `participants == [active]`.
+@MainActor
+@Observable
+final class ServerSessionRegistry {
+    let active: ServerSession
+    private(set) var participants: [ServerSession]
+    private(set) var participantsRevision: UInt64 = 0
+    /// Bumped when a secondary moves to another address, which can turn an unreachable server into a
+    /// reachable one without any participant changing.
+    private(set) var routesRevision: UInt64 = 0
+
+    @ObservationIgnored private let httpClient: HTTPClientProtocol
+    @ObservationIgnored private var secondaries: [String: (session: ServerSession, credential: SessionCredential)] = [:]
+    /// The credential each muted server refused. Keyed by credential, not just server, so signing
+    /// in again brings the server back at once instead of at the next launch.
+    @ObservationIgnored private var muted: [String: SessionCredential] = [:]
+    @ObservationIgnored private var lastSignature: [String] = []
+    /// Fires when a session joins, leaves, rotates its token or moves address: the container
+    /// mirrors the secondaries to the Top Shelf off it (Sodalite#218).
+    @ObservationIgnored var onSessionsChanged: (() -> Void)?
+    /// Real transport: a secondary built from here on waits for its LAN address to prove itself
+    /// before it sends its token (audit NET-201).
+    @ObservationIgnored var verifiesServerIdentity = false
+
+    init(
+        activeClient: JellyfinClient,
+        httpClient: HTTPClientProtocol,
+        libraryService: JellyfinLibraryServiceProtocol? = nil,
+        itemService: JellyfinItemServiceProtocol? = nil,
+        playbackService: JellyfinPlaybackServiceProtocol? = nil,
+        liveTvService: JellyfinLiveTvServiceProtocol? = nil,
+        musicService: JellyfinMusicServiceProtocol? = nil
+    ) {
+        self.httpClient = httpClient
+        let activeLibraryService = libraryService ?? JellyfinLibraryService(client: activeClient)
+        let active = ServerSession(
+            client: activeClient,
+            libraryService: activeLibraryService,
+            itemService: itemService ?? JellyfinItemService(client: activeClient),
+            playbackService: playbackService ?? JellyfinPlaybackService(client: activeClient),
+            liveTvService: liveTvService ?? JellyfinLiveTvService(client: activeClient),
+            musicService: musicService ?? JellyfinMusicService(client: activeClient, libraryService: activeLibraryService),
+            isActive: true,
+            server: nil,
+            userID: ""
+        )
+        self.active = active
+        self.participants = [active]
+    }
+
+    func apply(
+        active activeIdentity: (server: JellyfinServer, userID: String)?,
+        secondaries candidates: [ParticipantCandidate],
+        baseURL: (JellyfinServer) -> URL
+    ) {
+        active.updateActive(server: activeIdentity?.server, userID: activeIdentity?.userID ?? "")
+        let wanted = candidates.filter { muted[$0.server.id] != $0.credential }
+        var next: [String: (session: ServerSession, credential: SessionCredential)] = [:]
+        for candidate in wanted {
+            // A changed address or name builds a fresh session, so its client and route follow.
+            if let existing = secondaries[candidate.server.id], existing.credential == candidate.credential,
+               existing.session.server == candidate.server {
+                next[candidate.server.id] = existing
+            } else {
+                next[candidate.server.id] = (
+                    ServerSession.secondary(
+                        candidate, baseURL: baseURL(candidate.server), httpClient: httpClient,
+                        routeGate: verifiesServerIdentity ? RouteGate(isEnforced: true) : nil
+                    ),
+                    candidate.credential
+                )
+            }
+        }
+        secondaries = next
+        participants = [active] + wanted.compactMap { next[$0.server.id]?.session }
+        noteParticipantsChanged()
+    }
+
+    /// A secondary that refused its token sits out until it has a new one; a re-auth prompt for a
+    /// server nobody is looking at would be worse than its rows going missing.
+    func mute(serverID: String) {
+        guard let credential = secondaries[serverID]?.credential, muted[serverID] != credential else { return }
+        muted[serverID] = credential
+        LogTap.shared.note("[sessions] secondary \(serverID.prefix(8)) refused its token, left out until it signs in again")
+        secondaries[serverID] = nil
+        participants.removeAll { !$0.isActive && $0.server?.id == serverID }
+        noteParticipantsChanged()
+    }
+
+    func session(forServerID serverID: String?) -> ServerSession {
+        guard let serverID, serverID != active.server?.id else { return active }
+        return secondaries[serverID]?.session ?? active
+    }
+
+    /// The session of a server that takes part right now, nil for one that left a combined setup.
+    /// For a write that resolves its session late: `session(forServerID:)` would hand it to the
+    /// active account instead (audit LTM-201).
+    func resolve(serverID: String?) -> ServerSession? {
+        guard let serverID, serverID != active.server?.id else { return active }
+        return secondaries[serverID]?.session
+    }
+
+    func session(for item: JellyfinItem) -> ServerSession { session(forServerID: item.serverID) }
+
+    /// The secondary session of a server, nil for the active one and for a server not taking part,
+    /// where `session(forServerID:)` would fall back to the active one.
+    func secondary(serverID: String) -> ServerSession? { secondaries[serverID]?.session }
+
+    func endpoint(forServerID serverID: String?) -> (baseURL: URL, token: String?)? {
+        let client = session(forServerID: serverID).client
+        guard let base = client.baseURL else { return nil }
+        return (base, client.verifiedAccessToken)
+    }
+
+    func updateRoute(_ url: URL, for session: ServerSession) {
+        guard session.client.baseURL != url else { return }
+        session.client.baseURL = url
+        routesRevision &+= 1
+        onSessionsChanged?()
+    }
+
+    /// The secondaries as the Top Shelf extension reads them, nil while no profile is active.
+    var shelfParticipants: ShelfParticipants? {
+        guard !active.userID.isEmpty else { return nil }
+        let members = participants.filter { !$0.isActive }.compactMap { session -> ShelfParticipants.Member? in
+            guard let serverID = session.server?.id,
+                  let url = session.client.verifiedBaseURL,
+                  let token = session.client.accessToken
+            else { return nil }
+            return ShelfParticipants.Member(serverID: serverID, serverURL: url.absoluteString,
+                                            userID: session.userID, accessToken: token)
+        }
+        return ShelfParticipants(activeUserID: active.userID, secondaries: members)
+    }
+
+    private func noteParticipantsChanged() {
+        let signature = participants.map { "\($0.server?.id ?? "")|\($0.userID)|\($0.client.accessToken ?? "")" }
+        guard signature != lastSignature else { return }
+        lastSignature = signature
+        participantsRevision &+= 1
+        onSessionsChanged?()
+    }
+}

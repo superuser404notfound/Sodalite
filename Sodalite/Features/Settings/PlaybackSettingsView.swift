@@ -19,184 +19,6 @@ struct PlaybackSettingsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
 
-                sectionHeader("settings.playback.section.episodes")
-
-                boolRow(
-                    icon: "play.square.stack",
-                    title: "settings.playback.autoplayNextEp",
-                    subtitle: "settings.playback.autoplayNextEp.subtitle",
-                    value: Binding(
-                        get: { prefs.autoplayNextEpisode },
-                        set: { prefs.autoplayNextEpisode = $0 }
-                    )
-                )
-
-                // Off plays the episode out (credits, post-credit scenes) and switches at its real end
-                // instead of counting down over the outro (Sodalite#67). Inert without autoplay, so it
-                // greys out with it rather than offering a switch that cannot do anything.
-                // Off is a value here, never "0 s" (Sodalite#133): a zero-second countdown on the credits
-                // anchor would be an instant jump, and that is what auto-skip outro below already offers.
-                ValuePickerRow(
-                    icon: "timer",
-                    title: "settings.playback.autoplayCountdown",
-                    subtitle: "settings.playback.autoplayCountdown.subtitle",
-                    options: PlaybackPreferences.nextEpisodeCountdownChoices,
-                    selection: Binding(
-                        get: { prefs.nextEpisodeCountdownLength },
-                        set: { prefs.nextEpisodeCountdownLength = $0 }
-                    ),
-                    label: { seconds in
-                        seconds == 0
-                            ? String(localized: "settings.playback.off", defaultValue: "Off")
-                            : "\(seconds) s"
-                    }
-                )
-                .disabled(!prefs.autoplayNextEpisode)
-                .opacity(prefs.autoplayNextEpisode ? 1 : 0.4)
-
-                // Where that countdown sits (Sodalite#133). Greys out with the countdown itself: without
-                // one there is no placement to make, the switch is at the end of the episode either way.
-                ValuePickerRow(
-                    icon: "arrow.right.to.line",
-                    title: "settings.playback.countdownAnchor",
-                    subtitle: "settings.playback.countdownAnchor.subtitle",
-                    options: NextEpisodePolicy.CountdownAnchor.allCases,
-                    selection: Binding(
-                        get: { prefs.nextEpisodeCountdownAnchor },
-                        set: { prefs.nextEpisodeCountdownAnchor = $0 }
-                    ),
-                    label: { anchor in
-                        switch anchor {
-                        case .outro:
-                            String(localized: "settings.playback.countdownAnchor.outro",
-                                   defaultValue: "At the Credits")
-                        case .end:
-                            String(localized: "settings.playback.countdownAnchor.end",
-                                   defaultValue: "At the End")
-                        }
-                    }
-                )
-                .disabled(!prefs.autoplayNextEpisode || prefs.nextEpisodeCountdownLength == 0)
-                .opacity(prefs.autoplayNextEpisode && prefs.nextEpisodeCountdownLength > 0 ? 1 : 0.4)
-
-                boolRow(
-                    icon: "forward.end.fill",
-                    title: "settings.playback.autoSkipIntro",
-                    subtitle: "settings.playback.autoSkipIntro.subtitle",
-                    value: Binding(
-                        get: { prefs.autoSkipIntro },
-                        set: { prefs.autoSkipIntro = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "forward.frame.fill",
-                    title: "settings.playback.autoSkipRecap",
-                    subtitle: "settings.playback.autoSkipRecap.subtitle",
-                    value: Binding(
-                        get: { prefs.autoSkipRecap },
-                        set: { prefs.autoSkipRecap = $0 }
-                    )
-                )
-
-                boolRow(
-                    icon: "forward.end.alt.fill",
-                    title: "settings.playback.autoSkipOutro",
-                    subtitle: "settings.playback.autoSkipOutro.subtitle",
-                    value: Binding(
-                        get: { prefs.autoSkipOutro },
-                        set: { prefs.autoSkipOutro = $0 }
-                    )
-                )
-
-                sectionHeader("settings.playback.section.controls")
-
-                ValuePickerRow(
-                    icon: "goforward",
-                    title: "settings.playback.skipForward",
-                    subtitle: "settings.playback.skipForward.subtitle",
-                    options: PlaybackPreferences.skipIntervalChoices,
-                    selection: Binding(
-                        get: { prefs.skipForwardSeconds },
-                        set: { prefs.skipForwardSeconds = $0 }
-                    ),
-                    label: { seconds in "\(seconds) s" }
-                )
-
-                ValuePickerRow(
-                    icon: "gobackward",
-                    title: "settings.playback.skipBackward",
-                    subtitle: "settings.playback.skipBackward.subtitle",
-                    options: PlaybackPreferences.skipIntervalChoices,
-                    selection: Binding(
-                        get: { prefs.skipBackwardSeconds },
-                        set: { prefs.skipBackwardSeconds = $0 }
-                    ),
-                    label: { seconds in "\(seconds) s" }
-                )
-
-                #if os(tvOS)
-                boolRow(
-                    icon: "hand.draw",
-                    title: "settings.playback.touchpadScrubbing",
-                    subtitle: "settings.playback.touchpadScrubbing.subtitle",
-                    value: Binding(
-                        get: { prefs.touchpadScrubbing },
-                        set: { prefs.touchpadScrubbing = $0 }
-                    )
-                )
-                #endif
-
-                boolRow(
-                    icon: "rectangle.center.inset.filled.badge.plus",
-                    title: "settings.playback.scrubPreview",
-                    subtitle: "settings.playback.scrubPreview.subtitle",
-                    value: Binding(
-                        get: { prefs.showScrubPreview },
-                        set: { prefs.showScrubPreview = $0 }
-                    )
-                )
-
-                if prefs.showScrubPreview {
-                    boolRow(
-                        icon: "square.grid.3x3.fill",
-                        title: "settings.playback.serverTrickplay",
-                        subtitle: "settings.playback.serverTrickplay.subtitle",
-                        value: Binding(
-                            get: { prefs.preferServerTrickplay },
-                            set: { prefs.preferServerTrickplay = $0 }
-                        )
-                    )
-                }
-
-                sectionHeader("settings.playback.section.streaming")
-
-                ValuePickerRow(
-                    icon: "arrow.down.circle",
-                    title: "settings.playback.buffer",
-                    subtitle: "settings.playback.buffer.subtitle",
-                    options: PlaybackPreferences.NetworkBufferDepth.allCases,
-                    selection: Binding(
-                        get: { prefs.networkBufferDepth },
-                        set: { prefs.networkBufferDepth = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-                .settingsValueScope(.device)
-
-                ValuePickerRow(
-                    icon: "backward.circle",
-                    title: "settings.playback.liveBuffer",
-                    subtitle: "settings.playback.liveBuffer.subtitle",
-                    options: PlaybackPreferences.LiveBufferDepth.allCases,
-                    selection: Binding(
-                        get: { prefs.liveBufferDepth },
-                        set: { prefs.liveBufferDepth = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-                .settingsValueScope(.device)
-
                 sectionHeader("settings.playback.section.languages")
 
                 languageRow(
@@ -242,16 +64,6 @@ struct PlaybackSettingsView: View {
                 )
 
                 boolRow(
-                    icon: "gobackward",
-                    title: "settings.playback.subtitlesOnSkipBack",
-                    subtitle: "settings.playback.subtitlesOnSkipBack.subtitle",
-                    value: Binding(
-                        get: { prefs.subtitlesOnSkipBack },
-                        set: { prefs.subtitlesOnSkipBack = $0 }
-                    )
-                )
-
-                boolRow(
                     icon: "bookmark",
                     title: "settings.playback.rememberTracks",
                     subtitle: "settings.playback.rememberTracks.subtitle",
@@ -261,16 +73,234 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
-                sectionHeader("settings.playback.section.subtitleStyle")
+                sectionHeader("settings.playback.section.episodes")
 
                 boolRow(
-                    icon: "wand.and.stars",
-                    title: "settings.playback.subtitle.styledASS",
-                    subtitle: "settings.playback.subtitle.styledASS.subtitle",
+                    icon: "play.square.stack",
+                    title: "settings.playback.autoplayNextEp",
+                    subtitle: "settings.playback.autoplayNextEp.subtitle",
                     value: Binding(
-                        get: { prefs.styledASSSubtitles },
-                        set: { prefs.styledASSSubtitles = $0 }
+                        get: { prefs.autoplayNextEpisode },
+                        set: { prefs.autoplayNextEpisode = $0 }
                     )
+                )
+
+                // Off never shows the card: autoplay then switches at the real end, without autoplay
+                // the player closes there. The countdown below lives on the card, so it greys out too.
+                boolRow(
+                    icon: "rectangle.on.rectangle",
+                    title: "settings.playback.nextEpisodeCard",
+                    subtitle: "settings.playback.nextEpisodeCard.subtitle",
+                    value: Binding(
+                        get: { prefs.showNextEpisodeCard },
+                        set: { prefs.showNextEpisodeCard = $0 }
+                    )
+                )
+
+                // Off plays the episode out (credits, post-credit scenes) and switches at its real end
+                // instead of counting down over the outro (Sodalite#67). Inert without autoplay, so it
+                // greys out with it rather than offering a switch that cannot do anything.
+                // Off is a value here, never "0 s" (Sodalite#133): a zero-second countdown on the credits
+                // anchor would be an instant jump, and that is what auto-skip outro below already offers.
+                ValuePickerRow(
+                    icon: "timer",
+                    title: "settings.playback.autoplayCountdown",
+                    subtitle: "settings.playback.autoplayCountdown.subtitle",
+                    options: PlaybackPreferences.nextEpisodeCountdownChoices,
+                    selection: Binding(
+                        get: { prefs.nextEpisodeCountdownLength },
+                        set: { prefs.nextEpisodeCountdownLength = $0 }
+                    ),
+                    label: { seconds in
+                        seconds == 0
+                            ? String(localized: "settings.playback.off", defaultValue: "Off")
+                            : "\(seconds) s"
+                    }
+                )
+                .disabled(!countdownApplies)
+                .opacity(countdownApplies ? 1 : 0.4)
+
+                // Where that countdown sits (Sodalite#133). Greys out with the countdown itself: without
+                // one there is no placement to make, the switch is at the end of the episode either way.
+                ValuePickerRow(
+                    icon: "arrow.right.to.line",
+                    title: "settings.playback.countdownAnchor",
+                    subtitle: "settings.playback.countdownAnchor.subtitle",
+                    options: NextEpisodePolicy.CountdownAnchor.allCases,
+                    selection: Binding(
+                        get: { prefs.nextEpisodeCountdownAnchor },
+                        set: { prefs.nextEpisodeCountdownAnchor = $0 }
+                    ),
+                    label: { anchor in
+                        switch anchor {
+                        case .outro:
+                            String(localized: "settings.playback.countdownAnchor.outro",
+                                   defaultValue: "At the Credits")
+                        case .end:
+                            String(localized: "settings.playback.countdownAnchor.end",
+                                   defaultValue: "At the End")
+                        }
+                    }
+                )
+                .disabled(!countdownApplies || prefs.nextEpisodeCountdownLength == 0)
+                .opacity(countdownApplies && prefs.nextEpisodeCountdownLength > 0 ? 1 : 0.4)
+
+                boolRow(
+                    icon: "film.stack",
+                    title: "settings.playback.playPrerolls",
+                    subtitle: "settings.playback.playPrerolls.subtitle",
+                    value: Binding(
+                        get: { prefs.playPrerolls },
+                        set: { prefs.playPrerolls = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "forward.end.fill",
+                    title: "settings.playback.autoSkipIntro",
+                    subtitle: "settings.playback.autoSkipIntro.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSkipIntro },
+                        set: { prefs.autoSkipIntro = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "forward.frame.fill",
+                    title: "settings.playback.autoSkipRecap",
+                    subtitle: "settings.playback.autoSkipRecap.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSkipRecap },
+                        set: { prefs.autoSkipRecap = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "forward.end.alt.fill",
+                    title: "settings.playback.autoSkipOutro",
+                    subtitle: "settings.playback.autoSkipOutro.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSkipOutro },
+                        set: { prefs.autoSkipOutro = $0 }
+                    )
+                )
+
+                boolRow(
+                    icon: "forward.fill",
+                    title: "settings.playback.autoSkipCommercials",
+                    subtitle: "settings.playback.autoSkipCommercials.subtitle",
+                    value: Binding(
+                        get: { prefs.autoSkipCommercials },
+                        set: { prefs.autoSkipCommercials = $0 }
+                    )
+                )
+
+                sectionHeader("settings.playback.section.movies")
+
+                boolRow(
+                    icon: "star",
+                    title: "settings.playback.askForRating",
+                    subtitle: "settings.playback.askForRating.subtitle",
+                    value: Binding(
+                        get: { prefs.askForRatingAfterMovie },
+                        set: { prefs.askForRatingAfterMovie = $0 }
+                    )
+                )
+
+                sectionHeader("settings.playback.section.controls")
+
+                ValuePickerRow(
+                    icon: "goforward",
+                    title: "settings.playback.skipForward",
+                    subtitle: "settings.playback.skipForward.subtitle",
+                    options: PlaybackPreferences.skipIntervalChoices,
+                    selection: Binding(
+                        get: { prefs.skipForwardSeconds },
+                        set: { prefs.skipForwardSeconds = $0 }
+                    ),
+                    label: { seconds in "\(seconds) s" }
+                )
+
+                ValuePickerRow(
+                    icon: "gobackward",
+                    title: "settings.playback.skipBackward",
+                    subtitle: "settings.playback.skipBackward.subtitle",
+                    options: PlaybackPreferences.skipIntervalChoices,
+                    selection: Binding(
+                        get: { prefs.skipBackwardSeconds },
+                        set: { prefs.skipBackwardSeconds = $0 }
+                    ),
+                    label: { seconds in "\(seconds) s" }
+                )
+
+                boolRow(
+                    icon: "gobackward",
+                    title: "settings.playback.subtitlesOnSkipBack",
+                    subtitle: "settings.playback.subtitlesOnSkipBack.subtitle",
+                    value: Binding(
+                        get: { prefs.subtitlesOnSkipBack },
+                        set: { prefs.subtitlesOnSkipBack = $0 }
+                    )
+                )
+
+                #if os(tvOS)
+                boolRow(
+                    icon: "hand.draw",
+                    title: "settings.playback.touchpadScrubbing",
+                    subtitle: "settings.playback.touchpadScrubbing.subtitle",
+                    value: Binding(
+                        get: { prefs.touchpadScrubbing },
+                        set: { prefs.touchpadScrubbing = $0 }
+                    )
+                )
+                #endif
+
+                boolRow(
+                    icon: "rectangle.center.inset.filled.badge.plus",
+                    title: "settings.playback.scrubPreview",
+                    subtitle: "settings.playback.scrubPreview.subtitle",
+                    value: Binding(
+                        get: { prefs.showScrubPreview },
+                        set: { prefs.showScrubPreview = $0 }
+                    )
+                )
+
+                if prefs.showScrubPreview {
+                    boolRow(
+                        icon: "square.grid.3x3.fill",
+                        title: "settings.playback.serverTrickplay",
+                        subtitle: "settings.playback.serverTrickplay.subtitle",
+                        value: Binding(
+                            get: { prefs.preferServerTrickplay },
+                            set: { prefs.preferServerTrickplay = $0 }
+                        )
+                    )
+                }
+
+                sectionHeader("settings.playback.section.subtitleStyle")
+
+                ValuePickerRow(
+                    icon: "textformat",
+                    title: "settings.playback.subtitle.font",
+                    subtitle: "settings.playback.subtitle.font.subtitle",
+                    options: PlaybackPreferences.SubtitleFont.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleFont },
+                        set: { prefs.subtitleFont = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "bold",
+                    title: "settings.playback.subtitle.weight",
+                    subtitle: "settings.playback.subtitle.weight.subtitle",
+                    options: PlaybackPreferences.SubtitleWeight.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleWeight },
+                        set: { prefs.subtitleWeight = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
 
                 ValuePickerRow(
@@ -298,19 +328,6 @@ struct PlaybackSettingsView: View {
                 )
 
                 ValuePickerRow(
-                    icon: "number.square",
-                    title: "settings.playback.teletext.title",
-                    subtitle: "settings.playback.teletext.subtitle",
-                    options: PlaybackPreferences.LiveTeletextPage.allCases,
-                    selection: Binding(
-                        get: { prefs.liveTeletextPage },
-                        set: { prefs.liveTeletextPage = $0 }
-                    ),
-                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
-                )
-                .settingsValueScope(.device)
-
-                ValuePickerRow(
                     icon: "rectangle.fill",
                     title: "settings.playback.subtitle.background",
                     subtitle: "settings.playback.subtitle.background.subtitle",
@@ -320,6 +337,18 @@ struct PlaybackSettingsView: View {
                         set: { prefs.subtitleBackground = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+
+                ValuePickerRow(
+                    icon: "arrow.up.and.down",
+                    title: "settings.playback.subtitle.position",
+                    subtitle: "settings.playback.subtitle.position.subtitle",
+                    options: PlaybackPreferences.SubtitleVerticalPosition.allCases,
+                    selection: Binding(
+                        get: { prefs.subtitleVerticalPosition },
+                        set: { prefs.subtitleVerticalPosition = $0 }
+                    ),
+                    label: { $0.label }
                 )
 
                 ValuePickerRow(
@@ -340,41 +369,122 @@ struct PlaybackSettingsView: View {
                     label: PlaybackSettingsView.formatSubtitleDelay
                 )
 
+                boolRow(
+                    icon: "wand.and.stars",
+                    title: "settings.playback.subtitle.styledASS",
+                    subtitle: "settings.playback.subtitle.styledASS.subtitle",
+                    value: Binding(
+                        get: { prefs.styledASSSubtitles },
+                        set: { prefs.styledASSSubtitles = $0 }
+                    )
+                )
+
                 ValuePickerRow(
-                    icon: "arrow.up.and.down",
-                    title: "settings.playback.subtitle.position",
-                    subtitle: "settings.playback.subtitle.position.subtitle",
-                    options: PlaybackPreferences.SubtitleVerticalPosition.allCases,
+                    icon: "number.square",
+                    title: "settings.playback.teletext.title",
+                    subtitle: "settings.playback.teletext.subtitle",
+                    options: PlaybackPreferences.LiveTeletextPage.allCases,
                     selection: Binding(
-                        get: { prefs.subtitleVerticalPosition },
-                        set: { prefs.subtitleVerticalPosition = $0 }
+                        get: { prefs.liveTeletextPage },
+                        set: { prefs.liveTeletextPage = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                sectionHeader("settings.playback.section.streaming")
+
+                #if os(tvOS)
+                ValuePickerRow(
+                    icon: "dial.medium",
+                    title: "settings.playback.quality",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityWifi },
+                        set: { prefs.streamingQualityWifi = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+                #else
+                ValuePickerRow(
+                    icon: "wifi",
+                    title: "settings.playback.qualityWifi",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityWifi },
+                        set: { prefs.streamingQualityWifi = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "antenna.radiowaves.left.and.right",
+                    title: "settings.playback.qualityCellular",
+                    subtitle: "settings.playback.quality.subtitle",
+                    options: StreamingQuality.allCases,
+                    selection: Binding(
+                        get: { prefs.streamingQualityCellular },
+                        set: { prefs.streamingQualityCellular = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+                #endif
+
+                ValuePickerRow(
+                    icon: "square.stack.3d.up",
+                    title: "settings.playback.versionOrder",
+                    subtitle: "settings.playback.versionOrder.subtitle",
+                    options: VersionOrder.allCases,
+                    selection: Binding(
+                        get: { prefs.versionOrder },
+                        set: { prefs.versionOrder = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
 
                 ValuePickerRow(
-                    icon: "textformat",
-                    title: "settings.playback.subtitle.font",
-                    subtitle: "settings.playback.subtitle.font.subtitle",
-                    options: PlaybackPreferences.SubtitleFont.allCases,
+                    icon: "arrow.down.circle",
+                    title: "settings.playback.buffer",
+                    subtitle: "settings.playback.buffer.subtitle",
+                    options: PlaybackPreferences.NetworkBufferDepth.allCases,
                     selection: Binding(
-                        get: { prefs.subtitleFont },
-                        set: { prefs.subtitleFont = $0 }
+                        get: { prefs.networkBufferDepth },
+                        set: { prefs.networkBufferDepth = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
+                .settingsValueScope(.device)
 
                 ValuePickerRow(
-                    icon: "bold",
-                    title: "settings.playback.subtitle.weight",
-                    subtitle: "settings.playback.subtitle.weight.subtitle",
-                    options: PlaybackPreferences.SubtitleWeight.allCases,
+                    icon: "backward.circle",
+                    title: "settings.playback.liveBuffer",
+                    subtitle: "settings.playback.liveBuffer.subtitle",
+                    options: PlaybackPreferences.LiveBufferDepth.allCases,
                     selection: Binding(
-                        get: { prefs.subtitleWeight },
-                        set: { prefs.subtitleWeight = $0 }
+                        get: { prefs.liveBufferDepth },
+                        set: { prefs.liveBufferDepth = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "clock.arrow.circlepath",
+                    title: "settings.playback.liveDelay",
+                    subtitle: "settings.playback.liveDelay.subtitle",
+                    options: PlaybackPreferences.LiveDelay.allCases,
+                    selection: Binding(
+                        get: { prefs.liveDelay },
+                        set: { prefs.liveDelay = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
 
                 sectionHeader("settings.playback.section.picture")
 
@@ -392,18 +502,36 @@ struct PlaybackSettingsView: View {
 
                 // AetherEngine#455: only a display without Dolby Vision of its own has anything to gain
                 // here, so on one that has it the row greys out rather than offering a dead switch.
-                boolRow(
+                // Sodalite#245: the third value lets a file's own HDR10+ win on an HDR10+ TV.
+                ValuePickerRow(
                     icon: "sparkles.tv",
                     title: "settings.playback.forceDolbyVision",
                     subtitle: "settings.playback.forceDolbyVision.subtitle",
-                    value: Binding(
-                        get: { prefs.forceDolbyVisionOnNonDVDisplay },
-                        set: { prefs.forceDolbyVisionOnNonDVDisplay = $0 }
-                    )
+                    options: DolbyVisionOnHDR10Mode.allCases,
+                    selection: Binding(
+                        get: { prefs.dolbyVisionOnHDR10Mode },
+                        set: { prefs.dolbyVisionOnHDR10Mode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
                 )
                 .settingsValueScope(.device)
                 .disabled(displayHasDolbyVision)
                 .opacity(displayHasDolbyVision ? 0.4 : 1)
+
+                // AetherEngine#846: sub-1080p 8-bit SDR only, the engine leaves everything else alone.
+                // AetherEngine#1039: the third value adds the line-art scaler for animated titles.
+                ValuePickerRow(
+                    icon: "wand.and.sparkles",
+                    title: "settings.playback.enhancedUpscaling",
+                    subtitle: "settings.playback.enhancedUpscaling.subtitle",
+                    options: EnhancedUpscalingMode.allCases,
+                    selection: Binding(
+                        get: { prefs.upscalingMode },
+                        set: { prefs.upscalingMode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
 
                 sectionHeader("settings.playback.section.audio")
 
@@ -418,31 +546,131 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
-                sectionHeader("settings.playback.section.advanced")
-
-                boolRow(
-                    icon: "info.circle",
-                    title: "settings.playback.statsForNerds",
-                    subtitle: "settings.playback.statsForNerds.subtitle",
-                    value: Binding(
-                        get: { prefs.showStatsForNerds },
-                        set: { prefs.showStatsForNerds = $0 }
-                    )
+                ValuePickerRow(
+                    icon: "hifispeaker.2",
+                    title: "settings.playback.trueHDAtmos",
+                    subtitle: "settings.playback.trueHDAtmos.subtitle",
+                    options: [nil] + SpatialSpeakerLayout.allCases,
+                    selection: Binding(
+                        get: { prefs.heightChannelLayout },
+                        set: { prefs.heightChannelLayout = $0 }
+                    ),
+                    label: { $0?.rawValue ?? String(localized: "common.off") }
                 )
                 .settingsValueScope(.device)
 
-                if prefs.showStatsForNerds {
+                // AetherEngine#923: shaping decodes the audio, so it also takes a track off passthrough.
+                ValuePickerRow(
+                    icon: "speaker.wave.3",
+                    title: "settings.playback.speakers",
+                    subtitle: "settings.playback.speakers.subtitle",
+                    options: SpeakerLayout.allCases,
+                    selection: Binding(
+                        get: { prefs.speakerLayout },
+                        set: { prefs.speakerLayout = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                if prefs.speakerLayout == .stereo {
                     boolRow(
-                        icon: "waveform.path.ecg",
-                        title: "settings.playback.engineDiagnostics.title",
-                        subtitle: "settings.playback.engineDiagnostics.subtitle",
+                        icon: "speaker.wave.2.bubble",
+                        title: "settings.playback.lfeInStereoDownmix",
+                        subtitle: "settings.playback.lfeInStereoDownmix.subtitle",
                         value: Binding(
-                            get: { prefs.showEngineDiagnostics },
-                            set: { prefs.showEngineDiagnostics = $0 }
+                            get: { prefs.lfeInStereoDownmix },
+                            set: { prefs.lfeInStereoDownmix = $0 }
                         )
                     )
                     .settingsValueScope(.device)
                 }
+
+                ValuePickerRow(
+                    icon: "person.wave.2",
+                    title: "settings.playback.dialogueBoost",
+                    subtitle: "settings.playback.dialogueBoost.subtitle",
+                    options: DialogueBoost.allCases,
+                    selection: Binding(
+                        get: { prefs.dialogueBoost },
+                        set: { prefs.dialogueBoost = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "moon.zzz",
+                    title: "settings.playback.nightMode",
+                    subtitle: "settings.playback.nightMode.subtitle",
+                    options: NightMode.allCases,
+                    selection: Binding(
+                        get: { prefs.nightMode },
+                        set: { prefs.nightMode = $0 }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                if prefs.nightMode == .scheduled {
+                    ValuePickerRow(
+                        icon: "clock",
+                        title: "settings.playback.nightMode.start",
+                        subtitle: "settings.playback.nightMode.start.subtitle",
+                        options: Array(0...23),
+                        selection: Binding(
+                            get: { prefs.nightModeStartHour },
+                            set: { prefs.nightModeStartHour = $0 }
+                        ),
+                        label: { AudioShapingSettings.hourLabel($0) }
+                    )
+                    .settingsValueScope(.device)
+
+                    ValuePickerRow(
+                        icon: "clock.badge.checkmark",
+                        title: "settings.playback.nightMode.end",
+                        subtitle: "settings.playback.nightMode.end.subtitle",
+                        options: Array(0...23),
+                        selection: Binding(
+                            get: { prefs.nightModeEndHour },
+                            set: { prefs.nightModeEndHour = $0 }
+                        ),
+                        label: { AudioShapingSettings.hourLabel($0) }
+                    )
+                    .settingsValueScope(.device)
+                }
+
+                // AetherEngine#464: the same device value the player's audio menu steps.
+                ValuePickerRow(
+                    icon: "metronome",
+                    title: "settings.playback.audioDelay",
+                    subtitle: "settings.playback.audioDelay.subtitle",
+                    options: AudioDelay.choices,
+                    selection: Binding(
+                        get: { AudioDelay.stepped(prefs.audioDelayMilliseconds, by: 0) },
+                        set: { prefs.audioDelayMilliseconds = $0 }
+                    ),
+                    label: AudioDelay.label
+                )
+                .settingsValueScope(.device)
+
+                sectionHeader("settings.playback.section.music")
+
+                // Sodalite#242: a track already playing follows the change at once.
+                ValuePickerRow(
+                    icon: "waveform.path",
+                    title: "settings.playback.musicNormalization",
+                    subtitle: "settings.playback.musicNormalization.subtitle",
+                    options: MusicNormalization.allCases,
+                    selection: Binding(
+                        get: { prefs.musicNormalization },
+                        set: {
+                            prefs.musicNormalization = $0
+                            dependencies.musicPlaybackCoordinator.normalizationSettingChanged()
+                        }
+                    ),
+                    label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
             }
             .screenContentInset()
             .task { displayHasDolbyVision = AetherEngine.displayCapabilities.supportsDolbyVision }
@@ -464,15 +692,14 @@ struct PlaybackSettingsView: View {
     }
 
     private func sectionHeader(_ key: LocalizedStringKey) -> some View {
-        Text(key)
-            .font(.title3)
-            .fontWeight(.semibold)
-            .foregroundStyle(.secondary)
-            .padding(.top, 24)
-            .padding(.bottom, 4)
+        SettingsSectionHeader(key)
     }
 
     // MARK: - Rows
+
+    private var countdownApplies: Bool {
+        prefs.autoplayNextEpisode && prefs.showNextEpisodeCard
+    }
 
     private func boolRow(
         icon: String,

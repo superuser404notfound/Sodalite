@@ -11,21 +11,17 @@ struct SidebarProfileHeader: View {
     let isExpanded: Bool
 
     @Environment(\.appState) private var appState
-    @Environment(\.dependencies) private var dependencies
 
     private var user: JellyfinUser? { appState.activeUser }
 
     var body: some View {
         if let user {
-            HStack(spacing: SidebarMetrics.labelSpacing) {
-                avatar(for: user)
+            HStack(spacing: 0) {
+                SidebarProfileAvatar(user: user)
                     .frame(width: SidebarMetrics.iconColumn, height: SidebarMetrics.iconColumn)
-                if isExpanded {
+                SidebarRevealedLabel(isExpanded: isExpanded) {
                     Text(user.name)
-                        .font(.headline)
                         .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
                 }
             }
             .padding(.horizontal, SidebarMetrics.itemHorizontalPadding(isExpanded: isExpanded))
@@ -36,41 +32,35 @@ struct SidebarProfileHeader: View {
             .allowsHitTesting(false)
         }
     }
+}
 
-    private func avatar(for user: JellyfinUser) -> some View {
-        ZStack {
-            if let url = dependencies.jellyfinImageService.userProfileImageURL(
-                userID: user.id,
-                tag: user.primaryImageTag
-            ) {
-                AsyncCachedImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    initialsCircle(for: user)
-                }
-                .clipShape(Circle())
-            } else {
-                initialsCircle(for: user)
-            }
-        }
-        .overlay(Circle().strokeBorder(Color.Theme.hairline, lineWidth: 1))
-    }
+/// The header's avatar, shared with the profile row that takes its place when there is more than
+/// one profile to switch between.
+///
+/// On the focused row's white pill it goes black like the glyphs beside it: white initials in a
+/// white-on-white circle and a white hairline left nothing to see there (Sodalite#207).
+struct SidebarProfileAvatar: View {
+    let user: JellyfinUser
+    var state: SidebarItemState = .rest
 
-    private func initialsCircle(for user: JellyfinUser) -> some View {
-        ZStack {
-            Circle().fill(Color.Theme.restFill)
-            Text(Self.initials(for: user.name))
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-        }
-    }
+    @Environment(\.dependencies) private var dependencies
 
-    static func initials(for name: String) -> String {
-        let parts = name.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(name.prefix(2)).uppercased()
+    private var isOnFocusPill: Bool { state == .focused }
+
+    var body: some View {
+        ProfileAvatar(
+            name: user.name,
+            url: dependencies.activeProfileAvatarURL(userID: user.id, tag: user.primaryImageTag),
+            font: .system(size: 16, weight: .semibold, design: .rounded),
+            fill: isOnFocusPill ? AnyShapeStyle(Color.clear) : AnyShapeStyle(Color.Theme.restFill),
+            textStyle: AnyShapeStyle(state.labelColor)
+        )
+        .overlay(
+            Circle().strokeBorder(
+                isOnFocusPill ? state.labelColor : Color.Theme.hairline,
+                lineWidth: isOnFocusPill ? 2 : 1
+            )
+        )
     }
 }
 #endif

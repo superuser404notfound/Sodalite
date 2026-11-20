@@ -2,6 +2,9 @@ import SwiftUI
 import Combine
 import AetherEngine
 import SwiftAssRenderer
+#if os(macOS)
+import AppKit
+#endif
 
 /// Renders subtitle cues at the current playback time. Text cues draw as
 /// a styled box; image cues (PGS/DVB/HDMV) draw as bitmaps at normalised
@@ -35,22 +38,41 @@ struct SubtitleOverlayView: View {
     /// Non-nil exactly while an embedded ASS/SSA track is active AND swift-ass-renderer initialized.
     let assRenderer: AssSubtitlesRenderer?
     /// Reload pre-announcements from the ASS coordinator (see `ASSFrameHostView`'s nil suppression).
-    let assReloadSignal: PassthroughSubject<Void, Never>
+    let assReloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
     /// Lowercased active subtitle codec ("ass"/"ssa"/"subrip"/...); drives the raw-event-line
     /// stripper for the fallback where an ASS track is active but the styled renderer bailed.
     let activeSubtitleCodec: String?
+    /// Same gate for the secondary track: under `preserveASSMarkup` its ASS cues are raw event lines too.
+    var secondarySubtitleCodec: String? = nil
 
     /// While a secondary track is selected, the primary renders through the plain-text overlay
     /// (not libass) so both lines stack without overlap; libass positions ASS primaries opaquely
     /// so the secondary cannot reliably go above it (issue #47). Full ASS styling returns when off.
     let hasSecondaryTrack: Bool
-    /// Coded video dims for bitmap-canvas mapping; .zero falls back to full-bounds layout.
+    /// The picture's presented shape (coded size with the pixel aspect applied); .zero falls back to
+    /// full-bounds layout.
     var videoSize: CGSize = .zero
+    /// Display-width multiplier of the source's pixels. A bitmap canvas is in the video's coded
+    /// pixels (engine contract, AE#993), so it widens by the same factor the picture does.
+    var pixelAspect: CGFloat = 1
     /// Which rectangle the picture actually occupies. `.fill` draws the video `.resizeAspectFill`,
     /// so the picture covers the surface and overflows it; cues placed against the picture have to
     /// follow it there instead of staying on the aspect-fit band the video would occupy in
     /// `.original` (#120).
     var pictureMode: PlaybackPreferences.PictureMode = .original
+    /// Which share of the cues this instance draws. A folded iPhone Duo splits them over two
+    /// instances: everything bound to the picture stays on it, the plain text lines move below the fold.
+    var role: Role = .all
+
+    enum Role {
+        /// Every cue, on the picture.
+        case all
+        /// Bitmaps, styled ASS and text cues that carry their own placement; the shared text stack is
+        /// drawn by a `.textStackOnly` instance elsewhere.
+        case pictureBound
+        /// Only the shared bottom stack of plain text lines, centred in this view's frame.
+        case textStackOnly
+    }
 
     /// Fixed bottom inset for text cues while controls are visible, above the 300 pt gradient band.
     private static let controlsVisibleBottomInset: CGFloat = 280
@@ -69,12 +91,36 @@ struct SubtitleOverlayView: View {
     var body: some View {
         // libass styling used ONLY without a secondary track; with one the primary
         // falls back to the plain-text overlay so both share one stack (issue #47).
-        if let assRenderer, !hasSecondaryTrack {
-            ASSRenderedSubtitles(
-                renderer: assRenderer,
-                reloadSignal: assReloadSignal,
-                currentOffset: currentTime
-            )
+        if role == .textStackOnly {
+            if assRenderer == nil || hasSecondaryTrack {
+                GeometryReader { geo in
+                    textCues(in: geo.size, safeAreaInsets: EdgeInsets())
+                }
+                .allowsHitTesting(false)
+            }
+        } else if let assRenderer, !hasSecondaryTrack {
+            // Same pin as the bitmap layer: AVKit's invisible chrome widens contentOverlayView's
+            // safe-area insets around an audio-switch reload, and the libass canvas follows the
+            // bounds, so every line was redrawn on a shorter canvas, mid-screen and resized.
+            GeometryReader { geo in
+                // libass scales PlayResX/Y onto its canvas per axis, so the canvas has to be the
+                // picture, not the screen: on a portrait iPhone the screen-sized canvas stretched
+                // every glyph tall and narrow and sat the lines under the bottom bar.
+                let rect = Self.videoRect(videoSize: videoSize, in: geo.size,
+                                          fillsSurface: pictureMode == .fill)
+                ASSRenderedSubtitles(
+                    renderer: assRenderer,
+                    reloadSignal: assReloadSignal,
+                    currentOffset: currentTime - delaySeconds
+                )
+                // The host binds its renderer once, at creation. An audio switch or the next
+                // episode swaps the renderer without a nil in between, and the kept host went on
+                // drawing the freed one while the new one never got a canvas (#234).
+                .id(ObjectIdentifier(assRenderer))
+                .frame(width: rect.width, height: rect.height)
+                .position(x: rect.midX, y: rect.midY)
+            }
+            .ignoresSafeArea()
             .allowsHitTesting(false)
         } else {
             cueOverlay
@@ -101,45 +147,86 @@ struct SubtitleOverlayView: View {
             .ignoresSafeArea()
 
             // Text cues share ONE bottom-anchored stack so secondary sits above primary
-            // regardless of wrap count (a fixed offset fails on a 2-line primary). Stays
-            // safe-area-aware.
+            // regardless of wrap count (a fixed offset fails on a 2-line primary).
+            #if os(tvOS)
+            // Laid out inside the window's safe area, not the overlay's: AVKit's invisible chrome
+            // widens contentOverlayView's insets around an audio-switch reload, which lifted every
+            // line by that amount for a few seconds. The window's insets are the resting values,
+            // so the settled position is unchanged.
             GeometryReader { geo in
-                Color.clear
-                    .overlay(alignment: .topLeading) {
-                        let activePrimary = activeCues(in: cues, maxDuration: maxCueDuration)
-                        // A cue that asks for its own spot (AetherEngine #233: teletext pages,
-                        // WebVTT cue settings, ASS `\an`/`\pos`) leaves the shared stack and is
-                        // drawn where it asked. That also keeps it clear of the secondary track
-                        // by construction, which is what the stack exists to guarantee (#47).
-                        let placedCues = activePrimary.filter { $0.placement != nil && renderLine(for: $0) != nil }
-                        let primaryRenderLines: [RenderLine] = activePrimary.compactMap { cue in
-                            cue.placement == nil ? renderLine(for: cue) : nil
-                        }
-                        let secondaryLines: [String] = activeCues(in: secondaryCues, maxDuration: secondaryMaxCueDuration).compactMap { cue in
-                            guard case .text(let raw) = cue.body, !raw.isEmpty else { return nil }
-                            return raw
-                        }
-                        if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
-                            stackedText(
-                                primary: primaryRenderLines,
-                                secondary: secondaryLines,
-                                in: geo.size,
-                                safeAreaInsets: geo.safeAreaInsets
-                            )
-                        }
-                        ForEach(placedCues, id: \.id) { cue in
-                            placedText(cue, in: geo.size)
-                        }
-                    }
+                let insets = Self.windowSafeAreaInsets
+                let size = CGSize(width: max(0, geo.size.width - insets.leading - insets.trailing),
+                                  height: max(0, geo.size.height - insets.top - insets.bottom))
+                textCues(in: size, safeAreaInsets: insets)
+                    .frame(width: size.width, height: size.height)
+                    .position(x: insets.leading + size.width / 2, y: insets.top + size.height / 2)
             }
+            .ignoresSafeArea()
+            #else
+            GeometryReader { geo in
+                textCues(in: geo.size, safeAreaInsets: geo.safeAreaInsets)
+            }
+            #endif
         }
         .allowsHitTesting(false)
+    }
+
+    #if os(tvOS)
+    private static var windowSafeAreaInsets: EdgeInsets {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+        let i = window?.safeAreaInsets ?? .zero
+        return EdgeInsets(top: i.top, leading: i.left, bottom: i.bottom, trailing: i.right)
+    }
+    #endif
+
+    private func textCues(in size: CGSize, safeAreaInsets: EdgeInsets) -> some View {
+        Color.clear
+            .overlay(alignment: .topLeading) {
+                let activePrimary = activeCues(in: cues, maxDuration: maxCueDuration)
+                // A cue that asks for its own spot (AetherEngine #233: teletext pages,
+                // WebVTT cue settings, ASS `\an`/`\pos`) leaves the shared stack and is
+                // drawn where it asked. That also keeps it clear of the secondary track
+                // by construction, which is what the stack exists to guarantee (#47).
+                let placedCues = activePrimary.filter { $0.placement != nil && renderLine(for: $0) != nil }
+                let primaryRenderLines: [RenderLine] = activePrimary.compactMap { cue in
+                    cue.placement == nil ? renderLine(for: cue) : nil
+                }
+                let secondaryLines: [String] = activeCues(in: secondaryCues, maxDuration: secondaryMaxCueDuration).compactMap { cue in
+                    guard case .text(let raw) = cue.body else { return nil }
+                    let display = isASSSecondaryActive ? strippedASSText(raw) : raw
+                    return display.isEmpty ? nil : display
+                }
+                if role == .textStackOnly {
+                    if !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
+                        centredStack(primary: primaryRenderLines, secondary: secondaryLines, in: size)
+                    }
+                } else if role == .all, !primaryRenderLines.isEmpty || !secondaryLines.isEmpty {
+                    stackedText(
+                        primary: primaryRenderLines,
+                        secondary: secondaryLines,
+                        in: size,
+                        safeAreaInsets: safeAreaInsets
+                    )
+                }
+                if role != .textStackOnly {
+                    ForEach(placedCues, id: \.id) { cue in
+                        placedText(cue, in: size)
+                    }
+                }
+            }
     }
 
     /// True while the selected stream is ASS/SSA. In the cue path (styled renderer nil) the
     /// cue text bodies are still RAW event lines (`ReadOrder,Layer,...,Text`), stripped before display.
     private var isASSTrackActive: Bool {
         activeSubtitleCodec == "ass" || activeSubtitleCodec == "ssa"
+    }
+
+    private var isASSSecondaryActive: Bool {
+        secondarySubtitleCodec == "ass" || secondarySubtitleCodec == "ssa"
     }
 
     /// Fallback when the styled renderer is unavailable: raw event lines
@@ -219,6 +306,26 @@ struct SubtitleOverlayView: View {
         .padding(.bottom, placement.padding)
         .frame(width: size.width, height: size.height, alignment: .bottom)
         .offset(y: placement.offsetBelowSafeArea)
+        .transition(.opacity)
+    }
+
+    /// The stack as drawn below the fold of an iPhone Duo: the same lines and styling, centred in a
+    /// band of its own instead of anchored above the picture's bottom edge.
+    private func centredStack(primary: [RenderLine], secondary: [String], in size: CGSize) -> some View {
+        let (pointSize, _) = textMetrics(in: size)
+        return VStack(spacing: 6) {
+            ForEach(Array(secondary.enumerated()), id: \.offset) { _, line in
+                styledText(line, pointSize: pointSize)
+            }
+            ForEach(primary) { line in
+                switch line {
+                case .plain(_, let text): styledText(text, pointSize: pointSize)
+                case .rich(_, let runs): styledRuns(runs, pointSize: pointSize)
+                }
+            }
+        }
+        .frame(maxWidth: max(0, size.width - 40))
+        .frame(width: size.width, height: size.height)
         .transition(.opacity)
     }
 
@@ -539,6 +646,7 @@ struct SubtitleOverlayView: View {
         let frame = Self.bitmapCueFrame(position: image.position,
                                         canvas: image.canvasSize,
                                         videoSize: videoSize,
+                                        pixelAspect: pixelAspect,
                                         in: size,
                                         verticalShift: bitmapVerticalShift(in: size),
                                         fillsSurface: pictureMode == .fill)
@@ -554,12 +662,18 @@ struct SubtitleOverlayView: View {
     /// canvas maps onto the aspect-fit video rect, center-anchored, and the cue rides along.
     /// Cues land where the disc authored them, including the lower letterbox bar.
     nonisolated static func bitmapCueFrame(position: CGRect,
-                                           canvas: CGSize,
+                                           canvas codedCanvas: CGSize,
                                            videoSize: CGSize,
+                                           pixelAspect: CGFloat = 1,
                                            in bounds: CGSize,
                                            verticalShift: CGFloat = 0,
                                            fillsSurface: Bool = false) -> CGRect {
         let videoRect = videoRect(videoSize: videoSize, in: bounds, fillsSurface: fillsSurface)
+        // The canvas is in coded pixels and `videoSize` is presented, so the canvas widens by the
+        // pixel aspect first. Without it a 720x576 DVB plane on 16:9 SD covered a 1024x576 picture
+        // as a 5:4 shape, 1.42x too tall, and every bottom line landed below the screen.
+        let canvas = CGSize(width: codedCanvas.width * (pixelAspect > 0 ? pixelAspect : 1),
+                            height: codedCanvas.height)
         let canvasRect: CGRect
         if videoRect.width > 0, canvas.width > 0, canvas.height > 0, videoSize.width > 0 {
             // Scale the canvas so it COVERS the video rect: the video is a crop of the plane
@@ -680,19 +794,40 @@ struct SubtitleOverlayView: View {
     }
 }
 
-// MARK: - Styled ASS host
+// MARK: - Styled ASS host (platform-split)
 
 /// Hosts the styled ASS frame stream. A clone of swift-ass-renderer's `AssSubtitlesView`
-/// (canvas sized in layoutSubviews, frames drawn at `ProcessedImage.imageRect`) with ONE
-/// difference: nil frames from the coordinator's `reloadTrack` are suppressed. The renderer
-/// publishes a transient nil before the identical re-render lands, which blinked every visible
-/// sub; the coordinator pre-announces reloads via `reloadSignal` so suppression is deterministic.
-/// A nil with no announced reload is a real cue end and hides instantly.
+/// (canvas sized in layout, frames drawn at `ProcessedImage.imageRect`) with ONE difference:
+/// nil frames from the coordinator's `reloadTrack` are suppressed. The renderer publishes a
+/// transient nil before the identical re-render lands, which blinked every visible sub; the
+/// coordinator announces each reload's start and its landing via `reloadSignal`, and a nil in
+/// between is held until the new track is parsed. A nil with no reload in flight is a real cue
+/// end and hides instantly.
+///
+/// Frames are drawn into a `CALayer` (contents = `CGImage`) so the same host compiles on iOS
+/// (UIView) and macOS (NSView). See `ASSFrameHostView` for the macOS geometry handling.
+#if os(macOS)
+private struct ASSRenderedSubtitles: NSViewRepresentable {
+    let renderer: AssSubtitlesRenderer
+    let reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
+    /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
+    /// track-data queries since the renderer's own offset is not public here.
+    let currentOffset: Double
+
+    func makeNSView(context: Context) -> ASSFrameHostView {
+        ASSFrameHostView(renderer: renderer, reloadSignal: reloadSignal)
+    }
+
+    func updateNSView(_ view: ASSFrameHostView, context: Context) {
+        view.currentOffset = currentOffset
+    }
+}
+#else
 private struct ASSRenderedSubtitles: UIViewRepresentable {
     let renderer: AssSubtitlesRenderer
-    let reloadSignal: PassthroughSubject<Void, Never>
+    let reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>
     /// Playback offset (overlay's `currentTime`, a sourceTime mirror); frame view needs it for
-    /// track-data queries since the renderer's own offset is not public.
+    /// track-data queries since the renderer's own offset is not public here.
     let currentOffset: Double
 
     func makeUIView(context: Context) -> ASSFrameHostView {
@@ -703,34 +838,59 @@ private struct ASSRenderedSubtitles: UIViewRepresentable {
         view.currentOffset = currentOffset
     }
 }
+#endif
 
-final class ASSFrameHostView: UIView {
+#if os(macOS)
+typealias ASSHostBase = NSView
+#else
+typealias ASSHostBase = UIView
+#endif
+
+final class ASSFrameHostView: ASSHostBase {
     /// Playback offset fed by the representable on every SwiftUI update (~10 Hz).
     var currentOffset: Double = 0
     private let renderer: AssSubtitlesRenderer
-    private let canvasScale: CGFloat
-    private let imageView = UIImageView()
+    /// Frames are drawn as this layer's `contents` (a `CGImage`), positioned by `imageRect`.
+    private let imageLayer = CALayer()
     private var lastRenderBounds = CGRect.zero
     private var cancellables = Set<AnyCancellable>()
-    /// Suppress nil frames until this deadline (armed per reload signal). `.distantPast` = off.
-    private var suppressNilDeadline = Date.distantPast
-    /// Deferred hide scheduled during suppression so a swallowed real cue end still hides.
+    /// Reloads announced and not yet landed. A nil frame while this is above zero is the
+    /// renderer's transient re-parse nil, not a cue end.
+    private var reloadsInFlight = 0
+    /// A nil arrived during a reload and the last image is being held for it.
+    private var holdingThroughReload = false
+    /// Hide check (end-watch poll or the stuck-reload fallback); cancelled by any published frame.
     private var hideWorkItem: DispatchWorkItem?
-    /// Generous upper bound for one reload round-trip (parse + font matching + render).
-    private static let reloadSuppressWindow: TimeInterval = 0.5
+    /// Fallback in case a landing never arrives (renderer torn down mid-parse).
+    private var reloadFallback: DispatchWorkItem?
+    private static let reloadFallbackDelay: TimeInterval = 5
 
-    init(renderer: AssSubtitlesRenderer, reloadSignal: PassthroughSubject<Void, Never>) {
+    init(renderer: AssSubtitlesRenderer, reloadSignal: PassthroughSubject<ASSRenderCoordinator.ReloadPhase, Never>) {
         self.renderer = renderer
-        self.canvasScale = UITraitCollection.current.displayScale
         super.init(frame: .zero)
+        imageLayer.contentsGravity = .resize
+        #if os(macOS)
+        // Layer-backed NSView. Flipping the backing layer's geometry (plus the matching
+        // `isFlipped` override below) establishes a top-left origin world like iOS, so libass'
+        // top-left `imageRect` applies directly to the sublayer and its CGImage contents render
+        // upright.
+        wantsLayer = true
+        layer?.isGeometryFlipped = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.addSublayer(imageLayer)
+        #else
         backgroundColor = .clear
         isUserInteractionEnabled = false
-        addSubview(imageView)
-        // No receive(on:): synchronous main-actor delivery arms suppression before the
-        // renderer's transient nil can arrive (coordinator sends right before reloadTrack).
+        layer.addSublayer(imageLayer)
+        #endif
+        // No receive(on:): synchronous main-actor delivery arms suppression before the renderer's
+        // transient nil can arrive (coordinator sends right before reloadTrack).
         reloadSignal
-            .sink { [weak self] in
-                self?.suppressNilDeadline = Date().addingTimeInterval(Self.reloadSuppressWindow)
+            .sink { [weak self] phase in
+                switch phase {
+                case .began: self?.reloadBegan()
+                case .landed: self?.reloadLanded()
+                }
             }
             .store(in: &cancellables)
         renderer
@@ -744,76 +904,124 @@ final class ASSFrameHostView: UIView {
         fatalError("init(coder:) not supported")
     }
 
+    /// Backing scale for the libass canvas. Read per layout so a window moved between displays
+    /// with different backing factors re-renders at the correct scale.
+    private var displayScale: CGFloat {
+        #if os(macOS)
+        return window?.backingScaleFactor ?? 2
+        #else
+        return UITraitCollection.current.displayScale
+        #endif
+    }
+
+    #if os(macOS)
+    override var isFlipped: Bool { true }
+    /// Never swallow mouse events meant for the video / chrome beneath (iOS uses isUserInteractionEnabled).
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func layout() {
+        super.layout()
+        handleLayout()
+    }
+    #else
     override func layoutSubviews() {
         super.layoutSubviews()
-        // A zero-bounds pass must never reach the renderer: a 0x0 canvas renders every
-        // event as nil, hiding the visible subtitle with no reload announced.
-        guard !bounds.isEmpty else {
-            return
-        }
-        if !lastRenderBounds.isEmpty, imageView.image != nil, lastRenderBounds != bounds {
+        handleLayout()
+    }
+    #endif
+
+    private func handleLayout() {
+        // A zero-bounds pass must never reach the renderer: a 0x0 canvas renders every event as
+        // nil, hiding the visible subtitle with no reload announced.
+        guard !bounds.isEmpty else { return }
+        if !lastRenderBounds.isEmpty, imageLayer.contents != nil, lastRenderBounds != bounds {
             let ratioX = bounds.width / lastRenderBounds.width
             let ratioY = bounds.height / lastRenderBounds.height
-            let f = imageView.frame
-            imageView.frame = CGRect(
+            let f = imageLayer.frame
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            imageLayer.frame = CGRect(
                 x: f.origin.x * ratioX, y: f.origin.y * ratioY,
                 width: f.width * ratioX, height: f.height * ratioY
             ).integral
+            CATransaction.commit()
         }
-        renderer.setCanvasSize(bounds.size, scale: canvasScale)
+        renderer.setCanvasSize(bounds.size, scale: displayScale)
     }
+
+    // MARK: Frame application
+
+    private func setFrame(_ image: ProcessedImage) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        imageLayer.frame = image.imageRect
+        imageLayer.contents = image.image   // CGImage, cross-platform
+        imageLayer.isHidden = false
+        CATransaction.commit()
+    }
+
+    private func hideNow() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        imageLayer.isHidden = true
+        imageLayer.contents = nil
+        CATransaction.commit()
+    }
+
+    // MARK: Nil-frame suppression
 
     private func handleFrameChanged(_ image: ProcessedImage?) {
         if let image {
             hideWorkItem?.cancel()
             hideWorkItem = nil
-            suppressNilDeadline = .distantPast
+            holdingThroughReload = false
             lastRenderBounds = bounds
-            imageView.frame = image.imageRect
-            imageView.image = UIImage(cgImage: image.image)
-            imageView.isHidden = false
+            setFrame(image)
+        } else if reloadsInFlight > 0 {
+            // Reload in flight: keep the last image until the new track is parsed.
+            holdingThroughReload = true
         } else {
-            let remaining = suppressNilDeadline.timeIntervalSinceNow
-            guard remaining > 0 else {
-                // Real cue end (no reload announced): hide instantly.
-                hideWorkItem?.cancel()
-                hideWorkItem = nil
-                hideNow()
-                return
-            }
-            // Reload in flight: keep the last image; arm a safety hide at the deadline
-            // in case no frame follows (reload coinciding with a real cue end).
-            guard hideWorkItem == nil else { return }
-            scheduleSafetyHide(after: remaining)
+            // Real cue end (no reload in flight): hide instantly.
+            hideWorkItem?.cancel()
+            hideWorkItem = nil
+            holdingThroughReload = false
+            hideNow()
         }
     }
 
-    /// Resolve a suppression window that ended without a new frame (re-arms if a newer reload
-    /// extended the deadline). libass skips the publish when a reload's re-render is visually
-    /// identical (parked on the transient nil), so at the deadline query track data directly: an
-    /// active event means keep the image and end suppression; none means hide (reload hit a cue end).
-    private func scheduleSafetyHide(after delay: TimeInterval) {
+    private func reloadBegan() {
+        reloadsInFlight += 1
+        reloadFallback?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            self.hideWorkItem = nil
-            let remaining = self.suppressNilDeadline.timeIntervalSinceNow
-            if remaining > 0 {
-                self.scheduleSafetyHide(after: remaining)
-                return
-            }
-            let stillActive = !self.renderer.dialogues(at: self.currentOffset).isEmpty
-            if stillActive {
-                self.suppressNilDeadline = .distantPast
-                // Frame subject is parked on nil, so the real cue end's nil-after-nil is
-                // swallowed by the duplicate filter and the frame would linger forever.
-                // Watch track data for the end ourselves until the next published frame.
-                self.scheduleEndWatch()
-            } else {
-                self.hideNow()
-            }
+            self.reloadFallback = nil
+            self.reloadsInFlight = 0
+            self.resolveHeldFrame()
         }
-        hideWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+        reloadFallback = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.reloadFallbackDelay, execute: work)
+    }
+
+    private func reloadLanded() {
+        reloadsInFlight = max(0, reloadsInFlight - 1)
+        guard reloadsInFlight == 0 else { return }
+        reloadFallback?.cancel()
+        reloadFallback = nil
+        resolveHeldFrame()
+    }
+
+    /// The new track is in place and no frame followed the held nil. libass skips the publish
+    /// when the re-render is identical (the subject stays parked on nil), so ask the track data:
+    /// an active event means the held image is still right; none means the reload met a cue end.
+    private func resolveHeldFrame() {
+        guard holdingThroughReload else { return }
+        holdingThroughReload = false
+        if renderer.dialogues(at: currentOffset).isEmpty {
+            hideNow()
+        } else {
+            // The real cue end will be a nil-after-nil that the duplicate filter swallows, so
+            // watch the track data for it until the next published frame.
+            scheduleEndWatch()
+        }
     }
 
     /// Poll track data while holding a manually-kept frame; hide once no event is active.
@@ -822,7 +1030,10 @@ final class ASSFrameHostView: UIView {
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
             self.hideWorkItem = nil
-            if self.renderer.dialogues(at: self.currentOffset).isEmpty {
+            // Mid-parse the track is empty, which would read as a cue end; hold it for the landing.
+            if self.reloadsInFlight > 0 {
+                self.holdingThroughReload = true
+            } else if self.renderer.dialogues(at: self.currentOffset).isEmpty {
                 self.hideNow()
             } else {
                 self.scheduleEndWatch()
@@ -830,11 +1041,5 @@ final class ASSFrameHostView: UIView {
         }
         hideWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
-    }
-
-    private func hideNow() {
-        imageView.isHidden = true
-        imageView.image = nil
-        suppressNilDeadline = .distantPast
     }
 }

@@ -51,7 +51,6 @@ struct HomeFeedPersistenceTests {
         func getNextUp(userID: String, seriesID: String?, limit: Int, rewatching: Bool) async throws -> JellyfinItemsResponse { throw Unused() }
         func getItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse { throw Unused() }
         func getGenres(userID: String) async throws -> [NamedItem] { throw Unused() }
-        func getStudios(userID: String) async throws -> [NamedItem] { throw Unused() }
     }
 
     private func item(_ id: String) -> JellyfinItem {

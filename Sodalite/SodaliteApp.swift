@@ -1,6 +1,10 @@
 import SwiftUI
 import AetherEngine
+#if canImport(UIKit)
 import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 #if os(iOS)
 /// Drives app orientation: the app rotates freely on iPhone; a fullscreen player session narrows it
@@ -11,6 +15,15 @@ final class OrientationAppDelegate: NSObject, UIApplicationDelegate {
                      supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .pad { return .all }
         return PlayerOrientation.playerMask ?? .allButUpsideDown
+    }
+
+    /// Sodalite#81: iOS relaunches the app to deliver background download events. The container
+    /// recreates the session on launch; this handler is called once the session reports that every
+    /// event has been delivered.
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        guard DownloadSessionDelegate.identifiers.contains(identifier) else { completionHandler(); return }
+        DownloadRelaunch.store(completionHandler, for: identifier)
     }
 }
 #endif
@@ -31,6 +44,24 @@ struct SodaliteApp: App {
 
         // Now that appState is wired, connect the pending-requests monitor (reads appState + Seerr service).
         dependencies.wirePendingRequestsMonitor()
+        dependencies.wireMyRequestsWatcher()
+        dependencies.seerrRejectionHandler.start()
+        #if !os(macOS)
+        let watcherDeps = dependencies
+        MyRequestsBackgroundRefresh.register {
+            let watcher = watcherDeps.myRequestsWatcher
+            await watcherDeps.restoreSeerrSessionForBackgroundLaunch()
+            if await BackgroundRefreshTask.waitFor({ watcher.isEnabled }) {
+                watcher.reloadForActiveProfile()
+                await watcher.refresh()
+                await watcherDeps.syncAppIconBadge()
+            }
+            return MyRequestsBackgroundRefresh.keepScheduling(
+                scope: watcherDeps.myRequestsScope,
+                notifyEnabled: { watcherDeps.seerrNotificationPreferences.notifyMyRequests(scope: $0) }
+            )
+        }
+        #endif
 
         #if os(iOS)
         // Register the background refresh that fires a local notification when new requests await approval.
@@ -38,16 +69,24 @@ struct SodaliteApp: App {
         PendingRequestsBackgroundRefresh.register {
             let prefs = deps.seerrNotificationPreferences
             guard prefs.notifyPendingRequests else { return false }
+            await deps.restoreSeerrSessionForBackgroundLaunch()
+            // Without the session the monitor has nothing to count, and the chain would reschedule blind (PTD-204).
+            _ = await BackgroundRefreshTask.waitFor { deps.pendingRequestsMonitor.isEligible() }
             await PendingRequestsSync.refreshAndSync(
                 monitor: deps.pendingRequestsMonitor,
                 preferences: prefs,
                 jellyfinServerID: deps.activeServer?.id,
-                jellyfinUserID: deps.activeUserID
+                jellyfinUserID: deps.activeUserID,
+                syncBadge: { await deps.syncAppIconBadge() }
             )
             return true
         }
         // Show notifications as banners even while the app is foregrounded.
         PendingRequestsNotifier.configureForegroundPresentation()
+        #endif
+
+        #if os(macOS)
+        MacPlayerWindowSession.installTerminationHook()
         #endif
 
         // Hand the live AppState/DependencyContainer to the intent layer so AppIntent.perform() drives navigation without rebuilding its own DI graph.
@@ -57,7 +96,11 @@ struct SodaliteApp: App {
         // for the silent CloudKit pushes that drive near-real-time propagation.
         dependencies.attachCloudSync()
         Task { @MainActor in
+            #if canImport(UIKit)
             UIApplication.shared.registerForRemoteNotifications()
+            #elseif canImport(AppKit)
+            NSApplication.shared.registerForRemoteNotifications()
+            #endif
         }
 
         // Wire AetherEngine diagnostics into LogTap on EVERY build, App Store included: a playback bug
@@ -76,7 +119,7 @@ struct SodaliteApp: App {
         ShelfLog.sink = { line in
             LogTap.shared.note(line)
         }
-        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification,
+        NotificationCenter.default.addObserver(forName: AppActivity.didBecomeActive,
                                                object: nil, queue: nil) { _ in
             LogTap.shared.importShelfLines()
         }
@@ -120,6 +163,7 @@ struct SodaliteApp: App {
         )
         WindowGroup {
             AppRouter()
+                .phoneLandscapeKeepsPhoneLayout()
                 .environment(\.appState, appState)
                 .environment(\.dependencies, dependencies)
                 .environment(\.appearanceTheme, theme)
@@ -140,14 +184,72 @@ struct SodaliteApp: App {
                 }
                 // Third crossing of the same bridge. The shelf is redrawn afterwards because the
                 // cells it is holding were built from the old choice and nothing else will ask.
+                // Fourth crossing: an episode title the app veils must not sit on the home screen.
+                .task(id: dependencies.spoilerPolicy(userID: appState.activeUser?.id).topShelfTitleVeil) {
+                    let veil = dependencies.spoilerPolicy(userID: appState.activeUser?.id).topShelfTitleVeil
+                    guard veil != TopShelfTitleVeil.read() else { return }
+                    TopShelfTitleVeil.write(veil)
+                    TopShelfRefresher.invalidate()
+                }
                 .task(id: dependencies.appearancePreferences.topShelfImage) {
                     TopShelfArtwork.write(rawValue: dependencies.appearancePreferences.topShelfImage.rawValue)
                     TopShelfRefresher.invalidate()
                 }
+                // Fifth crossing: a show hidden from Home's rows stays off the shelf as well.
+                .task(id: appState.profileKey) { mirrorHiddenShowsToShelf() }
+                .onReceive(NotificationCenter.default.publisher(for: .homeConfigDidChange)) { _ in
+                    mirrorHiddenShowsToShelf()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .cloudSyncDidApplyChanges)) { _ in
+                    mirrorHiddenShowsToShelf()
+                }
                 .onOpenURL { url in
                     handleDeepLink(url)
                 }
+                #if os(macOS)
+                // Artwork runs up to the window's top edge with only the traffic lights over it;
+                // the sidebar already names where you are, so the title is noise.
+                .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+                // Hidden on the window rather than removed from the toolbar: `.toolbar(removing:
+                // .title)` changed how the toolbar lays out, and with the sidebar collapsed its
+                // toggle went into the overflow menu at the far right. The window keeps its title
+                // for the Window menu and Mission Control.
+                .navigationTitle(Text(verbatim: ""))
+                #endif
         }
+        #if os(macOS)
+        // Wide enough for the sidebar plus a poster grid that is not one column, which is the shape
+        // every library screen was laid out for.
+        .defaultSize(width: 1280, height: 820)
+        .commands { BackCommands() }
+        // Restoration alone can bring back nothing: quit with only the player window open and the
+        // next launch restores that one, which opts out of restoring, and no window at all.
+        .defaultLaunchBehavior(.presented)
+        #endif
+
+        #if os(macOS)
+        MacPlayerWindowScene()
+        MacAboutWindowScene()
+
+        MacSettingsWindowScene {
+            MacSettingsWindowContent()
+                .environment(\.appState, appState)
+                .environment(\.dependencies, dependencies)
+                .environment(\.appearanceTheme, theme)
+                .preferredColorScheme(.dark)
+                .tint(theme.palette.control.color)
+        }
+        #endif
+    }
+
+    /// Writes only on a change: the home-config signal fires for every row edit too, and each
+    /// write would otherwise ask the shelf to reload.
+    private func mirrorHiddenShowsToShelf() {
+        guard let profile = appState.profileKey else { return }
+        let mirror = DroppedSeriesStore.shelfMirror(for: profile)
+        guard mirror != TopShelfHiddenShows.read() else { return }
+        TopShelfHiddenShows.write(mirror)
+        TopShelfRefresher.invalidate()
     }
 
     /// Handles `sodalite://item/{id}` and `sodalite://play/{id}` (TopShelf's display and play actions): stashes the id in AppState for AppRouter to resolve. Synchronously tears down any active player modal first, else a TopShelf tap waking the app from a paused player loses ~10s to the player's own appDidBecomeActive reload before AppRouter's .task(id:) cycles in.
@@ -159,6 +261,7 @@ struct SodaliteApp: App {
         appState.isResolvingDeepLink = true
         // Assigned before the id: AppRouter's .task is keyed on the id, so the flag has to be in place when it fires.
         appState.pendingDeepLinkAutoPlay = route.autoPlay
+        appState.pendingDeepLinkServerID = route.serverID
         appState.pendingDeepLinkItemID = route.itemID
     }
 }

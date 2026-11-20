@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// Three passes, 250ms and then 500ms apart. Long enough to outlast the server finishing the resize
 /// it served half of, short enough that a caller's own fallback is not held back by much when the
@@ -16,12 +15,16 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     var fallbackURL: URL? = nil
     /// Fires with the decoded image whenever one lands, cache hit included, so a caller can derive
     /// artwork colours (ArtworkTint) without decoding the bytes a second time.
-    var onImageLoaded: ((UIImage) -> Void)? = nil
+    var onImageLoaded: ((PlatformImage) -> Void)? = nil
     /// Fires false when a load starts and true once every candidate has failed. The placeholder is
     /// also what shows WHILE loading, so a caller that deliberately blanks its placeholder (the
     /// detail-page logo reserving its slot, Sodalite#97) can only tell "still coming" from "never
     /// coming" here, and put its own fallback back.
     var onLoadFailed: ((Bool) -> Void)? = nil
+    /// Crop the decoded image to its non-transparent pixels before it is cached, so the content
+    /// closure and its size see the visible mark and not the canvas around it. The title logo only
+    /// (Sodalite#192).
+    var trimsTransparentMargin = false
     /// Built with the decoded image AND that image's own size, so a caller that has to size its
     /// frame from the source's aspect ratio reads both out of the same state. Handing the size back
     /// through `onImageLoaded` instead puts it in the CALLER's state, one view up, where the image
@@ -33,7 +36,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     init(
         url: URL?,
         fallbackURL: URL? = nil,
-        onImageLoaded: ((UIImage) -> Void)? = nil,
+        onImageLoaded: ((PlatformImage) -> Void)? = nil,
         onLoadFailed: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping (Image) -> Content,
         @ViewBuilder placeholder: @escaping () -> Placeholder
@@ -51,8 +54,9 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     init(
         url: URL?,
         fallbackURL: URL? = nil,
-        onImageLoaded: ((UIImage) -> Void)? = nil,
+        onImageLoaded: ((PlatformImage) -> Void)? = nil,
         onLoadFailed: ((Bool) -> Void)? = nil,
+        trimsTransparentMargin: Bool = false,
         @ViewBuilder sizedContent: @escaping (Image, CGSize) -> Content,
         @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
@@ -60,14 +64,20 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         self.fallbackURL = fallbackURL
         self.onImageLoaded = onImageLoaded
         self.onLoadFailed = onLoadFailed
+        self.trimsTransparentMargin = trimsTransparentMargin
         self.content = sizedContent
         self.placeholder = placeholder
+        // A card that scrolls back into a lazy row is a new view, and an empty first frame faded its
+        // cached artwork in again over the placeholder, a reload in all but the network (Sodalite#212).
+        _loaded = State(initialValue: url.flatMap {
+            ImageCache.shared.image(for: Self.cacheKey(for: $0, trimmed: trimsTransparentMargin))
+        })
     }
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appState) private var appState
-    @State private var loaded: UIImage?
+    @State private var loaded: PlatformImage?
     /// Failures that heal on their own (offline blip, an iOS local-network permission prompt still
     /// unanswered, a resize the server had not finished writing) must not latch the placeholder
     /// forever.
@@ -79,11 +89,14 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     /// tvOS 26.6. `requestContentReload` is the app's "an outside cause made your last failure
     /// obsolete" signal, and an image that failed transiently is one of the things that gave up.
     @State private var retryOnActivate = false
+    /// Bumped to ask for another load through `.task(id:)`, which cancels the one in flight. An
+    /// unstructured `Task { load() }` was never cancelled and could write an old URL's image (CMP-202).
+    @State private var retryToken = 0
 
     var body: some View {
         ZStack {
             if let loaded {
-                content(Image(uiImage: loaded), loaded.size)
+                content(Image(platformImage: loaded), loaded.size)
                     .transition(.opacity.animation(.easeIn(duration: 0.25)))
                     // Above the placeholder for the length of the swap, which is what lets the
                     // placeholder stay opaque underneath instead of having to fade in step.
@@ -99,25 +112,34 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
                     .zIndex(0)
             }
         }
-        .task(id: "\(url?.absoluteString ?? "")|\(fallbackURL?.absoluteString ?? "")") {
+        .task(id: "\(url?.absoluteString ?? "")|\(fallbackURL?.absoluteString ?? "")|\(retryToken)") {
             await load()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active, retryOnActivate, loaded == nil {
-                Task { await load() }
+                retryToken += 1
             }
         }
         // The server came back, or a permission did. Only the loads that failed in a way that can
         // heal ask again; a 404 and a body that is not an image read the same however often you try.
         .onChange(of: appState.requestContentReload) { _, _ in
             if retryOnActivate, loaded == nil {
-                Task { await load() }
+                retryToken += 1
             }
         }
     }
 
     @MainActor
     private func load() async {
+        // A hit is drawn without the reset below, so a card seeded from the cache in `init` keeps its
+        // first frame instead of blanking and fading back in.
+        if let url, let cached = ImageCache.shared.image(for: Self.cacheKey(for: url, trimmed: trimsTransparentMargin)) {
+            retryOnActivate = false
+            onLoadFailed?(false)
+            loaded = cached
+            onImageLoaded?(cached)
+            return
+        }
         // Reset on URL change so a stale image from the previous profile doesn't flash while the new one loads.
         loaded = nil
         retryOnActivate = false
@@ -159,6 +181,7 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
         switch result {
         case .image(let image):
             loaded = image
+            onLoadFailed?(false)
             onImageLoaded?(image)
         case .exhausted(let armSceneRetry):
             retryOnActivate = armSceneRetry
@@ -168,6 +191,10 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
             // text title up for a load that never finished being asked.
             break
         }
+    }
+
+    nonisolated private static func cacheKey(for url: URL, trimmed: Bool) -> URL {
+        trimmed ? ImageCache.trimmedKey(for: url) : url
     }
 
     /// "Logo", "Backdrop", "Primary": the segment after /Images/, which is what a reader of the
@@ -192,39 +219,56 @@ struct AsyncCachedImage<Content: View, Placeholder: View>: View {
     @MainActor
     private func loadImage(from url: URL?, attempt: Int) async -> ImageLoadOutcome {
         guard let url else { return .noImage }
+        let cacheKey = Self.cacheKey(for: url, trimmed: trimsTransparentMargin)
 
-        if let cached = ImageCache.shared.image(for: url) {
+        if let cached = ImageCache.shared.image(for: cacheKey) {
             return .image(cached)
         }
 
-        // Request built on MainActor to read the MainActor-isolated token; attach auth only for the active Jellyfin host so external URLs (TMDB/CDN posters) don't see our token.
-        var request = URLRequest(url: url)
-        // 15s, not the 60s default: one hanging poster otherwise holds the row in placeholder for a full minute.
-        request.timeoutInterval = 15
-        if url.host == dependencies.jellyfinClient.baseURL?.host,
-           let token = dependencies.jellyfinClient.accessToken,
-           !token.isEmpty {
-            request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
-        }
+        // Request built on MainActor to read the MainActor-isolated tokens; attach auth only for a participating Jellyfin server, matched by host and port, so external URLs (TMDB/CDN posters) don't see our token.
+        let request = ImageCache.request(for: url, auth: ImageAuth.snapshot(dependencies.sessionRegistry))
 
-        let outcome = await Self.fetchAndDecode(request: request, attempt: attempt)
+        let outcome = await Self.fetchAndDecode(
+            request: request, attempt: attempt, trimsTransparentMargin: trimsTransparentMargin)
         guard case .image(let prepared) = outcome else { return outcome }
         // Cache before the cancellation check: a `.task(id:)` invalidation may cancel between decode and @State write, but the bytes are already in memory, so skipping the store would re-pay bandwidth+decode on next mount. Only a WHOLE image ever gets here, so a payload that stopped in the middle cannot latch itself into the session (Sodalite#123).
-        ImageCache.shared.store(prepared, for: url)
+        ImageCache.shared.store(prepared, for: cacheKey)
         guard !Task.isCancelled else { return .noImage }
         return .image(prepared)
     }
 
-    /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop; static + `nonisolated` keeps it on the cooperative pool. Cancellation propagates from the enclosing `.task(id:)`.
+    /// Network + decode + force-decompress off the MainActor. `preparingForDisplay()` runs the pixel decode now so the first draw isn't a scroll frame-drop. Cancellation propagates from the enclosing `.task(id:)`.
+    ///
+    /// `@concurrent` is what puts it on the cooperative pool. Under approachable concurrency a plain
+    /// `nonisolated async` runs on the caller's actor, and the caller is MainActor, so every card on
+    /// Home decoded its JPEG on the main thread, one after the other, and scrolling stuttered while
+    /// they came in (Sodalite#212).
     ///
     /// `attempt` reaches `ImageFetch` rather than staying here: a 200 is not the same as a whole
     /// image, and the retry that follows one has to ask the SERVER, not the HTTP cache that just
     /// stored the half file (Sodalite#123).
-    nonisolated private static func fetchAndDecode(request: URLRequest, attempt: Int) async -> ImageLoadOutcome {
+    ///
+    /// The trim runs here, after `ImageFetch` has refused a payload that stopped short, so a
+    /// half-written logo is never measured (Sodalite#123), and before the cache, so a hit costs
+    /// nothing (Sodalite#192).
+    @concurrent nonisolated private static func fetchAndDecode(
+        request: URLRequest, attempt: Int, trimsTransparentMargin: Bool
+    ) async -> ImageLoadOutcome {
         switch await ImageFetch.load(request, attempt: attempt) {
         case .whole(let data):
-            guard let image = UIImage(data: data) else { return .noImage }
-            return .image(image.preparingForDisplay() ?? image)
+            guard var image = PlatformImage(data: data) else { return .noImage }
+            if trimsTransparentMargin {
+                let trimmed = image.trimmingTransparentMargin()
+                if trimmed !== image {
+                    LogTap.shared.note(
+                        "[Image] trimmed \(imageKind(request.url)) \(itemTail(request.url))"
+                            + " \(Int(image.size.width))x\(Int(image.size.height))"
+                            + " -> \(Int(trimmed.size.width))x\(Int(trimmed.size.height))"
+                    )
+                    image = trimmed
+                }
+            }
+            return .image(image.preparedForDisplay() ?? image)
         case .incomplete:
             return .incompletePayload
         case .noImage:
@@ -247,34 +291,81 @@ final class ImageCache: @unchecked Sendable {
     // Plain `nonisolated` (not `(unsafe)`): Sendable constant reachable from background prefetch under the project's MainActor default isolation.
     nonisolated static let shared = ImageCache()
 
-    // `nonisolated(unsafe)`: NSCache is thread-safe, so prefetch can `store` from background tasks without a per-image MainActor hop.
-    nonisolated(unsafe) private let cache: NSCache<NSURL, UIImage>
+    /// Least recently USED goes first, so the rows just scrolled past outlive the ones far above
+    /// them (Sodalite#212, see `LRUCostCache`). Thread-safe, so prefetch stores from background tasks.
+    nonisolated private let cache: LRUCostCache<URL, PlatformImage>
 
-    /// Cost-based eviction by decoded byte size; the 150 MB budget gates (countLimit stays generous), bounded so long sessions don't grow into hundreds of MB.
+    /// The decoded bytes the cache may hold, from `costLimit(physicalMemory:)`.
+    nonisolated var costLimit: Int { cache.costLimit }
+
     nonisolated private init() {
-        let cache = NSCache<NSURL, UIImage>()
-        cache.totalCostLimit = 150_000_000
-        cache.countLimit = 1000
-        self.cache = cache
+        cache = LRUCostCache(costLimit: Self.costLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory))
+        #if canImport(UIKit)
+        // Half, not all: the screen that is up keeps its newest cards.
+        let cache = cache
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: nil
+        ) { _ in
+            cache.trim(toFraction: 0.5)
+            LogTap.shared.note("[ImageCache] memory warning, trimmed to \(cache.totalCost / 1_000_000) MB")
+        }
+        #endif
     }
 
-    // nonisolated so the prefetch hot path stores from off-actor tasks without a per-image MainActor hop (NSCache is thread-safe).
-    nonisolated func image(for url: URL) -> UIImage? {
-        cache.object(forKey: url as NSURL)
+    /// 75 MB per GB of RAM, between 150 MB (Apple TV HD, 2 GB) and 300 MB (Apple TV 4K 2022, 4 GB).
+    ///
+    /// The budget is not a share of the RAM, it is a share of what jetsam allows the process, about
+    /// 2.1 GB on a 4 GB Apple TV (AE#104), and Home stays alive under the player: a 4K session put the
+    /// engine at some 900 MB on its own. A flat 150 MB held some 60 cards at the widths `ImageWidth`
+    /// asks for, under what one Home screen draws, so prefetching the lower rows evicted the ones on
+    /// screen (Sodalite#212). A memory warning trims the cache to half, the second line behind this one.
+    nonisolated static func costLimit(physicalMemory: UInt64) -> Int {
+        let gigabytes = (Double(physicalMemory) / Double(1 << 30)).rounded()
+        let budget = Int(gigabytes) * 75_000_000
+        return min(max(budget, 150_000_000), 300_000_000)
     }
 
-    nonisolated func store(_ image: UIImage, for url: URL) {
-        cache.setObject(image, forKey: url as NSURL, cost: estimatedBytes(for: image))
+    /// How many images a prefetch may warm: half the budget, counted in typical cards (a 640px
+    /// poster decodes to 2.46 MB, a 960px landscape card to 2.07 MB), so the screen keeps the other
+    /// half and a prefetch can never push out what it is drawing (Sodalite#212).
+    nonisolated static func prefetchLimit(costLimit: Int) -> Int {
+        costLimit / 2 / 2_500_000
+    }
+
+    /// Evictions since the last call, for the diagnostic line a prefetch writes.
+    nonisolated func takeEvictionCount() -> Int {
+        cache.takeEvictionCount()
+    }
+
+    /// Decoded bytes held now, for the diagnostic line.
+    nonisolated var residentBytes: Int { cache.totalCost }
+
+    // nonisolated so the prefetch hot path stores from off-actor tasks without a per-image MainActor hop (the LRU is lock-protected).
+    nonisolated func image(for url: URL) -> PlatformImage? {
+        cache.value(for: url)
+    }
+
+    nonisolated func store(_ image: PlatformImage, for url: URL) {
+        cache.store(image, for: url, cost: estimatedBytes(for: image))
+    }
+
+    /// A trimmed image is a different image from the one at its URL, so it is cached under its own
+    /// key: a surface that asks for the same URL untrimmed must not read the crop, nor the logo the
+    /// canvas. A fragment never reaches the server, so the request itself is unchanged.
+    nonisolated static func trimmedKey(for url: URL) -> URL {
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.fragment = "trimmed"
+        return components?.url ?? url
     }
 
     /// Wipe on profile switches: a poster cached with user A's token may be unfetchable under user B's permissions.
     func clear() {
-        cache.removeAllObjects()
+        cache.removeAll()
     }
 
-    /// Decoded size estimate: width × height × scale² × 4 bytes (RGBA8). Ignores HDR/wide-gamut backing, fine as an NSCache cost signal.
-    nonisolated private func estimatedBytes(for image: UIImage) -> Int {
-        let scale = image.scale
+    /// Decoded size estimate: width × height × scale² × 4 bytes (RGBA8). Ignores HDR/wide-gamut backing, fine as a cost signal.
+    nonisolated private func estimatedBytes(for image: PlatformImage) -> Int {
+        let scale = image.pixelScale
         let pixels = image.size.width * scale * image.size.height * scale
         return Int(pixels) * 4
     }
@@ -283,52 +374,81 @@ final class ImageCache: @unchecked Sendable {
 // MARK: - Prefetch
 
 extension ImageCache {
-    /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `authToken`/`jellyfinHost` mirror `load`: X-Emby-Token only for the active Jellyfin host so external CDN URLs don't leak the token.
+    /// Background batch cache-warm: skips cached URLs, fans out the rest with bounded concurrency, drops failures silently. `auth` mirrors `load`: X-Emby-Token only for a participating Jellyfin server so external CDN URLs don't leak the token.
+    /// Returns how many images it decoded into the cache, for the caller's diagnostic line.
+    @discardableResult
     static func prefetch(
         _ urls: [URL],
-        authToken: String?,
-        jellyfinHost: String?
-    ) async {
-        let pending = urls.filter { ImageCache.shared.image(for: $0) == nil }
-        guard !pending.isEmpty else { return }
+        auth: ImageAuth,
+        load: @escaping @Sendable (URL, ImageAuth) async -> Bool = { await prefetchOne(url: $0, auth: $1) }
+    ) async -> Int {
+        // Skip what another prefetch is already loading (audit BRW-203: three overlapping runs
+        // fetched and decoded every search poster three times).
+        let pending = PrefetchInFlight.claim(urls.filter { ImageCache.shared.image(for: $0) == nil })
+        guard !pending.isEmpty else { return 0 }
+        defer { PrefetchInFlight.release(pending) }
 
-        await withTaskGroup(of: Void.self) { group in
-            // 6 in flight: saturates a home LAN without crowding foreground fetches; matches URLSession's per-host default.
-            let maxConcurrent = 6
+        return await withTaskGroup(of: Bool.self) { group in
+            // Half of `ImageFetch.session`'s connections per host, so the cards on screen always find
+            // free ones: at six of six, a visible card queued behind the prefetch (Sodalite#212).
+            let maxConcurrent = ImageFetch.connectionsPerHost / 2
             var iter = pending.makeIterator()
 
             for _ in 0..<min(maxConcurrent, pending.count) {
                 guard let url = iter.next() else { break }
                 group.addTask {
-                    await prefetchOne(url: url, token: authToken, jfHost: jellyfinHost)
+                    await load(url, auth)
                 }
             }
-            for await _ in group {
+            var warmed = 0
+            for await stored in group {
+                if stored { warmed += 1 }
                 if let url = iter.next() {
                     group.addTask {
-                        await prefetchOne(url: url, token: authToken, jfHost: jellyfinHost)
+                        await load(url, auth)
                     }
                 }
             }
+            return warmed
         }
     }
 
-    nonisolated private static func prefetchOne(
-        url: URL,
-        token: String?,
-        jfHost: String?
-    ) async {
+    /// The one place an artwork request is built: 15 s rather than the 60 s default (one hanging
+    /// poster otherwise holds a row in placeholder for a minute), and `X-Emby-Token` only for a
+    /// participating Jellyfin server, so an external CDN never sees the token (audit CMP-R202).
+    nonisolated static func request(for url: URL, auth: ImageAuth?, timeout: TimeInterval = 15) -> URLRequest {
         var request = URLRequest(url: url)
-        request.timeoutInterval = 15
-        if let token, !token.isEmpty, url.host == jfHost {
+        request.timeoutInterval = timeout
+        if let token = auth?.token(for: url) {
             request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
         }
+        return request
+    }
+
+    nonisolated private static func prefetchOne(url: URL, auth: ImageAuth) async -> Bool {
+        let imageRequest = request(for: url, auth: auth)
         // Same funnel as the foreground path: a prefetch must never be the thing that puts a
         // half-written resize into either cache, and the HTTP entry it would leave behind is what
         // the first focus would then read (Sodalite#123).
-        guard case .whole(let data) = await ImageFetch.load(request),
-              let image = UIImage(data: data)
-        else { return }
-        ImageCache.shared.store(image.preparingForDisplay() ?? image, for: url)
+        guard case .whole(let data) = await ImageFetch.load(imageRequest),
+              let image = PlatformImage(data: data)
+        else { return false }
+        ImageCache.shared.store(image.preparedForDisplay() ?? image, for: url)
+        return true
+    }
+}
+
+/// URLs a running `ImageCache.prefetch` has taken, so a second run does not load them again.
+nonisolated enum PrefetchInFlight {
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var urls = Set<URL>()
+
+    /// The URLs nobody else holds, now held by the caller. Repeats within `urls` count once.
+    static func claim(_ candidates: [URL]) -> [URL] {
+        lock.withLock { candidates.filter { urls.insert($0).inserted } }
+    }
+
+    static func release(_ released: [URL]) {
+        lock.withLock { urls.subtract(released) }
     }
 }

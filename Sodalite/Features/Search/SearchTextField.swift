@@ -1,9 +1,12 @@
+#if os(iOS)
+// The iOS search field. tvOS uses SwiftUI's `.searchable`, macOS SwiftUI's own field.
 import SwiftUI
 import UIKit
 
-/// UIKit UITextField wrapper: on tvOS it's a first-class focus-engine citizen (clean tab-bar/results routing, reliable keyboard overlay) where SwiftUI's TextField has focus quirks.
+/// UIKit UITextField wrapper with UIKit's own clear button.
 struct SearchTextField: UIViewRepresentable {
     @Binding var text: String
+    @Binding var isEditing: Bool
     var placeholder: String
 
     func makeUIView(context: Context) -> UITextField {
@@ -11,7 +14,7 @@ struct SearchTextField: UIViewRepresentable {
         field.placeholder = placeholder
         field.autocorrectionType = .no
         field.autocapitalizationType = .none
-        // tvOS UITextField defaults to a large font; 26pt keeps the inline bar slim.
+        // 26pt keeps the inline bar slim.
         field.font = UIFont.systemFont(ofSize: 26, weight: .regular)
         field.delegate = context.coordinator
         field.addTarget(
@@ -20,13 +23,10 @@ struct SearchTextField: UIViewRepresentable {
             for: .editingChanged
         )
         field.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        // Clear button, iOS only: UIKit draws it inside the field at the trailing edge, where iOS
-        // looks for it, and localizes and voices it for free. tvOS has no pointer to hit it with.
-        // .always rather than .whileEditing so it survives the keyboard being dismissed, which is
-        // exactly when a stale query is in the way.
-        #if os(iOS)
+        // UIKit draws the clear button inside the field at the trailing edge, where iOS looks for
+        // it, and localizes and voices it for free. .always rather than .whileEditing so it survives
+        // the keyboard being dismissed, which is exactly when a stale query is in the way.
         field.clearButtonMode = .always
-        #endif
         return field
     }
 
@@ -36,6 +36,12 @@ struct SearchTextField: UIViewRepresentable {
         }
         uiView.placeholder = placeholder
         context.coordinator.parent = self
+        if !isEditing && uiView.isFirstResponder {
+            uiView.resignFirstResponder()
+        } else if isEditing && !uiView.isFirstResponder && uiView.window != nil {
+            // Sodalite#209: a second tap on the Search tab asks for the keyboard.
+            uiView.becomeFirstResponder()
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -53,18 +59,25 @@ struct SearchTextField: UIViewRepresentable {
             parent.text = sender.text ?? ""
         }
 
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            if !parent.isEditing { parent.isEditing = true }
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            if parent.isEditing { parent.isEditing = false }
+        }
+
         func textFieldShouldReturn(_ textField: UITextField) -> Bool {
             textField.resignFirstResponder()
             return true
         }
 
-        #if os(iOS)
         /// The clear button does not post .editingChanged, so the binding is published here or the
         /// field empties while the results below keep showing the old query's hits.
         func textFieldShouldClear(_ textField: UITextField) -> Bool {
             parent.text = ""
             return true
         }
-        #endif
     }
 }
+#endif

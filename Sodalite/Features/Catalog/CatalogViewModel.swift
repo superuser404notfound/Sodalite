@@ -65,6 +65,9 @@ final class CatalogViewModel {
     var isLoadingDiscover = false
     var isLoadingRequests = false
     var errorMessage: String?
+    /// The admin queue's own load failure. It used to land in `errorMessage`, which this view never
+    /// reads, so a failed load looked like an empty queue (CAT-206).
+    var allRequestsError: String?
 
     private let discoverService: SeerrDiscoverServiceProtocol
     private let requestService: SeerrRequestServiceProtocol
@@ -366,7 +369,8 @@ final class CatalogViewModel {
             let result = try await requestService.myRequests(
                 userID: userID,
                 take: 50,
-                skip: 0
+                skip: 0,
+                sort: .added
             )
             myRequests = result.results
             myRequestsTotal = result.pageInfo.results
@@ -392,7 +396,8 @@ final class CatalogViewModel {
             let result = try await requestService.myRequests(
                 userID: userID,
                 take: 50,
-                skip: myRequestsSkip
+                skip: myRequestsSkip,
+                sort: .added
             )
             // Dedupe against the visible list: Seerr repeats records across adjacent pages when status counts shift between fetches.
             let existing = Set(myRequests.map(\.id))
@@ -485,6 +490,7 @@ final class CatalogViewModel {
         allRequestsSkip = 0
         allRequests = []
         allRequestsTotal = 0
+        allRequestsError = nil
         isLoadingAllRequests = true
         defer {
             if generation == allRequestsGeneration { isLoadingAllRequests = false }
@@ -512,7 +518,7 @@ final class CatalogViewModel {
             } while filter == .declined && allRequests.isEmpty && allRequestsSkip < allRequestsTotal
         } catch {
             guard generation == allRequestsGeneration else { return }
-            errorMessage = ErrorText.user(for: error)
+            allRequestsError = ErrorText.user(for: error)
         }
     }
 
@@ -593,14 +599,15 @@ final class CatalogViewModel {
 
     func deleteRequest(_ request: SeerrRequest) async {
         // Optimistic remove; restore on failure so the user can retry.
-        let snapshot = allRequests
+        let generation = allRequestsGeneration
+        let removed = allRequests.firstIndex(where: { $0.id == request.id })
         allRequests.removeAll { $0.id == request.id }
         do {
             try await requestService.deleteRequest(requestID: request.id)
             lastAdminRequestOutcome = .deleted
             await refreshAllRequestsCounts()
         } catch let error as APIError where error.isUnauthorized {
-            allRequests = snapshot
+            reinsert(request, at: removed, ifGeneration: generation)
             lastAdminRequestOutcome = .permissionDenied
             // No local permission refresh: the 403 toast is the signal; next session restore reloads activeSeerrUser (AppRouter hides the tab if the revoke sticks).
         } catch let error as APIError where error.isNotFound {
@@ -608,9 +615,18 @@ final class CatalogViewModel {
             lastAdminRequestOutcome = .deleted
             await refreshAllRequestsCounts()
         } catch {
-            allRequests = snapshot
+            reinsert(request, at: removed, ifGeneration: generation)
             lastAdminRequestOutcome = .failed(message: ErrorText.user(for: error))
         }
+    }
+
+    /// Puts back only the row a failed delete took out, at its old place. A reload that replaced the
+    /// list meanwhile is newer and is left alone; a page appended or another mutation since then is
+    /// kept, which assigning the old list would have thrown away (CAT-207, audit review R-CATALOG-6).
+    private func reinsert(_ request: SeerrRequest, at index: Int?, ifGeneration generation: Int) {
+        guard generation == allRequestsGeneration, let index,
+              !allRequests.contains(where: { $0.id == request.id }) else { return }
+        allRequests.insert(request, at: min(index, allRequests.count))
     }
 
     func updateRequest(_ request: SeerrRequest, body: SeerrRequestUpdateBody) async -> SeerrRequest? {
@@ -641,7 +657,7 @@ final class CatalogViewModel {
         outcome: AdminRequestOutcome,
         action: @escaping () async throws -> SeerrRequest
     ) async {
-        let snapshot = allRequests
+        // Nothing is changed before the await, so a failure has nothing to undo.
         do {
             let updated = try await action()
             replaceRequest(updated)
@@ -651,15 +667,12 @@ final class CatalogViewModel {
             lastAdminRequestOutcome = outcome
             await refreshAllRequestsCounts()
         } catch let error as APIError where error.isUnauthorized {
-            allRequests = snapshot
             lastAdminRequestOutcome = .permissionDenied
             // No local permission refresh: the 403 toast is the signal; next session restore reloads activeSeerrUser (AppRouter hides the tab if the revoke sticks).
         } catch let error as APIError where error.isNotFound {
             // Stale row (another admin already changed it); silent reload of the current filter drops it.
-            allRequests = snapshot
             await loadAllRequests()
         } catch {
-            allRequests = snapshot
             lastAdminRequestOutcome = .failed(message: ErrorText.user(for: error))
         }
     }

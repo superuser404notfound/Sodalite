@@ -41,11 +41,17 @@ struct CloudSyncSettingsParityTests {
     ///
     /// Named exemptions, all still written for older decoders and no longer settings this build
     /// stores: `skipIntervalSeconds` is the pre-split single interval (Sodalite#144), the two
-    /// overlay flags are required by 1.0.0's synthesized decoder.
+    /// overlay flags are required by 1.0.0's synthesized decoder. `playerControls` (Sodalite#194)
+    /// postdates the legacy record and travels in the profile record alone; no build that reads the
+    /// legacy record knows it, and its Stats half still goes out as `showStatsForNerds`. `versionOrder`
+    /// and `playThemeSongs` (Sodalite#219), `autoSkipCommercials` (Sodalite#224), `musicNormalization`
+    /// (Sodalite#242) and `playPrerolls` (Sodalite#244) postdate it the same way.
     @Test func everyPlaybackSettingIsInThePayload() {
         let defaults = scratchDefaults("playback")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
         let profile = storedSettingNames(of: PlaybackPreferences(store: defaults))
+            .subtracting(["playerControls", "versionOrder", "playThemeSongs", "autoSkipCommercials",
+                          "musicNormalization", "playPrerolls"])
         let payload = payloadFieldNames(.playback)
             .subtracting(["skipIntervalSeconds", "showDiagnosticOverlay", "focusDiagnosticOverlayOnDV"])
         #expect(profile.isDisjoint(with: device))
@@ -55,14 +61,26 @@ struct CloudSyncSettingsParityTests {
     @Test func everyAppearanceSettingIsInThePayload() {
         let defaults = scratchDefaults("appearance")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
+        // `pinnedLibraryTabs`, `uprightArtwork`, `showPosterRating` and `tabOrder` postdate the
+        // legacy record and travel in the profile record alone.
         let profile = storedSettingNames(of: AppearancePreferences(store: defaults))
+            .subtracting(["pinnedLibraryTabs", "uprightArtwork", "showPosterRating", "tabOrder"])
         let payload = payloadFieldNames(.appearance)
         #expect(profile.isDisjoint(with: device))
         #expect(profile.union(device.intersection(payload)) == payload)
     }
 
+    /// Named exemptions: the two streaming-quality rungs (Sodalite#87), the TrueHD Atmos heights
+    /// switch (AetherEngine#731) and its bed layout, the live delay (AetherEngine 7.45.0) and the six audio shaping values
+    /// (AetherEngine#923, #1044), the upscaling switches (AetherEngine#846, #1039) and the audio delay
+    /// (AetherEngine#464) and the HDR10+ preference (Sodalite#245) postdate the legacy records.
+    /// Those records exist only for builds that already read them, and no such build knows any of them.
     @Test func everyDeviceValueTravelsInOneLegacyRecord() {
         let device = storedSettingNames(of: DevicePreferences(store: scratchDefaults("device")))
+            .subtracting(["streamingQualityWifi", "streamingQualityCellular", "trueHDAtmosHeights", "objectAudioLayout", "liveDelay",
+                          "speakerLayout", "dialogueBoost", "nightMode", "nightModeStartHour", "nightModeEndHour", "lfeInStereoDownmix",
+                          "enhancedUpscaling", "lineArtUpscaling", "audioDelayMilliseconds",
+                          "preferHDR10PlusOverForcedDolbyVision"])
         let playback = device.intersection(payloadFieldNames(.playback))
         let appearance = device.intersection(payloadFieldNames(.appearance))
         #expect(playback.isDisjoint(with: appearance))
@@ -85,7 +103,9 @@ struct CloudSyncSettingsParityTests {
 
     @Test func everySeerrNotificationSettingIsInThePayload() {
         let store = SeerrNotificationPreferences(defaults: scratchDefaults("seerr"))
-        #expect(storedSettingNames(of: store) == payloadFieldNames(.seerrNotifications))
+        // The my-requests switch is per profile and device-local by design; its revision only re-renders rows.
+        let stored = storedSettingNames(of: store).subtracting(["myRequestsRevision"])
+        #expect(stored == payloadFieldNames(.seerrNotifications))
     }
 
     @Test func everyParentalControlsSettingIsInThePayload() {
@@ -95,9 +115,10 @@ struct CloudSyncSettingsParityTests {
 
     /// The other store keys are per-entry memories, not preference stores: their payload is one
     /// `entries` map that CloudSyncMerge merges per key, so there is no field list to keep in step.
+    /// The reveals carry a second such map, their hides (Sodalite#222), merged the same way.
     @Test func theMemoryStoresAreCoveredByTheirPerKeyMerge() {
         #expect(payloadFieldNames(.trackMemory) == ["entries"])
-        #expect(payloadFieldNames(.spoilerReveals) == ["entries"])
+        #expect(payloadFieldNames(.spoilerReveals) == ["entries", "hiddenAt"])
         #expect(payloadFieldNames(.spoilerSeriesRules) == ["entries"])
     }
 }

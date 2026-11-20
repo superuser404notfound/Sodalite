@@ -74,6 +74,7 @@ struct SeerrEffectiveRequestBadge: View {
             case .processing: return .processing
             case .pending: return .approved
             case .deleted: return .removed
+            case .failed: return .failed
             case .unknown, nil: return .processing
             }
         }

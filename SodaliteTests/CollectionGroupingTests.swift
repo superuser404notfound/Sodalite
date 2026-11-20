@@ -166,7 +166,6 @@ struct CollectionGroupingShuffleTests {
         }
         func getLatestMedia(userID: String, parentID: String?, includeItemTypes: [ItemType]?, limit: Int) async throws -> [JellyfinItem] { [] }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     @Test func shuffleNeverCollapses() async {

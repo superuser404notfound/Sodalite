@@ -61,6 +61,24 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     /// later build and the profile's playback settings never reached another device. nil keeps the
     /// local value.
     var touchpadScrubbing: Bool?
+    /// Optional for the same reason. nil keeps the local value.
+    var showNextEpisodeCard: Bool?
+    /// Optional for the same reason. nil keeps the local value.
+    var askForRatingAfterMovie: Bool?
+    /// Sodalite#194, the encoded `PlayerControlsLayout`. Optional for the same reason; nil keeps the
+    /// local layout.
+    var playerControls: String?
+    /// Raw value of `VersionOrder`. Optional for the same reason; nil keeps the local value.
+    var versionOrder: String?
+    /// Sodalite#219. Optional for the same reason; nil keeps the local value.
+    var playThemeSongs: Bool?
+    /// Sodalite#224. Optional for the same reason; nil keeps the local value.
+    var autoSkipCommercials: Bool?
+    /// Sodalite#242, raw value of `MusicNormalization`. Optional for the same reason; nil keeps the
+    /// local value.
+    var musicNormalization: String?
+    /// Sodalite#244. Optional for the same reason; nil keeps the local value.
+    var playPrerolls: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -94,7 +112,15 @@ extension ProfilePlaybackPayload {
             preferServerTrickplay: p.preferServerTrickplay,
             rememberTrackSelections: p.rememberTrackSelections,
             subtitlesOnSkipBack: p.subtitlesOnSkipBack,
-            touchpadScrubbing: p.touchpadScrubbing
+            touchpadScrubbing: p.touchpadScrubbing,
+            showNextEpisodeCard: p.showNextEpisodeCard,
+            askForRatingAfterMovie: p.askForRatingAfterMovie,
+            playerControls: p.playerControls.encoded(),
+            versionOrder: p.versionOrder.rawValue,
+            playThemeSongs: p.playThemeSongs,
+            autoSkipCommercials: p.autoSkipCommercials,
+            musicNormalization: p.musicNormalization.rawValue,
+            playPrerolls: p.playPrerolls
         )
     }
 
@@ -128,6 +154,87 @@ extension ProfilePlaybackPayload {
         p.rememberTrackSelections = rememberTrackSelections
         p.subtitlesOnSkipBack = subtitlesOnSkipBack
         if let touchpadScrubbing { p.touchpadScrubbing = touchpadScrubbing }
+        if let showNextEpisodeCard { p.showNextEpisodeCard = showNextEpisodeCard }
+        if let askForRatingAfterMovie { p.askForRatingAfterMovie = askForRatingAfterMovie }
+        if let playerControls {
+            p.playerControls = PlayerControlsLayout.decoded(playerControls, showsStats: p.showStatsForNerds)
+        }
+        if let order = versionOrder.flatMap(VersionOrder.init(rawValue:)) { p.versionOrder = order }
+        if let playThemeSongs { p.playThemeSongs = playThemeSongs }
+        if let autoSkipCommercials { p.autoSkipCommercials = autoSkipCommercials }
+        if let mode = musicNormalization.flatMap(MusicNormalization.init(rawValue:)) { p.musicNormalization = mode }
+        if let playPrerolls { p.playPrerolls = playPrerolls }
+    }
+}
+
+extension ProfilePlaybackPayload {
+    /// A legacy `settings-playback` record in profile form, so the one apply below serves both
+    /// (audit SYNC-R202). Fields the legacy payload does not carry are nil (keep the local value) or
+    /// take `base`'s current value where this payload has no optional slot. Device fields stay out.
+    @MainActor
+    init(legacy p: PlaybackSettingsPayload, base: PlaybackPreferences) {
+        self.init(
+            updatedAt: p.updatedAt,
+            autoplayNextEpisode: p.autoplayNextEpisode,
+            autoplayCountdown: p.autoplayCountdown ?? base.autoplayCountdown,
+            autoSkipIntro: p.autoSkipIntro,
+            autoSkipRecap: p.autoSkipRecap ?? base.autoSkipRecap,
+            autoSkipOutro: p.autoSkipOutro,
+            nextEpisodeCountdownSeconds: p.nextEpisodeCountdownSeconds,
+            nextEpisodeCountdownAnchor: p.nextEpisodeCountdownAnchor ?? base.nextEpisodeCountdownAnchor.rawValue,
+            skipForwardSeconds: p.skipForwardSeconds ?? p.skipIntervalSeconds,
+            skipBackwardSeconds: p.skipBackwardSeconds ?? p.skipIntervalSeconds,
+            preferredAudioLanguage: p.preferredAudioLanguage,
+            preferredSubtitleLanguage: p.preferredSubtitleLanguage,
+            autoSubtitleForForeignAudio: p.autoSubtitleForForeignAudio,
+            autoForcedSubtitles: p.autoForcedSubtitles ?? base.autoForcedSubtitles,
+            styledASSSubtitles: p.styledASSSubtitles,
+            subtitleFontSize: p.subtitleFontSize,
+            subtitleColor: p.subtitleColor,
+            subtitleBackground: p.subtitleBackground,
+            subtitleDelaySeconds: p.subtitleDelaySeconds,
+            subtitleVerticalPosition: p.subtitleVerticalPosition,
+            subtitleFont: p.subtitleFont,
+            subtitleWeight: p.subtitleWeight,
+            pictureMode: p.pictureMode,
+            showScrubPreview: p.showScrubPreview,
+            preferServerTrickplay: p.preferServerTrickplay,
+            rememberTrackSelections: p.rememberTrackSelections ?? base.rememberTrackSelections,
+            subtitlesOnSkipBack: p.subtitlesOnSkipBack ?? base.subtitlesOnSkipBack,
+            touchpadScrubbing: p.touchpadScrubbing,
+            showNextEpisodeCard: p.showNextEpisodeCard,
+            askForRatingAfterMovie: p.askForRatingAfterMovie
+        )
+    }
+}
+
+extension ProfileAppearancePayload {
+    /// The appearance counterpart of `init(legacy:base:)` above.
+    @MainActor
+    init(legacy a: AppearanceSettingsPayload, base: AppearancePreferences) {
+        self.init(
+            updatedAt: a.updatedAt,
+            accentChoice: a.accentChoice,
+            backgroundStyle: a.backgroundStyle,
+            showContentLogos: a.showContentLogos,
+            continueWatchingImage: a.continueWatchingImage,
+            largeCards: a.largeCards,
+            nowPlayingUsesSeriesPoster: a.nowPlayingUsesSeriesPoster,
+            spoilerProtectionEnabled: a.spoilerProtectionEnabled,
+            spoilerHideEpisodes: a.spoilerHideEpisodes,
+            spoilerHideMovies: a.spoilerHideMovies,
+            // Absent means the sender has no opinion (Sodalite#62, #140): the current values go back in.
+            hiddenTabs: a.hiddenTabs ?? base.syncedHiddenTabs,
+            navigationStyle: a.navigationStyle ?? base.navigationStyle.rawValue,
+            showPosterBadges: a.showPosterBadges,
+            showDetailBadges: a.showDetailBadges,
+            showLibraryNames: a.showLibraryNames,
+            showPosterProgress: a.showPosterProgress,
+            showCommunityRating: a.showCommunityRating,
+            showCriticRating: a.showCriticRating,
+            showTagline: a.showTagline,
+            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles
+        )
     }
 }
 
@@ -156,6 +263,16 @@ struct ProfileAppearancePayload: Codable, Equatable {
     /// when absent, the rule this file states at the top: a sender that has no opinion must not
     /// hand one over.
     var showTagline: Bool?
+    /// nil from a build without the episode-title veil, unapplied for the same reason.
+    var spoilerHideEpisodeTitles: Bool? = nil
+    /// nil from a build without library tabs, unapplied for the same reason.
+    var pinnedLibraryTabs: [PinnedLibraryTab]? = nil
+    /// nil from a build without the upright artwork choice, unapplied for the same reason.
+    var uprightArtwork: String? = nil
+    /// nil from a build without the poster rating pill, unapplied for the same reason.
+    var showPosterRating: Bool? = nil
+    /// nil from a build without tab reordering (Sodalite#235), unapplied for the same reason.
+    var tabOrder: [String]? = nil
 }
 
 extension ProfileAppearancePayload {
@@ -182,7 +299,12 @@ extension ProfileAppearancePayload {
             showPosterProgress: a.showPosterProgress,
             showCommunityRating: a.showCommunityRating,
             showCriticRating: a.showCriticRating,
-            showTagline: a.showTagline
+            showTagline: a.showTagline,
+            spoilerHideEpisodeTitles: a.spoilerHideEpisodeTitles,
+            pinnedLibraryTabs: a.pinnedLibraryTabs,
+            uprightArtwork: a.uprightArtwork.rawValue,
+            showPosterRating: a.showPosterRating,
+            tabOrder: a.tabOrder
         )
     }
 
@@ -206,6 +328,13 @@ extension ProfileAppearancePayload {
         a.showCommunityRating = showCommunityRating
         a.showCriticRating = showCriticRating
         if let showTagline { a.showTagline = showTagline }
+        if let spoilerHideEpisodeTitles { a.spoilerHideEpisodeTitles = spoilerHideEpisodeTitles }
+        if let pinnedLibraryTabs { a.setPinnedLibraryTabs(pinnedLibraryTabs) }
+        if let artwork = uprightArtwork.flatMap(AppearancePreferences.UprightArtwork.init(rawValue:)) {
+            a.uprightArtwork = artwork
+        }
+        if let showPosterRating { a.showPosterRating = showPosterRating }
+        if let tabOrder { a.setTabOrder(tabOrder) }
     }
 }
 
@@ -220,6 +349,20 @@ struct ProfileHomePayload: Codable, Equatable {
     var rewatchNextUp: Bool
     var collectionGrouping: String
     var librarySorts: [String: String]
+    /// Combine servers (Sodalite#85). No longer written or applied (audit SYNC-201): who contributes
+    /// on a second server is per device. Kept so a record from a build that sent them still decodes.
+    var combineServers: Bool?
+    var combineServersExcluded: [String]?
+    /// My Media order and hiding (Sodalite#85). Optional so a record from an older build decodes.
+    var libraryLayoutJSON: Data?
+    /// The Home banner's HomeHeroMode. Optional so a record from an older build decodes, and nil
+    /// while the profile never chose, so the default stays a default on every device.
+    var heroMode: String?
+    /// The libraries left out of the banner (Sodalite#238). Optional so a record from an older
+    /// build decodes; nil while the profile never chose.
+    var heroExcludedLibraries: [String]?
+    /// DroppedSeriesStore's list. Optional so a record from an older build decodes.
+    var droppedSeriesJSON: Data?
 }
 
 /// Type-erased profile payload, the per-profile counterpart of `SettingsSyncPayload`.

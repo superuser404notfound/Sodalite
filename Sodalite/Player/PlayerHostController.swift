@@ -1,3 +1,7 @@
+#if !os(macOS)
+// Player chrome for the UIKit host: it is display-only by construction, because
+// PlayerHostController owns every press and moves a cursor through it. macOS has its own
+// transport, whose controls handle their own clicks (Platforms/macOS/MacPlayerScreen.swift).
 import SwiftUI
 import AetherEngine
 import AVFoundation
@@ -25,8 +29,19 @@ final class PlayerHostController: AVPlayerViewController {
     /// blank environment, so `\.appearanceTheme` has to be put back by hand below.
     private let theme: ResolvedAppearanceTheme
     private let onDismiss: () -> Void
+    let mode: PlayerPresentationMode
+    /// Sodalite#175: the multiview coordinator takes the view model; set when Live TV hands this one over.
+    /// Returns whether the coordinator took it; if not, this player carries on as it was.
+    var onEnterMultiview: ((PlayerViewModel) -> Bool)?
 
     private var hasLaunched = false
+    /// Set by handOffToMultiview so the dismiss that follows leaves the view model playing.
+    private var handingOff = false
+    /// An off-screen controller whose view model plays on elsewhere: its engine sinks must not take the surface back.
+    private var detached = false
+    /// Sodalite#175 diagnostics, see PlayerHostDiagnostics.
+    nonisolated let diagnosticID: String
+    private var playerBoundAt: Date?
 
     #if os(iOS)
     /// Orientation-session identity. The exit is terminal for it, so a lifecycle callback that still
@@ -43,6 +58,10 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Engine render surface, mounted into `contentOverlayView` only for the SW (dav1d) backend; the native path renders off `self.player`'s own AVPlayerLayer.
     private let aetherView = AetherPlayerView()
+    /// AetherEngine#711 follow-up: where the engine holds the picture across the item swap of an audio
+    /// switch. The native path renders through AVKit here, not through `aetherView`, so the engine
+    /// needs a surface of its own above the video; top of `contentOverlayView`, under our overlay.
+    private let stillView = AetherStillView()
     private var aetherViewMounted = false
 
     #if os(tvOS) || os(iOS)
@@ -53,6 +72,10 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Our recognizers, so suppressAVKitGestures can disable AVKit's own (arrow→10s skip, select→toggle, pan→scrub) which otherwise fire silently and eat presses before our handlers.
     private var ourGestureRecognizers: [UIGestureRecognizer] = []
+    #if os(tvOS)
+    /// Remote silence before the press being handled; see `LiveZapInput.wakeIdle`.
+    private var remoteIdleBeforePress: TimeInterval = 0
+    #endif
 
     #if os(tvOS)
     /// Sodalite#115: where on the 1st-generation remote's glass surface the click landed. UIKit reports
@@ -62,7 +85,12 @@ final class PlayerHostController: AVPlayerViewController {
     #endif
 
     /// Weak ref to our overlay's hosting view so suppressAVKitChrome's class-name heuristic skips it (it sits among AVKit's chrome views).
-    private weak var overlayHostingView: UIView?
+    private(set) weak var overlayHostingView: UIView?
+    #if os(iOS)
+    /// AVKit's own frames from before the picture moved above an iPhone Duo's fold, put back when it
+    /// unfolds (`PlayerHostController+Fold`). Empty whenever the player is not split.
+    var foldSavedFrames: [ObjectIdentifier: (frame: CGRect, filledScreen: Bool)] = [:]
+    #endif
 
     /// Engine `$currentAVPlayer` (fires on every internal reload, e.g. selectAudioTrack rebuilds NativeAVPlayerHost; sink rebinds `.player`) + `$playbackBackend` (mounts aetherView for SW path).
     private var engineSubscriptions: Set<AnyCancellable> = []
@@ -81,6 +109,8 @@ final class PlayerHostController: AVPlayerViewController {
     /// suspension, and the assertion that keeps the app running long enough to send it.
     private var liveSuspensionRelease: Task<Void, Never>?
     private var liveSuspensionAssertion: UIBackgroundTaskIdentifier = .invalid
+    private var liveSuspensionToken = UUID()
+    private var shelfRefreshAssertion: UIBackgroundTaskIdentifier = .invalid
     /// Set synchronously by the AVKit PiP delegate (willStart) BEFORE PiP dismisses this VC, so
     /// viewWillDisappear can tell a PiP handoff from a real dismiss and not stopPlayback (which would
     /// idle the engine and immediately close PiP). nonisolated(unsafe): written from the nonisolated
@@ -102,17 +132,29 @@ final class PlayerHostController: AVPlayerViewController {
     private let externalSubtitleWindow = ExternalSubtitleWindowController()
     /// UIScene connect/disconnect observer tokens, registered once per player bind (idempotent).
     private var externalScreenObservers: [NSObjectProtocol] = []
+    /// Sodalite#189: the software path's picture on a wired external screen.
+    private let externalSoftwareVideo = ExternalSoftwareVideoWindowController()
+    private let externalDisplayAccessory = ExternalDisplaySceneAccessory()
     #endif
 
     init(
         viewModel: PlayerViewModel,
         theme: ResolvedAppearanceTheme,
+        mode: PlayerPresentationMode = .standalone,
         onDismiss: @escaping () -> Void
     ) {
         self.viewModel = viewModel
         self.theme = theme
+        self.mode = mode
         self.onDismiss = onDismiss
+        self.diagnosticID = PlayerHostDiagnostics.makeID()
         super.init(nibName: nil, bundle: nil)
+        PlayerHostDiagnostics.register(self)
+        LogTap.shared.note("[NowPlaying] host \(diagnosticID) created mode=\(mode)")
+    }
+
+    deinit {
+        LogTap.shared.note("[NowPlaying] host \(diagnosticID) deinit")
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -120,6 +162,24 @@ final class PlayerHostController: AVPlayerViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        #if os(tvOS)
+        viewModel.offersMultiview = offersMultiview
+        viewModel.multiviewReturnsToGrid = mode.returnsToMultiview
+        viewModel.onMultiviewRequested = { [weak self] in
+            guard let self else { return }
+            if self.mode.returnsToMultiview { self.dismissPlayer() } else { self.handOffToMultiview() }
+        }
+        #endif
+
+        #if os(iOS)
+        // AetherEngine#1070: a screen mirror carries the software path's picture to the receiver, so the
+        // engine must not report it as staying on the device. A recording reads as captured too, and there
+        // is no telling the two apart here; a hint hidden by mistake is the cheaper error.
+        viewModel.player.setScreenMirrored(traitCollection.sceneCaptureState == .active)
+        registerForTraitChanges([UITraitSceneCaptureState.self]) { (self: Self, _: UITraitCollection) in
+            self.viewModel.player.setScreenMirrored(self.traitCollection.sceneCaptureState == .active)
+        }
+        #endif
 
         // REQUIRED on tvOS for AVKit's Now Playing session + AirPods + Atmos sync; visible chrome is suppressed separately.
         showsPlaybackControls = true
@@ -138,8 +198,13 @@ final class PlayerHostController: AVPlayerViewController {
         // player alive across backgrounding, canStartPictureInPictureAutomaticallyFromInline triggers PiP
         // on swipe-Home. tvOS does not use PiP.
         #if os(iOS)
-        allowsPictureInPicturePlayback = true
-        canStartPictureInPictureAutomaticallyFromInline = true
+        allowsPictureInPicturePlayback = mode.offersPictureInPicture
+        canStartPictureInPictureAutomaticallyFromInline = mode.offersPictureInPicture
+        // Sodalite#189: unlike the per-player observers below, the software path binds no AVPlayer.
+        for name in [UIScene.willConnectNotification, UIScene.didDisconnectNotification] {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(externalSceneDidChange(_:)), name: name, object: nil)
+        }
         #else
         allowsPictureInPicturePlayback = false
         #endif
@@ -157,14 +222,21 @@ final class PlayerHostController: AVPlayerViewController {
             overlay.addSubview(pipController.sourceView)
         }
         #endif
+        if let overlay = contentOverlayView {
+            stillView.frame = overlay.bounds
+            stillView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            overlay.addSubview(stillView)
+            viewModel.player.bindStillView(stillView)
+        }
 
         // The nil case is load-bearing: the SW (dav1d/VP9) path never sets currentAVPlayer, so without `self.player = nil` AVKit keeps the old item-less player and renders its own spinner over our frames ("AV1 plays but loading never goes away").
         let engine = viewModel.player
         engine.$currentAVPlayer
             .receive(on: DispatchQueue.main)
             .sink { [weak self] avPlayer in
-                guard let self else { return }
-                LogTap.shared.note("[NowPlaying] vc_rebind player=\(avPlayer == nil ? "nil" : "set") items=\(avPlayer?.currentItem?.externalMetadata.count ?? -1)")
+                guard let self, !self.detached else { return }
+                LogTap.shared.note("[NowPlaying] vc_rebind player=\(avPlayer == nil ? "nil" : "set") items=\(avPlayer?.currentItem?.externalMetadata.count ?? -1) host=\(self.diagnosticID)")
+                if avPlayer != nil, self.playerBoundAt == nil { self.playerBoundAt = Date() }
                 if let avPlayer {
                     // AirPlay enabled: the engine serves the loopback HLS over the LAN WiFi IP while external
                     // playback is active (AetherEngine #86), so the receiver reaches the engine-processed stream
@@ -279,7 +351,7 @@ final class PlayerHostController: AVPlayerViewController {
         engine.$playbackBackend
             .receive(on: DispatchQueue.main)
             .sink { [weak self] backend in
-                guard let self else { return }
+                guard let self, !self.detached else { return }
                 switch backend {
                 case .software, .aether:
                     self.mountAetherViewIfNeeded()
@@ -287,6 +359,9 @@ final class PlayerHostController: AVPlayerViewController {
                     // .audio is the audio-only path: no video surface to mount.
                     self.unmountAetherViewIfNeeded()
                 }
+                #if os(iOS)
+                self.updateExternalSoftwareVideo()
+                #endif
             }
             .store(in: &engineSubscriptions)
 
@@ -381,6 +456,7 @@ final class PlayerHostController: AVPlayerViewController {
         )
             .tint(tint)
             .environment(\.appearanceTheme, theme)
+            .phoneLandscapeKeepsPhoneLayout()
         let hosting = UIHostingController(rootView: overlay)
         hosting.view.backgroundColor = .clear
         #if os(iOS)
@@ -396,6 +472,9 @@ final class PlayerHostController: AVPlayerViewController {
         hosting.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         hosting.didMove(toParent: self)
         overlayHostingView = hosting.view
+        #if os(iOS)
+        installFoldObservation()
+        #endif
 
         #if os(tvOS)
         // Siri Remote input. iOS touch transport is wired in Phase 3.
@@ -414,16 +493,28 @@ final class PlayerHostController: AVPlayerViewController {
         rightTap.require(toFail: rightHold)
         addPressGesture(.upArrow, action: #selector(upPressed))
         addPressGesture(.downArrow, action: #selector(downPressed))
+        addPressGesture(.pageUp, action: #selector(pageUpPressed))
+        addPressGesture(.pageDown, action: #selector(pageDownPressed))
 
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         pan.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirect.rawValue)]
         view.addGestureRecognizer(pan)
         ourGestureRecognizers.append(pan)
+
+        let rest = RestingTouchGestureRecognizer { [weak self] in self?.surfaceRested() }
+        view.addGestureRecognizer(rest)
+        ourGestureRecognizers.append(rest)
+
+        let activity = RemoteActivityGestureRecognizer { [weak self] idle in self?.remoteIdleBeforePress = idle }
+        view.addGestureRecognizer(activity)
+        ourGestureRecognizers.append(activity)
         #else
         // iOS touch transport: screen gestures live in the SwiftUI overlay (PlayerGestureCatcher),
         // below the controls, so they coexist with the tappable widgets. Nothing to attach here.
         #endif
 
+        // A multiview tile's session owns suspension and foreground retune for every tile.
+        guard mode.observesAppLifecycle else { return }
         // Foreground reloads the pipeline at current position (VT + AVIO die in suspension).
         NotificationCenter.default.addObserver(
             self, selector: #selector(appDidBecomeActive),
@@ -449,6 +540,7 @@ final class PlayerHostController: AVPlayerViewController {
         case .original: self.videoGravity = .resizeAspect
         case .fill:     self.videoGravity = .resizeAspectFill
         }
+        stillView.videoGravity = videoGravity
         #if os(tvOS)
         // The PiP source layer covers AVKit's video; mismatched gravity would visibly double-expose.
         pipController.setVideoGravity(videoGravity)
@@ -464,9 +556,19 @@ final class PlayerHostController: AVPlayerViewController {
         aetherView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewModel.player.bind(view: aetherView)
         aetherViewMounted = true
+        #if os(iOS)
+        externalDisplayAccessory.setActive(true, on: self)
+        #endif
     }
 
     private func unmountAetherViewIfNeeded() {
+        #if os(iOS)
+        if externalSoftwareVideo.isShowingVideo {
+            externalSoftwareVideo.tearDown(engine: viewModel.player)
+            syncExternalPlaybackDestination()
+        }
+        externalDisplayAccessory.setActive(false, on: self)
+        #endif
         guard aetherViewMounted else { return }
         viewModel.player.unbind(view: aetherView)
         aetherView.removeFromSuperview()
@@ -495,7 +597,8 @@ final class PlayerHostController: AVPlayerViewController {
     /// (framework limitation, see the softwarePiPSource sink comment), so SW titles get no button here;
     /// SW-PiP is iOS-only until the OS closes that gap.
     private func updatePiPAvailability() {
-        viewModel.isPiPAvailable = AVPictureInPictureController.isPictureInPictureSupported()
+        viewModel.isPiPAvailable = mode.offersPictureInPicture
+            && AVPictureInPictureController.isPictureInPictureSupported()
             && viewModel.player.currentAVPlayer != nil
         if !viewModel.isPiPAvailable { viewModel.isPiPPossible = false }
     }
@@ -540,6 +643,10 @@ final class PlayerHostController: AVPlayerViewController {
     /// every external-playback edge and on every route change, because switching receivers mid-session
     /// changes the name without touching the flag.
     private func syncExternalPlaybackDestination() {
+        if externalSoftwareVideo.isShowingVideo {
+            viewModel.setExternalPlaybackDestination(.externalDisplay)
+            return
+        }
         guard externalPlaybackActive else {
             viewModel.setExternalPlaybackDestination(nil)
             return
@@ -547,6 +654,27 @@ final class PlayerHostController: AVPlayerViewController {
         let ports = AVAudioSession.sharedInstance().currentRoute.outputs
             .map { (type: $0.portType, name: $0.portName) }
         viewModel.setExternalPlaybackDestination(ExternalPlaybackPresentation.destination(ports: ports))
+    }
+
+    /// Sodalite#189: the software path has no AVKit external playback, so a wired display only mirrors
+    /// the device until the picture is moved into a window on the display's own scene.
+    private func updateExternalSoftwareVideo(connecting: UIWindowScene? = nil) {
+        guard !detached else { return }
+        externalSoftwareVideo.update(engine: viewModel.player, viewModel: viewModel, connecting: connecting)
+        syncExternalPlaybackDestination()
+    }
+
+    @objc private func externalSceneDidChange(_ note: Notification) {
+        guard (note.object as? UIWindowScene)?.session.role == .windowExternalDisplayNonInteractive else { return }
+        let event = note.name == UIScene.willConnectNotification ? "connect" : "disconnect"
+        LogTap.shared.note("[ExternalVideo] scene \(event) backend=\(viewModel.player.playbackBackend)")
+        // A disconnecting scene can still be listed among the connected ones while this runs.
+        if note.name == UIScene.didDisconnectNotification {
+            externalSoftwareVideo.tearDown(engine: viewModel.player)
+            syncExternalPlaybackDestination()
+            return
+        }
+        updateExternalSoftwareVideo(connecting: note.object as? UIWindowScene)
     }
 
     /// Sodalite#98: draw the subtitle overlay on a wired external screen, which the app can only do by
@@ -707,12 +835,13 @@ final class PlayerHostController: AVPlayerViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         #if os(iOS)
-        PlayerOrientation.engage(locked: viewModel.preferences.playerRotationLocked, session: orientationSession)
+        PlayerOrientation.engage(locked: viewModel.preferences.appliesRotationLock, session: orientationSession)
         viewModel.startVolumeObservation()
         #endif
         // Kick off playback as the modal starts appearing so network/demuxer work overlaps the present-then-layout sequence.
         guard !hasLaunched else { return }
         hasLaunched = true
+        guard mode.launchesPlayback else { return }
         // Tracked launch: a back-press during loading cancels this task (latches teardown) so an in-flight load can't resume into player.load() after dismissal and leave audio behind a gone player.
         viewModel.beginPlayback()
     }
@@ -794,6 +923,14 @@ final class PlayerHostController: AVPlayerViewController {
     private func hideChrome(on v: UIView, preserve: Set<ObjectIdentifier>) {
         if preserve.contains(ObjectIdentifier(v)) { return }
         let typeName = String(describing: type(of: v))
+        // Sodalite#177: iOS 26+ draws a full-screen AVMobileGlassBackgroundDimmingView (black at 0.40)
+        // under its controls, which darkened the picture to 60% for as long as AVKit showed them: a few
+        // seconds on the native path, the whole session on the SW path (no player, controls never hide).
+        // AVKit drives its alpha without a layout pass, so a zeroed alpha comes back; hidden sticks.
+        if typeName.contains("Dimming") {
+            v.isHidden = true
+            return
+        }
         // Keywords matched against AVKit's runtime view hierarchy: Controls (_AVPlayerControlsView), Transport (scrubber), Info (title/_AVPlayerInfoView), Menu (AVInfoMenuCell picker rows), Focus (_AVFocusContainerView). Match Focus not Container (too broad).
         let isChrome = typeName.contains("Controls")
             || typeName.contains("Transport")
@@ -839,6 +976,9 @@ final class PlayerHostController: AVPlayerViewController {
         if let host = overlayHostingView, host.frame != view.bounds {
             host.frame = view.bounds
         }
+        #if os(iOS)
+        updateFoldLayout()
+        #endif
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -851,10 +991,90 @@ final class PlayerHostController: AVPlayerViewController {
         PlayerOrientation.unlock(session: orientationSession)
         endKeyboardTransport()
         #endif
-        unmountAetherViewIfNeeded()
-        player = nil
+        let stops = mode.stopsOnDismiss && !handingOff
+        unbindForDismissal(path: "viewWillDisappear", stops: stops)
+        // A tile or a hand-off leaves the view model playing; dropping this surface lets the grid's take the layer back.
+        guard stops else {
+            detached = true
+            return
+        }
         viewModel.stopPlayback()
+        PlayerHostDiagnostics.noteAftermath("stop")
     }
+
+    /// Takes the picture and AVKit's player away from this controller, and says so in the log with what
+    /// AVKit believed either side of it (Sodalite#175 diagnostics).
+    private func unbindForDismissal(path: String, stops: Bool) {
+        let before = nowPlayingFacts
+        unmountAetherViewIfNeeded()
+        viewModel.player.unbindStillView(stillView)
+        player = nil
+        let bound = playerBoundAt.map { String(format: "%.1fs", Date().timeIntervalSince($0)) } ?? "never"
+        LogTap.shared.note(
+            "[NowPlaying] host \(diagnosticID) unbind path=\(path) mode=\(mode) stops=\(stops) "
+            + "engine=\(lifecycleSessionFacts) boundFor=\(bound) before[\(before)] after[\(nowPlayingFacts)] "
+            + "live=[\(PlayerHostDiagnostics.liveSummary())]")
+    }
+
+    /// One controller in a `PlayerHostDiagnostics` listing.
+    var diagnosticSummary: String {
+        var facts = "\(diagnosticID) \(mode)"
+        if detached { facts += " detached" }
+        if handingOff { facts += " handedOff" }
+        if pipActive { facts += " pipActive" }
+        facts += presentingViewController == nil ? " offscreen" : " presented"
+        return facts + " \(nowPlayingFacts)"
+    }
+
+    /// What this controller holds that could keep a Now Playing registration alive. The AVKit half reads
+    /// internals by name, so it exists in Debug builds only: the App Store's static analysis finds the strings.
+    private var nowPlayingFacts: String {
+        var facts = "player=\(player == nil ? "nil" : "set")"
+        #if os(tvOS)
+        facts += " pip=\(pipController.diagnosticFacts)"
+        #endif
+        #if DEBUG
+        func flag(_ object: NSObject, getter: String, key: String) -> String {
+            guard object.responds(to: NSSelectorFromString(getter)) else { return "?" }
+            return (object.value(forKey: key) as? Bool).map { $0 ? "1" : "0" } ?? "?"
+        }
+        facts += " avkitActive=\(flag(self, getter: "isActiveNowPlaying", key: "activeNowPlaying"))"
+        facts += " otherVCActive=\(flag(self, getter: "_isAnotherPlayerViewControllerNowPlaying", key: "_isAnotherPlayerViewControllerNowPlaying"))"
+        if let ivar = class_getInstanceVariable(AVPlayerViewController.self, "_mediaRemoteManager"),
+           let manager = object_getIvar(self, ivar) as? NSObject {
+            facts += " mgrNowPlaying=\(flag(manager, getter: "isNowPlaying", key: "nowPlaying"))"
+            facts += " mgrPublishing=\(flag(manager, getter: "isPublishing", key: "publishing"))"
+        } else {
+            facts += " mgr=nil"
+        }
+        #endif
+        return facts
+    }
+
+    /// Sodalite#175: give the playing view model to multiview. The coordinator dismisses this controller,
+    /// and `handingOff` keeps that dismiss from stopping playback.
+    func handOffToMultiview() {
+        guard let onEnterMultiview else { return }
+        // Set before the call: the coordinator's dismiss of this controller must already see a hand-off.
+        handingOff = true
+        detached = true
+        guard onEnterMultiview(viewModel) else {
+            handingOff = false
+            detached = false
+            return
+        }
+        // The session owns lifecycle from here; a still-alive controller must not retune tile 1 beside it.
+        let center = NotificationCenter.default
+        center.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        center.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        unbindForDismissal(path: "handOff", stops: false)
+        // The grid has no transport bar to focus, and no Play/Pause to take a paused channel out of its pause.
+        viewModel.hideControls()
+        if viewModel.player.state == .paused { viewModel.player.play() }
+    }
+
+    var offersMultiview: Bool { (mode.offersMultiview || mode.returnsToMultiview) && viewModel.isLiveSession }
 
     /// Sodalite#149: the one word that says which kind of trip this was, short enough to read next to a
     /// playhead in a log line.
@@ -893,7 +1113,48 @@ final class PlayerHostController: AVPlayerViewController {
         // Background audio / PiP keep the session running on purpose; the outage watchdog must not end one
         // the viewer cannot see, so it stops probing until we are back.
         viewModel.setAppActive(false)
+        // Sodalite#184: from here until the way back has asked the server, a session that is not
+        // playing writes nothing. See `SuspendedSessionReturn`.
+        if viewModel.hasStartedPlaying, !viewModel.isLiveSession {
+            #if os(iOS)
+            let backgroundAudio = backgroundWasPlaying && viewModel.player.playbackBackend != .none
+            #else
+            let backgroundAudio = false
+            #endif
+            viewModel.holdReportsForSuspension(
+                pictureInPictureActive: viewModel.player.pictureInPictureActive,
+                backgroundAudioPlaying: backgroundAudio)
+        }
         armLiveSuspensionRelease()
+        refreshTopShelfForSuspension()
+    }
+
+    /// Home pressed mid-title leaves the player without a stop report, so nothing told the shelf
+    /// that this item's resume position moved, and its cell is named after the old one. tvOS asks the
+    /// extension for the shelf about a second later, and the extension cannot render the missing
+    /// cell itself (25 MB ceiling, see `ResumeBarArtwork.existing`). So the position goes to the
+    /// server now and the app renders before it is suspended; the extension shows remote artwork for
+    /// the moment in between and is asked again once the files are there.
+    private func refreshTopShelfForSuspension() {
+        #if os(tvOS)
+        guard viewModel.hasStartedPlaying, !viewModel.isLiveSession, shelfRefreshAssertion == .invalid else { return }
+        // Same strong captures as the live release below, for the same reason: an assertion nobody
+        // ends is a termination.
+        shelfRefreshAssertion = UIApplication.shared.beginBackgroundTask(withName: "topshelf-refresh") {
+            self.endShelfRefreshAssertion()
+        }
+        Task { @MainActor in
+            await self.viewModel.reportProgress(whileHeld: true)
+            await TopShelfRefresher.refresh()
+            self.endShelfRefreshAssertion()
+        }
+        #endif
+    }
+
+    private func endShelfRefreshAssertion() {
+        guard shelfRefreshAssertion != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(shelfRefreshAssertion)
+        shelfRefreshAssertion = .invalid
     }
 
     /// How long a backgrounded live session waits for the engine to give its pipeline up before the
@@ -914,6 +1175,11 @@ final class PlayerHostController: AVPlayerViewController {
         viewModel.liveTunerReleasedWhileSuspended = false
         guard viewModel.isLiveSession, viewModel.activeLiveStreamID != nil else { return }
         liveSuspensionRelease?.cancel()
+        // A second trip while the first release is still waiting: its assertion would be overwritten
+        // below and never ended (audit PHOST-205).
+        endLiveSuspensionAssertion()
+        let token = UUID()
+        liveSuspensionToken = token
         // Without the assertion the wait and the close both die at suspension, which is the same as
         // never having sent them. Both closures hold this controller strongly on purpose: an
         // assertion nobody ends is a termination, and a weak reference that has gone is exactly the
@@ -927,6 +1193,8 @@ final class PlayerHostController: AVPlayerViewController {
         liveSuspensionRelease = Task { @MainActor in
             await self.viewModel.releaseLiveSessionForSuspension(
                 waitingForTeardownUpTo: Self.liveSuspensionTeardownWait)
+            // A newer arming owns the slot and the assertion by now.
+            guard self.liveSuspensionToken == token else { return }
             self.liveSuspensionRelease = nil
             self.endLiveSuspensionAssertion()
         }
@@ -1077,16 +1345,44 @@ final class PlayerHostController: AVPlayerViewController {
             return
         }
 
-        guard needsReload else { return }
-
-        // tvOS deactivates the AVAudioSession on background; without re-arming it the post-reload resume drives a synchronizer with no live session (state .playing but no audio, no frames advance).
-        try? AVAudioSession.sharedInstance().setActive(true)
+        guard needsReload else {
+            viewModel.progressReportsHeldForSuspension = false
+            return
+        }
 
         // Real background return: VT + AVIO are dead, reload from current position then hold paused on the resumed frame (auto-resume after a sleep gap is startling). load() returns once the panel handshake settles, NOT once audio flows, so the trailing pause can land while AVPlayer is still waitingToPlayAtSpecifiedRate re-buffering the AVIO reconnect. If the user presses Play during the slow reload that intent must win or it clobbers the resume ("play does nothing, press again"); beginBackgroundReload/finishBackgroundReload arbitrate.
+        // Sodalite#184: the server is asked first, since another client may have moved this item on
+        // while the session slept. See `SuspendedSessionReturn`.
+        let suspendedAt = backgroundedAt ?? Date()
+        let awaySeconds = Date().timeIntervalSince(suspendedAt)
+        let positionTicks = viewModel.currentPositionTicks
         viewModel.beginBackgroundReload()
         Task { @MainActor in
-            try? await viewModel.player.reloadAtCurrentPosition()
-            viewModel.finishBackgroundReload()
+            let movedOn = await viewModel.serverMovedOnWhileSuspended(since: suspendedAt,
+                                                                      positionTicks: positionTicks)
+            // Back pressed while the server was being asked: that dismissal already ran, held.
+            guard !viewModel.didStopPlayback else { return }
+            let decision = SuspendedSessionReturn.decide(awaySeconds: awaySeconds, serverMovedOn: movedOn)
+            LogTap.shared.note(String(
+                format: "[Lifecycle] #184 return after %.0fs: server %@ -> %@",
+                awaySeconds,
+                movedOn.map { $0 ? "moved on" : "unchanged" } ?? "did not answer",
+                decision.logLabel))
+            switch decision {
+            case .close(let reportsStop):
+                if reportsStop {
+                    viewModel.progressReportsHeldForSuspension = false
+                } else {
+                    viewModel.stopReportVetoed = true
+                }
+                dismissPlayer()
+            case .reload:
+                viewModel.progressReportsHeldForSuspension = false
+                // tvOS deactivates the AVAudioSession on background; without re-arming it the post-reload resume drives a synchronizer with no live session (state .playing but no audio, no frames advance).
+                try? AVAudioSession.sharedInstance().setActive(true)
+                try? await viewModel.player.reloadAtCurrentPosition()
+                viewModel.finishBackgroundReload()
+            }
         }
     }
 
@@ -1137,7 +1433,7 @@ final class PlayerHostController: AVPlayerViewController {
         // Segment skip over a transient scrub: the touchpad reports a tiny pan before its click, past the 40pt threshold, flipping isScrubbing/showControls; without this the tap-to-skip lands in commit-scrub. scrubMovedMeaningfully separates a deliberate drag (which must commit to its target) from the pre-click jitter, so only jitter skips here.
         if viewModel.activeSkipSegment != nil && !viewModel.isDropdownOpen
            && (!viewModel.showControls || viewModel.controlsFocus == .progressBar)
-           && !viewModel.scrubMovedMeaningfully {
+           && !viewModel.scrubMovedMeaningfully && !viewModel.isScanLatched {
             if viewModel.isScrubbing { viewModel.cancelScrub() }
             viewModel.skipActiveSegment()
             return
@@ -1159,7 +1455,11 @@ final class PlayerHostController: AVPlayerViewController {
         if !viewModel.isDropdownOpen,
            !viewModel.showControls || viewModel.controlsFocus == .progressBar,
            let direction = remoteSurface.consumeEdgeDirection() {
-            viewModel.seekJumpByConfiguredInterval(direction: direction)
+            if viewModel.isScanLatched {
+                viewModel.stepLatchedScan(direction: direction)
+            } else {
+                viewModel.seekJumpByConfiguredInterval(direction: direction)
+            }
             return
         }
         #endif
@@ -1168,13 +1468,32 @@ final class PlayerHostController: AVPlayerViewController {
         } else if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             viewModel.activateControl(viewModel.controlsFocus)
         } else if viewModel.isScrubbing {
-            viewModel.commitScrub()
+            // Sodalite#186 round 3: landing a scan plays from there, the way the system player does.
+            viewModel.commitScrub(thenPlay: viewModel.isScanLatched && !viewModel.isPlaying)
         } else {
             // Sodalite#58, unconditional since #114: a click on hidden controls pauses or resumes, the
             // way the system player behaves. togglePlayPause raises the transport itself, so the click
-            // still gives feedback, and Up/Down still opens it without touching playback.
-            viewModel.togglePlayPause()
+            // still gives feedback. Live differs, see `hiddenControlsSelect`.
+            switch Self.hiddenControlsSelect(isLive: viewModel.isLiveSession, controlsVisible: viewModel.showControls) {
+            case .showControls: viewModel.showControlsTemporarily()
+            case .togglePlayback: viewModel.togglePlayPause()
+            }
         }
+    }
+
+    /// What a click does once nothing above it has claimed the press.
+    ///
+    /// On VOD, Up and Down open the bar without touching playback, so the click can pause. On live
+    /// they change the channel (Sodalite#173), which left a long press as the only way to the bar.
+    /// So on live the first click opens it, and the second, with the bar up on the progress bar,
+    /// pauses as before.
+    enum HiddenControlsSelect: Equatable {
+        case showControls
+        case togglePlayback
+    }
+
+    nonisolated static func hiddenControlsSelect(isLive: Bool, controlsVisible: Bool) -> HiddenControlsSelect {
+        isLive && !controlsVisible ? .showControls : .togglePlayback
     }
 
     /// Sodalite#104: what the Play/Pause button means while a scrub is pending.
@@ -1246,7 +1565,8 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.errorMessage != nil { viewModel.moveErrorFocus(by: -1); return }
         // Stats panel: horizontal nav is inert (no rows behind it to target).
         if statsOverlayCapturesPresses { return }
-        if viewModel.isDropdownOpen { return }
+        if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: -1); return }
+        if viewModel.isScanLatched { viewModel.stepLatchedScan(direction: -1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: -1)
             viewModel.scheduleControlsHide()
@@ -1260,13 +1580,29 @@ final class PlayerHostController: AVPlayerViewController {
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveRight(); return }
         if viewModel.errorMessage != nil { viewModel.moveErrorFocus(by: 1); return }
         if statsOverlayCapturesPresses { return }
-        if viewModel.isDropdownOpen { return }
+        if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: 1); return }
+        if viewModel.isScanLatched { viewModel.stepLatchedScan(direction: 1); return }
         if viewModel.showControls && viewModel.controlsFocus != .progressBar {
             stepTransportFocus(direction: 1)
             viewModel.scheduleControlsHide()
         } else {
             viewModel.seekJumpByConfiguredInterval(direction: 1)
         }
+    }
+
+    /// Left/right are otherwise inert in a dropdown; on the subtitle menu's timing row they step it,
+    /// and on the audio menu's shaping rows they step the setting one value (a hold too).
+    private func stepHighlightedSubtitleOffset(by steps: Int) {
+        if case .audio(let idx) = viewModel.trackDropdown {
+            let rows = viewModel.audioMenuRows
+            guard rows.indices.contains(idx) else { return }
+            viewModel.stepAudioSetting(rows[idx], by: steps.signum())
+            return
+        }
+        guard case .subtitle(let idx) = viewModel.trackDropdown,
+              viewModel.subtitleMenuRows.indices.contains(idx),
+              viewModel.subtitleMenuRows[idx] == .offset else { return }
+        viewModel.stepSubtitleOffset(by: steps)
     }
 
     @objc private func leftHeld(_ gesture: UILongPressGestureRecognizer) {
@@ -1324,15 +1660,17 @@ final class PlayerHostController: AVPlayerViewController {
         }
     }
 
-    /// Continuous hold-to-seek spool from a directional long press; gated like the tap-skip path so a hold while navigating buttons or with stats/dropdown up is ignored.
+    /// A scan from a directional long press, which keeps running after the release (Sodalite#186); gated like the tap-skip path so a hold while navigating buttons or with stats/dropdown up is ignored.
     private func handleHold(_ gesture: UILongPressGestureRecognizer, direction: Int) {
         switch gesture.state {
         case .began:
+            // A held press on the timing row jumps a whole second instead of spooling the video.
+            if viewModel.isDropdownOpen { stepHighlightedSubtitleOffset(by: direction * 10); return }
             if statsOverlayCapturesPresses || viewModel.isDropdownOpen || viewModel.subtitleSearchVisible || viewModel.isSubtitleDeletePromptVisible { return }
             if viewModel.showControls && viewModel.controlsFocus != .progressBar { return }
             viewModel.beginContinuousSeek(direction: direction)
         case .ended, .cancelled, .failed:
-            viewModel.endContinuousSeek()
+            viewModel.latchContinuousSeek()
         default:
             break
         }
@@ -1340,30 +1678,44 @@ final class PlayerHostController: AVPlayerViewController {
 
     /// Step focus through transport buttons, built dynamically so a stream missing audio/subtitle tracks has no dead stops.
     private func stepTransportFocus(direction: Int) {
-        // Live has its own control row (LiveTransportBar); the VOD list below does not apply.
-        if viewModel.isLiveSession {
-            let order = viewModel.liveTransportFocusOrder
-            guard let current = order.firstIndex(of: viewModel.controlsFocus) else { return }
-            let next = current + direction
-            if next >= 0 && next < order.count { viewModel.controlsFocus = order[next] }
-            return
-        }
-        let order = viewModel.transportFocusOrder
-        guard let current = order.firstIndex(of: viewModel.controlsFocus) else {
-            // The focused button left the row under the user: the skip segment ended, or the
-            // next-episode prompt was taken (Sodalite#103). Both sit at the head of the row, so the
-            // row start is the nearest thing to where focus was; returning here left it stuck on a
-            // control that is not on screen, with only Menu or Down to get out.
-            if let first = order.first { viewModel.controlsFocus = first }
-            return
-        }
-        let next = current + direction
-        if next >= 0 && next < order.count {
-            viewModel.controlsFocus = order[next]
+        // Live has its own control row (LiveTransportBar); the VOD list does not apply.
+        let order = viewModel.isLiveSession ? viewModel.liveTransportFocusOrder : viewModel.transportFocusOrder
+        if let next = PlayerViewModel.steppedTransportFocus(
+            order: order, current: viewModel.controlsFocus, direction: direction) {
+            viewModel.controlsFocus = next
         }
     }
 
+    #if os(tvOS)
+    private func routeLiveZap(_ key: LiveZapInput.Key) -> Bool {
+        let action = LiveZapInput.action(
+            for: key, isLive: viewModel.isLiveSession, showControls: viewModel.showControls,
+            errorVisible: viewModel.errorMessage != nil,
+            overlayCapturesInput: viewModel.isSubtitleDeletePromptVisible || viewModel.subtitleSearchVisible
+                || statsOverlayCapturesPresses || viewModel.isDropdownOpen,
+            remoteIdle: remoteIdleBeforePress)
+        switch action {
+        case .zap(let delta): viewModel.requestZap(by: delta); return true
+        case .wake: viewModel.showZapWakeBanner(); return true
+        case .ignore: return true
+        case .passThrough: return false
+        }
+    }
+
+    @objc private func pageUpPressed() { _ = routeLiveZap(.pageUp) }
+    @objc private func pageDownPressed() { _ = routeLiveZap(.pageDown) }
+    #endif
+
     @objc private func upPressed() {
+        // A latched scan keeps the bar up and the focus on it until it lands or is thrown away.
+        if viewModel.isScanLatched { return }
+        #if os(tvOS)
+        if routeLiveZap(.up) { return }
+        #endif
+        upNavigate()
+    }
+
+    private func upNavigate() {
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveUp(); return }
         if viewModel.errorMessage != nil { return }
@@ -1388,12 +1740,13 @@ final class PlayerHostController: AVPlayerViewController {
                 }
                 // Read the rendered order rather than restate its gates: this used to be a hand-written
                 // chain that had to be kept in step with two other copies, and drifting from them is
-                // how Up lands on a button that is not on screen. "From Start" is skipped because it
-                // discards the resume position, an unwanted first stop for a single press of Up.
-                viewModel.controlsFocus = viewModel.transportFocusOrder
-                    .first(where: { $0 != .restartButton }) ?? .speedButton
+                // how Up lands on a button that is not on screen. With every control hidden
+                // (Sodalite#194) there is nothing above the bar, so focus stays on it.
+                if let landing = PlayerViewModel.upLanding(in: viewModel.transportFocusOrder) {
+                    viewModel.controlsFocus = landing
+                }
                 viewModel.scheduleControlsHide()
-            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .speedButton, .pictureButton, .pipButton, .infoButton, .returnToLiveButton:
+            case .restartButton, .skipSegmentButton, .nextEpisodeButton, .chapterButton, .episodeButton, .audioButton, .subtitleButton, .qualityButton, .speedButton, .pictureButton, .upscaleButton, .pipButton, .multiviewButton, .infoButton, .returnToLiveButton:
                 viewModel.scheduleControlsHide()
             }
         } else {
@@ -1401,7 +1754,28 @@ final class PlayerHostController: AVPlayerViewController {
         }
     }
 
+    #if os(tvOS)
+    /// Sodalite#167: a thumb resting on the clickpad lands on Up's reveal from hidden.
+    private func surfaceRested() {
+        guard SiriRemoteRestingTouch.revealsTransport(
+            showControls: viewModel.showControls,
+            overlayCapturesInput: viewModel.isSubtitleDeletePromptVisible || viewModel.subtitleSearchVisible
+                || viewModel.errorMessage != nil || statsOverlayCapturesPresses || viewModel.isDropdownOpen,
+            nextEpisodePromptVisible: viewModel.showNextEpisodeOverlay
+        ) else { return }
+        viewModel.showControlsTemporarily()
+    }
+    #endif
+
     @objc private func downPressed() {
+        if viewModel.isScanLatched { return }
+        #if os(tvOS)
+        if routeLiveZap(.down) { return }
+        #endif
+        downNavigate()
+    }
+
+    private func downNavigate() {
         if viewModel.isSubtitleDeletePromptVisible { return }
         if viewModel.subtitleSearchVisible { viewModel.subtitleSearchMoveDown(); return }
         if viewModel.errorMessage != nil { return }
@@ -1438,7 +1812,7 @@ final class PlayerHostController: AVPlayerViewController {
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .episode(highlighted: newIdx)
         case .audio(let idx):
-            let count = viewModel.displayAudioTracks.count
+            let count = viewModel.audioMenuRows.count
             guard count > 0 else { return }
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .audio(highlighted: newIdx)
@@ -1457,6 +1831,10 @@ final class PlayerHostController: AVPlayerViewController {
             let count = PlayerViewModel.speedOptions.count
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .speed(highlighted: newIdx)
+        case .quality(let idx):
+            let count = viewModel.pickerQualities.count
+            let newIdx = max(0, min(count - 1, idx + offset))
+            viewModel.trackDropdown = .quality(highlighted: newIdx)
         case .picture(let idx):
             let count = PlaybackPreferences.PictureMode.allCases.count
             let newIdx = max(0, min(count - 1, idx + offset))
@@ -1474,10 +1852,20 @@ final class PlayerHostController: AVPlayerViewController {
         PlayerOrientation.unlock(session: orientationSession)
         viewModel.stopVolumeObservation()
         #endif
-        unmountAetherViewIfNeeded()
-        player = nil
+        let stops = mode.stopsOnDismiss && !handingOff
+        unbindForDismissal(path: "dismissPlayer", stops: stops)
+        // A tile's full screen: Back returns to the grid with the tile still playing. A handed-off
+        // controller was already given away, its dismiss belongs to the coordinator.
+        guard stops else {
+            detached = true
+            if !handingOff { onDismiss() }
+            // The coordinator may be zooming back to the grid, or waiting for the zoom in to land first.
+            if presentingViewController != nil, !isBeingDismissed, !isBeingPresented { dismiss(animated: false) }
+            return
+        }
         // stopPlayback fire-and-forgets the reportStop call (DrHurt #12); called inline so synchronous teardown finishes before onDismiss and the back press hits the dismiss animation immediately.
         viewModel.stopPlayback()
+        PlayerHostDiagnostics.noteAftermath("stop")
         onDismiss()
         #if os(tvOS)
         PiPSessionCoordinator.shared.playerDidDismiss(self)
@@ -1489,16 +1877,12 @@ final class PlayerHostController: AVPlayerViewController {
 
     // MARK: - Pan (Touchpad Scrubbing)
 
-    private enum PanAxis { case undetermined, horizontal, vertical }
-
     private var lastDropdownStep: CGFloat = 0
-    private var panAxis: PanAxis = .undetermined
+    private var panAxis: PlayerPanAxis = .undetermined
     private var verticalStepFired = false
     private var horizontalStepFired = false
     private var scrubCommitted = false
 
-    /// Travel (pt) to commit a pan to one axis; low enough to feel responsive, high enough a diagonal swipe doesn't trigger vertical nav.
-    private static let panAxisCommitThreshold: CGFloat = 40
     /// Vertical travel (pt) to fire up/down, one fire per gesture (single-shot like arrow keys).
     private static let verticalFireThreshold: CGFloat = 150
     /// Horizontal travel (pt) to fire left/right for transport-button nav (not scrubbing).
@@ -1511,7 +1895,34 @@ final class PlayerHostController: AVPlayerViewController {
     private static let dropdownStepSize: CGFloat = 300
 
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
-        if viewModel.isSubtitleDeletePromptVisible { return }
+        // Error screen and subtitle delete prompt: one horizontal swipe = one step between their buttons, like
+        // a click. Without this the error screen's swipe fell through to the scrub branch below and the
+        // prompt swallowed it, so only clicks moved the highlight.
+        if viewModel.errorMessage != nil || viewModel.isSubtitleDeletePromptVisible {
+            switch gesture.state {
+            case .began:
+                panAxis = .undetermined
+                horizontalStepFired = false
+            case .changed:
+                let t = gesture.translation(in: view)
+                if panAxis == .undetermined {
+                    panAxis = PlayerPanAxis.resolve(translation: t)
+                }
+                let v = gesture.velocity(in: view)
+                guard panAxis == .horizontal, !horizontalStepFired,
+                      abs(t.x) >= Self.horizontalFireThreshold,
+                      abs(v.x) >= Self.stepMinVelocity
+                else { break }
+                horizontalStepFired = true
+                if t.x < 0 { leftPressed() } else { rightPressed() }
+            case .ended, .cancelled:
+                panAxis = .undetermined
+                horizontalStepFired = false
+            default:
+                break
+            }
+            return
+        }
         // Subtitle search overlay: swipes route through the arrow-key @objc handlers via the cumulative dropdownStepSize model (one step per item, no overshoot).
         if viewModel.subtitleSearchVisible {
             switch gesture.state {
@@ -1521,11 +1932,7 @@ final class PlayerHostController: AVPlayerViewController {
             case .changed:
                 let t = gesture.translation(in: view)
                 if panAxis == .undetermined {
-                    let absX = abs(t.x)
-                    let absY = abs(t.y)
-                    if max(absX, absY) >= Self.panAxisCommitThreshold {
-                        panAxis = absX > absY ? .horizontal : .vertical
-                    }
+                    panAxis = PlayerPanAxis.resolve(translation: t)
                 }
                 guard panAxis != .undetermined else { break }
                 let delta = panAxis == .horizontal ? t.x : t.y
@@ -1537,7 +1944,7 @@ final class PlayerHostController: AVPlayerViewController {
                         if panAxis == .horizontal {
                             forward ? rightPressed() : leftPressed()
                         } else {
-                            forward ? downPressed() : upPressed()
+                            forward ? downNavigate() : upNavigate()
                         }
                     }
                     lastDropdownStep = currentStep
@@ -1560,18 +1967,14 @@ final class PlayerHostController: AVPlayerViewController {
             case .changed:
                 let t = gesture.translation(in: view)
                 if panAxis == .undetermined {
-                    let absX = abs(t.x)
-                    let absY = abs(t.y)
-                    if max(absX, absY) >= Self.panAxisCommitThreshold {
-                        panAxis = absX > absY ? .horizontal : .vertical
-                    }
+                    panAxis = PlayerPanAxis.resolve(translation: t)
                 }
                 if panAxis == .vertical, !verticalStepFired {
                     let v = gesture.velocity(in: view)
                     if abs(t.y) >= Self.verticalFireThreshold,
                        abs(v.y) >= Self.stepMinVelocity {
                         verticalStepFired = true
-                        if t.y < 0 { upPressed() } else { downPressed() }
+                        if t.y < 0 { upNavigate() } else { downNavigate() }
                     }
                 }
                 // Horizontal axis swallowed: overlay has no left/right nav.
@@ -1626,11 +2029,7 @@ final class PlayerHostController: AVPlayerViewController {
             let t = gesture.translation(in: view)
 
             if panAxis == .undetermined {
-                let absX = abs(t.x)
-                let absY = abs(t.y)
-                if max(absX, absY) >= Self.panAxisCommitThreshold {
-                    panAxis = absX > absY ? .horizontal : .vertical
-                }
+                panAxis = PlayerPanAxis.resolve(translation: t)
             }
 
             switch panAxis {
@@ -1663,7 +2062,7 @@ final class PlayerHostController: AVPlayerViewController {
                       abs(v.y) >= Self.stepMinVelocity
                 else { return }
                 verticalStepFired = true
-                if t.y < 0 { upPressed() } else { downPressed() }
+                if t.y < 0 { upNavigate() } else { downNavigate() }
             case .undetermined:
                 break
             }
@@ -1684,3 +2083,4 @@ final class PlayerHostController: AVPlayerViewController {
     }
 
 }
+#endif

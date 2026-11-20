@@ -13,6 +13,10 @@ struct HorizontalMediaRow: View {
     /// Sodalite#66. The row paints show-level art rather than each item's own still, so the cards
     /// skip the spoiler blur (Continue Watching set to Backdrop or Thumb).
     var showsSeriesArtwork: Bool = false
+    /// Per-card server chip (Sodalite#85).
+    var itemLabel: ((JellyfinItem) -> String?)? = nil
+    /// Set on a capped row: a trailing card that opens the full list.
+    var onShowAll: (() -> Void)? = nil
     /// Overrides the tier's row inset so the row can line up with a host screen that insets differently.
     var inset: CGFloat? = nil
 
@@ -44,8 +48,9 @@ struct HorizontalMediaRow: View {
             RowScrollView(leading: leadingInset, trailing: rowInset,
                           vertical: metrics.rowVerticalPadding) {
                 LazyHStack(spacing: metrics.itemSpacing) {
-                    ForEach(items) { item in
-                        FocusableCard {
+                    // Per server: two servers can carry the same id, and a repeated identity draws a blank card.
+                    ForEach(items, id: \.originKey) { item in
+                        FocusableCard(opensMenuOnHold: true) {
                             onItemSelected?(item)
                         } content: { isFocused in
                             MediaCard(
@@ -54,8 +59,15 @@ struct HorizontalMediaRow: View {
                                 fallbackURL: fallbackURLProvider?(item),
                                 style: cardStyle,
                                 isFocused: isFocused,
-                                showsSeriesArtwork: showsSeriesArtwork
+                                showsSeriesArtwork: showsSeriesArtwork,
+                                serverLabel: itemLabel?(item)
                             )
+                        }
+                        .mediaContextMenu(for: item) { onItemSelected?($0) }
+                    }
+                    if let onShowAll {
+                        FocusableCard(action: onShowAll, exposesButtonSemantics: true) { isFocused in
+                            ShowAllCard(style: cardStyle, isFocused: isFocused)
                         }
                     }
                 }

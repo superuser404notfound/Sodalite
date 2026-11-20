@@ -1,0 +1,341 @@
+import Foundation
+import Testing
+@testable import Sodalite
+
+@MainActor
+struct SparseGridStoreTests {
+    /// MainActor-isolated so the `@Sendable` fetch closure may capture it under Swift 6.
+    @MainActor final class Server {
+        var all: [JellyfinItem]
+        var requests: [Int] = []
+        var failing: Set<Int> = []
+        var totalOverride: Int?
+        /// AIOMetadata's emulated Jellyfin: requests over 100 are answered with 50, and the total
+        /// is only what was served plus one page of lookahead until the catalog runs out.
+        var emulatesAIOMetadata = false
+        /// A cross-library list on that same server: the total is only what this answer reached.
+        var reportsOnlyServed = false
+        init(count: Int) { all = (0..<count).map { Server.item("i\($0)") } }
+        static func item(_ id: String, type: String = "Movie") -> JellyfinItem {
+            try! JSONDecoder().decode(JellyfinItem.self,
+                from: Data(#"{"Id":"\#(id)","Name":"\#(id)","Type":"\#(type)"}"#.utf8))
+        }
+        func fetch(_ start: Int, _ limit: Int) async throws -> JellyfinItemsResponse {
+            requests.append(start)
+            if failing.contains(start) { throw URLError(.timedOut) }
+            if emulatesAIOMetadata {
+                let served = limit > 100 ? 50 : limit
+                let items = Array(all.dropFirst(start).prefix(served))
+                let more = start + items.count < all.count
+                return JellyfinItemsResponse(items: items,
+                    totalRecordCount: start + items.count + (more && !items.isEmpty ? served : 0))
+            }
+            if reportsOnlyServed {
+                let items = Array(all.dropFirst(start).prefix(limit))
+                return JellyfinItemsResponse(items: items, totalRecordCount: start + items.count)
+            }
+            return JellyfinItemsResponse(items: Array(all.dropFirst(start).prefix(limit)),
+                                         totalRecordCount: totalOverride ?? all.count)
+        }
+    }
+
+    private func started(_ server: Server, pageSize: Int = 10, seed: [JellyfinItem] = [],
+                         hidden: @escaping (JellyfinItem) -> Bool = { _ in false }) async -> SparseGridStore {
+        let store = SparseGridStore(pageSize: pageSize)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: hidden, seed: seed)
+        await store.waitForIdle()
+        return store
+    }
+
+    @Test func firstPageSizesTheGridToTheTotal() async {
+        let server = Server(count: 35)
+        let store = await started(server)
+        #expect(store.slots.count == 35)
+        #expect(server.requests == [0])
+        #expect(store.item(at: 9)?.id == "i9")
+        #expect(store.slots[10] == .pending)
+        if case .loaded(let items) = store.firstPage { #expect(items.count == 10) } else { Issue.record("first page") }
+    }
+
+    @Test func slotLoadsItsOwnPageAtAnAbsoluteOffset() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        store.slotAppeared(57)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 50])
+        #expect(store.item(at: 57)?.id == "i57")
+        #expect(store.slots[40] == .pending)
+    }
+
+    @Test func aPageIsRequestedOnce() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        for i in 20..<30 { store.slotAppeared(i) }
+        await store.waitForIdle()
+        store.slotAppeared(25)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 20])
+    }
+
+    @Test func offscreenPagesLeaveTheQueue() async {
+        let server = Server(count: 200)
+        let store = SparseGridStore(pageSize: 10, maxInFlight: 1)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: { _ in false }, seed: [])
+        // Page 0 is in flight; these three queue behind it.
+        store.slotAppeared(30); store.slotAppeared(60); store.slotAppeared(90)
+        store.slotDisappeared(30); store.slotDisappeared(60)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 90])
+    }
+
+    @Test func newestRequestGoesFirst() async {
+        let server = Server(count: 200)
+        let store = SparseGridStore(pageSize: 10, maxInFlight: 1)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: { _ in false }, seed: [])
+        store.slotAppeared(30); store.slotAppeared(60)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 60, 30])
+    }
+
+    @Test func prioritizedSlotLoadsWithoutAppearing() async {
+        let server = Server(count: 200)
+        let store = await started(server)
+        store.prioritize(slot: 150)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 150])
+    }
+
+    @Test func totalShrinkTruncatesSlotsAndForgetsPages() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        store.slotAppeared(95)
+        await store.waitForIdle()
+        server.all = Array(server.all.prefix(55))
+        store.slotAppeared(55)
+        await store.waitForIdle()
+        #expect(store.slots.count == 55)
+        #expect(store.visibleIndices.last == 54)
+    }
+
+    @Test func totalGrowAppendsPending() async {
+        let server = Server(count: 30)
+        let store = await started(server)
+        server.all += (30..<45).map { Server.item("n\($0)") }
+        store.slotAppeared(15)
+        await store.waitForIdle()
+        #expect(store.slots.count == 45)
+        #expect(store.slots[44] == .pending)
+    }
+
+    @Test func staleGenerationIsDiscarded() async {
+        let old = Server(count: 50)
+        let fresh = Server(count: 5)
+        let store = SparseGridStore(pageSize: 10)
+        store.start(fetch: { try await old.fetch($0, $1) }, isHidden: { _ in false }, seed: [])
+        store.start(fetch: { try await fresh.fetch($0, $1) }, isHidden: { _ in false }, seed: [])
+        await store.waitForIdle()
+        #expect(store.slots.count == 5)
+    }
+
+    @Test func failedPageRetriesOnReappear() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        server.failing = [20]
+        store.slotAppeared(25)
+        await store.waitForIdle()
+        #expect(store.slots[25] == .pending)
+        server.failing = []
+        store.slotDisappeared(25)
+        store.slotAppeared(25)
+        await store.waitForIdle()
+        #expect(store.item(at: 25)?.id == "i25")
+    }
+
+    @Test func failedFirstPageIsReported() async {
+        let server = Server(count: 100)
+        server.failing = [0]
+        let store = await started(server)
+        #expect(store.firstPage == .failed)
+        #expect(store.slots.isEmpty)
+    }
+
+    @Test func seedPaintsBeforeTheFetchAndIsReplaced() async {
+        let server = Server(count: 30)
+        let store = SparseGridStore(pageSize: 10)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: { _ in false },
+                    seed: [Server.item("cached")])
+        #expect(store.item(at: 0)?.id == "cached")
+        await store.waitForIdle()
+        #expect(store.item(at: 0)?.id == "i0")
+        #expect(store.slots.count == 30)
+    }
+
+    @Test func hiddenItemsLeaveVisibleIndices() async {
+        let server = Server(count: 10)
+        server.all[3] = Server.item("audio", type: "Playlist")
+        let store = await started(server, pageSize: 20, hidden: { $0.id == "audio" })
+        #expect(store.slots[3] == .hidden)
+        #expect(!store.visibleIndices.contains(3))
+        #expect(store.visibleIndices.count == 9)
+    }
+
+    @Test func visibleIndexAtOrAfterSkipsHidden() async {
+        let server = Server(count: 10)
+        server.all[3] = Server.item("audio", type: "Playlist")
+        let store = await started(server, hidden: { $0.id == "audio" })
+        #expect(store.visibleIndex(atOrAfter: 3) == 4)
+    }
+
+    @Test func visibleIndexAtOrAfterClampsPastEnd() async {
+        let store = await started(Server(count: 10), pageSize: 20)
+        #expect(store.visibleIndex(atOrAfter: 500) == 9)
+    }
+
+    @Test func seededInitPaintsWithoutFetching() {
+        let store = SparseGridStore(pageSize: 10, seed: [Server.item("cached")])
+        #expect(store.item(at: 0)?.id == "cached")
+        #expect(store.slots.count == 1)
+    }
+
+    @Test func revalidateRefetchesVisiblePagesAndKeepsTheGrid() async {
+        let server = Server(count: 100)
+        let store = await started(server)
+        store.slotAppeared(25)
+        await store.waitForIdle()
+        server.all[25] = Server.item("changed")
+        store.revalidate()
+        #expect(store.item(at: 25)?.id == "i25")
+        #expect(store.slots.count == 100)
+        await store.waitForIdle()
+        #expect(store.item(at: 25)?.id == "changed")
+        #expect(server.requests.suffix(2).sorted() == [0, 20])
+    }
+
+    @Test func theSeedIsNotTheServerTotal() async {
+        let server = Server(count: 300)
+        let store = SparseGridStore(pageSize: 10, seed: (0..<10).map { Server.item("c\($0)") })
+        #expect(!store.knowsTotal)
+        store.start(fetch: { try await server.fetch($0, $1) }, isHidden: { _ in false }, seed: store.loadedItems)
+        #expect(!store.knowsTotal)
+        await store.waitForIdle()
+        #expect(store.knowsTotal)
+        #expect(store.slots.count == 300)
+    }
+
+    @Test func revalidateAfterAFailedFirstPageKeepsTheGridAndRecovers() async {
+        let server = Server(count: 30)
+        let store = await started(server)
+        server.failing = [0]
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.firstPage == .failed)
+        #expect(store.slots.count == 30)
+        server.failing = []
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.item(at: 0)?.id == "i0")
+        if case .loaded = store.firstPage {} else { Issue.record("first page should recover") }
+    }
+
+    @Test func aShortPageIsFilledFromWhereItStopped() async {
+        let server = Server(count: 1200)
+        server.emulatesAIOMetadata = true
+        let store = await started(server, pageSize: 200)
+        #expect(server.requests == [0, 50, 100])
+        #expect(store.item(at: 199)?.id == "i199")
+        #expect(store.slots.count > 200)
+    }
+
+    @Test func aLookaheadTotalGrowsUntilTheCatalogEnds() async {
+        let server = Server(count: 1200)
+        server.emulatesAIOMetadata = true
+        let store = await started(server, pageSize: 200)
+        // Page 6 is the empty answer behind a last page that came back full.
+        for page in 1...6 {
+            store.slotAppeared(page * 200)
+            await store.waitForIdle()
+        }
+        #expect(store.slots.count == 1200)
+        #expect(store.item(at: 1199)?.id == "i1199")
+        #expect(store.loadedItems.count == 1200)
+    }
+
+    @Test func aRefetchOfAnEarlyPageKeepsTheRowsBehindIt() async {
+        let server = Server(count: 1200)
+        server.emulatesAIOMetadata = true
+        let store = await started(server, pageSize: 200)
+        store.slotAppeared(600)
+        await store.waitForIdle()
+        let grown = store.slots.count
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.slots.count == grown)
+        #expect(store.item(at: 650)?.id == "i650")
+    }
+
+    @Test func aChunkThatFailsLeavesThePageToRetry() async {
+        let server = Server(count: 1200)
+        server.emulatesAIOMetadata = true
+        server.failing = [50]
+        let store = await started(server, pageSize: 200)
+        #expect(store.item(at: 49)?.id == "i49")
+        #expect(store.slots[50] == .pending)
+        server.failing = []
+        store.slotAppeared(50)
+        await store.waitForIdle()
+        #expect(store.item(at: 199)?.id == "i199")
+    }
+
+    @Test func aFullAnswerAtAServedOnlyTotalLeavesOneSlotToAskOn() async {
+        let server = Server(count: 120)
+        server.reportsOnlyServed = true
+        let store = await started(server, pageSize: 50)
+        #expect(store.slots.count == 51)
+        #expect(store.slots[50] == .pending)
+        store.slotAppeared(50)
+        await store.waitForIdle()
+        #expect(store.slots.count == 101)
+        store.slotAppeared(100)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 50, 100])
+        #expect(store.slots.count == 120)
+        #expect(store.loadedItems.count == 120)
+    }
+
+    @Test func anEmptyAnswerPastTheLookaheadSlotEndsTheGrid() async {
+        let server = Server(count: 100)
+        server.reportsOnlyServed = true
+        let store = await started(server, pageSize: 50)
+        store.slotAppeared(50)
+        await store.waitForIdle()
+        store.slotAppeared(100)
+        await store.waitForIdle()
+        #expect(store.slots.count == 100)
+        #expect(store.visibleIndices.last == 99)
+    }
+
+    @Test func aLibraryOfExactlyOnePageCostsOneEmptyRequest() async {
+        let server = Server(count: 50)
+        let store = await started(server, pageSize: 50)
+        #expect(store.slots.count == 51)
+        store.slotAppeared(50)
+        await store.waitForIdle()
+        #expect(server.requests == [0, 50])
+        #expect(store.slots.count == 50)
+    }
+
+    @Test func aRefetchOfPageZeroKeepsAServedOnlyGrid() async {
+        let server = Server(count: 300)
+        server.reportsOnlyServed = true
+        let store = await started(server, pageSize: 50)
+        for slot in [50, 100, 150] {
+            store.slotAppeared(slot)
+            await store.waitForIdle()
+        }
+        let grown = store.slots.count
+        store.revalidate()
+        await store.waitForIdle()
+        #expect(store.slots.count == grown)
+        #expect(store.item(at: 160)?.id == "i160")
+    }
+}

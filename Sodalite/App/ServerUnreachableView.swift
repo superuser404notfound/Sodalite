@@ -21,12 +21,15 @@ struct ServerUnreachableView: View {
     /// Offered only where there is a slot to fill and a sheet to fill it in.
     let onAddExternalAddress: (() -> Void)?
     let onRetry: () async -> Void
+    /// Sodalite#81: offered while the profile has downloads; the first and prominent action then.
+    var onOpenDownloads: (() -> Void)? = nil
 
     @State private var isRetrying = false
 
     private var symbol: String {
         switch state {
         case .noNetwork: "wifi.slash"
+        case .foreignNetwork: "wifi.exclamationmark"
         default: "network.slash"
         }
     }
@@ -37,6 +40,8 @@ struct ServerUnreachableView: View {
             Text("server.noNetwork.title")
         case .offNetwork:
             Text("server.offNetwork.title \(serverName)")
+        case .foreignNetwork:
+            Text("server.foreignNetwork.title \(serverName)")
         default:
             Text("server.unreachable.title \(serverName)")
         }
@@ -46,7 +51,11 @@ struct ServerUnreachableView: View {
     /// the sentence explains the button, and a button with no explanation, or an explanation with no
     /// button, is the half that reads as a dead end.
     private var subtitle: Text? {
-        onAddExternalAddress == nil ? nil : Text("server.offNetwork.body")
+        let address: Text? = onAddExternalAddress == nil ? nil : Text("server.offNetwork.body")
+        guard state == .foreignNetwork else { return address }
+        let network = Text("server.foreignNetwork.body")
+        guard let address else { return network }
+        return Text("\(network) \(address)")
     }
 
     var body: some View {
@@ -68,6 +77,17 @@ struct ServerUnreachableView: View {
             .frame(maxWidth: 620)
 
             VStack(spacing: 14) {
+                if let onOpenDownloads {
+                    Button(action: onOpenDownloads) {
+                        Text("downloads.goToDownloads")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(SettingsTileButtonStyle(isProminent: true))
+                }
+
                 if let onAddExternalAddress {
                     Button(action: onAddExternalAddress) {
                         Text("server.offNetwork.addExternal")
@@ -76,7 +96,7 @@ struct ServerUnreachableView: View {
                             .padding(.horizontal, 32)
                             .padding(.vertical, 12)
                     }
-                    .buttonStyle(SettingsTileButtonStyle(isProminent: true))
+                    .buttonStyle(SettingsTileButtonStyle(isProminent: onOpenDownloads == nil))
                 }
 
                 Button {
@@ -100,7 +120,7 @@ struct ServerUnreachableView: View {
                 // and a screen whose only way forward reads as decoration is the Sodalite#82
                 // complaint one screen over. Where the add-address button is present that one is the
                 // primary and this one must stay under it.
-                .buttonStyle(SettingsTileButtonStyle(isProminent: onAddExternalAddress == nil))
+                .buttonStyle(SettingsTileButtonStyle(isProminent: onAddExternalAddress == nil && onOpenDownloads == nil))
                 .disabled(isRetrying)
             }
         }
@@ -133,7 +153,7 @@ extension ServerUnreachableView {
         present: @escaping () -> Void
     ) -> (() -> Void)? {
         #if os(iOS)
-        guard state == .offNetwork || state == .unreachable,
+        guard state == .offNetwork || state == .foreignNetwork || state == .unreachable,
               server?.emptyURLSlot == .external
         else { return nil }
         return present
@@ -159,7 +179,8 @@ private struct AddExternalAddressSheetModifier: ViewModifier {
                 AddSecondURLSheet(
                     slot: slot,
                     knownURL: server.url,
-                    resolve: ServerAddressResolution.jellyfin(dependencies.serverDiscoveryService),
+                    resolve: ServerAddressResolution.jellyfin(
+                        dependencies.serverDiscoveryService, expectedServerID: server.id),
                     onSave: { newURL in
                         let merged = server.urls(filling: slot, with: newURL)
                         try? dependencies.updateServerURLs(

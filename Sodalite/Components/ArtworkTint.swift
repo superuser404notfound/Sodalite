@@ -1,7 +1,4 @@
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#endif
 
 /// The two ends of a page's tint: the colour directly under the hero band, and the colour the page
 /// has deepened to by its bottom. Deliberately not black at the far end, the page keeps its colour
@@ -57,7 +54,6 @@ struct ArtworkStripReading: Equatable {
 /// 0.89 that is entirely JPEG noise. Both keep the plain average, which is grey, which is honest.
 enum ArtworkTint {
 
-    #if canImport(UIKit)
     /// Cells the bottom strip is reduced to before it is measured. Wide and short, like the strip,
     /// and 512 cells is enough to separate a hue from noise while staying one draw and one pass.
     nonisolated private static let gridWidth = 64
@@ -85,13 +81,13 @@ enum ArtworkTint {
     ///
     /// The strip, not the whole image: the tint has to continue the pixels the band actually ends on,
     /// and a full-frame average of a dark-bottom/bright-top backdrop lands somewhere neither edge is.
-    nonisolated static func bottomEdgePalette(of image: UIImage) -> ArtworkPalette? {
+    nonisolated static func bottomEdgePalette(of image: PlatformImage) -> ArtworkPalette? {
         guard let reading = stripReading(of: image) else { return nil }
         return palette(for: reading)
     }
 
     /// Measures the bottom eighth: its average, and what its coloured pixels agree on.
-    nonisolated static func stripReading(of image: UIImage) -> ArtworkStripReading? {
+    nonisolated static func stripReading(of image: PlatformImage) -> ArtworkStripReading? {
         guard let source = image.cgImage, source.width > 0, source.height > 0 else { return nil }
 
         // CGImage crop coordinates are top-left origin, so the bottom strip starts at height - strip.
@@ -203,13 +199,13 @@ enum ArtworkTint {
     ) -> ArtworkPalette {
         let near = min(max(brightness, 0.12), 0.30)
         return ArtworkPalette(
-            near: Color(uiColor: UIColor(hue: hue, saturation: saturation, brightness: near, alpha: 1)),
-            far: Color(uiColor: UIColor(hue: hue, saturation: saturation, brightness: near * 0.4, alpha: 1))
+            near: Color(hue: hue, saturation: saturation, brightness: near),
+            far: Color(hue: hue, saturation: saturation, brightness: near * 0.4)
         )
     }
 
-    /// RGB to HSB by hand: the measurement walks 512 cells, and UIColor would allocate one object per
-    /// cell to hand back the same three numbers.
+    /// RGB to HSB by hand: the measurement walks 512 cells, and a platform colour object would be
+    /// allocated once per cell to hand back the same three numbers.
     nonisolated static func hsb(
         red: CGFloat,
         green: CGFloat,
@@ -232,10 +228,8 @@ enum ArtworkTint {
         }
         return (hue, maxComponent == 0 ? 0 : delta / maxComponent, maxComponent)
     }
-    #endif
 }
 
-#if canImport(UIKit)
 /// Tints already derived, keyed by the artwork URL that produced them.
 ///
 /// Two sibling views need the same colour (the band fades into it, the page below is painted with
@@ -257,7 +251,7 @@ final class ArtworkTintStore {
 
     /// Derives and stores the tint for `url` once. Cheap (one 64x8 draw of an already decoded image),
     /// but off the main actor regardless: it runs while the detail page is painting its first frame.
-    func resolve(_ image: UIImage, for url: URL) {
+    func resolve(_ image: PlatformImage, for url: URL) {
         guard palettes[url] == nil, !inFlight.contains(url) else { return }
         inFlight.insert(url)
         Task.detached(priority: .utility) {
@@ -271,4 +265,3 @@ final class ArtworkTintStore {
         }
     }
 }
-#endif

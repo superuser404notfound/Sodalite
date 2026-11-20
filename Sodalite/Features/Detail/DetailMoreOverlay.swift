@@ -148,7 +148,7 @@ private struct MoreDetailsBlock<Content: View>: View {
                     .fill(isFocused ? Color.Theme.focusFill : .clear)
             )
             .animation(.easeInOut(duration: 0.2), value: isFocused)
-            .focusable()
+            .focusableSurface()
             .focused($isFocused)
         #else
         content()

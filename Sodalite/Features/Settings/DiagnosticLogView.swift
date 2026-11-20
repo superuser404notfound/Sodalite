@@ -304,7 +304,7 @@ struct LogActionButton: View {
             .focusStroke(cornerRadius: 14, isFocused: isFocused)
             .focusResponse(.tile.flat, isFocused: isFocused)
             .opacity(isEnabled ? 1 : 0.4)
-            .focusable(isEnabled)
+            .focusableSurface(isEnabled)
             .focused($isFocused)
             .stableTap(isFocused: isFocused) {
                 guard isEnabled else { return }
@@ -332,7 +332,7 @@ struct LogActionLabel: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(.white.opacity(isFocused ? 0.15 : 0.05))
+                    .fill(isFocused ? Color.Theme.focusFill : Color.white.opacity(0.05))
             )
     }
 }
@@ -394,7 +394,7 @@ private struct LogBlock: View {
                 .fill(isFocused ? AnyShapeStyle(.tint.opacity(0.18)) : AnyShapeStyle(Color.clear))
         )
         .focusStroke(cornerRadius: 12, isFocused: isFocused)
-        .focusable(true)
+        .focusableSurface(true)
         .focused($isFocused)
     }
 }

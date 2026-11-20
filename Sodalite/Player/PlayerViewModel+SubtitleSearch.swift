@@ -1,5 +1,40 @@
 import Foundation
 
+/// What identifies an external subtitle stream across a renumbering: Jellyfin keeps no file name on
+/// the stream, and the index shifts when a file is added or removed in front of it (audit PUI-202).
+struct ExternalSubtitleSignature: Hashable, Sendable {
+    let language: String?
+    let codec: String?
+    let title: String?
+    let displayTitle: String?
+
+    init(_ stream: MediaStream) {
+        language = stream.language?.lowercased()
+        codec = stream.codec?.lowercased()
+        title = stream.title
+        displayTitle = stream.displayTitle
+    }
+
+    static func externals(in streams: [MediaStream]) -> [ExternalSubtitleSignature] {
+        streams.filter { $0.isExternal == true }.map(ExternalSubtitleSignature.init)
+    }
+
+    /// The external stream that is new in `after`: the first one whose signature occurs more often
+    /// than in `before`. Works whichever way Jellyfin orders the externals.
+    static func newlyAttached(before: [ExternalSubtitleSignature], after: [MediaStream]) -> MediaStream? {
+        var remaining = before.reduce(into: [ExternalSubtitleSignature: Int]()) { $0[$1, default: 0] += 1 }
+        for stream in after where stream.isExternal == true {
+            let signature = ExternalSubtitleSignature(stream)
+            if let left = remaining[signature], left > 0 {
+                remaining[signature] = left - 1
+            } else {
+                return stream
+            }
+        }
+        return nil
+    }
+}
+
 /// Feature #4: in-player subtitle search/download via Jellyfin RemoteSearch
 /// (server needs OpenSubtitles plugin); downloads attach server-side as
 /// external streams, applied live through the sidecar subtitle path.
@@ -31,6 +66,7 @@ extension PlayerViewModel {
     }
 
     func dismissSubtitleSearch() {
+        subtitleSearchGeneration += 1
         subtitleSearchVisible = false
         subtitleSearchState = .idle
     }
@@ -43,11 +79,15 @@ extension PlayerViewModel {
 
     func searchSubtitles() async {
         subtitleSearchState = .loading
+        subtitleSearchGeneration += 1
+        let generation = subtitleSearchGeneration
+        let itemID = item.id
         let language = subtitleSearchLanguage
         do {
-            let raw = try await searchRemoteSubtitlesWithRetry(language: language)
-            // Drop a late result whose language the user already switched away from.
-            guard language == subtitleSearchLanguage else { return }
+            let raw = try await searchRemoteSubtitlesWithRetry(language: language, itemID: itemID)
+            // Drop a late result of an older search (another language, the same one asked twice) or of
+            // an item the player has left.
+            guard generation == subtitleSearchGeneration, item.id == itemID else { return }
             // Hash matches are timed against this exact file; surface first, then popularity.
             let results = raw.sorted { lhs, rhs in
                 if (lhs.isHashMatch == true) != (rhs.isHashMatch == true) {
@@ -65,7 +105,7 @@ extension PlayerViewModel {
                 subtitleSearchFocus = .result(0)
             }
         } catch {
-            guard language == subtitleSearchLanguage else { return }
+            guard generation == subtitleSearchGeneration, item.id == itemID else { return }
             subtitleSearchState = .error(
                 String(localized: "player.subtitle.search.error",
                        defaultValue: "Subtitle search failed. The server may not have a subtitle provider installed.")
@@ -77,13 +117,13 @@ extension PlayerViewModel {
     /// RemoteSearch with one retry: the OpenSubtitles provider cold-starts and
     /// times out on a session's first query, so a retry avoids a false "no
     /// provider installed" message.
-    private func searchRemoteSubtitlesWithRetry(language: String) async throws -> [RemoteSubtitleInfo] {
+    private func searchRemoteSubtitlesWithRetry(language: String, itemID: String) async throws -> [RemoteSubtitleInfo] {
         do {
-            return try await playbackService.searchRemoteSubtitles(itemID: item.id, language: language)
+            return try await playbackService.searchRemoteSubtitles(itemID: itemID, language: language)
         } catch {
             LogTap.shared.note("[SubSearch] first attempt failed (\(error)); retrying once")
             try await Task.sleep(for: .milliseconds(400))
-            return try await playbackService.searchRemoteSubtitles(itemID: item.id, language: language)
+            return try await playbackService.searchRemoteSubtitles(itemID: itemID, language: language)
         }
     }
 
@@ -92,9 +132,9 @@ extension PlayerViewModel {
     /// time polling stops (slow CDN), parks in `.downloadTimedOut` ("Try again").
     func downloadAndApplySubtitle(_ info: RemoteSubtitleInfo) async {
         subtitleSearchState = .downloading(id: info.id)
-        // External subs are never deduped, so subtitleStreams' index set is a
-        // sound "before" snapshot for spotting the newly attached one.
-        let before = Set(subtitleStreams.map(\.index))
+        // External subs are never deduped; their signatures (not their indices, which shift when the
+        // server renumbers) are the "before" snapshot for spotting the newly attached one.
+        let before = ExternalSubtitleSignature.externals(in: subtitleStreams)
         let itemID = item.id
         let sourceID = mediaSourceID
         do {
@@ -125,7 +165,7 @@ extension PlayerViewModel {
     /// `itemID` / `sourceID` are the session the download was started for: the poll outlives an
     /// auto-advance, and reading them live would apply this item's new stream index to the next one.
     private func applyNewlyAttachedSubtitle(
-        info: RemoteSubtitleInfo, before: Set<Int>, itemID: String, sourceID: String
+        info: RemoteSubtitleInfo, before: [ExternalSubtitleSignature], itemID: String, sourceID: String
     ) async {
         var newStream: MediaStream?
         for attempt in 0..<5 {
@@ -139,10 +179,8 @@ extension PlayerViewModel {
             guard let source = response.mediaSources.first(where: { $0.id == sourceID })
                 ?? response.mediaSources.first else { continue }
             let refreshed = Self.dedupedSubtitleStreams(from: source.mediaStreams)
-            if let added = refreshed.first(where: {
-                $0.isExternal == true && !before.contains($0.index)
-            }) {
-                subtitleStreams = refreshed
+            if let added = ExternalSubtitleSignature.newlyAttached(before: before, after: refreshed) {
+                adoptRefreshedMediaStreams(source.mediaStreams)
                 newStream = added
                 break
             }
@@ -281,14 +319,17 @@ extension PlayerViewModel {
 
     private func performSubtitleDeletion(streamIndex: Int) async {
         if activeSubtitleIndex == streamIndex { selectSubtitleTrack(id: nil) }
+        if activeSecondarySubtitleIndex == streamIndex { selectSecondarySubtitleTrack(id: nil) }
+        let itemID = item.id
         do {
-            try await playbackService.deleteSubtitle(itemID: item.id, index: streamIndex)
+            try await playbackService.deleteSubtitle(itemID: itemID, index: streamIndex)
             let response = try await playbackService.getPlaybackInfo(
-                itemID: item.id, userID: userID, profile: nil
+                itemID: itemID, userID: userID, profile: nil
             )
+            guard item.id == itemID else { return }
             if let source = response.mediaSources.first(where: { $0.id == mediaSourceID })
                 ?? response.mediaSources.first {
-                subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+                adoptRefreshedMediaStreams(source.mediaStreams, removing: streamIndex)
             }
             subtitleDeleteState = .hidden
             scheduleControlsHide()
@@ -298,5 +339,42 @@ extension PlayerViewModel {
                        defaultValue: "Could not delete the subtitle. You may not have permission.")
             )
         }
+    }
+}
+
+// MARK: - Renumbered streams
+
+extension PlayerViewModel {
+
+    /// Takes a fresh PlaybackInfo stream list after a subtitle was added or removed. Jellyfin renumbers
+    /// the streams, so the active picks and the engine track map are re-keyed to the streams they named,
+    /// and both stream lists change together (audit PUI-202, PUI-203).
+    func adoptRefreshedMediaStreams(_ mediaStreams: [MediaStream]?, removing removedIndex: Int? = nil) {
+        let old = subtitleStreams.filter { $0.index != removedIndex }
+        let new = subtitleMenuStreams(from: mediaStreams ?? [])
+        activeSubtitleIndex = Self.remappedSubtitleIndex(activeSubtitleIndex, old: old, new: new)
+        activeSecondarySubtitleIndex = Self.remappedSubtitleIndex(activeSecondarySubtitleIndex, old: old, new: new)
+        externalEngineTrackIDs = externalEngineTrackIDs.reduce(into: [:]) { result, entry in
+            if let index = Self.remappedSubtitleIndex(entry.key, old: old, new: new) {
+                result[index] = entry.value
+            }
+        }
+        subtitleStreams = new
+        sourceMediaStreams = mediaStreams ?? []
+    }
+
+    /// Where the stream that carried `index` in `old` sits in `new`: the same kind of stream (language,
+    /// codec, titles, external flag), counted by occurrence so two identical files keep their order.
+    /// nil when it is gone.
+    static func remappedSubtitleIndex(_ index: Int?, old: [MediaStream], new: [MediaStream]) -> Int? {
+        guard let index, let target = old.first(where: { $0.index == index }) else { return nil }
+        func key(_ stream: MediaStream) -> [String?] {
+            [stream.language?.lowercased(), stream.codec?.lowercased(), stream.title, stream.displayTitle,
+             stream.isExternal == true ? "external" : "embedded", stream.isForced == true ? "forced" : nil]
+        }
+        let targetKey = key(target)
+        let ordinal = old.prefix { $0.index != index }.filter { key($0) == targetKey }.count
+        let matches = new.filter { key($0) == targetKey }
+        return matches.indices.contains(ordinal) ? matches[ordinal].index : nil
     }
 }

@@ -44,6 +44,30 @@ struct CollectionRowLayoutTests {
         #expect(CollectionItemRow.verticalAlignment(hasOverview: false) == .center)
     }
 
+    @Test("an episode names its show and its number above the title")
+    func episodeCarriesSeriesLine() throws {
+        let episode = try item(#"{"Id":"e","Name":"The One Where","Type":"Episode","SeriesName":"Friends","ParentIndexNumber":3,"IndexNumber":15}"#)
+        #expect(CollectionItemRow.seriesLine(for: episode) == "Friends · S3, E15")
+
+        let special = try item(#"{"Id":"e","Name":"Special","Type":"Episode","SeriesName":"Friends","ParentIndexNumber":0}"#)
+        #expect(CollectionItemRow.seriesLine(for: special) == "Friends · S0")
+    }
+
+    @Test("no series line for a movie or an episode without a show name")
+    func seriesLineOnlyForNamedEpisodes() throws {
+        let movie = try item(#"{"Id":"m","Name":"Heat","Type":"Movie","SeriesName":"Heat"}"#)
+        #expect(CollectionItemRow.seriesLine(for: movie) == nil)
+
+        let orphan = try item(#"{"Id":"e","Name":"Pilot","Type":"Episode","SeriesName":"","IndexNumber":1}"#)
+        #expect(CollectionItemRow.seriesLine(for: orphan) == nil)
+    }
+
+    @Test("the series line takes one overview line, so the block still ends at the poster")
+    func overviewYieldsALineToTheSeries() {
+        #expect(CollectionItemRow.overviewLineLimit(hasSeriesLine: false) == 3)
+        #expect(CollectionItemRow.overviewLineLimit(hasSeriesLine: true) == 2)
+    }
+
     @Test("row reads its metrics instead of hardcoding poster and font sizes")
     func rowIsMetricsDriven() throws {
         let source = try sourceFile("Sodalite/Features/Detail/CollectionDetailView.swift")
@@ -51,7 +75,6 @@ struct CollectionRowLayoutTests {
         #expect(source.contains("metrics.listPosterSize"))
         #expect(source.contains("metrics.listTitleFont"))
         #expect(source.contains("metrics.listOverviewFont"))
-        #expect(source.contains("lineLimit(3)"))
     }
 
     @Test("metadata chips wrap instead of shrinking past legibility")
@@ -59,6 +82,10 @@ struct CollectionRowLayoutTests {
         let source = try sourceFile("Sodalite/Features/Detail/CollectionDetailView.swift")
         #expect(source.contains("FlowLayout(spacing: 10)"))
         #expect(!source.contains("minimumScaleFactor"))
+    }
+
+    private func item(_ json: String) throws -> JellyfinItem {
+        try JSONDecoder().decode(JellyfinItem.self, from: Data(json.utf8))
     }
 
     private func sourceFile(_ relativePath: String) throws -> String {

@@ -27,7 +27,7 @@
 /// failures before: a width that moved with the setting would drop every cached image and re-resize
 /// the library on the server the moment someone flipped it, and a width that moved with a measured
 /// column re-fires the load and flashes the artwork out and back. Fewer images resident is the
-/// cheaper of the three, and `NSCache` evicts rather than fails.
+/// cheaper of the three, and the cache evicts rather than fails.
 ///
 /// One bucket per family, not one per surface, for the same reason. The 16:9 tiles (genre, library,
 /// provider, episode and program cards) are fixed at 360pt and can never draw past 720, so they
@@ -69,6 +69,12 @@ nonisolated enum ImageWidth {
     /// 3840, and Jellyfin's backdrops come from TMDB at 1920 wide, so this is the source ceiling and
     /// asking for more only makes the server upscale.
     static let fullBleed = 1920
+
+    /// The backdrop cropped to the upright iPhone's 4:5 hero (Home's banner, the detail pages). The
+    /// crop keeps 45% of a 16:9 width, so a 440pt phone at 3x needs a source 1650px tall, 2933 wide.
+    /// Past `fullBleed` on purpose: a 1920 source passes through unresized, and the 3840 ones TMDB
+    /// carries for newer titles stop being upscaled 1.5x.
+    static let tallHero = 2880
 
     /// Top Shelf cell art, download AND decode. The shelf is not one of our tiers, tvOS fixes the
     /// cell, so the size comes from the screen: on tvOS 26 two cells and a bit fill the 1920pt row,

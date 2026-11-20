@@ -14,20 +14,28 @@ struct DetailViewModelRefreshSeasonsTests {
     /// test.
     final class MockItemService: JellyfinItemServiceProtocol, @unchecked Sendable {
         var seasons: [JellyfinItem] = []
+        var episodesBySeason: [String: [JellyfinItem]] = [:]
 
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse {
             JellyfinItemsResponse(items: seasons, totalRecordCount: seasons.count)
         }
         func getEpisodes(seriesID: String, seasonID: String, userID: String) async throws -> JellyfinItemsResponse {
-            JellyfinItemsResponse(items: [], totalRecordCount: 0)
+            let items = episodesBySeason[seasonID] ?? []
+            return JellyfinItemsResponse(items: items, totalRecordCount: items.count)
         }
         func getItemDetail(userID: String, itemID: String) async throws -> JellyfinItem { throw ServiceFailure() }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse {
+            throw ServiceFailure()
+        }
+        func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }
         func setFavorite(userID: String, itemID: String, isFavorite: Bool) async throws {}
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
+        func setRating(userID: String, itemID: String, rating: Double?) async throws {}
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }
@@ -72,7 +80,7 @@ struct DetailViewModelRefreshSeasonsTests {
         vm.nextUpEpisode = nextUp
         vm.currentEpisodeID = nextUp.id
         vm.cachedPlaybackInfo = PrefetchedPlaybackInfo(
-            itemID: nextUp.id, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
+            itemID: nextUp.id, quality: .original, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
         )
         vm.selectedSeasonID = "s2"
 
@@ -96,7 +104,7 @@ struct DetailViewModelRefreshSeasonsTests {
         vm.nextUpEpisode = nextUp
         vm.currentEpisodeID = nextUp.id
         vm.cachedPlaybackInfo = PrefetchedPlaybackInfo(
-            itemID: nextUp.id, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
+            itemID: nextUp.id, quality: .original, response: PlaybackInfoResponse(mediaSources: [], playSessionId: nil)
         )
 
         // Season 3 was deleted; Next Up's own season (2) survives.

@@ -63,7 +63,6 @@ struct HomeLatestShowsRowTests {
             throw Unused()
         }
         func getGenres(userID: String) async throws -> [NamedItem] { [] }
-        func getStudios(userID: String) async throws -> [NamedItem] { [] }
     }
 
     private static func item(_ json: String) throws -> JellyfinItem {

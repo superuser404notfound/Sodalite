@@ -27,6 +27,9 @@ final class LiveDirectStreamMemory {
     /// the rarer case of a URL that still resolves but no longer carries the channel it was stored for.
     nonisolated static let maxAge: TimeInterval = 7 * 24 * 60 * 60
 
+    /// An unchanged URL is re-stamped at most this often, far inside `maxAge`.
+    nonisolated static let refreshInterval: TimeInterval = 24 * 60 * 60
+
     private static let storageKey = KeychainKeys.liveDirectStreams
 
     private var entries: [String: Entry]
@@ -68,9 +71,13 @@ final class LiveDirectStreamMemory {
     }
 
     /// Record a URL that just direct-played. Re-recording an unchanged URL still refreshes
-    /// `updatedAt`, which is what keeps a channel in daily use from ever aging out.
+    /// `updatedAt` (once a day), which is what keeps a channel in daily use from ever aging out.
     func remember(_ url: URL, userID: String, channelID: String, now: Date = Date()) {
         let key = Self.scopeKey(userID: userID, channelID: channelID)
+        // Every successful tune lands here. An unchanged URL refreshed within the last day writes
+        // nothing: the keychain blob is up to 300 entries, written on the main actor.
+        if let existing = entries[key], existing.url == url.absoluteString,
+           now.timeIntervalSince(existing.updatedAt) < Self.refreshInterval { return }
         entries[key] = Entry(url: url.absoluteString, updatedAt: now)
         entries = Self.capped(entries)
         persist()

@@ -92,21 +92,30 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     /// `DetailBackdrop` owns the artwork). Same two URLs that surface passes to the backdrop.
     var heroImageURL: URL? = nil
     var heroPosterURL: URL? = nil
+    /// The same backdrop at `ImageWidth.tallHero`, for the 4:5 crop; nil falls back to `heroImageURL`.
+    var heroTallImageURL: URL? = nil
+    /// iPhone portrait: a tall 4:5 hero instead of the 16:9 band, the shape Home's banner takes on an
+    /// upright iPhone. Only for items with a real upright poster to fall back on (films, series,
+    /// collections); an episode still or a home video's thumb is wide.
+    var portraitHero: Bool = false
     @ViewBuilder let hero: () -> Hero
     @ViewBuilder let primary: () -> Primary
     @ViewBuilder let content: () -> Content
 
-    /// Scroll-driven full-screen dim: 0 at top, ramps to 0.3 one hero-window deep, restoring readability over bright artwork without losing the full-bleed look.
-    @State private var scrollDim: Double = 0
-
-    /// tvOS fold marker state. The offset feeds off the same scroll-geometry hook as scrollDim.
-    @State private var scrollOffset: CGFloat = 0
+    /// Scroll-driven dim and fold-marker state. Held in an object that only the two small layers
+    /// below read, so a scroll frame does not run this body and rebuild the page (audit CMP-203).
+    @State private var scroll = DetailScrollState()
+    /// iPhone portrait: whether the band has mostly left the top, so the system's soft top edge may
+    /// blur what scrolls under the Dynamic Island and the close button (as on Home and the genre
+    /// pages). Only there: landscape and iPad have no island for rows to run under.
+    @State private var bandHasLeftTop = false
     /// Viewport height, which is also the first page's height (it is `containerRelativeFrame`).
     /// Read rather than assumed, so the pinned mark arrives with the fold on every tier.
     @State private var containerHeight: CGFloat = 0
     @State private var belowFoldHeight: CGFloat = 0
     @State private var hintSettled = false
 
+    @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
@@ -153,32 +162,24 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         #endif
     }
 
-    private var showsScrollHint: Bool {
-        reservesScrollHint && ScrollHintPolicy.isVisible(
-            scrollOffset: scrollOffset,
-            belowFoldHeight: belowFoldHeight,
-            hasSettled: hintSettled
-        )
-    }
-
     /// Per-side window safe-area insets, used to push only the CONTENT clear of the Dynamic Island while
     /// the backdrop + scrims stay full-bleed. Read from the window (the overlay is full-bleed, so the
     /// environment inset is gone). In landscape the island is on one side only, so only that side is
     /// inset and the island itself covers that margin; ~0 in portrait / iPad / tvOS (no change).
-    private var safeLeading: CGFloat {
+    ///
+    /// Held in state and re-read on every size change rather than computed in `body`: the body
+    /// re-runs on rotation because the size class flips, and at that moment the window still reports
+    /// the portrait insets (left 0). Nothing re-ran it afterwards, so the page sometimes stayed laid
+    /// out under the island until something else invalidated it.
+    @State private var safeLeading: CGFloat = 0
+    @State private var safeTrailing: CGFloat = 0
+
+    private func refreshWindowInsets() {
         #if os(iOS)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets.left ?? 0
-        #else
-        0
-        #endif
-    }
-    private var safeTrailing: CGFloat {
-        #if os(iOS)
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets.right ?? 0
-        #else
-        0
+        let insets = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.safeAreaInsets ?? .zero
+        if safeLeading != insets.left { safeLeading = insets.left }
+        if safeTrailing != insets.right { safeTrailing = insets.right }
         #endif
     }
 
@@ -196,12 +197,16 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
+        portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder primary: @escaping () -> Primary,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.heroImageURL = heroImageURL
         self.heroPosterURL = heroPosterURL
+        self.heroTallImageURL = heroTallImageURL
+        self.portraitHero = portraitHero
         self.hero = hero
         self.primary = primary
         self.content = content
@@ -241,7 +246,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                         .padding(.bottom, ScrollHintPolicy.primaryBottomInset(reservesHint: reservesScrollHint))
                         .overlay(alignment: .bottom) {
                             if reservesScrollHint {
-                                ScrollHintChevron(isVisible: showsScrollHint)
+                                ScrollHintLayer(scroll: scroll, belowFoldHeight: belowFoldHeight, hasSettled: hintSettled)
                                     .padding(.bottom, 10)
                             }
                         }
@@ -307,19 +312,26 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
                 .background(alignment: .top) { TuckGround(palette: artworkPalette) }
             }
         }
-        .background(Color.black.opacity(scrollDim).ignoresSafeArea())
+        .background { ScrollDimLayer(scroll: scroll) }
         .onScrollGeometryChange(for: Double.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { _, offset in
-            // Linear ramp over the clear hero window, capped at 0.3.
-            scrollDim = min(max(offset / heroWindow, 0), 1) * 0.3
-            scrollOffset = offset
+            scroll.update(offset: offset, heroWindow: heroWindow)
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.containerSize.height
         } action: { _, height in
             containerHeight = height
         }
+        // The window's insets can lag the first layout pass of a rotation, so read once now and once
+        // more after the pass has settled.
+        .onGeometryChange(for: CGSize.self) { proxy in
+            proxy.size
+        } action: { _ in
+            refreshWindowInsets()
+            DispatchQueue.main.async { refreshWindowInsets() }
+        }
+        .onAppear { refreshWindowInsets() }
         // Hold the hint back through the cover's present transition, so a viewer who immediately
         // presses down never sees it appear.
         .task {
@@ -336,9 +348,9 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         // rather than with a report that it "sometimes looks wrong".
         .task {
             try? await Task.sleep(for: .milliseconds(1500))
-            guard scrollOffset > ScrollHintPolicy.hideThreshold else { return }
+            guard scroll.offset > ScrollHintPolicy.hideThreshold else { return }
             LogTap.shared.note(
-                "detail: page settled at offset \(Int(scrollOffset.rounded())) "
+                "detail: page settled at offset \(Int(scroll.offset.rounded())) "
                 + "of viewport \(Int(containerHeight.rounded())), below fold \(Int(belowFoldHeight.rounded()))"
             )
         }
@@ -359,13 +371,18 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
     private var portraitBody: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                heroBand
+                if usesTallHero {
+                    tallHero
+                } else {
+                    heroBand
+                }
 
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
                         primary()
                     }
-                    .padding(.top, 20)
+                    // Over the tall hero's dissolve by `tallHeroOverlap`: see there.
+                    .padding(.top, usesTallHero ? 20 - Self.tallHeroOverlap : 20)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 40) {
@@ -403,7 +420,7 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
             .overlay(alignment: .top) {
                 hero()
                     .padding(.horizontal, metrics.rowInset)
-                    .frame(height: max(0, safeTop + bandHeight - 12), alignment: .bottom)
+                    .frame(height: max(0, safeTop + heroHeight - 12 - (usesTallHero ? Self.tallHeroOverlap : 0)), alignment: .bottom)
                     .allowsHitTesting(false)
             }
         }
@@ -412,10 +429,99 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         .ignoresSafeArea(edges: [.top, .bottom])
         // iOS 26 lays its own effect over a scroll view's top edge, on top of the band, and it is a
         // separate thing from the navigation bar's background: hiding that background left the top of
-        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). This page draws its
-        // own top edge and wants neither.
-        .scrollEdgeEffectHidden(true, for: .top)
+        // the band black anyway on a PUSHED detail page (measured, Sodalite#95). So it stays off
+        // while the band is up there, and comes on once the band has mostly scrolled away: from then
+        // on the page's rows pass under the status bar and the close button, and they blur out there
+        // like everywhere else instead of running under them sharp.
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > heroHeight * 0.6
+        } action: { _, hasLeft in
+            bandHasLeftTop = hasLeft
+        }
+        .safeAreaBar(edge: .top) {
+            // Only the height of the close button's row, for the edge effect to cover it too. The
+            // page ignores the top safe area, so this moves nothing on it.
+            Color.clear.frame(height: 56)
+        }
+        .scrollEdgeEffectHidden(!bandHasLeftTop, for: .top)
         .animation(.easeInOut(duration: 0.4), value: artworkPalette)
+    }
+
+    /// The tall hero, on Home's upright banner recipe (HomeHeroCarousel.portraitArtwork): the
+    /// backdrop, cropped to the 4:5 box's middle, hangs from just under the Dynamic Island, so none
+    /// of it is behind the island or the back button, and a heavily blurred copy of the same art
+    /// fills the island strip. The bottom dissolves into the artwork's colour like the band does.
+    ///
+    /// Pulling the page down past its top stretches the artwork instead of uncovering what is above
+    /// it: the whole hero scales up from its bottom edge by exactly the overscroll, so its top stays
+    /// on the screen's edge. Read per frame in `visualEffect` rather than through scroll state, which
+    /// lags a drag (see the trailing filler's note).
+    private var tallHero: some View {
+        let near = artworkPalette.near
+        return ZStack(alignment: .top) {
+            tallHeroImage(alignment: .center)
+                .blur(radius: 30, opaque: true)
+                // Keeps the clock legible on bright art.
+                .overlay(alignment: .top) {
+                    LinearGradient(colors: [.black.opacity(0.25), .black.opacity(0)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: safeTop)
+                }
+            tallHeroImage(alignment: .top)
+                .mask {
+                    VStack(spacing: 0) {
+                        LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
+                            .frame(height: 28)
+                        Color.black
+                    }
+                }
+                .padding(.top, safeTop)
+        }
+        .frame(maxWidth: .infinity, minHeight: safeTop + tallHeroHeight, maxHeight: safeTop + tallHeroHeight)
+        .overlay(alignment: .bottom) {
+            LinearGradient(
+                stops: [
+                    .init(color: near.opacity(0), location: 0),
+                    .init(color: near.opacity(0.12), location: 0.30),
+                    .init(color: near.opacity(0.45), location: 0.58),
+                    .init(color: near.opacity(0.85), location: 0.82),
+                    .init(color: near, location: 1)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 220)
+            .allowsHitTesting(false)
+        }
+        // Global, not the scroll view's space: the page runs under the top safe area and carries a
+        // top bar inset, so at rest the hero sits at the screen's edge but not at the scroll space's
+        // zero, and only the screen's edge is what the stretch has to hold.
+        .visualEffect { content, proxy in
+            let pull = max(0, proxy.frame(in: .global).minY)
+            return content.scaleEffect(1 + pull / max(1, proxy.size.height), anchor: .bottom)
+        }
+        .allowsHitTesting(false)
+    }
+
+    /// The art laid over a surface that takes exactly the space it is offered: framed directly, a
+    /// filled image grows its frame to the overflow, as on Home's banner.
+    private func tallHeroImage(alignment: Alignment) -> some View {
+        Color.clear
+            .overlay(alignment: alignment) {
+                AsyncCachedImage(url: artworkURL, onImageLoaded: { image in
+                    #if canImport(UIKit)
+                    if let url = artworkURL {
+                        ArtworkTintStore.shared.resolve(image, for: url)
+                    }
+                    #endif
+                }) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    artworkPalette.near
+                }
+            }
+            .clipped()
     }
 
     /// The band: the artwork's own top edge continued across the Dynamic Island, then the artwork.
@@ -551,9 +657,51 @@ struct DetailContentOverlay<Hero: View, Primary: View, Content: View>: View {
         )
     }
 
+    /// The backdrop on both shapes, unless the profile asks for the poster in the tall hero
+    /// (`AppearancePreferences.UprightArtwork`): most posters carry the title printed at the foot,
+    /// under the logo and the panel, and the page showed it twice (Blexbi, the same doubling
+    /// Sodalite#95 took the poster away for once).
     private var artworkURL: URL? {
-        heroImageURL ?? heroPosterURL
+        usesTallHero ? tallHeroURL : (heroImageURL ?? heroPosterURL)
     }
+
+    private var tallHeroURL: URL? {
+        let backdrop = heroTallImageURL ?? heroImageURL
+        return dependencies.appearancePreferences.uprightArtwork == .poster
+            ? (heroPosterURL ?? backdrop)
+            : (backdrop ?? heroPosterURL)
+    }
+
+    /// Upright iPhone only. Every other tier draws the fixed `DetailBackdrop`, which keys its colour
+    /// by the backdrop URL, so asking for the poster's colour there found none and the page under
+    /// the fold went black.
+    private var usesTallHero: Bool {
+        isPhonePortrait && portraitHero && tallHeroURL != nil
+    }
+
+    /// The artwork's height below the island: the 16:9 band, or the tall hero's 4:5 box.
+    private var heroHeight: CGFloat {
+        usesTallHero ? tallHeroHeight : bandHeight
+    }
+
+    /// 4:5 off the window width, as Home's upright banner, and the same on every page: a height
+    /// derived from the panel below gave each title its own crop and resized the art whenever the
+    /// panel's text changed (device, 2026-10-14).
+    private var tallHeroHeight: CGFloat {
+        #if os(iOS)
+        let width = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.keyWindow?.bounds.width ?? 390
+        return (width * 5 / 4).rounded()
+        #else
+        return 0
+        #endif
+    }
+
+    /// How far the logo and the panel reach up over the tall hero's bottom. That stretch is already the
+    /// dissolve into the page colour (220 pt), so it reads as the page rather than the picture, and
+    /// taking the room from there is what keeps Play on the first screen under a full 4:5 hero with
+    /// an episode's title in the panel.
+    private static var tallHeroOverlap: CGFloat { 56 }
 
     private var portraitBandUsesPoster: Bool {
         heroImageURL == nil && heroPosterURL != nil
@@ -689,12 +837,16 @@ extension DetailContentOverlay where Primary == EmptyView {
     init(
         heroImageURL: URL? = nil,
         heroPosterURL: URL? = nil,
+        heroTallImageURL: URL? = nil,
+        portraitHero: Bool = false,
         @ViewBuilder hero: @escaping () -> Hero = { EmptyView() },
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.init(
             heroImageURL: heroImageURL,
             heroPosterURL: heroPosterURL,
+            heroTallImageURL: heroTallImageURL,
+            portraitHero: portraitHero,
             hero: hero,
             primary: { EmptyView() },
             content: content
@@ -735,5 +887,48 @@ struct PageScrollProxyCapture: ViewModifier {
                 .onAppear { proxy = pageProxy }
         }
         #endif
+    }
+}
+
+
+/// What a scroll frame writes. Only the derived values are observed, and only when they change:
+/// the dim moves in 1/200 steps and the hint flips once at the threshold, so the page body does not
+/// run per frame (audit CMP-203). The raw offset is for the settle log and is not observed.
+@Observable
+final class DetailScrollState {
+    private(set) var dim: Double = 0
+    private(set) var pastHintThreshold = false
+    @ObservationIgnored private(set) var offset: CGFloat = 0
+
+    func update(offset: Double, heroWindow: CGFloat) {
+        self.offset = CGFloat(offset)
+        // Linear ramp over the clear hero window, capped at 0.3.
+        let ramp = min(max(offset / Double(heroWindow), 0), 1) * 0.3
+        let stepped = (ramp * 200).rounded() / 200
+        if stepped != dim { dim = stepped }
+        let past = CGFloat(offset) >= ScrollHintPolicy.hideThreshold
+        if past != pastHintThreshold { pastHintThreshold = past }
+    }
+}
+
+/// Full-screen dim: 0 at top, 0.3 one hero window deep, restoring readability over bright artwork.
+private struct ScrollDimLayer: View {
+    let scroll: DetailScrollState
+
+    var body: some View {
+        Color.black.opacity(scroll.dim).ignoresSafeArea()
+    }
+}
+
+private struct ScrollHintLayer: View {
+    let scroll: DetailScrollState
+    let belowFoldHeight: CGFloat
+    let hasSettled: Bool
+
+    var body: some View {
+        ScrollHintChevron(isVisible: ScrollHintPolicy.isVisible(
+            scrollOffset: scroll.pastHintThreshold ? ScrollHintPolicy.hideThreshold : 0,
+            belowFoldHeight: belowFoldHeight,
+            hasSettled: hasSettled))
     }
 }

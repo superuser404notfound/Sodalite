@@ -6,11 +6,27 @@ final class DetailViewModel {
     var item: JellyfinItem
     var isFavorite: Bool
     var isPlayed: Bool
+    /// The viewer's own 0 to 10 rating of the top-level item, nil when unrated.
+    var rating: Double?
+    /// A rating write is in flight, so a detail refetch landing meanwhile must not put the old value back.
+    private var isWritingRating = false
+    /// Bumped by every favourite / watched write. A detail response that started before the bump
+    /// describes the old state and must not overwrite the optimistic value (audit DET-207).
+    private var favoriteWrites = 0
+    private var playedWrites = 0
+    private var isWritingFavorite = false
+    private var queuedFavorite: Bool?
+    private var queuedPlayed: Bool?
+    private var isWritingPlayed = false
     /// Played overrides keyed by item/episode/season ID; live-updates the watched badge without mutating the immutable JellyfinItem (same "pass state to the card" pattern as isFocused/isCurrent).
     var playedOverrides: [String: Bool] = [:]
     /// Favorite overrides keyed by episode ID; same reason as playedOverrides, the heart badge has to update without mutating the item.
     var favoriteOverrides: [String: Bool] = [:]
-    var seasons: [JellyfinItem] = []
+    /// Rating overrides keyed by episode ID, for the same reason; an inner nil is a cleared rating.
+    var ratingOverrides: [String: Double?] = [:]
+    var seasons: [JellyfinItem] = [] {
+        didSet { loadSelectedSeasonExtras() }
+    }
     var episodes: [JellyfinItem] = []
     /// Cache-miss episode fetch for the selected season in flight; drives the skeleton row instead of a blank ("grey then everything at once" slow-CDN symptom).
     var isLoadingEpisodes = false
@@ -21,9 +37,23 @@ final class DetailViewModel {
     /// Full next-up episode, populated when getNextUp lands; lets the play button render "S1E5 · 12:34" + resume bar before loadEpisodes fills `episodes` (else a flicker on the first focused tile).
     var nextUpEpisode: JellyfinItem?
     var similarItems: [JellyfinItem] = []
+    /// Extras from the item's clips/extras folders (Sodalite#179). Fetched only when the detail reports a SpecialFeatureCount.
+    var specialFeatures: [JellyfinItem] = []
+    /// Every local trailer, for the Trailers & Extras row (Sodalite#195). Fetched only when the detail reports a LocalTrailerCount.
+    var localTrailers: [JellyfinItem] = []
     /// Similar titles the server does NOT have, from Jellyseerr. Empty unless the catalog is connected and visible, the item carries a TMDB id, and something survives the dedupe.
     var catalogSimilar: [SeerrMedia] = []
-    var selectedSeasonID: String?
+    /// TMDB, IMDb and RT scores from Jellyseerr for a movie or series; nil until they land or when there is no ratings service.
+    var externalRatings: ExternalRatings?
+    /// A ratings fetch is out, so the metadata line holds the server's star back. Capped by a deadline so a slow Seerr cannot keep it hidden.
+    var isAwaitingExternalRatings = false
+    var selectedSeasonID: String? {
+        didSet { loadSelectedSeasonExtras() }
+    }
+    /// A season's own extras, from the `extras` folder inside its folder (Sodalite#243), keyed by season id.
+    /// Filled per season on first selection; a failed fetch leaves no entry, so the next selection retries.
+    private(set) var seasonExtras: [String: [JellyfinItem]] = [:]
+    @ObservationIgnored private var seasonExtrasInFlight: Set<String> = []
     var isLoading = false
     /// True once full-detail settles (success or failure). isLoading can flip false at the snapshot deadline while the detail roundtrip is still in flight, so views key overview/secondary placeholders on this to reserve space (Sodalite#15).
     var hasFullDetail = false
@@ -36,17 +66,49 @@ final class DetailViewModel {
         (item.localTrailerCount ?? 0) > 0
     }
 
+    /// The YouTube trailers the page embeds when the server has no local one (Sodalite#195). A local
+    /// trailer is usually the same film's trailer, so it wins rather than sitting beside its double.
+    /// Always empty on tvOS: it has no WebKit, and a deep link into the YouTube app did not work there.
+    var remoteTrailers: [YouTubeTrailer] {
+        #if os(tvOS)
+        []
+        #else
+        hasLocalTrailer ? [] : item.youTubeTrailers
+        #endif
+    }
+
+    /// The one the Trailer button plays.
+    var remoteTrailer: YouTubeTrailer? { remoteTrailers.first }
+
+    var hasTrailer: Bool { hasLocalTrailer || remoteTrailer != nil }
+
+    /// Whether the Trailers & Extras row has anything to show.
+    var hasTrailersOrExtras: Bool {
+        !localTrailers.isEmpty || !remoteTrailers.isEmpty || !specialFeatures.isEmpty
+    }
+
     /// Season the tab bar currently has selected; the season synopsis box reads its overview.
     var selectedSeason: JellyfinItem? {
         selectedSeasonID.flatMap { id in seasons.first(where: { $0.id == id }) }
     }
 
+    /// Extras of the season on screen; empty while they load and for a season without any.
+    var selectedSeasonExtras: [JellyfinItem] {
+        selectedSeasonID.flatMap { seasonExtras[$0] } ?? []
+    }
+
     private let itemService: JellyfinItemServiceProtocol
     private let libraryService: JellyfinLibraryServiceProtocol?
     private let playbackService: JellyfinPlaybackServiceProtocol?
+    /// The rung a play from this page would start on (Sodalite#87), read per prefetch so a network
+    /// change between two prefetches is followed.
+    private let streamingQuality: @MainActor () -> StreamingQuality
     private let imageService: JellyfinImageService
     /// nil when Seerr is not connected, or when the caller does not want a catalog row (collections, playlists).
     private let seerrMediaService: SeerrMediaServiceProtocol?
+    /// Jellyseerr for the named scores; nil without a connection or with both rating switches off. Separate from
+    /// `seerrMediaService` because hiding the Catalog tab removes catalog content, and a score is not catalog content.
+    private let ratingsService: SeerrMediaServiceProtocol?
     private let userID: String
     /// Episode the detail was opened from (vs the series tile); loadSeasons lands on its season instead of running next-up logic.
     private let initialEpisode: JellyfinItem?
@@ -66,6 +128,10 @@ final class DetailViewModel {
         playbackInfoPrefetchTask?.cancel()
     }
 
+    /// Set by the detail view when Trakt is connected, so watched and rating changes reach Trakt
+    /// the moment they are made.
+    @ObservationIgnored var trakt: TraktService?
+
     init(
         item: JellyfinItem,
         itemService: JellyfinItemServiceProtocol,
@@ -74,22 +140,28 @@ final class DetailViewModel {
         libraryService: JellyfinLibraryServiceProtocol? = nil,
         playbackService: JellyfinPlaybackServiceProtocol? = nil,
         seerrMediaService: SeerrMediaServiceProtocol? = nil,
-        initialEpisode: JellyfinItem? = nil
+        ratingsService: SeerrMediaServiceProtocol? = nil,
+        initialEpisode: JellyfinItem? = nil,
+        streamingQuality: @escaping @MainActor () -> StreamingQuality = { .original }
     ) {
+        self.streamingQuality = streamingQuality
         self.item = item
         self.isFavorite = item.userData?.isFavorite ?? false
         self.isPlayed = item.userData?.played ?? false
+        self.rating = item.userData?.rating
         self.itemService = itemService
         self.libraryService = libraryService
         self.playbackService = playbackService
         self.imageService = imageService
         self.seerrMediaService = seerrMediaService
+        self.ratingsService = ratingsService
         self.userID = userID
         self.initialEpisode = initialEpisode
     }
 
     /// First local trailer to play, or nil; fetched on Trailer-button tap so the endpoint is hit on demand.
     func loadTrailer() async -> JellyfinItem? {
+        if let loaded = localTrailers.first { return loaded }
         let trailers = try? await itemService.getLocalTrailers(userID: userID, itemID: item.id)
         return trailers?.first
     }
@@ -100,6 +172,8 @@ final class DetailViewModel {
 
         let itemID = item.id
         let itemType = item.type
+        let favoriteWritesAtStart = favoriteWrites
+        let playedWritesAtStart = playedWrites
 
         // Avoid `async let`: @MainActor service calls crossing back into this non-isolated @Observable crash the task-local allocator with swift_task_dealloc_specific SIGABRT "freed pointer was not the last allocation". Task{}.value keeps each call on its own allocator while staying parallel.
         let detailTask = Task { try? await itemService.getItemDetail(userID: userID, itemID: itemID) }
@@ -119,8 +193,10 @@ final class DetailViewModel {
         let snapshotTmdbID = item.tmdbID
         Task { [weak self] in
             guard let self else { return }
-            let similar = try? await itemService.getSimilarItems(itemID: itemID, userID: userID, limit: 12)
-            let libraryItems = similar?.items ?? []
+            // With "external content in suggestions" on, the server mixes guide programs and channel trailers
+            // into this list; neither is a library item, so the tap lands on a page whose Play fails with 400.
+            let similar = try? await itemService.getSimilarItems(itemID: itemID, userID: userID, limit: 20)
+            let libraryItems = Array((similar?.items ?? []).filter { $0.type != .unknown }.prefix(12))
             if similar != nil {
                 await MainActor.run { self.similarItems = libraryItems }
             }
@@ -135,6 +211,19 @@ final class DetailViewModel {
             )
         }
 
+        if let mediaType = Self.seerrMediaType(for: itemType), ratingsService != nil {
+            isAwaitingExternalRatings = true
+            Task { [weak self] in
+                // Same reason as the catalog row: the TMDB id comes off the fetched detail.
+                let detail = await detailTask.value
+                await self?.loadExternalRatings(tmdbID: detail?.tmdbID ?? snapshotTmdbID, mediaType: mediaType)
+            }
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                self?.isAwaitingExternalRatings = false
+            }
+        }
+
         // Snapshot-paint deadline (500ms): if the fetches haven't settled, flip isLoading=false and paint from the navigating-row JellyfinItem snapshot. Fast servers complete first and keep the quiet single-render path; slow CDN libraries (10+ s, Sodalite#12) stop showing the 30 s spinner and fade content in as fetches settle. Tradeoff: a brief field-fill repaint vs the hard wall (Sodalite#15).
         Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(500))
@@ -144,8 +233,13 @@ final class DetailViewModel {
 
         if let detail = await detailTask.value {
             item = detail
-            isFavorite = detail.userData?.isFavorite ?? false
-            isPlayed = detail.userData?.played ?? false
+            applyFetchedUserState(detail, favoriteWrites: favoriteWritesAtStart, playedWrites: playedWritesAtStart)
+            if (detail.localTrailerCount ?? 0) > 0 {
+                loadLocalTrailers(for: itemID)
+            }
+            if (detail.specialFeatureCount ?? 0) > 0 {
+                loadSpecialFeatures(for: itemID)
+            }
         }
         // Settled either way: on failure nothing more arrives, so placeholders must stop reserving space.
         hasFullDetail = true
@@ -162,6 +256,61 @@ final class DetailViewModel {
         isLoading = false
     }
 
+    /// Same shape as the extras, which the trailers share a row with.
+    private func loadLocalTrailers(for itemID: String) {
+        Task { [weak self] in
+            guard let self else { return }
+            let trailers = (try? await itemService.getLocalTrailers(userID: userID, itemID: itemID)) ?? []
+            await MainActor.run { self.localTrailers = trailers }
+        }
+    }
+
+    /// Below the fold like the similar row, so it lands progressively instead of gating isLoading.
+    private func loadSpecialFeatures(for itemID: String) {
+        Task { [weak self] in
+            guard let self else { return }
+            let extras = (try? await itemService.getSpecialFeatures(userID: userID, itemID: itemID)) ?? []
+            await MainActor.run { self.specialFeatures = extras }
+        }
+    }
+
+    /// Runs on every change of the selection or the season list, because either can land first: an
+    /// episode deep link selects its season before getSeasons has said whether it has extras.
+    private func loadSelectedSeasonExtras() {
+        guard let season = selectedSeason, (season.specialFeatureCount ?? 0) > 0,
+              seasonExtras[season.id] == nil, !seasonExtrasInFlight.contains(season.id) else { return }
+        let seasonID = season.id
+        seasonExtrasInFlight.insert(seasonID)
+        Task { [weak self] in
+            guard let self else { return }
+            let extras = try? await itemService.getSpecialFeatures(userID: userID, itemID: seasonID)
+            seasonExtrasInFlight.remove(seasonID)
+            if let extras { seasonExtras[seasonID] = extras }
+        }
+    }
+
+    /// TMDB score from the title's Seerr detail, RT and IMDb from the ratings endpoint, both best-effort.
+    private func loadExternalRatings(tmdbID: Int?, mediaType: SeerrMediaType) async {
+        defer { isAwaitingExternalRatings = false }
+        guard let ratingsService, let tmdbID else { return }
+        let voteTask = Task { () -> Double? in
+            switch mediaType {
+            case .movie: try? await ratingsService.movieDetail(tmdbID: tmdbID).voteAverage
+            case .tv: try? await ratingsService.tvDetail(tmdbID: tmdbID).voteAverage
+            case .person, .unknown: nil
+            }
+        }
+        let ratingsTask = Task { try? await ratingsService.ratings(mediaType: mediaType, tmdbID: tmdbID) }
+        let vote = await voteTask.value
+        let ratings = await ratingsTask.value
+        let result = ExternalRatings(
+            tmdb: vote,
+            imdb: ratings?.imdb?.criticsScore,
+            rottenTomatoes: ratings?.rt?.criticsScore
+        )
+        if result != ExternalRatings() { externalRatings = result }
+    }
+
     /// Catalog counterpart of the similar row: what Jellyseerr suggests and the server does not have.
     /// Recommendations first with a fallback to similar, the same order and reasoning as CatalogDetailView.
     /// Inert without a Seerr service (not connected, or the caller hid the catalog), without a TMDB id,
@@ -171,12 +320,8 @@ final class DetailViewModel {
               let tmdbID,
               let mediaType = Self.seerrMediaType(for: itemType) else { return }
 
-        let recommended = (try? await seerrMediaService.recommendations(mediaType: mediaType, tmdbID: tmdbID)) ?? []
-        var candidates = SeerrLibraryDedupe.droppingAvailable(recommended)
-        if candidates.isEmpty {
-            let similar = (try? await seerrMediaService.similar(mediaType: mediaType, tmdbID: tmdbID)) ?? []
-            candidates = SeerrLibraryDedupe.droppingAvailable(similar)
-        }
+        let candidates = await SeerrLibraryDedupe.suggestions(
+            service: seerrMediaService, mediaType: mediaType, tmdbID: tmdbID)
         // Second net against the library row right above it: Jellyseerr's own sync can be stale or
         // unconfigured, and the same title in both rows is the thing this split was meant to end.
         let result = SeerrLibraryDedupe.removing(candidates, matching: libraryItems)
@@ -224,9 +369,13 @@ final class DetailViewModel {
                 guard let self,
                       let nextEp = await task.value?.items.first else { return }
                 self.nextUpEpisode = nextEp
-                if let seasonID = nextEp.seasonId {
+                // A season the viewer already picked while Next Up was out stays (audit DET-204).
+                // Play still targets Next Up either way, so its id and PlaybackInfo are set regardless.
+                if let seasonID = nextEp.seasonId, self.selectedSeasonID == nil {
                     self.selectedSeasonID = seasonID
                     await self.loadEpisodes(seasonID: seasonID)
+                }
+                if nextEp.seasonId != nil {
                     self.currentEpisodeID = nextEp.id
                     self.prefetchPlaybackInfo(for: nextEp.id)
                 }
@@ -311,18 +460,52 @@ final class DetailViewModel {
                 }
                 if let seasonEpisodes {
                     episodesCache[seasonEpisodes.seasonID] = seasonEpisodes.items
-                    episodes = seasonEpisodes.items
+                    // The viewer may have picked another season while the two requests ran (audit DET-203).
+                    if selectedSeasonID == seasonEpisodes.seasonID {
+                        episodes = seasonEpisodes.items
+                    }
                 }
             }
         default:
+            let favoriteWritesAtStart = favoriteWrites
+            let playedWritesAtStart = playedWrites
             if let detail = try? await itemService.getItemDetail(userID: userID, itemID: item.id) {
                 await MainActor.run {
                     item = detail
-                    isFavorite = detail.userData?.isFavorite ?? false
-                    isPlayed = detail.userData?.played ?? false
+                    applyFetchedUserState(detail, favoriteWrites: favoriteWritesAtStart, playedWrites: playedWritesAtStart)
                 }
             }
         }
+    }
+
+    /// Takes favourite, watched and rating from a fetched detail unless a write of ours overtook the
+    /// request. Fresh watched data also retires the mark this page made on the item itself.
+    private func applyFetchedUserState(_ detail: JellyfinItem, favoriteWrites favoriteStamp: Int, playedWrites playedStamp: Int) {
+        if !isWritingFavorite, favoriteStamp == favoriteWrites {
+            isFavorite = detail.userData?.isFavorite ?? false
+        }
+        if !isWritingPlayed, playedStamp == playedWrites {
+            isPlayed = detail.userData?.played ?? false
+            playedOverrides[detail.id] = nil
+        }
+        if !isWritingRating { rating = detail.userData?.rating }
+    }
+
+    /// The episode after `episode` in disc order, crossing into the next season (Sodalite#230). Reads
+    /// the season lists the page already holds and fetches only a list it has never loaded.
+    func successor(of episode: JellyfinItem) async -> JellyfinItem? {
+        guard let seasonID = episode.seasonId else { return nil }
+        // A season list that failed to load says nothing about the season being over.
+        guard let list = await seasonEpisodes(seasonID: seasonID) else { return nil }
+        if let next = EpisodeSuccession.next(after: episode, in: list) { return next }
+        guard let nextSeason = EpisodeSuccession.season(after: seasonID, in: seasons),
+              let list = await seasonEpisodes(seasonID: nextSeason.id) else { return nil }
+        return EpisodeSuccession.first(in: list)
+    }
+
+    private func seasonEpisodes(seasonID: String) async -> [JellyfinItem]? {
+        if let cached = episodesCache[seasonID] { return cached }
+        return try? await itemService.getEpisodes(seriesID: item.id, seasonID: seasonID, userID: userID).items
     }
 
     /// Patch in-memory resume position for `itemID` straight from the playback-stop payload (issue #24). Deterministic counterpart to refreshResumePosition(): patches playbackPositionTicks on every in-memory copy rather than racing the server commit / ETag cache (re-fetch left the movie button stale ~10% and the episode button stale every time). Patches all holders (movie, next-up/current episode, loaded list, cached). @MainActor + synchronous so the @Observable mutation reliably re-renders.
@@ -333,6 +516,10 @@ final class DetailViewModel {
             candidate.setResumePosition(ticks)
         }
         patch(&item)
+        if item.id == itemID { isPlayed = item.userData?.played ?? isPlayed }
+        // Playback writes the real state, so a mark made on this page no longer describes it
+        // (audit DET-206).
+        playedOverrides[itemID] = nil
         if var next = nextUpEpisode { patch(&next); nextUpEpisode = next }
         for index in episodes.indices { patch(&episodes[index]) }
         for index in collectionItems.indices { patch(&collectionItems[index]) }
@@ -344,6 +531,37 @@ final class DetailViewModel {
             patch(&cached)
             episodeDetailCache[itemID] = cached
         }
+    }
+
+    /// A playback stop for `itemID` arrived (`.playbackProgressDidChange`): patch from the payload,
+    /// reconcile with the server, patch again so a stale cached refetch cannot put the old position
+    /// back (issue #24). Every detail page goes through this (audit DET-R204). `beforeRefresh` is
+    /// the series page's advance past a finished episode; `patchView` re-applies the position to
+    /// copies the page holds itself.
+    @MainActor
+    func handlePlaybackStop<T>(
+        itemID: String?, ticks: Int64?, seriesID: String? = nil,
+        patchView: () -> Void = {},
+        beforeRefresh: () async -> T
+    ) async -> T {
+        // A stop for another show says nothing about this page.
+        if let seriesID, item.type == .series, seriesID != item.id {
+            return await beforeRefresh()
+        }
+        func patch() {
+            if let itemID, let ticks { applyPlaybackPosition(itemID: itemID, ticks: ticks) }
+            patchView()
+        }
+        patch()
+        let result = await beforeRefresh()
+        await refreshResumePosition()
+        patch()
+        return result
+    }
+
+    @MainActor
+    func handlePlaybackStop(itemID: String?, ticks: Int64?, seriesID: String? = nil) async {
+        await handlePlaybackStop(itemID: itemID, ticks: ticks, seriesID: seriesID, beforeRefresh: {})
     }
 
     /// A *arr upgrade rewrote the file behind an episode: Jellyfin ids items by path, so the library holds
@@ -359,6 +577,7 @@ final class DetailViewModel {
         swap(&item)
         if var next = nextUpEpisode { swap(&next); nextUpEpisode = next }
         for index in episodes.indices { swap(&episodes[index]) }
+        for index in collectionItems.indices { swap(&collectionItems[index]) }
         for (key, var list) in episodesCache {
             for index in list.indices { swap(&list[index]) }
             episodesCache[key] = list
@@ -368,6 +587,7 @@ final class DetailViewModel {
         episodeDetailCache[staleID] = nil
         playedOverrides[staleID] = nil
         favoriteOverrides[staleID] = nil
+        ratingOverrides[staleID] = nil
         if currentEpisodeID == staleID { currentEpisodeID = newItem.id }
         // The replacement is a different file, so the response fetched for the id that died describes
         // neither it nor its successor.
@@ -461,18 +681,28 @@ final class DetailViewModel {
 
         do {
             // Chronological oldest-first: franchise box-sets read in release order; SortName would put "Avengers" before "Iron Man". PremiereDate is Jellyfin's original theatrical/first-air date.
-            let query = ItemQuery(
+            var query = ItemQuery(
                 parentID: item.id,
                 sortBy: "PremiereDate,ProductionYear,SortName",
                 sortOrder: "Ascending",
-                limit: 50,
+                limit: CollectionMembers.pageSize,
                 // Full set on purpose: Play/Shuffle enqueue these members verbatim and the player
                 // reads chapters, trickplay, mediaStreams and mediaSources off the queue entry
                 // with no re-fetch (Sodalite#68).
                 fields: JellyfinEndpoint.detailFields
             )
-            let response = try await itemService.getCollectionItems(userID: userID, query: query)
-            collectionItems = response.items
+            // The first page paints at once; a long collection fills in behind it.
+            var members: [JellyfinItem] = []
+            var seen = Set<String>()
+            while true {
+                query.startIndex = members.count
+                let page = try await itemService.getCollectionItems(userID: userID, query: query).items
+                let fresh = page.filter { seen.insert($0.id).inserted }
+                members += fresh
+                collectionItems = members
+                // A page of nothing new is a server ignoring StartIndex: stop rather than spin.
+                if fresh.isEmpty || CollectionMembers.isLastPage(received: page.count, loaded: members.count) { break }
+            }
         } catch {
         }
     }
@@ -481,32 +711,127 @@ final class DetailViewModel {
         guard item.type == .playlist else { return }
 
         do {
-            // No sortBy: keep the user's manual playlist order (sorting would defeat the purpose).
-            // detailFields for the same reason as loadCollectionItems: the playlist's Play and
-            // Shuffle buttons enqueue these items directly.
-            let query = ItemQuery(parentID: item.id, limit: 200, fields: JellyfinEndpoint.detailFields)
-            let response = try await itemService.getCollectionItems(userID: userID, query: query)
-            collectionItems = response.items
+            let pageSize = 200
+            var items: [JellyfinItem] = []
+            while true {
+                let page = try await itemService.getPlaylistItems(
+                    playlistID: item.id, userID: userID, startIndex: items.count, limit: pageSize)
+                items += page.items
+                if page.items.count < pageSize || items.count >= page.totalRecordCount { break }
+            }
+            collectionItems = items
         } catch {
             // Leave collectionItems empty; the view shows its empty state.
         }
     }
 
     func toggleFavorite() async {
-        let oldValue = isFavorite
-        isFavorite.toggle()
-
-        do {
-            try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: isFavorite)
-            NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
-        } catch {
-            isFavorite = oldValue
+        // A press while a write is out is not lost: the heart flips now and the last wanted value
+        // goes out when the running write ends (audit review R-DET-6).
+        if isWritingFavorite {
+            isFavorite.toggle()
+            queuedFavorite = isFavorite
+            return
         }
+        var confirmed = isFavorite
+        isFavorite.toggle()
+        var target = isFavorite
+        isWritingFavorite = true
+        defer { isWritingFavorite = false }
+        while true {
+            favoriteWrites += 1
+            do {
+                try await itemService.setFavorite(userID: userID, itemID: item.id, isFavorite: target)
+                confirmed = target
+                NotificationCenter.default.post(name: .homeFavoritesDidChange, object: nil)
+            } catch {
+                queuedFavorite = nil
+                isFavorite = confirmed
+                return
+            }
+            guard let next = queuedFavorite else { return }
+            queuedFavorite = nil
+            if next == confirmed { return }
+            target = next
+        }
+    }
+
+    /// nil clears the rating. Optimistic like the favorite toggle, rolled back if the server refuses.
+    func setRating(_ newValue: Double?) async {
+        let oldValue = rating
+        guard newValue != oldValue else { return }
+        rating = newValue
+        isWritingRating = true
+        defer { isWritingRating = false }
+        do {
+            try await itemService.setRating(userID: userID, itemID: item.id, rating: newValue)
+            trakt?.ratingChanged(for: item, rating: newValue)
+        } catch {
+            rating = oldValue
+        }
+    }
+
+    /// Effective rating of an episode: in-session override wins over the server snapshot.
+    func rating(of item: JellyfinItem) -> Double? {
+        if let override = ratingOverrides[item.id] { return override }
+        return item.userData?.rating
+    }
+
+    /// nil clears the episode's rating. Optimistic, rolled back if the server refuses.
+    func setEpisodeRating(_ episode: JellyfinItem, rating newValue: Double?) async {
+        guard newValue != rating(of: episode) else { return }
+        let oldValue = ratingOverrides[episode.id]
+        ratingOverrides[episode.id] = .some(newValue)
+        do {
+            try await itemService.setRating(userID: userID, itemID: episode.id, rating: newValue)
+            trakt?.ratingChanged(for: episode, rating: newValue)
+        } catch {
+            ratingOverrides[episode.id] = oldValue
+        }
+    }
+
+    /// What a page shows for an item: the server snapshot with this session's own writes on top.
+    /// The one place Play, Resume, the checkmarks and the hearts read, so the pages cannot drift
+    /// (audit DET-R203).
+    struct EffectiveState: Equatable {
+        var isPlayed: Bool
+        var positionTicks: Int64
+        var isFavorite: Bool
+    }
+
+    func effectiveState(of candidate: JellyfinItem) -> EffectiveState {
+        let isTop = candidate.id == item.id
+        let override = playedOverrides[candidate.id]
+        return EffectiveState(
+            isPlayed: override ?? (isTop ? isPlayed : (candidate.userData?.played ?? false)),
+            // Marking played or unplayed makes the server drop the resume position, so the old one
+            // is not part of the effective state (audit DET-205).
+            positionTicks: override != nil ? 0 : (candidate.userData?.playbackPositionTicks ?? 0),
+            isFavorite: favoriteOverrides[candidate.id] ?? (isTop ? isFavorite : (candidate.userData?.isFavorite ?? false))
+        )
+    }
+
+    /// The item with this session's played mark applied to its userData, for handing to the player,
+    /// which reads the resume position off the item (audit DET-205).
+    func resolvedForPlayback(_ candidate: JellyfinItem) -> JellyfinItem {
+        guard let override = playedOverrides[candidate.id] else { return candidate }
+        return Self.marked(candidate, played: override)
+    }
+
+    /// The item as the server holds it after a mark: played flag set, resume position gone.
+    private static func marked(_ candidate: JellyfinItem, played: Bool) -> JellyfinItem {
+        var copy = candidate
+        let base = copy.userData ?? UserItemData(
+            playbackPositionTicks: nil, playCount: nil, isFavorite: nil,
+            played: nil, unplayedItemCount: nil, playedPercentage: nil, lastPlayedDate: nil
+        )
+        copy.userData = base.with(playbackPositionTicks: 0, playedPercentage: played ? 100 : 0, played: played)
+        return copy
     }
 
     /// Effective favorite state: in-session override wins over the server snapshot.
     func isFavorite(_ item: JellyfinItem) -> Bool {
-        favoriteOverrides[item.id] ?? (item.userData?.isFavorite ?? false)
+        effectiveState(of: item).isFavorite
     }
 
     /// Toggle a single episode. `isFavorite` is the desired new state.
@@ -525,33 +850,57 @@ final class DetailViewModel {
 
     /// Effective played state: in-session override wins over the server snapshot.
     func isPlayed(_ item: JellyfinItem) -> Bool {
-        playedOverrides[item.id] ?? (item.userData?.played ?? false)
+        effectiveState(of: item).isPlayed
     }
 
-    /// Did the viewer mark this watched in THIS session? A narrower question than ``isPlayed(_:)``,
-    /// and the only one the resume indicator may ask. An explicit mark-watched makes the server drop
-    /// the item's resume position (`MarkPlayed` resets it), so the capsule has to go before the
-    /// refetch; a `played` that arrived FROM the server alongside a position is a re-watch and keeps
-    /// its capsule.
+    /// Did the viewer mark this watched or unwatched in THIS session? A narrower question than
+    /// ``isPlayed(_:)``, and the only one the resume indicator may ask. Either mark makes the server
+    /// drop the item's resume position, so the capsule has to go before the refetch; a `played` that
+    /// arrived FROM the server alongside a position is a re-watch and keeps its capsule.
     func wasMarkedPlayedInSession(_ item: JellyfinItem) -> Bool {
-        playedOverrides[item.id] == true
+        playedOverrides[item.id] != nil
     }
 
     /// Toggle the top-level item (movie or whole series).
     func togglePlayed() async {
-        let oldValue = isPlayed
+        // Same last-press-wins rule as the favourite (audit review R-DET-6).
+        if isWritingPlayed {
+            isPlayed.toggle()
+            playedOverrides[item.id] = isPlayed
+            queuedPlayed = isPlayed
+            return
+        }
+        var confirmed = isPlayed
+        var confirmedOverride = playedOverrides[item.id]
         isPlayed.toggle()
         playedOverrides[item.id] = isPlayed
-
-        do {
-            try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: isPlayed)
-            NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
-            // Marking watched drops the item out of Resume and advances Next Up, so both
-            // shelf sections are stale.
-            TopShelfRefresher.invalidate()
-        } catch {
-            isPlayed = oldValue
-            playedOverrides[item.id] = oldValue
+        var target = isPlayed
+        isWritingPlayed = true
+        defer { isWritingPlayed = false }
+        while true {
+            playedWrites += 1
+            do {
+                try await itemService.setPlayed(userID: userID, itemID: item.id, isPlayed: target)
+                // The item copy takes the mark too, so a later playback patch cannot flip isPlayed
+                // back to what the page opened with (audit review R-DET-4).
+                item = Self.marked(item, played: target)
+                confirmed = target
+                confirmedOverride = target
+                trakt?.playedChanged(for: item, played: target)
+                NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
+                // Marking watched drops the item out of Resume and advances Next Up, so both
+                // shelf sections are stale.
+                TopShelfRefresher.invalidate()
+            } catch {
+                queuedPlayed = nil
+                isPlayed = confirmed
+                playedOverrides[item.id] = confirmedOverride
+                return
+            }
+            guard let next = queuedPlayed else { return }
+            queuedPlayed = nil
+            if next == confirmed { return }
+            target = next
         }
     }
 
@@ -562,6 +911,7 @@ final class DetailViewModel {
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: episode.id, isPlayed: isPlayed)
+            trakt?.playedChanged(for: episode, played: isPlayed)
             NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
             // Marking watched drops the item out of Resume and advances Next Up, so both
             // shelf sections are stale.
@@ -578,18 +928,22 @@ final class DetailViewModel {
             affected.formUnion(episodes.map(\.id))
         }
 
-        let previous = playedOverrides
-        playedOverrides[seasonID] = isPlayed
-        for id in affected { playedOverrides[id] = isPlayed }
+        // Roll back only the keys this call set, so a toggle made meanwhile survives (audit DET-207).
+        let touched = affected.union([seasonID])
+        let previous = Dictionary(uniqueKeysWithValues: touched.map { ($0, playedOverrides[$0]) })
+        for id in touched { playedOverrides[id] = isPlayed }
 
         do {
             try await itemService.setPlayed(userID: userID, itemID: seasonID, isPlayed: isPlayed)
+            if item.type == .series, let number = seasons.first(where: { $0.id == seasonID })?.indexNumber {
+                trakt?.playedChanged(for: item, played: isPlayed, seasonNumber: number)
+            }
             NotificationCenter.default.post(name: .homePlayedDidChange, object: nil)
             // Marking watched drops the item out of Resume and advances Next Up, so both
             // shelf sections are stale.
             TopShelfRefresher.invalidate()
         } catch {
-            playedOverrides = previous
+            for (id, old) in previous where playedOverrides[id] == isPlayed { playedOverrides[id] = old }
         }
     }
 
@@ -604,13 +958,14 @@ final class DetailViewModel {
         cachedPlaybackInfo = nil
         playbackInfoPrefetchTask = Task { [weak self] in
             guard let self else { return }
+            let quality = self.streamingQuality()
             let response = try? await playbackService.getPlaybackInfo(
                 itemID: itemID, userID: self.userID,
-                profile: DirectPlayProfile.current()
+                profile: DirectPlayProfile.current(maxStreamingBitrate: quality.maxStreamingBitrate)
             )
             if Task.isCancelled { return }
             self.cachedPlaybackInfo = response.map {
-                PrefetchedPlaybackInfo(itemID: itemID, response: $0)
+                PrefetchedPlaybackInfo(itemID: itemID, quality: quality, response: $0)
             }
             // AetherEngine#551: the response is already in hand and the URL builders are pure, so
             // warming the source the play button would open costs no further round trip. This is the
@@ -633,7 +988,16 @@ final class DetailViewModel {
         imageService.posterURL(for: item, maxWidth: 1290)
     }
 
-    func backdropURL(for item: JellyfinItem) -> URL? {
-        imageService.backdropURL(for: item)
+    /// The series poster while `item` may still be the stub an episode link opens on: the stub has
+    /// no image tags, but the episode names its series' primary image, and that is the same URL the
+    /// loaded series produces, so the hero does not swap pictures when the series arrives.
+    func seriesHeroPosterURL(for item: JellyfinItem, episode: JellyfinItem?) -> URL? {
+        if let url = heroPosterURL(for: item) { return url }
+        guard let episode, let seriesID = episode.seriesId, let tag = episode.seriesPrimaryImageTag else { return nil }
+        return imageService.imageURL(itemID: seriesID, serverID: episode.serverID, imageType: .primary, tag: tag, maxWidth: 1290)
+    }
+
+    func backdropURL(for item: JellyfinItem, maxWidth: Int = ImageWidth.fullBleed) -> URL? {
+        imageService.backdropURL(for: item, maxWidth: maxWidth)
     }
 }

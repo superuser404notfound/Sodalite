@@ -1,4 +1,9 @@
+#if !os(macOS)
+// Live playback presents the same UIKit modal as the rest; the Mac has no live player yet.
 import SwiftUI
+#if os(tvOS)
+import AetherEngine
+#endif
 import UIKit
 
 // MARK: - Live Player Launcher (UIKit modal presentation)
@@ -11,15 +16,18 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
     let playbackService: JellyfinPlaybackServiceProtocol
     let liveTvService: JellyfinLiveTvServiceProtocol
     let userID: String
+    /// The server the channel lives on, not necessarily the active one (Sodalite#85).
+    let serverName: String
     let preferences: PlaybackPreferences
     let directStreamMemory: LiveDirectStreamMemory
+    /// The channel's server user's `EnableAudioPlaybackTranscoding` (#100).
+    let canTranscodeAudio: Bool
     /// Same reason as PlayerLauncher: the theme has to be picked up on the SwiftUI side and carried
     /// across the UIKit boundary by hand.
     @Environment(\.appearanceTheme) private var appearanceTheme
     /// And the same for the server verdict (Sodalite#126).
     @Environment(\.appState) private var appState
 
-    private var serverName: String { appState.activeServer?.name ?? "" }
 
     private var reachability: () -> ServerReachability {
         let state = appState
@@ -30,82 +38,73 @@ struct LivePlayerLauncher: UIViewControllerRepresentable {
         PlayerLauncherHostVC()
     }
 
+    /// The live view model's inputs, in one place shared with the grid's tile factory and the Mac launcher.
+    private var sessionFactory: LiveSessionFactory {
+        LiveSessionFactory(
+            playbackService: playbackService, liveTvService: liveTvService, userID: userID,
+            preferences: preferences, directStreamMemory: directStreamMemory,
+            canTranscodeAudio: canTranscodeAudio, serverName: serverName, serverReachability: reachability)
+    }
+
     func updateUIViewController(_ host: PlayerLauncherHostVC, context: Context) {
-        if isPresented, let liveContext = self.context {
-            guard host.viewIfLoaded?.window != nil else { return }
-            if host.presentedViewController is PlayerHostController || host.pendingLivePresent { return }
-            host.pendingLivePresent = true
-            attemptPresent(host: host, liveContext: liveContext, attempt: 0)
-        } else if !isPresented, host.presentedViewController is PlayerHostController {
-            // Programmatic dismissal (sign-out, deep link, teardown); else the
-            // live player stays as a zombie modal.
-            host.dismiss(animated: false)
-        }
-    }
-
-    /// Anything still presented ANYWHERE above the window root blocks the player: UIKit refuses to
-    /// present from a controller whose chain is already presenting. Checking only the host missed
-    /// the iPhone channel list, which can be two sheets deep and is not presenting from the host,
-    /// so the poll passed instantly and the present failed silently (a dead "Watch live" button).
-    /// Strictly more conservative than the old check: it can only wait longer, never shorter.
-    private func blockingPresentation(above host: PlayerLauncherHostVC) -> UIViewController? {
-        var cursor: UIViewController? = host.view.window?.rootViewController ?? host
-        var blocker: UIViewController?
-        while let presented = cursor?.presentedViewController {
-            if !(presented is PlayerHostController) { blocker = presented }
-            cursor = presented
-        }
-        return blocker
-    }
-
-    /// Present only once the info popover (a SwiftUI sheet) has finished dismissing; presenting
-    /// mid-dismiss fails ("view is not in the window hierarchy"), so poll (40 x 50ms) until
-    /// nothing above the host is presented.
-    private func attemptPresent(host: PlayerLauncherHostVC, liveContext: LivePlaybackContext, attempt: Int) {
-        // Binding can flip false during the poll (user backed out); don't
-        // launch a player nobody asked for.
-        guard isPresented else {
-            host.pendingLivePresent = false
-            return
-        }
-        if blockingPresentation(above: host) != nil {
-            guard attempt < 40 else { host.pendingLivePresent = false; return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                attemptPresent(host: host, liveContext: liveContext, attempt: attempt + 1)
-            }
-            return
-        }
-        host.pendingLivePresent = false
-        if host.presentedViewController is PlayerHostController { return }
-
-        // Second video while PiP runs: close the PiP session first (progress reported), Netflix behavior.
         #if os(tvOS)
-        PiPSessionCoordinator.shared.endActiveSession()
+        // Sodalite#175: the grid owns the session until it hands a player back or closes.
+        if let multiview = host.multiview {
+            if !isPresented { multiview.stopAll() }
+            return
+        }
         #endif
-
-        let item = JellyfinItem(liveChannel: liveContext.channel, program: liveContext.program)
-        let vm = PlayerViewModel(
-            item: item,
-            startFromBeginning: true,
-            playbackService: playbackService,
-            userID: userID,
-            preferences: preferences,
-            isLiveSession: true,
-            liveChannel: liveContext.channel,
-            liveProgram: liveContext.program,
-            liveTvService: liveTvService,
-            directStreamMemory: directStreamMemory,
-            serverName: serverName,
-            serverReachability: reachability
-        )
-        let playerVC = PlayerHostController(
-            viewModel: vm,
-            theme: appearanceTheme,
-            onDismiss: {
-                host.dismiss(animated: false) { isPresented = false }
+        if isPresented, let liveContext = self.context, host.presentedPlayer == nil, !host.isLaunching {
+            // The same settled-chain present the VOD launcher uses (Sodalite#31): from the scene's top-most
+            // controller, never from the host, which an iPhone channel list two sheets deep leaves blocked.
+            host.isLaunching = true
+            let isPresentedBinding = _isPresented
+            let factory = sessionFactory
+            let appearanceTheme = appearanceTheme
+            host.presentWhenContextIsFree { [weak host] in
+                let vm = factory.makeViewModel(
+                    channel: liveContext.channel, program: liveContext.program, zapFilter: liveContext.zapFilter)
+                let onDismiss: () -> Void = { [weak host] in
+                    isPresentedBinding.wrappedValue = false
+                    host?.tearDownPlayer {
+                        #if os(tvOS)
+                        host?.multiview = nil
+                        #endif
+                    }
+                }
+                let playerVC = PlayerHostController(viewModel: vm, theme: appearanceTheme, onDismiss: onDismiss)
+                playerVC.modalPresentationStyle = .fullScreen
+                #if os(tvOS)
+                if let host {
+                    LiveMultiviewCoordinator.wireEntry(
+                        playerVC,
+                        host: host,
+                        fallbackChannel: liveContext.channel,
+                        makeTileVM: tileFactory(factory: factory, zapFilter: liveContext.zapFilter),
+                        theme: appearanceTheme,
+                        onPlayerDismiss: onDismiss
+                    )
+                }
+                #endif
+                return playerVC
             }
-        )
-        playerVC.modalPresentationStyle = .fullScreen
-        host.present(playerVC, animated: false)
+        } else if !isPresented {
+            // Programmatic dismissal (sign-out, deep link, teardown); else the live player stays as a
+            // zombie modal.
+            host.cancelPendingLaunch()
+            if host.presentedPlayer != nil { host.tearDownPlayer(nil) }
+        }
     }
+
+    #if os(tvOS)
+    /// Sodalite#175: a multiview tile is the same live player on its own engine.
+    private func tileFactory(factory: LiveSessionFactory, zapFilter: GuideFilter) -> LiveMultiviewCoordinator.TileFactory {
+        { channel, engine in
+            factory.makeViewModel(
+                channel: channel, program: channel.currentProgram, zapFilter: zapFilter,
+                engine: engine, role: .secondary)
+        }
+    }
+    #endif
 }
+#endif

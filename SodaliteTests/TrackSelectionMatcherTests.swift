@@ -21,10 +21,10 @@ struct TrackSelectionMatcherTests {
 
     private func audio(id: Int, codec: String = "eac3", lang: String? = "ger",
                        name: String = "German", channels: Int = 6,
-                       commentary: Bool = false) -> TrackInfo {
+                       commentary: Bool = false, described: Bool = false) -> TrackInfo {
         TrackInfo(id: id, name: name, codec: codec, language: lang, channels: channels,
                   bitrate: 0, isDefault: false, isForced: false, isHearingImpaired: false,
-                  isCommentary: commentary, isAtmos: false, assHeader: nil)
+                  isCommentary: commentary, isVisualImpaired: described, isAtmos: false, assHeader: nil)
     }
 
     // MARK: - Signatures
@@ -144,6 +144,35 @@ struct TrackSelectionMatcherTests {
         #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 5)
     }
 
+    // MARK: - Audio description (AetherEngine#919)
+
+    @Test("a remembered main mix never resolves to an audio description, even one with its channel count")
+    func mainMixNeverAdoptsDescribed() {
+        let signature = TrackSelectionMatcher.audioSignature(audio(id: 1, channels: 6))
+        let tracks = [audio(id: 2, channels: 6, described: true), audio(id: 3, channels: 2)]
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 3)
+    }
+
+    @Test("a remembered audio description resolves to this title's described track or to nothing")
+    func describedOnlyAdoptsDescribed() {
+        let signature = TrackSelectionMatcher.audioSignature(audio(id: 1, channels: 6, described: true))
+        #expect(signature.descriptor == TrackSelectionMatcher.describedDescriptor)
+        let tracks = [audio(id: 2, channels: 6), audio(id: 3, channels: 2, described: true)]
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: tracks)?.id == 3)
+        #expect(TrackSelectionMatcher.matchAudio(signature, in: [audio(id: 2, channels: 6)]) == nil)
+    }
+
+    @Test("the system setting takes the described track of the picked language, never another language's")
+    func systemSettingStaysInLanguage() {
+        let tracks = [audio(id: 1, lang: "eng", channels: 6), audio(id: 2, lang: "ger", channels: 6, described: true),
+                      audio(id: 3, lang: "eng", channels: 2, described: true),
+                      audio(id: 4, lang: "eng", channels: 6, described: true)]
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[0], in: tracks)?.id == 4)
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[3], in: tracks) == nil)
+        #expect(TrackSelectionMatcher.describedAudio(for: tracks[0], in: Array(tracks.prefix(2))) == nil)
+        #expect(TrackSelectionMatcher.describedAudio(for: nil, in: tracks) == nil)
+    }
+
     // MARK: - Plan
 
     @Test("no entry falls through to the app's automatic resolution")
@@ -204,5 +233,72 @@ struct TrackSelectionMatcherTests {
         let plan = TrackSelectionMatcher.plan(entry: entry, subtitleStreams: [],
                                               audioTracks: [audio(id: 9, channels: 6)])
         #expect(plan.audioTrackID == 9)
+    }
+
+    // MARK: - Pre-load audio
+
+    private func audioStream(index: Int, codec: String, lang: String? = "eng",
+                             title: String? = nil, channels: Int,
+                             external: Bool = false) -> MediaStream {
+        MediaStream(index: index, type: .audio, codec: codec, language: lang,
+                    displayTitle: nil, title: title, isDefault: nil, isForced: nil,
+                    isExternal: external, height: nil, width: nil, channels: channels,
+                    videoRange: nil, videoRangeType: nil, averageFrameRate: nil,
+                    realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: nil)
+    }
+
+    /// BurgerMage27's file: TrueHD Atmos first, AC-3 and DTS-HD MA behind it, all English. The
+    /// remembered DTS-HD track used to open as TrueHD and reload about three seconds in.
+    private var discRemux: [MediaStream] {
+        [MediaStream(index: 0, type: .video, codec: "hevc", language: nil, displayTitle: nil,
+                     title: nil, isDefault: nil, isForced: nil, isExternal: false, height: 2160,
+                     width: 3840, channels: nil, videoRange: nil, videoRangeType: nil,
+                     averageFrameRate: nil, realFrameRate: nil, profile: nil, bitRate: nil, dvProfile: nil),
+         audioStream(index: 1, codec: "truehd", channels: 8),
+         audioStream(index: 2, codec: "ac3", channels: 6),
+         audioStream(index: 3, codec: "dts", channels: 8)]
+    }
+
+    @Test("a remembered second track of the same language resolves to its container index before load")
+    func preloadPicksSameLanguageSibling() {
+        let remembered = TrackSelectionMatcher.audioSignature(
+            audio(id: 3, codec: "dts", lang: "eng", name: "English", channels: 8))
+        let entry = TrackMemoryEntry(subtitle: nil, audio: remembered,
+                                     updatedAt: Date(timeIntervalSince1970: 1))
+        #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: entry, mediaStreams: discRemux) == 3)
+    }
+
+    @Test("an external file numbered first shifts the Jellyfin index back to the container's")
+    func preloadMapsPastExternalStreams() {
+        let remembered = TrackSelectionMatcher.audioSignature(
+            audio(id: 2, codec: "ac3", lang: "eng", name: "English", channels: 6))
+        let entry = TrackMemoryEntry(subtitle: nil, audio: remembered,
+                                     updatedAt: Date(timeIntervalSince1970: 1))
+        let streams = [sub(index: 0, lang: "eng", external: true)]
+            + discRemux.map { stream in
+                MediaStream(index: stream.index + 1, type: stream.type, codec: stream.codec,
+                            language: stream.language, displayTitle: nil, title: nil, isDefault: nil,
+                            isForced: nil, isExternal: false, height: nil, width: nil,
+                            channels: stream.channels, videoRange: nil, videoRangeType: nil,
+                            averageFrameRate: nil, realFrameRate: nil, profile: nil, bitRate: nil,
+                            dvProfile: nil)
+            }
+        #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: entry, mediaStreams: streams) == 2)
+    }
+
+    @Test("nothing remembered, another language or a remembered description leaves the pick to the engine")
+    func preloadDefersWhenItCannotDecide() {
+        #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: nil, mediaStreams: discRemux) == nil)
+
+        let german = TrackSelectionMatcher.audioSignature(audio(id: 1, lang: "ger"))
+        let germanEntry = TrackMemoryEntry(subtitle: nil, audio: german,
+                                           updatedAt: Date(timeIntervalSince1970: 1))
+        #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: germanEntry, mediaStreams: discRemux) == nil)
+
+        let described = TrackSelectionMatcher.audioSignature(
+            audio(id: 4, lang: "eng", name: "English", channels: 2, described: true))
+        let describedEntry = TrackMemoryEntry(subtitle: nil, audio: described,
+                                              updatedAt: Date(timeIntervalSince1970: 1))
+        #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: describedEntry, mediaStreams: discRemux) == nil)
     }
 }

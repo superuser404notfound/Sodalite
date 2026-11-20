@@ -44,6 +44,7 @@ final class NetworkPathObserver {
             didSeeInitialPath = true
             return
         }
+        NotificationCenter.default.post(name: .networkPathWillChange, object: nil)
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
@@ -82,6 +83,13 @@ nonisolated final class NetworkPathSnapshot: @unchecked Sendable {
         /// generous OR is the safe side: it can only ever fail to suppress a denial, never suppress
         /// a real one.
         var isAttachedToALocalNetwork: Bool { usesLocalInterface || hasLocalInterface }
+
+        /// Cellular, or a path the system marks expensive (a phone hotspot). Picks the cellular
+        /// streaming rung on iOS (Sodalite#87).
+        var isMetered: Bool = false
+
+        /// The IPv4 subnets on those local interfaces, empty where none could be read.
+        var subnets: [LocalSubnet] = []
     }
 
     private let lock = NSLock()
@@ -108,7 +116,9 @@ extension NetworkPathSnapshot.Reading {
         self.init(
             isSatisfied: path.status == .satisfied,
             usesLocalInterface: localTypes.contains(where: path.usesInterfaceType),
-            hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) }
+            hasLocalInterface: path.availableInterfaces.contains { localTypes.contains($0.type) },
+            isMetered: path.usesInterfaceType(.cellular) || path.isExpensive,
+            subnets: LocalSubnet.current(path: path)
         )
     }
 }

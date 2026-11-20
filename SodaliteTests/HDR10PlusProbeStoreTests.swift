@@ -17,6 +17,7 @@ struct HDR10PlusProbeStoreTests {
         range: String? = "HDR10",
         dvProfile: Int? = nil,
         container: String? = "mkv",
+        videoType: String? = nil,
         sourceIDs: [String] = ["src1"]
     ) throws -> JellyfinItem {
         var stream = [#""Index":0"#, #""Type":"Video""#, #""Width":3840"#, #""Height":2160"#]
@@ -30,6 +31,7 @@ struct HDR10PlusProbeStoreTests {
             let sources = sourceIDs.map { sourceID -> String in
                 var source = [#""Id":"\#(sourceID)""#, #""MediaStreams":\#(streams)"#]
                 if let container { source.append(#""Container":"\#(container)""#) }
+                if let videoType { source.append(#""VideoType":"\#(videoType)""#) }
                 return "{\(source.joined(separator: ","))}"
             }
             fields.append(#""MediaSources":[\#(sources.joined(separator: ","))]"#)
@@ -42,8 +44,8 @@ struct HDR10PlusProbeStoreTests {
                               enabled: Bool = true) -> (HDR10PlusProbeStore, ProbeSpy) {
         let spy = ProbeSpy(answer: answer)
         let store = HDR10PlusProbeStore(
-            streamURL: { itemID, sourceID, container in
-                URL(string: "https://jf.example/Videos/\(itemID)/stream.\(container ?? "mp4")?MediaSourceId=\(sourceID)&Static=true")
+            streamURL: { item, sourceID, container in
+                URL(string: "https://jf.example/Videos/\(item.id)/stream.\(container ?? "mp4")?MediaSourceId=\(sourceID)&Static=true")
             },
             isEnabled: { enabled },
             probe: { url, _ in try spy.probe(url) }
@@ -62,6 +64,13 @@ struct HDR10PlusProbeStoreTests {
     @Test("a server that already said HDR10+ is not asked again")
     func skipsDeclaredHDR10Plus() throws {
         let item = try Self.item(range: "HDR10Plus")
+        #expect(!HDR10PlusProbeStore.shouldProbe(item: item, sourceID: "src1"))
+    }
+
+    @Test("a Blu-ray or DVD folder has no file to open, the server would encode one",
+          arguments: ["BluRay", "Dvd"])
+    func skipsDiscFolder(videoType: String) throws {
+        let item = try Self.item(container: "ts", videoType: videoType)
         #expect(!HDR10PlusProbeStore.shouldProbe(item: item, sourceID: "src1"))
     }
 

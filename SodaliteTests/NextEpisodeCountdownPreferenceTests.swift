@@ -22,6 +22,17 @@ struct NextEpisodeCountdownPreferenceTests {
         #expect(PlaybackPreferences(store: defaults(#function)).nextEpisodeCountdownAnchor == .outro)
     }
 
+    /// The card is what shipped, so an untouched install keeps it.
+    @Test func cardDefaultsToOn() {
+        #expect(PlaybackPreferences(store: defaults(#function)).showNextEpisodeCard)
+    }
+
+    @Test func cardSwitchPersistsAcrossInstances() {
+        let store = defaults(#function)
+        PlaybackPreferences(store: store).showNextEpisodeCard = false
+        #expect(PlaybackPreferences(store: store).showNextEpisodeCard == false)
+    }
+
     @Test func anchorPersistsAcrossInstances() {
         let store = defaults(#function)
         let a = PlaybackPreferences(store: store)

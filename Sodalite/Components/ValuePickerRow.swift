@@ -6,10 +6,10 @@ import SwiftUI
 /// testable. A two-option row is a TOGGLE and wraps in both directions; three or more are an ordered
 /// list and clamp at their ends.
 ///
-/// Sodalite#115: the select click is the only gesture that reaches every remote, and it only ever steps
-/// forward. With a clamped step that gave any toggle already sitting on its last option a click that did
-/// nothing, which is how "Stats for Nerds" could be switched on and never off again. Two states are peers,
-/// so there is no end for them to clamp against. For a longer list there is, and the greyed chevron says so.
+/// Sodalite#115: the select click is the only gesture that reaches every remote. On a toggle it steps,
+/// and a clamped step gave any toggle already sitting on its last option a click that did nothing, which
+/// is how "Stats for Nerds" could be switched on and never off again. Two states are peers, so there is
+/// no end for them to clamp against. For a longer list there is, and the greyed chevron says so.
 enum ValuePickerAdvance {
 
     /// The index a step lands on. `count` is the number of options.
@@ -24,13 +24,22 @@ enum ValuePickerAdvance {
     static func canMove(from current: Int, by step: Int, count: Int) -> Bool {
         index(from: current, by: step, count: count) != current
     }
+
+    /// Whether the select click opens the full list instead of stepping. A forward-only click on a
+    /// clamped list stops dead at its end and can only get back with left, which the first-generation
+    /// Siri Remote and a CEC TV remote do not reliably have; the list reaches every value in one pick.
+    static func selectOpensList(count: Int) -> Bool {
+        count > 2
+    }
 }
 
-/// Full-width settings row: left/right cycles options directly (no dropdown), Select also advances forward, chevrons are cues not focus targets.
+/// Full-width settings row: left/right steps through the options directly, Select flips a toggle or opens the list of a longer row, chevrons are cues not focus targets.
 struct ValuePickerRow<Value: Hashable>: View {
     let icon: String
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
+    /// Shown instead of `title`: a name from the server, which must not go through a catalog lookup.
+    var verbatimTitle: String? = nil
     let options: [Value]
     @Binding var selection: Value
     let label: (Value) -> String
@@ -38,12 +47,57 @@ struct ValuePickerRow<Value: Hashable>: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.settingsValueScope) private var valueScope
     @FocusState private var focused: Bool
+    @State private var isListPresented = false
 
     /// iPhone compact stacks the picker control under the label (the one-line tvOS row overflows
     /// the narrow width, which collapses the label column and blows up the row height).
     private var isCompact: Bool { hSizeClass == .compact }
 
+    #if os(tvOS)
+    @State private var focusAcquiredAt: Date?
+    #endif
+
     var body: some View {
+        #if os(tvOS)
+        // A Button, not `stableTap`: the system routes Select to the focused button's action, while
+        // SwiftUI's long-press gesture only saw about one press in five on this row (measured on
+        // Wohnzimmer, 2026-10-21: 11 of 11 presses reached the window, a handful the gesture).
+        Button(action: selectPressed) { surface }
+            .buttonStyle(ValuePickerRowButtonStyle())
+            .focused($focused)
+            .onChange(of: focused) { _, isFocused in
+                focusAcquiredAt = isFocused ? Date() : nil
+            }
+            .onMoveCommand { direction in
+                switch direction {
+                case .left:  advance(by: -1)
+                case .right: advance(by: 1)
+                default: break
+                }
+            }
+            .menuPresentation(isPresented: $isListPresented) {
+                CatalogPickerSheet(
+                    title: title,
+                    options: options.indices.map { .init(id: String($0), label: label(options[$0])) },
+                    selectedID: String(currentIndex),
+                    onSelect: { id in
+                        if let index = Int(id), options.indices.contains(index) {
+                            selection = options[index]
+                        }
+                        isListPresented = false
+                    },
+                    onCancel: { isListPresented = false }
+                )
+            }
+        #else
+        // iOS uses the tappable chevrons, both directions.
+        surface
+            .focusableSurface(true)
+            .focused($focused)
+        #endif
+    }
+
+    private var surface: some View {
         layout
             .padding(.horizontal, isCompact ? 16 : 28)
             .padding(.vertical, isCompact ? 16 : 22)
@@ -53,25 +107,23 @@ struct ValuePickerRow<Value: Hashable>: View {
             )
             .focusStroke(cornerRadius: 16, isFocused: focused)
             .focusResponse(.row, isFocused: focused)
-            .focusable(true)
-            .focused($focused)
             .animation(.easeInOut(duration: 0.15), value: selection)
-            #if os(tvOS)
-            .onMoveCommand { direction in
-                switch direction {
-                case .left:  advance(by: -1)
-                case .right: advance(by: 1)
-                default: break
-                }
-            }
-            // tvOS: Select also advances forward (focus-gated). iOS uses the tappable chevrons (both
-            // directions); on a list of three or more a forward-only tap still cannot reach a lower option,
-            // which is what the chevrons are for. On a two-option row it wraps, so a click is a full toggle.
-            .stableTap(isFocused: focused) {
-                advance(by: 1)
-            }
-            #endif
     }
+
+    #if os(tvOS)
+    /// Select flips a two-option row and opens the list of a longer one. Dropped while focus is
+    /// younger than `StableTapModifier.stableFocusWindow`, the same drift guard every other row has.
+    private func selectPressed() {
+        guard let acquired = focusAcquiredAt,
+              Date().timeIntervalSince(acquired) >= StableTapModifier.stableFocusWindow
+        else { return }
+        if ValuePickerAdvance.selectOpensList(count: options.count) {
+            isListPresented = true
+        } else {
+            advance(by: 1)
+        }
+    }
+    #endif
 
     @ViewBuilder
     private var layout: some View {
@@ -104,13 +156,12 @@ struct ValuePickerRow<Value: Hashable>: View {
 
     private var labelView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            (verbatimTitle.map(Text.init(verbatim:)) ?? Text(title))
                 .font(.body)
                 .fontWeight(.medium)
             Text(subtitle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             // Inside the card, so it cannot read as belonging to the next row (measured both ways on
             // 2026-09-17; a caption between two cards did).
@@ -168,3 +219,13 @@ struct ValuePickerRow<Value: Hashable>: View {
         }
     }
 }
+
+#if os(tvOS)
+/// Draws the row as it is: the row carries its own fill, stroke and lift, and a custom style keeps
+/// tvOS from adding its own focus effect on top.
+private struct ValuePickerRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+    }
+}
+#endif

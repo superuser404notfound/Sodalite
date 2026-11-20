@@ -13,6 +13,8 @@ final class PlaybackPreferences {
     private enum Keys {
         static let autoplayNextEpisode = "playback.autoplayNextEpisode"
         static let autoplayCountdown = "playback.autoplayCountdown"
+        static let showNextEpisodeCard = "playback.showNextEpisodeCard"
+        static let askForRatingAfterMovie = "playback.askForRatingAfterMovie"
         static let nextEpisodeCountdownSeconds = "playback.nextEpisodeCountdownSeconds"
         static let nextEpisodeCountdownAnchor = "playback.nextEpisodeCountdownAnchor"
         static let skipForwardSeconds = "playback.skipForwardSeconds"
@@ -25,6 +27,7 @@ final class PlaybackPreferences {
         static let autoSkipIntro = "playback.autoSkipIntro"
         static let autoSkipRecap = "playback.autoSkipRecap"
         static let autoSkipOutro = "playback.autoSkipOutro"
+        static let autoSkipCommercials = "playback.autoSkipCommercials"
         static let autoSubtitleForForeignAudio = "playback.autoSubtitleForForeignAudio"
         static let autoForcedSubtitles = "playback.autoForcedSubtitles"
         static let styledASSSubtitles = "playback.styledASSSubtitles"
@@ -45,6 +48,11 @@ final class PlaybackPreferences {
         static let rememberTrackSelections = "playback.rememberTrackSelections"
         static let subtitlesOnSkipBack = "playback.subtitlesOnSkipBack"
         static let touchpadScrubbing = "playback.touchpadScrubbing"
+        static let playerControls = "playback.playerControls"
+        static let versionOrder = "playback.versionOrder"
+        static let playThemeSongs = "playback.playThemeSongs"
+        static let playPrerolls = "playback.playPrerolls"
+        static let musicNormalization = "playback.musicNormalization"
     }
 
     // MARK: - Allowed Values
@@ -143,15 +151,30 @@ final class PlaybackPreferences {
     }
 
     /// Downward-only fraction-of-player-rect steps, no negative half; explicit `default` opt-out matters for PGS/DVB/DVD source-baked positions.
+    /// The `edge` steps fill the gap between Bottom Edge and Low, where a single line sits in the letterbox bar (#229).
     enum SubtitleVerticalPosition: String, CaseIterable, Sendable, Identifiable {
         case `default`
         case bottom
+        case edge2
+        case edge4
+        case edge6
+        case edge8
         case step1
         case step2
         case step3
 
         var id: String { rawValue }
         var titleKey: String { "settings.playback.subtitle.position.\(rawValue)" }
+
+        /// The named steps keep their words; the in-between ones read as a localized percentage, which needs no catalog entry.
+        var label: String {
+            switch self {
+            case .edge2, .edge4, .edge6, .edge8:
+                return (fractionFromBottom ?? 0).formatted(.percent.precision(.fractionLength(0)))
+            default:
+                return String(localized: String.LocalizationValue(titleKey))
+            }
+        }
 
         /// Fraction of player rect height from bottom edge; nil = no override (historical baseline, bitmap cues untouched).
         var fractionFromBottom: Double? {
@@ -160,6 +183,10 @@ final class PlaybackPreferences {
             // 0 = flush with the screen bottom, distinct from nil: the letterbox bar varies with
             // aspect ratio, so any positive anchor centres in it only at one ratio (#15).
             case .bottom:  return 0
+            case .edge2:   return 0.02
+            case .edge4:   return 0.04
+            case .edge6:   return 0.06
+            case .edge8:   return 0.08
             case .step1:   return 0.10
             case .step2:   return 0.20
             case .step3:   return 0.30
@@ -249,6 +276,25 @@ final class PlaybackPreferences {
         }
     }
 
+    /// How far behind the broadcast live TV plays, passed to the engine as
+    /// `LoadOptions.liveEdgeCushionSeconds`: the buffer a slow or unsteady connection has against
+    /// the channel. The join waits until that much has arrived, so a channel takes up to that much
+    /// longer to start. Off keeps the engine's own distance.
+    enum LiveDelay: String, CaseIterable, Sendable, Identifiable {
+        case off, tenSeconds, twentySeconds, thirtySeconds, fortyFiveSeconds
+        var id: String { rawValue }
+        var titleKey: String { "settings.playback.liveDelay.\(rawValue)" }
+        var seconds: Double? {
+            switch self {
+            case .off:              return nil
+            case .tenSeconds:       return 10
+            case .twentySeconds:    return 20
+            case .thirtySeconds:    return 30
+            case .fortyFiveSeconds: return 45
+            }
+        }
+    }
+
     // MARK: - Properties
 
     var autoplayNextEpisode: Bool {
@@ -261,6 +307,41 @@ final class PlaybackPreferences {
         didSet { store.set(autoplayCountdown, forKey: Keys.autoplayCountdown) }
     }
 
+    /// Off never puts the next-episode card up: with autoplay the successor follows at the real
+    /// end, without it the player closes there like at a movie's end. Same routing as a card the
+    /// user dismissed, only for every episode.
+    var showNextEpisodeCard: Bool {
+        didSet { store.set(showNextEpisodeCard, forKey: Keys.showNextEpisodeCard) }
+    }
+
+    /// Sodalite#48: a film played to its end, unrated, asks for the viewer's rating once the player closes.
+    var askForRatingAfterMovie: Bool {
+        didSet { store.set(askForRatingAfterMovie, forKey: Keys.askForRatingAfterMovie) }
+    }
+
+    /// Sodalite#219: detail pages play the server's theme song. Off by default, it is sound nobody asked for.
+    var playThemeSongs: Bool {
+        didSet { store.set(playThemeSongs, forKey: Keys.playThemeSongs) }
+    }
+
+    /// Sodalite#244: plays the server's pre-rolls (Local Intros plugin) before a start from the beginning.
+    /// On by default like Jellyfin-Web's cinema mode; without such a plugin the server hands out none.
+    var playPrerolls: Bool {
+        didSet { store.set(playPrerolls, forKey: Keys.playPrerolls) }
+    }
+
+    /// Sodalite#242: plays music at the loudness the server measured. Off by default, it needs the
+    /// library's LUFS scan and changes how a familiar album sounds.
+    var musicNormalization: MusicNormalization {
+        didSet { store.set(musicNormalization.rawValue, forKey: Keys.musicNormalization) }
+    }
+
+    /// Which version of a multi-version title is listed first and plays untouched: the largest frame,
+    /// or the server's own order for a library that puts a language first.
+    var versionOrder: VersionOrder {
+        didSet { store.set(versionOrder.rawValue, forKey: Keys.versionOrder) }
+    }
+
     var autoSkipIntro: Bool {
         didSet { store.set(autoSkipIntro, forKey: Keys.autoSkipIntro) }
     }
@@ -271,6 +352,11 @@ final class PlaybackPreferences {
 
     var autoSkipOutro: Bool {
         didSet { store.set(autoSkipOutro, forKey: Keys.autoSkipOutro) }
+    }
+
+    /// Sodalite#224, every commercial break the server marked, once each per playback.
+    var autoSkipCommercials: Bool {
+        didSet { store.set(autoSkipCommercials, forKey: Keys.autoSkipCommercials) }
     }
 
     /// How long the countdown runs once armed. Inert while `autoplayCountdown` is off; read through
@@ -408,14 +494,26 @@ final class PlaybackPreferences {
         didSet { store.set(subtitlesOnSkipBack, forKey: Keys.subtitlesOnSkipBack) }
     }
 
+    /// Sodalite#194: which player controls show, and in what order. Stats lives in here too; it was
+    /// a device switch before, which seeds a profile that has no layout of its own yet.
+    var playerControls: PlayerControlsLayout {
+        didSet { store.set(playerControls.encoded(), forKey: Keys.playerControls) }
+    }
+
+    /// What the legacy cloud record still carries for older builds, which know Stats only as one
+    /// switch: on while any row still shows the chip.
+    var showStatsForNerds: Bool {
+        PlayerControlGroup.allCases.contains { playerControls.isVisible(.stats, in: $0) }
+    }
+
+    /// A lock whose button is hidden could never be released from the player, so it stops applying.
+    var appliesRotationLock: Bool {
+        playerRotationLocked && playerControls.isVisible(.rotationLock, in: .topBar)
+    }
+
     // MARK: - Device values
 
     // Pass-throughs to the one `DevicePreferences` every profile shares; see there.
-
-    var showStatsForNerds: Bool {
-        get { device.showStatsForNerds }
-        set { device.showStatsForNerds = newValue }
-    }
 
     var showEngineDiagnostics: Bool {
         get { device.showEngineDiagnostics }
@@ -425,6 +523,20 @@ final class PlaybackPreferences {
     var preferLosslessAudioBridge: Bool {
         get { device.preferLosslessAudioBridge }
         set { device.preferLosslessAudioBridge = newValue }
+    }
+
+    var trueHDAtmosHeights: Bool {
+        get { device.trueHDAtmosHeights }
+        set { device.trueHDAtmosHeights = newValue }
+    }
+
+    /// The settings row's one value: nil is heights off, otherwise the bed they render into.
+    var heightChannelLayout: SpatialSpeakerLayout? {
+        get { device.trueHDAtmosHeights ? device.objectAudioLayout : nil }
+        set {
+            if let newValue { device.objectAudioLayout = newValue }
+            device.trueHDAtmosHeights = newValue != nil
+        }
     }
 
     var playerRotationLocked: Bool {
@@ -442,6 +554,34 @@ final class PlaybackPreferences {
         set { device.liveBufferDepth = newValue }
     }
 
+    var liveDelay: LiveDelay {
+        get { device.liveDelay }
+        set { device.liveDelay = newValue }
+    }
+
+    var streamingQualityWifi: StreamingQuality {
+        get { device.streamingQualityWifi }
+        set { device.streamingQualityWifi = newValue }
+    }
+
+    var streamingQualityCellular: StreamingQuality {
+        get { device.streamingQualityCellular }
+        set { device.streamingQualityCellular = newValue }
+    }
+
+    /// The rung a new session starts on, read once at session start (Sodalite#87).
+    func defaultStreamingQuality(
+        reading: NetworkPathSnapshot.Reading? = NetworkPathSnapshot.shared.current
+    ) -> StreamingQuality {
+        #if os(tvOS)
+        let platformHasCellular = false
+        #else
+        let platformHasCellular = true
+        #endif
+        return StreamingQuality.resolve(wifi: streamingQualityWifi, cellular: streamingQualityCellular,
+                                        reading: reading, platformHasCellular: platformHasCellular)
+    }
+
     var liveTeletextPage: LiveTeletextPage {
         get { device.liveTeletextPage }
         set { device.liveTeletextPage = newValue }
@@ -452,8 +592,91 @@ final class PlaybackPreferences {
         set { device.forceDolbyVisionOnNonDVDisplay = newValue }
     }
 
+    var preferHDR10PlusOverForcedDolbyVision: Bool {
+        get { device.preferHDR10PlusOverForcedDolbyVision }
+        set { device.preferHDR10PlusOverForcedDolbyVision = newValue }
+    }
+
+    /// The settings row over the two values above (Sodalite#245).
+    var dolbyVisionOnHDR10Mode: DolbyVisionOnHDR10Mode {
+        get {
+            DolbyVisionOnHDR10Mode(force: forceDolbyVisionOnNonDVDisplay,
+                                   preferHDR10Plus: preferHDR10PlusOverForcedDolbyVision)
+        }
+        set {
+            forceDolbyVisionOnNonDVDisplay = newValue != .off
+            preferHDR10PlusOverForcedDolbyVision = newValue == .hdr10PlusFirst
+        }
+    }
+
+    var enhancedUpscaling: Bool {
+        get { device.enhancedUpscaling }
+        set { device.enhancedUpscaling = newValue }
+    }
+
+    var lineArtUpscaling: Bool {
+        get { device.lineArtUpscaling }
+        set { device.lineArtUpscaling = newValue }
+    }
+
+    /// The settings picker's view of the two switches.
+    var upscalingMode: EnhancedUpscalingMode {
+        get { EnhancedUpscalingMode(enhanced: enhancedUpscaling, lineArt: lineArtUpscaling) }
+        set {
+            enhancedUpscaling = newValue != .off
+            lineArtUpscaling = newValue == .withAnimation
+        }
+    }
+
+    var speakerLayout: SpeakerLayout {
+        get { device.speakerLayout }
+        set { device.speakerLayout = newValue }
+    }
+
+    var audioDelayMilliseconds: Int {
+        get { device.audioDelayMilliseconds }
+        set { device.audioDelayMilliseconds = AudioDelay.clamped(newValue) }
+    }
+
+    var audioDelaySeconds: Double { AudioDelay.seconds(audioDelayMilliseconds) }
+
+    var dialogueBoost: DialogueBoost {
+        get { device.dialogueBoost }
+        set { device.dialogueBoost = newValue }
+    }
+
+    var nightMode: NightMode {
+        get { device.nightMode }
+        set { device.nightMode = newValue }
+    }
+
+    var nightModeStartHour: Int {
+        get { device.nightModeStartHour }
+        set { device.nightModeStartHour = newValue }
+    }
+
+    var nightModeEndHour: Int {
+        get { device.nightModeEndHour }
+        set { device.nightModeEndHour = newValue }
+    }
+
+    var lfeInStereoDownmix: Bool {
+        get { device.lfeInStereoDownmix }
+        set { device.lfeInStereoDownmix = newValue }
+    }
+
+    /// AetherEngine#923, resolved against the clock: a scheduled night mode is on or off by the hour.
+    func audioShaping(at date: Date = Date()) -> AudioShaping {
+        device.audioShapingSettings.shaping(at: date)
+    }
+
     var audioBridgeMode: AudioBridgeMode {
         preferLosslessAudioBridge ? .lossless : .surroundCompat
+    }
+
+    /// PCM over HDMI and to headphones, APAC over AirPlay (the engine decides per route).
+    var objectAudioRendering: ObjectAudioRendering {
+        heightChannelLayout.map { .render($0) } ?? .off
     }
 
     // MARK: - Init
@@ -483,9 +706,17 @@ final class PlaybackPreferences {
         self.device = device
         self.autoplayNextEpisode = store.object(forKey: Keys.autoplayNextEpisode) as? Bool ?? true
         self.autoplayCountdown = store.object(forKey: Keys.autoplayCountdown) as? Bool ?? true
+        self.showNextEpisodeCard = store.object(forKey: Keys.showNextEpisodeCard) as? Bool ?? true
+        self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
+        self.playThemeSongs = store.object(forKey: Keys.playThemeSongs) as? Bool ?? false
+        self.playPrerolls = store.object(forKey: Keys.playPrerolls) as? Bool ?? true
+        self.versionOrder = store.string(forKey: Keys.versionOrder).flatMap(VersionOrder.init(rawValue:)) ?? .quality
+        self.musicNormalization = store.string(forKey: Keys.musicNormalization)
+            .flatMap(MusicNormalization.init(rawValue:)) ?? .off
         self.autoSkipIntro = store.object(forKey: Keys.autoSkipIntro) as? Bool ?? false
         self.autoSkipRecap = store.object(forKey: Keys.autoSkipRecap) as? Bool ?? false
         self.autoSkipOutro = store.object(forKey: Keys.autoSkipOutro) as? Bool ?? false
+        self.autoSkipCommercials = store.object(forKey: Keys.autoSkipCommercials) as? Bool ?? false
         self.nextEpisodeCountdownSeconds = store.object(forKey: Keys.nextEpisodeCountdownSeconds) as? Int ?? 15
         self.nextEpisodeCountdownAnchor = (store.string(forKey: Keys.nextEpisodeCountdownAnchor))
             .flatMap(NextEpisodePolicy.CountdownAnchor.init(rawValue:)) ?? .outro
@@ -516,6 +747,9 @@ final class PlaybackPreferences {
         self.rememberTrackSelections = store.object(forKey: Keys.rememberTrackSelections) as? Bool ?? true
         self.subtitlesOnSkipBack = store.object(forKey: Keys.subtitlesOnSkipBack) as? Bool ?? true
         self.touchpadScrubbing = store.object(forKey: Keys.touchpadScrubbing) as? Bool ?? true
+        self.playerControls = store.string(forKey: Keys.playerControls)
+            .map { PlayerControlsLayout.decoded($0, showsStats: device.showStatsForNerds) }
+            ?? .defaults(showsStats: device.showStatsForNerds)
     }
 
     /// `scope` nil is the unprefixed legacy space. Without a `device`, one is built over the same
@@ -525,5 +759,29 @@ final class PlaybackPreferences {
             keyspace: PreferenceKeyspace(defaults: defaults, scope: scope),
             device: device ?? DevicePreferences(store: defaults)
         )
+    }
+}
+
+/// "Dolby Vision on HDR10 Displays": off, on for every Profile 8.1 / 7 file, or on except for a file
+/// that also carries HDR10+, which keeps its HDR10+ (Sodalite#245).
+enum DolbyVisionOnHDR10Mode: String, CaseIterable, Sendable, Identifiable {
+    case off, on, hdr10PlusFirst
+    var id: String { rawValue }
+    var titleKey: String { "settings.playback.forceDolbyVision.\(rawValue)" }
+
+    init(force: Bool, preferHDR10Plus: Bool) {
+        self = !force ? .off : (preferHDR10Plus ? .hdr10PlusFirst : .on)
+    }
+}
+
+/// AetherEngine#846 / #1039: the Enhanced Upscaling picker. `withAnimation` keeps the automatic scaler for
+/// everything else and gives animated titles the engine's line-art scaler.
+enum EnhancedUpscalingMode: String, CaseIterable, Sendable, Identifiable {
+    case off, on, withAnimation
+    var id: String { rawValue }
+    var titleKey: String { "settings.playback.enhancedUpscaling.\(rawValue)" }
+
+    init(enhanced: Bool, lineArt: Bool) {
+        self = !enhanced ? .off : (lineArt ? .withAnimation : .on)
     }
 }

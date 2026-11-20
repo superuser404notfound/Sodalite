@@ -8,6 +8,8 @@ enum SubtitleMenuRow: Equatable {
     case off
     /// A selectable track, carrying the stream index the engine expects back.
     case track(streamIndex: Int)
+    /// Per-title timing offset, stepped with left/right on tvOS (VOD, active track only).
+    case offset
     /// Pinned footer opening the online search (VOD only).
     case searchOnline
 }
@@ -22,11 +24,13 @@ enum SubtitleMenuRow: Equatable {
 enum SubtitleMenuLayout {
     static func rows(streams: [MediaStream],
                      supportsSecondary: Bool,
-                     supportsSearch: Bool) -> [SubtitleMenuRow] {
+                     supportsSearch: Bool,
+                     supportsOffset: Bool = false) -> [SubtitleMenuRow] {
         var rows: [SubtitleMenuRow] = []
         if supportsSecondary { rows.append(.secondaryHeader) }
         rows.append(.off)
         rows += streams.map { .track(streamIndex: $0.index) }
+        if supportsOffset { rows.append(.offset) }
         if supportsSearch { rows.append(.searchOnline) }
         return rows
     }

@@ -13,9 +13,24 @@ enum FilterCacheKey {
             "home-genre-\(name)"
         }
 
+        /// The Home banner's titles in one of its modes, so a launch paints the banner with the rows.
+        nonisolated static func hero(mode: String) -> String {
+            "home-hero-\(mode)"
+        }
+
+        /// The full list behind a capped Home row ("All Movies", "All Series").
+        nonisolated static func row(_ type: String) -> String {
+            "home-row-\(type)"
+        }
+
         /// My Media library grid. The grouping mode is in the key because it changes the shape of the result (collection tiles vs. single movies); a shared key would repaint the previous shape from cache after the setting flips.
         nonisolated static func library(id: String, grouping: CollectionGrouping) -> String {
             "library_\(id)_\(grouping.rawValue)"
+        }
+
+        /// One folder of a folder-browsed library (Sodalite#180). No grouping: collections never form inside it.
+        nonisolated static func folder(id: String) -> String {
+            "folder_\(id)"
         }
     }
 

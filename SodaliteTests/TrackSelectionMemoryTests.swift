@@ -65,6 +65,46 @@ struct TrackSelectionMemoryTests {
         #expect(entry?.updatedAt == Date(timeIntervalSince1970: 20))
     }
 
+    @Test("a subtitle offset round-trips and leaves the track picks alone")
+    func subtitleOffsetRoundTrip() {
+        let store = defaults(#function)
+        let memory = TrackSelectionMemory(store: store)
+        memory.recordSubtitle(.off, for: "k", now: Date(timeIntervalSince1970: 10))
+        memory.recordSubtitleOffset(1.5, for: "k", now: Date(timeIntervalSince1970: 20))
+        let entry = TrackSelectionMemory(store: store).entry(for: "k")
+        #expect(entry?.subtitleOffset == 1.5)
+        #expect(entry?.subtitle == .off)
+        #expect(entry?.updatedAt == Date(timeIntervalSince1970: 20))
+    }
+
+    /// Stored as 0, not nil: the cloud merge fills a missing offset from the older entry (a 1.0 device
+    /// never writes the field), so a cleared one has to be a value that says so.
+    @Test("a zero offset clears a set one and stays distinguishable from never set")
+    func zeroOffsetClears() {
+        let memory = TrackSelectionMemory(store: defaults(#function))
+        memory.recordSubtitleOffset(0.4, for: "k", now: Date(timeIntervalSince1970: 10))
+        memory.recordSubtitleOffset(0, for: "k", now: Date(timeIntervalSince1970: 20))
+        #expect(memory.entry(for: "k")?.subtitleOffset == 0)
+
+        memory.recordSubtitleOffset(0, for: "never", now: Date(timeIntervalSince1970: 30))
+        #expect(memory.entry(for: "never")?.subtitleOffset == nil)
+    }
+
+    /// The offset belongs to one file, so an episode keys it by itself, never by its series.
+    @Test("the offset key is the item, even for an episode")
+    func offsetKeyIgnoresSeries() {
+        #expect(TrackSelectionMemory.itemKey(userID: "u1", itemID: "e1") == "u1|item|e1")
+    }
+
+    /// Entries written before the field existed carry no `subtitleOffset` key at all.
+    @Test("an entry from an older build decodes without an offset")
+    func legacyEntryDecodes() throws {
+        let json = #"{"subtitle":{"off":{}},"updatedAt":0}"#
+        let entry = try JSONDecoder().decode(TrackMemoryEntry.self, from: Data(json.utf8))
+        #expect(entry.subtitleOffset == nil)
+        #expect(entry.subtitle == .off)
+    }
+
     @Test("the store caps itself by evicting the oldest entries")
     func capEviction() {
         let memory = TrackSelectionMemory(store: defaults(#function))

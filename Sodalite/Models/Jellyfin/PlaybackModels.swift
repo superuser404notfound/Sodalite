@@ -22,12 +22,15 @@ struct PlaybackInfoResponse: Codable, Sendable {
 /// (`currentEpisodeID`) rather than the response's own identity.
 struct PrefetchedPlaybackInfo: Sendable {
     let itemID: String
+    /// The rung the response was fetched at (Sodalite#87). A response at another rung describes
+    /// another stream: its TranscodingUrl, or its direct-play verdict, belongs to that cap.
+    let quality: StreamingQuality
     let response: PlaybackInfoResponse
 
-    /// The response if it describes `itemID`, else nil. A caller that cannot say which item it is
-    /// launching has no business using a prefetch.
-    func matching(_ itemID: String) -> PlaybackInfoResponse? {
-        self.itemID == itemID ? response : nil
+    /// The response if it describes `itemID` at `quality`, else nil. A caller that cannot say which
+    /// item it is launching has no business using a prefetch.
+    func matching(_ itemID: String, quality: StreamingQuality) -> PlaybackInfoResponse? {
+        self.itemID == itemID && self.quality == quality ? response : nil
     }
 }
 
@@ -47,6 +50,10 @@ struct PlaybackMediaSource: Codable, Sendable, Identifiable {
     let liveStreamId: String?
     /// Transcode reason(s) (e.g. `ContainerNotSupported`, `VideoCodecNotSupported`, `VideoBitrateNotSupported`); decisive signal for full video re-encode vs cheap remux, drives live copy-vs-encode tuning.
     let transcodeReasons: [String]?
+    /// Jellyfin's `VideoType`, see `DiscFolder`.
+    var videoType: String? = nil
+
+    var isDiscFolder: Bool { DiscFolder.matches(videoType: videoType) }
 
     enum CodingKeys: String, CodingKey {
         case id = "Id"
@@ -62,6 +69,7 @@ struct PlaybackMediaSource: Codable, Sendable, Identifiable {
         case mediaStreams = "MediaStreams"
         case liveStreamId = "LiveStreamId"
         case transcodeReasons = "TranscodeReasons"
+        case videoType = "VideoType"
     }
 }
 
@@ -101,7 +109,7 @@ struct JellyfinSessionInfo: Decodable, Sendable {
 
 // MARK: - Media Segments
 
-/// `/MediaSegments/{itemId}` intro/outro/preview markers; native on Jellyfin 10.10+, intro-skipper plugin on 10.9.
+/// `/MediaSegments/{itemId}` intro/outro/recap/commercial markers; native on Jellyfin 10.10+, intro-skipper plugin on 10.9.
 struct MediaSegmentsResponse: Codable, Sendable {
     let items: [MediaSegment]
     let totalRecordCount: Int?
@@ -132,13 +140,26 @@ struct MediaSegment: Codable, Sendable, Identifiable {
     var endSeconds: Double { Double(endTicks) / 10_000_000 }
 }
 
-/// Paired result for one item's intro + outro + recap markers, returned in a
-/// single request to `/MediaSegments/{itemId}`. Any of them may be nil if the
+/// One item's intro + outro + recap markers and every commercial break, returned in a
+/// single request to `/MediaSegments/{itemId}`. Any of them may be nil (or empty) if the
 /// server didn't detect that segment type.
 struct EpisodeSegments: Sendable {
     let intro: MediaSegment?
     let outro: MediaSegment?
     let recap: MediaSegment?
+    /// Sodalite#224. All of them, sorted by start: a recording has one per break.
+    var commercials: [MediaSegment] = []
+}
+
+extension EpisodeSegments {
+    init(items: [MediaSegment]) {
+        self.init(
+            intro: items.first(where: { $0.type == .intro }),
+            outro: items.first(where: { $0.type == .outro }),
+            recap: items.first(where: { $0.type == .recap }),
+            commercials: items.filter { $0.type == .commercial }.sorted { $0.startTicks < $1.startTicks }
+        )
+    }
 }
 
 enum SegmentType: String, Codable, Sendable {

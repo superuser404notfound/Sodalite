@@ -42,6 +42,14 @@ struct ValuePickerRowAdvanceTests {
         #expect(ValuePickerAdvance.canMove(from: 3, by: -1, count: 4))
     }
 
+    @Test("select flips a toggle and opens the list of anything longer")
+    func selectOpensLongerLists() {
+        #expect(!ValuePickerAdvance.selectOpensList(count: 1))
+        #expect(!ValuePickerAdvance.selectOpensList(count: 2))
+        #expect(ValuePickerAdvance.selectOpensList(count: 3))
+        #expect(ValuePickerAdvance.selectOpensList(count: 15))
+    }
+
     @Test("degenerate lists stay in bounds instead of trapping")
     func degenerateLists() {
         #expect(ValuePickerAdvance.index(from: 0, by: 1, count: 1) == 0)

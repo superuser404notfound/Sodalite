@@ -20,8 +20,11 @@ struct MediaCard: View {
     /// Sodalite#66. Set where the row paints show-level art (Continue Watching on Backdrop or
     /// Thumb): a series backdrop is marketing art, so the spoiler veil stays off the image.
     let showsSeriesArtwork: Bool
+    /// Server name for a same-name collection or playlist from another server (Sodalite#85).
+    let serverLabel: String?
 
     @Environment(\.dependencies) private var dependencies
+    @Environment(\.appState) private var appState
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     /// Enlarge factor from Appearance settings (1.0 normal), applied to every style so rows stay proportional.
@@ -48,7 +51,8 @@ struct MediaCard: View {
         fallbackURL: URL? = nil,
         style: MediaCardStyle = .poster,
         isFocused: Bool = false,
-        showsSeriesArtwork: Bool = false
+        showsSeriesArtwork: Bool = false,
+        serverLabel: String? = nil
     ) {
         self.item = item
         self.imageURL = imageURL
@@ -56,6 +60,7 @@ struct MediaCard: View {
         self.style = style
         self.isFocused = isFocused
         self.showsSeriesArtwork = showsSeriesArtwork
+        self.serverLabel = serverLabel
     }
 
     var body: some View {
@@ -134,12 +139,15 @@ struct MediaCard: View {
     }
 
     private var displayTitle: String {
-        guard style == .landscape, item.type == .episode else { return item.name }
-        return EpisodeMetadataFormatter.label(season: nil, episode: item.indexNumber,
-                                              title: item.name)
+        let policy = dependencies.spoilerPolicy(userID: appState.activeUser?.id)
+        guard style == .landscape, item.type == .episode else { return policy.displayName(of: item) }
+        let label = EpisodeMetadataFormatter.label(season: nil, episode: item.indexNumber,
+                                                   title: policy.visibleTitle(of: item))
+        return label.isEmpty ? policy.displayName(of: item) : label
     }
 
     private var displaySubtitle: String? {
+        if let serverLabel { return serverLabel }
         if item.type == .episode, let seriesName = item.seriesName {
             // Season only: the episode number is already on the title line above.
             return EpisodeMetadataFormatter.label(seriesName: seriesName,
@@ -156,7 +164,7 @@ struct MediaCard: View {
     private var progressOverlay: some View {
         if let resumeFraction {
             ResumeProgressBar(fraction: resumeFraction,
-                              remaining: item.resumeRemainingTicks?.ticksToCompactDisplay,
+                              remaining: item.resumeRemainingTicks?.ticksToDurationDisplay,
                               posterWidth: tierPosterWidth,
                               scale: scale)
         }
@@ -180,7 +188,7 @@ struct MediaCard: View {
     private var accessibilityProgress: String {
         guard let resumeFraction else { return "" }
         let percent = resumeFraction.formatted(.percent.precision(.fractionLength(0)))
-        guard let remaining = item.resumeRemainingTicks?.ticksToCompactDisplay else { return percent }
+        guard let remaining = item.resumeRemainingTicks?.ticksToDurationDisplay else { return percent }
         return "\(percent), \(remaining)"
     }
 
@@ -191,6 +199,8 @@ struct MediaCard: View {
         case .episode: "play.rectangle"
         case .season: "tv"
         case .musicAlbum, .audio: "music.note"
+        case .video: "play.rectangle"
+        case .folder: "folder"
         default: "photo"
         }
     }

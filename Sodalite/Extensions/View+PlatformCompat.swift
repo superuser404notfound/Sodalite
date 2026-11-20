@@ -1,23 +1,34 @@
 import SwiftUI
 
+/// What a field holds, for the keyboards that pick a layout from it. See `verbatimTextEntry`.
+enum VerbatimTextEntryKind {
+    case plain
+    case url
+}
+
 struct ThemeNavigationStack<Content: View>: View {
     @ViewBuilder let content: () -> Content
+    @Environment(\.shellBarInset) private var shellBarInset
 
     var body: some View {
         NavigationStack {
-            content().themedNavigationDestination()
+            // Inside, on the root only: the tvOS top bar's room (see `reservesShellBar`).
+            content().shellBarInset(shellBarInset).themedNavigationDestination()
         }
+        .environment(\.shellBarInset, 0)
     }
 }
 
 struct ThemeNavigationPathStack<Content: View>: View {
     @Binding var path: NavigationPath
     @ViewBuilder let content: () -> Content
+    @Environment(\.shellBarInset) private var shellBarInset
 
     var body: some View {
         NavigationStack(path: $path) {
-            content().themedNavigationDestination()
+            content().shellBarInset(shellBarInset).themedNavigationDestination()
         }
+        .environment(\.shellBarInset, 0)
     }
 }
 
@@ -39,12 +50,20 @@ extension View {
         #endif
     }
 
+    /// For a tab page whose scroll view starts right under the iPhone's floating corner chrome
+    /// (TabRootView.scrollsUnderChrome): the page itself reaches the top of the screen, and only the
+    /// scroll CONTENT starts below the chrome, so rows scroll up through the band behind the badge
+    /// and buttons and blur out there instead of being cut at a line.
+    func scrollsUnderShellChrome() -> some View {
+        modifier(ScrollsUnderShellChrome())
+    }
+
     @ViewBuilder
     func themedNavigationDestination() -> some View {
         #if os(iOS)
         containerBackground(.clear, for: .navigation)
         #else
-        self
+        pushedPage()
         #endif
     }
 }
@@ -162,10 +181,19 @@ extension View {
     /// Applies .ignoresSafeArea only when `active`. Lets a detail screen stay full-bleed on
     /// tvOS/iPad while its scroll content respects the safe area on iPhone portrait (so the
     /// content is not clipped under the status bar / home indicator).
+    ///
+    /// On the Mac the leading inset is the sidebar, since detail pages are pushed into the split
+    /// view's detail column there, so only the vertical edges are given up: the page still runs
+    /// under the toolbar, and its title and buttons stay out from under the sidebar. The backdrop
+    /// keeps its own unconditional `.ignoresSafeArea()` and still extends beneath it.
     @ViewBuilder
     func ignoresSafeArea(when active: Bool, edges: Edge.Set = .all) -> some View {
         if active {
+            #if os(macOS)
+            ignoresSafeArea(edges: edges.intersection(.vertical))
+            #else
             ignoresSafeArea(edges: edges)
+            #endif
         } else {
             self
         }
@@ -198,6 +226,93 @@ extension View {
     func onExitCommandIfEnabled(_ enabled: Bool, perform action: @escaping () -> Void) -> some View {
         #if os(tvOS)
         onExitCommand(perform: enabled ? action : nil)
+        #else
+        self
+        #endif
+    }
+
+    /// Hides the navigation bar on a screen that draws its own header.
+    ///
+    /// A Mac `NavigationStack` puts its controls in the window's toolbar, which is the window's and
+    /// not this screen's to hide, so there is nothing here to take away.
+    @ViewBuilder
+    func hidesNavigationBar() -> some View {
+        #if os(macOS)
+        self
+        #else
+        navigationBarHidden(true)
+        #endif
+    }
+
+    /// Keeps the navigation title on one line with the bar's controls.
+    ///
+    /// A Mac window title has no large form to shrink from, and tvOS draws no navigation bar at
+    /// all, so on neither is there a choice to make.
+    @ViewBuilder
+    func inlineNavigationTitle() -> some View {
+        #if os(iOS)
+        navigationBarTitleDisplayMode(.inline)
+        #else
+        self
+        #endif
+    }
+
+    /// Takes a field's text exactly as typed.
+    ///
+    /// The touch and remote keyboards correct, capitalise and choose a layout for a field unless
+    /// told not to, and a server address or a username is none of those things. A Mac keyboard does
+    /// not do any of it in the first place, so there is nothing there to switch off, and the
+    /// iOS-only modifiers that switch it off do not exist.
+    @ViewBuilder
+    func verbatimTextEntry(_ kind: VerbatimTextEntryKind = .plain) -> some View {
+        #if os(macOS)
+        autocorrectionDisabled()
+        #else
+        autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .keyboardType(kind == .url ? .URL : .default)
+        #endif
+    }
+
+    /// A presentation that takes the whole screen on iOS and tvOS.
+    ///
+    /// macOS has no `fullScreenCover` at all, and would be the wrong place for one: a Mac window is
+    /// one of several on a desktop, so the app's covers arrive there as sheets. A sheet is a window
+    /// of its own, which is also what makes it key and hands its content the keyboard.
+    @ViewBuilder
+    func fullScreenCoverCompat<Content: View>(
+        isPresented: Binding<Bool>,
+        onDismiss: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> Content
+    ) -> some View {
+        #if os(macOS)
+        sheet(isPresented: isPresented, onDismiss: onDismiss) { content().macCoverFrame() }
+        #else
+        fullScreenCover(isPresented: isPresented, onDismiss: onDismiss, content: content)
+        #endif
+    }
+
+    /// `item:` form, for the covers that carry their subject in the binding.
+    @ViewBuilder
+    func fullScreenCoverCompat<Item: Identifiable, Content: View>(
+        item: Binding<Item?>,
+        onDismiss: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) -> some View {
+        #if os(macOS)
+        sheet(item: item, onDismiss: onDismiss) { content($0).macCoverFrame() }
+        #else
+        fullScreenCover(item: item, onDismiss: onDismiss, content: content)
+        #endif
+    }
+
+    /// A Mac sheet sizes itself to its content, where a cover was handed the screen. These screens
+    /// were laid out for a window, so the sheet is floored at one rather than left to collapse
+    /// around whatever its first row happens to measure.
+    @ViewBuilder
+    func macCoverFrame() -> some View {
+        #if os(macOS)
+        frame(minWidth: 820, minHeight: 560)
         #else
         self
         #endif
@@ -241,10 +356,64 @@ private struct ShellPaysLeadingInsetKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct ShellLeadingSlotKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
 extension EnvironmentValues {
     /// Set by the sidebar shell on its content: the leading margin is already accounted for.
+    /// Set by the sidebar shell on a full-bleed tab (`SidebarShell.fullBleedTabs`): the width of the
+    /// rail's slot, which that page insets its own content by while its art runs on under the rail.
+    var shellLeadingSlot: CGFloat {
+        get { self[ShellLeadingSlotKey.self] }
+        set { self[ShellLeadingSlotKey.self] = newValue }
+    }
+
     var shellPaysLeadingInset: Bool {
         get { self[ShellPaysLeadingInsetKey.self] }
         set { self[ShellPaysLeadingInsetKey.self] = newValue }
+    }
+}
+
+private struct ScrollsUnderShellChrome: ViewModifier {
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+    #endif
+
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if hSizeClass == .compact {
+            // An empty bar the height of the chrome: it insets the content, and it is what the
+            // system's own scroll edge effect blurs under, which stays invisible while nothing is
+            // beneath it (a material band of our own showed as a grey strip at rest).
+            content
+                .safeAreaBar(edge: .top) {
+                    Color.clear.frame(height: TabRootView.gearChromeHeight)
+                }
+                .scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            content
+        }
+        #else
+        content
+        #endif
+    }
+}
+
+extension View {
+    /// `.focusable` for a surface that draws its own focus indicator (a `MediaFocusRing` or a
+    /// `focusStroke`), which is every focusable surface here.
+    ///
+    /// On the Mac it takes focus the way a Mac control does: from keyboard navigation, not from a
+    /// click. A click-focused card kept its ring after the click, and the system's own rectangular
+    /// ring was drawn around the app's rounded one, so a focused card wore two. Everywhere else it is
+    /// plain `.focusable`, which the tvOS focus engine and the iPad keyboard rely on unchanged.
+    func focusableSurface(_ isFocusable: Bool = true) -> some View {
+        #if os(macOS)
+        focusable(isFocusable, interactions: .activate)
+            .focusEffectDisabled()
+        #else
+        focusable(isFocusable)
+        #endif
     }
 }

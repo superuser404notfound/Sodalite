@@ -7,37 +7,42 @@ import Observation
 @MainActor
 final class ChannelListViewModel {
 
-    private(set) var channels: [JellyfinChannel] = []
-    private(set) var programsByChannel: [String: [JellyfinProgram]] = [:]
-    var isLoading: Bool { fetchingGeneration != nil }
-    private(set) var loadError: String?
-    private(set) var hasRadioChannels = false
-    private(set) var filter: GuideFilter = .default
-    private(set) var searchText = ""
+    /// The channel and program loader this list shares with the guide (LTM-R203).
+    private let lineup: LiveLineup
+    var channels: [JellyfinChannel] { lineup.channels }
+    var programsByChannel: [String: [JellyfinProgram]] { lineup.programsByChannel }
+    var isLoading: Bool { lineup.isLoadingChannels }
+    var loadError: String? { lineup.loadError }
+    /// Latched, see GuideViewModel.hasRadioChannels.
+    var hasRadioChannels: Bool { lineup.hasRadioChannels }
+    var filter: GuideFilter { lineup.filter }
+    var searchText: String { lineup.searchText }
+    /// See LiveLineup.requestEpoch: a visible row re-asks for its schedule when this changes.
+    var requestEpoch: Int { lineup.requestEpoch }
 
-    let timers: LiveTimerStore
+    var timers: LiveTimerStore { lineup.timers }
+    /// Genre narrowing (#182), shared with the guide grid.
+    var genres: GuideGenreController { lineup.genres }
+    /// Category narrowing (#201), shared with the guide grid.
+    var categories: GuideCategoryController { lineup.categories }
 
-    private let service: JellyfinLiveTvServiceProtocol
-    private let userID: String
-    private var fetchedChannels: [JellyfinChannel] = []
-    private var requestedProgramChannelIDs: Set<String> = []
-    private var loadGeneration = 0
-    /// See GuideViewModel.fetchingGeneration: a filter switch or refresh mid-paging starts its own loop.
-    private var fetchingGeneration: Int?
     private var didLoad = false
-    /// The list's own window: two days, the same horizon the grid uses.
-    private let windowStart = Date()
-    private var windowEnd: Date { windowStart.addingTimeInterval(GuideAxis.defaultSpan) }
 
-    init(service: JellyfinLiveTvServiceProtocol, userID: String, timers: LiveTimerStore) {
-        self.service = service
-        self.userID = userID
-        self.timers = timers
+    init(service: JellyfinLiveTvServiceProtocol, userID: String, timers: LiveTimerStore, now: Date = Date()) {
+        let window = Self.window(at: now)
+        self.lineup = LiveLineup(service: service, userID: userID, timers: timers,
+                                 windowStart: window.start, windowEnd: window.end)
+    }
+
+    /// Two days from the current half hour, the same horizon and rounding the grid uses.
+    static func window(at now: Date) -> (start: Date, end: Date) {
+        let start = GuideAxis.floorToSlot(now)
+        return (start, start.addingTimeInterval(GuideAxis.defaultSpan))
     }
 
     /// The two days the schedule sheet offers, matching the grid's axis.
     var scheduleDays: [Date] {
-        [windowStart, Calendar.current.date(byAdding: .day, value: 1, to: windowStart) ?? windowStart]
+        [lineup.windowStart, Calendar.current.date(byAdding: .day, value: 1, to: lineup.windowStart) ?? lineup.windowStart]
     }
 
     // MARK: - Loading
@@ -45,113 +50,52 @@ final class ChannelListViewModel {
     func load() async {
         guard !didLoad else { return }
         didLoad = true
-        await probeRadio()
-        await fetchChannels()
+        await lineup.fetchChannels()
     }
 
-    /// Pull to refresh. Only the channel list is re-asked: the schedule behind each row spans two
-    /// days and does not go stale, what goes stale is the row's "now", and that follows the clock
-    /// rather than a request. `channels` is left standing until the first page lands, so the list
-    /// does not blink empty under the user's finger.
+    /// LTM-206: the list outlives its window (a Mac app left running overnight), so the window is
+    /// re-derived from the clock and the rows re-requested. Returns true when it moved.
+    @discardableResult
+    func refreshWindow(now: Date = Date()) -> Bool {
+        let window = Self.window(at: now)
+        guard window.start != lineup.windowStart else { return false }
+        lineup.setWindow(start: window.start, end: window.end)
+        return true
+    }
+
+    /// Pull to refresh. The window is re-derived and every row's schedule re-requested along with
+    /// the channel list. `channels` is left standing until the first page lands, so the list does
+    /// not blink empty under the user's finger.
     func refresh() async {
-        loadGeneration += 1
-        fetchedChannels = []
-        await fetchChannels()
+        refreshWindow()
+        await lineup.refresh()
     }
 
     /// See GuideViewModel.recover().
     func recover() async {
-        guard loadError != nil else { return }
-        loadError = nil
-        if fetchedChannels.isEmpty {
+        guard lineup.loadError != nil else { return }
+        lineup.clearLoadError()
+        if lineup.hasFetchedChannels {
+            await lineup.fetchChannels()
+        } else {
             didLoad = false
             await load()
-        } else {
-            await fetchChannels()
         }
     }
 
-    private func probeRadio() async {
-        var probe = GuideFilter.default
-        probe.kind = .radio
-        let response = try? await service.getChannels(
-            userID: userID, startIndex: 0, limit: 1, filter: probe)
-        hasRadioChannels = !(response?.items.isEmpty ?? true)
-    }
-
+    /// See GuideViewModel.apply(filter:).
     func apply(filter newFilter: GuideFilter) async {
-        guard newFilter != filter else { return }
-        filter = newFilter
-        loadGeneration += 1
-        fetchedChannels = []
-        channels = []
-        programsByChannel = [:]
-        requestedProgramChannelIDs = []
-        await fetchChannels()
+        await lineup.apply(filter: newFilter)
     }
 
     func apply(searchText newValue: String) {
-        searchText = newValue
-        recomputeVisibleChannels()
-    }
-
-    private func fetchChannels() async {
-        let generation = loadGeneration
-        guard fetchingGeneration != generation else { return }
-        fetchingGeneration = generation
-        defer { if fetchingGeneration == generation { fetchingGeneration = nil } }
-        var startIndex = fetchedChannels.count
-        var complete = false
-        while !complete, startIndex < GuideViewModel.channelHardCap {
-            do {
-                let response = try await service.getChannels(
-                    userID: userID, startIndex: startIndex,
-                    limit: GuideViewModel.pageSize, filter: filter)
-                guard generation == loadGeneration else { return }
-                fetchedChannels.append(contentsOf: response.items)
-                timers.seedFavorites(from: response.items)
-                startIndex += response.items.count
-                if response.items.count < GuideViewModel.pageSize { complete = true }
-                loadError = nil
-                recomputeVisibleChannels()
-            } catch {
-                guard generation == loadGeneration else { return }
-                loadError = ErrorText.user(for: error)
-                return
-            }
-        }
-    }
-
-    private func recomputeVisibleChannels() {
-        channels = searchText.isEmpty
-            ? fetchedChannels
-            : fetchedChannels.filter { GuideViewModel.matches(channel: $0, query: searchText) }
+        lineup.apply(searchText: newValue)
     }
 
     // MARK: - Programs
 
     func ensurePrograms(for channelIDs: [String]) async {
-        let missing = channelIDs.filter { !requestedProgramChannelIDs.contains($0) }
-        guard !missing.isEmpty else { return }
-        missing.forEach { requestedProgramChannelIDs.insert($0) }
-        do {
-            let programs = try await service.getPrograms(
-                channelIDs: missing, userID: userID, start: windowStart, end: windowEnd)
-            var grouped = programsByChannel
-            for program in programs {
-                guard let channelID = program.channelId else { continue }
-                grouped[channelID, default: []].append(program)
-            }
-            for channelID in missing {
-                grouped[channelID]?.sort {
-                    ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast)
-                }
-            }
-            programsByChannel = grouped
-            timers.seedTimers(from: programs)
-        } catch {
-            missing.forEach { requestedProgramChannelIDs.remove($0) }
-        }
+        await lineup.ensurePrograms(for: channelIDs)
     }
 
     func schedule(for channel: JellyfinChannel) -> [JellyfinProgram] {

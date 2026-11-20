@@ -3,12 +3,19 @@ import Foundation
 /// App-wide notification names, centralised because posters/observers span features (player, detail, auth, catalog).
 extension Notification.Name {
     static let homeConfigDidChange = Notification.Name("homeConfigDidChange")
+    /// Posted by `NetworkPathObserver` the moment the path changes, ahead of its debounced
+    /// callback, so the route proofs of the old network are gone before anything sends again
+    /// (audit review R-ROUTE-3).
+    static let networkPathWillChange = Notification.Name("networkPathWillChange")
     /// Posted by a library grid after the user picked a sort (Sodalite#78) so CloudSyncService mirrors
     /// the choice. Separate from `.homeConfigDidChange`, which HomeView answers with a full row reload
     /// the grid does not need.
     static let librarySortDidChange = Notification.Name("librarySortDidChange")
     static let homeFavoritesDidChange = Notification.Name("homeFavoritesDidChange")
     static let homePlayedDidChange = Notification.Name("homePlayedDidChange")
+    /// Posted by `TraktService` when the Trakt watchlist or lists changed, so Home rebuilds its
+    /// Trakt rows and detail pages refresh their watchlist button.
+    static let traktListsDidChange = Notification.Name("traktListsDidChange")
     /// Posted by PlayerViewModel after a playback-stop report so HomeView/detail refresh Continue Watching / Next Up. Carries PlaybackProgressKey.itemID (the EPISODE for series) + positionTicks; detail views patch that item's in-memory userData directly (authoritative, race-free, vs re-fetch + stale ETag, issue #24).
     static let playbackProgressDidChange = Notification.Name("playbackProgressDidChange")
     /// Posted by detail views after a deletion so HomeView reloads and the item disappears immediately.
@@ -17,6 +24,9 @@ extension Notification.Name {
     static let loginDidComplete = Notification.Name("loginDidComplete")
     /// Posted whenever the set of Seerr requests changed (submitted, or removed from the catalog detail / by a cascading deletion) so CatalogView refreshes loaded request lists. Without it the list keeps its stale rows until an app restart.
     static let seerrRequestsDidChange = Notification.Name("seerrRequestsDidChange")
+    /// A due who's-watching reprompt closes every presented detail cover. `.onReceive`, not a state
+    /// flag, because the covers sit under the player when this fires (R-LIFECYCLE-1).
+    static let closeDetailCoversForReprompt = Notification.Name("closeDetailCoversForReprompt")
 
     /// Posted by SeerrClient when Seerr answers 401 to the session cookie it still holds. CatalogView
     /// re-probes the session and, if it is gone, drops to its "Set up Seerr" state.
@@ -25,6 +35,9 @@ extension Notification.Name {
     /// Posted after an admin approves/declines/deletes a request or the admin queue reloads its counts,
     /// so the pending-requests monitor recomputes the Catalog tab badge.
     static let seerrPendingRequestsShouldRefresh = Notification.Name("seerrPendingRequestsShouldRefresh")
+
+    /// iOS: the user tapped a my-request banner; userInfo["itemID"] is the Jellyfin item to open.
+    static let myRequestNotificationOpened = Notification.Name("myRequestNotificationOpened")
 
     /// Posted by CloudSyncService after remote changes were applied locally, so
     /// server lists, pickers, and settings screens refresh.
@@ -47,6 +60,16 @@ extension Notification.Name {
     /// item and every list still holding the old id would keep failing on it. Carries
     /// LibraryItemReplacementKey.staleID + .item.
     static let libraryItemDidReplace = Notification.Name("libraryItemDidReplace")
+
+    /// Posted by PlayerViewModel when an item played to its real end and the player is about to
+    /// close, not on a stop. Carries PlaybackEndKey.itemID.
+    static let playbackDidReachEnd = Notification.Name("playbackDidReachEnd")
+}
+
+/// userInfo keys for `.playbackDidReachEnd`.
+enum PlaybackEndKey {
+    /// `String` id of the item that finished.
+    static let itemID = "itemID"
 }
 
 /// userInfo keys for `.libraryItemDidReplace`.
@@ -69,4 +92,8 @@ enum PlaybackProgressKey {
     static let itemID = "itemID"
     /// `Int64` position (in Jellyfin ticks) the player stopped at.
     static let positionTicks = "positionTicks"
+    /// `String`, the episode's show, set only by the stop at the end of a session.
+    static let seriesID = "seriesID"
+    /// `String`, the item's `ServerId` when it carries one.
+    static let serverID = "serverID"
 }

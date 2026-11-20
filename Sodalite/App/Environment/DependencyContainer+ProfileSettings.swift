@@ -59,6 +59,8 @@ extension DependencyContainer {
         case .home(let h):
             ProfileHomeStore.apply(h, scope: key.storageScope)
             if key == activeProfileKey {
+                // Kept for the rows and layout: Home rebuilds from them.
+                refreshSessionRegistry()
                 NotificationCenter.default.post(name: .homeConfigDidChange, object: nil)
             }
         }

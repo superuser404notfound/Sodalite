@@ -19,7 +19,10 @@ struct CatalogDetailView: View {
     /// Withdrawing an existing request is the page's own action, not the draft's, and so is its error.
     @State private var showCancelRequestConfirm = false
     @State private var isCancellingRequest = false
-    @State private var cancelError: String?
+    /// Admin re-send of a request whose Radarr/Sonarr handover failed (Sodalite#210).
+    @State private var isRetryingRequest = false
+    /// Error of the page's own request actions, withdraw and retry.
+    @State private var requestActionError: String?
 
     /// Currently-viewed season; independent of the request set so the user can browse episodes without requesting.
     @State private var viewedSeasonNumber: Int?
@@ -37,6 +40,7 @@ struct CatalogDetailView: View {
     @State private var recommendations: [SeerrMedia] = []
     /// Rotten Tomatoes critics score, best-effort from Seerr's ratings endpoint; nil on older server / no RT data.
     @State private var rtCriticsScore: Int?
+    @State private var imdbRating: Double?
     @State private var navigateToMedia: SeerrMedia?
     @State private var selectedCastMember: CastMember?
     /// TMDB collection this movie belongs to; nil for standalone movies and for every series (Sodalite#52).
@@ -141,6 +145,8 @@ struct CatalogDetailView: View {
             DetailContentOverlay(
                 heroImageURL: SeerrImageURL.backdrop(path: backdropPath),
                 heroPosterURL: SeerrImageURL.poster(path: posterPath, size: .w780),
+                heroTallImageURL: SeerrImageURL.backdrop(path: backdropPath, size: .original),
+                portraitHero: true,
                 hero: {
                 heroTitle
             }, primary: {
@@ -243,7 +249,8 @@ struct CatalogDetailView: View {
                 runtimeMinutes: metadataRuntime,
                 year: nil,
                 certification: metadataCertification,
-                rtCriticsScore: rtCriticsScore
+                rtCriticsScore: rtCriticsScore,
+                imdbRating: imdbRating
             )
             if !genres.isEmpty {
                 Text(genres.map(\.name).joined(separator: " · "))
@@ -280,8 +287,14 @@ struct CatalogDetailView: View {
                     HStack(spacing: 16) { requestButtons }
                 }
 
-                if let cancelError {
-                    Text(cancelError)
+                if showsFailedHint {
+                    Label("catalog.request.failed.hint", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let requestActionError {
+                    Text(requestActionError)
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
@@ -316,6 +329,17 @@ struct CatalogDetailView: View {
         .focused($focusedField, equals: .request)
         .frame(maxWidth: isPhonePortrait ? .infinity : nil)
 
+        if canRetryFailedRequests {
+            GlassActionButton(
+                title: "home.retry",
+                systemImage: "arrow.clockwise",
+                isLoading: isRetryingRequest,
+                action: { Task { await retryFailedRequests() } }
+            )
+            .frame(maxWidth: isPhonePortrait ? .infinity : nil)
+            .focusSuppressed(overviewHasFocus && openRequests.isEmpty)
+        }
+
         // Only offered while a request is actually open. Jellyseerr never revisits a request once it stops moving (its availability sync looks at available titles only), so a title pulled out of Sonarr elsewhere keeps reporting a pipeline state with no way to clear it from here.
         if !openRequests.isEmpty {
             GlassActionButton(
@@ -336,12 +360,45 @@ struct CatalogDetailView: View {
         return (info?.requests ?? []).filter(\.isOpen)
     }
 
+    /// Requests whose Radarr/Sonarr handover failed. Jellyseerr keeps no reason for it, the cause is only in its server log, so the page can say what happened and, for an admin, send them again.
+    private var failedRequests: [SeerrRequest] {
+        let info = movieDetail?.mediaInfo ?? tvDetail?.mediaInfo
+        return (info?.requests ?? []).filter { $0.status == .failed }
+    }
+
+    /// A failure behind a title that has since arrived is history.
+    private var showsFailedHint: Bool {
+        !failedRequests.isEmpty && mediaStatus != .available
+    }
+
+    /// `POST /request/{id}/retry` needs MANAGE_REQUESTS, the same right the admin queue is gated on.
+    private var canRetryFailedRequests: Bool {
+        showsFailedHint && appState.activeSeerrUser?.canManageRequests == true
+    }
+
+    /// Re-sends every failed request; Jellyseerr flips each back to approved and hands it to Radarr/Sonarr again.
+    private func retryFailedRequests() async {
+        isRetryingRequest = true
+        defer { isRetryingRequest = false }
+        requestActionError = nil
+        do {
+            for request in failedRequests {
+                try await dependencies.seerrRequestService.retryRequest(requestID: request.id)
+            }
+        } catch {
+            requestActionError = ErrorText.user(for: error)
+        }
+        // Also after a partial failure: the requests already re-sent are approved now, and a second press on stale state would only earn a 409 for them.
+        NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
+        await refreshDetailAfterRequest()
+    }
+
     /// Deletes every open request for this title, then refreshes so the chips drop their pipeline state.
     /// Jellyseerr rejects this with 403 for a user who may not touch the request; that message is surfaced rather than swallowed, since the row stays visible and the user would otherwise retry forever.
     private func cancelOpenRequests() async {
         isCancellingRequest = true
         defer { isCancellingRequest = false }
-        cancelError = nil
+        requestActionError = nil
         do {
             for request in openRequests {
                 try await dependencies.seerrRequestService.deleteRequest(requestID: request.id)
@@ -350,7 +407,7 @@ struct CatalogDetailView: View {
             NotificationCenter.default.post(name: .seerrRequestsDidChange, object: nil)
             await refreshDetailAfterRequest()
         } catch {
-            cancelError = ErrorText.user(for: error)
+            requestActionError = ErrorText.user(for: error)
         }
     }
 
@@ -580,7 +637,8 @@ struct CatalogDetailView: View {
     }
 
     private var mediaStatus: SeerrMediaStatus? {
-        let seerr = movieDetail?.mediaInfo?.status ?? tvDetail?.mediaInfo?.status ?? media.mediaInfo?.status
+        let info = movieDetail?.mediaInfo ?? tvDetail?.mediaInfo ?? media.mediaInfo
+        let seerr = info?.displayStatus
         // Jellyfin ground truth: the whole title is gone, so override Seerr's stale "available" badge with .deleted.
         if (seerr == .available || seerr == .partiallyAvailable), titlePresence == .absent {
             return .deleted
@@ -790,36 +848,24 @@ struct CatalogDetailView: View {
     }
 
     private func loadRecommendations() async {
-        let service = dependencies.seerrMediaService
-        do {
-            // Titles the server already has are dropped: this row is the catalog, and what is on the
-            // server belongs on its own detail page, not behind a request button (Vincent, 2026-08-17).
-            // The filter runs before the empty check, so a wall of owned recommendations falls through
-            // to similar instead of leaving the row looking short for no reason.
-            let recs = SeerrLibraryDedupe.droppingAvailable(
-                try await service.recommendations(mediaType: media.mediaType, tmdbID: media.id)
-            )
-            if !recs.isEmpty {
-                recommendations = recs
-                return
-            }
-            recommendations = SeerrLibraryDedupe.droppingAvailable(
-                try await service.similar(mediaType: media.mediaType, tmdbID: media.id)
-            )
-        } catch {
-            // Best-effort: leave the row absent, no banner.
-        }
+        // Titles the server already has are dropped: this row is the catalog, and what is on the
+        // server belongs on its own detail page, not behind a request button (Vincent, 2026-08-17).
+        // A wall of owned recommendations, or a failing endpoint, falls through to similar.
+        recommendations = await SeerrLibraryDedupe.suggestions(
+            service: dependencies.seerrMediaService, mediaType: media.mediaType, tmdbID: media.id)
     }
 
     private func loadRatings() async {
-        // Nothing to draw, nothing to ask for (Sodalite#127).
-        guard dependencies.appearancePreferences.showCriticRating else { return }
-        // Best-effort: the ratings endpoint 404s on older servers or when no
-        // RT data exists, leave the badge absent in that case.
-        guard let rt = try? await dependencies.seerrMediaService.ratings(
+        // Nothing to draw, nothing to ask for (Sodalite#127). IMDb counts as a community score.
+        let prefs = dependencies.appearancePreferences
+        let wantsIMDb = prefs.showCommunityRating && media.mediaType == .movie
+        guard prefs.showCriticRating || wantsIMDb else { return }
+        // Best-effort: the endpoint 404s when Seerr found neither score, leave the badges absent then.
+        guard let ratings = try? await dependencies.seerrMediaService.ratings(
             mediaType: media.mediaType, tmdbID: media.id
         ) else { return }
-        if let score = rt.criticsScore { rtCriticsScore = score }
+        if let score = ratings.rt?.criticsScore { rtCriticsScore = score }
+        if let score = ratings.imdb?.criticsScore { imdbRating = score }
     }
 
     /// Light refresh after a successful request: replaces only the mediaInfo-carrying detail (badges/chips pick up pending state); tab selection and episode lists stay untouched. NOT load(): that flips the full-screen loading state and re-runs config/recommendations.

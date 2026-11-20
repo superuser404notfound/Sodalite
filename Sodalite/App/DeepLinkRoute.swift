@@ -1,10 +1,12 @@
 import Foundation
 
 /// The `sodalite://` links the Top Shelf emits. `item` is the cell's displayAction (Select),
-/// `play` its playAction (the remote's Play button).
+/// `play` its playAction (the remote's Play button). `?server=` names the server of a combined
+/// shelf's item that is not on the active one (Sodalite#218).
 struct DeepLinkRoute: Equatable {
     let itemID: String
     let autoPlay: Bool
+    var serverID: String? = nil
 
     static func parse(_ url: URL) -> DeepLinkRoute? {
         guard url.scheme == "sodalite" else { return nil }
@@ -16,7 +18,12 @@ struct DeepLinkRoute: Equatable {
         }
         let id = url.pathComponents.dropFirst().first ?? ""
         guard isItemID(id) else { return nil }
-        return DeepLinkRoute(itemID: id, autoPlay: autoPlay)
+        let server = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first { $0.name == "server" }?.value
+        // A server id is the same 32-digit GUID shape, and is checked as strictly: it picks the
+        // session the request goes out on.
+        if let server, !isItemID(server) { return nil }
+        return DeepLinkRoute(itemID: id, autoPlay: autoPlay, serverID: server)
     }
 
     /// A Jellyfin item id is a GUID: 32 hex digits, dashed or not. Checked here rather than left to

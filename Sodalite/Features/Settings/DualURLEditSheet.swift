@@ -13,7 +13,7 @@ struct DualURLEditSheet: View {
     let externalPlaceholder: LocalizedStringKey
     let initialInternalURL: URL?
     let initialExternalURL: URL?
-    let resolve: @Sendable (String) async -> URL?
+    let resolve: ServerAddressResolution.Discover
     let onSave: (URL?, URL?) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -33,18 +33,14 @@ struct DualURLEditSheet: View {
             Form {
                 Section {
                     TextField(internalPlaceholder, text: $internalText)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                        .verbatimTextEntry(.url)
                         .disabled(isValidating)
                 } header: {
                     Text("multiServer.urls.internal", bundle: .main)
                 }
                 Section {
                     TextField(externalPlaceholder, text: $externalText)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                        .verbatimTextEntry(.url)
                         .disabled(isValidating)
                 } header: {
                     Text("multiServer.urls.external", bundle: .main)
@@ -60,7 +56,7 @@ struct DualURLEditSheet: View {
             }
             .scrollContentBackground(.hidden)
             .navigationTitle(Text(title, bundle: .main))
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("common.cancel") { dismiss() }
@@ -115,6 +111,9 @@ struct DualURLEditSheet: View {
             case .unresolved:
                 // Name the field that failed: with two of them, "that address" is a guess.
                 validationError = "multiServer.urls.invalid \(text.trimmingCharacters(in: .whitespacesAndNewlines))"
+                return
+            case .otherServer(let url):
+                validationError = "multiServer.urls.otherServer \(url.host() ?? url.absoluteString)"
                 return
             }
         }

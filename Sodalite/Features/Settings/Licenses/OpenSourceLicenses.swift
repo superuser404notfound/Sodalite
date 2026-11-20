@@ -60,6 +60,13 @@ enum OpenSourceLicenses {
             textResource: "LicenseText-MIT"
         ),
         OpenSourceComponent(
+            name: "LibTrueHD (truehd, oamd)",
+            licenseName: "MIT, Apache-2.0",
+            url: "https://github.com/superuser404notfound/LibTrueHD",
+            notice: "Copyright (c) 2026 Quick104 and Vincent Herbst (MIT). Includes the truehd and oamd crates from the truehdd project, Copyright Rainbaby and the truehdd contributors, under the Apache License 2.0.",
+            textResource: "LicenseText-LibTrueHD"
+        ),
+        OpenSourceComponent(
             name: "SwiftAssRenderer",
             licenseName: "MIT",
             url: "https://github.com/mihai8804858/swift-ass-renderer",

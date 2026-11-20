@@ -245,6 +245,23 @@ struct LiveTransportLabelTests {
             isAtLiveEdge: false, behindLiveSeconds: 30, playheadWallClock: at) == "-0:30")
     }
 
+    /// Sodalite#233: the tvOS slot leaves the time to the knob clock and takes it back where that
+    /// clock steps aside, so both must read one rule.
+    @Test("the knob clock steps aside within 22% of either end")
+    func theKnobClockStepsAsideNearTheEnds() {
+        let tv: CGFloat = 1680
+        #expect(LiveRailLabels.showsPlayheadClock(progress: 0.5, width: tv))
+        #expect(LiveRailLabels.showsPlayheadClock(progress: 0.25, width: tv))
+        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.1, width: tv))
+        #expect(!LiveRailLabels.showsPlayheadClock(progress: 0.9, width: tv))
+        // Before the rail has been measured the share alone decides, so the slot does not flash the
+        // time on the first frame of every appearance (round 2) and agrees with the measured answer.
+        for progress: Float in [0.05, 0.21, 0.25, 0.5, 0.77, 0.9] {
+            #expect(LiveRailLabels.showsPlayheadClock(progress: progress, width: 0)
+                    == LiveRailLabels.showsPlayheadClock(progress: progress, width: tv))
+        }
+    }
+
     @Test("both bars format a wall clock the same way")
     func oneClockFormat() {
         let at = Date(timeIntervalSinceReferenceDate: 800_000_000)
@@ -359,6 +376,37 @@ struct LiveProgramMetadataTests {
         #expect(lines.header == "NOVA Science")
         #expect(lines.subtitle == "S52, E3 · Chasing Carbon")
     }
+
+    private func decodedProgram(_ fields: String) throws -> JellyfinProgram {
+        let json = "{\"Id\":\"p\",\"Name\":\"Heat\",\(fields)}"
+        return try JSONDecoder().decode(JellyfinProgram.self, from: Data(json.utf8))
+    }
+
+    @Test("a live movie reads name over year, like a stored one (Sodalite#159)")
+    func aliveMovieCarriesItsYear() throws {
+        let program = try decodedProgram("\"IsMovie\":true,\"ProductionYear\":1995")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == "1995")
+        #expect(program.identityLabel == "1995")
+    }
+
+    @Test("the year of anything but a movie is an air date and stays off screen (Sodalite#159)")
+    func anonMovieYearIsIgnored() throws {
+        let program = try decodedProgram("\"IsSeries\":true,\"ProductionYear\":2024")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == nil)
+        #expect(program.identityLabel == nil)
+    }
+
+    @Test("a movie with no year in the guide still reads as itself (Sodalite#159)")
+    func amovieWithoutAYearIsOneLine() throws {
+        let program = try decodedProgram("\"IsMovie\":true")
+        let lines = PlayerTitleLines(item: JellyfinItem(liveChannel: channel, program: program))
+        #expect(lines.header == "Heat")
+        #expect(lines.subtitle == nil)
+    }
 }
 
 /// Sodalite#159: the player draws its title on three surfaces, and only one of them ran the second
@@ -400,12 +448,12 @@ struct PlayerTitleLinesTests {
 
 /// Sodalite#104: left and right on the d-pad already did two different things, and the bar drew them
 /// identically. A press is a discrete step whose destination is known before it lands; a hold is a
-/// scan ramping 15x to 240x that you stop when the picture looks right, and nothing about it is
+/// scan doubling 2x to 128x that you stop when the picture looks right, and nothing about it is
 /// countable, so a fixed-interval glyph over it would be a lie.
 @Suite("The two seek gestures speak two languages (Sodalite#104)")
 struct SeekReadoutTests {
 
-    @Test("a burst of presses counts itself")
+    @Test("a burst of presses keeps its count, which the readout turns into a distance")
     func abursCounts() {
         var readout: SeekReadout = .press(seconds: 10, count: 1, direction: -1)
         // Three more presses of the same interval, the same way.
@@ -419,17 +467,88 @@ struct SeekReadoutTests {
     @Test("the side of travel is what puts the glyph beside the clock")
     func directionIsCarried() {
         #expect(SeekReadout.press(seconds: 30, count: 1, direction: 1).direction == 1)
-        #expect(SeekReadout.hold(rate: 96, direction: -1).direction == -1)
+        #expect(SeekReadout.hold(rate: 64, direction: -1).direction == -1)
     }
 
     @Test("a hold names a rate, and a press never does")
     func thetwoAreNotTheSameShape() {
-        #expect(SeekReadout.hold(rate: 96, direction: 1) != SeekReadout.press(seconds: 96, count: 1, direction: 1))
-        // The rate the continuous scan ramps through, which has no countable step in it.
-        for held in stride(from: 0.0, through: 10.0, by: 0.5) {
-            let rate = min(15 + held * 26, 240)
-            #expect(rate >= 15 && rate <= 240)
-        }
+        #expect(SeekReadout.hold(rate: 64, direction: 1) != SeekReadout.press(seconds: 64, count: 1, direction: 1))
+    }
+
+    /// Sodalite#186 round 3: the doubling ladder from 2x took 19 s over a 24-minute episode. Three
+    /// stages from 8x, a fourth only on a film long enough to want it.
+    @Test("a scan steps 8x, 32x, 128x, and 256x only on a long film")
+    func scanLadder() {
+        #expect(SeekReadout.scanRates(durationSeconds: 24 * 60) == [8, 32, 128])
+        #expect(SeekReadout.scanRates(durationSeconds: 0) == [8, 32, 128])
+        #expect(SeekReadout.scanRates(durationSeconds: 2 * 3600) == [8, 32, 128, 256])
+        #expect(SeekReadout.holdStageFraction(8) == 0)
+        #expect(SeekReadout.holdStageFraction(256) == 1)
+    }
+
+    @Test("a held scan climbs a stage every 1.5 s and stops at the top")
+    func heldScanClimbs() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.tick(at: t0.advanced(by: .seconds(1.49)))
+        #expect(scan.rate == 8)
+        scan.tick(at: t0.advanced(by: .seconds(1.5)))
+        #expect(scan.rate == 32)
+        scan.tick(at: t0.advanced(by: .seconds(600)))
+        #expect(scan.rate == 128)
+    }
+
+    @Test("letting go keeps the scan at the stage it reached")
+    func releaseLatches() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0.advanced(by: .seconds(2)))
+        #expect(!scan.isHeld)
+        scan.tick(at: t0.advanced(by: .seconds(60)))
+        #expect(scan.rate == 32)
+    }
+
+    @Test("presses step up, step down, and turn the scan around from the bottom")
+    func pressesSteer() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0)
+        scan.press(direction: 1, at: t0)
+        scan.press(direction: 1, at: t0)
+        scan.press(direction: 1, at: t0)
+        #expect(scan.rate == 128)
+        scan.press(direction: -1, at: t0)
+        scan.press(direction: -1, at: t0)
+        #expect(scan.rate == 8)
+        #expect(scan.direction == 1)
+        scan.press(direction: -1, at: t0)
+        #expect(scan.rate == 8)
+        #expect(scan.direction == -1)
+    }
+
+    @Test("a hold the other way turns a latched scan around from the bottom stage")
+    func holdReverses() {
+        let t0 = ContinuousClock.now
+        var scan = SeekScan(rates: [8, 32, 128], direction: 1, heldAt: t0)
+        scan.release(at: t0.advanced(by: .seconds(4)))
+        #expect(scan.rate == 128)
+        scan.hold(direction: -1, at: t0.advanced(by: .seconds(5)))
+        #expect(scan.direction == -1)
+        #expect(scan.rate == 8)
+        scan.tick(at: t0.advanced(by: .seconds(6.5)))
+        #expect(scan.rate == 32)
+    }
+
+    /// Sodalite#186: a burst says how far it went, signed, so "4x" can no longer read as a fifth speed.
+    @Test("a burst names the distance it covered, not how many presses it took")
+    func aBurstNamesItsDistance() {
+        let forward = SeekReadout.burstTotal(seconds: 10, count: 4, direction: 1)
+        let back = SeekReadout.burstTotal(seconds: 30, count: 3, direction: -1)
+        #expect(forward.hasPrefix("+"))
+        #expect(forward.contains("40"))
+        #expect(!forward.contains("x"))
+        #expect(back.hasPrefix("\u{2212}"))
+        #expect(back.contains("1"))
     }
 
     @Test("every skip interval the settings offer has a glyph to draw it with")
@@ -542,19 +661,29 @@ struct LiveNextUpTests {
 
     @Test("a programme still to come is named with how long until it starts")
     func aprogrammeIsCounted() {
-        // Spelled the way the locale spells a duration, which past an hour is hours AND minutes
-        // rather than a hundred-odd minutes ("In 1 hour and 41 minutes: The OT").
+        // Spelled like every duration in the app, which past an hour is hours AND minutes rather
+        // than a hundred-odd minutes ("In 1h 41m: The OT", Sodalite#165).
         let text = LiveNextUpLine.text(name: "The OT", startsIn: 101 * 60)
         #expect(text.contains("The OT"))
         #expect(text.contains("1"))
         #expect(text.contains("41"))
     }
 
-    @Test("a programme about to start drops the countdown rather than saying zero")
-    func aboutToStartIsNamedWithoutANumber() {
+    @Test("the last minute of the countdown reads one minute, never zero")
+    func aboutToStartCountsItsLastMinute() {
         let text = LiveNextUpLine.text(name: "The OT", startsIn: 20)
         #expect(text.contains("The OT"))
-        #expect(!text.contains("0 "))
+        #expect(text.contains("1") && !text.contains("0"))
+    }
+
+    @Test("a programme that has started is named without a number")
+    func startedIsNamedWithoutANumber() {
+        for seconds: TimeInterval in [0, -5] {
+            let text = LiveNextUpLine.text(name: "The OT", startsIn: seconds)
+            #expect(text.contains("The OT"))
+            let hasDigit = text.contains { $0.isNumber }
+            #expect(!hasDigit, "\(text)")
+        }
     }
 }
 

@@ -26,6 +26,7 @@ struct DetailViewModelFavoriteTests {
             throw ServiceFailure()
         }
         func getLocalTrailers(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
+        func getSpecialFeatures(userID: String, itemID: String) async throws -> [JellyfinItem] { [] }
         func getSeasons(seriesID: String, userID: String) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }
@@ -35,7 +36,16 @@ struct DetailViewModelFavoriteTests {
         func getSimilarItems(itemID: String, userID: String, limit: Int) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }
+        func getPlaylistItems(playlistID: String, userID: String, startIndex: Int, limit: Int) async throws -> JellyfinItemsResponse {
+            throw ServiceFailure()
+        }
         func setPlayed(userID: String, itemID: String, isPlayed: Bool) async throws {}
+        var ratingCalls: [(itemID: String, rating: Double?)] = []
+        func setRating(userID: String, itemID: String, rating: Double?) async throws {
+            if shouldThrow { throw ServiceFailure() }
+            ratingCalls.append((itemID, rating))
+        }
+        func clearPlaybackPosition(userID: String, itemID: String) async throws {}
         func getCollectionItems(userID: String, query: ItemQuery) async throws -> JellyfinItemsResponse {
             throw ServiceFailure()
         }

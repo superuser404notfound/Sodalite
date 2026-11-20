@@ -4,6 +4,150 @@ import Foundation
 /// WhatsNewView fires once on first launch after update; group highlights by kind (.new / .improve / .fix).
 enum Changelog {
     static let entries: [ChangelogEntry] = [
+        // MARK: 1.1.0
+        ChangelogEntry(
+            version: "1.1.0",
+            highlights: [
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.mac.title",
+                    "changelog.1_1_0.mac.body",
+                    icon: "macbook"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.combinedServers.title",
+                    "changelog.1_1_0.combinedServers.body",
+                    icon: "square.stack.3d.up.fill"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.offlineDownloads.title",
+                    "changelog.1_1_0.offlineDownloads.body",
+                    icon: "arrow.down.circle"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.trakt.title",
+                    "changelog.1_1_0.trakt.body",
+                    icon: "arrow.triangle.2.circlepath"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.home.title",
+                    "changelog.1_1_0.home.body",
+                    icon: "rectangle.topthird.inset.filled"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.cards.title",
+                    "changelog.1_1_0.cards.body",
+                    icon: "contextualmenu.and.cursorarrow"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.libraries.title",
+                    "changelog.1_1_0.libraries.body",
+                    icon: "rectangle.stack"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.detailPages.title",
+                    "changelog.1_1_0.detailPages.body",
+                    icon: "popcorn.fill"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.sound.title",
+                    "changelog.1_1_0.sound.body",
+                    icon: "speaker.wave.3"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.picture.title",
+                    "changelog.1_1_0.picture.body",
+                    icon: "wand.and.sparkles"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.controls.title",
+                    "changelog.1_1_0.controls.body",
+                    icon: "slider.horizontal.below.rectangle"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.scrubbing.title",
+                    "changelog.1_1_0.scrubbing.body",
+                    icon: "forward.fill"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.playbackChoices.title",
+                    "changelog.1_1_0.playbackChoices.body",
+                    icon: "dial.medium"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.liveTV.title",
+                    "changelog.1_1_0.liveTV.body",
+                    icon: "tv"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.guide.title",
+                    "changelog.1_1_0.guide.body",
+                    icon: "line.3.horizontal.decrease.circle"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.multiview.title",
+                    "changelog.1_1_0.multiview.body",
+                    icon: "rectangle.split.2x2"
+                ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_1_0.requests.title",
+                    "changelog.1_1_0.requests.body",
+                    icon: "bell.badge"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.profiles.title",
+                    "changelog.1_1_0.profiles.body",
+                    icon: "person.2"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.appleTVNavigation.title",
+                    "changelog.1_1_0.appleTVNavigation.body",
+                    icon: "appletv"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.signIn.title",
+                    "changelog.1_1_0.signIn.body",
+                    icon: "person.badge.key"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.iPhoneAndIPad.title",
+                    "changelog.1_1_0.iPhoneAndIPad.body",
+                    icon: "iphone"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.look.title",
+                    "changelog.1_1_0.look.body",
+                    icon: "paintpalette.fill"
+                ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_1_0.smallThings.title",
+                    "changelog.1_1_0.smallThings.body",
+                    icon: "sparkles"
+                ),
+            ]
+        ),
         // MARK: 1.0.0
         ChangelogEntry(
             version: "1.0.0",

@@ -7,7 +7,7 @@ import SwiftUI
 struct AddSecondURLSheet: View {
     let slot: ServerRoute
     let knownURL: URL
-    let resolve: @Sendable (String) async -> URL?
+    let resolve: ServerAddressResolution.Discover
     let onSave: (URL) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -40,9 +40,7 @@ struct AddSecondURLSheet: View {
                 }
                 Section {
                     TextField(placeholder, text: $urlText)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                        .verbatimTextEntry(.url)
                         .disabled(isValidating)
                 } footer: {
                     Text("multiServer.addURL.footer", bundle: .main)
@@ -56,7 +54,7 @@ struct AddSecondURLSheet: View {
             }
             .scrollContentBackground(.hidden)
             .navigationTitle(Text(title, bundle: .main))
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("common.cancel") { dismiss() }
@@ -95,6 +93,8 @@ struct AddSecondURLSheet: View {
             validationError = "multiServer.urls.atLeastOne"
         case .unresolved:
             validationError = "multiServer.urls.invalid \(typed)"
+        case .otherServer(let url):
+            validationError = "multiServer.urls.otherServer \(url.host() ?? url.absoluteString)"
         case .resolved(let url):
             pendingURL = url
             // Show what discovery settled on rather than the shorthand that produced it.

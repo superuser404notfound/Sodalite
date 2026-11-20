@@ -5,6 +5,7 @@ enum HomeSection: Identifiable {
     case tags(HomeTagRowData)
     case discoverProviders
     case libraries([JellyfinLibrary])
+    case trakt(TraktHomeRowData)
 
     var id: String {
         switch self {
@@ -12,6 +13,7 @@ enum HomeSection: Identifiable {
         case .tags(let data): data.id
         case .discoverProviders: "discoverProviders"
         case .libraries: "myMedia"
+        case .trakt(let data): "trakt-\(data.id)"
         }
     }
 }
@@ -22,8 +24,13 @@ struct HomeRowData: Identifiable, Sendable, Codable {
     var items: [JellyfinItem]
     var libraryID: String? = nil
     var libraryName: String? = nil
+    /// The server a per-library row belongs to; nil on a row merged from several (Sodalite#85).
+    var serverID: String? = nil
+    /// The library's `CollectionType` on a per-library row: "boxsets" makes it a collection shelf
+    /// titled with the library's own name rather than "Latest in".
+    var collectionType: String? = nil
 
-    /// Ids are unique here, first occurrence wins, because the row renders through `ForEach(items)`
+    /// Ids are unique here (per server, `originKey`), first occurrence wins, because the row renders through `ForEach(items)`
     /// and SwiftUI gives undefined layout when two children claim one identity: the second one
     /// reserves its slot in the LazyHStack and draws nothing (measured on device: two blank cards
     /// mid-row in Latest Series). It is the row builder that can produce a repeat, not the caller's mistake:
@@ -34,13 +41,17 @@ struct HomeRowData: Identifiable, Sendable, Codable {
         type: HomeRowType,
         items: [JellyfinItem],
         libraryID: String? = nil,
-        libraryName: String? = nil
+        libraryName: String? = nil,
+        serverID: String? = nil,
+        collectionType: String? = nil
     ) {
         self.type = type
         var seen = Set<String>()
-        self.items = items.filter { seen.insert($0.id).inserted }
+        self.items = items.filter { seen.insert($0.originKey).inserted }
         self.libraryID = libraryID
         self.libraryName = libraryName
+        self.serverID = serverID
+        self.collectionType = collectionType
     }
 
     /// Decoding routes through the init above instead of filling the properties directly, so a feed
@@ -53,9 +64,13 @@ struct HomeRowData: Identifiable, Sendable, Codable {
             type: try container.decode(HomeRowType.self, forKey: .type),
             items: try container.decode([JellyfinItem].self, forKey: .items),
             libraryID: try container.decodeIfPresent(String.self, forKey: .libraryID),
-            libraryName: try container.decodeIfPresent(String.self, forKey: .libraryName)
+            libraryName: try container.decodeIfPresent(String.self, forKey: .libraryName),
+            serverID: try container.decodeIfPresent(String.self, forKey: .serverID),
+            collectionType: try container.decodeIfPresent(String.self, forKey: .collectionType)
         )
     }
+
+    var isCollectionShelf: Bool { type == .libraryLatest && collectionType == "boxsets" }
 
     var id: String {
         if type == .libraryLatest, let libraryID {

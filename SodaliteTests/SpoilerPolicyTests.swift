@@ -32,7 +32,8 @@ struct SpoilerPolicyTests {
         episodes: Bool = true,
         movies: Bool = true,
         revealed: Set<String> = [],
-        overrides: [String: Bool] = [:]
+        overrides: [String: Bool] = [:],
+        titles: Bool = false
     ) -> SpoilerPolicy {
         SpoilerPolicy(
             enabled: enabled,
@@ -40,7 +41,8 @@ struct SpoilerPolicyTests {
             hideMovies: movies,
             userID: "u1",
             revealedKeys: revealed,
-            seriesOverrides: overrides
+            seriesOverrides: overrides,
+            hideEpisodeTitles: titles
         )
     }
 
@@ -113,6 +115,22 @@ struct SpoilerPolicyTests {
         let key = SpoilerPolicy.key(userID: "u1", itemID: "i1")
         #expect(!policy(revealed: [key]).isHidden(try item(id: "i1")))
         #expect(policy(revealed: [key]).isHidden(try item(id: "i2")))
+    }
+
+    @Test("only a reveal by hand can be hidden again, not a watched or started episode (Sodalite#222)")
+    func manuallyRevealed() throws {
+        let p = policy(revealed: ["u1|i1"])
+        #expect(p.isManuallyRevealed(try item()))
+        #expect(!p.isManuallyRevealed(try item(played: true)))
+        #expect(!p.isManuallyRevealed(try item(percentage: 40)))
+        #expect(!policy().isManuallyRevealed(try item()))
+        #expect(!policy(enabled: false, revealed: ["u1|i1"]).isManuallyRevealed(try item()))
+    }
+
+    @Test("a revealed episode under a hidden series rule can be hidden again (Sodalite#222)")
+    func manuallyRevealedUnderHiddenRule() throws {
+        let p = policy(enabled: false, revealed: ["u1|i1"], overrides: ["u1|s1": true])
+        #expect(p.isManuallyRevealed(try item(seriesID: "s1")))
     }
 
     @Test("the key is scoped per user and per item, not per series")
@@ -222,5 +240,38 @@ struct SpoilerPolicyTests {
         #expect(policy().effectiveHidesSeries("s1"))
         #expect(!policy(overrides: ["u1|s1": false]).effectiveHidesSeries("s1"))
         #expect(!policy(episodes: false).effectiveHidesSeries("s1"))
+    }
+
+    @Test("an episode title stays visible unless its own switch is on")
+    func titleNeedsItsOwnSwitch() throws {
+        let episode = try item()
+        #expect(policy().isHidden(episode, surface: .text))
+        #expect(!policy().isHidden(episode, surface: .title))
+        #expect(policy().visibleTitle(of: episode) == "N")
+        #expect(policy(titles: true).isHidden(episode, surface: .title))
+        #expect(policy(titles: true).visibleTitle(of: episode) == nil)
+    }
+
+    @Test("only an episode title is covered, never a movie, season or series name")
+    func titleIsEpisodeOnly() throws {
+        for type in ["Movie", "Season", "Series"] {
+            #expect(!policy(titles: true).isHidden(try item(type: type, seriesID: "s1", childCount: 2, unplayed: 2), surface: .title))
+        }
+    }
+
+    @Test("a per-series rule covers one show's titles while the global switch is off")
+    func titleRidesSeriesRule() throws {
+        let p = policy(enabled: false, overrides: ["u1|s1": true], titles: true)
+        #expect(p.visibleTitle(of: try item(seriesID: "s1")) == nil)
+        #expect(p.visibleTitle(of: try item(seriesID: "s2")) == "N")
+    }
+
+    @Test("the reveal rules uncover a title like they uncover the rest")
+    func titleReveals() throws {
+        let p = policy(titles: true)
+        #expect(p.visibleTitle(of: try item(played: true)) == "N")
+        #expect(p.visibleTitle(of: try item(percentage: 12)) == "N")
+        #expect(policy(revealed: ["u1|i1"], titles: true).visibleTitle(of: try item()) == "N")
+        #expect(!policy(overrides: ["u1|s1": false], titles: true).isHidden(try item(seriesID: "s1"), surface: .title))
     }
 }

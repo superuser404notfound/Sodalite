@@ -6,6 +6,8 @@ struct RecordingsView: View {
     @Environment(\.appState) private var appState
     @Environment(\.dependencies) private var dependencies
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    @Environment(\.serverSession) private var serverSessionOverride
+    @Environment(\.liveTVPolicy) private var liveTVPolicy
     let model: RecordingsViewModel
     let tint: Color
 
@@ -14,15 +16,22 @@ struct RecordingsView: View {
     @State private var recordingToDelete: JellyfinItem?
 
     private var imageService: JellyfinImageService { dependencies.jellyfinImageService }
+    /// The server the Live TV tab runs against (Sodalite#85).
+    private var session: ServerSession { serverSessionOverride ?? dependencies.sessionRegistry.active }
+    private var sessionUserID: String? { session.isActive ? dependencies.activeUserID : session.userID }
     private var metrics: LayoutMetrics { LayoutMetrics.current(hSizeClass) }
 
     /// Same rule as the detail pages: the server's own CanDelete (it knows a DVR-only deletion grant),
     /// else the account policy.
     private func canDelete(_ item: JellyfinItem) -> Bool {
-        item.canDelete ?? (appState.activeUser?.canDeleteContent == true)
+        item.canDelete ?? policy.canDeleteContent
     }
 
-    private var canManageLiveTv: Bool { appState.activeUser?.canManageLiveTv == true }
+    private var canManageLiveTv: Bool { policy.canManageLiveTv }
+
+    private var policy: LiveTVPolicy {
+        liveTVPolicy ?? LiveTVPolicy(isActiveSource: true, activeUser: appState.activeUser, sessionUser: nil)
+    }
 
     /// tvOS/iPad keep the fixed 4-column grid; compact goes adaptive so landscape tiles fit ~2-up
     /// on a phone (the poster-scaled gridMinimum would pack three cramped columns).
@@ -44,15 +53,16 @@ struct RecordingsView: View {
             .padding(.horizontal, hSizeClass == .compact ? metrics.gridInset : 80)
             .padding(.vertical, hSizeClass == .compact ? 24 : 40)
         }
+        .drivesShellBar()
         .task { await model.load() }
         .overlay {
-            if let userID = dependencies.activeUserID {
+            if let userID = sessionUserID {
                 PlayerLauncher(
                     isPresented: $isPlayerPresented,
                     item: playerItem,
                     startFromBeginning: false,
-                    playbackService: dependencies.jellyfinPlaybackService,
-                    itemService: dependencies.jellyfinItemService,
+                    playbackService: session.playbackService,
+                    itemService: session.itemService,
                     userID: userID,
                     preferences: dependencies.playbackPreferences,
                     trackMemory: dependencies.trackSelectionMemory,
@@ -104,7 +114,7 @@ struct RecordingsView: View {
                     RecordingCard(
                         item: item,
                         imageURL: imageService.imageURL(
-                            itemID: item.id, imageType: .primary,
+                            itemID: item.id, serverID: item.serverID, imageType: .primary,
                             tag: item.imageTags?.primary, maxWidth: ImageWidth.wideCard),
                         isInProgress: model.isInProgress(item),
                         tint: tint,
@@ -186,12 +196,10 @@ private struct RecordingCard: View {
         hSizeClass == .compact ? LayoutMetrics.current(hSizeClass).landscapeSize.height : 180
     }
 
-    /// "92 min" runtime; JellyfinItem has no display-ready date (premiereDate is a raw string), so runtime stands in.
+    /// "1h 32m" runtime; JellyfinItem has no display-ready date (premiereDate is a raw string), so runtime stands in.
     private var runtimeLabel: String? {
         guard let ticks = item.runTimeTicks, ticks > 0 else { return nil }
-        let minutes = Int(ticks / 600_000_000)
-        guard minutes > 0 else { return nil }
-        return "\(minutes) min"
+        return ticks.ticksToDurationDisplay
     }
 
     var body: some View {
@@ -220,7 +228,7 @@ private struct RecordingCard: View {
                 }
             }
             .focusResponse(.card.flat, isFocused: focused)
-            .focusable()
+            .focusableSurface()
             .focused($focused)
             .stableTap(isFocused: focused) { onPlay() }
 
@@ -237,7 +245,7 @@ private struct RecordingCard: View {
                         .foregroundStyle(deleteFocused ? Color.black : .secondary)
                         .padding(8)
                         .background(Circle().fill(deleteFocused ? AnyShapeStyle(tint) : AnyShapeStyle(Color.clear)))
-                        .focusable()
+                        .focusableSurface()
                         .focused($deleteFocused)
                         .stableTap(isFocused: deleteFocused) { onDelete() }
                 }
@@ -279,8 +287,8 @@ private struct TimerRow: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 20)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(focused ? 0.10 : 0.04)))
-        .focusable()
+        .background(RoundedRectangle(cornerRadius: 10).fill(focused ? Color.Theme.focusFill : Color.Theme.restFillFaint))
+        .focusableSurface()
         .focused($focused)
         .stableTap(isFocused: focused) { onCancel?() }
     }

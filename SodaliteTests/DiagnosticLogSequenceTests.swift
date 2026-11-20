@@ -44,11 +44,9 @@ struct DiagnosticLogSequenceTests {
     @MainActor
     @Test("LogTap's sequenceNumber keeps climbing after lines.count pins at the ring cap")
     func sequenceNumberOutlivesTheRingCap() async throws {
-        let tap = LogTap.shared
-        tap.clear()
-        // clear() hops to the main queue; let that drain before asserting the reset landed.
-        await Task.yield()
-        try await Task.sleep(for: .milliseconds(50))
+        // Its own instance: the shared one also takes every line the app host and the tests running
+        // alongside this one note, and one of those landing mid-count made this read 311.
+        let tap = LogTap()
         #expect(tap.sequenceNumber == 0)
 
         for index in 0..<310 {
@@ -60,7 +58,5 @@ struct DiagnosticLogSequenceTests {
 
         #expect(tap.lines.count == 300, "the ring should have capped at 300")
         #expect(tap.sequenceNumber == 310, "sequenceNumber should count every append, not just what's buffered")
-
-        tap.clear()
     }
 }

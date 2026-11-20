@@ -20,15 +20,27 @@ struct DetailHeroSynopsis: View {
     /// Sodalite#50. The teaser is veiled by exactly the same rule as the box below the fold, or a
     /// hidden episode synopsis would simply be printed one screen higher.
     var spoilerItem: JellyfinItem?
+    /// What a tap on the teaser does on touch: the page's More Details action, so the truncated
+    /// text is not a dead end. tvOS leaves the panel outside the focus engine and ignores it.
+    var onTap: (() -> Void)?
+    /// The upright iPhone's placement under the action row (Blexbi): the page scrolls freely there,
+    /// so a tap opens the whole text in place instead of leaving for More Details. The reserved
+    /// lines still hold while it is closed, which is what keeps the buttons above it still.
+    var expandsInPlace = false
+
+    @State private var isExpanded = false
 
     @Environment(\.verticalSizeClass) private var vSizeClass
+    @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.dependencies) private var dependencies
     @Environment(\.appState) private var appState
 
     /// Two lines in a short viewport (iPhone landscape), where the first page is not viewport-locked
-    /// and every added line pushes the action row further past the fold.
+    /// and every added line pushes the action row further past the fold, and in the upright
+    /// iPhone's column, which shares its first screen with the poster. The rest is behind the info
+    /// button.
     private var lineCount: Int {
-        vSizeClass == .compact ? 2 : 3
+        vSizeClass == .compact || hSizeClass == .compact ? 2 : 3
     }
 
     private var isSpoilerHidden: Bool {
@@ -41,10 +53,22 @@ struct DetailHeroSynopsis: View {
             Text(text)
                 .font(.body)
                 .foregroundStyle(.secondary)
-                .lineLimit(lineCount, reservesSpace: true)
+                .lineLimit(isExpanded ? .max : lineCount, reservesSpace: !isExpanded)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .spoilerVeil(isHidden: isSpoilerHidden, style: .text)
+                #if !os(tvOS)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if expandsInPlace, !isSpoilerHidden {
+                        withAnimation(.easeInOut(duration: 0.25)) { isExpanded.toggle() }
+                    } else {
+                        onTap?()
+                    }
+                }
+                #endif
+                .onChange(of: text) { isExpanded = false }
+                .onChange(of: isSpoilerHidden) { if $1 { isExpanded = false } }
         } else if isPending {
             // Reserved, not a skeleton. The panel already carries a material, and three grey bars
             // inside it read as more chrome than the fetch they stand in for is worth.

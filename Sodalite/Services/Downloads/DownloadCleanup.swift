@@ -1,0 +1,138 @@
+import Foundation
+
+enum DownloadCleanupScope: Equatable {
+    case everything
+    case server(String)
+    case profile(serverID: String, userID: String)
+}
+
+/// Downloads leave with the account that made them (Sodalite#81): files of a profile nobody can sign
+/// into any more would only be reachable by deleting the app.
+@MainActor
+enum DownloadCleanup {
+    static func usage(_ scope: DownloadCleanupScope, store: DownloadStore) -> DownloadStore.Usage {
+        let own = switch scope {
+        case .everything: store.totalUsage()
+        case .server(let id): store.usage(serverID: id)
+        case .profile(let serverID, let userID): store.usage(serverID: serverID, userID: userID)
+        }
+        let fetched = store.usage(of: fetchedThroughHome(scope, store: store))
+        return DownloadStore.Usage(items: own.items + fetched.items, bytes: own.bytes + fetched.bytes)
+    }
+
+    /// What other profiles downloaded from this server through a combined Home (Sodalite#202) goes
+    /// when the server is removed. A profile scope leaves it: signing one account out, or its own
+    /// Delete All, must not reach into another profile's Downloads it never listed.
+    static func fetchedThroughHome(_ scope: DownloadCleanupScope, store: DownloadStore) -> [DownloadStore.StoredItem] {
+        guard case .server(let id) = scope else { return [] }
+        return store.originItems(serverID: id)
+    }
+
+    static func perform(_ scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?) async {
+        let fetched = fetchedThroughHome(scope, store: store)
+        if let manager {
+            await manager.cancelTasks(of: fetched)
+            if let active = store.activeProfile, covers(scope, active) {
+                for item in store.items.values where item.manifest.state != .complete && item.manifest.state != .missingOnServer {
+                    await manager.cancel(itemID: item.id)
+                }
+            }
+            // Profiles that are not active have nothing in `items`, but their tasks still run.
+            switch scope {
+            case .everything: await manager.cancelTasks(serverID: nil, userID: nil)
+            case .server(let id): await manager.cancelTasks(serverID: id, userID: nil)
+            case .profile(let serverID, let userID): await manager.cancelTasks(serverID: serverID, userID: userID)
+            }
+        }
+        store.delete(fetched)
+        if !fetched.isEmpty { manager?.serversChanged() }
+        switch scope {
+        case .everything: try? store.deleteAll()
+        case .server(let id): try? store.deleteServer(serverID: id)
+        case .profile(let serverID, let userID): try? store.deleteProfile(serverID: serverID, userID: userID)
+        }
+    }
+
+    /// Removes a profile, then its downloads. The order matters (ASD-201): a `forget` that throws
+    /// leaves the profile in place, and its files with it.
+    static func purge(afterForgetting scope: DownloadCleanupScope, store: DownloadStore, manager: DownloadManager?,
+                      forget: () throws -> Void) async throws {
+        try forget()
+        await perform(scope, store: store, manager: manager)
+    }
+
+    static func warning(for usage: DownloadStore.Usage) -> String? {
+        guard usage.items > 0 else { return nil }
+        return String(localized: "downloads.cleanup.warning \(usage.items) \(usage.bytes.formatted(.byteCount(style: .file)))")
+    }
+
+    private static func covers(_ scope: DownloadCleanupScope, _ profile: ProfileKey) -> Bool {
+        switch scope {
+        case .everything: true
+        case .server(let id): profile.serverID == id
+        case .profile(let serverID, let userID): profile.serverID == serverID && profile.userID == userID
+        }
+    }
+}
+
+extension DependencyContainer {
+    /// Called from the explicit user actions only (log out, remove a server, forget or sign a profile
+    /// out everywhere, reset), never from `removeServer` / `forgetUser` themselves: iCloud applies a
+    /// removal made on another device through those, and a token the server rejected drops the
+    /// profile through them too, and neither may take a phone's downloads with it.
+    func purgeDownloads(_ scope: DownloadCleanupScope) async {
+        await DownloadCleanup.perform(scope, store: downloadStore, manager: downloadManager)
+    }
+
+    /// Forgets a remembered profile and, once that worked, deletes its downloads (ASD-201).
+    func forgetUserAndPurgeDownloads(id: String, serverID: String) async throws {
+        try await DownloadCleanup.purge(afterForgetting: .profile(serverID: serverID, userID: id),
+                                        store: downloadStore, manager: downloadManager) {
+            try forgetUser(id: id, serverID: serverID)
+        }
+    }
+
+    /// "Sign out and remove" on the signed-in profile. The downloads go first: the sign-out reroutes
+    /// the session, and the store then points at another profile (ASD-201).
+    func signOutOfActiveProfileAndPurgeDownloads() async {
+        guard let server = activeServer,
+              let userID = try? keychainService.loadString(for: KeychainKeys.userID(serverID: server.id)) else {
+            signOutOfActiveProfile()
+            return
+        }
+        // The purge awaits; the profile picked meanwhile must not be the one that is signed out.
+        let ref = ProfileRef(serverID: server.id, userID: userID)
+        await purgeDownloads(.profile(serverID: server.id, userID: userID))
+        if isActiveProfile(ref) {
+            signOutOfActiveProfile()
+        } else {
+            try? forgetUser(id: userID, serverID: server.id)
+        }
+    }
+
+    /// The confirmation text with the downloads that go along, when there are any.
+    func messageWithDownloadWarning(_ base: String, scope: DownloadCleanupScope) -> String {
+        guard let warning = DownloadCleanup.warning(for: DownloadCleanup.usage(scope, store: downloadStore)) else { return base }
+        return base + "\n\n" + warning
+    }
+}
+
+import SwiftUI
+
+extension View {
+    /// Asks before forgetting a profile that still has downloads on this device (Sodalite#81). A
+    /// profile without any is forgotten at once, as before: the question exists for the files.
+    func confirmsForgettingDownloads(_ pending: Binding<RememberedUser?>, message: @escaping (RememberedUser) -> String,
+                                     perform: @escaping (RememberedUser) -> Void) -> some View {
+        alert(
+            pending.wrappedValue.map { String(localized: "profile.forget.confirm \($0.name)") } ?? "",
+            isPresented: Binding(get: { pending.wrappedValue != nil }, set: { if !$0 { pending.wrappedValue = nil } }),
+            presenting: pending.wrappedValue
+        ) { user in
+            Button("profile.forget.confirm.short", role: .destructive) { perform(user) }
+            Button("common.cancel", role: .cancel) {}
+        } message: { user in
+            Text(verbatim: message(user))
+        }
+    }
+}

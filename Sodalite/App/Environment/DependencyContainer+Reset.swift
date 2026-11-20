@@ -23,9 +23,15 @@ extension DependencyContainer {
             }
         }
 
+        // Sodalite#81: a reset device holds no downloads either; before clearSession, while running
+        // transcodes can still be told to stop.
+        await DownloadCleanup.perform(.everything, store: downloadStore, manager: downloadManager)
+
         // Servers, tokens, profiles, passwords, Seerr, and cloud sync off on this device.
         try? clearSession()
         clearSessionResidue()
+        // Before the keychain wipe, which then takes the emptied item with it.
+        serverTrustStore.removeAll()
         // clearSession scrubs session state; a reset owes nothing to anything. The Guardian PIN, its
         // throttle, the remembered live routes and whatever a later key adds all sit in the same
         // keychain service, so take the service rather than a list that would fall behind.

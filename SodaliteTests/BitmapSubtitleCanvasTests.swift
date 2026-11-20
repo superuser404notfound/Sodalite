@@ -87,6 +87,39 @@ struct BitmapSubtitleCanvasTests {
         expectClose(frame.width, 1152, "width")
     }
 
+    @Test("anamorphic SD: a coded 720x576 canvas covers the 16:9 picture instead of overhanging it")
+    func anamorphicCanvasWidensWithThePicture() {
+        // DVB / DVD on 720x576 at 16:9 (pixel aspect 64:45): the engine reports the coded frame as
+        // the canvas, the picture presents at 1024x576 and fills the 16:9 screen.
+        let pixelAspect: CGFloat = 64.0 / 45.0
+        let frame = SubtitleOverlayView.bitmapCueFrame(position: bottomLine,
+                                                       canvas: CGSize(width: 720, height: 576),
+                                                       videoSize: CGSize(width: 720 * pixelAspect, height: 576),
+                                                       pixelAspect: pixelAspect,
+                                                       in: tvBounds)
+        expectClose(frame.minX, 384, "minX")
+        expectClose(frame.width, 1152, "width")
+        expectClose(frame.minY, 928.8, "minY")
+        expectClose(frame.height, 64.8, "height")
+    }
+
+    @Test("anamorphic cropped DVD: the canvas keeps its rows, only its width follows the pixels")
+    func anamorphicCroppedRipKeepsRows() {
+        // 720x432 cut out of a 720x480 DVD at pixel aspect 32:27; the engine keeps the 720x480
+        // canvas since the widths match. The picture is 853.3x432 on screen units, canvas 853.3x480.
+        let pixelAspect: CGFloat = 32.0 / 27.0
+        let bounds = CGSize(width: 853.333, height: 432)
+        let frame = SubtitleOverlayView.bitmapCueFrame(position: bottomLine,
+                                                       canvas: CGSize(width: 720, height: 480),
+                                                       videoSize: CGSize(width: 720 * pixelAspect, height: 432),
+                                                       pixelAspect: pixelAspect,
+                                                       in: bounds)
+        // Canvas row 0.86 * 480 = 412.8, minus the 24 rows cropped off the top.
+        expectClose(frame.minY, 388.8, "minY")
+        expectClose(frame.height, 28.8, "height")
+        expectClose(frame.width, 512, "width")
+    }
+
     @Test("unknown video dims fall back to the full-bounds layout")
     func unknownVideoDimsFallBackToBounds() {
         let frame = SubtitleOverlayView.bitmapCueFrame(position: bottomLine,

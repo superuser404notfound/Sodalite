@@ -59,9 +59,55 @@ struct TrackDisplayFormatterTests {
         #expect(TrackDisplayFormatter.shortName(for: track) == "Dolby Atmos")
     }
 
+    /// AetherEngine#731: TrueHD Atmos is the track that keeps its heights, so the menu has to say which
+    /// of a film's TrueHD tracks it is. `isAtmos` answers for E-AC-3 JOC only; the profile tells TrueHD.
+    @Test("TrueHD Atmos names itself, plain TrueHD keeps its layout")
+    func trueHDAtmosNamesItself() {
+        let atmos = TrackInfo(id: 1, name: "Track 1 (truehd)", codec: "truehd", language: nil, channels: 8,
+                              isDefault: true, profile: "Dolby TrueHD + Dolby Atmos")
+        #expect(TrackDisplayFormatter.shortName(for: atmos) == "Dolby TrueHD Atmos")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: atmos) == "Dolby TrueHD Atmos")
+        let plain = TrackInfo(id: 2, name: "Track 2 (truehd)", codec: "truehd", language: nil, channels: 8,
+                              isDefault: false, profile: nil)
+        #expect(!TrackDisplayFormatter.isTrueHDAtmos(plain))
+        #expect(TrackDisplayFormatter.audioDisplayName(for: plain) != "Dolby TrueHD Atmos")
+    }
+
+    /// AetherEngine#744: DTS:X keeps its heights like TrueHD Atmos. libavcodec's decoder is `dca`,
+    /// which the menu used to print as "DCA 7.1".
+    @Test("DTS:X names itself, the rest of the DTS family names its member")
+    func dtsFamily() {
+        func dts(_ profile: String?) -> TrackInfo {
+            TrackInfo(id: 3, name: "Track 3 (dca)", codec: "dca", language: nil, channels: 8,
+                      isDefault: true, profile: profile)
+        }
+        for profile in ["DTS-HD MA + DTS:X", "DTS-HD MA + DTS:X IMAX"] {
+            #expect(TrackDisplayFormatter.isDTSX(dts(profile)))
+            #expect(TrackDisplayFormatter.shortName(for: dts(profile)) == "DTS:X")
+            #expect(TrackDisplayFormatter.audioDisplayName(for: dts(profile)) == "DTS:X")
+        }
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-HD MA")) == "DTS-HD MA 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-HD HRA")) == "DTS-HD HRA 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts("DTS-ES")) == "DTS 7.1")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: dts(nil)) == "DTS 7.1")
+        // A track the engine confirmed as DTS:X under a plain "DTS-HD MA" label is named by the engine's flag.
+        let confirmed = TrackInfo(id: 4, name: "Track 4 (dca)", codec: "dca", language: nil, channels: 8,
+                                  isDefault: false, profile: "DTS-HD MA", isDTSX: true)
+        #expect(TrackDisplayFormatter.audioDisplayName(for: confirmed) == "DTS:X")
+    }
+
     @Test("a track with neither language nor a describable format keeps its name")
     func lastResortIsTheName() {
         let track = audio(language: nil, codec: "", channels: 0, name: "Commentary")
         #expect(TrackDisplayFormatter.shortName(for: track) == "Commentary")
+    }
+
+    @Test("an audio description says so in the menu row")
+    func describedInMenuRow() {
+        let described = TrackInfo(id: 1, name: "a", codec: "ac3", language: "en", channels: 6, isDefault: false,
+                                  isVisualImpaired: true)
+        let suffix = String(localized: "player.track.audioDescription", defaultValue: "Audio Description")
+        #expect(TrackDisplayFormatter.audioDisplayName(for: described).hasSuffix(suffix))
+        #expect(!TrackDisplayFormatter.audioDisplayName(for: audio(language: "en")).hasSuffix(suffix))
     }
 }

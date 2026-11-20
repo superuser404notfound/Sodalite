@@ -78,7 +78,7 @@ private struct ParentalGateHost: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .fullScreenCover(item: Binding(
+            .fullScreenCoverCompat(item: Binding(
                 get: {
                     dependencies.parentalGate.presenterStack.last == hostID
                         ? dependencies.parentalGate.activeRequest

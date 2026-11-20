@@ -39,7 +39,7 @@ struct StatsOverlayView: View {
     var onClose: (() -> Void)? = nil
 
     private var panelWidth: CGFloat {
-        #if os(iOS)
+        #if os(iOS) || os(macOS)
         return 380
         #else
         return 560
@@ -48,6 +48,17 @@ struct StatsOverlayView: View {
 
     private var videoStream: MediaStream? {
         facts.stream(ofType: .video)
+    }
+
+    /// Jellyfin's video stream where it describes what plays, nil under a transcode (Sodalite#87).
+    private var fileVideoStream: MediaStream? {
+        Self.fileFactsDescribePlayback(playMethod: playMethod) ? videoStream : nil
+    }
+
+    /// Whether the library file's own facts describe the video on screen. Under a transcode they describe
+    /// the file the server re-encodes, not the stream that arrives.
+    static func fileFactsDescribePlayback(playMethod: PlayMethod?) -> Bool {
+        playMethod != .transcode
     }
 
     private var activeAudioStream: MediaStream? {
@@ -73,7 +84,7 @@ struct StatsOverlayView: View {
             HStack(spacing: 0) {
                 Spacer()
                 panel
-                    #if os(iOS)
+                    #if os(iOS) || os(macOS)
                     .padding(.trailing, 16)
                     .padding(.vertical, 16)
                     #else
@@ -93,7 +104,10 @@ struct StatsOverlayView: View {
     /// churns. iOS reads the key window (shared with `PlayerOverlayView`), tvOS the scene's screen, where
     /// the title-safe margin is this panel's own 40pt padding and the window carries no insets.
     private static func hostGeometry(fallback: CGSize) -> (CGSize, EdgeInsets) {
-        #if os(iOS)
+        #if os(macOS)
+        // The Mac mounts the panel straight over the window's content, which has no insets to undo.
+        return (fallback, EdgeInsets())
+        #elseif os(iOS)
         let (bounds, insets) = PlayerOverlayView.windowGeometry(fallback: fallback)
         return (
             bounds.size,
@@ -109,12 +123,13 @@ struct StatsOverlayView: View {
 
     /// Latches once the slide-in settles, gating scrollTo so the mount-time `statsSectionIndex = 0` reset (fires the same render cycle) doesn't run a 0.2s scrollTo that fights the panel's 0.25s `.move(edge: .trailing)` transition (stuck-halfway-in for ~1s).
     @State private var didFinishAppearTransition = false
+    @StateObject private var refreshMonitor = DisplayRefreshMonitor()
 
     private var panel: some View {
         ScrollViewReader { proxy in
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
-                    #if os(iOS)
+                    #if os(iOS) || os(macOS)
                     HStack {
                         Text("player.stats.title")
                             .font(.title3)
@@ -182,6 +197,9 @@ struct StatsOverlayView: View {
             try? await Task.sleep(for: .milliseconds(300))
             didFinishAppearTransition = true
         }
+        // The display link ticks at the panel's rate, so it runs only while the panel is open.
+        .onAppear { refreshMonitor.start() }
+        .onDisappear { refreshMonitor.stop() }
     }
 
     /// Draws a section only when the shared availability set lists it, under the anchor and highlight the
@@ -290,14 +308,57 @@ struct StatsOverlayView: View {
                 row("detail.tech.resolution", value: resolution)
             }
             if let fps = player.sourceVideoFrameRate
-                ?? videoStream?.realFrameRate ?? videoStream?.averageFrameRate {
-                row("detail.tech.framerate", value: String(format: "%.3g fps", fps))
+                ?? fileVideoStream?.realFrameRate ?? fileVideoStream?.averageFrameRate {
+                row("detail.tech.framerate", value: FrameRateFormat.fps(fps))
+            }
+            // Next to the frame rate on purpose: 23.976 fps over 23.976 Hz is a match, over 24 or 60 Hz it is not.
+            if let hz = refreshMonitor.refreshRate {
+                row("player.stats.displayRefresh", value: FrameRateFormat.hz(hz))
+            }
+            if let deinterlace = player.decodedVideoFormat?.deinterlace {
+                row("player.stats.deinterlacing", value: Self.deinterlaceLabel(
+                    deinterlace, sourceFrameRate: player.sourceVideoFrameRate))
             }
             if let bps = videoBitrate {
                 row("detail.tech.bitrate", value: Self.formatBitrate(bps))
             }
             row("player.stats.dynamicRange", value: videoRangeLabel)
+            if let format = videoStreamFormat {
+                if let pixelFormat = format.pixelFormat {
+                    row("player.stats.pixelFormat", value: pixelFormat)
+                }
+                if let depth = format.bitDepth {
+                    row("player.stats.bitDepth", value: "\(depth)-bit")
+                }
+                if let primaries = format.colorPrimariesLabel {
+                    row("player.stats.colorPrimaries", value: primaries)
+                }
+                if let transfer = format.transferLabel {
+                    row("player.stats.colorTransfer", value: transfer)
+                }
+                if let matrix = format.matrixLabel {
+                    row("player.stats.colorMatrix", value: matrix)
+                }
+                if let range = format.rangeLabel {
+                    row("player.stats.colorRange", value: range)
+                }
+            }
+            if let decoded = player.decodedVideoFormat {
+                row("player.stats.displayBuffer", value: decoded.pixelBufferLabel)
+            }
+            if let upscale = player.activeUpscale {
+                row("player.stats.upscaling", value: Self.upscaleLabel(
+                    sourceSize: upscale.sourceSize, mlScale: upscale.mlScale, targetSize: upscale.targetSize,
+                    degraded: upscale.degraded, disabledReason: upscale.disabledReason,
+                    lineArt: upscale.scaler == .lineArt))
+            }
         }
+    }
+
+    /// AE#658: what the engine's own decoder produced where it decodes (software path), the source's
+    /// declaration otherwise. On the native path AVPlayer decodes and the frames never reach the engine.
+    private var videoStreamFormat: VideoStreamFormat? {
+        player.decodedVideoFormat?.frame ?? player.sourceVideoStreamFormat
     }
 
     /// Prefer the engine's TrackInfo (live Atmos flag + channel count); the Jellyfin MediaStream fills the
@@ -308,7 +369,7 @@ struct StatsOverlayView: View {
         return section("detail.tech.audio") {
             if let codec = engineTrack?.codec.uppercased()
                 ?? activeAudioStream?.codec?.uppercased() {
-                row("detail.tech.codec", value: codec)
+                row("detail.tech.codec", value: engineTrack?.profile.map { "\(codec) · \($0)" } ?? codec)
             }
             let channels = engineTrack?.channels ?? activeAudioStream?.channels ?? 0
             let isAtmos = engineTrack?.isAtmos ?? false
@@ -319,6 +380,15 @@ struct StatsOverlayView: View {
                         ? "\(Self.channelLayoutLabel(channels)) · Atmos"
                         : Self.channelLayoutLabel(channels)
                 )
+            }
+            if let rate = engineTrack?.sampleRate, rate > 0 {
+                row("player.stats.sampleRate", value: Self.formatSampleRate(rate))
+            }
+            if let bits = engineTrack?.bitsPerSample, bits > 0 {
+                row("player.stats.bitDepth", value: "\(bits)-bit")
+            }
+            if let sampleFormat = engineTrack?.sampleFormat {
+                row("player.stats.sampleFormat", value: sampleFormat)
             }
             let bitrate = activeAudioStream?.bitRate.map(Int64.init)
                 ?? engineTrack.map(\.bitrate)
@@ -336,7 +406,9 @@ struct StatsOverlayView: View {
     /// The engine's track stands in where Jellyfin has no stream to name: a live channel carries its
     /// subtitles inside the transport stream, and the item that launched it is a channel, not a file.
     private var subtitleSection: some View {
-        let engineTrack = player.subtitleTracks.first { $0.id == activeSubtitleIndex }
+        // A VOD track Jellyfin does not list carries its engine id inside its index (Sodalite#247).
+        let engineID = activeSubtitleIndex.map { EngineSubtitleInventory.engineTrackID(forMenuIndex: $0) ?? $0 }
+        let engineTrack = player.subtitleTracks.first { $0.id == engineID }
         return section("detail.tech.subtitles") {
             if let codec = activeSubtitleStream?.codec?.uppercased()
                 ?? engineTrack?.codec.uppercased() {
@@ -485,30 +557,95 @@ struct StatsOverlayView: View {
 
     // MARK: - Derived video labels
 
-    /// Engine spelling ("HEVC"), with the container's profile appended when it has one. The Jellyfin codec
-    /// stands in only until the engine has probed.
     private var videoCodecLabel: String? {
-        guard let name = player.sourceVideoCodecName?.uppercased()
-            ?? videoStream?.codec?.uppercased() else { return nil }
-        let profile = videoStream?.profile ?? ""
+        Self.videoCodecLabel(engineName: player.sourceVideoCodecName,
+                             engineProfile: player.sourceVideoStreamFormat?.profile,
+                             file: fileVideoStream)
+    }
+
+    /// Engine spelling ("HEVC") with the profile appended when one is known, the engine's first. The file's
+    /// codec and profile stand in only until the engine has probed, and never under a transcode.
+    static func videoCodecLabel(engineName: String?, engineProfile: String?, file: MediaStream?) -> String? {
+        guard let name = engineName?.uppercased() ?? file?.codec?.uppercased() else { return nil }
+        let profile = engineProfile ?? file?.profile ?? ""
         return profile.isEmpty ? name : "\(name) \(profile)"
     }
 
+    /// AetherEngine#846: the stage chain, source to delivered size. MetalFX runs unless the stage degraded
+    /// or the VideoToolbox pass alone already lands on the target (the ML-only route of a slower GPU).
+    /// AetherEngine#1039: the line-art scaler restores, then upscales 2x, then resamples bilinearly where 2x
+    /// misses. A degraded line-art stage has dropped the restore pass.
+    static func upscaleLabel(
+        sourceSize: CGSize, mlScale: Float?, targetSize: CGSize, degraded: Bool, disabledReason: String?,
+        lineArt: Bool = false
+    ) -> String {
+        if let disabledReason { return "off (\(disabledReason))" }
+        func size(_ s: CGSize) -> String { "\(Int(s.width.rounded()))×\(Int(s.height.rounded()))" }
+        var steps = [size(sourceSize)]
+        if lineArt {
+            if !degraded { steps.append("Restore") }
+            steps.append("Line Art 2x")
+            let landsOnTarget = abs(sourceSize.width * 2 - targetSize.width) <= 1
+                && abs(sourceSize.height * 2 - targetSize.height) <= 1
+            if !landsOnTarget { steps.append("Bilinear") }
+            steps.append(size(targetSize))
+            return steps.joined(separator: " → ")
+        }
+        var runsMetalFX = !degraded
+        if let mlScale {
+            steps.append("ML \(String(format: "%g", Double(mlScale)))x")
+            let mlWidth = sourceSize.width * CGFloat(mlScale)
+            let mlHeight = sourceSize.height * CGFloat(mlScale)
+            let landsOnTarget = abs(mlWidth - targetSize.width) <= 1 && abs(mlHeight - targetSize.height) <= 1
+            if landsOnTarget { runsMetalFX = false }
+        }
+        if runsMetalFX { steps.append("MetalFX") }
+        steps.append(size(targetSize))
+        return steps.joined(separator: " → ")
+    }
+
     private var resolutionLabel: String? {
-        if player.sourceVideoWidth > 0, player.sourceVideoHeight > 0 {
-            return "\(player.sourceVideoWidth)×\(player.sourceVideoHeight)"
+        Self.resolutionLabel(engineWidth: Int(player.sourceVideoWidth),
+                             engineHeight: Int(player.sourceVideoHeight),
+                             file: fileVideoStream,
+                             scan: player.sourceVideoScan)
+    }
+
+    /// AE#983: the engine's scan verdict rides on the height ("1920×1080i · TFF"), nothing when it is unknown.
+    static func resolutionLabel(
+        engineWidth: Int, engineHeight: Int, file: MediaStream?, scan: VideoScan = .unknown
+    ) -> String? {
+        let size: String
+        if engineWidth > 0, engineHeight > 0 {
+            size = "\(engineWidth)×\(engineHeight)"
+        } else if let w = file?.width, let h = file?.height {
+            size = "\(w)×\(h)"
+        } else {
+            return nil
         }
-        if let w = videoStream?.width, let h = videoStream?.height {
-            return "\(w)×\(h)"
+        switch scan {
+        case .unknown: return size
+        case .progressive: return size + "p"
+        case .interlaced(.topFieldFirst): return size + "i · TFF"
+        case .interlaced(.bottomFieldFirst): return size + "i · BFF"
+        case .interlaced(.unknown): return size + "i"
         }
-        return nil
+    }
+
+    /// "bwdif (CPU) → 25 fps": the filter, where it runs, and the rate it hands the display.
+    static func deinterlaceLabel(_ deinterlace: VideoDeinterlace, sourceFrameRate: Double?) -> String {
+        let label = "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
+        guard let rate = sourceFrameRate, rate > 0 else { return label }
+        let output = rate * Double(deinterlace.outputFramesPerSourceFrame)
+        return label + " → " + FrameRateFormat.fps(output)
     }
 
     /// The engine's declared VIDEO bitrate when the container carries one; the source-wide figure from
     /// Jellyfin otherwise, which is what this row showed before and is close enough to be worth keeping.
     private var videoBitrate: Int? {
         if player.sourceVideoBitrate > 0 { return Int(player.sourceVideoBitrate) }
-        return facts.bitrate
+        // Under a transcode the file's figure is not the stream's; the live section carries what arrives.
+        return Self.fileFactsDescribePlayback(playMethod: playMethod) ? facts.bitrate : nil
     }
 
     /// Source video range refined with the DV profile. When the engine clamps `videoFormat` to `.sdr`
@@ -518,7 +655,7 @@ struct StatsOverlayView: View {
         Self.videoRangeLabel(
             source: player.sourceVideoFormat,
             presented: player.videoFormat,
-            dvProfile: player.sourceDVProfile ?? videoStream?.dvProfile,
+            dvProfile: player.sourceDVProfile ?? fileVideoStream?.dvProfile,
             conversion: player.dolbyVisionConversion)
     }
 
@@ -582,6 +719,10 @@ struct StatsOverlayView: View {
         }
     }
 
+    static func formatSampleRate(_ hz: Int) -> String {
+        hz % 1000 == 0 ? "\(hz / 1000) kHz" : String(format: "%.1f kHz", Double(hz) / 1000)
+    }
+
     private static func formatBitrate(_ bps: Int) -> String {
         let mbps = Double(bps) / 1_000_000
         if mbps >= 1 { return String(format: "%.1f Mbps", mbps) }
@@ -600,10 +741,12 @@ struct StatsOverlayView: View {
         return "\(inst)  ·  avg \(avg) Mbps"
     }
 
-    private static func formatBufferPair(seconds: Double?, cachedBytes: Int64?) -> String {
+    /// The cache half only where the engine keeps one: the remote-HLS bypass has AVPlayer's buffer and no
+    /// engine cache, and a half that can never fill reads as broken (Sodalite#87).
+    static func formatBufferPair(seconds: Double?, cachedBytes: Int64?) -> String {
         let sec = seconds.map { String(format: "+%.1f s", $0) } ?? "—"
-        let mb = cachedBytes.map { String(format: "%d MB", $0 / 1_048_576) } ?? "—"
-        return "\(sec)  ·  \(mb) cached"
+        guard let cachedBytes else { return sec }
+        return "\(sec)  ·  \(String(format: "%d MB", cachedBytes / 1_048_576)) cached"
     }
 
     private static func formatNetworkPair(mbps: Double?, transferred: Int64?) -> String {

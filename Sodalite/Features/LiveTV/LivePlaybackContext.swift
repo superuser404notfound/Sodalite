@@ -6,4 +6,5 @@ struct LivePlaybackContext: Identifiable, Equatable {
     var id: String { channel.id }
     let channel: JellyfinChannel
     let program: JellyfinProgram?
+    var zapFilter: GuideFilter = .default
 }
