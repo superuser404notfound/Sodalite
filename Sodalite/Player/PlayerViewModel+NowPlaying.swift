@@ -31,6 +31,10 @@ extension PlayerViewModel {
     ///   - Manual `MPNowPlayingInfoCenter.nowPlayingInfo` writes crash with `_dispatch_assert_queue_fail` on both NWConnection and BSD-socket HLS loopback (962292d).
     ///   - `AVAssetResourceLoaderDelegate` for HLS segments rejected by AVPlayer (Apple Forum 113063).
     /// Only path left is private API (`_nowPlayingSession` via KVC), not worth the reject risk. Everything else (title/cover/scrub/play-pause/AirPods/Enhance Dialogue/Reduce Loud Sounds/Atmos) works.
+    /// All of the above is iOS and tvOS, where AVKit owns the session. The Mac player has no AVKit session, so there
+    /// the engine owns Now Playing and the commands (`ownsVideoNowPlayingSession` / `ownsVideoNowPlayingCommands`,
+    /// set in `DependencyContainer`), the setup AetherPlayer ships on macOS. Its skips use the engine's
+    /// `remoteSkipInterval` (10 s), not the per-direction intervals of the in-player arrows.
 
     // MARK: - Post-load artwork refresh
 
