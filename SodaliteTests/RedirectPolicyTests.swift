@@ -100,9 +100,10 @@ struct RedirectPolicyTests {
             request("https://cdn.example.net/poster.jpg?ApiKey=\(token)&\(signed)&api_key=\(token)", credentials: false),
             from: request("https://jf.example.com/Items/x/Images/Primary?ApiKey=\(token)", credentials: false)))
         #expect(followed.url?.absoluteString == "https://cdn.example.net/poster.jpg?\(signed)")
-        #expect(RedirectPolicy.dropsQueryCredential(
-            request("https://cdn.example.net/poster.jpg?ApiKey=\(token)", credentials: false),
-            from: request("https://jf.example.com/Items/x/Images/Primary?ApiKey=\(token)", credentials: false)))
+        #expect(RedirectPolicy.decide(
+            request("https://cdn.example.net/poster.jpg", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?ApiKey=\(token)", credentials: false))
+            == .follow(request("https://cdn.example.net/poster.jpg", credentials: false), leftURLTokenBehind: true))
     }
 
     @Test("the token under another name is dropped too, nested or in the path it is refused")
@@ -126,8 +127,53 @@ struct RedirectPolicyTests {
             request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false),
             from: request("http://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)))
         #expect(followed.url?.query()?.contains(token) == true)
-        #expect(!RedirectPolicy.dropsQueryCredential(
+        guard case .follow(_, let left) = RedirectPolicy.decide(
             request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false),
-            from: request("http://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)))
+            from: request("http://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false))
+        else { Issue.record("same-origin upgrade refused"); return }
+        #expect(!left)
+    }
+
+    @Test("a stream on a moved domain is followed without its token, so the new host answers 401")
+    func movedDomainStreamLosesToken() throws {
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://new.example.com/Videos/x/stream?static=true&ApiKey=\(token)", credentials: false),
+            from: request("https://jf.example.com/Videos/x/stream?static=true&ApiKey=\(token)", credentials: false)))
+        #expect(followed.url?.absoluteString == "https://new.example.com/Videos/x/stream?static=true")
+    }
+
+    @Test("the token is found in another case")
+    func tokenMatchIgnoresCase() throws {
+        let from = request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://cdn.example.net/p.jpg?key=\(token.uppercased())", credentials: false), from: from))
+        #expect(followed.url?.absoluteString == "https://cdn.example.net/p.jpg")
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/login/\(token.uppercased())", credentials: false), from: from) == nil)
+    }
+
+    @Test("a token sent in a header is refused when the target puts it in the URL")
+    func headerTokenEchoedInURLRefused() {
+        var from = request("https://jf.example.com/Users/u/Items", credentials: false)
+        from.setValue("MediaBrowser Client=\"Sodalite\", Token=\"\(token)\"", forHTTPHeaderField: "X-Emby-Authorization")
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/login/\(token)", credentials: false), from: from) == nil)
+        var cookie = request("https://seerr.example.com/api/v1/auth/me", credentials: false)
+        cookie.setValue("connect.sid=s%3Aabcdefghijklmnopqrstuvwxyz.sig", forHTTPHeaderField: "Cookie")
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/?rd=s%253Aabcdefghijklmnopqrstuvwxyz.sig", credentials: false),
+            from: cookie) == nil)
+    }
+
+    @Test("a token in a base64 SSO state is refused")
+    func base64WrappedTokenRefused() throws {
+        let original = "https://jf.example.com/Items/x/Images/Primary?api_key=\(token)"
+        let from = request(original, credentials: false)
+        let standard = Data(original.utf8).base64EncodedString()
+        let urlSafe = standard.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+            .trimmingCharacters(in: CharacterSet(charactersIn: "="))
+        let escaped = try #require(standard.addingPercentEncoding(withAllowedCharacters: .alphanumerics))
+        #expect(RedirectPolicy.redirect(request("https://auth.example.com/?state=\(escaped)", credentials: false), from: from) == nil)
+        #expect(RedirectPolicy.redirect(request("https://auth.example.com/?state=\(urlSafe)", credentials: false), from: from) == nil)
     }
 }
