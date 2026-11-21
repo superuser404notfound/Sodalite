@@ -20,6 +20,13 @@ final class DependencyContainer {
         // AetherEngine#1041: music Now Playing (card, clock and transport commands) on both audio hosts.
         // The music coordinator only stages the track's identity and the queue's next/previous.
         engine.ownsAudioNowPlaying = true
+        #if os(macOS)
+        // The Mac player draws its own transport over a bare AVPlayer, so AVKit publishes nothing and
+        // the play/pause key opened Music instead of reaching the player (bvsveera, Discord). The
+        // engine writes the shared center and answers the commands there, as in AetherPlayer.
+        engine.ownsVideoNowPlayingSession = true
+        engine.ownsVideoNowPlayingCommands = true
+        #endif
         engine.maximumSubtitleOffsetSeconds = SubtitleOffset.maximumShift
         return engine
     }()
