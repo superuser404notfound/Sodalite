@@ -29,4 +29,13 @@ struct StatsScanDeinterlaceTests {
         #expect(StatsOverlayView.deinterlaceLabel(cpu, sourceFrameRate: 25) == "bwdif (CPU) → 25 fps")
         #expect(StatsOverlayView.deinterlaceLabel(cpu, sourceFrameRate: nil) == "bwdif (CPU)")
     }
+
+    /// AE#853: inverse telecine hands the display film frames, four of every five source frames.
+    @Test func inverseTelecineSaysSoAndShowsTheFilmRate() {
+        let ivtc = VideoDeinterlace(filter: "bwdif", isHardware: false, fieldRate: .frame, inverseTelecine: true)
+        #expect(StatsOverlayView.deinterlaceLabel(ivtc, sourceFrameRate: 29.97) == "IVTC + bwdif (CPU) → 23.976 fps")
+        let gpu = VideoDeinterlace(filter: "bwdif_videotoolbox", isHardware: true, fieldRate: .frame,
+                                   inverseTelecine: true)
+        #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: nil) == "IVTC + bwdif_videotoolbox (GPU)")
+    }
 }
