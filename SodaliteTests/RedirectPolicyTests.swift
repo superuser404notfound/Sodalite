@@ -69,9 +69,6 @@ struct RedirectPolicyTests {
         #expect(RedirectPolicy.redirect(
             request("https://auth.example.com/?rd=https%3A%2F%2Fjf.example.com%2FItems%2Fx%2FImages%2FPrimary%3Fapi_key%3Dtok", credentials: false),
             from: request("https://jf.example.com/Items/x/Images/Primary?api_key=tok&ApiKey=tok", credentials: false)) == nil)
-        #expect(RedirectPolicy.redirect(
-            request("https://new.example.com/Videos/x/stream?ApiKey=tok", credentials: false),
-            from: request("https://jf.example.com/Videos/x/stream?ApiKey=tok", credentials: false)) == nil)
     }
 
     @Test("a tokenized URL still takes the same-host upgrade, and an untokenized one still crosses")
@@ -83,5 +80,54 @@ struct RedirectPolicyTests {
             request("https://cdn.example.com/poster.jpg", credentials: false),
             from: request("https://jf.example.com/Items/x/Images/Primary?tag=t", credentials: false)) != nil)
     }
-}
 
+    // MARK: Sodalite#249
+
+    private let token = "0123456789abcdef0123456789abcdef"
+
+    @Test("artwork that redirects to an image host is followed without the token")
+    func imageHostRedirectFollowedWithoutToken() throws {
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://img.example.net/t/p/w500/poster.jpg", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?tag=t&api_key=\(token)", credentials: false)))
+        #expect(followed.url?.absoluteString == "https://img.example.net/t/p/w500/poster.jpg")
+    }
+
+    @Test("a target that echoes the token keeps everything but the token, byte for byte")
+    func echoedTokenIsDropped() throws {
+        let signed = "X-Amz-Credential=AKIA%2F20261121%2Fus-east-1&X-Amz-Signature=ab%2Bcd"
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://cdn.example.net/poster.jpg?ApiKey=\(token)&\(signed)&api_key=\(token)", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?ApiKey=\(token)", credentials: false)))
+        #expect(followed.url?.absoluteString == "https://cdn.example.net/poster.jpg?\(signed)")
+        #expect(RedirectPolicy.dropsQueryCredential(
+            request("https://cdn.example.net/poster.jpg?ApiKey=\(token)", credentials: false),
+            from: request("https://jf.example.com/Items/x/Images/Primary?ApiKey=\(token)", credentials: false)))
+    }
+
+    @Test("the token under another name is dropped too, nested or in the path it is refused")
+    func tokenElsewhereRefused() throws {
+        let from = request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)
+        let renamed = try #require(RedirectPolicy.redirect(
+            request("https://new.example.com/Items/x/Images/Primary?key=\(token)&tag=t", credentials: false),
+            from: from))
+        #expect(renamed.url?.absoluteString == "https://new.example.com/Items/x/Images/Primary?tag=t")
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/login?rd=https%253A%252F%252Fjf.example.com%252F%253Fapi_key%253D\(token)", credentials: false),
+            from: from) == nil)
+        #expect(RedirectPolicy.redirect(
+            request("https://auth.example.com/login/\(token)", credentials: false),
+            from: from) == nil)
+    }
+
+    @Test("a hop on the same origin keeps the token in the URL")
+    func sameOriginKeepsURLToken() throws {
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false),
+            from: request("http://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)))
+        #expect(followed.url?.query()?.contains(token) == true)
+        #expect(!RedirectPolicy.dropsQueryCredential(
+            request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false),
+            from: request("http://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)))
+    }
+}

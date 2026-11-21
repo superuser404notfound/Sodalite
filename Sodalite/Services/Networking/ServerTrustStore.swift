@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import Security
+import Synchronization
 
 /// The SHA-256 of a certificate, in the two forms this app needs it: one to compare, one to read.
 nonisolated enum CertificateFingerprint {
@@ -251,25 +252,72 @@ nonisolated enum RedirectPolicy {
     /// Why a hop is refused, nil when it may be followed.
     enum Refusal: Equatable {
         case downgrade
-        /// The URL itself carries the token, so stripping headers protects nothing: a forward-auth
-        /// SSO page (`?rd=<the whole URL>`) or a moved domain would log it (audit NET-209).
+        /// The next URL would still carry the token after its own `api_key` items are dropped,
+        /// for example a forward-auth SSO page that wraps the whole URL in `?rd=` (audit NET-209).
         case tokenInQuery
     }
 
     static func refusal(_ proposed: URLRequest, from previous: URLRequest?) -> Refusal? {
         guard let from = previous?.url, let to = proposed.url else { return nil }
         if from.scheme?.lowercased() == "https", to.scheme?.lowercased() == "http" { return .downgrade }
-        if !credentialsAllowed(from: from, to: to), carriesQueryCredential(from) { return .tokenInQuery }
+        if !credentialsAllowed(from: from, to: to) {
+            let tokens = queryCredentials(from)
+            if !tokens.isEmpty, contains(tokens, in: removingQueryItems(valued: tokens, from: to)) {
+                return .tokenInQuery
+            }
+        }
         return nil
     }
 
-    static func carriesQueryCredential(_ url: URL) -> Bool {
-        URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains {
-            credentialQueryItems.contains($0.name.lowercased()) && !($0.value ?? "").isEmpty
-        } ?? false
+    /// The token values the URL carries in a query item Jellyfin reads one from.
+    static func queryCredentials(_ url: URL) -> Set<String> {
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        return Set(items.compactMap { item in
+            guard credentialQueryItems.contains(item.name.lowercased()),
+                  let value = item.value, !value.isEmpty else { return nil }
+            return value
+        })
+    }
+
+    /// Whether the cross-origin hop drops a token from the URL on the way (it is followed then).
+    static func dropsQueryCredential(_ proposed: URLRequest, from previous: URLRequest?) -> Bool {
+        guard let from = previous?.url, let to = proposed.url,
+              !credentialsAllowed(from: from, to: to) else { return false }
+        let tokens = queryCredentials(from)
+        return !tokens.isEmpty && removingQueryItems(valued: tokens, from: to) != to
+    }
+
+    /// Drops every query item whose value is one of the tokens, whatever its name, and keeps the
+    /// rest byte for byte: a presigned CDN URL breaks when its signature is encoded differently.
+    static func removingQueryItems(valued tokens: Set<String>, from url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let items = components.percentEncodedQueryItems else { return url }
+        let kept = items.filter { item in
+            !tokens.contains(item.value.flatMap { $0.removingPercentEncoding ?? $0 } ?? "")
+        }
+        guard kept.count != items.count else { return url }
+        components.percentEncodedQueryItems = kept.isEmpty ? nil : kept
+        return components.url ?? url
+    }
+
+    /// A token anywhere in the URL, also percent-encoded inside another parameter (`?rd=`), up to
+    /// three layers deep.
+    static func contains(_ tokens: Set<String>, in url: URL) -> Bool {
+        var text = url.absoluteString
+        for _ in 0..<4 {
+            if tokens.contains(where: { text.contains($0) }) { return true }
+            guard let decoded = text.removingPercentEncoding, decoded != text else { return false }
+            text = decoded
+        }
+        return false
     }
 
     /// The request to follow, or nil to refuse the hop (the 3xx is then the response).
+    ///
+    /// A hop to another origin loses the credential headers and, since Sodalite#249, the token in
+    /// the URL, and is followed. Refusing it outright (1.1.0 build 13) blanked every poster on a
+    /// server whose artwork answers with a redirect to an image host. Jellyfin's image endpoints
+    /// need no token, so the image host still answers.
     static func redirect(_ proposed: URLRequest, from previous: URLRequest?) -> URLRequest? {
         guard let from = previous?.url, let to = proposed.url else { return proposed }
         guard refusal(proposed, from: previous) == nil else { return nil }
@@ -283,6 +331,8 @@ nonisolated enum RedirectPolicy {
             }
         } else {
             for name in credentialHeaders { request.setValue(nil, forHTTPHeaderField: name) }
+            let tokens = queryCredentials(from)
+            if !tokens.isEmpty { request.url = removingQueryItems(valued: tokens, from: to) }
         }
         return request
     }
@@ -319,10 +369,18 @@ extension ServerTrustDelegate {
         case .tokenInQuery:
             LogTap.shared.note("[http] refused to carry a token in the URL from \(previous?.url?.host() ?? "?") to \(request.url?.host() ?? "?")")
         case nil:
-            break
+            if RedirectPolicy.dropsQueryCredential(request, from: previous) {
+                let pair = "\(previous?.url?.host() ?? "?") to \(request.url?.host() ?? "?")"
+                // Once per host pair: every poster on such a server takes this hop.
+                if Self.droppedTokenHops.withLock({ $0.insert(pair).inserted }) {
+                    LogTap.shared.note("[http] followed a redirect from \(pair) without the URL token")
+                }
+            }
         }
         completionHandler(RedirectPolicy.redirect(request, from: previous))
     }
+
+    private static let droppedTokenHops = Mutex<Set<String>>([])
 }
 
 /// The keychain half of the pin store.
