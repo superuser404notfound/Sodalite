@@ -632,12 +632,13 @@ struct StatsOverlayView: View {
         }
     }
 
-    /// "bwdif (CPU) → 25 fps": the filter, where it runs, and the rate it hands the display.
+    /// "bwdif (CPU) → 25 fps": the filter, where it runs, and the rate it hands the display. Inverse
+    /// telecine (AE#853) leads with "IVTC +", and its output is film at 4/5 of the source rate.
     static func deinterlaceLabel(_ deinterlace: VideoDeinterlace, sourceFrameRate: Double?) -> String {
-        let label = "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
+        let label = (deinterlace.inverseTelecine ? "IVTC + " : "")
+            + "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
         guard let rate = sourceFrameRate, rate > 0 else { return label }
-        let output = rate * Double(deinterlace.outputFramesPerSourceFrame)
-        return label + " → " + FrameRateFormat.fps(output)
+        return label + " → " + FrameRateFormat.fps(rate * deinterlace.outputFrameRateFactor)
     }
 
     /// The engine's declared VIDEO bitrate when the container carries one; the source-wide figure from
