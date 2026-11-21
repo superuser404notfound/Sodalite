@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import Security
+import Synchronization
 
 /// The SHA-256 of a certificate, in the two forms this app needs it: one to compare, one to read.
 nonisolated enum CertificateFingerprint {
@@ -248,43 +249,142 @@ nonisolated enum RedirectPolicy {
     /// the token there instead of in a header.
     static let credentialQueryItems: Set<String> = ["api_key", "apikey", "x-emby-token"]
 
-    /// Why a hop is refused, nil when it may be followed.
+    /// Why a hop is refused.
     enum Refusal: Equatable {
         case downgrade
-        /// The URL itself carries the token, so stripping headers protects nothing: a forward-auth
-        /// SSO page (`?rd=<the whole URL>`) or a moved domain would log it (audit NET-209).
-        case tokenInQuery
+        /// The next URL would still carry the token after the items that hold it are dropped, for
+        /// example a forward-auth SSO page that wraps the whole URL in `?rd=` (audit NET-209).
+        case tokenInURL
     }
 
-    static func refusal(_ proposed: URLRequest, from previous: URLRequest?) -> Refusal? {
-        guard let from = previous?.url, let to = proposed.url else { return nil }
-        if from.scheme?.lowercased() == "https", to.scheme?.lowercased() == "http" { return .downgrade }
-        if !credentialsAllowed(from: from, to: to), carriesQueryCredential(from) { return .tokenInQuery }
-        return nil
+    enum Decision: Equatable {
+        /// `leftURLTokenBehind`: the previous URL carried a token in its query that this hop does
+        /// not take along.
+        case follow(URLRequest, leftURLTokenBehind: Bool)
+        case refuse(Refusal)
     }
 
-    static func carriesQueryCredential(_ url: URL) -> Bool {
-        URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains {
-            credentialQueryItems.contains($0.name.lowercased()) && !($0.value ?? "").isEmpty
-        } ?? false
-    }
-
-    /// The request to follow, or nil to refuse the hop (the 3xx is then the response).
-    static func redirect(_ proposed: URLRequest, from previous: URLRequest?) -> URLRequest? {
-        guard let from = previous?.url, let to = proposed.url else { return proposed }
-        guard refusal(proposed, from: previous) == nil else { return nil }
+    /// The one place a redirect is judged; `refusal` and `redirect` read from it.
+    ///
+    /// A hop to another origin loses the credential headers and every query item whose value is
+    /// the token, and is followed. Refusing it outright (1.1.0 build 13) blanked every poster on a
+    /// server whose artwork answers with a redirect to an image host (Sodalite#249). Jellyfin's
+    /// image endpoints need no token, so the image host still answers.
+    static func decide(_ proposed: URLRequest, from previous: URLRequest?) -> Decision {
+        guard let previous, let from = previous.url, let to = proposed.url else {
+            return .follow(proposed, leftURLTokenBehind: false)
+        }
+        if from.scheme?.lowercased() == "https", to.scheme?.lowercased() == "http" { return .refuse(.downgrade) }
 
         var request = proposed
         if credentialsAllowed(from: from, to: to) {
             for name in credentialHeaders {
-                if let value = previous?.value(forHTTPHeaderField: name) {
+                if let value = previous.value(forHTTPHeaderField: name) {
                     request.setValue(value, forHTTPHeaderField: name)
                 }
             }
-        } else {
-            for name in credentialHeaders { request.setValue(nil, forHTTPHeaderField: name) }
+            return .follow(request, leftURLTokenBehind: false)
         }
-        return request
+
+        for name in credentialHeaders { request.setValue(nil, forHTTPHeaderField: name) }
+        let urlTokens = queryCredentials(from)
+        let tokens = urlTokens.union(headerCredentials(previous))
+        guard !tokens.isEmpty else { return .follow(request, leftURLTokenBehind: false) }
+        let stripped = removingQueryItems(valued: tokens, from: to)
+        if contains(tokens, in: stripped) { return .refuse(.tokenInURL) }
+        request.url = stripped
+        return .follow(request, leftURLTokenBehind: !urlTokens.isEmpty)
+    }
+
+    static func refusal(_ proposed: URLRequest, from previous: URLRequest?) -> Refusal? {
+        if case .refuse(let reason) = decide(proposed, from: previous) { return reason }
+        return nil
+    }
+
+    /// The request to follow, or nil to refuse the hop (the 3xx is then the response).
+    static func redirect(_ proposed: URLRequest, from previous: URLRequest?) -> URLRequest? {
+        if case .follow(let request, _) = decide(proposed, from: previous) { return request }
+        return nil
+    }
+
+    /// The token values the URL carries in a query item Jellyfin reads one from, lowercased
+    /// (Jellyfin compares tokens without case).
+    static func queryCredentials(_ url: URL) -> Set<String> {
+        let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        return Set(items.compactMap { item in
+            guard credentialQueryItems.contains(item.name.lowercased()),
+                  let value = item.value, !value.isEmpty else { return nil }
+            return value.lowercased()
+        })
+    }
+
+    /// Tokens and cookie values the request sends in headers, lowercased. A proxy that copies one
+    /// into the Location would otherwise hand it to the other host in the URL.
+    static func headerCredentials(_ request: URLRequest) -> Set<String> {
+        var tokens = Set<String>()
+        for name in ["X-Emby-Token", "X-MediaBrowser-Token"] {
+            if let value = request.value(forHTTPHeaderField: name), !value.isEmpty { tokens.insert(value.lowercased()) }
+        }
+        for name in ["Authorization", "X-Emby-Authorization"] {
+            guard let value = request.value(forHTTPHeaderField: name),
+                  let range = value.range(of: #"Token="([^"]+)""#, options: .regularExpression) else { continue }
+            tokens.insert(value[range].dropFirst(7).dropLast().lowercased())
+        }
+        // Only long cookie values, so a short flag cannot match some unrelated part of the URL.
+        for pair in (request.value(forHTTPHeaderField: "Cookie") ?? "").split(separator: ";") {
+            guard let equals = pair.firstIndex(of: "=") else { continue }
+            let value = pair[pair.index(after: equals)...].trimmingCharacters(in: .whitespaces)
+            if value.count >= 16 {
+                tokens.insert((value.removingPercentEncoding ?? value).lowercased())
+            }
+        }
+        return tokens
+    }
+
+    /// Drops every query item whose value is one of the tokens, whatever its name, and keeps the
+    /// rest byte for byte: a presigned CDN URL breaks when its signature is encoded differently.
+    static func removingQueryItems(valued tokens: Set<String>, from url: URL) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let items = components.percentEncodedQueryItems else { return url }
+        let kept = items.filter { item in
+            !tokens.contains((item.value.flatMap { $0.removingPercentEncoding ?? $0 } ?? "").lowercased())
+        }
+        guard kept.count != items.count else { return url }
+        components.percentEncodedQueryItems = kept.isEmpty ? nil : kept
+        return components.url ?? url
+    }
+
+    /// A token anywhere in the URL, in any case: also percent-encoded inside another parameter
+    /// (`?rd=`, up to three layers) or base64 in one (an SSO `state`).
+    static func contains(_ tokens: Set<String>, in url: URL) -> Bool {
+        var text = url.absoluteString
+        for _ in 0..<4 {
+            if matches(tokens, text) { return true }
+            if base64Values(in: text).contains(where: { matches(tokens, $0) }) { return true }
+            guard let decoded = text.removingPercentEncoding, decoded != text else { return false }
+            text = decoded
+        }
+        return false
+    }
+
+    private static func matches(_ tokens: Set<String>, _ text: String) -> Bool {
+        let lowered = text.lowercased()
+        return tokens.contains { lowered.contains($0) }
+    }
+
+    /// Every run of base64 or base64url characters long enough to hold a token, decoded, plus a
+    /// percent-decoded copy of each. `=` ends a run (it is the separator in `state=`, the padding
+    /// is put back), and a run with a `/` is tried whole and piece by piece, since the path's own
+    /// slashes join it to its neighbours.
+    private static func base64Values(in text: String) -> [String] {
+        let runs = text.split { !($0.isASCII && ($0.isLetter || $0.isNumber || "+/-_".contains($0))) }
+        let candidates = runs.flatMap { run in [run] + (run.contains("/") ? run.split(separator: "/") : []) }
+        return candidates.filter { $0.count >= 24 }.flatMap { run -> [String] in
+            var b64 = run.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+            b64 += String(repeating: "=", count: (4 - b64.count % 4) % 4)
+            guard let data = Data(base64Encoded: b64), let decoded = String(data: data, encoding: .utf8) else { return [] }
+            return [decoded, decoded.removingPercentEncoding ?? decoded]
+        }
     }
 
     /// Same host, and either the same scheme and port or an http to https upgrade.
@@ -313,16 +413,34 @@ extension ServerTrustDelegate {
         completionHandler: @escaping (URLRequest?) -> Void
     ) {
         let previous = task.currentRequest ?? task.originalRequest
-        switch RedirectPolicy.refusal(request, from: previous) {
-        case .downgrade:
-            LogTap.shared.note("[http] refused a redirect from https to http at \(request.url?.host() ?? "?")")
-        case .tokenInQuery:
-            LogTap.shared.note("[http] refused to carry a token in the URL from \(previous?.url?.host() ?? "?") to \(request.url?.host() ?? "?")")
-        case nil:
-            break
+        let fromHost = previous?.url?.host() ?? "?", toHost = request.url?.host() ?? "?"
+        switch RedirectPolicy.decide(request, from: previous) {
+        case .refuse(.downgrade):
+            LogTap.shared.note("[http] refused a redirect from https to http at \(toHost)")
+            completionHandler(nil)
+        case .refuse(.tokenInURL):
+            LogTap.shared.note("[http] refused to carry a token in the URL from \(fromHost) to \(toHost)")
+            completionHandler(nil)
+        case .follow(let followed, let leftURLTokenBehind):
+            if leftURLTokenBehind, Self.shouldLogDroppedToken("\(fromHost) to \(toHost)") {
+                LogTap.shared.note("[http] followed a redirect from \(fromHost) to \(toHost) without the URL token")
+            }
+            completionHandler(followed)
         }
-        completionHandler(RedirectPolicy.redirect(request, from: previous))
     }
+
+    /// Every poster on such a server takes the same hop, so the line comes once a minute per host
+    /// pair: often enough to still be in the 300-line log when someone looks.
+    private static func shouldLogDroppedToken(_ pair: String) -> Bool {
+        let now = ContinuousClock.now
+        return droppedTokenHops.withLock { last in
+            if let previous = last[pair], now - previous < .seconds(60) { return false }
+            last[pair] = now
+            return true
+        }
+    }
+
+    private static let droppedTokenHops = Mutex<[String: ContinuousClock.Instant]>([:])
 }
 
 /// The keychain half of the pin store.
