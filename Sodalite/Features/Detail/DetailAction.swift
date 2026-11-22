@@ -15,6 +15,7 @@ import Foundation
 enum DetailAction: Hashable {
     case play
     case version
+    case tracks
     case shuffle
     case replay
     case trailer
