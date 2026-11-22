@@ -685,6 +685,28 @@ final class PlayerViewModel {
     /// item plays, nothing for any item an episode switch or a replacement brought in.
     var launchPinnedSourceID: String? { item.id == launchItemID ? preferredMediaSourceID : nil }
 
+    /// The tracks picked on the detail page (Sodalite#250). Bound to the launch item like the version.
+    let launchTrackPick: LaunchTrackPick?
+    /// Per LAUNCH, like `prerollsConsumed`: once applied, a retry or a rung switch keeps what the
+    /// viewer has since chosen in the player instead of applying the page's pick again.
+    private(set) var launchTrackPickConsumed = false
+
+    /// The page's pick while it still applies: the launch item, its first resolved load.
+    var pendingLaunchTrackPick: LaunchTrackPick? {
+        guard !launchTrackPickConsumed, item.id == launchItemID,
+              let launchTrackPick, launchTrackPick.itemID == item.id, !launchTrackPick.isEmpty else { return nil }
+        return launchTrackPick
+    }
+
+    /// The page's pick has been applied: the audio is remembered the way an in-player pick is (the
+    /// subtitle records itself through `selectSubtitleTrack(userInitiated:)`), and it never applies again.
+    func recordAppliedLaunchPick(audioTrack: TrackInfo?) {
+        if pendingLaunchTrackPick?.audio != nil, let audioTrack, let key = memoryScopeKey {
+            trackMemory?.recordAudio(TrackSelectionMatcher.audioSignature(audioTrack), for: key)
+        }
+        launchTrackPickConsumed = true
+    }
+
     /// Sodalite#81: the downloaded file this session plays instead of asking the server. Changes on an
     /// auto-advance to another downloaded episode.
     var localDownload: DownloadedItem?
@@ -1091,6 +1113,7 @@ final class PlayerViewModel {
         canTranscodeAudio: Bool = true,
         cachedPlaybackInfo: PrefetchedPlaybackInfo? = nil,
         preferredMediaSourceID: String? = nil,
+        launchTrackPick: LaunchTrackPick? = nil,
         playQueue: [JellyfinItem] = [],
         isLiveSession: Bool = false,
         liveChannel: JellyfinChannel? = nil,
@@ -1121,6 +1144,7 @@ final class PlayerViewModel {
         self.cachedPlaybackInfo = cachedPlaybackInfo
         self.preferredMediaSourceID = preferredMediaSourceID
         self.launchItemID = item.id
+        self.launchTrackPick = launchTrackPick
         self.playQueue = playQueue
         self.queueIndex = 0
         self.isLiveSession = isLiveSession
@@ -1488,14 +1512,17 @@ final class PlayerViewModel {
             // A remembered pick (Sodalite#46) outranks the global preference here. Where Jellyfin's
             // indices are the file's own, the remembered track itself goes in too, so a second track
             // of the same language opens on the first frame instead of reloading in resolveInitialTracks.
-            let rememberedEntry = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
+            // A pick from the detail page (Sodalite#250) outranks both on its first load.
+            let rememberedEntry = initialTrackEntry()
             let rememberedAudioLanguage = rememberedEntry?.audio?.language
             let preferredAudio = rememberedAudioLanguage ?? effectivePreferredAudioLanguage()
             // subtitlePlayMethod, not activePlayMethod: a transcoded download loads as direct play
             // but its streams are renumbered, and only the subtitle route knows the file's origin.
             let rememberedAudioIndex = subtitlePlayMethod == .directPlay
-                ? TrackSelectionMatcher.preloadAudioStreamIndex(
-                    entry: rememberedEntry, mediaStreams: sourceMediaStreams)
+                ? pendingLaunchTrackPick?.preloadAudioIndex(
+                    playedSourceID: launchPickSourceID, isDirectPlay: true, mediaStreams: sourceMediaStreams)
+                    ?? TrackSelectionMatcher.preloadAudioStreamIndex(
+                        entry: rememberedEntry, mediaStreams: sourceMediaStreams)
                 : nil
             // AE#88: declare external Jellyfin subs at load so they list in engine.subtitleTracks
             // and join the native WebVTT renditions (PiP / external display); the map routes UI selections to engine ids.
@@ -3144,17 +3171,33 @@ final class PlayerViewModel {
         return subtitleStreams.contains { $0.index == index } ? index : nil
     }
 
+    /// The remembered entry, with the detail page's pick laid over it while that pick is pending.
+    private func initialTrackEntry() -> TrackMemoryEntry? {
+        let remembered = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
+        return pendingLaunchTrackPick.map { $0.overriding(remembered) } ?? remembered
+    }
+
+    /// The source the page's pick indices may be read against. A download keeps its own numbering
+    /// when it was transcoded, so a local session reads none of them and matches by signature.
+    private var launchPickSourceID: String? { isLocalSession ? nil : mediaSourceID }
+
     private func resolveInitialTracks(audioLanguage: String?) {
-        let entry = memoryScopeKey.flatMap { trackMemory?.entry(for: $0) }
-        let plan = TrackSelectionMatcher.plan(
-            entry: entry,
+        let pick = pendingLaunchTrackPick
+        var plan = TrackSelectionMatcher.plan(
+            entry: initialTrackEntry(),
             subtitleStreams: subtitleStreams,
             audioTracks: player.audioTracks
         )
+        if let pick {
+            plan = pick.pinning(plan, playedSourceID: launchPickSourceID,
+                                isDirectPlay: subtitlePlayMethod == .directPlay,
+                                mediaStreams: sourceMediaStreams, subtitleStreams: subtitleStreams)
+        }
 
         // AetherEngine#919: with nothing remembered, the system's Audio Descriptions setting swaps the
-        // engine's pick for the described track of the same language.
-        let audioTrackID = plan.audioTrackID ?? (AudioDescriptionPreference.isPreferred
+        // engine's pick for the described track of the same language. A track picked on the page
+        // stands as picked.
+        let audioTrackID = plan.audioTrackID ?? (pick?.audio == nil && AudioDescriptionPreference.isPreferred
             ? TrackSelectionMatcher.describedAudio(
                 for: player.audioTracks.first { $0.id == player.activeAudioTrackIndex },
                 in: player.audioTracks)?.id
@@ -3167,13 +3210,24 @@ final class PlayerViewModel {
             player.selectAudioTrack(index: audioTrackID)
         }
 
+        // A subtitle the page picked counts as the viewer's own, so it is remembered and ends the
+        // temporary subtitle windows the way a pick in the player does.
+        let pickedSubtitle = pick?.subtitle != nil
         switch plan.subtitle {
         case .off:
-            selectSubtitleTrack(id: nil)
+            selectSubtitleTrack(id: nil, userInitiated: pickedSubtitle)
         case .select(let streamIndex):
-            selectSubtitleTrack(id: streamIndex)
+            selectSubtitleTrack(id: streamIndex, userInitiated: pickedSubtitle)
         case .fallThrough:
             applyPreferredSubtitle(forAudioLanguage: audioLanguage)
+        }
+
+        // Only a picked track that was found here is remembered; without a match the engine's own
+        // choice plays, and that is not the viewer's.
+        if pick != nil {
+            recordAppliedLaunchPick(audioTrack: plan.audioTrackID.flatMap { id in
+                player.audioTracks.first { $0.id == id }
+            })
         }
     }
 
