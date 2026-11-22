@@ -301,4 +301,44 @@ struct TrackSelectionMatcherTests {
                                               updatedAt: Date(timeIntervalSince1970: 1))
         #expect(TrackSelectionMatcher.preloadAudioStreamIndex(entry: describedEntry, mediaStreams: discRemux) == nil)
     }
+
+    // MARK: - Jellyfin audio in engine shape (Sodalite#250)
+
+    @Test("a Jellyfin audio stream signs the same way the engine track for it does")
+    func audioSignatureFromJellyfinStream() {
+        let streams = discRemux
+        let signature = TrackSelectionMatcher.audioSignature(streams[3], in: streams)
+        #expect(signature == TrackSelectionMatcher.audioSignature(
+            audio(id: 3, codec: "dts", lang: "eng", name: "English", channels: 8)))
+        #expect(signature.isForced == false)
+        #expect(signature.isExternal == false)
+    }
+
+    @Test("a commentary title on a Jellyfin stream becomes the commentary descriptor")
+    func jellyfinCommentaryDescriptor() {
+        let streams = [audioStream(index: 1, codec: "ac3", title: "Director's Commentary", channels: 2)]
+        #expect(TrackSelectionMatcher.audioSignature(streams[0], in: streams).descriptor == "commentary")
+    }
+
+    @Test("the audio list is the file's own audio, without video, subtitles or external audio")
+    func jellyfinAudioStreamsFilter() {
+        let streams = discRemux + [audioStream(index: 4, codec: "aac", channels: 2, external: true),
+                                   sub(index: 5, lang: "eng")]
+        #expect(TrackSelectionMatcher.jellyfinAudioStreams(streams).map(\.index) == [1, 2, 3])
+        #expect(TrackSelectionMatcher.jellyfinAudioStreams(nil).isEmpty)
+    }
+
+    @Test("the engine-shaped track carries the container index, not Jellyfin's")
+    func audioTrackInfoUsesContainerIndex() {
+        let streams = [sub(index: 0, lang: "eng", external: true)]
+            + discRemux.map { stream in
+                MediaStream(index: stream.index + 1, type: stream.type, codec: stream.codec,
+                            language: stream.language, displayTitle: nil, title: nil, isDefault: nil,
+                            isForced: nil, isExternal: false, height: nil, width: nil,
+                            channels: stream.channels, videoRange: nil, videoRangeType: nil,
+                            averageFrameRate: nil, realFrameRate: nil, profile: nil, bitRate: nil,
+                            dvProfile: nil)
+            }
+        #expect(TrackSelectionMatcher.audioTrackInfo(streams[3], in: streams).id == 2)
+    }
 }

@@ -151,19 +151,38 @@ enum TrackSelectionMatcher {
     /// or a remembered audio description, which Jellyfin's stream list does not mark.
     static func preloadAudioStreamIndex(entry: TrackMemoryEntry?, mediaStreams: [MediaStream]) -> Int? {
         guard let signature = entry?.audio, signature.descriptor != describedDescriptor else { return nil }
-        let tracks = mediaStreams
-            .filter { $0.type == .audio && $0.isExternal != true }
-            .map { stream in
-                TrackInfo(
-                    id: PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: stream.index, in: mediaStreams),
-                    name: stream.title ?? "",
-                    codec: stream.codec ?? "",
-                    language: stream.language,
-                    channels: stream.channels ?? 0,
-                    isDefault: stream.isDefault == true
-                )
-            }
+        let tracks = jellyfinAudioStreams(mediaStreams).map { audioTrackInfo($0, in: mediaStreams) }
         return matchAudio(signature, in: tracks)?.id
+    }
+
+    // MARK: - Jellyfin audio in engine shape
+
+    /// The file's own audio streams as Jellyfin lists them. External audio files are left out, the
+    /// engine never opens them.
+    static func jellyfinAudioStreams(_ mediaStreams: [MediaStream]?) -> [MediaStream] {
+        mediaStreams?.filter { $0.type == .audio && $0.isExternal != true } ?? []
+    }
+
+    /// A Jellyfin audio stream as the engine would list it, so a pick made before the engine has
+    /// opened anything (the detail page, the preload) signs and labels the way the player does.
+    /// Jellyfin marks no audio description, so this never claims one.
+    static func audioTrackInfo(_ stream: MediaStream, in mediaStreams: [MediaStream]) -> TrackInfo {
+        let codec = stream.codec ?? ""
+        return TrackInfo(
+            id: PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: stream.index, in: mediaStreams),
+            name: stream.title ?? "",
+            codec: codec,
+            language: stream.language,
+            channels: stream.channels ?? 0,
+            isDefault: stream.isDefault == true,
+            isAtmos: codec.lowercased() == "eac3"
+                && (stream.profile?.localizedCaseInsensitiveContains("Atmos") ?? false),
+            profile: stream.profile
+        )
+    }
+
+    static func audioSignature(_ stream: MediaStream, in mediaStreams: [MediaStream]) -> TrackSignature {
+        audioSignature(audioTrackInfo(stream, in: mediaStreams))
     }
 
     // MARK: - Plan
