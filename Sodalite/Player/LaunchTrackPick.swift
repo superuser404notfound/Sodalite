@@ -48,9 +48,11 @@ struct LaunchTrackPick: Equatable, Sendable {
     ///
     /// The subtitle menu speaks Jellyfin's indices under every play method, so a subtitle index holds
     /// whenever the picked source plays. The engine's audio ids are the container's, which only direct
-    /// play shares. "Off" needs no index and holds everywhere.
+    /// play shares, and only an id the engine actually lists is pinned: Jellyfin can name a stream the
+    /// probe skipped. "Off" needs no index and holds everywhere.
     func pinning(_ plan: TrackSelectionPlan, playedSourceID: String?, isDirectPlay: Bool,
-                 mediaStreams: [MediaStream], subtitleStreams: [MediaStream]) -> TrackSelectionPlan {
+                 mediaStreams: [MediaStream], subtitleStreams: [MediaStream],
+                 engineAudioIDs: Set<Int>) -> TrackSelectionPlan {
         var pinned = plan
         let sameSource = playsPickedSource(playedSourceID)
         switch subtitle {
@@ -64,10 +66,34 @@ struct LaunchTrackPick: Equatable, Sendable {
             break
         }
         if let audio, sameSource, isDirectPlay {
-            pinned.audioTrackID = PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: audio.streamIndex,
-                                                                        in: mediaStreams)
+            let engineID = PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: audio.streamIndex, in: mediaStreams)
+            if engineAudioIDs.contains(engineID) { pinned.audioTrackID = engineID }
         }
         return pinned
+    }
+
+    /// The audio index PlaybackInfo should name. A transcode carries only that audio, so without it
+    /// the server encodes its own default and no pick after the load can reach another track. Nil
+    /// when the pinned source is another version than the one picked against.
+    func playbackInfoAudioIndex(pinnedSourceID: String?) -> Int? {
+        guard let audio else { return nil }
+        if let pinnedSourceID, pinnedSourceID != sourceID { return nil }
+        return audio.streamIndex
+    }
+
+    /// What applying the plan put on screen of the PICKED subtitle, for track memory. Nil when the pick
+    /// did not land: an unmatched forced pick turns into "off" in the plan, and remembering that would
+    /// store the opposite of what the viewer chose.
+    func appliedSubtitle(_ plan: TrackSelectionPlan, subtitleStreams: [MediaStream]) -> RememberedSubtitle? {
+        switch (subtitle, plan.subtitle) {
+        case (.off, .off):
+            return .off
+        case (.track, .select(let index)):
+            return subtitleStreams.first { $0.index == index }
+                .map { .track(TrackSelectionMatcher.subtitleSignature($0)) }
+        default:
+            return nil
+        }
     }
 
     private func playsPickedSource(_ playedSourceID: String?) -> Bool {

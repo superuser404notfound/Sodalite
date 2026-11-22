@@ -85,18 +85,64 @@ struct LaunchTrackPickTests {
         let plan = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: nil)
         let pinned = pick(subtitle: .track(streamIndex: 3, signature: english))
             .pinning(plan, playedSourceID: "src-a", isDirectPlay: false, mediaStreams: streams,
-                     subtitleStreams: [streams[0], streams[3], streams[4]])
+                     subtitleStreams: [streams[0], streams[3], streams[4]], engineAudioIDs: [0, 1])
         #expect(pinned.subtitle == .select(streamIndex: 3))
     }
 
     @Test func pinningUsesAudioIndexOnlyUnderDirectPlay() {
         let plan = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: 0)
         let direct = pick(audio: ac3Pick())
-            .pinning(plan, playedSourceID: "src-a", isDirectPlay: true, mediaStreams: streams, subtitleStreams: [])
+            .pinning(plan, playedSourceID: "src-a", isDirectPlay: true, mediaStreams: streams, subtitleStreams: [], engineAudioIDs: [0, 1])
         #expect(direct.audioTrackID == 1)
         let transcode = pick(audio: ac3Pick())
-            .pinning(plan, playedSourceID: "src-a", isDirectPlay: false, mediaStreams: streams, subtitleStreams: [])
+            .pinning(plan, playedSourceID: "src-a", isDirectPlay: false, mediaStreams: streams, subtitleStreams: [], engineAudioIDs: [0, 1])
         #expect(transcode.audioTrackID == 0)
+    }
+
+    /// Jellyfin can list an audio stream the engine's probe did not (an unsupported codec); selecting
+    /// an id the engine does not have would reload for nothing.
+    @Test func pinningKeepsThePlanWhenTheEngineLacksTheTrack() {
+        let plan = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: 0)
+        let pinned = pick(audio: ac3Pick())
+            .pinning(plan, playedSourceID: "src-a", isDirectPlay: true, mediaStreams: streams,
+                     subtitleStreams: [], engineAudioIDs: [0])
+        #expect(pinned.audioTrackID == 0)
+    }
+
+    // MARK: - PlaybackInfo
+
+    /// A transcode only carries the audio PlaybackInfo named, so the picked index has to go there.
+    @Test func playbackInfoNamesThePickedAudioOfThePinnedSource() {
+        #expect(pick(audio: ac3Pick()).playbackInfoAudioIndex(pinnedSourceID: "src-a") == 2)
+        #expect(pick(audio: ac3Pick()).playbackInfoAudioIndex(pinnedSourceID: nil) == 2)
+        #expect(pick(audio: ac3Pick()).playbackInfoAudioIndex(pinnedSourceID: "src-b") == nil)
+        #expect(pick(subtitle: .off).playbackInfoAudioIndex(pinnedSourceID: "src-a") == nil)
+    }
+
+    // MARK: - What gets remembered
+
+    @Test func anOffPickAppliedAsOffIsRemembered() {
+        let plan = TrackSelectionPlan(subtitle: .off, audioTrackID: nil)
+        #expect(pick(subtitle: .off).appliedSubtitle(plan, subtitleStreams: streams) == .off)
+    }
+
+    @Test func aTrackPickRemembersTheStreamThatWasSelected() {
+        let english = TrackSelectionMatcher.subtitleSignature(streams[3])
+        let plan = TrackSelectionPlan(subtitle: .select(streamIndex: 3), audioTrackID: nil)
+        #expect(pick(subtitle: .track(streamIndex: 3, signature: english))
+            .appliedSubtitle(plan, subtitleStreams: streams) == .track(english))
+    }
+
+    /// An unmatched forced pick becomes "off" in the plan; remembering that would store the opposite
+    /// of what the viewer picked.
+    @Test func anUnmatchedTrackPickRemembersNothing() {
+        let forced = TrackSignature(language: "eng", isForced: true, isExternal: false, codec: "pgssub",
+                                    descriptor: "forced", channels: nil)
+        let off = TrackSelectionPlan(subtitle: .off, audioTrackID: nil)
+        #expect(pick(subtitle: .track(streamIndex: 7, signature: forced)).appliedSubtitle(off, subtitleStreams: streams) == nil)
+        let fallThrough = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: nil)
+        #expect(pick(subtitle: .track(streamIndex: 7, signature: forced)).appliedSubtitle(fallThrough, subtitleStreams: streams) == nil)
+        #expect(pick(audio: ac3Pick()).appliedSubtitle(off, subtitleStreams: streams) == nil)
     }
 
     @Test func pinningIgnoresIndexOfAnotherSource() {
@@ -104,7 +150,7 @@ struct LaunchTrackPickTests {
         let plan = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: nil)
         let pinned = pick(audio: ac3Pick(), subtitle: .track(streamIndex: 3, signature: english))
             .pinning(plan, playedSourceID: "src-b", isDirectPlay: true, mediaStreams: streams,
-                     subtitleStreams: [streams[3]])
+                     subtitleStreams: [streams[3]], engineAudioIDs: [0, 1])
         #expect(pinned == plan)
     }
 
@@ -113,14 +159,14 @@ struct LaunchTrackPickTests {
         let plan = TrackSelectionPlan(subtitle: .off, audioTrackID: nil)
         let pinned = pick(subtitle: .track(streamIndex: 9, signature: english))
             .pinning(plan, playedSourceID: "src-a", isDirectPlay: true, mediaStreams: streams,
-                     subtitleStreams: [streams[3]])
+                     subtitleStreams: [streams[3]], engineAudioIDs: [0, 1])
         #expect(pinned == plan)
     }
 
     @Test func pinningTurnsAnOffPickIntoOff() {
         let plan = TrackSelectionPlan(subtitle: .fallThrough, audioTrackID: nil)
         let pinned = pick(subtitle: .off)
-            .pinning(plan, playedSourceID: "src-b", isDirectPlay: false, mediaStreams: streams, subtitleStreams: [])
+            .pinning(plan, playedSourceID: "src-b", isDirectPlay: false, mediaStreams: streams, subtitleStreams: [], engineAudioIDs: [0, 1])
         #expect(pinned.subtitle == .off)
     }
 
@@ -156,7 +202,7 @@ struct LaunchTrackPickTests {
 
     @Test func pendingPickIsGoneOnceConsumed() throws {
         let vm = try makeViewModel(pick: pick(audio: ac3Pick()))
-        vm.recordAppliedLaunchPick(audioTrack: nil)
+        vm.recordAppliedLaunchPick(audioTrack: nil, subtitle: nil)
         #expect(vm.pendingLaunchTrackPick == nil)
         vm.resetSessionState(.sameItemReload)
         #expect(vm.pendingLaunchTrackPick == nil)
@@ -164,17 +210,18 @@ struct LaunchTrackPickTests {
 
     @Test func pickIsRecordedLikeAnInPlayerPick() throws {
         let memory = TrackSelectionMemory(store: UserDefaults(suiteName: "test.launchpick.mem.\(UUID())")!)
-        let vm = try makeViewModel(pick: pick(audio: ac3Pick()), memory: memory)
+        let vm = try makeViewModel(pick: pick(audio: ac3Pick(), subtitle: .off), memory: memory)
         let engineTrack = TrackSelectionMatcher.audioTrackInfo(streams[2], in: streams)
-        vm.recordAppliedLaunchPick(audioTrack: engineTrack)
+        vm.recordAppliedLaunchPick(audioTrack: engineTrack, subtitle: .off)
         let key = TrackSelectionMemory.scopeKey(userID: "user", itemID: "e1", seriesID: "show")
         #expect(memory.entry(for: key)?.audio == TrackSelectionMatcher.audioSignature(engineTrack))
+        #expect(memory.entry(for: key)?.subtitle == .off)
     }
 
     @Test func pickIsNotRecordedWhenMemoryIsOff() throws {
         let memory = TrackSelectionMemory(store: UserDefaults(suiteName: "test.launchpick.off.\(UUID())")!)
         let vm = try makeViewModel(pick: pick(audio: ac3Pick()), memory: memory, remember: false)
-        vm.recordAppliedLaunchPick(audioTrack: TrackSelectionMatcher.audioTrackInfo(streams[2], in: streams))
+        vm.recordAppliedLaunchPick(audioTrack: TrackSelectionMatcher.audioTrackInfo(streams[2], in: streams), subtitle: .off)
         #expect(memory.entries.isEmpty)
         #expect(vm.pendingLaunchTrackPick == nil)
     }

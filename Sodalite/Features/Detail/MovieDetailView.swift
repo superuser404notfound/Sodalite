@@ -133,7 +133,11 @@ struct MovieDetailView: View {
         .hidesToolbarBackground()
         .downloadRungDialog(target: $downloadTarget)
         .onChange(of: showPlayer) { _, isShowing in
-            if !isShowing { streamFromServer = false }
+            guard !isShowing else { return }
+            streamFromServer = false
+            // The pick was for that start. What the viewer chose then lives in track memory, and a
+            // Resume must not override a change made in the player since (Sodalite#250).
+            trackPick = TrackPickSelection()
         }
         .overlay {
             if let userID = sessionUserID {
@@ -631,13 +635,14 @@ struct MovieDetailView: View {
         }
     }
 
-    /// The version in force, and its server once other servers' copies are on offer, since the
-    /// same "4K" can then mean either one.
     /// The page's track pick for the item Play hands the player, read against the version it starts.
     private var launchTrackPick: LaunchTrackPick? {
         let target = viewModel.map { $0.resolvedForPlayback($0.item) } ?? item
         return trackPick.resolved(for: target, source: versionSelection.resolvedSource(for: target))
     }
+
+    /// The version in force, and its server once other servers' copies are on offer, since the
+    /// same "4K" can then mean either one.
 
     private func versionButtonSubtitle(vm: DetailViewModel) -> String? {
         let sources = vm.item.selectableMediaSources

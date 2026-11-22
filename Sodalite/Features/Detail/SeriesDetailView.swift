@@ -282,7 +282,11 @@ struct SeriesDetailView: View {
         .hidesToolbarBackground()
         .downloadRungDialog(target: $downloadTarget)
         .onChange(of: showPlayer) { _, isShowing in
-            if !isShowing { streamFromServer = false }
+            guard !isShowing else { return }
+            streamFromServer = false
+            // The pick was for that start. What the viewer chose then lives in track memory, and a
+            // Resume must not override a change made in the player since (Sodalite#250).
+            trackPick = TrackPickSelection()
         }
         .overlay {
             if let userID = sessionUserID {
@@ -297,10 +301,10 @@ struct SeriesDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: versionSelection.preferredSourceID(for: playItem.map(mediaDetail(for:))),
-                    launchTrackPick: playItem.map(mediaDetail(for:)).flatMap {
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: playItemMedia),
+                    launchTrackPick: playOriginatedFromPlayButton ? playItemMedia.flatMap {
                         trackPick.resolved(for: $0, source: versionSelection.resolvedSource(for: $0))
-                    },
+                    } : nil,
                     playQueue: playQueue,
                     localDownload: streamFromServer ? nil : playItem.flatMap { dependencies.downloadStore.completedItem($0.id) },
                     downloadStore: dependencies.downloadStore
@@ -1420,6 +1424,13 @@ struct SeriesDetailView: View {
         LogTap.shared.note("[EpisodeRow] advance_refocus from=\(finished.id) to=\(successor.id)")
         pendingEpisodeFocusIsReturn = true
         pendingEpisodeFocus = successor.id
+    }
+
+    /// What the launcher reads versions from. The page's pills belong to its Play and Restart buttons,
+    /// so an episode card keeps the list entry it always played, even the card of the same episode.
+    private var playItemMedia: JellyfinItem? {
+        guard let playItem else { return nil }
+        return playOriginatedFromPlayButton ? mediaDetail(for: playItem) : playItem
     }
 
     /// `episode` with its files: the fetched detail of the show page's play target when that is the
