@@ -129,4 +129,42 @@ struct TrackPickSelectionTests {
         #expect(TrackPickSelection.isOffered(for: try source("\(video),\(audio1),\(sub)")))
         #expect(!TrackPickSelection.isOffered(for: nil))
     }
+
+    // MARK: - The pill's label
+
+    /// The simulator's locale decides the words, so the expectations are built from the catalog and
+    /// the locale's own language names rather than from English.
+    private func language(_ code: String) -> String {
+        Locale.current.localizedString(forLanguageCode: code) ?? code
+    }
+
+    @Test func pillSubtitleAutomatic() throws {
+        let e1 = try item()
+        #expect(TrackPickSelection().pillSubtitle(for: e1, source: source("src-a", in: e1)) == String(localized: "detail.tracks.automatic"))
+    }
+
+    @Test func pillSubtitleAudioOnly() throws {
+        let e1 = try item()
+        let a = source("src-a", in: e1)
+        var selection = TrackPickSelection()
+        selection.chooseAudio(stream(2, in: a), item: e1, source: a)
+        #expect(selection.pillSubtitle(for: e1, source: a) == language("ger"))
+    }
+
+    @Test func pillSubtitleBoth() throws {
+        let e1 = try item()
+        let a = source("src-a", in: e1)
+        var selection = TrackPickSelection()
+        selection.chooseAudio(stream(2, in: a), item: e1, source: a)
+        selection.chooseSubtitle(.stream(stream(3, in: a)), item: e1, source: a)
+        #expect(selection.pillSubtitle(for: e1, source: a) == language("ger") + " · " + String(localized: "detail.tracks.subtitleSummary \(language("eng"))"))
+    }
+
+    @Test func pillSubtitleOff() throws {
+        let e1 = try item()
+        let a = source("src-a", in: e1)
+        var selection = TrackPickSelection()
+        selection.chooseSubtitle(.off, item: e1, source: a)
+        #expect(selection.pillSubtitle(for: e1, source: a) == String(localized: "detail.tracks.subtitlesOff"))
+    }
 }
