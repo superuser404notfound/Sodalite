@@ -157,7 +157,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Direct Play for almost everything**: H.264, HEVC (including Main10), AV1, VP9, VP8, MPEG-4 Part 2 (XviD / DivX), MPEG-2, VC-1, old Microsoft formats (MS-MPEG4 v1 to v3, WMV1 to WMV3) and old Flash video (Sorenson Spark, On2 VP6). Containers: MKV, MP4, MOV, AVI, MPEG-TS, M2TS, VOB, 3GP, WebM, OGG, ASF / WMV and FLV, with their audio. Only rare codecs like Theora and RealVideo still go through the server.
 - **Resume anywhere**: pick up where you left off, on any device. A Restart button plays from the start instead.
 - **Quick return**: close a title and resume it later while the app is still open, and it starts right away from what was already loaded instead of fetching it again. Switching profile or server drops what was kept.
-- **Pick your version**: when a title has several versions (rips, resolutions, editions), choose which one to play.
+- **Pick your version**: when a title has several versions (rips, resolutions, editions), choose which one to play. Episodes too, also from the show's page for the episode Play starts.
 - **Shuffle a series**: random episodes across all seasons.
 - **Trailers**: local trailers play from your server. On iPhone, iPad and Mac, a title without one plays its YouTube trailer instead.
 - **Pre-rolls** (on by default, Settings → Playback): if your server hands out pre-roll videos, for example through the Local Intros plugin, they play before a movie or episode that starts from the beginning. Skip Pre-roll jumps to the next one or straight to the movie. A resume never plays them.
@@ -194,6 +194,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Search and download subtitles** in the player when your server has none. Matches by file hash get a badge.
 - **Dual subtitles**: show a second text track above the first, for example the original plus a translation.
 - **Audio track switcher**: change language or mix while you watch.
+- **Pick tracks before Play**: the Audio & Subtitles button next to Version on a movie or episode page picks the audio and subtitles of the version Play starts. The pick plays from the first second and is remembered like one made in the player. Untouched, it says Automatic and the player chooses as usual.
 - **Remembered tracks**: your audio and subtitle choice comes back for that movie, or for the whole series. Matched by language and type, not track number, and synced with your profile. A remembered track plays from the first second, even when the file has another track in the same language before it.
 
 ### Player controls

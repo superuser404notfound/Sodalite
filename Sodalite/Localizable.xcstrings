@@ -74043,6 +74043,330 @@
         }
       }
     },
+    "changelog.1_2_0.detailPages.body" : {
+      "comment" : "What's New 1.2.0: body of the detail pages highlight (Sodalite#250, audio and subtitles before Play)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk a titulky si vyberete ještě před stisknutím Přehrát, novým tlačítkem Zvuk a titulky vedle Verze na stránkách filmů a epizod. Vaše volba hraje od první sekundy a zapamatuje se stejně jako volba v přehrávači. Stránka seriálu teď nabízí obě tlačítka i pro epizodu, kterou Přehrát spustí."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg lyd og undertekster, før du trykker på Afspil, med den nye knap Lyd og undertekster ved siden af Version på film- og afsnitssider. Dit valg spiller fra første sekund og huskes som et valg i afspilleren. En series side tilbyder nu begge knapper til det afsnit, Afspil starter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle Ton und Untertitel, bevor du auf Abspielen drückst, mit der neuen Taste Audio & Untertitel neben Version auf Film- und Episodenseiten. Deine Wahl läuft ab der ersten Sekunde und wird gemerkt wie eine Wahl im Player. Auch die Seite einer Serie bietet beide Tasten jetzt für die Folge an, die Abspielen startet."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιλέξτε ήχο και υπότιτλους πριν πατήσετε Αναπαραγωγή, με το νέο κουμπί Ήχος και υπότιτλοι δίπλα στην Έκδοση στις σελίδες ταινιών και επεισοδίων. Η επιλογή σας παίζει από το πρώτο δευτερόλεπτο και απομνημονεύεται όπως μια επιλογή στο πρόγραμμα αναπαραγωγής. Η σελίδα μιας σειράς προσφέρει πλέον και τα δύο κουμπιά για το επεισόδιο που ξεκινά η Αναπαραγωγή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick the audio and subtitles before you press Play, with the new Audio & Subtitles button next to Version on movie and episode pages. Your pick plays from the first second and is remembered like one made in the player. A show's page now offers both buttons for the episode Play starts, too."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige el audio y los subtítulos antes de pulsar Reproducir, con el nuevo botón Audio y subtítulos junto a Versión en las páginas de películas y episodios. Tu elección suena desde el primer segundo y se recuerda como una hecha en el reproductor. La página de una serie ofrece ahora ambos botones para el episodio que inicia Reproducir."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitse ääni ja tekstitys ennen kuin painat Toista, uudella Ääni ja tekstitykset -painikkeella Versio-painikkeen vieressä elokuvien ja jaksojen sivuilla. Valintasi soi ensimmäisestä sekunnista ja muistetaan kuten soittimessa tehty valinta. Sarjan sivu tarjoaa nyt molemmat painikkeet myös jaksolle, jonka Toista käynnistää."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez l'audio et les sous-titres avant d'appuyer sur Lecture, avec le nouveau bouton Audio et sous-titres à côté de Version sur les pages de films et d'épisodes. Votre choix s'applique dès la première seconde et est mémorisé comme un choix fait dans le lecteur. La page d'une série propose désormais les deux boutons pour l'épisode que lance Lecture."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odaberite zvuk i titlove prije nego što pritisnete Reproduciraj, novim gumbom Zvuk i titlovi pokraj Verzije na stranicama filmova i epizoda. Vaš odabir svira od prve sekunde i pamti se kao odabir u playeru. Stranica serije sada nudi oba gumba i za epizodu koju Reproduciraj pokreće."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Válaszd ki a hangot és a feliratot, mielőtt megnyomod a Lejátszást, az új Hang és feliratok gombbal a Verzió mellett a film- és epizódoldalakon. A választásod az első másodperctől szól, és úgy marad meg, mint a lejátszóban hozott választás. A sorozatok oldala mostantól mindkét gombot kínálja ahhoz az epizódhoz, amelyet a Lejátszás elindít."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli audio e sottotitoli prima di premere Riproduci, con il nuovo pulsante Audio e sottotitoli accanto a Versione nelle pagine di film ed episodi. La tua scelta vale dal primo secondo e viene ricordata come una fatta nel player. La pagina di una serie ora offre entrambi i pulsanti per l'episodio che Riproduci avvia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "映画とエピソードのページで、バージョンの隣にある新しい「音声と字幕」ボタンから、再生を押す前に音声と字幕を選べます。選んだトラックは最初の1秒から流れ、プレーヤーでの選択と同じように記憶されます。シリーズのページでも、再生で始まるエピソードについて両方のボタンが使えるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영화와 에피소드 페이지의 버전 옆에 있는 새 오디오 및 자막 버튼으로 재생을 누르기 전에 오디오와 자막을 고를 수 있습니다. 선택한 트랙은 첫 1초부터 재생되며 플레이어에서 고른 것처럼 기억됩니다. 시리즈 페이지에서도 재생이 시작할 에피소드에 대해 두 버튼을 모두 쓸 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velg lyd og undertekster før du trykker på Spill av, med den nye knappen Lyd og undertekster ved siden av Versjon på film- og episodesider. Valget ditt spilles fra første sekund og huskes som et valg i avspilleren. Siden til en serie tilbyr nå begge knappene for episoden Spill av starter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies audio en ondertiteling voordat je op Afspelen drukt, met de nieuwe knop Audio en ondertiteling naast Versie op film- en afleveringspagina's. Je keuze speelt vanaf de eerste seconde en wordt onthouden zoals een keuze in de speler. De pagina van een serie biedt nu beide knoppen voor de aflevering die Afspelen start."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz dźwięk i napisy, zanim naciśniesz Odtwórz, nowym przyciskiem Dźwięk i napisy obok Wersji na stronach filmów i odcinków. Twój wybór gra od pierwszej sekundy i jest zapamiętywany jak wybór w odtwarzaczu. Strona serialu oferuje teraz oba przyciski także dla odcinka, który uruchamia Odtwórz."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha o áudio e as legendas antes de apertar Reproduzir, com o novo botão Áudio e legendas ao lado de Versão nas páginas de filmes e episódios. Sua escolha toca desde o primeiro segundo e é lembrada como uma feita no player. A página de uma série agora oferece os dois botões para o episódio que Reproduzir inicia."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha o áudio e as legendas antes de premir Reproduzir, com o novo botão Áudio e legendas ao lado de Versão nas páginas de filmes e episódios. A sua escolha toca desde o primeiro segundo e é memorizada como uma feita no leitor. A página de uma série oferece agora os dois botões para o episódio que Reproduzir inicia."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alege sunetul și subtitrările înainte să apeși Redă, cu noul buton Audio și subtitrări de lângă Versiune pe paginile filmelor și episoadelor. Alegerea ta se aude din prima secundă și este reținută ca una făcută în player. Pagina unui serial oferă acum ambele butoane pentru episodul pe care îl pornește Redă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбирайте звук и субтитры до нажатия «Воспроизвести» новой кнопкой «Аудио и субтитры» рядом с «Версией» на страницах фильмов и эпизодов. Выбор действует с первой секунды и запоминается так же, как выбор в плеере. Страница сериала теперь тоже предлагает обе кнопки для эпизода, который запускает «Воспроизвести»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk a titulky si vyberiete ešte pred stlačením Prehrať, novým tlačidlom Zvuk a titulky vedľa Verzie na stránkach filmov a epizód. Vaša voľba hrá od prvej sekundy a zapamätá sa rovnako ako voľba v prehrávači. Stránka seriálu teraz ponúka obe tlačidlá aj pre epizódu, ktorú Prehrať spustí."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj ljud och undertexter innan du trycker på Spela, med den nya knappen Ljud och undertexter bredvid Version på film- och avsnittssidor. Ditt val spelas från första sekunden och sparas som ett val i spelaren. En series sida erbjuder nu båda knapparna för avsnittet som Spela startar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film ve bölüm sayfalarında Sürüm'ün yanındaki yeni Ses ve altyazı düğmesiyle sesi ve altyazıyı Oynat'a basmadan önce seçin. Seçiminiz ilk saniyeden itibaren çalar ve oynatıcıda yapılmış bir seçim gibi hatırlanır. Bir dizinin sayfası artık Oynat'ın başlatacağı bölüm için de iki düğmeyi sunuyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обирайте звук і субтитри до натискання «Відтворити» новою кнопкою «Аудіо та субтитри» поруч із «Версією» на сторінках фільмів і епізодів. Вибір діє з першої секунди й запам'ятовується так само, як вибір у плеєрі. Сторінка серіалу тепер теж пропонує обидві кнопки для епізоду, який запускає «Відтворити»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在电影和剧集页面上，用“版本”旁新的“音频和字幕”按钮，在按下播放前选好音频和字幕。所选轨道从第一秒起就会播放，并像在播放器里选的一样被记住。剧集主页现在也为播放将开始的那一集提供这两个按钮。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在電影和劇集頁面上，用「版本」旁新的「音訊與字幕」按鈕，在按下播放前選好音訊和字幕。所選音軌從第一秒起就會播放，並像在播放器裡選的一樣被記住。劇集主頁現在也為播放將開始的那一集提供這兩個按鈕。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.detailPages.title" : {
+      "comment" : "What's New 1.2.0: title of the detail pages highlight",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Více na stránkách s detaily"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mere på detaljesiderne"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr auf den Detailseiten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Περισσότερα στις σελίδες λεπτομερειών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More on detail pages"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más en las páginas de detalles"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lisää tietosivuilla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus sur les pages de détails"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Više na stranicama s detaljima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Több a részletek oldalakon"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Di più nelle pagine dei dettagli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細ページがさらに充実"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상세 페이지에 더 많은 기능"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mer på detaljsidene"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meer op detailpagina's"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Więcej na stronach szczegółów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais nas páginas de detalhes"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais nas páginas de detalhes"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mai mult pe paginile de detalii"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Больше на страницах с подробностями"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viac na stránkach s podrobnosťami"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mer på detaljsidorna"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntı sayfalarında daha fazlası"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Більше на сторінках із подробицями"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详情页更丰富"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細資料頁更豐富"
+          }
+        }
+      }
+    },
     "changelog.modal.dismiss" : {
       "extractionState" : "manual",
       "localizations" : {
