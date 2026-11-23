@@ -71,6 +71,10 @@ final class PlayerViewModel {
     var remainingTime: String = "-00:00"
     /// The seconds behind `remainingTime`, on the same whole-second gate. Feeds the end time (Sodalite#251).
     var remainingSeconds: Double = 0
+    /// When `remainingSeconds` was read. A playing title's end counts from here, not from now: the
+    /// label re-evaluates at arbitrary moments between reads, and now plus a stale rest wobbles by
+    /// up to a tick, enough to flip the minute back and forth when the end sits on one.
+    @ObservationIgnored var remainingSampledAt: Date?
     var progress: Float = 0
 
     /// Fraction of the timeline whose content is cached ahead of the playhead (disk SegmentCache
@@ -582,7 +586,7 @@ final class PlayerViewModel {
     /// Whole source-second last written to the `currentTime`/`remainingTime` labels. The clock ticks
     /// at 10 Hz but the labels are second-resolution, so we only re-format/re-publish when the second
     /// changes, cutting ~9/10 redundant string allocations and label invalidations per second.
-    @ObservationIgnored private var lastDisplayedSecond: Int = -1
+    @ObservationIgnored var lastDisplayedSecond: Int = -1
 
     // Intro + outro + recap markers and commercial breaks, all from Jellyfin Media Segments / intro-skipper plugin in one call.
     var introSegment: MediaSegment?
@@ -2257,6 +2261,7 @@ final class PlayerViewModel {
                     self.currentTime = self.formatSeconds(time)
                     let rem = dur - time
                     self.remainingTime = rem > 0 ? "-\(self.formatSeconds(rem))" : "-00:00"
+                    self.remainingSampledAt = Date()
                     self.remainingSeconds = max(0, rem)
                 }
                 // The progress bar must NOT follow the live clock during a scrub (would fight scrubProgress).

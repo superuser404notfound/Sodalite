@@ -239,7 +239,9 @@ struct MacPlayerScreen: View {
                     MacPlayerMenus(viewModel: viewModel)
                 }
                 transportButton("arrow.up.left.and.arrow.down.right", size: .body, action: toggleFullScreen)
-                PlayerEndTimeText(viewModel: viewModel)
+                // Holds its room while there is no estimate, so play/pause does not slide sideways
+                // when a pre-roll ends or the title reaches its last second.
+                PlayerEndTimeText(viewModel: viewModel, reservesSpace: !viewModel.isLiveSession)
                     .foregroundStyle(.white.opacity(0.75))
                 Text(viewModel.remainingTime)
                     .monospacedDigit()

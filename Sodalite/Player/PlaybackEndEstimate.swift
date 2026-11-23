@@ -16,8 +16,16 @@ extension PlayerViewModel {
         guard !isLiveSession, !isPlayingPreroll else { return nil }
         let duration = effectiveDuration
         guard duration > 0 else { return nil }
-        let remaining = isScrubbing ? duration * Double(1 - scrubProgress) : remainingSeconds
-        let rate = Self.speedOptions[max(0, min(Self.speedOptions.count - 1, activeSpeedIndex))]
-        return PlaybackEndEstimate.endDate(now: now, remainingSeconds: remaining, rate: rate)
+        if isScrubbing {
+            return PlaybackEndEstimate.endDate(now: now, remainingSeconds: duration * Double(1 - scrubProgress),
+                                               rate: rate)
+        }
+        // Paused, the end moves with the clock; playing, it counts from the read (see remainingSampledAt).
+        let base = isPlaying ? (remainingSampledAt ?? now) : now
+        return PlaybackEndEstimate.endDate(now: base, remainingSeconds: remainingSeconds, rate: rate)
+    }
+
+    private var rate: Float {
+        Self.speedOptions[max(0, min(Self.speedOptions.count - 1, activeSpeedIndex))]
     }
 }

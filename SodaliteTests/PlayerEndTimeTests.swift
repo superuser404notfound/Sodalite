@@ -25,6 +25,25 @@ struct PlayerEndTimeTests {
         #expect(vm.estimatedEnd(now: now) == now + 600)
     }
 
+    @Test("while playing, the end counts from when the remaining time was read, so it cannot flicker")
+    func playingAnchorsToTheSample() throws {
+        let vm = try makeViewModel()
+        vm.isPlaying = true
+        vm.remainingSeconds = 600
+        vm.remainingSampledAt = now - 0.4
+        #expect(vm.estimatedEnd(now: now) == now - 0.4 + 600)
+        #expect(vm.estimatedEnd(now: now + 0.9) == now - 0.4 + 600)
+    }
+
+    @Test("while paused, the end moves with the clock")
+    func pausedFollowsTheClock() throws {
+        let vm = try makeViewModel()
+        vm.isPlaying = false
+        vm.remainingSeconds = 600
+        vm.remainingSampledAt = now - 30
+        #expect(vm.estimatedEnd(now: now) == now + 600)
+    }
+
     @Test("double speed halves the rest")
     func speedCounts() throws {
         let vm = try makeViewModel()

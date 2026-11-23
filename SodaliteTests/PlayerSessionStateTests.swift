@@ -67,6 +67,8 @@ struct PlayerSessionStateTests {
         vm.resumePositionTicks = 99
         vm.playbackTime = 120
         vm.nextEpisodeCountdown = 3
+        vm.remainingSeconds = 2100
+        vm.remainingSampledAt = Date()
 
         vm.resetSessionState(.itemSwitch(to: try episode("e2")))
 
@@ -92,6 +94,8 @@ struct PlayerSessionStateTests {
         #expect(vm.resumePositionTicks == 0)
         #expect(vm.playbackTime == 0)
         #expect(vm.nextEpisodeCountdown == 10)
+        #expect(vm.remainingSeconds == 0)
+        #expect(vm.remainingSampledAt == nil)
     }
 
     /// PCORE-203: the engine drops the secondary line on every load; the view model must too.
