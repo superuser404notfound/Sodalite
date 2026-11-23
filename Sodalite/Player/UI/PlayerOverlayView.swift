@@ -849,6 +849,19 @@ private extension PlayerOverlayView {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 10) {
                     #if os(tvOS)
+                    // Sodalite#251. Its slot stays while the controls are hidden, so the badges under it
+                    // do not jump each time the transport opens. Fades on the scrim's clock (Sodalite#168).
+                    if showsClockSlot {
+                        PlayerClockText()
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .opacity(controlsOverlayVisible ? 1 : 0)
+                            .animation(controlsOverlayVisible
+                                       ? .easeInOut(duration: 0.3)
+                                       : .linear(duration: ControlScrimLayer.fadeOutDuration),
+                                       value: controlsOverlayVisible)
+                    }
                     if let announced = viewModel.announcedVideoFormat {
                         VideoFormatBadge(format: announced)
                     }
@@ -859,13 +872,22 @@ private extension PlayerOverlayView {
                     }
                 }
                 .padding(.horizontal, 80)
-                .padding(.top, 68)
+                // The clock lines up with the title, which sits at 60; the badges alone keep their 68.
+                .padding(.top, showsClockSlot ? 60 : 68)
             }
             Spacer()
         }
         .animation(.easeInOut(duration: 0.2), value: viewModel.activeSpeedIndex)
         .animation(.easeInOut(duration: 0.2), value: viewModel.announcedVideoFormat)
         .allowsHitTesting(false)
+    }
+
+    var showsClockSlot: Bool {
+        #if os(tvOS)
+        viewModel.preferences.showPlayerClock
+        #else
+        false
+        #endif
     }
 }
 

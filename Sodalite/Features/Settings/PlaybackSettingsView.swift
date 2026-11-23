@@ -243,6 +243,16 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                boolRow(
+                    icon: "clock",
+                    title: "settings.playback.showPlayerClock",
+                    subtitle: "settings.playback.showPlayerClock.subtitle",
+                    value: Binding(
+                        get: { prefs.showPlayerClock },
+                        set: { prefs.showPlayerClock = $0 }
+                    )
+                )
+
                 #if os(tvOS)
                 boolRow(
                     icon: "hand.draw",

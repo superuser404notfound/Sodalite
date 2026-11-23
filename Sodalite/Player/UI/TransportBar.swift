@@ -86,6 +86,7 @@ struct TransportBar: View {
     @State private var readoutWidth: CGFloat = 0
     @State private var elapsedWidth: CGFloat = 0
     @State private var remainingWidth: CGFloat = 0
+    @State private var endTimeWidth: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 10) {
@@ -125,6 +126,7 @@ struct TransportBar: View {
 
     /// The gap a label keeps from the readout crossing the row before it steps aside.
     private static let readoutLabelGap: CGFloat = 16
+    private static let endTimeSpacing: CGFloat = 24
 
     /// The elapsed and remaining clocks, and the seek readout that travels across them.
     ///
@@ -154,6 +156,11 @@ struct TransportBar: View {
             let coversElapsed = readout != nil && x - half < elapsedWidth + Self.readoutLabelGap
             let coversRemaining = readout != nil
                 && x + half > width - remainingWidth - Self.readoutLabelGap
+            // The end time steps aside on its own, so a readout near the end does not take the
+            // remaining time with it (Sodalite#251).
+            let endEdge = width - remainingWidth - Self.endTimeSpacing
+            let coversEnd = readout != nil
+                && x + half > endEdge - endTimeWidth - Self.readoutLabelGap
 
             ZStack {
                 HStack(spacing: 8) {
@@ -174,16 +181,24 @@ struct TransportBar: View {
 
                     Spacer()
 
-                    Text(remainingTime)
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.7))
-                        .opacity(coversRemaining ? 0 : 1)
-                        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { remainingWidth = $0 }
+                    // Left of the remaining time, so the remaining time keeps its place at the edge
+                    // (Sodalite#251).
+                    HStack(spacing: Self.endTimeSpacing) {
+                        PlayerEndTimeText(viewModel: viewModel)
+                            .opacity(coversEnd ? 0 : 1)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { endTimeWidth = $0 }
+                        Text(remainingTime)
+                            .opacity(coversRemaining ? 0 : 1)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { remainingWidth = $0 }
+                    }
+                    .font(.callout)
+                    .fontWeight(.medium)
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.7))
                 }
                 .animation(.easeInOut(duration: 0.2), value: coversElapsed)
                 .animation(.easeInOut(duration: 0.2), value: coversRemaining)
+                .animation(.easeInOut(duration: 0.2), value: coversEnd)
 
                 if let readout {
                     SeekReadoutView(readout: readout)

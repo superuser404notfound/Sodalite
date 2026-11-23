@@ -127,8 +127,20 @@ struct PlayerTouchControls: View {
                         topBarButton(control)
                     }
                 }
-                if viewModel.videoFormat != .sdr {
-                    VideoFormatBadge(format: viewModel.videoFormat, compact: true)
+                if viewModel.preferences.showPlayerClock || viewModel.videoFormat != .sdr {
+                    HStack(spacing: 8) {
+                        // Sodalite#251. The player hides the status bar, so this is the only clock. Under the
+                        // buttons rather than beside them: there, a phone in portrait cut the title to a word.
+                        if viewModel.preferences.showPlayerClock {
+                            PlayerClockText()
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .fixedSize()
+                        }
+                        if viewModel.videoFormat != .sdr {
+                            VideoFormatBadge(format: viewModel.videoFormat, compact: true)
+                        }
+                    }
                 }
             }
         }
@@ -257,6 +269,19 @@ struct PlayerTouchControls: View {
                         .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
                         .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 }
+            }
+
+            // Sodalite#251: its own line under the remaining time. Beside it, the wider right label
+            // would push the play button off centre. The line holds its room while there is no
+            // estimate (a pre-roll, the last second), so the controls above it do not jump.
+            if viewModel.preferences.showPlayerClock, !viewModel.isLiveSession {
+                HStack {
+                    Spacer()
+                    PlayerEndTimeText(viewModel: viewModel, reservesSpace: true)
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .padding(.top, -10)
             }
         }
     }

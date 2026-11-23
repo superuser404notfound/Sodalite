@@ -176,6 +176,15 @@ struct MacPlayerScreen: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 96)
             .padding(.top, 8)
+            // Sodalite#251. Full screen hides the menu bar, and its clock with it.
+            .overlay(alignment: .topTrailing) {
+                if viewModel.preferences.showPlayerClock {
+                    PlayerClockText()
+                        .font(.headline)
+                        .padding(.trailing, 24)
+                        .padding(.top, 8)
+                }
+            }
             .background(alignment: .top) {
                 LinearGradient(colors: [.black.opacity(0.7), .clear], startPoint: .top, endPoint: .bottom)
                     .frame(height: 120)
@@ -230,6 +239,10 @@ struct MacPlayerScreen: View {
                     MacPlayerMenus(viewModel: viewModel)
                 }
                 transportButton("arrow.up.left.and.arrow.down.right", size: .body, action: toggleFullScreen)
+                // Holds its room while there is no estimate, so play/pause does not slide sideways
+                // when a pre-roll ends or the title reaches its last second.
+                PlayerEndTimeText(viewModel: viewModel, reservesSpace: !viewModel.isLiveSession)
+                    .foregroundStyle(.white.opacity(0.75))
                 Text(viewModel.remainingTime)
                     .monospacedDigit()
                     .opacity(preroll ? 0 : 1)
