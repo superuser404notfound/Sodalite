@@ -176,6 +176,15 @@ struct MacPlayerScreen: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 96)
             .padding(.top, 8)
+            // Sodalite#251. Full screen hides the menu bar, and its clock with it.
+            .overlay(alignment: .topTrailing) {
+                if viewModel.preferences.showPlayerClock {
+                    PlayerClockText()
+                        .font(.headline)
+                        .padding(.trailing, 24)
+                        .padding(.top, 8)
+                }
+            }
             .background(alignment: .top) {
                 LinearGradient(colors: [.black.opacity(0.7), .clear], startPoint: .top, endPoint: .bottom)
                     .frame(height: 120)
@@ -230,6 +239,8 @@ struct MacPlayerScreen: View {
                     MacPlayerMenus(viewModel: viewModel)
                 }
                 transportButton("arrow.up.left.and.arrow.down.right", size: .body, action: toggleFullScreen)
+                PlayerEndTimeText(viewModel: viewModel)
+                    .foregroundStyle(.white.opacity(0.75))
                 Text(viewModel.remainingTime)
                     .monospacedDigit()
                     .opacity(preroll ? 0 : 1)

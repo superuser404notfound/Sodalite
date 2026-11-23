@@ -127,8 +127,18 @@ struct PlayerTouchControls: View {
                         topBarButton(control)
                     }
                 }
-                if viewModel.videoFormat != .sdr {
-                    VideoFormatBadge(format: viewModel.videoFormat, compact: true)
+                HStack(spacing: 8) {
+                    // Sodalite#251. The player hides the status bar, so this is the only clock. Under the
+                    // buttons rather than beside them: there, a phone in portrait cut the title to a word.
+                    if viewModel.preferences.showPlayerClock {
+                        PlayerClockText()
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .fixedSize()
+                    }
+                    if viewModel.videoFormat != .sdr {
+                        VideoFormatBadge(format: viewModel.videoFormat, compact: true)
+                    }
                 }
             }
         }
@@ -257,6 +267,18 @@ struct PlayerTouchControls: View {
                         .font(.caption).monospacedDigit().foregroundStyle(.white.opacity(0.75))
                         .opacity(viewModel.isPlayingPreroll ? 0 : 1)
                 }
+            }
+
+            // Sodalite#251: its own line under the remaining time. Beside it, the wider right label
+            // would push the play button off centre.
+            if viewModel.preferences.showPlayerClock, viewModel.estimatedEnd() != nil {
+                HStack {
+                    Spacer()
+                    PlayerEndTimeText(viewModel: viewModel)
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .padding(.top, -10)
             }
         }
     }
