@@ -14,6 +14,12 @@ enum Changelog {
                     "changelog.1_2_0.detailPages.body",
                     icon: "captions.bubble"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.playerClock.title",
+                    "changelog.1_2_0.playerClock.body",
+                    icon: "clock"
+                ),
             ]
         ),
         // MARK: 1.1.0

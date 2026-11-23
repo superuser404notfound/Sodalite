@@ -207,6 +207,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Separate skip intervals**: 5, 10, 15 or 30 seconds, set separately for back and forward.
 - **Swipe to Scrub**: drag on the Siri Remote touch surface to move the playhead, or turn it off so a resting thumb cannot move the timeline.
 - **From Start**: jump back to the beginning without leaving the player.
+- **Clock and end time** (on by default, Settings → Playback): while the controls are up, the player shows the time and when the title will end. The end time sits by the remaining time, counts in the playback speed and follows a scrub, so it also says when you would finish from there. Live TV shows the clock only.
 - **Now Playing controls**: the skip buttons in Control Center and the Apple TV Now Playing panel work too. On the Mac, the play/pause key and the other media keys control the player.
 - **Your own button layout**: Settings → Player Controls lists every player button. Hide what you never use and set the order, separately for video and live TV. On iPhone and iPad this includes the top bar buttons and the brightness and volume swipes.
 - **Stats for Nerds**: an optional panel with everything about the stream: codecs, resolution, exact frame rate (23.976, not 24), HDR format, audio format and channels, bitrate, buffer, network speed, dropped frames and A/V sync. On Apple TV it also shows the refresh rate the TV is running at, so you can see whether Match Frame Rate landed on the right mode. A second switch adds engine diagnostics.
