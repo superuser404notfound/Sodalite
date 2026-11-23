@@ -8,3 +8,16 @@ nonisolated enum PlaybackEndEstimate {
         return now.addingTimeInterval(remainingSeconds / Double(rate))
     }
 }
+
+extension PlayerViewModel {
+    /// The end time the transport shows. A scrub moves it with the knob, so it answers "when would I
+    /// finish from there". Live has no end of its own, and a pre-roll plays under the movie's item.
+    func estimatedEnd(now: Date = Date()) -> Date? {
+        guard !isLiveSession, !isPlayingPreroll else { return nil }
+        let duration = effectiveDuration
+        guard duration > 0 else { return nil }
+        let remaining = isScrubbing ? duration * Double(1 - scrubProgress) : remainingSeconds
+        let rate = Self.speedOptions[max(0, min(Self.speedOptions.count - 1, activeSpeedIndex))]
+        return PlaybackEndEstimate.endDate(now: now, remainingSeconds: remaining, rate: rate)
+    }
+}

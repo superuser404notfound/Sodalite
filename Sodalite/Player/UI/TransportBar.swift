@@ -174,13 +174,18 @@ struct TransportBar: View {
 
                     Spacer()
 
-                    Text(remainingTime)
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.7))
-                        .opacity(coversRemaining ? 0 : 1)
-                        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { remainingWidth = $0 }
+                    // The end time stands left of the remaining time, so the remaining time keeps its
+                    // place at the edge, and the readout measures both as one label (Sodalite#251).
+                    HStack(spacing: 24) {
+                        PlayerEndTimeText(viewModel: viewModel)
+                        Text(remainingTime)
+                    }
+                    .font(.callout)
+                    .fontWeight(.medium)
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.7))
+                    .opacity(coversRemaining ? 0 : 1)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { remainingWidth = $0 }
                 }
                 .animation(.easeInOut(duration: 0.2), value: coversElapsed)
                 .animation(.easeInOut(duration: 0.2), value: coversRemaining)

@@ -69,6 +69,8 @@ final class PlayerViewModel {
     var currentTime: String = "00:00"
     var totalTime: String = "00:00"
     var remainingTime: String = "-00:00"
+    /// The seconds behind `remainingTime`, on the same whole-second gate. Feeds the end time (Sodalite#251).
+    var remainingSeconds: Double = 0
     var progress: Float = 0
 
     /// Fraction of the timeline whose content is cached ahead of the playhead (disk SegmentCache
@@ -2255,6 +2257,7 @@ final class PlayerViewModel {
                     self.currentTime = self.formatSeconds(time)
                     let rem = dur - time
                     self.remainingTime = rem > 0 ? "-\(self.formatSeconds(rem))" : "-00:00"
+                    self.remainingSeconds = max(0, rem)
                 }
                 // The progress bar must NOT follow the live clock during a scrub (would fight scrubProgress).
                 guard !self.isScrubbing else { return }
