@@ -45,13 +45,14 @@ struct CloudSyncSettingsParityTests {
     /// postdates the legacy record and travels in the profile record alone; no build that reads the
     /// legacy record knows it, and its Stats half still goes out as `showStatsForNerds`. `versionOrder`
     /// and `playThemeSongs` (Sodalite#219), `autoSkipCommercials` (Sodalite#224), `musicNormalization`
-    /// (Sodalite#242) and `playPrerolls` (Sodalite#244) postdate it the same way.
+    /// (Sodalite#242), `playPrerolls` (Sodalite#244) and `showPlayerClock` (Sodalite#251) postdate it
+    /// the same way.
     @Test func everyPlaybackSettingIsInThePayload() {
         let defaults = scratchDefaults("playback")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
         let profile = storedSettingNames(of: PlaybackPreferences(store: defaults))
             .subtracting(["playerControls", "versionOrder", "playThemeSongs", "autoSkipCommercials",
-                          "musicNormalization", "playPrerolls"])
+                          "musicNormalization", "playPrerolls", "showPlayerClock"])
         let payload = payloadFieldNames(.playback)
             .subtracting(["skipIntervalSeconds", "showDiagnosticOverlay", "focusDiagnosticOverlayOnDV"])
         #expect(profile.isDisjoint(with: device))

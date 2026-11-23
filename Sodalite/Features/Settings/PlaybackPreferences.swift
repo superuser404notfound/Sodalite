@@ -52,6 +52,7 @@ final class PlaybackPreferences {
         static let versionOrder = "playback.versionOrder"
         static let playThemeSongs = "playback.playThemeSongs"
         static let playPrerolls = "playback.playPrerolls"
+        static let showPlayerClock = "playback.showPlayerClock"
         static let musicNormalization = "playback.musicNormalization"
     }
 
@@ -328,6 +329,11 @@ final class PlaybackPreferences {
     /// On by default like Jellyfin-Web's cinema mode; without such a plugin the server hands out none.
     var playPrerolls: Bool {
         didSet { store.set(playPrerolls, forKey: Keys.playPrerolls) }
+    }
+
+    /// Sodalite#251: the device clock and the estimated end time while the player controls are up.
+    var showPlayerClock: Bool {
+        didSet { store.set(showPlayerClock, forKey: Keys.showPlayerClock) }
     }
 
     /// Sodalite#242: plays music at the loudness the server measured. Off by default, it needs the
@@ -710,6 +716,7 @@ final class PlaybackPreferences {
         self.askForRatingAfterMovie = store.object(forKey: Keys.askForRatingAfterMovie) as? Bool ?? true
         self.playThemeSongs = store.object(forKey: Keys.playThemeSongs) as? Bool ?? false
         self.playPrerolls = store.object(forKey: Keys.playPrerolls) as? Bool ?? true
+        self.showPlayerClock = store.object(forKey: Keys.showPlayerClock) as? Bool ?? true
         self.versionOrder = store.string(forKey: Keys.versionOrder).flatMap(VersionOrder.init(rawValue:)) ?? .quality
         self.musicNormalization = store.string(forKey: Keys.musicNormalization)
             .flatMap(MusicNormalization.init(rawValue:)) ?? .off
