@@ -10,6 +10,9 @@ extension PlayerViewModel {
 
     var effectiveEnhancedUpscaling: Bool { upscalingOverride ?? preferences.enhancedUpscaling }
 
+    /// The 1080p switch follows the setting; the player chip can only turn it off for this video.
+    var effectiveFullHDUpscaling: Bool { upscalingOverride == false ? false : preferences.fullHDUpscaling }
+
     /// AetherEngine#1039: the scaler for this load. The line-art scaler only for drawn content, which the
     /// genres say. A Jellyfin episode carries none of its own, so its series' are read, once per series.
     func upscaleScalerForLoad() async -> UpscaleScaler {
@@ -96,7 +99,11 @@ extension PlayerViewModel {
             guard let self else { return }
             defer { if upscaleToggleGeneration == generation { upscaleToggleTask = nil } }
             do {
-                try await player.reloadAtCurrentPosition { $0.upscalesLowResolutionVideo = enable }
+                let fullHD = effectiveFullHDUpscaling
+                try await player.reloadAtCurrentPosition {
+                    $0.upscalesLowResolutionVideo = enable
+                    $0.upscalesFullHDVideo = fullHD
+                }
             } catch AetherEngineError.sessionNotReloadable(.upscaleRouteNeedsFreshLoad) where isLiveSession {
                 // A live source keeps its route on a rebuild; the load that decides it again is a retune.
                 await retuneLiveStream()

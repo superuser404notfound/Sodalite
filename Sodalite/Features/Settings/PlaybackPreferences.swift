@@ -625,6 +625,11 @@ final class PlaybackPreferences {
         set { device.lineArtUpscaling = newValue }
     }
 
+    var fullHDUpscaling: Bool {
+        get { device.fullHDUpscaling }
+        set { device.fullHDUpscaling = newValue }
+    }
+
     /// The settings picker's view of the two switches.
     var upscalingMode: EnhancedUpscalingMode {
         get { EnhancedUpscalingMode(enhanced: enhancedUpscaling, lineArt: lineArtUpscaling) }
