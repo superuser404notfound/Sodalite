@@ -52,12 +52,11 @@ struct LibraryFilterSheet: View {
         .background(.thinMaterial)
         #endif
         .onAppear { focusedRow = groups.first.map(groupRowID) }
-        #if os(tvOS)
-        // Deeper than the cover's own Menu handler, so it wins while a checklist is open.
-        .onExitCommandCompat {
+        // Deeper than the cover's own Menu handler, so it wins while a checklist is open. Only
+        // then: installed on the groups page too, it swallowed the press that closes the panel.
+        .onExitCommandIfEnabled(openGroup != nil) {
             if let group = openGroup { close(group) }
         }
-        #endif
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
@@ -90,13 +89,19 @@ struct LibraryFilterSheet: View {
 
     private func open(_ group: LibraryFilterGroup) {
         openGroup = group
-        focusedRow = options(for: group).first?.id
+        focus(options(for: group).first?.id)
     }
 
     /// Back to the groups, with focus on the group just left.
     private func close(_ group: LibraryFilterGroup) {
         openGroup = nil
-        focusedRow = groupRowID(group)
+        focus(groupRowID(group))
+    }
+
+    /// The page swap rebuilds the rows, and an assignment made in the same turn is dropped: focus
+    /// fell to the first row, which on the way back is Clear All. One turn later it sticks.
+    private func focus(_ id: String?) {
+        Task { focusedRow = id }
     }
 
     private func groupRowID(_ group: LibraryFilterGroup) -> String { "group-\(group.rawValue)" }
@@ -160,7 +165,7 @@ struct LibraryFilterSheet: View {
         .focused($focusedRow, equals: id)
         .stableTap(isFocused: isFocused) {
             action()
-            focusedRow = groups.first.map(groupRowID)
+            focus(groups.first.map(groupRowID))
         }
     }
 

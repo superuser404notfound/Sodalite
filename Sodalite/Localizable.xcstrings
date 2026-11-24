@@ -74689,6 +74689,328 @@
         }
       }
     },
+    "changelog.1_2_0.libraryFilters.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačítko Filtr v každé knihovně zúží výběr podle žánru, roku, věkového omezení, štítku, studia, jazyka, 4K a dalšího, se stejnými skupinami jako webový klient Jellyfinu. Funguje společně s Nezhlédnuté a Zhlédnuté."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Filter-knap i hvert bibliotek indsnævrer efter genre, år, aldersgrænse, tag, studie, sprog, 4K og mere, med de samme grupper som Jellyfins webklient. Den virker sammen med Usete og Sete."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Filter-Knopf in jeder Mediathek grenzt nach Genre, Jahr, Altersfreigabe, Tag, Studio, Sprache, 4K und mehr ein, mit denselben Gruppen wie Jellyfins Web-Client. Er wirkt zusammen mit Ungesehen und Gesehen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα κουμπί Φίλτρο σε κάθε βιβλιοθήκη περιορίζει κατά είδος, έτος, διαβάθμιση ηλικίας, ετικέτα, στούντιο, γλώσσα, 4K και άλλα, με τις ίδιες ομάδες όπως το web πρόγραμμα του Jellyfin. Λειτουργεί μαζί με τα Μη προβεβλημένα και Προβεβλημένα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Filter button on every library grid narrows it by genre, year, rating, tag, studio, language, 4K and more, the same groups as Jellyfin's web client. It works together with Unwatched and Watched."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un botón Filtrar en cada biblioteca acota por género, año, clasificación por edad, etiqueta, estudio, idioma, 4K y más, con los mismos grupos que el cliente web de Jellyfin. Funciona junto con No vistos y Vistos."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jokaisen kirjaston Suodata-painike rajaa lajityypin, vuoden, ikärajan, tagin, studion, kielen, 4K:n ja muun mukaan, samoilla ryhmillä kuin Jellyfinin verkkosovellus. Se toimii yhdessä Katsomattomat- ja Katsotut-valinnan kanssa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un bouton Filtrer dans chaque médiathèque affine par genre, année, classification, tag, studio, langue, 4K et plus, avec les mêmes groupes que le client web de Jellyfin. Il se combine avec Non vus et Vus."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gumb Filtar u svakoj knjižnici sužava prikaz po žanru, godini, dobnoj oznaci, oznaci, studiju, jeziku, 4K i drugome, s istim skupinama kao Jellyfinov web klijent. Radi zajedno s Negledano i Gledano."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minden könyvtárban egy Szűrő gomb szűkít műfaj, év, korhatár, címke, stúdió, nyelv, 4K és más szerint, ugyanazokkal a csoportokkal, mint a Jellyfin webes kliense. Együtt működik a Nem látott és a Látott szűrővel."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pulsante Filtra in ogni libreria restringe per genere, anno, classificazione, tag, studio, lingua, 4K e altro, con gli stessi gruppi del client web di Jellyfin. Funziona insieme a Non visti e Visti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各ライブラリのフィルタボタンで、ジャンル、年、年齢制限、タグ、スタジオ、言語、4Kなどで絞り込めます。グループはJellyfinのWebクライアントと同じです。未視聴・視聴済みと組み合わせて使えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 라이브러리의 필터 버튼으로 장르, 연도, 연령 등급, 태그, 스튜디오, 언어, 4K 등으로 좁힐 수 있습니다. 그룹은 Jellyfin 웹 클라이언트와 같습니다. 시청 안 함, 시청함과 함께 작동합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Filter-knapp i hvert bibliotek snevrer inn etter sjanger, år, aldersgrense, tagg, studio, språk, 4K og mer, med de samme gruppene som Jellyfins nettklient. Den virker sammen med Usett og Sett."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een Filter-knop in elke bibliotheek beperkt op genre, jaar, leeftijdsclassificatie, tag, studio, taal, 4K en meer, met dezelfde groepen als de webclient van Jellyfin. Hij werkt samen met Niet bekeken en Bekeken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przycisk Filtruj w każdej bibliotece zawęża według gatunku, roku, kategorii wiekowej, tagu, studia, języka, 4K i nie tylko, z tymi samymi grupami co klient webowy Jellyfina. Działa razem z Nieobejrzane i Obejrzane."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um botão Filtrar em cada biblioteca restringe por gênero, ano, classificação indicativa, tag, estúdio, idioma, 4K e mais, com os mesmos grupos do cliente web do Jellyfin. Funciona junto com Não assistidos e Assistidos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um botão Filtrar em cada biblioteca restringe por género, ano, classificação etária, etiqueta, estúdio, idioma, 4K e mais, com os mesmos grupos do cliente web do Jellyfin. Funciona em conjunto com Não vistos e Vistos."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un buton Filtru în fiecare bibliotecă restrânge după gen, an, clasificare de vârstă, etichetă, studio, limbă, 4K și altele, cu aceleași grupuri ca în clientul web Jellyfin. Funcționează împreună cu Nevizionate și Vizionate."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка «Фильтр» в каждой медиатеке сужает список по жанру, году, возрастному рейтингу, тегу, студии, языку, 4K и другому, с теми же группами, что и в веб-клиенте Jellyfin. Работает вместе с «Непросмотренные» и «Просмотренные»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačidlo Filter v každej knižnici zúži výber podľa žánru, roku, vekového obmedzenia, štítku, štúdia, jazyka, 4K a ďalšieho, s rovnakými skupinami ako webový klient Jellyfinu. Funguje spolu s Nepozreté a Pozreté."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En Filter-knapp i varje bibliotek smalnar av efter genre, år, åldersgräns, tagg, studio, språk, 4K med mera, med samma grupper som Jellyfins webbklient. Den fungerar tillsammans med Osedda och Sedda."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her kütüphanedeki Filtre düğmesi türe, yıla, yaş sınırına, etikete, stüdyoya, dile, 4K'ya ve daha fazlasına göre daraltır; gruplar Jellyfin web istemcisindekilerle aynıdır. İzlenmemiş ve İzlenmiş ile birlikte çalışır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопка «Фільтр» у кожній медіатеці звужує список за жанром, роком, віковим рейтингом, тегом, студією, мовою, 4K та іншим, з тими самими групами, що й у веб-клієнті Jellyfin. Працює разом із «Непереглянуті» та «Переглянуті»."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个媒体库中的筛选按钮可按类型、年份、分级、标签、制片公司、语言、4K 等缩小范围，分组与 Jellyfin 网页客户端相同。可与未观看、已观看一起使用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每個媒體庫中的篩選按鈕可依類型、年份、分級、標籤、製片公司、語言、4K 等縮小範圍，分組與 Jellyfin 網頁用戶端相同。可與未觀看、已觀看一起使用。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.libraryFilters.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtry v knihovnách"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre i bibliotekerne"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter in den Mediatheken"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φίλτρα στις βιβλιοθήκες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Library filters"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros en las bibliotecas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suodattimet kirjastoissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtres dans les médiathèques"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtri u knjižnicama"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szűrők a könyvtárakban"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtri nelle librerie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリのフィルタ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리 필터"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre i bibliotekene"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filters in de bibliotheken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtry w bibliotekach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros nas bibliotecas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros nas bibliotecas"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre în biblioteci"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фильтры в медиатеках"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre v knižniciach"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter i biblioteken"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kütüphanelerde filtreler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фільтри в медіатеках"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体库筛选"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒體庫篩選"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.playerClock.body" : {
       "extractionState" : "manual",
       "localizations" : {
