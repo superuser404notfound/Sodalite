@@ -66,6 +66,15 @@ struct EnhancedUpscalingTests {
         #expect(DevicePreferences(store: defaults).fullHDUpscaling)
     }
 
+    /// The chip can show for 1080p alone. Turning it off and on again must not switch on the SD and
+    /// 720p upscaler the viewer has off.
+    @Test func chipRestoresEachSwitchFromItsOwnSetting() {
+        #expect(PlayerViewModel.upscaleSwitch(false, override: true) == false)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: true) == true)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: nil) == true)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: false) == false)
+    }
+
     @Test func lineArtLabelNamesTheResampleOnlyWhenTwoTimesMisses() {
         #expect(StatsOverlayView.upscaleLabel(
             sourceSize: CGSize(width: 1920, height: 1080), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
