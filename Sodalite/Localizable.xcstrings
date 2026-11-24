@@ -74367,6 +74367,330 @@
         }
       }
     },
+    "changelog.1_2_0.fasterStart.body" : {
+      "comment" : "What's New 1.2.0: body of the faster start highlight (fonts embedded in a video load after it starts)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videa s vlastními písmy pro titulky, běžná u anime, se nyní spustí hned. Písma se načtou na pozadí a stylizované titulky je použijí o chvíli později."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoer med egne skrifttyper til undertekster, som er almindelige i anime, starter nu med det samme. Skrifttyperne indlæses i baggrunden, og stylede undertekster tager dem i brug et øjeblik senere."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videos mit eigenen Untertitelschriften, wie sie bei Anime üblich sind, starten jetzt sofort. Die Schriften laden im Hintergrund, gestaltete Untertitel übernehmen sie einen Moment später."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα βίντεο με δικές τους γραμματοσειρές υποτίτλων, συνηθισμένα στα anime, ξεκινούν πλέον αμέσως. Οι γραμματοσειρές φορτώνονται στο παρασκήνιο και οι μορφοποιημένοι υπότιτλοι τις χρησιμοποιούν λίγο αργότερα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videos that carry their own subtitle fonts, common with anime, now start right away. The fonts load in the background, and styled subtitles pick them up a moment later."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los vídeos que incluyen sus propias fuentes de subtítulos, habituales en el anime, ahora empiezan al instante. Las fuentes se cargan en segundo plano y los subtítulos con estilo las usan un momento después."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videot, joissa on omat tekstitysfontit, kuten animessa usein, alkavat nyt heti. Fontit latautuvat taustalla, ja muotoillut tekstitykset ottavat ne käyttöön hetken kuluttua."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vidéos qui embarquent leurs propres polices de sous-titres, courantes dans l'anime, démarrent désormais aussitôt. Les polices se chargent en arrière-plan et les sous-titres stylisés les utilisent un instant plus tard."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videozapisi s vlastitim fontovima za titlove, česti kod animea, sada se pokreću odmah. Fontovi se učitavaju u pozadini, a stilizirani titlovi ih preuzimaju trenutak kasnije."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A saját feliratbetűtípusokat tartalmazó videók, amelyek az animéknél gyakoriak, most azonnal elindulnak. A betűtípusok a háttérben töltődnek be, a formázott feliratok pedig egy pillanattal később használják őket."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I video con font propri per i sottotitoli, comuni negli anime, ora partono subito. I font si caricano in background e i sottotitoli con stile li adottano un attimo dopo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アニメでよく見られる、字幕用フォントを内蔵した動画がすぐに再生されるようになりました。フォントはバックグラウンドで読み込まれ、スタイル付き字幕は少し後にそのフォントで表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "애니메이션에서 흔한, 자체 자막 글꼴을 포함한 영상이 이제 바로 재생됩니다. 글꼴은 백그라운드에서 불러오며, 스타일 자막은 잠시 후 해당 글꼴로 표시됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoer med egne skrifter for undertekster, vanlig i anime, starter nå med en gang. Skriftene lastes i bakgrunnen, og stiliserte undertekster tar dem i bruk et øyeblikk senere."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video's met eigen lettertypen voor ondertitels, gebruikelijk bij anime, starten nu meteen. De lettertypen laden op de achtergrond en opgemaakte ondertitels gebruiken ze een moment later."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filmy z własnymi czcionkami napisów, częste w anime, uruchamiają się teraz od razu. Czcionki wczytują się w tle, a stylizowane napisy przejmują je chwilę później."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos que trazem as próprias fontes de legenda, comuns em animes, agora começam na hora. As fontes carregam em segundo plano, e as legendas estilizadas passam a usá-las um instante depois."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os vídeos que trazem os seus próprios tipos de letra para legendas, comuns no anime, começam agora de imediato. Os tipos de letra carregam em segundo plano e as legendas com estilo passam a usá-los um momento depois."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videoclipurile care au propriile fonturi pentru subtitrări, frecvente la anime, pornesc acum imediat. Fonturile se încarcă în fundal, iar subtitrările stilizate le preiau o clipă mai târziu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видео со своими шрифтами для субтитров, обычные для аниме, теперь запускаются сразу. Шрифты загружаются в фоне, а оформленные субтитры переходят на них чуть позже."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videá s vlastnými písmami pre titulky, bežné pri anime, sa teraz spustia hneď. Písma sa načítajú na pozadí a štylizované titulky ich použijú o chvíľu neskôr."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videor med egna typsnitt för undertexter, vanliga i anime, startar nu direkt. Typsnitten laddas i bakgrunden och formaterade undertexter använder dem en stund senare."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Animelerde yaygın olan, kendi altyazı yazı tiplerini taşıyan videolar artık hemen başlıyor. Yazı tipleri arka planda yüklenir, biçimli altyazılar onları kısa bir süre sonra kullanır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відео з власними шрифтами для субтитрів, звичні для аніме, тепер запускаються одразу. Шрифти завантажуються у фоні, а оформлені субтитри переходять на них трохи згодом."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自带字幕字体的视频（在动漫中很常见）现在会立即开始播放。字体在后台加载，样式字幕稍后即会使用这些字体。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自帶字幕字型的影片（在動畫中很常見）現在會立即開始播放。字型在背景載入，樣式字幕稍後便會使用這些字型。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.fasterStart.title" : {
+      "comment" : "What's New 1.2.0: title of the faster start highlight",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rychlejší start s vloženými písmy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hurtigere start med indlejrede skrifttyper"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnellerer Start mit eingebetteten Schriften"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ταχύτερη έναρξη με ενσωματωμένες γραμματοσειρές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faster start with embedded fonts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicio más rápido con fuentes incrustadas"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nopeampi käynnistys upotetuilla fonteilla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarrage plus rapide avec polices intégrées"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brže pokretanje s ugrađenim fontovima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gyorsabb indítás beágyazott betűtípusokkal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvio più rapido con font incorporati"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "埋め込みフォント付き動画の再生開始を高速化"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내장 글꼴이 있는 영상의 빠른 시작"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raskere start med innebygde skrifter"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snellere start met ingesloten lettertypen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szybszy start z osadzonymi czcionkami"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início mais rápido com fontes incorporadas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início mais rápido com tipos de letra incorporados"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pornire mai rapidă cu fonturi încorporate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Быстрый запуск со встроенными шрифтами"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rýchlejší štart s vloženými písmami"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snabbare start med inbäddade typsnitt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gömülü yazı tipleriyle daha hızlı başlangıç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Швидший запуск із вбудованими шрифтами"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内嵌字体的视频启动更快"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "內嵌字型的影片啟動更快"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.fullHDUpscaling.body" : {
       "extractionState" : "manual",
       "localizations" : {

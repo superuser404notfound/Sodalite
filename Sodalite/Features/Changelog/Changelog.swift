@@ -32,6 +32,12 @@ enum Changelog {
                     "changelog.1_2_0.fullHDUpscaling.body",
                     icon: "arrow.up.left.and.arrow.down.right"
                 ),
+                ChangelogHighlight(
+                    .improve,
+                    "changelog.1_2_0.fasterStart.title",
+                    "changelog.1_2_0.fasterStart.body",
+                    icon: "bolt"
+                ),
             ]
         ),
         // MARK: 1.1.0
