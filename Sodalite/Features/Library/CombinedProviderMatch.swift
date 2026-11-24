@@ -28,15 +28,37 @@ enum CombinedProviderMatch {
         studioDeadline: Duration,
         scanDeadline: Duration
     ) async -> (phase1: JellyfinItemsResponse?, allItems: [JellyfinItem]?, tmdbMap: [String: JellyfinItem], complete: Bool) {
+        await fetch(
+            sources: sources,
+            studioQuery: { _ in studioQuery },
+            libraryQuery: libraryQuery.map { query in { _ in query } },
+            studioDeadline: studioDeadline,
+            scanDeadline: scanDeadline
+        )
+    }
+
+    /// Per-server queries, for a filter menu whose genre ids differ between servers (Sodalite#252).
+    /// A nil query means that server cannot match: an empty answer, not a failure.
+    static func fetch(
+        sources: [HomeSource],
+        studioQuery: (HomeSource) -> ItemQuery?,
+        libraryQuery: ((HomeSource) -> ItemQuery?)?,
+        studioDeadline: Duration,
+        scanDeadline: Duration
+    ) async -> (phase1: JellyfinItemsResponse?, allItems: [JellyfinItem]?, tmdbMap: [String: JellyfinItem], complete: Bool) {
         typealias Answer = (studio: [JellyfinItem]?, library: [JellyfinItem]?)
         var answers: [Int: Answer] = [:]
         await withTaskGroup(of: (Int, Answer).self) { group in
             for (index, source) in sources.enumerated() {
+                let studioQuery = studioQuery(source)
+                let scansLibrary = libraryQuery != nil
+                let libraryQuery = libraryQuery?(source)
                 let studio: @MainActor @Sendable () async -> [JellyfinItem]? = {
-                    try? await source.libraryService.getItems(userID: source.userID, query: studioQuery).items
+                    guard let studioQuery else { return [] }
+                    return try? await source.libraryService.getItems(userID: source.userID, query: studioQuery).items
                 }
                 let library: @MainActor @Sendable () async -> [JellyfinItem]? = {
-                    guard let libraryQuery else { return [] }
+                    guard scansLibrary, let libraryQuery else { return [] }
                     return try? await source.libraryService.getItems(userID: source.userID, query: libraryQuery).items
                 }
                 let isActive = source.isActive

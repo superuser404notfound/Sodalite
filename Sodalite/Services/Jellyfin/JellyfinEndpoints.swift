@@ -55,6 +55,13 @@ enum JellyfinEndpoint: APIEndpoint {
     // Genres
     case genres(userID: String)
 
+    // Library filter facets (Sodalite#252): what a grid's filter menu offers, asked for that grid's
+    // own library. `/Items/Filters` is the legacy call Jellyfin web still fills genres, ratings, tags
+    // and years from; `/Items/Filters2` adds genre ids and the two language lists.
+    case itemFilters(userID: String, scope: FacetScope)
+    case itemFilters2(userID: String, scope: FacetScope)
+    case studios(userID: String, scope: FacetScope)
+
     // PlaybackInfo body is the DeviceProfile dict (DirectPlayProfile [String: Any]) bridged through JSONValue for the Encodable body path.
     case playbackInfo(itemID: String, userID: String, payload: JSONValue)
     case livePlaybackInfo(itemID: String, userID: String, maxStreamingBitrate: Int, payload: JSONValue, autoOpen: Bool)
@@ -129,8 +136,10 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Users/AuthenticateWithQuickConnect"
         case .userViews(let userID):
             "/Users/\(userID)/Views"
-        case .items(let userID, _):
-            "/Users/\(userID)/Items"
+        case .items(let userID, let query):
+            // `/Users/{id}/Items` drops AudioLanguages and SubtitleLanguages without a word
+            // (Jellyfin 12.2: a bogus language still answered all 59 films), `/Items` honours them.
+            query.needsItemsRoot ? "/Items" : "/Users/\(userID)/Items"
         case .itemDetail(let userID, let itemID):
             "/Users/\(userID)/Items/\(itemID)"
         case .localTrailers(let userID, let itemID):
@@ -163,6 +172,12 @@ enum JellyfinEndpoint: APIEndpoint {
             "/Items/\(itemID)"
         case .genres:
             "/Genres"
+        case .itemFilters:
+            "/Items/Filters"
+        case .itemFilters2:
+            "/Items/Filters2"
+        case .studios:
+            "/Studios"
         case .playbackInfo(let itemID, _, _), .livePlaybackInfo(let itemID, _, _, _, _):
             "/Items/\(itemID)/PlaybackInfo"
         case .sessionPlaying:
@@ -289,8 +304,20 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "MaxStreamingBitrate", value: String(maxStreamingBitrate)),
             ]
 
-        case .items(_, let query):
-            return query.toQueryItems()
+        case .items(let userID, let query):
+            var items = query.toQueryItems()
+            if query.needsItemsRoot { items.insert(URLQueryItem(name: "UserId", value: userID), at: 0) }
+            return items
+
+        case .itemFilters(let userID, let scope), .itemFilters2(let userID, let scope):
+            return [URLQueryItem(name: "UserId", value: userID)] + scope.queryItems(sendsRecursive: true)
+
+        case .studios(let userID, let scope):
+            return [
+                URLQueryItem(name: "UserId", value: userID),
+                URLQueryItem(name: "SortBy", value: "SortName"),
+                URLQueryItem(name: "SortOrder", value: "Ascending"),
+            ] + scope.queryItems(sendsRecursive: false)
 
         case .localTrailers(let userID, _), .specialFeatures(let userID, _), .intros(let userID, _):
             // UserId for user data; detailFields so trailers arrive with MediaSources/Chapters like a playable detail item.
@@ -646,6 +673,38 @@ struct ItemQuery: Sendable {
     var nameLessThan: String?
     var nameStartsWithOrGreater: String?
 
+    // The library filter menu (Sodalite#252). Several values in one parameter match any of them,
+    // separate parameters all have to match.
+    /// `GenreIds`, next to `genres`: the two are separate constraints on the server, so a genre
+    /// tile's own genre and a genre picked in its menu narrow together instead of widening.
+    var genreIDs: [String]?
+    /// `StudioIds`. Careful: when `Studios` names are also sent, the server takes the names and
+    /// ignores these, so a studio tile hides the menu's studio group.
+    var studioIDs: [String]?
+    var officialRatings: [String]?
+    var tags: [String]?
+    var years: [Int]?
+    var hasSubtitles: Bool?
+    var hasTrailer: Bool?
+    var hasSpecialFeature: Bool?
+    var hasThemeSong: Bool?
+    var hasThemeVideo: Bool?
+    /// `IsHd`: true is HD, false is SD. 4K is neither (Jellyfin 12.2 counts it under `Is4K` only).
+    var isHD: Bool?
+    var is4K: Bool?
+    var is3D: Bool?
+    /// `VideoTypes` (Dvd, BluRay, Iso).
+    var videoTypes: [String]?
+    var audioLanguages: [String]?
+    var subtitleLanguages: [String]?
+    /// `SeriesStatus` (Continuing, Ended, Unreleased).
+    var seriesStatus: [String]?
+
+    /// The language filters only work on `/Items`, see `JellyfinEndpoint.items`.
+    var needsItemsRoot: Bool {
+        !(audioLanguages ?? []).isEmpty || !(subtitleLanguages ?? []).isEmpty
+    }
+
     /// Fixed-format UTC: the server parses this, it is not display text, so no locale-aware formatter.
     private static let premiereDateFormatter = ISO8601DateFormatter()
 
@@ -696,6 +755,24 @@ struct ItemQuery: Sendable {
             )
         }
 
+        appendList("GenreIds", genreIDs, separator: "|", to: &items)
+        appendList("StudioIds", studioIDs, separator: "|", to: &items)
+        appendList("OfficialRatings", officialRatings, separator: "|", to: &items)
+        appendList("Tags", tags, separator: "|", to: &items)
+        appendList("Years", years?.map(String.init), separator: ",", to: &items)
+        appendFlag("HasSubtitles", hasSubtitles, to: &items)
+        appendFlag("HasTrailer", hasTrailer, to: &items)
+        appendFlag("HasSpecialFeature", hasSpecialFeature, to: &items)
+        appendFlag("HasThemeSong", hasThemeSong, to: &items)
+        appendFlag("HasThemeVideo", hasThemeVideo, to: &items)
+        appendFlag("IsHd", isHD, to: &items)
+        appendFlag("Is4K", is4K, to: &items)
+        appendFlag("Is3D", is3D, to: &items)
+        appendList("VideoTypes", videoTypes, separator: ",", to: &items)
+        appendList("AudioLanguages", audioLanguages, separator: ",", to: &items)
+        appendList("SubtitleLanguages", subtitleLanguages, separator: ",", to: &items)
+        appendList("SeriesStatus", seriesStatus, separator: ",", to: &items)
+
         items.append(URLQueryItem(name: "Fields", value: fields))
         items.append(URLQueryItem(name: "Recursive", value: String(recursive)))
         // Omitted entirely when nil: Jellyfin only consults its own grouping config while the param is absent (an explicit false overrides the admin's setting). The Collections row uses a dedicated BoxSet query, unaffected either way.
@@ -703,6 +780,47 @@ struct ItemQuery: Sendable {
             items.append(URLQueryItem(name: "CollapseBoxSetItems", value: String(collapseBoxSetItems)))
         }
 
+        return items
+    }
+
+    private func appendList(_ name: String, _ values: [String]?, separator: String, to items: inout [URLQueryItem]) {
+        guard let values, !values.isEmpty else { return }
+        items.append(URLQueryItem(name: name, value: values.joined(separator: separator)))
+    }
+
+    private func appendFlag(_ name: String, _ value: Bool?, to items: inout [URLQueryItem]) {
+        guard let value else { return }
+        items.append(URLQueryItem(name: name, value: String(value)))
+    }
+}
+
+/// Which library a filter menu describes: the grid's own parent and item types, never the whole
+/// server (the app's `/Genres` call is server-wide and the wrong list here).
+struct FacetScope: Sendable, Hashable {
+    var parentID: String?
+    var includeItemTypes: [ItemType]?
+    /// A folder grid lists one level. Only `/Items/Filters2` takes `Recursive`; the legacy
+    /// `/Items/Filters` and `/Studios` ignore it, so a folder's genre, year and studio lists may
+    /// describe its whole parent.
+    var recursive = true
+
+    init(parentID: String?, includeItemTypes: [ItemType]?, recursive: Bool = true) {
+        self.parentID = parentID
+        self.includeItemTypes = includeItemTypes
+        self.recursive = recursive
+    }
+
+    init(query: ItemQuery) {
+        self.init(parentID: query.parentID, includeItemTypes: query.includeItemTypes, recursive: query.recursive)
+    }
+
+    func queryItems(sendsRecursive: Bool) -> [URLQueryItem] {
+        var items: [URLQueryItem] = []
+        if let parentID { items.append(URLQueryItem(name: "ParentId", value: parentID)) }
+        if let includeItemTypes, !includeItemTypes.isEmpty {
+            items.append(URLQueryItem(name: "IncludeItemTypes", value: includeItemTypes.map(\.rawValue).joined(separator: ",")))
+        }
+        if sendsRecursive { items.append(URLQueryItem(name: "Recursive", value: String(recursive))) }
         return items
     }
 }

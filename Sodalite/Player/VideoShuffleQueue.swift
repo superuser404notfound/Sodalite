@@ -26,8 +26,9 @@ enum VideoShuffleQueue {
         query.sortOrder = nil
         query.limit = limit
         query.startIndex = nil
-        // Shuffle ignores the watch-status filter per the feature spec.
-        query.filters = nil
+        // Shuffle ignores the watch-status filter per the feature spec (Sodalite#17); what the
+        // filter menu put there (favorites, continue watching) stays.
+        query.filters = withoutWatchFilter(query.filters)
         // A library grid may defer collection grouping to the server (Sodalite#44); a collapsed BoxSet in the queue is not playable, so shuffle always takes the flat list.
         query.collapseBoxSetItems = false
         // A folder-browsed grid lists one level; its shuffle draws from the whole tree beneath it (Sodalite#180).
@@ -38,5 +39,49 @@ enum VideoShuffleQueue {
         query.fields = JellyfinEndpoint.detailFields
         let response = try? await service.getItems(userID: userID, query: query)
         return response?.items ?? []
+    }
+
+    /// How many matching series a filtered shows shuffle draws from.
+    static let seriesSampleSize = 20
+
+    /// A shows grid narrowed by the filter menu (Sodalite#252). The menu describes series, and
+    /// their genre, rating, status or year does not carry onto episodes (Jellyfin 12.2 answers
+    /// `IncludeItemTypes=Episode&Genres=Animation` with nothing). So the matching series are drawn
+    /// first, then random episodes from each, mixed.
+    static func buildFromSeries(
+        seriesQuery: ItemQuery,
+        limit: Int = defaultLimit,
+        service: JellyfinLibraryServiceProtocol,
+        userID: String
+    ) async -> [JellyfinItem] {
+        var query = seriesQuery
+        query.includeItemTypes = [.series]
+        query.sortBy = "Random"
+        query.sortOrder = nil
+        query.limit = seriesSampleSize
+        query.startIndex = nil
+        query.filters = withoutWatchFilter(query.filters)
+        query.collapseBoxSetItems = false
+        query.recursive = true
+        query.fields = ""
+        guard let series = try? await service.getItems(userID: userID, query: query).items,
+              !series.isEmpty else { return [] }
+        let perSeries = max(1, limit / series.count)
+        let episodes = await withTaskGroup(of: [JellyfinItem].self) { group in
+            for show in series {
+                group.addTask {
+                    await build(parentID: show.id, itemTypes: [.episode], limit: perSeries, service: service, userID: userID)
+                }
+            }
+            var all: [JellyfinItem] = []
+            for await batch in group { all += batch }
+            return all
+        }
+        return Array(episodes.shuffled().prefix(limit))
+    }
+
+    private static func withoutWatchFilter(_ filters: [String]?) -> [String]? {
+        let kept = (filters ?? []).filter { $0 != "IsPlayed" && $0 != "IsUnplayed" }
+        return kept.isEmpty ? nil : kept
     }
 }
