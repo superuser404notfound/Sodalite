@@ -122,7 +122,9 @@ final class JellyfinLibraryService: JellyfinLibraryServiceProtocol {
         let extra = await modern
         let studioItems = await studios?.items ?? []
         return ServerFacets(
-            genres: base.genres ?? [],
+            // Filters2 takes `Recursive` and the legacy call does not, so on a folder grid its list
+            // is the true one, and every genre on it has an id to send.
+            genres: extra?.genres.map { $0.map(\.name) } ?? base.genres ?? [],
             genreIDs: Dictionary((extra?.genres ?? []).map { ($0.name.lowercased(), $0.id) }, uniquingKeysWith: { first, _ in first }),
             officialRatings: base.officialRatings ?? [],
             tags: base.tags ?? [],

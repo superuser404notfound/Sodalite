@@ -3,7 +3,8 @@ import SwiftUI
 // The filter menu of the library grids (Sodalite#252), the groups Jellyfin web offers. It sits next
 // to the watch control and ANDs with it: Unwatched plus Horror plus 1999 is unwatched horror from
 // 1999. Several values inside one group match any of them, except where the server only has
-// separate yes/no parameters (Features, and 3D next to a resolution), which can only all match.
+// separate yes/no parameters (Features, and 3D next to any other video type), which can only all
+// match. 4K and SD or HD are the exception the other way: two parameters the server ORs.
 
 /// The menu's groups, in the order they are listed.
 enum LibraryFilterGroup: String, CaseIterable, Hashable, Identifiable, Sendable {
@@ -106,9 +107,10 @@ enum LibraryVideoTypeFilter: String, CaseIterable, Hashable, Sendable {
         }
     }
 
-    /// SD, HD and 4K are one choice. The server has `IsHd=true/false` and a separate `Is4K`, and
-    /// counts a 4K file as neither SD nor HD, so two of them together could only ever match nothing.
-    var isResolution: Bool { self == .sd || self == .hd || self == .uhd }
+    /// SD and HD are the two values of one parameter, `IsHd=false/true`, so only one of them goes
+    /// out. 4K is its own `Is4K`, which Jellyfin 12.2 ORs with `IsHd` (measured: HD 9 movies, 4K 50,
+    /// both 59), and HD alone leaves 4K out. So 4K combines with either, SD and HD replace each other.
+    var isSDOrHD: Bool { self == .sd || self == .hd }
 
     /// The `VideoTypes` value of a disc kind; the three share one parameter and match any.
     var jellyfinVideoType: String? {
@@ -269,10 +271,10 @@ struct LibraryFilterSelection: Hashable, Sendable {
         }
     }
 
-    /// A resolution replaces the one picked before (see `LibraryVideoTypeFilter.isResolution`).
+    /// SD replaces HD and the other way round (see `LibraryVideoTypeFilter.isSDOrHD`).
     mutating func toggle(_ videoType: LibraryVideoTypeFilter) {
         if videoTypes.remove(videoType) != nil { return }
-        if videoType.isResolution { videoTypes = videoTypes.filter { !$0.isResolution } }
+        if videoType.isSDOrHD { videoTypes = videoTypes.filter { !$0.isSDOrHD } }
         videoTypes.insert(videoType)
     }
 
@@ -348,8 +350,13 @@ enum LibraryFilterGroups {
     static func visible(for query: ItemQuery, facets: LibraryFacets?) -> [LibraryFilterGroup] {
         LibraryFilterGroup.allCases.filter { group in
             switch group {
-            case .filters, .features, .videoType:
+            case .filters, .features:
                 return true
+            case .videoType:
+                // Resolution and disc type describe a file, which a series row does not have.
+                // Jellyfin web hides this group on shows as well.
+                guard let types = query.includeItemTypes, !types.isEmpty else { return true }
+                return !types.allSatisfy { $0 == .series }
             case .seriesStatus:
                 return query.includeItemTypes?.contains(.series) ?? false
             case .genres:

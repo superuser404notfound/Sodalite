@@ -72,15 +72,21 @@ struct LibraryFilterTests {
         #expect(value("IsHd", in: try #require(selection.applied(to: movies, facets: nil))) == "true")
     }
 
-    /// The server counts 4K as neither SD nor HD, so two resolutions together could only match nothing.
-    @Test func aResolutionReplacesTheOnePickedBefore() {
+    /// SD and HD share `IsHd`, so one replaces the other. `Is4K` is its own parameter, which the
+    /// server ORs with `IsHd` (12.2: HD 9 movies, 4K 50, both 59), so 4K stays next to either.
+    @Test func sdAndHdReplaceEachOtherAnd4KCombines() throws {
         var selection = LibraryFilterSelection()
         selection.toggle(.sd)
         selection.toggle(.threeD)
         selection.toggle(.uhd)
-        #expect(selection.videoTypes == [.uhd, .threeD])
+        #expect(selection.videoTypes == [.sd, .uhd, .threeD])
+        selection.toggle(.hd)
+        #expect(selection.videoTypes == [.hd, .uhd, .threeD])
+        let narrowed = try #require(selection.applied(to: movies, facets: nil))
+        #expect(value("IsHd", in: narrowed) == "true")
+        #expect(value("Is4K", in: narrowed) == "true")
         selection.toggle(.uhd)
-        #expect(selection.videoTypes == [.threeD])
+        #expect(selection.videoTypes == [.hd, .threeD])
     }
 
     // MARK: - Genres and studios by id, per server
@@ -189,6 +195,18 @@ struct LibraryFilterTests {
         shows.includeItemTypes = [.series]
         #expect(LibraryFilterGroups.visible(for: shows, facets: nil).contains(.seriesStatus))
         #expect(!LibraryFilterGroups.visible(for: movies, facets: nil).contains(.seriesStatus))
+    }
+
+    /// Resolution and disc type describe files; a shows grid lists series rows.
+    @Test func videoTypeIsHiddenOnAShowsGrid() {
+        var shows = movies
+        shows.includeItemTypes = [.series]
+        #expect(!LibraryFilterGroups.visible(for: shows, facets: nil).contains(.videoType))
+        var mixed = movies
+        mixed.includeItemTypes = [.movie, .series]
+        #expect(LibraryFilterGroups.visible(for: mixed, facets: nil).contains(.videoType))
+        mixed.includeItemTypes = nil
+        #expect(LibraryFilterGroups.visible(for: mixed, facets: nil).contains(.videoType))
     }
 
     /// The server takes a studio tile's `Studios` names and drops `StudioIds`.

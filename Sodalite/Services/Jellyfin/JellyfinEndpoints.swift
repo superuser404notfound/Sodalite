@@ -317,6 +317,11 @@ enum JellyfinEndpoint: APIEndpoint {
                 URLQueryItem(name: "UserId", value: userID),
                 URLQueryItem(name: "SortBy", value: "SortName"),
                 URLQueryItem(name: "SortOrder", value: "Ascending"),
+                // Names and ids are all the menu reads. A secondary server answers under a 4 s
+                // deadline, and a big library has thousands of studios.
+                URLQueryItem(name: "EnableImages", value: "false"),
+                URLQueryItem(name: "EnableUserData", value: "false"),
+                URLQueryItem(name: "EnableTotalRecordCount", value: "false"),
             ] + scope.queryItems(sendsRecursive: false)
 
         case .localTrailers(let userID, _), .specialFeatures(let userID, _), .intros(let userID, _):

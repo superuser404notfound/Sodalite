@@ -51,14 +51,13 @@ enum CombinedProviderMatch {
         await withTaskGroup(of: (Int, Answer).self) { group in
             for (index, source) in sources.enumerated() {
                 let studioQuery = studioQuery(source)
-                let scansLibrary = libraryQuery != nil
                 let libraryQuery = libraryQuery?(source)
                 let studio: @MainActor @Sendable () async -> [JellyfinItem]? = {
                     guard let studioQuery else { return [] }
                     return try? await source.libraryService.getItems(userID: source.userID, query: studioQuery).items
                 }
                 let library: @MainActor @Sendable () async -> [JellyfinItem]? = {
-                    guard scansLibrary, let libraryQuery else { return [] }
+                    guard let libraryQuery else { return [] }
                     return try? await source.libraryService.getItems(userID: source.userID, query: libraryQuery).items
                 }
                 let isActive = source.isActive

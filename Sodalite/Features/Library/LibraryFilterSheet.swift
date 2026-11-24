@@ -126,7 +126,7 @@ struct LibraryFilterSheet: View {
                 .font(.body)
                 .opacity(0.6)
         }
-        .rowChrome(isFocused: isFocused, tint: tintColor, compact: isCompact)
+        .libraryPanelRow(isFocused: isFocused, tint: tintColor, compact: isCompact)
         .focused($focusedRow, equals: id)
         .stableTap(isFocused: isFocused) { open(group) }
     }
@@ -145,7 +145,7 @@ struct LibraryFilterSheet: View {
                     .font(.body.weight(.semibold))
             }
         }
-        .rowChrome(isFocused: isFocused, tint: tintColor, compact: isCompact)
+        .libraryPanelRow(isFocused: isFocused, tint: tintColor, compact: isCompact)
         .focused($focusedRow, equals: option.id)
         .accessibilityAddTraits(isOn ? .isSelected : [])
         .stableTap(isFocused: isFocused) { option.toggle(&selection) }
@@ -161,7 +161,7 @@ struct LibraryFilterSheet: View {
             Image(systemName: "xmark")
                 .font(.body)
         }
-        .rowChrome(isFocused: isFocused, tint: tintColor, compact: isCompact)
+        .libraryPanelRow(isFocused: isFocused, tint: tintColor, compact: isCompact)
         .focused($focusedRow, equals: id)
         .stableTap(isFocused: isFocused) {
             action()
@@ -171,9 +171,23 @@ struct LibraryFilterSheet: View {
 
     // MARK: - Content
 
-    /// What is picked in a group, in list order, or "Any".
+    /// What is picked in a group, in list order, or "Any". The facet groups read the lists
+    /// directly: a library can carry thousands of studios and tags, and this runs per row per redraw.
     private func summary(for group: LibraryFilterGroup) -> String {
-        let picked = options(for: group).filter { $0.isOn(selection) }.map(\.title)
+        let picked: [String]
+        switch group {
+        case .genres: picked = (facets?.genres ?? []).filter(selection.genres.contains)
+        case .parentalRatings: picked = (facets?.officialRatings ?? []).filter(selection.officialRatings.contains)
+        case .tags: picked = (facets?.tags ?? []).filter(selection.tags.contains)
+        case .studios: picked = (facets?.studios ?? []).filter(selection.studios.contains)
+        case .years: picked = (facets?.years ?? []).filter(selection.years.contains).map(String.init)
+        case .audioLanguages:
+            picked = (facets?.audioLanguages ?? []).filter { selection.audioLanguages.contains($0.value) }.map(\.name)
+        case .subtitleLanguages:
+            picked = (facets?.subtitleLanguages ?? []).filter { selection.subtitleLanguages.contains($0.value) }.map(\.name)
+        case .filters, .features, .videoType, .seriesStatus:
+            picked = options(for: group).filter { $0.isOn(selection) }.map(\.title)
+        }
         guard !picked.isEmpty else { return String(localized: "library.filter.any") }
         return picked.joined(separator: ", ")
     }
@@ -249,21 +263,5 @@ struct LibraryFilterSheet: View {
 
     private static func localized(_ key: String) -> String {
         String(localized: String.LocalizationValue(key))
-    }
-}
-
-private extension View {
-    /// The sort panel's row: tint on focus, the surface fill at rest.
-    func rowChrome(isFocused: Bool, tint: Color, compact: Bool) -> some View {
-        self
-            .padding(.horizontal, compact ? 18 : 32)
-            .padding(.vertical, compact ? 14 : 22)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(isFocused ? tint : Color.Theme.surface)
-            )
-            .foregroundStyle(isFocused ? Color.black : Color.primary)
-            .focusableSurface(true)
     }
 }

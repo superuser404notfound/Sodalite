@@ -288,9 +288,22 @@ struct FilteredGridView: View {
                             Image(systemName: "film")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.tertiary)
-                            Text("library.empty.message")
+                            // A filter that matches nothing is not an empty library, and the
+                            // way out is right here instead of back up at the Filter button.
+                            Text(filterSelection.isEmpty ? "library.empty.message" : "library.filter.noMatch")
                                 .foregroundStyle(.secondary)
-                            if !isTabRoot {
+                            if !filterSelection.isEmpty {
+                                Button {
+                                    filterSelection = LibraryFilterSelection()
+                                    filterDraft = filterSelection
+                                } label: {
+                                    Text("library.filter.clearAll")
+                                        .font(.body)
+                                        .padding(.horizontal, 32)
+                                        .padding(.vertical, 12)
+                                }
+                                .buttonStyle(SettingsTileButtonStyle())
+                            } else if !isTabRoot {
                                 Button { dismiss() } label: {
                                     Text("common.back")
                                         .font(.body)
@@ -781,7 +794,8 @@ struct FilteredGridView: View {
     }
 
     /// Every server of a combined grid is asked, a secondary under the same deadline its pages get.
-    /// A server that does not answer is left out of the lists; the menu still opens.
+    /// A server that does not answer is left out of the lists; the menu still opens. When none
+    /// answers, `facets` stays nil, so the next open of the menu asks again.
     private func loadFacets() async {
         facetsLoading = true
         defer { facetsLoading = false }
@@ -804,12 +818,13 @@ struct FilteredGridView: View {
                     if let answer = collected[index] { answers.append((source.serverID, answer)) }
                 }
             }
-            facets = LibraryFacets.merge(answers)
+            if !answers.isEmpty { facets = LibraryFacets.merge(answers) }
             return
         }
-        guard let userID = sessionUserID else { return }
-        let answer = try? await session.libraryService.getFilterFacets(userID: userID, scope: scope)
-        facets = LibraryFacets.merge(answer.map { [(serverKey, $0)] } ?? [])
+        guard let userID = sessionUserID,
+              let answer = try? await session.libraryService.getFilterFacets(userID: userID, scope: scope)
+        else { return }
+        facets = LibraryFacets.merge([(serverKey, answer)])
     }
 
     /// Narrowing the server cannot express. On the sparse grid the same rule hides a slot instead
