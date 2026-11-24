@@ -9,7 +9,7 @@ import SwiftAssRenderer
 ///   raw paced event cues (`preserveASSMarkup`) + `TrackInfo.assHeader`
 ///   -> `ASSScriptBuilder` -> batched `reloadTrack(content:)`
 ///   `engine.clock.$sourceTime` -> `setTimeOffset`
-///   `engine.fontAttachments` -> font directory -> `FontConfig`
+///   `engine.$fontAttachments` -> font directory -> `FontConfig`
 ///
 /// One instance per session, owned by `PlayerViewModel`; inactive until an ASS/SSA track selected.
 @MainActor
@@ -81,6 +81,9 @@ final class ASSRenderCoordinator {
     /// stays nil, caller keeps the text path) when the header is missing or setup fails.
     /// Fonts are written off-main (anime MKVs embed dozens of 5-20 MB CJK faces); when all files
     /// already exist the renderer installs synchronously so `activate(...); renderer` still works.
+    /// The engine reads a Matroska file's fonts after the first frame (AE#1129), so an activation at
+    /// load usually sees none yet: the renderer starts on whatever the item's cache holds and is
+    /// rebuilt once the list lands with fonts the cache lacks.
     func activate(header: String?, itemID: String) {
         deactivate()
         guard let header, !header.isEmpty else { return }
@@ -110,6 +113,14 @@ final class ASSRenderCoordinator {
             .sink { [weak self] cues in self?.consume(cues: cues) }
             .store(in: &cancellables)
 
+        // Fonts that land after the activation (AE#1129). The current value was handled above.
+        player.$fontAttachments
+            .dropFirst()
+            .filter { !$0.isEmpty }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] fonts in self?.fontsDidArrive(fonts, fontsDir: fontsDir, generation: generation) }
+            .store(in: &cancellables)
+
         // Clock sink: cue times and sourceTime share the source-PTS coordinate (no conversion).
         // Doubles as trailing-batch flush, since the cue sink only runs on cue-array emissions
         // and a batch landing in the window with no later emission (EOF tail) would never flush.
@@ -136,6 +147,30 @@ final class ASSRenderCoordinator {
         pendingEvents = false
         earliestPendingStart = .infinity
         lastReloadAt = .distantPast
+    }
+
+    private func fontsDidArrive(_ fonts: [FontAttachment], fontsDir: URL, generation: Int) {
+        guard activationGeneration == generation,
+              !Self.allFontsPresent(fonts, in: fontsDir) else { return }
+        Task.detached(priority: .userInitiated) { [weak self] in
+            Self.writeFontAttachments(fonts, to: fontsDir)
+            await MainActor.run {
+                guard let self, self.activationGeneration == generation else { return }
+                self.reinstallRenderer(fontsDir: fontsDir)
+            }
+        }
+    }
+
+    /// libass reads its font directory when the renderer is built, so new fonts need a new one. It
+    /// starts without a track, so the whole script goes in at once instead of waiting for a batch.
+    private func reinstallRenderer(fontsDir: URL) {
+        renderer?.freeTrack()
+        installRenderer(fontsDir: fontsDir)
+        guard builder != nil else { return }
+        pendingEvents = true
+        earliestPendingStart = lastOffset
+        lastReloadAt = .distantPast
+        flushPendingEventsIfDue()
     }
 
     private func installRenderer(fontsDir: URL) {
