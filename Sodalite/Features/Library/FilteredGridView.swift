@@ -47,6 +47,15 @@ struct FilteredGridView: View {
     /// non-default sort must not paint the cached default order), and .task runs a frame too late.
     @State private var sort: LibrarySort
     @State private var showSortSheet = false
+    /// The filter menu (Sodalite#252). Not remembered, like the watch choice: a library opens
+    /// unfiltered. The panel edits `filterDraft` and the grid adopts it when the panel closes, so
+    /// ticking five boxes reloads once.
+    @State private var filterSelection = LibraryFilterSelection()
+    @State private var filterDraft = LibraryFilterSelection()
+    @State private var showFilterSheet = false
+    /// Loaded when the menu first opens, then kept for the life of the grid.
+    @State private var facets: LibraryFacets?
+    @State private var facetsLoading = false
     /// Presents the single-field sheet that fills the server's empty URL slot (iOS only; tvOS has
     /// no URL editor).
     @State private var showAddURLSheet = false
@@ -205,19 +214,26 @@ struct FilteredGridView: View {
                             systemImage: "shuffle",
                             action: {
                                 guard let userID = sessionUserID else { return }
+                                // Draws from what the filter menu leaves, not the whole library.
+                                guard let base = menuNarrowed(query, serverID: serverKey) else { return }
                                 // Shows libraries shuffle episodes across the whole
                                 // library; everything else keeps its own item types.
                                 var types = query.includeItemTypes ?? [.movie]
-                                if types.contains(.series) { types = [.episode] }
+                                let showsSeries = types.contains(.series)
+                                if showsSeries { types = [.episode] }
                                 if browsesFolders { types = [.video] }
+                                let throughSeries = showsSeries && !filterSelection.isEmpty
                                 Task {
-                                    let queue = await VideoShuffleQueue.build(
-                                        parentID: query.parentID,
-                                        baseQuery: query,
-                                        itemTypes: types,
-                                        service: session.libraryService,
-                                        userID: userID
-                                    )
+                                    let queue = throughSeries
+                                        ? await VideoShuffleQueue.buildFromSeries(
+                                            seriesQuery: base, service: session.libraryService, userID: userID)
+                                        : await VideoShuffleQueue.build(
+                                            parentID: query.parentID,
+                                            baseQuery: base,
+                                            itemTypes: types,
+                                            service: session.libraryService,
+                                            userID: userID
+                                        )
                                     guard let first = queue.first else { return }
                                     playItem = first
                                     playQueue = queue
@@ -232,6 +248,14 @@ struct FilteredGridView: View {
                                 action: { showSortSheet = true }
                             )
                         }
+                        // On every grid, streaming tiles included: their two phases are both
+                        // narrowed, unlike a sort, which could only order one of them.
+                        GlassActionButton(
+                            title: "library.filter.title",
+                            systemImage: "line.3.horizontal.decrease",
+                            subtitle: filterSelection.isEmpty ? nil : String(filterSelection.activeCount),
+                            action: openFilterMenu
+                        )
                         Spacer()
                     }
                     .padding(.horizontal, metrics.gridInset)
@@ -264,9 +288,22 @@ struct FilteredGridView: View {
                             Image(systemName: "film")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.tertiary)
-                            Text("library.empty.message")
+                            // A filter that matches nothing is not an empty library, and the
+                            // way out is right here instead of back up at the Filter button.
+                            Text(filterSelection.isEmpty ? "library.empty.message" : "library.filter.noMatch")
                                 .foregroundStyle(.secondary)
-                            if !isTabRoot {
+                            if !filterSelection.isEmpty {
+                                Button {
+                                    filterSelection = LibraryFilterSelection()
+                                    filterDraft = filterSelection
+                                } label: {
+                                    Text("library.filter.clearAll")
+                                        .font(.body)
+                                        .padding(.horizontal, 32)
+                                        .padding(.vertical, 12)
+                                }
+                                .buttonStyle(SettingsTileButtonStyle())
+                            } else if !isTabRoot {
                                 Button { dismiss() } label: {
                                     Text("common.back")
                                         .font(.body)
@@ -421,6 +458,19 @@ struct FilteredGridView: View {
                 }
             )
         }
+        .menuPresentation(isPresented: $showFilterSheet, onDismiss: {
+            if filterDraft != filterSelection { filterSelection = filterDraft }
+        }) {
+            LibraryFilterSheet(
+                selection: $filterDraft,
+                groups: LibraryFilterGroups.visible(for: query, facets: facets),
+                facets: facets,
+                isLoadingFacets: facetsLoading,
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                )
+            )
+        }
         // The fix for an off-network server, offered where the failure is (Sodalite#122).
         .addExternalAddressSheet(isPresented: $showAddURLSheet)
         .onChange(of: reloadKey) { _, _ in
@@ -476,7 +526,7 @@ struct FilteredGridView: View {
                 loadFailed = false
                 isLoading = false
                 // Same rule as before: only the unfiltered default order feeds init hydration.
-                if let scope = cacheScope, watchFilter == .all, sort == .default {
+                if let scope = cacheScope, watchFilter == .all, filterSelection.isEmpty, sort == .default {
                     FilterCache.shared.setHomeFilterItems(
                         browsable(page), filterKey: scope.key, identity: scope.identity
                     )
@@ -705,17 +755,77 @@ struct FilteredGridView: View {
     /// (the same quirk HomeView.swift:24 documents against), and the augment does not change between
     /// two detail visits, or across a sort change: only the watch filter narrows it.
     @State private var cachedPhase2Items: [JellyfinItem] = []
-    /// The watch filter `cachedPhase2Items` was resolved under; nil until the first resolve lands.
-    @State private var phase2CacheFilter: WatchStatusFilter?
+    /// The narrowing `cachedPhase2Items` was resolved under; nil until the first resolve lands.
+    @State private var phase2CacheFilter: Phase2Filter?
 
-    /// Anything that invalidates the loaded page set: both a filter flip and a sort change need the
-    /// same reset (grid, pagination cursor, end marker) before the keyed task refetches.
+    /// Both filters narrow phase 2 on the server, so a cached resolve belongs to both.
+    struct Phase2Filter: Equatable {
+        let watch: WatchStatusFilter
+        let menu: LibraryFilterSelection
+    }
+
+    private var phase2Filter: Phase2Filter { Phase2Filter(watch: watchFilter, menu: filterSelection) }
+
+    /// Anything that invalidates the loaded page set: a filter flip, a menu change and a sort change
+    /// need the same reset (grid, pagination cursor, end marker) before the keyed task refetches.
+    /// The alphabet rail counts against the query built under this key, so it follows too.
     private struct ReloadKey: Equatable {
         let filter: WatchStatusFilter
+        let menu: LibraryFilterSelection
         let sort: LibrarySort
     }
 
-    private var reloadKey: ReloadKey { ReloadKey(filter: watchFilter, sort: sort) }
+    private var reloadKey: ReloadKey { ReloadKey(filter: watchFilter, menu: filterSelection, sort: sort) }
+
+    /// The single-server grid's key into `facets.byServer`.
+    private var serverKey: String { session.server?.id ?? "" }
+
+    /// `base` narrowed by the menu for one server; nil when that server cannot match at all.
+    private func menuNarrowed(_ base: ItemQuery, serverID: String) -> ItemQuery? {
+        guard !filterSelection.isEmpty else { return base }
+        return filterSelection.applied(to: base, facets: facets?.byServer[serverID])
+    }
+
+    private func openFilterMenu() {
+        filterDraft = filterSelection
+        showFilterSheet = true
+        guard facets == nil, !facetsLoading else { return }
+        Task { await loadFacets() }
+    }
+
+    /// Every server of a combined grid is asked, a secondary under the same deadline its pages get.
+    /// A server that does not answer is left out of the lists; the menu still opens. When none
+    /// answers, `facets` stays nil, so the next open of the menu asks again.
+    private func loadFacets() async {
+        facetsLoading = true
+        defer { facetsLoading = false }
+        let scope = FacetScope(query: query)
+        if isMerged, let sources {
+            var answers: [(serverID: String, facets: ServerFacets)] = []
+            await withTaskGroup(of: (Int, ServerFacets?).self) { group in
+                for (index, source) in sources.enumerated() {
+                    let run: @MainActor @Sendable () async -> ServerFacets? = {
+                        try? await source.libraryService.getFilterFacets(userID: source.userID, scope: scope)
+                    }
+                    let isActive = source.isActive
+                    group.addTask {
+                        (index, isActive ? await run() : await Deadline.race(.seconds(4)) { await run() } ?? nil)
+                    }
+                }
+                var collected: [Int: ServerFacets] = [:]
+                for await (index, answer) in group { if let answer { collected[index] = answer } }
+                for (index, source) in sources.enumerated() {
+                    if let answer = collected[index] { answers.append((source.serverID, answer)) }
+                }
+            }
+            if !answers.isEmpty { facets = LibraryFacets.merge(answers) }
+            return
+        }
+        guard let userID = sessionUserID,
+              let answer = try? await session.libraryService.getFilterFacets(userID: userID, scope: scope)
+        else { return }
+        facets = LibraryFacets.merge([(serverKey, answer)])
+    }
 
     /// Narrowing the server cannot express. On the sparse grid the same rule hides a slot instead
     /// (`SparseGridStore` keeps the server's count).
@@ -726,9 +836,9 @@ struct FilteredGridView: View {
     /// Whether a load can skip the 10 000-item scan and the Seerr watch-provider calls and reuse
     /// what the last full load resolved into `cachedPhase2Items` (Audit 2026-09-25 BROWSE-6): only
     /// for a smart-provider tile (the two-phase augment only exists there), and only when the cached
-    /// resolve belongs to the SAME watch filter, since the filter narrows both phases server-side.
+    /// resolve belongs to the SAME watch filter and filter menu, since both narrow both phases server-side.
     static func canReuseCachedPhase2(
-        smartProviderID: Int?, cacheFilter: WatchStatusFilter?, currentFilter: WatchStatusFilter
+        smartProviderID: Int?, cacheFilter: Phase2Filter?, currentFilter: Phase2Filter
     ) -> Bool {
         smartProviderID != nil && cacheFilter == currentFilter
     }
@@ -743,12 +853,14 @@ struct FilteredGridView: View {
         if let filter = watchFilter.jellyfinFilter {
             effectiveQuery.filters = [filter]
         }
-        let isWatchFiltered = watchFilter != .all
+        // Not cached: the cache feeds the next first paint, which is always unfiltered.
+        let isWatchFiltered = watchFilter != .all || !filterSelection.isEmpty
+        let watchAndSortQuery = effectiveQuery
 
         // A reappear with an already-resolved augment for this filter: skip the scan below and the
         // Seerr calls behind refreshWatchProviderAugment entirely (BROWSE-6).
         let reusePhase2 = Self.canReuseCachedPhase2(
-            smartProviderID: smartProviderID, cacheFilter: phase2CacheFilter, currentFilter: watchFilter
+            smartProviderID: smartProviderID, cacheFilter: phase2CacheFilter, currentFilter: phase2Filter
         )
 
         if usesSparseGrid {
@@ -762,6 +874,12 @@ struct FilteredGridView: View {
             let service = session.libraryService
             let seed = storeKey == nil ? store.loadedItems : []
             storeKey = reloadKey
+            guard let effectiveQuery = menuNarrowed(watchAndSortQuery, serverID: serverKey) else {
+                // Nothing in this library can match (a picked genre it does not have).
+                store.start(fetch: { _, _ in JellyfinItemsResponse(items: [], totalRecordCount: 0) }, isHidden: { _ in false }, seed: [])
+                railBaseQuery = nil
+                return
+            }
             railBaseQuery = effectiveQuery
             resolver = AlphabetJumpResolver(count: { query in
                 try await service.getItems(userID: userID, query: query).totalRecordCount
@@ -782,7 +900,7 @@ struct FilteredGridView: View {
         // A combined Home's genre or studio grid: every server, one sort order (Sodalite#85).
         if isMerged, smartProviderID == nil, let sources {
             let outcome = await mergedGrid.load(
-                sources: MergedPager.sources(from: sources, query: effectiveQuery),
+                sources: MergedPager.sources(from: sources) { menuNarrowed(watchAndSortQuery, serverID: $0.serverID) },
                 sort: sort, pageSize: query.limit ?? 50, filter: browsable)
             guard !Task.isCancelled, generation == loadGeneration else { return }
             switch outcome {
@@ -808,8 +926,9 @@ struct FilteredGridView: View {
             // A combined Home's provider tile: both phases from every server (Sodalite#85).
             let libraryQuery = ProviderMatchMerging.libraryScanQuery(watchFilter: watchFilter.jellyfinFilter)
             let combined = await CombinedProviderMatch.fetch(
-                sources: sources, studioQuery: effectiveQuery,
-                libraryQuery: reusePhase2 ? nil : libraryQuery,
+                sources: sources,
+                studioQuery: { menuNarrowed(watchAndSortQuery, serverID: $0.serverID) },
+                libraryQuery: reusePhase2 ? nil : { menuNarrowed(libraryQuery, serverID: $0.serverID) },
                 studioDeadline: .seconds(4), scanDeadline: .seconds(20))
             phase1Response = combined.phase1
             allItems = combined.allItems
@@ -817,18 +936,25 @@ struct FilteredGridView: View {
             combinedIncomplete = !combined.complete
         } else {
             // nil = fetch failed/cancelled, distinct from "server empty": a failure must never replace the grid or persist into FilterCache as a valid empty (that poisoned the cache and killed instant-paint until the next pre-warm).
-            async let studioMatchTask: JellyfinItemsResponse? = { [effectiveQuery] in
-                try? await session.libraryService.getItems(
-                    userID: userID, query: effectiveQuery
+            let narrowedQuery = menuNarrowed(watchAndSortQuery, serverID: serverKey)
+            let narrowedScan = menuNarrowed(
+                ProviderMatchMerging.libraryScanQuery(watchFilter: watchFilter.jellyfinFilter), serverID: serverKey
+            )
+            // A menu this library cannot match is an empty answer, not a failure.
+            let noMatch = JellyfinItemsResponse(items: [], totalRecordCount: 0)
+            async let studioMatchTask: JellyfinItemsResponse? = { [narrowedQuery, noMatch] in
+                guard let narrowedQuery else { return noMatch }
+                return try? await session.libraryService.getItems(
+                    userID: userID, query: narrowedQuery
                 )
             }()
 
-            async let allLibraryTask: [JellyfinItem]? = { [watchFilterValue = watchFilter.jellyfinFilter] in
+            async let allLibraryTask: [JellyfinItem]? = { [narrowedScan] in
                 guard smartProviderID != nil, !reusePhase2 else { return [] }
+                guard let narrowedScan else { return [] }
                 // Fetch the whole library in one shot, not per-id AnyProviderIdEquals lookups: robust against Jellyfin version quirks and amortised across every TMDB id.
-                let allQuery = ProviderMatchMerging.libraryScanQuery(watchFilter: watchFilterValue)
                 return try? await session.libraryService.getItems(
-                    userID: userID, query: allQuery
+                    userID: userID, query: narrowedScan
                 ).items
             }()
             phase1Response = await studioMatchTask
@@ -949,7 +1075,7 @@ struct FilteredGridView: View {
 
         let phase2Items = providerTmdbIDs.compactMap { tmdbMap[$0] }
         cachedPhase2Items = phase2Items
-        phase2CacheFilter = watchFilter
+        phase2CacheFilter = phase2Filter
         let merged = isMerged
             ? CombinedProviderMatch.mergePhases(phase1: studioItems, phase2: phase2Items)
             : ProviderMatchMerging.merge(phase1: studioItems, phase2: phase2Items)

@@ -1,6 +1,6 @@
 import Foundation
 
-struct NamedItem: Codable, Sendable, Identifiable, Equatable {
+nonisolated struct NamedItem: Codable, Sendable, Identifiable, Equatable {
     let id: String
     let name: String
 
@@ -10,7 +10,7 @@ struct NamedItem: Codable, Sendable, Identifiable, Equatable {
     }
 }
 
-struct NamedItemsResponse: Codable, Sendable {
+nonisolated struct NamedItemsResponse: Codable, Sendable {
     let items: [NamedItem]
     let totalRecordCount: Int
 

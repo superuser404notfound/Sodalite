@@ -22,6 +22,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .new,
+                    "changelog.1_2_0.libraryFilters.title",
+                    "changelog.1_2_0.libraryFilters.body",
+                    icon: "line.3.horizontal.decrease"
+                ),
+                ChangelogHighlight(
+                    .new,
                     "changelog.1_2_0.fullHDUpscaling.title",
                     "changelog.1_2_0.fullHDUpscaling.body",
                     icon: "arrow.up.left.and.arrow.down.right"

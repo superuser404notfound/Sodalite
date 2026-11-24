@@ -7,12 +7,15 @@ import Testing
 /// Sodalite#68) and the ~10 Seerr watch-provider calls behind it ran again on every back-out. This
 /// pins the reuse policy `loadItems()` now guards the scan and the Seerr augment with.
 struct FilteredGridPhase2CacheTests {
+    private func key(_ watch: WatchStatusFilter) -> FilteredGridView.Phase2Filter {
+        FilteredGridView.Phase2Filter(watch: watch, menu: LibraryFilterSelection())
+    }
 
     @Test("a plain grid (no smart provider) never reuses a phase 2 cache")
     func plainGridNeverReuses() {
         #expect(
             FilteredGridView.canReuseCachedPhase2(
-                smartProviderID: nil, cacheFilter: .all, currentFilter: .all
+                smartProviderID: nil, cacheFilter: key(.all), currentFilter: key(.all)
             ) == false
         )
     }
@@ -21,7 +24,7 @@ struct FilteredGridPhase2CacheTests {
     func noCacheYetDoesNotReuse() {
         #expect(
             FilteredGridView.canReuseCachedPhase2(
-                smartProviderID: 8, cacheFilter: nil, currentFilter: .all
+                smartProviderID: 8, cacheFilter: nil, currentFilter: key(.all)
             ) == false
         )
     }
@@ -30,7 +33,7 @@ struct FilteredGridPhase2CacheTests {
     func reappearWithSameFilterReuses() {
         #expect(
             FilteredGridView.canReuseCachedPhase2(
-                smartProviderID: 8, cacheFilter: .unwatched, currentFilter: .unwatched
+                smartProviderID: 8, cacheFilter: key(.unwatched), currentFilter: key(.unwatched)
             ) == true
         )
     }
@@ -41,7 +44,7 @@ struct FilteredGridPhase2CacheTests {
     func filterChangeDoesNotReuse() {
         #expect(
             FilteredGridView.canReuseCachedPhase2(
-                smartProviderID: 8, cacheFilter: .all, currentFilter: .unwatched
+                smartProviderID: 8, cacheFilter: key(.all), currentFilter: key(.unwatched)
             ) == false
         )
     }
