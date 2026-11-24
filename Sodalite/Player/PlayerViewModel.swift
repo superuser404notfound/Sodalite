@@ -1561,6 +1561,7 @@ final class PlayerViewModel {
                     preferHDR10PlusOverForcedDolbyVision: preferences.preferHDR10PlusOverForcedDolbyVision,
                     upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
                     upscaleScaler: upscaleScaler,
+                    upscalesFullHDVideo: effectiveFullHDUpscaling,
                     matchContentEnabled: Self.matchContentEnabled,
                     panelIsInHDRMode: Self.panelIsInHDRMode,
                     audioBridgeMode: preferences.audioBridgeMode,

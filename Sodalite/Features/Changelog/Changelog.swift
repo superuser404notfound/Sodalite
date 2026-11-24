@@ -20,6 +20,12 @@ enum Changelog {
                     "changelog.1_2_0.playerClock.body",
                     icon: "clock"
                 ),
+                ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.fullHDUpscaling.title",
+                    "changelog.1_2_0.fullHDUpscaling.body",
+                    icon: "arrow.up.left.and.arrow.down.right"
+                ),
             ]
         ),
         // MARK: 1.1.0

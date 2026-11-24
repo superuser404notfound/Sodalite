@@ -48,6 +48,33 @@ struct EnhancedUpscalingTests {
             degraded: false, disabledReason: "frame budget overrun") == "off (frame budget overrun)")
     }
 
+    @Test func lanczosLabelIsOnePassToTheTarget() {
+        #expect(StatsOverlayView.upscaleLabel(
+            sourceSize: CGSize(width: 1920, height: 1080), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),
+            degraded: false, disabledReason: nil, lanczos: true) == "1920×1080 → Lanczos → 3840×2160")
+    }
+
+    /// The 1080p switch is a device value, off by default, apart from Enhanced Upscaling.
+    @Test func fullHDUpscalingIsADeviceValueOffByDefault() {
+        let defaults = scratch("fullHD")
+        let device = DevicePreferences(store: defaults)
+        #expect(!device.fullHDUpscaling)
+        let alice = PlaybackPreferences(store: defaults, scope: "s:alice", device: device)
+        alice.fullHDUpscaling = true
+        #expect(!device.enhancedUpscaling)
+        #expect(PlaybackPreferences(store: defaults, scope: "s:bob", device: device).fullHDUpscaling)
+        #expect(DevicePreferences(store: defaults).fullHDUpscaling)
+    }
+
+    /// The chip can show for 1080p alone. Turning it off and on again must not switch on the SD and
+    /// 720p upscaler the viewer has off.
+    @Test func chipRestoresEachSwitchFromItsOwnSetting() {
+        #expect(PlayerViewModel.upscaleSwitch(false, override: true) == false)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: true) == true)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: nil) == true)
+        #expect(PlayerViewModel.upscaleSwitch(true, override: false) == false)
+    }
+
     @Test func lineArtLabelNamesTheResampleOnlyWhenTwoTimesMisses() {
         #expect(StatsOverlayView.upscaleLabel(
             sourceSize: CGSize(width: 1920, height: 1080), mlScale: nil, targetSize: CGSize(width: 3840, height: 2160),

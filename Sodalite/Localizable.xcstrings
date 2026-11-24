@@ -74367,6 +74367,328 @@
         }
       }
     },
+    "changelog.1_2_0.fullHDUpscaling.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV roztahuje 1080p na 4K jednoduchým bilineárním škálováním. Nová volba Škálovat 1080p v Nastavení → Přehrávání použije Lanczos a zachová víc jemných detailů."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV strækker 1080p til 4K med simpel bilineær skalering. Den nye indstilling Opskaler 1080p under Indstillinger → Afspilning bruger Lanczos og bevarer flere fine detaljer."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Apple TV zieht 1080p mit einfacher bilinearer Skalierung auf 4K. Die neue Option 1080p hochskalieren unter Einstellungen → Wiedergabe nutzt Lanczos und erhält deutlich mehr feine Details."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Apple TV τεντώνει το 1080p σε 4K με απλή διγραμμική κλιμάκωση. Η νέα επιλογή Αναβάθμιση 1080p στις Ρυθμίσεις → Αναπαραγωγή χρησιμοποιεί Lanczos και κρατά περισσότερες λεπτομέρειες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV stretches 1080p to 4K with simple bilinear scaling. The new Upscale 1080p option in Settings → Playback uses Lanczos instead and keeps clearly more fine detail."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El Apple TV estira el 1080p a 4K con un escalado bilineal simple. La nueva opción Escalar 1080p en Ajustes → Reproducción usa Lanczos y conserva mucho más detalle fino."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV venyttää 1080p-kuvan 4K:ksi yksinkertaisella bilineaarisella skaalauksella. Uusi Skaalaa 1080p -valinta kohdassa Asetukset → Toisto käyttää Lanczosia ja säilyttää enemmän pieniä yksityiskohtia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’Apple TV étire le 1080p en 4K avec une simple mise à l’échelle bilinéaire. La nouvelle option Mise à l’échelle 1080p dans Réglages → Lecture utilise Lanczos et garde nettement plus de détails fins."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV razvlači 1080p na 4K jednostavnim bilinearnim skaliranjem. Nova opcija Skaliraj 1080p u Postavke → Reprodukcija koristi Lanczos i čuva više sitnih detalja."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az Apple TV egyszerű bilineáris skálázással nyújtja a 1080p képet 4K-ra. Az új 1080p felskálázása opció a Beállítások → Lejátszás menüben Lanczost használ, és több finom részletet megőriz."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV allarga il 1080p a 4K con un semplice ridimensionamento bilineare. La nuova opzione Upscaling 1080p in Impostazioni → Riproduzione usa Lanczos e mantiene molti più dettagli fini."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVは1080pを単純なバイリニア拡大で4Kに引き伸ばします。設定 → 再生の新しい「1080pをアップスケール」はLanczosを使い、細部をより多く残します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV는 1080p를 단순한 쌍선형 확대로 4K로 늘립니다. 설정 → 재생의 새 1080p 업스케일링 옵션은 Lanczos를 사용해 세부 묘사를 훨씬 더 많이 살립니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV strekker 1080p til 4K med enkel bilineær skalering. Det nye valget Oppskaler 1080p under Innstillinger → Avspilling bruker Lanczos og beholder flere fine detaljer."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV rekt 1080p op naar 4K met eenvoudige bilineaire schaling. De nieuwe optie 1080p opschalen in Instellingen → Afspelen gebruikt Lanczos en houdt duidelijk meer fijn detail."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV rozciąga 1080p do 4K prostym skalowaniem dwuliniowym. Nowa opcja Skalowanie 1080p w Ustawieniach → Odtwarzanie używa Lanczosa i zachowuje znacznie więcej drobnych szczegółów."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Apple TV estica o 1080p para 4K com uma ampliação bilinear simples. A nova opção Ampliar 1080p em Ajustes → Reprodução usa Lanczos e mantém bem mais detalhes finos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Apple TV estica o 1080p para 4K com uma ampliação bilinear simples. A nova opção Ampliar 1080p em Definições → Reprodução usa Lanczos e mantém bastante mais detalhe fino."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV întinde 1080p la 4K cu o scalare biliniară simplă. Noua opțiune Scalare 1080p din Setări → Redare folosește Lanczos și păstrează mult mai multe detalii fine."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV растягивает 1080p до 4K простым билинейным масштабированием. Новая настройка «Масштабирование 1080p» в разделе Настройки → Воспроизведение использует Lanczos и сохраняет заметно больше мелких деталей."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV rozťahuje 1080p na 4K jednoduchým bilineárnym škálovaním. Nová voľba Škálovať 1080p v Nastaveniach → Prehrávanie používa Lanczos a zachová viac jemných detailov."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV sträcker ut 1080p till 4K med enkel bilinjär skalning. Det nya valet Skala upp 1080p under Inställningar → Uppspelning använder Lanczos och behåller tydligt mer fina detaljer."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV, 1080p görüntüyü basit bilineer ölçeklemeyle 4K’ya genişletir. Ayarlar → Oynatma’daki yeni 1080p ölçeklendirme seçeneği Lanczos kullanır ve çok daha fazla ince ayrıntıyı korur."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV розтягує 1080p до 4K простим білінійним масштабуванням. Нове налаштування «Масштабування 1080p» у Параметри → Відтворення використовує Lanczos і зберігає помітно більше дрібних деталей."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 用简单的双线性缩放把 1080p 拉伸到 4K。设置 → 播放中新的“放大 1080p”选项改用 Lanczos，保留明显更多的细节。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV 以簡單的雙線性縮放把 1080p 拉伸到 4K。設定 → 播放中新的「放大 1080p」選項改用 Lanczos，保留明顯更多的細節。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.fullHDUpscaling.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ostřejší 1080p"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skarpere 1080p"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schärferes 1080p"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πιο καθαρό 1080p"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sharper 1080p"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p más nítido"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terävämpi 1080p"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p plus net"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oštriji 1080p"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Élesebb 1080p"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p più nitido"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "より鮮明な1080p"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 선명한 1080p"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skarpere 1080p"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scherper 1080p"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ostrzejsze 1080p"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p mais nítido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p mais nítido"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p mai clar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Более чёткое 1080p"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ostrejšie 1080p"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skarpare 1080p"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha keskin 1080p"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чіткіше 1080p"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更清晰的 1080p"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更清晰的 1080p"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.playerClock.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -204769,6 +205091,328 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "實驗性功能。在本裝置上套用 Dolby Vision 的逐幀資料，而非將靜態 HDR10 層送往顯示器。「HDR10+ 優先」會在支援的電視上保留檔案本身的 HDR10+。若顏色不正常請關閉。"
+          }
+        }
+      }
+    },
+    "settings.playback.fullHDUpscaling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovat 1080p"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opskaler 1080p"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p hochskalieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναβάθμιση 1080p"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale 1080p"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalar 1080p"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaa 1080p"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à l’échelle 1080p"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliraj 1080p"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p felskálázása"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling 1080p"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080pをアップスケール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p 업스케일링"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppskaler 1080p"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p opschalen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalowanie 1080p"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ampliar 1080p"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ampliar 1080p"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scalare 1080p"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабирование 1080p"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škálovať 1080p"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skala upp 1080p"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p ölçeklendirme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабування 1080p"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放大 1080p"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放大 1080p"
+          }
+        }
+      }
+    },
+    "settings.playback.fullHDUpscaling.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škáluje video 1080p na rozlišení displeje metodou Lanczos, ostřeji než systém. Takové tituly se přehrávají v softwarovém přehrávači."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalerer 1080p-video til skærmens opløsning med Lanczos, skarpere end systemets egen skalering. Titlerne afspilles i softwareafspilleren."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaliert 1080p-Video mit Lanczos auf die Auflösung des Displays, schärfer als das System selbst. Diese Titel laufen dann im Software-Player."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλιμακώνει βίντεο 1080p στην ανάλυση της οθόνης με Lanczos, πιο καθαρά από το σύστημα. Αυτοί οι τίτλοι παίζουν στο πρόγραμμα αναπαραγωγής λογισμικού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scales 1080p video to your display’s resolution with Lanczos, sharper than the system’s own scaling. Those titles play in the software player."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escala el vídeo 1080p a la resolución de la pantalla con Lanczos, más nítido que el escalado del sistema. Esos títulos se reproducen en el reproductor por software."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaalaa 1080p-videon näytön tarkkuuteen Lanczosilla, terävämmin kuin järjestelmä itse. Nämä nimikkeet toistetaan ohjelmistosoittimella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Met à l’échelle la vidéo 1080p à la résolution de l’écran avec Lanczos, plus net que le système. Ces titres sont lus par le lecteur logiciel."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalira 1080p video na razlučivost zaslona metodom Lanczos, oštrije od sustava. Ti se naslovi reproduciraju u softverskom playeru."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az 1080p videót Lanczos módszerrel a kijelző felbontására skálázza, élesebben, mint a rendszer. Ezek a címek a szoftveres lejátszóban futnak."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scala i video 1080p alla risoluzione dello schermo con Lanczos, più nitido del ridimensionamento di sistema. Quei titoli vengono riprodotti nel lettore software."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p映像をLanczosでディスプレイの解像度に拡大し、システムの拡大より鮮明に表示します。対象のタイトルはソフトウェアプレーヤーで再生されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p 영상을 Lanczos로 디스플레이 해상도에 맞게 확대해 시스템 기본 확대보다 선명하게 보여 줍니다. 해당 타이틀은 소프트웨어 플레이어에서 재생됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalerer 1080p-video til skjermens oppløsning med Lanczos, skarpere enn systemets egen skalering. Disse titlene spilles i programvarespilleren."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schaalt 1080p-video met Lanczos naar de resolutie van je scherm, scherper dan het systeem zelf. Die titels spelen in de softwarespeler."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skaluje wideo 1080p do rozdzielczości ekranu metodą Lanczos, ostrzej niż system. Takie tytuły są odtwarzane w odtwarzaczu programowym."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amplia vídeo 1080p para a resolução da tela com Lanczos, mais nítido que a ampliação do sistema. Esses títulos tocam no reprodutor por software."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amplia vídeo 1080p para a resolução do ecrã com Lanczos, mais nítido do que o sistema. Esses títulos são reproduzidos no leitor por software."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scalează video 1080p la rezoluția ecranului cu Lanczos, mai clar decât scalarea sistemului. Aceste titluri rulează în playerul software."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабирует видео 1080p до разрешения экрана методом Lanczos, чётче, чем система. Такие видео воспроизводятся программным плеером."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Škáluje video 1080p na rozlíšenie displeja metódou Lanczos, ostrejšie ako systém. Takéto tituly sa prehrávajú v softvérovom prehrávači."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalar 1080p-video till skärmens upplösning med Lanczos, skarpare än systemets egen skalning. De titlarna spelas i mjukvaruspelaren."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1080p videoyu Lanczos ile ekran çözünürlüğüne ölçekler, sistemin kendi ölçeklemesinden daha keskin. Bu içerikler yazılım oynatıcıda oynatılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Масштабує відео 1080p до роздільності екрана методом Lanczos, чіткіше, ніж система. Такі відео відтворюються програмним плеєром."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Lanczos 将 1080p 视频放大到显示器分辨率，比系统自带的缩放更清晰。这些影片将使用软件播放器播放。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Lanczos 將 1080p 影片放大到顯示器解析度，比系統內建的縮放更清晰。這些影片會使用軟體播放器播放。"
           }
         }
       }

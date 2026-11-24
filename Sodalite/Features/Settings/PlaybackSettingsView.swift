@@ -543,6 +543,18 @@ struct PlaybackSettingsView: View {
                 )
                 .settingsValueScope(.device)
 
+                // The Apple TV scales 1080p to a 4K panel bilinearly; the engine's Lanczos keeps more detail.
+                boolRow(
+                    icon: "arrow.up.left.and.arrow.down.right",
+                    title: "settings.playback.fullHDUpscaling",
+                    subtitle: "settings.playback.fullHDUpscaling.subtitle",
+                    value: Binding(
+                        get: { prefs.fullHDUpscaling },
+                        set: { prefs.fullHDUpscaling = $0 }
+                    )
+                )
+                .settingsValueScope(.device)
+
                 sectionHeader("settings.playback.section.audio")
 
                 boolRow(
