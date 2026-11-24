@@ -76,6 +76,7 @@ final class ASSRenderCoordinator {
     var onRendererChanged: ((AssSubtitlesRenderer?) -> Void)?
     /// Guards async font-write completion against a deactivate/re-activate during the writes.
     private var activationGeneration = 0
+    private var fontFallback = ASSFontFallback()
 
     /// Activate for the selected embedded track (`header` = track's `assHeader`). Bails (renderer
     /// stays nil, caller keeps the text path) when the header is missing or setup fails.
@@ -86,6 +87,7 @@ final class ASSRenderCoordinator {
         guard let header, !header.isEmpty else { return }
         activationGeneration += 1
         let generation = activationGeneration
+        fontFallback.activate(generation: generation)
         let fontsDir = ASSFontCache.directory(itemID: itemID)
         ASSFontCache.prune(keeping: fontsDir)
         let fonts = player.fontAttachments
@@ -126,6 +128,7 @@ final class ASSRenderCoordinator {
 
     func deactivate() {
         activationGeneration += 1
+        fontFallback.deactivate()
         cancellables.removeAll()
         renderer?.freeTrack()
         renderer = nil
@@ -140,13 +143,36 @@ final class ASSRenderCoordinator {
 
     private func installRenderer(fontsDir: URL) {
         let config = FontConfig(fontsPath: fontsDir, fontProvider: .coreText)
-        let renderer = AssSubtitlesRenderer(fontConfig: config)
+        let generation = activationGeneration
+        // Custom output receives warnings in Release too. Missing a requested family is normal:
+        // only a terminal glyph-resolution failure should discard the author's styling.
+        let renderer = AssSubtitlesRenderer(fontConfig: config, logOutput: .custom { [weak self] message in
+            #if DEBUG
+            if message.level != .verbose { print(message.message) }
+            #else
+            if message.level == .fatal { print(message.message) }
+            #endif
+            guard ASSFontFallback.isUnrenderableGlyph(message.message) else { return }
+            Task { @MainActor [weak self] in
+                self?.handleFontFailure(message.message, generation: generation)
+            }
+        })
         self.renderer = renderer
         // Paused, the clock does not tick, so without this the new renderer would sit at 0.
         renderer.setTimeOffset(scriptTime)
         onRendererChanged?(renderer)
         // Surface events that arrived in the builder while fonts were being written.
         flushPendingEventsIfDue()
+    }
+
+    private func handleFontFailure(_ message: String, generation: Int) {
+        guard fontFallback.take(message: message, generation: generation) else { return }
+        // Keep the engine's raw cues and the user's preference intact. Publishing nil switches
+        // the overlay to its existing ASS-to-plain-text path for this activation only. Merely
+        // changing libass's default family cannot guarantee coverage for the missing glyph.
+        print("[subtitles] Styled ASS font resolution failed; using plain text for this track")
+        deactivate()
+        onRendererChanged?(nil)
     }
 
     /// Which cues have already been handed to the builder, so a publication carrying the whole
@@ -254,5 +280,37 @@ final class ASSRenderCoordinator {
                 try? font.data.write(to: url, options: .atomic)
             }
         }
+    }
+}
+
+/// libass can substitute a missing family successfully. React only when it exhausts glyph
+/// fallback, not to the initial "Glyph ... not found, selecting one more font" diagnostic.
+/// Kept independent of the renderer so the policy is testable without device-specific fonts.
+nonisolated struct ASSFontFallback {
+    private var generation: Int?
+    private var hasFailed = false
+
+    mutating func activate(generation: Int) {
+        self.generation = generation
+        hasFailed = false
+    }
+
+    mutating func deactivate() {
+        generation = nil
+        hasFailed = false
+    }
+
+    mutating func take(message: String, generation: Int) -> Bool {
+        guard self.generation == generation, !hasFailed,
+              Self.isUnrenderableGlyph(message) else { return false }
+        hasFailed = true
+        return true
+    }
+
+    static func isUnrenderableGlyph(_ message: String) -> Bool {
+        // These are terminal diagnostics from ass_fontselect.c and ass_font.c. Do not match
+        // a generic "font not found": another installed/attached face may still work.
+        message.contains("fontselect: failed to find any fallback with glyph 0x")
+            || (message.contains("Glyph 0x") && message.contains(" not found in font for ("))
     }
 }
