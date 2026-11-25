@@ -12,13 +12,17 @@ struct SubtitleLoadingHintTests {
         let item = try JSONDecoder().decode(
             JellyfinItem.self,
             from: Data(#"{"Id":"m1","Name":"Movie","Type":"Movie","RunTimeTicks":36000000000}"#.utf8))
-        return PlayerViewModel(
+        let vm = PlayerViewModel(
             item: item, startFromBeginning: false, playbackService: RecordingPlaybackService(), userID: "user",
             preferences: PlaybackPreferences(store: UserDefaults(suiteName: "test.subtitleHint.\(UUID().uuidString)")!))
+        vm.subtitleLoadingHintDelay = .milliseconds(20)
+        return vm
     }
 
-    private func waitPastDelay() async {
-        try? await Task.sleep(for: SubtitleLoadingHint.delay + .milliseconds(300))
+    private func waitPastDelay(_ vm: PlayerViewModel) async {
+        for _ in 0..<200 where vm.subtitleLoadingHintTask != nil {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
     }
 
     @Test func aLoadPastTheDelayShowsTheHintLine() async throws {
@@ -27,12 +31,11 @@ struct SubtitleLoadingHintTests {
         vm.activeSubtitleCodec = "ass"
         vm.subtitleLoadingDidChange(true)
         #expect(vm.overlayCues.isEmpty)
-        await waitPastDelay()
+        await waitPastDelay(vm)
 
         #expect(vm.showsSubtitleLoadingHint)
         #expect(vm.overlayCues.count == 1)
-        if case .text(let text) = vm.overlayCues.first?.body { #expect(text == SubtitleLoadingHint.text) }
-        else { Issue.record("the hint is a text line") }
+        #expect(vm.overlayCues.first?.id == SubtitleLoadingHint.cue.id)
         #expect(vm.overlaySubtitleCodec == nil)
         #expect(vm.overlayMaxCueDuration == SubtitleLoadingHint.maxCueDuration)
     }
@@ -42,7 +45,7 @@ struct SubtitleLoadingHintTests {
         vm.activeSubtitleIndex = 3
         vm.subtitleLoadingDidChange(true)
         vm.subtitleLoadingDidChange(false)
-        await waitPastDelay()
+        await waitPastDelay(vm)
         #expect(!vm.showsSubtitleLoadingHint)
     }
 
@@ -50,7 +53,7 @@ struct SubtitleLoadingHintTests {
         let vm = try makeViewModel()
         vm.activeSubtitleIndex = 3
         vm.subtitleLoadingDidChange(true)
-        await waitPastDelay()
+        await waitPastDelay(vm)
         let line = SubtitleCue(id: 1, startTime: 10, endTime: 12, body: .text("Hello"))
         vm.subtitleCues = [line]
         #expect(!vm.showsSubtitleLoadingHint)
@@ -61,14 +64,37 @@ struct SubtitleLoadingHintTests {
     @Test func nothingIsAnnouncedWithoutAPickedTrack() async throws {
         let vm = try makeViewModel()
         vm.subtitleLoadingDidChange(true)
-        await waitPastDelay()
+        await waitPastDelay(vm)
         #expect(!vm.showsSubtitleLoadingHint)
         #expect(vm.overlayCues.isEmpty)
     }
 
+    /// A positive subtitle delay looks the cue up before zero.
     @Test func theHintLineCoversEveryPlayhead() {
-        let cue = SubtitleLoadingHint.cue(text: "x")
-        #expect(cue.startTime == 0)
-        #expect(cue.endTime >= 1_000_000)
+        #expect(SubtitleLoadingHint.cue.startTime < -1_000_000)
+        #expect(SubtitleLoadingHint.cue.endTime > 1_000_000)
+    }
+
+    @Test func aTemporarySkipBackWindowGetsNoHint() async throws {
+        let vm = try makeViewModel()
+        vm.activeSubtitleIndex = 3
+        vm.skipBackSubtitleWindow = SkipBackSubtitleWindow.State(origin: 100, landing: 80, streamIndex: 3)
+        vm.subtitleLoadingDidChange(true)
+        await waitPastDelay(vm)
+        #expect(!vm.showsSubtitleLoadingHint)
+    }
+
+    /// A republished `true` must neither restart the clock nor be lost after a local reset.
+    @Test func aRepeatedTrueKeepsTheClockAndAResetDoesNotSwallowTheNextOne() async throws {
+        let vm = try makeViewModel()
+        vm.activeSubtitleIndex = 3
+        vm.subtitleLoadingDidChange(true)
+        let first = vm.subtitleLoadingHintTask
+        vm.subtitleLoadingDidChange(true)
+        #expect(vm.subtitleLoadingHintTask == first)
+        vm.subtitleLoadingDidChange(false)
+        vm.subtitleLoadingDidChange(true)
+        await waitPastDelay(vm)
+        #expect(vm.showsSubtitleLoadingHint)
     }
 }
