@@ -332,6 +332,7 @@ extension PlayerViewModel {
         subtitleCues = []
         activeSubtitleIndex = nil
         activeSubtitleCodec = nil
+        subtitleLoadingDidChange(false)
         secondarySubtitleCues = []
         activeSecondarySubtitleIndex = nil
         // Silent forced fallback is per-item (streams + audio language); the next load re-resolves it.

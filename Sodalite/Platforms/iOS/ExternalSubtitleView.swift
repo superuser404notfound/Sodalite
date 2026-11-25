@@ -9,11 +9,11 @@ struct ExternalSubtitleView: View {
     var body: some View {
         ZStack {
             Color.clear
-            if !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
+            if !viewModel.overlayCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
                 SubtitleOverlayView(
-                    cues: viewModel.subtitleCues,
+                    cues: viewModel.overlayCues,
                     currentTime: viewModel.subtitleTime,
-                    maxCueDuration: viewModel.subtitleMaxCueDuration,
+                    maxCueDuration: viewModel.overlayMaxCueDuration,
                     secondaryCues: viewModel.shownSecondarySubtitleCues,
                     secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                     fontSize: viewModel.preferences.subtitleFontSize,
@@ -26,7 +26,7 @@ struct ExternalSubtitleView: View {
                     controlsVisible: false,
                     assRenderer: nil,
                     assReloadSignal: viewModel.assReloadSignal,
-                    activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                    activeSubtitleCodec: viewModel.overlaySubtitleCodec,
                     secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                     hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                     videoSize: viewModel.videoSize,

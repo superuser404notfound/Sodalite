@@ -190,7 +190,8 @@ Every feature is free. Settings are named as they appear in the app.
 ### Subtitles and tracks
 
 - **Every subtitle format, drawn on the device**: SubRip, ASS, SSA, WebVTT, mov_text, PGS, DVB, DVD, CEA-608 closed captions and DVB Teletext, embedded or as `.srt` / `.ass` / `.vtt` files. Your server never burns them into the picture.
-- **Subtitles at a lower streaming quality**: when the server converts the video, it hands each subtitle track over as a file of its own, picture-based ones included. The first pick of a text track can take up to a minute on a large file, because the server reads every subtitle out of the whole file first.
+- **Subtitles at a lower streaming quality**: when the server converts the video, it hands each subtitle track over as a file of its own, picture-based ones included. The first pick of a text track can take up to a minute on a large file, because the server reads every subtitle out of the whole file first. Until the first line arrives, the player shows "Loading subtitles…" where it will appear.
+- **No wait on the first subtitle (server tip)**: Jellyfin's Subtitle Extract plugin can extract subtitles during the library scan (`ExtractionDuringLibraryScan`), so a pick at a lower quality is there at once. It keeps a copy of every subtitle on the server, and according to the Jellyfin forum it only covers titles scanned after you turn it on. Sodalite does not start the extraction early by itself: on a test server, extracting while a stream was being converted slowed that stream below real time.
 - **Tracks the server missed**: the subtitle menu lists every track inside the file, also the ones your server's scan did not record, and closed captions carried in the video picture itself.
 - **Styled ASS / SSA**: original fonts, colors and positions, or plain text if you prefer (Settings → Playback).
 - **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. Fully automatic.

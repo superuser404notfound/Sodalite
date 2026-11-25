@@ -75663,157 +75663,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Když server kvůli nižší kvalitě streamování převádí video, nabídka zvuku znovu ukazuje všechny jazyky a zobrazí se i obrazové titulky jako PGS a DVD. Jiný jazyk zvuku spustí stream znovu ve stejné sekundě."
+            "value" : "Když server kvůli nižší kvalitě streamování převádí video, nabídka zvuku znovu ukazuje všechny jazyky a zobrazí se i obrazové titulky jako PGS a DVD. Jiný jazyk zvuku spustí stream znovu ve stejné sekundě. Dokud se titulky načítají, přehrávač to oznámí."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Når din server konverterer videoen til en lavere streamingkvalitet, viser lydmenuen igen alle sprog, og billedbaserede undertekster som PGS og DVD vises. Et andet lydsprog genstarter streamen ved samme sekund."
+            "value" : "Når din server konverterer videoen til en lavere streamingkvalitet, viser lydmenuen igen alle sprog, og billedbaserede undertekster som PGS og DVD vises. Et andet lydsprog genstarter streamen ved samme sekund. Mens en undertekst stadig indlæses, viser afspilleren det."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wenn dein Server das Video für eine niedrigere Streaming-Qualität umwandelt, zeigt das Audiomenü wieder alle Sprachen, und Bilduntertitel wie PGS und DVD erscheinen. Eine andere Tonsprache startet den Stream an derselben Sekunde neu."
+            "value" : "Wenn dein Server das Video für eine niedrigere Streaming-Qualität umwandelt, zeigt das Audiomenü wieder alle Sprachen, und Bilduntertitel wie PGS und DVD erscheinen. Eine andere Tonsprache startet den Stream an derselben Sekunde neu. Solange ein Untertitel noch lädt, zeigt der Player das an."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Όταν ο διακομιστής μετατρέπει το βίντεο για χαμηλότερη ποιότητα ροής, το μενού ήχου δείχνει ξανά όλες τις γλώσσες και εμφανίζονται και οι υπότιτλοι εικόνας όπως PGS και DVD. Μια άλλη γλώσσα ήχου ξεκινά τη ροή ξανά από το ίδιο δευτερόλεπτο."
+            "value" : "Όταν ο διακομιστής μετατρέπει το βίντεο για χαμηλότερη ποιότητα ροής, το μενού ήχου δείχνει ξανά όλες τις γλώσσες και εμφανίζονται και οι υπότιτλοι εικόνας όπως PGS και DVD. Μια άλλη γλώσσα ήχου ξεκινά τη ροή ξανά από το ίδιο δευτερόλεπτο. Όσο ένας υπότιτλος φορτώνει ακόμα, η αναπαραγωγή το δείχνει."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "When a lower streaming quality has your server convert the video, the audio menu lists every language again and picture-based subtitles like PGS and DVD show up. A new audio language restarts the stream at the same second."
+            "value" : "When a lower streaming quality has your server convert the video, the audio menu lists every language again and picture-based subtitles like PGS and DVD show up. A new audio language restarts the stream at the same second. While a subtitle is still loading, the player says so."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cuando tu servidor convierte el vídeo por una calidad de streaming menor, el menú de audio vuelve a mostrar todos los idiomas y aparecen los subtítulos de imagen como PGS y DVD. Otro idioma de audio reinicia el stream en el mismo segundo."
+            "value" : "Cuando tu servidor convierte el vídeo por una calidad de streaming menor, el menú de audio vuelve a mostrar todos los idiomas y aparecen los subtítulos de imagen como PGS y DVD. Otro idioma de audio reinicia el stream en el mismo segundo. Mientras un subtítulo sigue cargando, el reproductor lo indica."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kun palvelin muuntaa videon heikompaa suoratoistolaatua varten, äänivalikko näyttää taas kaikki kielet ja kuvapohjaiset tekstitykset, kuten PGS ja DVD, näkyvät. Toinen äänikieli käynnistää suoratoiston uudelleen samasta sekunnista."
+            "value" : "Kun palvelin muuntaa videon heikompaa suoratoistolaatua varten, äänivalikko näyttää taas kaikki kielet ja kuvapohjaiset tekstitykset, kuten PGS ja DVD, näkyvät. Toinen äänikieli käynnistää suoratoiston uudelleen samasta sekunnista. Kun tekstitys vielä latautuu, soitin kertoo sen."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quand votre serveur convertit la vidéo pour une qualité de streaming réduite, le menu audio propose de nouveau toutes les langues et les sous-titres en image comme PGS et DVD s'affichent. Une autre langue audio relance le flux à la même seconde."
+            "value" : "Quand votre serveur convertit la vidéo pour une qualité de streaming réduite, le menu audio propose de nouveau toutes les langues et les sous-titres en image comme PGS et DVD s'affichent. Une autre langue audio relance le flux à la même seconde. Tant qu'un sous-titre est en cours de chargement, le lecteur l'indique."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kad poslužitelj pretvara video za nižu kvalitetu streaminga, izbornik zvuka opet prikazuje sve jezike, a pojavljuju se i slikovni titlovi poput PGS i DVD. Drugi jezik zvuka ponovno pokreće stream u istoj sekundi."
+            "value" : "Kad poslužitelj pretvara video za nižu kvalitetu streaminga, izbornik zvuka opet prikazuje sve jezike, a pojavljuju se i slikovni titlovi poput PGS i DVD. Drugi jezik zvuka ponovno pokreće stream u istoj sekundi. Dok se titl još učitava, reproduktor to prikazuje."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ha a szerver alacsonyabb streamelési minőséghez alakítja át a videót, a hangmenü ismét minden nyelvet mutat, és megjelennek a képalapú feliratok, például a PGS és a DVD. Egy másik hangnyelv ugyanannál a másodpercnél indítja újra a streamet."
+            "value" : "Ha a szerver alacsonyabb streamelési minőséghez alakítja át a videót, a hangmenü ismét minden nyelvet mutat, és megjelennek a képalapú feliratok, például a PGS és a DVD. Egy másik hangnyelv ugyanannál a másodpercnél indítja újra a streamet. Amíg egy felirat még töltődik, a lejátszó jelzi ezt."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quando il server converte il video per una qualità di streaming ridotta, il menu audio mostra di nuovo tutte le lingue e compaiono i sottotitoli a immagine come PGS e DVD. Un'altra lingua audio riavvia lo stream allo stesso secondo."
+            "value" : "Quando il server converte il video per una qualità di streaming ridotta, il menu audio mostra di nuovo tutte le lingue e compaiono i sottotitoli a immagine come PGS e DVD. Un'altra lingua audio riavvia lo stream allo stesso secondo. Finché un sottotitolo è ancora in caricamento, il player lo indica."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "低いストリーミング画質のためにサーバーが動画を変換する場合も、オーディオメニューにすべての言語が表示され、PGSやDVDなどの画像字幕も表示されます。音声言語を変えると、同じ秒からストリームが再開します。"
+            "value" : "低いストリーミング画質のためにサーバーが動画を変換する場合も、オーディオメニューにすべての言語が表示され、PGSやDVDなどの画像字幕も表示されます。音声言語を変えると、同じ秒からストリームが再開します。 字幕の読み込み中は、プレーヤーにその旨が表示されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "낮은 스트리밍 화질 때문에 서버가 동영상을 변환할 때도 오디오 메뉴에 모든 언어가 다시 표시되고 PGS, DVD 같은 이미지 자막도 나타납니다. 다른 오디오 언어를 고르면 같은 초부터 스트림이 다시 시작됩니다."
+            "value" : "낮은 스트리밍 화질 때문에 서버가 동영상을 변환할 때도 오디오 메뉴에 모든 언어가 다시 표시되고 PGS, DVD 같은 이미지 자막도 나타납니다. 다른 오디오 언어를 고르면 같은 초부터 스트림이 다시 시작됩니다. 자막을 아직 불러오는 중이면 플레이어에 표시됩니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Når serveren konverterer videoen for en lavere strømmekvalitet, viser lydmenyen igjen alle språk, og bildebaserte undertekster som PGS og DVD vises. Et annet lydspråk starter strømmen på nytt fra samme sekund."
+            "value" : "Når serveren konverterer videoen for en lavere strømmekvalitet, viser lydmenyen igjen alle språk, og bildebaserte undertekster som PGS og DVD vises. Et annet lydspråk starter strømmen på nytt fra samme sekund. Mens en undertekst fortsatt lastes inn, viser avspilleren det."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Als je server de video omzet voor een lagere streamingkwaliteit, toont het audiomenu weer alle talen en verschijnen ondertitels in beeldformaat zoals PGS en DVD. Een andere audiotaal start de stream opnieuw op dezelfde seconde."
+            "value" : "Als je server de video omzet voor een lagere streamingkwaliteit, toont het audiomenu weer alle talen en verschijnen ondertitels in beeldformaat zoals PGS en DVD. Een andere audiotaal start de stream opnieuw op dezelfde seconde. Zolang een ondertitel nog laadt, laat de speler dat zien."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gdy serwer konwertuje wideo na niższą jakość strumienia, menu dźwięku znów pokazuje wszystkie języki, a napisy obrazkowe, takie jak PGS i DVD, się wyświetlają. Inny język dźwięku uruchamia strumień ponownie w tej samej sekundzie."
+            "value" : "Gdy serwer konwertuje wideo na niższą jakość strumienia, menu dźwięku znów pokazuje wszystkie języki, a napisy obrazkowe, takie jak PGS i DVD, się wyświetlają. Inny język dźwięku uruchamia strumień ponownie w tej samej sekundzie. Dopóki napisy się wczytują, odtwarzacz to pokazuje."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quando o servidor converte o vídeo para uma qualidade de streaming menor, o menu de áudio volta a mostrar todos os idiomas e as legendas em imagem, como PGS e DVD, aparecem. Outro idioma de áudio reinicia o stream no mesmo segundo."
+            "value" : "Quando o servidor converte o vídeo para uma qualidade de streaming menor, o menu de áudio volta a mostrar todos os idiomas e as legendas em imagem, como PGS e DVD, aparecem. Outro idioma de áudio reinicia o stream no mesmo segundo. Enquanto uma legenda ainda está carregando, o player avisa."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quando o servidor converte o vídeo para uma qualidade de streaming inferior, o menu de áudio volta a mostrar todos os idiomas e as legendas em imagem, como PGS e DVD, aparecem. Outro idioma de áudio reinicia o stream no mesmo segundo."
+            "value" : "Quando o servidor converte o vídeo para uma qualidade de streaming inferior, o menu de áudio volta a mostrar todos os idiomas e as legendas em imagem, como PGS e DVD, aparecem. Outro idioma de áudio reinicia o stream no mesmo segundo. Enquanto uma legenda ainda está a carregar, o leitor indica-o."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Când serverul convertește videoclipul pentru o calitate de streaming mai mică, meniul audio arată din nou toate limbile, iar subtitrările de tip imagine, precum PGS și DVD, apar. O altă limbă audio repornește streamul la aceeași secundă."
+            "value" : "Când serverul convertește videoclipul pentru o calitate de streaming mai mică, meniul audio arată din nou toate limbile, iar subtitrările de tip imagine, precum PGS și DVD, apar. O altă limbă audio repornește streamul la aceeași secundă. Cât timp o subtitrare se încarcă încă, playerul arată acest lucru."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Когда сервер перекодирует видео под более низкое качество потока, меню звука снова показывает все языки, а графические субтитры вроде PGS и DVD отображаются. Другой язык звука перезапускает поток с той же секунды."
+            "value" : "Когда сервер перекодирует видео под более низкое качество потока, меню звука снова показывает все языки, а графические субтитры вроде PGS и DVD отображаются. Другой язык звука перезапускает поток с той же секунды. Пока субтитры загружаются, плеер сообщает об этом."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keď server kvôli nižšej kvalite streamovania prevádza video, ponuka zvuku opäť ukazuje všetky jazyky a zobrazia sa aj obrazové titulky ako PGS a DVD. Iný jazyk zvuku spustí stream znova v tej istej sekunde."
+            "value" : "Keď server kvôli nižšej kvalite streamovania prevádza video, ponuka zvuku opäť ukazuje všetky jazyky a zobrazia sa aj obrazové titulky ako PGS a DVD. Iný jazyk zvuku spustí stream znova v tej istej sekunde. Kým sa titulky načítavajú, prehrávač to oznámi."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "När servern konverterar videon för en lägre streamingkvalitet visar ljudmenyn alla språk igen, och bildbaserade undertexter som PGS och DVD visas. Ett annat ljudspråk startar om strömmen på samma sekund."
+            "value" : "När servern konverterar videon för en lägre streamingkvalitet visar ljudmenyn alla språk igen, och bildbaserade undertexter som PGS och DVD visas. Ett annat ljudspråk startar om strömmen på samma sekund. Medan en undertext fortfarande läses in visar spelaren det."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunucun videoyu daha düşük bir akış kalitesi için dönüştürdüğünde ses menüsü yine tüm dilleri gösterir ve PGS ile DVD gibi görüntü tabanlı altyazılar görünür. Başka bir ses dili akışı aynı saniyeden yeniden başlatır."
+            "value" : "Sunucun videoyu daha düşük bir akış kalitesi için dönüştürdüğünde ses menüsü yine tüm dilleri gösterir ve PGS ile DVD gibi görüntü tabanlı altyazılar görünür. Başka bir ses dili akışı aynı saniyeden yeniden başlatır. Bir altyazı hâlâ yüklenirken oynatıcı bunu gösterir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Коли сервер перекодовує відео під нижчу якість потоку, меню звуку знову показує всі мови, а графічні субтитри, як-от PGS і DVD, відображаються. Інша мова звуку перезапускає потік з тієї самої секунди."
+            "value" : "Коли сервер перекодовує відео під нижчу якість потоку, меню звуку знову показує всі мови, а графічні субтитри, як-от PGS і DVD, відображаються. Інша мова звуку перезапускає потік з тієї самої секунди. Поки субтитри ще завантажуються, плеєр про це повідомляє."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器为较低的串流画质转换视频时，音频菜单也会再次列出所有语言，PGS 和 DVD 等图像字幕也会显示。换用另一种音频语言时，串流会从同一秒重新开始。"
+            "value" : "服务器为较低的串流画质转换视频时，音频菜单也会再次列出所有语言，PGS 和 DVD 等图像字幕也会显示。换用另一种音频语言时，串流会从同一秒重新开始。字幕仍在载入时，播放器会显示提示。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "伺服器為較低的串流畫質轉換影片時，音訊選單也會再次列出所有語言，PGS 和 DVD 等影像字幕也會顯示。換用另一種音訊語言時，串流會從同一秒重新開始。"
+            "value" : "伺服器為較低的串流畫質轉換影片時，音訊選單也會再次列出所有語言，PGS 和 DVD 等影像字幕也會顯示。換用另一種音訊語言時，串流會從同一秒重新開始。字幕仍在載入時，播放器會顯示提示。"
           }
         }
       }
@@ -167185,6 +167185,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "刪除此字幕？"
+          }
+        }
+      }
+    },
+    "player.subtitle.loading" : {
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Načítání titulků…"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indlæser undertekster…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untertitel werden geladen…"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φόρτωση υποτίτλων…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading subtitles…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando subtítulos…"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ladataan tekstityksiä…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des sous-titres…"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Učitavanje titlova…"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feliratok betöltése…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento sottotitoli…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "字幕を読み込み中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자막 불러오는 중…"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laster inn undertekster…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ondertitels laden…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wczytywanie napisów…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando legendas…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A carregar legendas…"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se încarcă subtitrările…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загрузка субтитров…"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Načítavajú sa titulky…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läser in undertexter…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altyazılar yükleniyor…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження субтитрів…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在载入字幕…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在載入字幕…"
           }
         }
       }
