@@ -104,6 +104,54 @@ struct TranscodeAudioMenuTests {
         vm.stopPlayback()
     }
 
+    /// The menu marks the pick at once, so a second press of it during the reload is the playing track.
+    @Test func aSecondPressDuringTheReloadDoesNotReopenAgain() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.activeAudioIndex = 1
+        vm.selectAudioTrack(id: 2, userInitiated: true)
+        vm.selectAudioTrack(id: 2, userInitiated: true)
+        await settle(service)
+        #expect(vm.activeAudioIndex == 2)
+        #expect(service.killedEncodings == ["ps-1"])
+        #expect(service.requestedAudioIndexes == [2])
+        vm.stopPlayback()
+    }
+
+    /// Track memory is not needed for an in-player pick to survive a retry.
+    @Test func anOutageRetryKeepsTheTranscodeAudio() async throws {
+        let service = RecordingPlaybackService()
+        let vm = try makeViewModel(service)
+        vm.activeAudioIndex = 2
+        vm.canRetryAfterOutage = true
+        vm.retryAfterOutage()
+        #expect(vm.pendingSessionCarry?.audioStreamIndex == 2)
+        for _ in 0..<300 where service.requestedAudioIndexes.isEmpty {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(service.requestedAudioIndexes == [2])
+        #expect(service.requestedMediaSourceIDs == ["src-1"])
+        vm.stopPlayback()
+    }
+
+    @Test func aRungSwitchCarriesTheAudioForADirectPlayLoad() throws {
+        let vm = try makeViewModel(RecordingPlaybackService())
+        vm.activeAudioIndex = 2
+        vm.selectStreamingQuality(.original)
+        #expect(vm.pendingSessionCarry?.audioStreamIndex == 2)
+        vm.stopPlayback()
+    }
+
+    @Test func withoutAnIndexTheServedAudioIsTheDefaultOrTheFirst() throws {
+        let streams = try JSONDecoder().decode([MediaStream].self, from: Data(#"""
+        [{"Index":1,"Type":"Audio","Codec":"aac","Language":"jpn"},
+         {"Index":2,"Type":"Audio","Codec":"aac","Language":"eng","IsDefault":true}]
+        """#.utf8))
+        #expect(PlayerViewModel.servedAudioStreamIndex(transcodingURL: "/m.m3u8", streams: streams) == 2)
+        #expect(PlayerViewModel.servedAudioStreamIndex(transcodingURL: "/m.m3u8", streams: Array(streams.prefix(1))) == 1)
+        #expect(PlayerViewModel.servedAudioStreamIndex(transcodingURL: "/m.m3u8?AudioStreamIndex=1", streams: streams) == 1)
+    }
+
     @Test func theURLsAudioIndexIsRead() {
         #expect(PlayerViewModel.transcodeAudioStreamIndex(
             transcodingURL: "/videos/x/master.m3u8?audioStreamIndex=4&VideoCodec=hevc") == 4)

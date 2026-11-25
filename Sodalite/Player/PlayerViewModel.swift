@@ -257,6 +257,9 @@ final class PlayerViewModel {
         /// Set by an audio pick under a transcode (Sodalite#253): the new language runs the automatic
         /// subtitle rule over the carried pick, as an in-place audio switch does.
         var reappliesSubtitleRule = false
+        /// The Jellyfin audio stream playing when the reload was asked for. A transcode names it in
+        /// PlaybackInfo, a direct play hands it to the engine before the first frame.
+        var audioStreamIndex: Int? = nil
     }
 
     var pendingSessionCarry: SessionCarry?
@@ -325,12 +328,10 @@ final class PlayerViewModel {
         activePlayMethod == .transcode && !isLiveSession && !isLocalSession && !isPlayingPreroll
     }
 
-    /// The Jellyfin index of the audio the transcode carries: the one its URL names, else the stream
-    /// Jellyfin marks default, which is what the server encodes without an index.
+    /// The Jellyfin index of the audio the transcode carries (`servedAudioStreamIndex`).
     var transcodedAudioStreamIndex: Int? {
-        Self.transcodeAudioStreamIndex(transcodingURL: activePlaybackSource?.transcodingUrl)
-            ?? TrackSelectionMatcher.jellyfinAudioStreams(activePlaybackSource?.mediaStreams)
-                .first { $0.isDefault == true }?.index
+        Self.servedAudioStreamIndex(transcodingURL: activePlaybackSource?.transcodingUrl,
+                                    streams: activePlaybackSource?.mediaStreams)
     }
 
     /// Subtitle streams in picker order (Jellyfin-default first); picker UI indexes here with "Off" at 0, not `subtitleStreams`.
@@ -1562,6 +1563,7 @@ final class PlayerViewModel {
             let isDirectPlay = subtitlePlayMethod == .directPlay
             let rememberedAudioIndex = pendingLaunchTrackPick?.preloadAudioIndex(
                     playedSourceID: launchPickSourceID, isDirectPlay: isDirectPlay, mediaStreams: sourceMediaStreams)
+                ?? (isDirectPlay ? carriedAudioEngineID() : nil)
                 ?? (isDirectPlay
                     ? TrackSelectionMatcher.preloadAudioStreamIndex(entry: rememberedEntry, mediaStreams: sourceMediaStreams)
                     : nil)
@@ -1756,6 +1758,14 @@ final class PlayerViewModel {
             ?? info.mediaSources.first else {
             throw PlayerEngineError.noSource
         }
+        // Sodalite#253: nobody named an audio, so a transcode carries the server's pick, and no later
+        // switch can reach another track of it. The one the engine would have opened on direct play
+        // goes into the request below.
+        let startAudioIndex: Int? = audioStreamIndex == nil
+            && PlaybackStreamSelection.resolve(itemID: item.id, source: source, using: playbackService)?.method == .transcode
+            ? Self.transcodeStartAudioIndex(entry: initialTrackEntry(),
+                                            preferredLanguage: effectivePreferredAudioLanguage(), source: source)
+            : nil
         // A subtitle the server picked itself is burned into a transcode, and Jellyfin prepares that
         // by extracting every subtitle from the whole file first: a minute on a 15 GB remux, past
         // AVPlayer's patience (Sodalite#87). Sodalite draws subtitles itself, so ask once more with
@@ -1764,10 +1774,26 @@ final class PlayerViewModel {
             LogTap.shared.note("[Quality] server burns in a subtitle; asking again pinned to \(source.id)")
             info = try await playbackService.getPlaybackInfo(
                 itemID: item.id, userID: userID, profile: profile,
-                mediaSourceID: source.id, audioStreamIndex: audioStreamIndex)
+                mediaSourceID: source.id, audioStreamIndex: audioStreamIndex ?? startAudioIndex)
             try throwIfSuperseded()
             guard let pinned = info.mediaSources.first else { throw PlayerEngineError.noSource }
             source = pinned
+        } else if let startAudioIndex {
+            // Optional: an answer that fails or names no source keeps the first one, which plays.
+            LogTap.shared.note("[Audio] transcode starts with audio \(startAudioIndex), asking again pinned to \(source.id)")
+            do {
+                let reasked = try await playbackService.getPlaybackInfo(
+                    itemID: item.id, userID: userID, profile: profile,
+                    mediaSourceID: source.id, audioStreamIndex: startAudioIndex)
+                try throwIfSuperseded()
+                if let pinned = reasked.mediaSources.first {
+                    info = reasked
+                    source = pinned
+                }
+            } catch {
+                try throwIfSuperseded()
+                LogTap.shared.note("[Audio] start audio request failed, keeping the server's pick: \(error.localizedDescription)")
+            }
         }
         playSessionID = info.playSessionId
         mediaSourceID = source.id
@@ -1788,31 +1814,10 @@ final class PlayerViewModel {
 
         // The same resolution the successor warm uses, so the URL this opens and the URL that
         // was warmed for it are the same string (AetherEngine#551 adopts by exact URL).
-        guard var resolved = PlaybackStreamSelection.resolve(
+        guard let resolved = PlaybackStreamSelection.resolve(
             itemID: item.id, source: source, using: playbackService
         ) else {
             throw PlayerEngineError.noURL
-        }
-        // Sodalite#253: nobody named an audio, so the server encoded its own pick, and no later switch
-        // can reach another track of a transcode. Ask once more for the one the engine would have
-        // opened on direct play. Pinned to the source, so the subtitle "none" still counts.
-        if resolved.method == .transcode, audioStreamIndex == nil,
-           let wanted = Self.transcodeStartAudioIndex(
-               entry: initialTrackEntry(), preferredLanguage: effectivePreferredAudioLanguage(), source: source) {
-            LogTap.shared.note("[Audio] transcode starts with audio \(wanted), asking again pinned to \(source.id)")
-            info = try await playbackService.getPlaybackInfo(
-                itemID: item.id, userID: userID, profile: profile,
-                mediaSourceID: source.id, audioStreamIndex: wanted)
-            try throwIfSuperseded()
-            if let pinned = info.mediaSources.first,
-               let reResolved = PlaybackStreamSelection.resolve(itemID: item.id, source: pinned, using: playbackService) {
-                source = pinned
-                resolved = reResolved
-                playSessionID = info.playSessionId
-                activePlaybackSource = source
-                subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
-                sourceMediaStreams = source.mediaStreams ?? []
-            }
         }
         let url = resolved.url
         activePlayMethod = resolved.method
@@ -2853,7 +2858,14 @@ final class PlayerViewModel {
             // would turn subtitles off (audit final review FR-PLR-2).
             pendingSessionCarry = pendingSessionCarry ?? SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
                                                                       secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
-                                                                      speedIndex: activeSpeedIndex)
+                                                                      speedIndex: activeSpeedIndex,
+                                                                      audioStreamIndex: playingJellyfinAudioStreamIndex)
+            // A transcode carries only the audio PlaybackInfo names, and the index counts only with
+            // the source pinned (Sodalite#253).
+            if servesOneAudioPerTranscode, let audio = pendingSessionCarry?.audioStreamIndex {
+                pendingMediaSourceID = mediaSourceID
+                pendingAudioStreamIndex = audio
+            }
         }
         resetSessionState(.sameItemReload)
         player.stop()
@@ -2981,6 +2993,7 @@ final class PlayerViewModel {
                                                                   secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
                                                                   speedIndex: activeSpeedIndex)
         if reappliesSubtitleRule { pendingSessionCarry?.reappliesSubtitleRule = true }
+        if let audioStreamIndex { pendingSessionCarry?.audioStreamIndex = audioStreamIndex }
         // A switch picked from the outage error is a new session: nothing of the outage carries.
         serverConfirmedUnreachable = false
         outageResumeSeconds = nil
@@ -3030,8 +3043,17 @@ final class PlayerViewModel {
 
     /// The language of the audio stream a Jellyfin transcode URL names in `AudioStreamIndex`.
     static func transcodeAudioLanguage(transcodingURL: String?, streams: [MediaStream]?) -> String? {
-        guard let index = transcodeAudioStreamIndex(transcodingURL: transcodingURL) else { return nil }
+        guard let index = servedAudioStreamIndex(transcodingURL: transcodingURL, streams: streams) else { return nil }
         return streams?.first { $0.type == .audio && $0.index == index }?.language
+    }
+
+    /// The Jellyfin audio stream a transcode carries: the one its URL names, else the one Jellyfin
+    /// encodes without an index, its default-flagged stream or the first. The menu, the language being
+    /// heard and the start pick all read this one rule (Sodalite#253).
+    static func servedAudioStreamIndex(transcodingURL: String?, streams: [MediaStream]?) -> Int? {
+        if let named = transcodeAudioStreamIndex(transcodingURL: transcodingURL) { return named }
+        let audio = TrackSelectionMatcher.jellyfinAudioStreams(streams)
+        return (audio.first { $0.isDefault == true } ?? audio.first)?.index
     }
 
     /// The `AudioStreamIndex` a Jellyfin transcode URL names.
@@ -3052,8 +3074,7 @@ final class PlayerViewModel {
         let streams = source.mediaStreams ?? []
         let audio = TrackSelectionMatcher.jellyfinAudioStreams(streams)
         guard audio.count > 1 else { return nil }
-        let served = transcodeAudioStreamIndex(transcodingURL: source.transcodingUrl)
-            ?? audio.first { $0.isDefault == true }?.index
+        let served = servedAudioStreamIndex(transcodingURL: source.transcodingUrl, streams: streams)
         let wanted: Int?
         if let remembered = TrackSelectionMatcher.rememberedJellyfinAudioIndex(entry: entry, mediaStreams: streams) {
             wanted = remembered
@@ -3195,6 +3216,9 @@ final class PlayerViewModel {
         reopenServerSession(
             log: "[Audio] transcode audio \(activeAudioIndex.map(String.init) ?? "?") -> \(streamIndex)",
             quality: nil, audioStreamIndex: streamIndex, reappliesSubtitleRule: true)
+        // The reopen disarmed the sink that would say so, and a second press of the same track while
+        // it loads must not reopen again.
+        activeAudioIndex = streamIndex
     }
 
     /// Dedupes subtitle streams: one EMBEDDED track per (language, codec), but descriptor variants
@@ -3312,6 +3336,16 @@ final class PlayerViewModel {
     private func carriedSubtitleIndex(_ index: Int?) -> Int? {
         guard let index, EngineSubtitleInventory.engineTrackID(forMenuIndex: index) != nil else { return index }
         return subtitleStreams.contains { $0.index == index } ? index : nil
+    }
+
+    /// The audio a same-item reload carries, as the engine id of this file's track: a pick made in the
+    /// player (or under a transcode, Sodalite#253) comes back on the first frame of a direct play, track
+    /// memory on or off. nil when the played source has no such audio stream.
+    private func carriedAudioEngineID() -> Int? {
+        guard let index = pendingSessionCarry?.audioStreamIndex,
+              TrackSelectionMatcher.jellyfinAudioStreams(sourceMediaStreams).contains(where: { $0.index == index })
+        else { return nil }
+        return Self.embeddedEngineTrackID(forJellyfinIndex: index, in: sourceMediaStreams)
     }
 
     /// The remembered entry, with the detail page's pick laid over it while that pick is pending.

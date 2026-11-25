@@ -150,17 +150,19 @@ enum TrackSelectionMatcher {
     /// original), and nil hands the pick back to the post-load `plan`: nothing remembered, no match,
     /// or a remembered audio description, which Jellyfin's stream list does not mark.
     static func preloadAudioStreamIndex(entry: TrackMemoryEntry?, mediaStreams: [MediaStream]) -> Int? {
-        guard let signature = entry?.audio, signature.descriptor != describedDescriptor else { return nil }
-        let tracks = jellyfinAudioStreams(mediaStreams).map { audioTrackInfo($0, in: mediaStreams) }
-        return matchAudio(signature, in: tracks)?.id
+        rememberedAudio(entry: entry, mediaStreams: mediaStreams) { audioTrackInfo($0, in: mediaStreams) }
     }
 
     /// The same match, answered as the Jellyfin index PlaybackInfo takes. A transcode carries only the
     /// audio PlaybackInfo named, so that is where a remembered track has to go (Sodalite#253).
     static func rememberedJellyfinAudioIndex(entry: TrackMemoryEntry?, mediaStreams: [MediaStream]) -> Int? {
+        rememberedAudio(entry: entry, mediaStreams: mediaStreams) { audioTrackInfo($0, id: $0.index) }
+    }
+
+    private static func rememberedAudio(entry: TrackMemoryEntry?, mediaStreams: [MediaStream],
+                                        track: (MediaStream) -> TrackInfo) -> Int? {
         guard let signature = entry?.audio, signature.descriptor != describedDescriptor else { return nil }
-        let tracks = jellyfinAudioStreams(mediaStreams).map { audioTrackInfo($0, id: $0.index) }
-        return matchAudio(signature, in: tracks)?.id
+        return matchAudio(signature, in: jellyfinAudioStreams(mediaStreams).map(track))?.id
     }
 
     // MARK: - Jellyfin audio in engine shape
