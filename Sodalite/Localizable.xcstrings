@@ -74043,7 +74043,7 @@
         }
       }
     },
-    "changelog.1_2_0.detailPages.body" : {
+    "changelog.1_1_1.detailPages.body" : {
       "comment" : "What's New 1.2.0: body of the detail pages highlight (Sodalite#250, audio and subtitles before Play)",
       "extractionState" : "manual",
       "localizations" : {
@@ -74205,7 +74205,7 @@
         }
       }
     },
-    "changelog.1_2_0.detailPages.title" : {
+    "changelog.1_1_1.detailPages.title" : {
       "comment" : "What's New 1.2.0: title of the detail pages highlight",
       "extractionState" : "manual",
       "localizations" : {
@@ -74367,7 +74367,7 @@
         }
       }
     },
-    "changelog.1_2_0.fasterStart.body" : {
+    "changelog.1_1_1.fasterStart.body" : {
       "comment" : "What's New 1.2.0: body of the faster start highlight (fonts embedded in a video load after it starts)",
       "extractionState" : "manual",
       "localizations" : {
@@ -74529,7 +74529,7 @@
         }
       }
     },
-    "changelog.1_2_0.fasterStart.title" : {
+    "changelog.1_1_1.fasterStart.title" : {
       "comment" : "What's New 1.2.0: title of the faster start highlight",
       "extractionState" : "manual",
       "localizations" : {
@@ -74691,7 +74691,7 @@
         }
       }
     },
-    "changelog.1_2_0.fullHDUpscaling.body" : {
+    "changelog.1_1_1.fullHDUpscaling.body" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -74852,7 +74852,7 @@
         }
       }
     },
-    "changelog.1_2_0.fullHDUpscaling.title" : {
+    "changelog.1_1_1.fullHDUpscaling.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -75013,7 +75013,7 @@
         }
       }
     },
-    "changelog.1_2_0.libraryFilters.body" : {
+    "changelog.1_1_1.libraryFilters.body" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -75174,7 +75174,7 @@
         }
       }
     },
-    "changelog.1_2_0.libraryFilters.title" : {
+    "changelog.1_1_1.libraryFilters.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -75335,7 +75335,7 @@
         }
       }
     },
-    "changelog.1_2_0.playerClock.body" : {
+    "changelog.1_1_1.playerClock.body" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
@@ -75496,7 +75496,7 @@
         }
       }
     },
-    "changelog.1_2_0.playerClock.title" : {
+    "changelog.1_1_1.playerClock.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "cs" : {
