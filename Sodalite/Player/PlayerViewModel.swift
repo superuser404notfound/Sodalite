@@ -254,6 +254,9 @@ final class PlayerViewModel {
         let subtitleStreamIndex: Int?
         let secondarySubtitleStreamIndex: Int?
         let speedIndex: Int
+        /// Set by an audio pick under a transcode (Sodalite#253): the new language runs the automatic
+        /// subtitle rule over the carried pick, as an in-place audio switch does.
+        var reappliesSubtitleRule = false
     }
 
     var pendingSessionCarry: SessionCarry?
@@ -302,8 +305,32 @@ final class PlayerViewModel {
 
     /// Audio tracks in picker order (container-default first); picker UI indexes here, not `player.audioTracks`.
     var displayAudioTracks: [TrackInfo] {
-        let tracks = player.audioTracks
+        let tracks = transcodeAudioTracks ?? player.audioTracks
         return tracks.filter { $0.isDefault } + tracks.filter { !$0.isDefault }
+    }
+
+    /// Sodalite#253: Jellyfin's HLS master carries only the audio PlaybackInfo named, so the engine
+    /// lists one track and the menu offered no other language. Under a streamed transcode the menu is
+    /// the source's own audio list instead, keyed by Jellyfin index, and a pick reopens the transcode
+    /// with that index. nil everywhere else.
+    var transcodeAudioTracks: [TrackInfo]? {
+        guard servesOneAudioPerTranscode else { return nil }
+        let streams = TrackSelectionMatcher.jellyfinAudioStreams(activePlaybackSource?.mediaStreams)
+        guard !streams.isEmpty else { return nil }
+        return streams.map { TrackSelectionMatcher.audioTrackInfo($0, id: $0.index) }
+    }
+
+    /// A transcoded download keeps one audio track in its file, and live has its own retune path.
+    var servesOneAudioPerTranscode: Bool {
+        activePlayMethod == .transcode && !isLiveSession && !isLocalSession && !isPlayingPreroll
+    }
+
+    /// The Jellyfin index of the audio the transcode carries: the one its URL names, else the stream
+    /// Jellyfin marks default, which is what the server encodes without an index.
+    var transcodedAudioStreamIndex: Int? {
+        Self.transcodeAudioStreamIndex(transcodingURL: activePlaybackSource?.transcodingUrl)
+            ?? TrackSelectionMatcher.jellyfinAudioStreams(activePlaybackSource?.mediaStreams)
+                .first { $0.isDefault == true }?.index
     }
 
     /// Subtitle streams in picker order (Jellyfin-default first); picker UI indexes here with "Off" at 0, not `subtitleStreams`.
@@ -386,12 +413,23 @@ final class PlayerViewModel {
     }
 
     /// Whether a subtitle stream reaches the engine as a file of its own rather than out of the played
-    /// stream. An external one always does. Under a transcode an embedded TEXT track does too
-    /// (Sodalite#87): the transcode renumbers the streams, and Jellyfin serves every text track as its
-    /// own file, so it goes the way an external one goes. A bitmap track Jellyfin can only burn in.
+    /// stream. An external one always does, and under a transcode every embedded one does too
+    /// (Sodalite#87): the transcode renumbers the streams, and Jellyfin serves each subtitle stream as
+    /// its own file. Bitmap tracks included (Sodalite#253): PGS comes back as a raw `.sup`, DVD and DVB
+    /// subtitles as a one-track Matroska file, both measured on Jellyfin 12. Left out, a picked PGS
+    /// track went to the SRT loader, got HTTP 400 and showed nothing.
     static func servedAsSidecar(_ stream: MediaStream, playMethod: PlayMethod?) -> Bool {
-        if stream.isExternal == true { return true }
-        return playMethod == .transcode && !isBitmapSubtitle(stream)
+        stream.isExternal == true || playMethod == .transcode
+    }
+
+    /// The format the engine is told a sidecar has. Jellyfin names PGS `PGSSUB`, which the engine does
+    /// not read as a bitmap format, so it would label the track SubRip; `sup` is the name it knows
+    /// (AE#921). The rest pass through, and the engine sniffs the file anyway.
+    static func sidecarFormatHint(_ stream: MediaStream) -> String? {
+        switch stream.codec?.lowercased() {
+        case "pgssub", "pgs", "hdmv_pgs_subtitle": return "sup"
+        default: return stream.codec
+        }
     }
 
     /// The engine names an embedded track by its container index, Jellyfin by its place in a list
@@ -962,15 +1000,6 @@ final class PlayerViewModel {
     /// (AetherEngine#48): sidecar headers publish asynchronously (unlike embedded TrackInfo), so
     /// activation waits for the first non-nil value. Cancelled on track change / deactivate.
     @ObservationIgnored private var sidecarASSHeaderCancellable: AnyCancellable?
-    /// In-flight transcode-path SRT load (server extraction can take up to 120s). Cancelled when the
-    /// user switches or disables the subtitle track so a stale load can't clobber the new selection.
-    @ObservationIgnored private var subtitleLoadTask: Task<Void, Never>?
-
-    func cancelSubtitleLoad() {
-        subtitleLoadTask?.cancel()
-        subtitleLoadTask = nil
-    }
-
     /// Live only: the automatic subtitle pick runs once per session, when the engine's track list
     /// first arrives. A latch rather than a time guard, so a republished list cannot override a pick
     /// the user has made since.
@@ -1759,10 +1788,31 @@ final class PlayerViewModel {
 
         // The same resolution the successor warm uses, so the URL this opens and the URL that
         // was warmed for it are the same string (AetherEngine#551 adopts by exact URL).
-        guard let resolved = PlaybackStreamSelection.resolve(
+        guard var resolved = PlaybackStreamSelection.resolve(
             itemID: item.id, source: source, using: playbackService
         ) else {
             throw PlayerEngineError.noURL
+        }
+        // Sodalite#253: nobody named an audio, so the server encoded its own pick, and no later switch
+        // can reach another track of a transcode. Ask once more for the one the engine would have
+        // opened on direct play. Pinned to the source, so the subtitle "none" still counts.
+        if resolved.method == .transcode, audioStreamIndex == nil,
+           let wanted = Self.transcodeStartAudioIndex(
+               entry: initialTrackEntry(), preferredLanguage: effectivePreferredAudioLanguage(), source: source) {
+            LogTap.shared.note("[Audio] transcode starts with audio \(wanted), asking again pinned to \(source.id)")
+            info = try await playbackService.getPlaybackInfo(
+                itemID: item.id, userID: userID, profile: profile,
+                mediaSourceID: source.id, audioStreamIndex: wanted)
+            try throwIfSuperseded()
+            if let pinned = info.mediaSources.first,
+               let reResolved = PlaybackStreamSelection.resolve(itemID: item.id, source: pinned, using: playbackService) {
+                source = pinned
+                resolved = reResolved
+                playSessionID = info.playSessionId
+                activePlaybackSource = source
+                subtitleStreams = Self.dedupedSubtitleStreams(from: source.mediaStreams)
+                sourceMediaStreams = source.mediaStreams ?? []
+            }
         }
         let url = resolved.url
         activePlayMethod = resolved.method
@@ -2353,7 +2403,9 @@ final class PlayerViewModel {
         player.$activeAudioTrackIndex
             .receive(on: DispatchQueue.main)
             .sink { [weak self] index in
-                self?.activeAudioIndex = index
+                guard let self else { return }
+                // Under a transcode the menu speaks Jellyfin indexes, not the engine's one track.
+                self.activeAudioIndex = self.servesOneAudioPerTranscode ? self.transcodedAudioStreamIndex : index
             }
             .store(in: &cancellables)
 
@@ -2883,11 +2935,31 @@ final class PlayerViewModel {
             streamingQuality = quality
             return
         }
+        reopenServerSession(
+            log: "[Quality] \(effectiveStreamingQuality.rawValue) -> \(quality.rawValue)",
+            quality: quality, audioStreamIndex: playingJellyfinAudioStreamIndex)
+    }
+
+    /// The Jellyfin audio stream playing now, for a reopen to name again. Under a transcode that is
+    /// the menu's own index; elsewhere the engine's track is matched back by what it is.
+    var playingJellyfinAudioStreamIndex: Int? {
+        if servesOneAudioPerTranscode { return activeAudioIndex }
+        let activeAudio = player.audioTracks.first { $0.id == activeAudioIndex }
+        return Self.jellyfinAudioStreamIndex(
+            language: activeAudio?.language, channels: activeAudio?.channels, codec: activeAudio?.codec,
+            in: activePlaybackSource?.mediaStreams)
+    }
+
+    /// A new stream of the same item from the same second: a rung pick (Sodalite#87) or an audio pick
+    /// under a transcode (Sodalite#253). The server session closes so no ffmpeg outlives it, and the
+    /// prefetch is dropped because it describes the old stream. Same shape as `retryAfterOutage`.
+    func reopenServerSession(log: String, quality: StreamingQuality?, audioStreamIndex: Int?,
+                             reappliesSubtitleRule: Bool = false) {
         // A reload that has not started yet still holds the second the viewer was at; the clock
         // reads zero until the new session plays.
         // From the outage error the clock may already read zero; the outage kept where it hit.
         let resumeAt = resumeOverrideSeconds ?? outageResumeSeconds ?? playbackTime
-        LogTap.shared.note("[Quality] \(effectiveStreamingQuality.rawValue) -> \(quality.rawValue) at \(String(format: "%.1f", resumeAt))s")
+        LogTap.shared.note("\(log) at \(String(format: "%.1f", resumeAt))s")
         let closeServerSession = makeServerSessionClose(positionTicks: Int64(resumeAt * 10_000_000))
         // The engine stop below zeroes its clock; sinks left armed would copy that into the transport
         // bar. startPlayback arms them again for the new session.
@@ -2896,21 +2968,19 @@ final class PlayerViewModel {
         // A countdown left running would advance while the reload is in flight.
         resetNextEpisodeOverlayState()
         hasWarmedSuccessor = false
-        let activeAudio = player.audioTracks.first { $0.id == activeAudioIndex }
         pendingMediaSourceID = mediaSourceID
-        pendingAudioStreamIndex = Self.jellyfinAudioStreamIndex(
-            language: activeAudio?.language, channels: activeAudio?.channels, codec: activeAudio?.codec,
-            in: activePlaybackSource?.mediaStreams)
+        pendingAudioStreamIndex = audioStreamIndex
         // The next session reports its own start; the closed one must not be closed again by a
         // later stopPlayback.
         hasReportedStart = false
         playSessionID = nil
-        streamingQuality = quality
+        if let quality { streamingQuality = quality }
         cachedPlaybackInfo = nil
         resumeOverrideSeconds = resumeAt > 0 ? resumeAt : nil
         pendingSessionCarry = pendingSessionCarry ?? SessionCarry(subtitleStreamIndex: activeSubtitleIndex,
                                                                   secondarySubtitleStreamIndex: activeSecondarySubtitleIndex,
                                                                   speedIndex: activeSpeedIndex)
+        if reappliesSubtitleRule { pendingSessionCarry?.reappliesSubtitleRule = true }
         // A switch picked from the outage error is a new session: nothing of the outage carries.
         serverConfirmedUnreachable = false
         outageResumeSeconds = nil
@@ -2960,11 +3030,41 @@ final class PlayerViewModel {
 
     /// The language of the audio stream a Jellyfin transcode URL names in `AudioStreamIndex`.
     static func transcodeAudioLanguage(transcodingURL: String?, streams: [MediaStream]?) -> String? {
+        guard let index = transcodeAudioStreamIndex(transcodingURL: transcodingURL) else { return nil }
+        return streams?.first { $0.type == .audio && $0.index == index }?.language
+    }
+
+    /// The `AudioStreamIndex` a Jellyfin transcode URL names.
+    static func transcodeAudioStreamIndex(transcodingURL: String?) -> Int? {
         guard let transcodingURL,
               let value = URLComponents(string: transcodingURL)?.queryItems?
-                .first(where: { $0.name.caseInsensitiveCompare("AudioStreamIndex") == .orderedSame })?.value,
-              let index = Int(value) else { return nil }
-        return streams?.first { $0.type == .audio && $0.index == index }?.language
+                .first(where: { $0.name.caseInsensitiveCompare("AudioStreamIndex") == .orderedSame })?.value
+        else { return nil }
+        return Int(value)
+    }
+
+    /// The audio a transcode should start with when nobody named one for this load (Sodalite#253). The
+    /// engine picks the remembered track or the preferred language itself on direct play; a transcode
+    /// carries only what PlaybackInfo named, so the same choice has to be made before the load. nil
+    /// keeps the server's pick: nothing to apply, or the server already plays that language.
+    static func transcodeStartAudioIndex(entry: TrackMemoryEntry?, preferredLanguage: String?,
+                                         source: PlaybackMediaSource) -> Int? {
+        let streams = source.mediaStreams ?? []
+        let audio = TrackSelectionMatcher.jellyfinAudioStreams(streams)
+        guard audio.count > 1 else { return nil }
+        let served = transcodeAudioStreamIndex(transcodingURL: source.transcodingUrl)
+            ?? audio.first { $0.isDefault == true }?.index
+        let wanted: Int?
+        if let remembered = TrackSelectionMatcher.rememberedJellyfinAudioIndex(entry: entry, mediaStreams: streams) {
+            wanted = remembered
+        } else if let preferredLanguage {
+            let speaks = { (stream: MediaStream) in languagesMatch(stream.language, preferredLanguage) }
+            if let served, audio.first(where: { $0.index == served }).map(speaks) == true { return nil }
+            wanted = (audio.first { $0.isDefault == true && speaks($0) } ?? audio.first(where: speaks))?.index
+        } else {
+            wanted = nil
+        }
+        return wanted == served ? nil : wanted
     }
 
     /// Whether a Jellyfin transcode URL burns a subtitle into the picture. `SubtitleMethod=Encode` alone
@@ -3052,6 +3152,10 @@ final class PlayerViewModel {
     }
 
     func selectAudioTrack(id: Int, userInitiated: Bool = false) {
+        if servesOneAudioPerTranscode {
+            selectTranscodeAudio(streamIndex: id, userInitiated: userInitiated)
+            return
+        }
         let action = LiveAudioSwitch.action(requestedIndex: id,
                                             activeIndex: activeAudioIndex,
                                             isLive: isLiveSession,
@@ -3077,6 +3181,20 @@ final class PlayerViewModel {
         // subtitle is actively selected). The engine hasn't settled the switch yet, so resolve
         // against the REQUESTED track's language, not activeAudioTrackIndex.
         applyForcedSubtitleFallback(audioLanguageOverride: language)
+    }
+
+    /// Sodalite#253: the engine cannot switch a transcode's audio, the stream has only one. The pick
+    /// reopens the transcode at the same rung and second with that Jellyfin index.
+    private func selectTranscodeAudio(streamIndex: Int, userInitiated: Bool) {
+        guard streamIndex != activeAudioIndex,
+              let stream = TrackSelectionMatcher.jellyfinAudioStreams(activePlaybackSource?.mediaStreams)
+                .first(where: { $0.index == streamIndex }) else { return }
+        if userInitiated, let key = memoryScopeKey {
+            trackMemory?.recordAudio(TrackSelectionMatcher.audioSignature(stream, in: sourceMediaStreams), for: key)
+        }
+        reopenServerSession(
+            log: "[Audio] transcode audio \(activeAudioIndex.map(String.init) ?? "?") -> \(streamIndex)",
+            quality: nil, audioStreamIndex: streamIndex, reappliesSubtitleRule: true)
     }
 
     /// Dedupes subtitle streams: one EMBEDDED track per (language, codec), but descriptor variants
@@ -3127,7 +3245,7 @@ final class PlayerViewModel {
                 language: stream.language,
                 isForced: stream.isForced == true,
                 isHearingImpaired: stream.isHearingImpaired == true,
-                formatHint: stream.codec))
+                formatHint: sidecarFormatHint(stream)))
         }
         return (descriptors, mapping)
     }
@@ -3184,6 +3302,7 @@ final class PlayerViewModel {
         if let secondary = carriedSubtitleIndex(carry.secondarySubtitleStreamIndex) {
             selectSecondarySubtitleTrack(id: secondary)
         }
+        if carry.reappliesSubtitleRule { applyPreferredSubtitle(forAudioLanguage: heardAudioLanguage) }
         activeSpeedIndex = carry.speedIndex
         if let rate = Self.rateToRestore(speedIndex: carry.speedIndex) { player.setRate(rate) }
     }
@@ -3667,10 +3786,6 @@ final class PlayerViewModel {
                 trackMemory?.recordSubtitle(.off, for: key)
             }
         }
-        // Cancel any in-flight transcode-path load so a slow earlier extraction can't overwrite the
-        // cues for the track the user just selected (or disabled).
-        subtitleLoadTask?.cancel()
-        subtitleLoadTask = nil
         guard let id else {
             activeSubtitleIndex = nil
             activeSubtitleCodec = nil
@@ -3732,12 +3847,11 @@ final class PlayerViewModel {
                 deactivateASSRendering()
             }
         } else {
-            // Transcoded session: HLS rewrites stream indices, so fall back to the legacy server-extracted
-            // SRT loader (text codecs only).
+            // Under a transcode every listed track is a sidecar, so only an index the menu does not
+            // list lands here, and there is nothing to show for it.
             deactivateASSRendering()
             player.clearSubtitle()
             subtitleCues = []
-            subtitleLoadTask = Task { await loadSubtitles(streamIndex: id) }
         }
 
         // Subtitle picked while the video lives in the PiP window (next-episode auto-advance runs the
@@ -3973,7 +4087,7 @@ final class PlayerViewModel {
             url: url, name: stream.flatMap(Self.sidecarName),
             language: stream?.language, isForced: stream?.isForced == true,
             isHearingImpaired: stream?.isHearingImpaired == true,
-            formatHint: stream?.codec))
+            formatHint: stream.flatMap(Self.sidecarFormatHint)))
         externalEngineTrackIDs[id] = info.id
         return info.id
     }
@@ -4004,79 +4118,6 @@ final class PlayerViewModel {
         sidecarASSHeaderCancellable = nil
         assCoordinator.deactivate()
         assRenderer = nil
-    }
-
-    private static let subtitleLog = Logger(
-        subsystem: "de.superuser404.Sodalite",
-        category: "Subtitles"
-    )
-
-
-    /// The sidecar SRT fetch owns a session, because `URLSession.shared` cannot carry a delegate and
-    /// this request goes to the same server whose certificate the user may have had to accept.
-    nonisolated static let sidecarSubtitleSession: URLSession = {
-        let config = URLSessionConfiguration.default
-        return URLSession(
-            configuration: config, delegate: ServerTrustDelegate.shared, delegateQueue: nil)
-    }()
-
-    private func loadSubtitles(streamIndex: Int) async {
-        let stream = subtitleStreams.first(where: { $0.index == streamIndex })
-        Self.subtitleLog.notice(
-            "loadSubtitles streamIndex=\(streamIndex, privacy: .public) codec=\(stream?.codec ?? "nil", privacy: .public) lang=\(stream?.language ?? "nil", privacy: .public)"
-        )
-
-        guard let url = playbackService.buildSubtitleURL(
-            itemID: item.id,
-            mediaSourceID: mediaSourceID,
-            streamIndex: streamIndex,
-            format: "srt"
-        ) else {
-            Self.subtitleLog.notice("→ failed to build URL")
-            return
-        }
-
-        // First hit can take seconds (Jellyfin lazy-extracts the sub via FFmpeg, nothing cached yet).
-        // Two attempts with a 120s budget cover both the slow extraction and a transient.
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 120
-
-        for attempt in 1...2 {
-            do {
-                let (data, response) = try await Self.sidecarSubtitleSession.data(for: request)
-                if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                    Self.subtitleLog.notice("→ attempt \(attempt, privacy: .public) HTTP \(http.statusCode, privacy: .public)")
-                    if attempt == 2 { return }
-                    continue
-                }
-                guard let content = String(data: data, encoding: .utf8), !content.isEmpty else {
-                    Self.subtitleLog.notice("→ attempt \(attempt, privacy: .public) empty payload")
-                    if attempt == 2 { return }
-                    try? await Task.sleep(for: .seconds(1))
-                    continue
-                }
-                let cues = await SRTParser.parse(content)
-                if cues.isEmpty {
-                    Self.subtitleLog.notice("→ attempt \(attempt, privacy: .public) parsed 0 cues from \(content.count, privacy: .public) bytes")
-                    if attempt == 2 { return }
-                    try? await Task.sleep(for: .seconds(1))
-                    continue
-                }
-                // A slow extraction may finish after the user switched/disabled the track; only the
-                // still-selected stream may write, so a stale load is a no-op.
-                guard !Task.isCancelled, activeSubtitleIndex == streamIndex else {
-                    Self.subtitleLog.notice("→ stale load for \(streamIndex, privacy: .public) dropped (active=\(self.activeSubtitleIndex ?? -1, privacy: .public))")
-                    return
-                }
-                subtitleCues = cues
-                Self.subtitleLog.notice("→ loaded \(cues.count, privacy: .public) cues on attempt \(attempt, privacy: .public)")
-                return
-            } catch {
-                Self.subtitleLog.notice("→ attempt \(attempt, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
-                if attempt == 2 { return }
-                try? await Task.sleep(for: .seconds(1))
-            }
-        }
     }
 
     // MARK: - Helpers

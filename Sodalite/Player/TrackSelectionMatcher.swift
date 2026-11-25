@@ -155,6 +155,14 @@ enum TrackSelectionMatcher {
         return matchAudio(signature, in: tracks)?.id
     }
 
+    /// The same match, answered as the Jellyfin index PlaybackInfo takes. A transcode carries only the
+    /// audio PlaybackInfo named, so that is where a remembered track has to go (Sodalite#253).
+    static func rememberedJellyfinAudioIndex(entry: TrackMemoryEntry?, mediaStreams: [MediaStream]) -> Int? {
+        guard let signature = entry?.audio, signature.descriptor != describedDescriptor else { return nil }
+        let tracks = jellyfinAudioStreams(mediaStreams).map { audioTrackInfo($0, id: $0.index) }
+        return matchAudio(signature, in: tracks)?.id
+    }
+
     // MARK: - Jellyfin audio in engine shape
 
     /// The file's own audio streams as Jellyfin lists them. External audio files are left out, the
@@ -167,9 +175,15 @@ enum TrackSelectionMatcher {
     /// opened anything (the detail page, the preload) signs and labels the way the player does.
     /// Jellyfin marks no audio description, so this never claims one.
     static func audioTrackInfo(_ stream: MediaStream, in mediaStreams: [MediaStream]) -> TrackInfo {
+        audioTrackInfo(stream, id: PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: stream.index, in: mediaStreams))
+    }
+
+    /// The same track under an id of the caller's choosing: the transcode audio menu keys its rows by
+    /// Jellyfin index, because the engine never sees those tracks (Sodalite#253).
+    static func audioTrackInfo(_ stream: MediaStream, id: Int) -> TrackInfo {
         let codec = stream.codec ?? ""
         return TrackInfo(
-            id: PlayerViewModel.embeddedEngineTrackID(forJellyfinIndex: stream.index, in: mediaStreams),
+            id: id,
             name: stream.title ?? "",
             codec: codec,
             language: stream.language,

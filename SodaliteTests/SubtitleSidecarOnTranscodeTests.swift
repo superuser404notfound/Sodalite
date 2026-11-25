@@ -4,10 +4,10 @@ import Testing
 @testable import Sodalite
 
 /// Sodalite#87: a transcode renumbers the streams, so an embedded subtitle cannot be picked out of it
-/// the way direct play does. Jellyfin serves every text subtitle stream as a file of its own, so on a
-/// transcode an embedded text track is handed to the engine as a sidecar, like an external one. That
-/// is what lets the skip-back window, the forced fallback and the picker work there at all; the old
-/// server-extraction loader took up to two minutes and the skip-back window is thirty seconds.
+/// the way direct play does. Jellyfin serves every subtitle stream as a file of its own, so on a
+/// transcode an embedded track is handed to the engine as a sidecar, like an external one. That is
+/// what lets the skip-back window, the forced fallback and the picker work there at all. Bitmap tracks
+/// too since Sodalite#253: Jellyfin 12 hands PGS out as a `.sup` and DVD subtitles as a Matroska file.
 struct SubtitleSidecarOnTranscodeTests {
     private func stream(_ index: Int, codec: String, external: Bool = false, forced: Bool = false) throws -> MediaStream {
         try JSONDecoder().decode(MediaStream.self, from: Data(
@@ -26,20 +26,33 @@ struct SubtitleSidecarOnTranscodeTests {
         #expect(!PlayerViewModel.servedAsSidecar(try stream(3, codec: "subrip"), playMethod: .directStream))
     }
 
-    /// Jellyfin can serve a bitmap track only by burning it in, which Sodalite never asks for.
-    @Test func anEmbeddedBitmapTrackIsNeverASidecar() throws {
-        #expect(!PlayerViewModel.servedAsSidecar(try stream(4, codec: "pgssub"), playMethod: .transcode))
-        #expect(!PlayerViewModel.servedAsSidecar(try stream(4, codec: "dvdsub"), playMethod: .transcode))
+    /// Before Sodalite#253 a picked PGS track went to the SRT loader, got HTTP 400 and showed nothing.
+    @Test func anEmbeddedBitmapTrackIsASidecarUnderATranscode() throws {
+        #expect(PlayerViewModel.servedAsSidecar(try stream(4, codec: "PGSSUB"), playMethod: .transcode))
+        #expect(PlayerViewModel.servedAsSidecar(try stream(4, codec: "dvdsub"), playMethod: .transcode))
+        #expect(!PlayerViewModel.servedAsSidecar(try stream(4, codec: "PGSSUB"), playMethod: .directPlay))
     }
 
-    @Test func aTranscodeDeclaresItsEmbeddedTextTracksToTheEngine() throws {
+    /// Jellyfin names PGS `PGSSUB`; the engine knows the format as `sup` and would label it SubRip.
+    @Test func aPGSSidecarIsAnnouncedAsSup() throws {
+        #expect(PlayerViewModel.sidecarFormatHint(try stream(4, codec: "PGSSUB")) == "sup")
+        #expect(PlayerViewModel.sidecarFormatHint(try stream(4, codec: "dvdsub")) == "dvdsub")
+        #expect(PlayerViewModel.sidecarFormatHint(try stream(4, codec: "subrip")) == "subrip")
+        let result = PlayerViewModel.externalSubtitleDescriptors(
+            streams: [try stream(4, codec: "PGSSUB")], playMethod: .transcode) {
+            URL(string: "https://jf.example/sub/\($0.index).PGSSUB")
+        }
+        #expect(result.descriptors.first?.formatHint == "sup")
+    }
+
+    @Test func aTranscodeDeclaresItsEmbeddedTracksToTheEngine() throws {
         let streams = [try stream(3, codec: "subrip", forced: true), try stream(4, codec: "pgssub"),
                        try stream(5, codec: "subrip"), try stream(9, codec: "srt", external: true)]
         let result = PlayerViewModel.externalSubtitleDescriptors(streams: streams, playMethod: .transcode) {
             URL(string: "https://jf.example/sub/\($0.index).srt")
         }
-        #expect(result.mapping.keys.sorted() == [3, 5, 9])
-        #expect(result.descriptors.count == 3)
+        #expect(result.mapping.keys.sorted() == [3, 4, 5, 9])
+        #expect(result.descriptors.count == 4)
         #expect(result.descriptors.first?.isForced == true)
     }
 
