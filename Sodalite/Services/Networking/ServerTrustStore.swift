@@ -270,7 +270,14 @@ nonisolated enum RedirectPolicy {
     /// the token, and is followed. Refusing it outright (1.1.0 build 13) blanked every poster on a
     /// server whose artwork answers with a redirect to an image host (Sodalite#249). Jellyfin's
     /// image endpoints need no token, so the image host still answers.
-    static func decide(_ proposed: URLRequest, from previous: URLRequest?) -> Decision {
+    ///
+    /// `original` is the request the app made before the first hop. A credential-named query item
+    /// of any hop is dropped from the next cross-origin URL, but only a token the app sent (in
+    /// `original`'s query, or in a header of `original` or `previous`) refuses the hop when it
+    /// shows up elsewhere in that URL. AIOStreams' poster redirect hops to its own URL with the
+    /// Top Posters key as `apiKey`, and that key belongs in the path of the next hop; reading it
+    /// as ours blanked every card on such a server.
+    static func decide(_ proposed: URLRequest, from previous: URLRequest?, original: URLRequest? = nil) -> Decision {
         guard let previous, let from = previous.url, let to = proposed.url else {
             return .follow(proposed, leftURLTokenBehind: false)
         }
@@ -287,23 +294,30 @@ nonisolated enum RedirectPolicy {
         }
 
         for name in credentialHeaders { request.setValue(nil, forHTTPHeaderField: name) }
-        let urlTokens = queryCredentials(from)
-        let tokens = urlTokens.union(headerCredentials(previous))
-        guard !tokens.isEmpty else { return .follow(request, leftURLTokenBehind: false) }
-        let stripped = removingQueryItems(valued: tokens, from: to)
-        if contains(tokens, in: stripped) { return .refuse(.tokenInURL) }
+        let hopTokens = queryCredentials(from)
+        var ours = headerCredentials(previous)
+        if let original {
+            ours.formUnion(original.url.map(queryCredentials) ?? [])
+            ours.formUnion(headerCredentials(original))
+        } else {
+            ours.formUnion(hopTokens)
+        }
+        let dropped = ours.union(hopTokens)
+        guard !dropped.isEmpty else { return .follow(request, leftURLTokenBehind: false) }
+        let stripped = removingQueryItems(valued: dropped, from: to)
+        if contains(ours, in: stripped) { return .refuse(.tokenInURL) }
         request.url = stripped
-        return .follow(request, leftURLTokenBehind: !urlTokens.isEmpty)
+        return .follow(request, leftURLTokenBehind: !hopTokens.isEmpty)
     }
 
-    static func refusal(_ proposed: URLRequest, from previous: URLRequest?) -> Refusal? {
-        if case .refuse(let reason) = decide(proposed, from: previous) { return reason }
+    static func refusal(_ proposed: URLRequest, from previous: URLRequest?, original: URLRequest? = nil) -> Refusal? {
+        if case .refuse(let reason) = decide(proposed, from: previous, original: original) { return reason }
         return nil
     }
 
     /// The request to follow, or nil to refuse the hop (the 3xx is then the response).
-    static func redirect(_ proposed: URLRequest, from previous: URLRequest?) -> URLRequest? {
-        if case .follow(let request, _) = decide(proposed, from: previous) { return request }
+    static func redirect(_ proposed: URLRequest, from previous: URLRequest?, original: URLRequest? = nil) -> URLRequest? {
+        if case .follow(let request, _) = decide(proposed, from: previous, original: original) { return request }
         return nil
     }
 
@@ -414,7 +428,7 @@ extension ServerTrustDelegate {
     ) {
         let previous = task.currentRequest ?? task.originalRequest
         let fromHost = previous?.url?.host() ?? "?", toHost = request.url?.host() ?? "?"
-        switch RedirectPolicy.decide(request, from: previous) {
+        switch RedirectPolicy.decide(request, from: previous, original: task.originalRequest) {
         case .refuse(.downgrade):
             LogTap.shared.note("[http] refused a redirect from https to http at \(toHost)")
             completionHandler(nil)
