@@ -329,7 +329,6 @@ extension PlayerViewModel {
             externalEngineTrackIDs = [:]
             activeAudioIndex = nil
         }
-        cancelSubtitleLoad()
         subtitleCues = []
         activeSubtitleIndex = nil
         activeSubtitleCodec = nil

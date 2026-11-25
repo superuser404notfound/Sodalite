@@ -98,7 +98,7 @@ extension PlayerViewModel {
             hasNextEpisodePrompt: showNextEpisodeOverlay && nextEpisode != nil,
             episodeCount: seasonEpisodes.count,
             chapterCount: chapters.count,
-            hasAudioTracks: !player.audioTracks.isEmpty,
+            hasAudioTracks: !displayAudioTracks.isEmpty,
             hasSubtitles: !subtitleStreams.isEmpty || supportsSubtitleSearch,
             hasQualityChoice: supportsQualityChoice,
             offersUpscaleToggle: upscaleToggleState != nil,

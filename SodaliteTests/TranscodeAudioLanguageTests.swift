@@ -21,10 +21,13 @@ struct TranscodeAudioLanguageTests {
         #expect(PlayerViewModel.transcodeAudioLanguage(transcodingURL: url, streams: try streams()) == "eng")
     }
 
-    @Test func aURLWithoutAnAudioIndexNamesNothing() throws {
+    /// Without an index Jellyfin encodes its default stream, the default-flagged one or the first
+    /// (Sodalite#253); the menu marks that one as playing, so the language must agree.
+    @Test func aURLWithoutAnAudioIndexNamesTheServersDefault() throws {
         #expect(PlayerViewModel.transcodeAudioLanguage(
-            transcodingURL: "/videos/x/master.m3u8?VideoBitrate=1", streams: try streams()) == nil)
-        #expect(PlayerViewModel.transcodeAudioLanguage(transcodingURL: nil, streams: try streams()) == nil)
+            transcodingURL: "/videos/x/master.m3u8?VideoBitrate=1", streams: try streams()) == "ger")
+        #expect(PlayerViewModel.transcodeAudioLanguage(transcodingURL: nil, streams: try streams()) == "ger")
+        #expect(PlayerViewModel.transcodeAudioLanguage(transcodingURL: nil, streams: []) == nil)
     }
 
     /// An index that names a subtitle or nothing is not an audio language.
