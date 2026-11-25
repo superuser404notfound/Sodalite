@@ -189,14 +189,15 @@ Every feature is free. Settings are named as they appear in the app.
 
 ### Subtitles and tracks
 
-- **Every subtitle format, drawn on the device**: SubRip, ASS, SSA, WebVTT, mov_text, PGS, DVB, DVD, CEA-608 closed captions and DVB Teletext, embedded or as `.srt` / `.ass` / `.vtt` files. Your server does not need to extract or burn anything.
+- **Every subtitle format, drawn on the device**: SubRip, ASS, SSA, WebVTT, mov_text, PGS, DVB, DVD, CEA-608 closed captions and DVB Teletext, embedded or as `.srt` / `.ass` / `.vtt` files. Your server never burns them into the picture.
+- **Subtitles at a lower streaming quality**: when the server converts the video, it hands each subtitle track over as a file of its own, picture-based ones included. The first pick of a text track can take up to a minute on a large file, because the server reads every subtitle out of the whole file first.
 - **Tracks the server missed**: the subtitle menu lists every track inside the file, also the ones your server's scan did not record, and closed captions carried in the video picture itself.
 - **Styled ASS / SSA**: original fonts, colors and positions, or plain text if you prefer (Settings → Playback).
 - **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. Fully automatic.
 - **Subtitles on skip back**: skipping back turns subtitles on until you are past where you jumped from, then off again. Also works in live TV's timeshift.
 - **Search and download subtitles** in the player when your server has none. Matches by file hash get a badge.
 - **Dual subtitles**: show a second text track above the first, for example the original plus a translation.
-- **Audio track switcher**: change language or mix while you watch.
+- **Audio track switcher**: change language or mix while you watch. At a lower streaming quality the server converts one audio track, so a new pick restarts the stream at the same second.
 - **Pick tracks before Play**: the Audio & Subtitles button next to Version on a movie or episode page picks the audio and subtitles of the version Play starts. The pick plays from the first second and is remembered like one made in the player. Untouched, it says Automatic and the player chooses as usual.
 - **Remembered tracks**: your audio and subtitle choice comes back for that movie, or for the whole series. Matched by language and type, not track number, and synced with your profile. A remembered track plays from the first second, even when the file has another track in the same language before it.
 
