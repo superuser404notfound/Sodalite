@@ -187,7 +187,7 @@ struct RedirectPolicyTests {
         let posterAPI = request("https://aio.example.com/api/v1/posters/top-poster?id=tt1&type=movie&fallback=x&apiKey=\(posterKey)", credentials: false)
         let target = "https://api.top-posters.example/\(posterKey)/imdb/poster/tt1.jpg?fallback=true"
         #expect(RedirectPolicy.decide(request(target, credentials: false), from: posterAPI, original: original)
-            == .follow(request(target, credentials: false), leftURLTokenBehind: false))
+            == .follow(request(target, credentials: false), leftURLTokenBehind: true))
     }
 
     @Test("our own token still may not leave through a later hop")
@@ -201,5 +201,25 @@ struct RedirectPolicyTests {
             request("https://img.example.net/poster.jpg?k=\(token)&w=500", credentials: false),
             from: echoed, original: original)
         #expect(stripped?.url?.absoluteString == "https://img.example.net/poster.jpg?w=500")
+    }
+
+    @Test("a token a hop put into its query is dropped from the next cross-origin URL")
+    func hopTokenStrippedFromQuery() throws {
+        let original = request("https://jf.example.com/sso/start", credentials: false)
+        let hop = request("https://jf.example.com/Items/x/Images/Primary?api_key=\(token)", credentials: false)
+        let followed = try #require(RedirectPolicy.redirect(
+            request("https://cdn.example.net/p.jpg?k=\(token)&w=500", credentials: false),
+            from: hop, original: original))
+        #expect(followed.url?.absoluteString == "https://cdn.example.net/p.jpg?w=500")
+    }
+
+    @Test("a header token of the original request refuses a later hop that puts it in the path")
+    func originalHeaderTokenRefusedOnLaterHop() {
+        var original = request("https://jf.example.com/Items/x/Images/Primary", credentials: false)
+        original.setValue(token, forHTTPHeaderField: "X-Emby-Token")
+        let hop = request("https://jf.example.com/api/v1/posters/p?id=tt1", credentials: false)
+        #expect(RedirectPolicy.redirect(
+            request("https://img.example.net/\(token)/p.jpg", credentials: false),
+            from: hop, original: original) == nil)
     }
 }

@@ -271,10 +271,12 @@ nonisolated enum RedirectPolicy {
     /// server whose artwork answers with a redirect to an image host (Sodalite#249). Jellyfin's
     /// image endpoints need no token, so the image host still answers.
     ///
-    /// `original` is the request the app made before the first hop. Only what it sent counts as a
-    /// token: a server may hop to its own URL that names a third-party key `apiKey` (AIOStreams'
-    /// poster redirect hands its Top Posters key on that way), and treating that key as ours
-    /// refused the next hop, whose path the key belongs in.
+    /// `original` is the request the app made before the first hop. A credential-named query item
+    /// of any hop is dropped from the next cross-origin URL, but only a token the app sent (in
+    /// `original`'s query, or in a header of `original` or `previous`) refuses the hop when it
+    /// shows up elsewhere in that URL. AIOStreams' poster redirect hops to its own URL with the
+    /// Top Posters key as `apiKey`, and that key belongs in the path of the next hop; reading it
+    /// as ours blanked every card on such a server.
     static func decide(_ proposed: URLRequest, from previous: URLRequest?, original: URLRequest? = nil) -> Decision {
         guard let previous, let from = previous.url, let to = proposed.url else {
             return .follow(proposed, leftURLTokenBehind: false)
@@ -292,14 +294,20 @@ nonisolated enum RedirectPolicy {
         }
 
         for name in credentialHeaders { request.setValue(nil, forHTTPHeaderField: name) }
-        let sent = original ?? previous
-        let urlTokens = sent.url.map(queryCredentials) ?? []
-        let tokens = urlTokens.union(headerCredentials(sent)).union(headerCredentials(previous))
-        guard !tokens.isEmpty else { return .follow(request, leftURLTokenBehind: false) }
-        let stripped = removingQueryItems(valued: tokens, from: to)
-        if contains(tokens, in: stripped) { return .refuse(.tokenInURL) }
+        let hopTokens = queryCredentials(from)
+        var ours = headerCredentials(previous)
+        if let original {
+            ours.formUnion(original.url.map(queryCredentials) ?? [])
+            ours.formUnion(headerCredentials(original))
+        } else {
+            ours.formUnion(hopTokens)
+        }
+        let dropped = ours.union(hopTokens)
+        guard !dropped.isEmpty else { return .follow(request, leftURLTokenBehind: false) }
+        let stripped = removingQueryItems(valued: dropped, from: to)
+        if contains(ours, in: stripped) { return .refuse(.tokenInURL) }
         request.url = stripped
-        return .follow(request, leftURLTokenBehind: !queryCredentials(from).isDisjoint(with: urlTokens))
+        return .follow(request, leftURLTokenBehind: !hopTokens.isEmpty)
     }
 
     static func refusal(_ proposed: URLRequest, from previous: URLRequest?, original: URLRequest? = nil) -> Refusal? {
