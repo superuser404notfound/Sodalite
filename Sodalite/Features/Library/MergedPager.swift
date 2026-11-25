@@ -115,8 +115,15 @@ final class MergedPager {
 extension MergedPager {
     /// One pager source per Home source, each running the grid's query with its own user.
     static func sources(from homeSources: [HomeSource], query: ItemQuery) -> [Source] {
-        homeSources.map { source in
-            Source(serverID: source.serverID, isActive: source.isActive) { start, limit in
+        sources(from: homeSources) { _ in query }
+    }
+
+    /// Each server with a query of its own: a filter menu sends a genre or studio by id, and ids
+    /// belong to one server (Sodalite#252). A server whose query is nil cannot match and is left out.
+    static func sources(from homeSources: [HomeSource], query: (HomeSource) -> ItemQuery?) -> [Source] {
+        homeSources.compactMap { source in
+            guard let query = query(source) else { return nil }
+            return Source(serverID: source.serverID, isActive: source.isActive) { start, limit in
                 var page = query
                 page.startIndex = start
                 page.limit = limit

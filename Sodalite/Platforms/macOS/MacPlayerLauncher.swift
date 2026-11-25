@@ -20,6 +20,8 @@ struct PlayerLauncher: View {
     var spoilerPolicy: SpoilerPolicy = .disabled
     var cachedPlaybackInfo: PrefetchedPlaybackInfo?
     var preferredMediaSourceID: String?
+    /// Sodalite#250: the tracks picked on the detail page; nil leaves them to the automatic path.
+    var launchTrackPick: LaunchTrackPick?
     var playQueue: [JellyfinItem] = []
     var localDownload: DownloadedItem?
     var downloadStore: DownloadStore?
@@ -58,6 +60,7 @@ struct PlayerLauncher: View {
             canTranscodeVideo: state.canTranscodeVideo(on: serverSession),
             cachedPlaybackInfo: cachedPlaybackInfo,
             preferredMediaSourceID: preferredMediaSourceID,
+            launchTrackPick: launchTrackPick,
             playQueue: playQueue,
             serverName: serverName,
             // Handed over as a reader, not a value: a server that dies forty minutes in is exactly

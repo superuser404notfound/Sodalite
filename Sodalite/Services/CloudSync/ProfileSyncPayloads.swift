@@ -79,6 +79,8 @@ struct ProfilePlaybackPayload: Codable, Equatable {
     var musicNormalization: String?
     /// Sodalite#244. Optional for the same reason; nil keeps the local value.
     var playPrerolls: Bool?
+    /// Sodalite#251. Optional for the same reason; nil keeps the local value.
+    var showPlayerClock: Bool?
 }
 
 extension ProfilePlaybackPayload {
@@ -120,7 +122,8 @@ extension ProfilePlaybackPayload {
             playThemeSongs: p.playThemeSongs,
             autoSkipCommercials: p.autoSkipCommercials,
             musicNormalization: p.musicNormalization.rawValue,
-            playPrerolls: p.playPrerolls
+            playPrerolls: p.playPrerolls,
+            showPlayerClock: p.showPlayerClock
         )
     }
 
@@ -164,6 +167,7 @@ extension ProfilePlaybackPayload {
         if let autoSkipCommercials { p.autoSkipCommercials = autoSkipCommercials }
         if let mode = musicNormalization.flatMap(MusicNormalization.init(rawValue:)) { p.musicNormalization = mode }
         if let playPrerolls { p.playPrerolls = playPrerolls }
+        if let showPlayerClock { p.showPlayerClock = showPlayerClock }
     }
 }
 

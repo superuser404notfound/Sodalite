@@ -45,13 +45,14 @@ struct CloudSyncSettingsParityTests {
     /// postdates the legacy record and travels in the profile record alone; no build that reads the
     /// legacy record knows it, and its Stats half still goes out as `showStatsForNerds`. `versionOrder`
     /// and `playThemeSongs` (Sodalite#219), `autoSkipCommercials` (Sodalite#224), `musicNormalization`
-    /// (Sodalite#242) and `playPrerolls` (Sodalite#244) postdate it the same way.
+    /// (Sodalite#242), `playPrerolls` (Sodalite#244) and `showPlayerClock` (Sodalite#251) postdate it
+    /// the same way.
     @Test func everyPlaybackSettingIsInThePayload() {
         let defaults = scratchDefaults("playback")
         let device = storedSettingNames(of: DevicePreferences(store: defaults))
         let profile = storedSettingNames(of: PlaybackPreferences(store: defaults))
             .subtracting(["playerControls", "versionOrder", "playThemeSongs", "autoSkipCommercials",
-                          "musicNormalization", "playPrerolls"])
+                          "musicNormalization", "playPrerolls", "showPlayerClock"])
         let payload = payloadFieldNames(.playback)
             .subtracting(["skipIntervalSeconds", "showDiagnosticOverlay", "focusDiagnosticOverlayOnDV"])
         #expect(profile.isDisjoint(with: device))
@@ -72,14 +73,14 @@ struct CloudSyncSettingsParityTests {
 
     /// Named exemptions: the two streaming-quality rungs (Sodalite#87), the TrueHD Atmos heights
     /// switch (AetherEngine#731) and its bed layout, the live delay (AetherEngine 7.45.0) and the six audio shaping values
-    /// (AetherEngine#923, #1044), the upscaling switches (AetherEngine#846, #1039) and the audio delay
+    /// (AetherEngine#923, #1044), the upscaling switches (AetherEngine#846, #1039, the 1080p one) and the audio delay
     /// (AetherEngine#464) and the HDR10+ preference (Sodalite#245) postdate the legacy records.
     /// Those records exist only for builds that already read them, and no such build knows any of them.
     @Test func everyDeviceValueTravelsInOneLegacyRecord() {
         let device = storedSettingNames(of: DevicePreferences(store: scratchDefaults("device")))
             .subtracting(["streamingQualityWifi", "streamingQualityCellular", "trueHDAtmosHeights", "objectAudioLayout", "liveDelay",
                           "speakerLayout", "dialogueBoost", "nightMode", "nightModeStartHour", "nightModeEndHour", "lfeInStereoDownmix",
-                          "enhancedUpscaling", "lineArtUpscaling", "audioDelayMilliseconds",
+                          "enhancedUpscaling", "lineArtUpscaling", "fullHDUpscaling", "audioDelayMilliseconds",
                           "preferHDR10PlusOverForcedDolbyVision"])
         let playback = device.intersection(payloadFieldNames(.playback))
         let appearance = device.intersection(payloadFieldNames(.appearance))

@@ -31,11 +31,18 @@ struct StatsScanDeinterlaceTests {
     }
 
     /// AE#853: inverse telecine hands the display film frames, four of every five source frames.
+    /// AE#1108: the label says where the cadence runs, which can differ from the deinterlacer.
     @Test func inverseTelecineSaysSoAndShowsTheFilmRate() {
         let ivtc = VideoDeinterlace(filter: "bwdif", isHardware: false, fieldRate: .frame, inverseTelecine: true)
-        #expect(StatsOverlayView.deinterlaceLabel(ivtc, sourceFrameRate: 29.97) == "IVTC + bwdif (CPU) → 23.976 fps")
+        #expect(StatsOverlayView.deinterlaceLabel(ivtc, sourceFrameRate: 29.97)
+                == "IVTC (CPU) + bwdif (CPU) → 23.976 fps")
         let gpu = VideoDeinterlace(filter: "bwdif_videotoolbox", isHardware: true, fieldRate: .frame,
-                                   inverseTelecine: true)
-        #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: nil) == "IVTC + bwdif_videotoolbox (GPU)")
+                                   inverseTelecine: true, inverseTelecineIsHardware: true)
+        #expect(StatsOverlayView.deinterlaceLabel(gpu, sourceFrameRate: nil)
+                == "IVTC (GPU) + bwdif_videotoolbox (GPU)")
+        let cpuCadence = VideoDeinterlace(filter: "bwdif_videotoolbox", isHardware: true, fieldRate: .frame,
+                                          inverseTelecine: true)
+        #expect(StatsOverlayView.deinterlaceLabel(cpuCadence, sourceFrameRate: nil)
+                == "IVTC (CPU) + bwdif_videotoolbox (GPU)")
     }
 }

@@ -24,6 +24,9 @@ struct MovieDetailView: View {
     /// Sodalite#81: one launch that streams a downloaded item instead of playing the file.
     @State private var streamFromServer = false
     @State private var versionChoice: VersionPickerChoice?
+    /// Audio and subtitles picked for Play (Sodalite#250), read against the version Play starts.
+    @State private var trackPick = TrackPickSelection()
+    @State private var trackChoice: TrackPickerChoice?
     @State private var ratingPrompt: RatingPrompt?
     /// The film just played to its end unrated; the prompt goes up once the player has closed.
     @State private var ratingPromptAfterPlayer: RatingPrompt?
@@ -130,7 +133,11 @@ struct MovieDetailView: View {
         .hidesToolbarBackground()
         .downloadRungDialog(target: $downloadTarget)
         .onChange(of: showPlayer) { _, isShowing in
-            if !isShowing { streamFromServer = false }
+            guard !isShowing else { return }
+            streamFromServer = false
+            // The pick was for that start. What the viewer chose then lives in track memory, and a
+            // Resume must not override a change made in the player since (Sodalite#250).
+            trackPick = TrackPickSelection()
         }
         .overlay {
             if let userID = sessionUserID {
@@ -148,6 +155,7 @@ struct MovieDetailView: View {
                     spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
                     preferredMediaSourceID: versionSelection.preferredSourceID(for: viewModel?.item ?? item),
+                    launchTrackPick: launchTrackPick,
                     localDownload: streamFromServer ? nil : dependencies.downloadStore.completedItem((viewModel?.item ?? item).id),
                     downloadStore: dependencies.downloadStore
                 )
@@ -200,6 +208,14 @@ struct MovieDetailView: View {
         .task(id: twinLookupKey) {
             guard let item = viewModel?.item, viewModel?.hasFullDetail == true else { return }
             twins = await ServerTwins.find(for: item, pageServerID: session.server?.id, on: twinSources)
+        }
+        .menuPresentation(item: $trackChoice) { choice in
+            TrackPickerSheet(
+                choice: choice,
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                )
+            ) { trackPick = $0 }
         }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
@@ -619,8 +635,15 @@ struct MovieDetailView: View {
         }
     }
 
+    /// The page's track pick for the item Play hands the player, read against the version it starts.
+    private var launchTrackPick: LaunchTrackPick? {
+        let target = viewModel.map { $0.resolvedForPlayback($0.item) } ?? item
+        return trackPick.resolved(for: target, source: versionSelection.resolvedSource(for: target))
+    }
+
     /// The version in force, and its server once other servers' copies are on offer, since the
     /// same "4K" can then mean either one.
+
     private func versionButtonSubtitle(vm: DetailViewModel) -> String? {
         let sources = vm.item.selectableMediaSources
         let source = versionSelection.resolvedSource(for: vm.item)
@@ -771,6 +794,21 @@ struct MovieDetailView: View {
                     }
                 )
                 .focused($focusedAction, equals: .version)
+            }
+
+            // Right after Version, because the tracks it lists are that version's (Sodalite#250).
+            if let source = versionSelection.resolvedSource(for: vm.item),
+               TrackPickSelection.isOffered(for: source) {
+                GlassActionButton(
+                    title: "detail.tracks.button",
+                    systemImage: "captions.bubble",
+                    subtitle: trackPick.pillSubtitle(for: vm.item, source: source),
+                    alwaysShowsLabel: VersionSelection.labelStaysOpen,
+                    action: {
+                        trackChoice = TrackPickerChoice(item: vm.item, source: source, selection: trackPick)
+                    }
+                )
+                .focused($focusedAction, equals: .tracks)
             }
 
             if hasProgress(vm: vm) {

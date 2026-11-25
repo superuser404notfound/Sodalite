@@ -44,6 +44,34 @@ struct DetailActionRowWidthTests {
         })
     }
 
+    /// Sodalite#250: the same row with the Audio & Subtitles pill after Version. Both collapse at
+    /// rest; `tracksFocused` opens the new one the way focus would.
+    private func movieRowWithTracks(tracksLabel: String, tracksFocused: Bool) -> CGFloat {
+        width(Group {
+            GlassActionButton(title: "detail.resume", systemImage: "play.fill",
+                              isProminent: true, subtitle: "1:23:45", action: {})
+            GlassActionButton(title: "detail.version.button", systemImage: "film.stack",
+                              subtitle: "2160p Remux", action: {})
+            GlassActionButton(title: "detail.tracks.button", systemImage: "captions.bubble",
+                              subtitle: tracksLabel, action: {})
+                .environment(\.collapsesActionButtonLabel, !tracksFocused)
+            GlassActionButton(title: "detail.replay", systemImage: "arrow.counterclockwise", action: {})
+            GlassActionButton(title: "detail.favorite", systemImage: "heart", action: {})
+            GlassActionButton(title: "detail.markWatched", systemImage: "checkmark.circle", action: {})
+            GlassActionButton(title: "detail.rating", systemImage: "star.fill", subtitle: "8 / 10", action: {})
+            GlassActionButton(title: "detail.moreDetails", systemImage: "info.circle", action: {})
+            GlassActionButton(title: "detail.delete.button", systemImage: "trash",
+                              isDestructive: true, action: {})
+        })
+    }
+
+    @Test func theRowFitsWithTheTrackPill() {
+        let resting = movieRowWithTracks(tracksLabel: "German · Subs English", tracksFocused: false)
+        #expect(resting <= budget, "resting row is \(resting) pt of \(budget)")
+        let focused = movieRowWithTracks(tracksLabel: "German · Subs English", tracksFocused: true)
+        #expect(focused <= budget, "focused row is \(focused) pt of \(budget)")
+    }
+
     /// At rest the version pill is a glyph like its neighbours, so what the server named the
     /// version costs the row nothing until the pill has focus.
     @Test func atRestTheVersionLabelCostsTheRowNothing() {

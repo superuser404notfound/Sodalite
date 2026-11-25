@@ -131,6 +131,7 @@ struct DevicePreferencesSplitTests {
         device.preferHDR10PlusOverForcedDolbyVision.toggle()
         device.enhancedUpscaling.toggle()
         device.lineArtUpscaling.toggle()
+        device.fullHDUpscaling.toggle()
         device.showTopShelfRow.toggle()
         device.topShelfImage = other(device.topShelfImage)
         device.speakerLayout = other(device.speakerLayout)
@@ -143,7 +144,7 @@ struct DevicePreferencesSplitTests {
 
         let names = Set(Mirror(reflecting: device).children.compactMap(\.label)
             .filter { $0.hasPrefix("_") && $0 != "_$observationRegistrar" }.map { String($0.dropFirst()) })
-        #expect(names.count == 25)
+        #expect(names.count == 26)
 
         defaults.removePersistentDomain(forName: suite)
         device.reloadFromStore()

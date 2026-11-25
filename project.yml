@@ -12,8 +12,8 @@ options:
   xcodeVersion: "27.0"
 settings:
   base:
-    MARKETING_VERSION: "1.1.0"
-    CURRENT_PROJECT_VERSION: "15"
+    MARKETING_VERSION: "1.1.1"
+    CURRENT_PROJECT_VERSION: "16"
     SWIFT_VERSION: "6.0"
     # Xcode's project template sets this, XcodeGen does not, so without it the build-setting
     # default (NO) applies and Xcode keeps offering to "fix" it in the UI, which would only
@@ -52,7 +52,7 @@ settingGroups:
 packages:
   AetherEngine:
     url: https://github.com/superuser404notfound/AetherEngine
-    revision: 8b737c24c7dcafe6cded8ddb7863591bc39fab97
+    revision: 1257b90d759f3bc3f0026f167b19db9eb6d5e201
     # Package traits the engine is built with. XcodeGen does not know the key and ignores it;
     # Scripts/generate-project.sh writes it into the generated project (AetherEngine#731, #744).
     traits: [TrueHDObjectAudio, DTSXObjectAudio, DolbyVisionStillReshaping, DolbyVisionFelCurves]

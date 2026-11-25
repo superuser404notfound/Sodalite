@@ -300,6 +300,10 @@ extension PlayerViewModel {
         trackDropdown = .none
         progress = 0
         playbackTime = 0
+        // The end time would otherwise count the previous item's rest against this one (Sodalite#251).
+        remainingSeconds = 0
+        remainingSampledAt = nil
+        lastDisplayedSecond = -1
         resumePositionTicks = 0
         resumeOverrideSeconds = nil
         outageResumeSeconds = nil

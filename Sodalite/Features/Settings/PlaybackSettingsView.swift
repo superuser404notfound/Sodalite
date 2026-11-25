@@ -243,6 +243,16 @@ struct PlaybackSettingsView: View {
                     )
                 )
 
+                boolRow(
+                    icon: "clock",
+                    title: "settings.playback.showPlayerClock",
+                    subtitle: "settings.playback.showPlayerClock.subtitle",
+                    value: Binding(
+                        get: { prefs.showPlayerClock },
+                        set: { prefs.showPlayerClock = $0 }
+                    )
+                )
+
                 #if os(tvOS)
                 boolRow(
                     icon: "hand.draw",
@@ -530,6 +540,18 @@ struct PlaybackSettingsView: View {
                         set: { prefs.upscalingMode = $0 }
                     ),
                     label: { String(localized: String.LocalizationValue($0.titleKey)) }
+                )
+                .settingsValueScope(.device)
+
+                // The Apple TV scales 1080p to a 4K panel bilinearly; the engine's Lanczos keeps more detail.
+                boolRow(
+                    icon: "arrow.up.left.and.arrow.down.right",
+                    title: "settings.playback.fullHDUpscaling",
+                    subtitle: "settings.playback.fullHDUpscaling.subtitle",
+                    value: Binding(
+                        get: { prefs.fullHDUpscaling },
+                        set: { prefs.fullHDUpscaling = $0 }
+                    )
                 )
                 .settingsValueScope(.device)
 

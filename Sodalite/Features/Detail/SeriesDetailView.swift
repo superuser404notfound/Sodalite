@@ -39,6 +39,13 @@ struct SeriesDetailView: View {
     private var versionSelection: VersionSelection {
         versionPick.ordered(dependencies.playbackPreferences.versionOrder)
     }
+    /// Audio and subtitles picked for the play target (Sodalite#250), keyed to it like the version.
+    @State private var trackPick = TrackPickSelection()
+    @State private var trackChoice: TrackPickerChoice?
+    /// The play target's full detail on the show page, where the target comes from the slim episode
+    /// list and carries no files. Read for versions and tracks only: its user data is as old as the
+    /// fetch, so progress and resume still come from the list entry.
+    @State private var playTargetDetail: JellyfinItem?
     /// Play launched from the glass-panel Play button vs an episode card; player-dismiss restores focus to the right control (else Down jumped past the seasons row to cast).
     @State private var playOriginatedFromPlayButton = false
     @State private var isShuffleLoading = false
@@ -275,7 +282,11 @@ struct SeriesDetailView: View {
         .hidesToolbarBackground()
         .downloadRungDialog(target: $downloadTarget)
         .onChange(of: showPlayer) { _, isShowing in
-            if !isShowing { streamFromServer = false }
+            guard !isShowing else { return }
+            streamFromServer = false
+            // The pick was for that start. What the viewer chose then lives in track memory, and a
+            // Resume must not override a change made in the player since (Sodalite#250).
+            trackPick = TrackPickSelection()
         }
         .overlay {
             if let userID = sessionUserID {
@@ -290,7 +301,10 @@ struct SeriesDetailView: View {
                     trackMemory: dependencies.trackSelectionMemory,
                     spoilerPolicy: dependencies.spoilerPolicy(userID: appState.activeUser?.id),
                     cachedPlaybackInfo: viewModel?.cachedPlaybackInfo,
-                    preferredMediaSourceID: versionSelection.preferredSourceID(for: playItem),
+                    preferredMediaSourceID: versionSelection.preferredSourceID(for: playItemMedia),
+                    launchTrackPick: playOriginatedFromPlayButton ? playItemMedia.flatMap {
+                        trackPick.resolved(for: $0, source: versionSelection.resolvedSource(for: $0))
+                    } : nil,
                     playQueue: playQueue,
                     localDownload: streamFromServer ? nil : playItem.flatMap { dependencies.downloadStore.completedItem($0.id) },
                     downloadStore: dependencies.downloadStore
@@ -304,6 +318,17 @@ struct SeriesDetailView: View {
         .task(id: autoPlayTargetKey) {
             maybeAutoPlay()
             maybePendingPlay()
+        }
+        // Sodalite#250: the show page's Play target is a slim list entry, so Version and Audio &
+        // Subtitles had nothing to offer there until its detail arrives. The view model caches it,
+        // so the episode panel opening on the same episode does not fetch it again.
+        .task(id: viewModel.flatMap { playTarget(vm: $0)?.id }) {
+            guard let vm = viewModel, let target = playTarget(vm: vm), target.awaitsMediaDetail,
+                  playTargetDetail?.id != target.id else { return }
+            let detail = await vm.enrichedEpisode(for: target)
+            if playTarget(vm: vm)?.id == detail.id, !detail.awaitsMediaDetail {
+                playTargetDetail = detail
+            }
         }
         // AE#579, see hdr10PlusProbeKey: asked for the episode on screen, once per version.
         .task(id: hdr10PlusProbeKey) {
@@ -331,6 +356,14 @@ struct SeriesDetailView: View {
                     Task { await vm.setEpisodeRating(episode, rating: value) }
                 }
             }
+        }
+        .menuPresentation(item: $trackChoice) { choice in
+            TrackPickerSheet(
+                choice: choice,
+                tintColor: dependencies.appearancePreferences.effectiveTint(
+                    isSupporter: dependencies.storeKitService.isSupporter
+                )
+            ) { trackPick = $0 }
         }
         .menuPresentation(item: $versionChoice) { choice in
             VersionPickerSheet(
@@ -1077,11 +1110,10 @@ struct SeriesDetailView: View {
 
     @ViewBuilder
     private func secondaryActionButtons(vm: DetailViewModel) -> some View {
-            // First after Play, same as movie detail: the version belongs to the
-            // episode Play would start, so it rides with playTarget and disappears with it. Series
-            // roots take their target from the slim episode list, which carries no MediaSources, so
-            // in practice it appears in the episode panel once enrichment lands (Sodalite#139).
-            if let target = playTarget(vm: vm),
+            // First after Play, same as movie detail: the version belongs to the episode Play would
+            // start, so it rides with playTarget and disappears with it (Sodalite#139). On the show
+            // page it appears once the target's detail lands (Sodalite#250).
+            if let target = playTarget(vm: vm).map(mediaDetail(for:)),
                VersionSelection.isOffered(for: target) {
                 let sources = target.selectableMediaSources
                 GlassActionButton(
@@ -1098,6 +1130,22 @@ struct SeriesDetailView: View {
                     }
                 )
                 .focused($focusedAction, equals: .version)
+            }
+
+            // The tracks of that same version (Sodalite#250).
+            if let target = playTarget(vm: vm).map(mediaDetail(for:)),
+               let source = versionSelection.resolvedSource(for: target),
+               TrackPickSelection.isOffered(for: source) {
+                GlassActionButton(
+                    title: "detail.tracks.button",
+                    systemImage: "captions.bubble",
+                    subtitle: trackPick.pillSubtitle(for: target, source: source),
+                    alwaysShowsLabel: VersionSelection.labelStaysOpen,
+                    action: {
+                        trackChoice = TrackPickerChoice(item: target, source: source, selection: trackPick)
+                    }
+                )
+                .focused($focusedAction, equals: .tracks)
             }
 
             // Shuffle whole series (server SortBy=Random scoped by series id). Hidden in the episode panel.
@@ -1376,6 +1424,20 @@ struct SeriesDetailView: View {
         LogTap.shared.note("[EpisodeRow] advance_refocus from=\(finished.id) to=\(successor.id)")
         pendingEpisodeFocusIsReturn = true
         pendingEpisodeFocus = successor.id
+    }
+
+    /// What the launcher reads versions from. The page's pills belong to its Play and Restart buttons,
+    /// so an episode card keeps the list entry it always played, even the card of the same episode.
+    private var playItemMedia: JellyfinItem? {
+        guard let playItem else { return nil }
+        return playOriginatedFromPlayButton ? mediaDetail(for: playItem) : playItem
+    }
+
+    /// `episode` with its files: the fetched detail of the show page's play target when that is the
+    /// episode asked about, the episode itself otherwise. For versions and tracks only.
+    private func mediaDetail(for episode: JellyfinItem) -> JellyfinItem {
+        guard episode.awaitsMediaDetail, let detail = playTargetDetail, detail.id == episode.id else { return episode }
+        return detail
     }
 
     /// Single source of truth for which episode the play button acts on (playTitle/subtitle/progress + action all read this). Order: tapped selectedEpisode, currentEpisodeID match, getNextUp (lands before the full list), first loaded episode.

@@ -28,6 +28,7 @@ final class DevicePreferences {
         static let preferHDR10PlusOverForcedDolbyVision = "playback.preferHDR10PlusOverForcedDolbyVision"
         static let enhancedUpscaling = "playback.enhancedUpscaling"
         static let lineArtUpscaling = "playback.lineArtUpscaling"
+        static let fullHDUpscaling = "playback.fullHDUpscaling"
         static let showTopShelfRow = "appearance.showTopShelfRow"
         static let topShelfImage = "appearance.topShelfImage"
         static let speakerLayout = "playback.speakerLayout"
@@ -158,6 +159,13 @@ final class DevicePreferences {
         didSet { store.set(lineArtUpscaling, forKey: Keys.lineArtUpscaling) }
     }
 
+    /// Default OFF. 1080p SDR goes to the display through the engine's Lanczos scaler instead of the Apple
+    /// TV's own bilinear one (`LoadOptions.upscalesFullHDVideo`). Its own switch, apart from
+    /// `enhancedUpscaling`, because it puts most of a library on the software player.
+    var fullHDUpscaling: Bool {
+        didSet { store.set(fullHDUpscaling, forKey: Keys.fullHDUpscaling) }
+    }
+
     /// tvOS Top Shelf row. On by default; see TopShelfEnabled for why it can be turned off at all.
     var showTopShelfRow: Bool {
         didSet { store.set(showTopShelfRow, forKey: Keys.showTopShelfRow) }
@@ -242,6 +250,7 @@ final class DevicePreferences {
             ?? Self.preferHDR10PlusOverForcedDolbyVisionDefault
         self.enhancedUpscaling = store.object(forKey: Keys.enhancedUpscaling) as? Bool ?? false
         self.lineArtUpscaling = store.object(forKey: Keys.lineArtUpscaling) as? Bool ?? false
+        self.fullHDUpscaling = store.object(forKey: Keys.fullHDUpscaling) as? Bool ?? false
         self.showTopShelfRow = store.object(forKey: Keys.showTopShelfRow) as? Bool ?? true
         self.topShelfImage = store.string(forKey: Keys.topShelfImage)
             .flatMap(AppearancePreferences.ContinueWatchingImage.init(rawValue:)) ?? .thumb
@@ -279,6 +288,7 @@ final class DevicePreferences {
         update(\.preferHDR10PlusOverForcedDolbyVision)
         update(\.enhancedUpscaling)
         update(\.lineArtUpscaling)
+        update(\.fullHDUpscaling)
         update(\.showTopShelfRow)
         update(\.topShelfImage)
         update(\.speakerLayout)

@@ -30,6 +30,8 @@ struct PlayerLauncher: UIViewControllerRepresentable {
     var cachedPlaybackInfo: PrefetchedPlaybackInfo?
     /// Version picker's choice; nil = default-first source.
     var preferredMediaSourceID: String?
+    /// Sodalite#250: the tracks picked on the detail page; nil leaves them to the automatic path.
+    var launchTrackPick: LaunchTrackPick?
     /// Shuffle / play queue; empty = single-item playback.
     var playQueue: [JellyfinItem] = []
     /// Sodalite#81: the downloaded file to play instead of the server's; nil streams.
@@ -81,6 +83,7 @@ struct PlayerLauncher: UIViewControllerRepresentable {
                     canTranscodeVideo: appState.canTranscodeVideo(on: serverSession),
                     cachedPlaybackInfo: cachedPlaybackInfo,
                     preferredMediaSourceID: preferredMediaSourceID,
+                    launchTrackPick: launchTrackPick,
                     playQueue: playQueue,
                     serverName: serverName,
                     serverReachability: reachability,

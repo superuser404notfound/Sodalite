@@ -455,6 +455,7 @@ extension PlayerViewModel {
             preferHDR10PlusOverForcedDolbyVision: preferences.preferHDR10PlusOverForcedDolbyVision,
             upscalesLowResolutionVideo: effectiveEnhancedUpscaling,
             upscaleScaler: liveUpscaleScaler,
+            upscalesFullHDVideo: effectiveFullHDUpscaling,
             matchContentEnabled: Self.matchContentEnabled,
             panelIsInHDRMode: Self.panelIsInHDRMode,
             audioBridgeMode: preferences.audioBridgeMode,

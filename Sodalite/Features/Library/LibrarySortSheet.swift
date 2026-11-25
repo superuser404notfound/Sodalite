@@ -58,19 +58,27 @@ struct LibrarySortSheet: View {
                     .font(.body)
             }
         }
-        .padding(.horizontal, isCompact ? 18 : 32)
-        .padding(.vertical, isCompact ? 14 : 22)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(isFocused ? tintColor : Color.Theme.surface)
-        )
-        .foregroundStyle(isFocused ? Color.black : Color.primary)
-        .focusableSurface(true)
+        .libraryPanelRow(isFocused: isFocused, tint: tintColor, compact: isCompact)
         .focused($focusedKey, equals: key)
         .stableTap(isFocused: isFocused) {
             onSelect(selection.toggled(to: key))
             dismiss()
         }
+    }
+}
+
+extension View {
+    /// A row of the library's sort and filter panels: tint on focus, the surface fill at rest.
+    func libraryPanelRow(isFocused: Bool, tint: Color, compact: Bool) -> some View {
+        self
+            .padding(.horizontal, compact ? 18 : 32)
+            .padding(.vertical, compact ? 14 : 22)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(isFocused ? tint : Color.Theme.surface)
+            )
+            .foregroundStyle(isFocused ? Color.black : Color.primary)
+            .focusableSurface(true)
     }
 }

@@ -34,6 +34,8 @@ extension View {
     /// For a screen that is sometimes a cover's page and sometimes straight in a tab's stack (a
     /// library grid, Watch Stats): pushes inside a cover, opens a cover of its own otherwise.
     ///
+    /// On the Mac it pushes the way `detailCover` does (`DetailPushPresenter`), see the body.
+    ///
     /// tvOS only differs. A detail pushed into a sidebar tab other than Home keeps the rail's slot
     /// beside it, because the tab's stack starts there and clips (Sodalite#215), so it has to sit
     /// above the shell the way every other detail does. Inside a cover the stack already runs from
@@ -58,6 +60,12 @@ private struct DetailDestinationPresenter<Item: Identifiable & Hashable, Destina
         } else {
             push(content)
         }
+        #elseif os(macOS)
+        // Not `navigationDestination(item:)`: on the Mac that push, from a grid that Home itself
+        // pushed, made SwiftUI re-flush the same navigation request on every layout pass until
+        // AppKit threw "more Update Constraints in Window passes than there are views" and the app
+        // died on the first click on a movie (Sodalite#254). Home's presence-driven push does not.
+        content.modifier(DetailPushPresenter(item: $item, destination: destination))
         #else
         push(content)
         #endif

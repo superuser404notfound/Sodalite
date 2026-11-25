@@ -350,7 +350,7 @@ struct StatsOverlayView: View {
                 row("player.stats.upscaling", value: Self.upscaleLabel(
                     sourceSize: upscale.sourceSize, mlScale: upscale.mlScale, targetSize: upscale.targetSize,
                     degraded: upscale.degraded, disabledReason: upscale.disabledReason,
-                    lineArt: upscale.scaler == .lineArt))
+                    lineArt: upscale.scaler == .lineArt, lanczos: upscale.scaler == .lanczos))
             }
         }
     }
@@ -574,14 +574,15 @@ struct StatsOverlayView: View {
     /// AetherEngine#846: the stage chain, source to delivered size. MetalFX runs unless the stage degraded
     /// or the VideoToolbox pass alone already lands on the target (the ML-only route of a slower GPU).
     /// AetherEngine#1039: the line-art scaler restores, then upscales 2x, then resamples bilinearly where 2x
-    /// misses. A degraded line-art stage has dropped the restore pass.
+    /// misses. A degraded line-art stage has dropped the restore pass. Lanczos is one pass to the target.
     static func upscaleLabel(
         sourceSize: CGSize, mlScale: Float?, targetSize: CGSize, degraded: Bool, disabledReason: String?,
-        lineArt: Bool = false
+        lineArt: Bool = false, lanczos: Bool = false
     ) -> String {
         if let disabledReason { return "off (\(disabledReason))" }
         func size(_ s: CGSize) -> String { "\(Int(s.width.rounded()))×\(Int(s.height.rounded()))" }
         var steps = [size(sourceSize)]
+        if lanczos { return (steps + ["Lanczos", size(targetSize)]).joined(separator: " → ") }
         if lineArt {
             if !degraded { steps.append("Restore") }
             steps.append("Line Art 2x")
@@ -633,10 +634,12 @@ struct StatsOverlayView: View {
     }
 
     /// "bwdif (CPU) → 25 fps": the filter, where it runs, and the rate it hands the display. Inverse
-    /// telecine (AE#853) leads with "IVTC +", and its output is film at 4/5 of the source rate.
+    /// telecine (AE#853) leads with "IVTC (GPU) +", and its output is film at 4/5 of the source rate.
+    /// It runs on the CPU ahead of a GPU deinterlacer when the engine falls back (AE#1108).
     static func deinterlaceLabel(_ deinterlace: VideoDeinterlace, sourceFrameRate: Double?) -> String {
-        let label = (deinterlace.inverseTelecine ? "IVTC + " : "")
-            + "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
+        let ivtc = deinterlace.inverseTelecine
+            ? "IVTC (\(deinterlace.inverseTelecineIsHardware ? "GPU" : "CPU")) + " : ""
+        let label = ivtc + "\(deinterlace.filter) (\(deinterlace.isHardware ? "GPU" : "CPU"))"
         guard let rate = sourceFrameRate, rate > 0 else { return label }
         return label + " → " + FrameRateFormat.fps(rate * deinterlace.outputFrameRateFactor)
     }
