@@ -982,6 +982,11 @@ final class PlayerViewModel {
     /// Lowercased Jellyfin codec of the active subtitle ("ass"/"ssa"/"subrip"/...), nil when off.
     /// The overlay reads it to gate the raw-ASS-event-line stripper.
     var activeSubtitleCodec: String?
+    /// The picked subtitle has been loading for longer than `SubtitleLoadingHint.delay`. Read through
+    /// `overlayCues`, which then shows one line saying so.
+    var subtitleLoadingHintVisible = false
+    @ObservationIgnored var subtitleLoadingHintTask: Task<Void, Never>?
+    @ObservationIgnored var subtitleLoadingHintDelay = SubtitleLoadingHint.delay
     /// Disc parity: forced captions render even while the user's subtitles are OFF. The engine
     /// silently decodes a forced source (`activeSubtitleIndex` stays nil, picker shows "Off"); the
     /// cue mirror filters to `isForced` when the source is a full bitmap track (AE#146). Resolved
@@ -2400,6 +2405,15 @@ final class PlayerViewModel {
                 guard let self else { return }
                 guard self.player.isSecondarySubtitleActive else { return }
                 self.secondarySubtitleCues = cues
+            }
+            .store(in: &cancellables)
+
+        // No removeDuplicates: a track reset clears the hint locally, and the engine's next `true`
+        // for the new track must still get through.
+        player.$isLoadingSubtitles
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] loading in
+                self?.subtitleLoadingDidChange(loading)
             }
             .store(in: &cancellables)
 

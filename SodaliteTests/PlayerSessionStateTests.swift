@@ -51,6 +51,7 @@ struct PlayerSessionStateTests {
         vm.activeSubtitleIndex = 3
         vm.activeSubtitleCodec = "srt"
         vm.subtitleCues = [cue(1)]
+        vm.subtitleLoadingHintVisible = true
         vm.activeSecondarySubtitleIndex = 4
         vm.secondarySubtitleCues = [cue(2)]
         vm.activeAudioIndex = 1
@@ -78,6 +79,7 @@ struct PlayerSessionStateTests {
         #expect(vm.activeSubtitleIndex == nil)
         #expect(vm.activeSubtitleCodec == nil)
         #expect(vm.subtitleCues.isEmpty)
+        #expect(vm.subtitleLoadingHintVisible == false)
         #expect(vm.activeSecondarySubtitleIndex == nil)
         #expect(vm.secondarySubtitleCues.isEmpty)
         #expect(vm.activeAudioIndex == nil)

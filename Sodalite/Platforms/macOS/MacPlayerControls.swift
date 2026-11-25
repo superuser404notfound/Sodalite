@@ -427,11 +427,11 @@ struct MacSubtitleLayer: View {
 
     var body: some View {
         if !viewModel.nativeSubtitleRenderingActive,
-           viewModel.assRenderer != nil || !viewModel.subtitleCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
+           viewModel.assRenderer != nil || !viewModel.overlayCues.isEmpty || !viewModel.shownSecondarySubtitleCues.isEmpty {
             SubtitleOverlayView(
-                cues: viewModel.subtitleCues,
+                cues: viewModel.overlayCues,
                 currentTime: viewModel.subtitleTime,
-                maxCueDuration: viewModel.subtitleMaxCueDuration,
+                maxCueDuration: viewModel.overlayMaxCueDuration,
                 secondaryCues: viewModel.shownSecondarySubtitleCues,
                 secondaryMaxCueDuration: viewModel.secondarySubtitleMaxCueDuration,
                 fontSize: viewModel.preferences.subtitleFontSize,
@@ -444,7 +444,7 @@ struct MacSubtitleLayer: View {
                 controlsVisible: controlsVisible,
                 assRenderer: viewModel.assRenderer,
                 assReloadSignal: viewModel.assReloadSignal,
-                activeSubtitleCodec: viewModel.activeSubtitleCodec,
+                activeSubtitleCodec: viewModel.overlaySubtitleCodec,
                 secondarySubtitleCodec: viewModel.activeSecondarySubtitleCodec,
                 hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                 videoSize: viewModel.videoSize,
