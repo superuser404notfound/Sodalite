@@ -29,9 +29,49 @@ struct EpisodeSuccessionTests {
         #expect(EpisodeSuccession.next(after: list[1], in: list) == nil)
     }
 
-    @Test func anEpisodeWithoutAnIndexHasNoNext() throws {
+    @Test func anEpisodeWithoutIndexOrAirDateHasNoNext() throws {
         let list = [try episode("e1", index: nil), try episode("e2", index: 2)]
         #expect(EpisodeSuccession.next(after: list[0], in: list) == nil)
+    }
+
+    private func dated(_ id: String, aired: String, name: String? = nil) throws -> JellyfinItem {
+        try item(#"{"Id":"\#(id)","Name":"\#(name ?? id)","Type":"Episode","SeriesId":"show","SeasonId":"s2024","PremiereDate":"\#(aired)"}"#)
+    }
+
+    /// Date-based shows carry an air date and no episode number. Auto-advance went back to the list
+    /// on them (Reddit report, a daily show with "Autoplay Next Episode" on).
+    @Test func aDatedEpisodeAdvancesToTheNextAirDate() throws {
+        let list = [
+            try dated("mar3", aired: "2024-03-03T00:00:00.0000000Z"),
+            try dated("mar1", aired: "2024-03-01T00:00:00.0000000Z"),
+            try dated("mar2", aired: "2024-03-02T00:00:00.0000000Z"),
+        ]
+        #expect(EpisodeSuccession.next(after: list[1], in: list)?.id == "mar2")
+        #expect(EpisodeSuccession.next(after: list[2], in: list)?.id == "mar3")
+        #expect(EpisodeSuccession.next(after: list[0], in: list) == nil)
+    }
+
+    @Test func twoEditionsOnOneDayFollowTheirNames() throws {
+        let list = [
+            try dated("b", aired: "2024-03-01T00:00:00Z", name: "B evening"),
+            try dated("a", aired: "2024-03-01T00:00:00Z", name: "A morning"),
+            try dated("c", aired: "2024-03-02T00:00:00Z"),
+        ]
+        #expect(EpisodeSuccession.next(after: list[1], in: list)?.id == "b")
+        #expect(EpisodeSuccession.next(after: list[0], in: list)?.id == "c")
+    }
+
+    @Test func aSeasonOfDatedEpisodesStartsAtTheOldest() throws {
+        let list = [try dated("mar2", aired: "2024-03-02T00:00:00Z"), try dated("mar1", aired: "2024-03-01T00:00:00Z")]
+        #expect(EpisodeSuccession.first(in: list)?.id == "mar1")
+        #expect(list.sorted(by: EpisodeSuccession.inDiscOrder).map(\.id) == ["mar1", "mar2"])
+    }
+
+    /// A numbered episode keeps the index rule even when air dates disagree with it.
+    @Test func numberedEpisodesIgnoreAirDates() throws {
+        let e1 = try item(#"{"Id":"e1","Name":"e1","Type":"Episode","SeriesId":"show","SeasonId":"s1","IndexNumber":1,"PremiereDate":"2024-03-05T00:00:00Z"}"#)
+        let e2 = try item(#"{"Id":"e2","Name":"e2","Type":"Episode","SeriesId":"show","SeasonId":"s1","IndexNumber":2,"PremiereDate":"2024-03-01T00:00:00Z"}"#)
+        #expect(EpisodeSuccession.next(after: e1, in: [e2, e1])?.id == "e2")
     }
 
     /// A finale rolls into the next numbered season, past the specials (season 0).

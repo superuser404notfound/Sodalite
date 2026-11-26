@@ -59,8 +59,9 @@ extension PlayerViewModel {
         let current = item
         let currentID = item.id
 
-        // Strict physical ordering, see EpisodeSuccession.
-        guard let currentSeasonID = item.seasonId, item.indexNumber != nil else { return }
+        // Strict physical ordering, see EpisodeSuccession. An episode without an index still has a
+        // successor there when it carries an air date (date-based shows).
+        guard let currentSeasonID = item.seasonId else { return }
 
         do {
             let episodes = try await playbackService.getEpisodes(
@@ -375,7 +376,7 @@ extension PlayerViewModel {
 
     // MARK: - Season Episode Picker
 
-    /// Loads the current season's episodes (sorted by indexNumber) into `seasonEpisodes` for the transport-bar picker. No-ops for items without a series + season.
+    /// Loads the current season's episodes (in disc order, see `EpisodeSuccession.inDiscOrder`) into `seasonEpisodes` for the transport-bar picker. No-ops for items without a series + season.
     func loadSeasonEpisodes() async {
         guard let seriesID = item.seriesId,
               let seasonID = item.seasonId else {
@@ -386,7 +387,7 @@ extension PlayerViewModel {
             let episodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: seasonID, userID: userID
             )
-            seasonEpisodes = episodes.sorted { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }
+            seasonEpisodes = episodes.sorted(by: EpisodeSuccession.inDiscOrder)
         } catch {
             #if DEBUG
             print("[SeasonPicker] Fetch failed: \(error)")
