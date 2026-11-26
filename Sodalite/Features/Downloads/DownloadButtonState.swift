@@ -60,4 +60,11 @@ struct DownloadRungOption: Identifiable, Equatable {
                 quality: $0, sourceBitrate: sourceBitrate, sourceSize: sourceSize, runtimeTicks: runtimeTicks))
         }
     }
+
+    /// The rung a download takes when Settings names a default quality instead of asking. A default
+    /// that would not transcode this file (the source is already below it, or the user may not
+    /// transcode) means the original, which is then the smaller file anyway.
+    static func preset(_ quality: StreamingQuality, in options: [DownloadRungOption]) -> DownloadRungOption? {
+        options.first { $0.quality == quality } ?? options.first { $0.quality == .original }
+    }
 }

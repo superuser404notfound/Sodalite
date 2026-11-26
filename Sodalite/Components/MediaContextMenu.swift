@@ -44,9 +44,32 @@ extension View {
     /// On tvOS the remote's Play button on the focused card starts the same playback as the menu's
     /// Play (Sodalite#196), the way the TV app, Netflix and Hulu answer it.
     func mediaContextMenu(for item: JellyfinItem, open: @escaping (JellyfinItem) -> Void) -> some View {
-        contextMenu { MediaContextMenu(item: item, open: open) }
+        modifier(MediaContextMenuHost(item: item, open: open))
             .modifier(PlayButtonStartsPlayback(item: item))
     }
+}
+
+/// Holds the card's download request, because a context menu closes before anything it starts could
+/// ask a question. The quality dialog then hangs off the card itself (on iPad, a popover at the card).
+private struct MediaContextMenuHost: ViewModifier {
+    let item: JellyfinItem
+    let open: (JellyfinItem) -> Void
+
+    #if os(tvOS)
+    func body(content: Content) -> some View {
+        content.contextMenu { MediaContextMenu(item: item, open: open, requestDownload: nil) }
+    }
+    #else
+    @State private var downloadTarget: DownloadTarget?
+
+    func body(content: Content) -> some View {
+        content
+            .contextMenu {
+                MediaContextMenu(item: item, open: open) { downloadTarget = .item(item, sourceID: nil) }
+            }
+            .downloadRungDialog(target: $downloadTarget)
+    }
+    #endif
 }
 
 extension PlayMediaItemAction {
@@ -84,6 +107,8 @@ private struct PlayButtonStartsPlayback: ViewModifier {
 private struct MediaContextMenu: View {
     let item: JellyfinItem
     let open: (JellyfinItem) -> Void
+    /// Nil on tvOS, where nothing downloads.
+    let requestDownload: (() -> Void)?
 
     @Environment(\.dependencies) private var dependencies
     @Environment(\.playMediaItem) private var playMediaItem
@@ -118,6 +143,13 @@ private struct MediaContextMenu: View {
                     playMediaItem(item, fromBeginning: true)
                 }
             }
+        }
+
+        // Movies and episodes only: a series has no single file, and its seasons download from the
+        // show page. Hidden once the title is queued or on the device; the detail page manages those.
+        if let requestDownload, offersWatched, dependencies.downloadManager != nil,
+           dependencies.downloadStore.item(item.id) == nil {
+            Button("downloads.action.download", systemImage: "arrow.down.circle") { requestDownload() }
         }
 
         Divider()

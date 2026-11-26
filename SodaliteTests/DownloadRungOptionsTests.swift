@@ -24,6 +24,30 @@ struct DownloadRungOptionsTests {
         #expect(options.first?.estimatedBytes == 5_570_000_000)
     }
 
+    /// A default quality in Settings skips the dialog. It takes that rung where the rung would shrink
+    /// the file, and the original where it would not, which is then the smaller file anyway.
+    @Test func aDefaultQualityTakesItsRungOrTheOriginal() {
+        let big = DownloadRungOption.options(sourceBitrate: 15_000_000, sourceSize: 10, runtimeTicks: nil)
+        #expect(DownloadRungOption.preset(.mbps4, in: big)?.quality == .mbps4)
+        #expect(DownloadRungOption.preset(.original, in: big)?.quality == .original)
+        let small = DownloadRungOption.options(sourceBitrate: 3_000_000, sourceSize: 10, runtimeTicks: nil)
+        #expect(DownloadRungOption.preset(.mbps4, in: small)?.quality == .original)
+        let noTranscode = DownloadRungOption.options(sourceBitrate: 15_000_000, sourceSize: 10, runtimeTicks: nil,
+                                                     canTranscodeVideo: false)
+        #expect(DownloadRungOption.preset(.mbps2, in: noTranscode)?.quality == .original)
+    }
+
+    @Test func theDefaultQualitySurvivesARelaunchAndStartsAsAsk() throws {
+        let suite = "DownloadRungOptionsTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(DownloadPreferences(store: defaults).defaultQuality == nil)
+        DownloadPreferences(store: defaults).defaultQuality = .mbps10
+        #expect(DownloadPreferences(store: defaults).defaultQuality == .mbps10)
+        DownloadPreferences(store: defaults).defaultQuality = nil
+        #expect(DownloadPreferences(store: defaults).defaultQuality == nil)
+    }
+
     private func source(_ id: String, name: String, height: Int, bitrate: Int, size: Int64) throws -> MediaSource {
         try JSONDecoder().decode(MediaSource.self, from: Data(#"""
             {"Id":"\#(id)","Name":"\#(name)","Size":\#(size),"Bitrate":\#(bitrate),

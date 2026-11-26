@@ -64,7 +64,8 @@ extension DownloadFailure {
 }
 
 #if !os(tvOS)
-/// Asks which rung to download at, every time, best first (Sodalite#81).
+/// Asks which rung to download at, best first (Sodalite#81). With a default quality in Settings it
+/// does not ask and starts the download at that rung right away.
 private struct DownloadRungDialog: ViewModifier {
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
@@ -76,7 +77,7 @@ private struct DownloadRungDialog: ViewModifier {
         content
             .confirmationDialog(
                 "downloads.dialog.title",
-                isPresented: Binding(get: { target != nil }, set: { if !$0 { target = nil } }),
+                isPresented: Binding(get: { target != nil && defaultQuality == nil }, set: { if !$0 { target = nil } }),
                 titleVisibility: .visible,
                 presenting: target
             ) { target in
@@ -88,9 +89,19 @@ private struct DownloadRungDialog: ViewModifier {
                 let message = message(for: target)
                 if !message.isEmpty { Text(message) }
             }
+            .onChange(of: target?.id) { _, _ in startWithDefaultQuality() }
             .alert(errorMessage ?? "", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("common.ok") {}
             }
+    }
+
+    private var defaultQuality: StreamingQuality? { dependencies.downloadPreferences.defaultQuality }
+
+    private func startWithDefaultQuality() {
+        guard let target, let defaultQuality else { return }
+        self.target = nil
+        guard let option = DownloadRungOption.preset(defaultQuality, in: options(for: target)) else { return }
+        start(target, option: option)
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {
