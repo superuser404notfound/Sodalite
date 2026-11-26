@@ -3303,7 +3303,9 @@ final class PlayerViewModel {
     /// question nobody asked.
     private func applyPreferredSubtitle(forAudioLanguage audioLanguage: String?) {
         if let explicit = preferences.preferredSubtitleLanguage {
-            if let match = bestSubtitleMatch(forLanguage: explicit) {
+            let match = bestSubtitleMatch(forLanguage: explicit)
+            LogTap.shared.note(SubtitleAutoPickLog.ruleLine(.preferredLanguage(explicit, picked: match)))
+            if let match {
                 selectSubtitleTrack(id: match.index)
             } else if isLiveSession,
                       let unlabelled = SkipBackSubtitleWindow.bestUnlabelledSubtitle(streams: subtitleStreams) {
@@ -3313,11 +3315,24 @@ final class PlayerViewModel {
             }
             return
         }
-        guard preferences.autoSubtitleForForeignAudio,
-              let preferredAudio = effectivePreferredAudioLanguage(),
-              Self.audioCountsAsForeign(audioLanguage: audioLanguage, preferredAudio: preferredAudio)
-        else { return }
-        if let match = bestSubtitleMatch(forLanguage: preferredAudio) {
+        guard preferences.autoSubtitleForForeignAudio else {
+            LogTap.shared.note(SubtitleAutoPickLog.ruleLine(.foreignRuleOff))
+            return
+        }
+        guard let preferredAudio = effectivePreferredAudioLanguage() else {
+            LogTap.shared.note(SubtitleAutoPickLog.ruleLine(.noPreferredAudio))
+            return
+        }
+        guard let audioLanguage,
+              Self.audioCountsAsForeign(audioLanguage: audioLanguage, preferredAudio: preferredAudio) else {
+            let heard = Self.isLanguageUnknown(audioLanguage) ? nil : audioLanguage
+            LogTap.shared.note(SubtitleAutoPickLog.ruleLine(.audioNotForeign(audio: heard, preferred: preferredAudio)))
+            return
+        }
+        let match = bestSubtitleMatch(forLanguage: preferredAudio)
+        LogTap.shared.note(SubtitleAutoPickLog.ruleLine(
+            .foreignAudio(audio: audioLanguage, preferred: preferredAudio, picked: match)))
+        if let match {
             selectSubtitleTrack(id: match.index)
         }
     }
@@ -3402,10 +3417,16 @@ final class PlayerViewModel {
             player.selectAudioTrack(index: audioTrackID)
         }
 
+        let rememberedSource: SubtitleAutoPickLog.RememberedSource =
+            pick?.subtitle != nil ? .detailPage : .trackMemory
         switch plan.subtitle {
         case .off:
+            LogTap.shared.note(SubtitleAutoPickLog.rememberedLine(
+                streamIndex: nil, streams: subtitleStreams, source: rememberedSource))
             selectSubtitleTrack(id: nil)
         case .select(let streamIndex):
+            LogTap.shared.note(SubtitleAutoPickLog.rememberedLine(
+                streamIndex: streamIndex, streams: subtitleStreams, source: rememberedSource))
             selectSubtitleTrack(id: streamIndex)
         case .fallThrough:
             applyPreferredSubtitle(forAudioLanguage: audioLanguage)
@@ -3479,9 +3500,8 @@ final class PlayerViewModel {
         }
         forcedSubtitleFallback = mode
         if mode != previous {
-            let line = "[PlayerVM] forced-subtitle fallback: \(mode) (audio=\(audioLanguage ?? "nil"))"
-            print(line)
-            LogTap.shared.note(line)
+            LogTap.shared.note(SubtitleAutoPickLog.forcedFallbackLine(
+                mode, streams: subtitleStreams, audioLanguage: audioLanguage))
         }
     }
 
