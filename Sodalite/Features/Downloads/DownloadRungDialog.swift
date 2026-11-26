@@ -64,7 +64,9 @@ extension DownloadFailure {
 }
 
 #if !os(tvOS)
-/// Asks which rung to download at, every time, best first (Sodalite#81).
+/// Asks which rung to download at, best first (Sodalite#81). With a default quality in Settings it
+/// does not ask and starts at that rung right away, a whole season included: the setting exists for
+/// queueing many titles quickly. The per-episode space check still refuses what does not fit.
 private struct DownloadRungDialog: ViewModifier {
     @Binding var target: DownloadTarget?
     @Environment(\.dependencies) private var dependencies
@@ -76,7 +78,7 @@ private struct DownloadRungDialog: ViewModifier {
         content
             .confirmationDialog(
                 "downloads.dialog.title",
-                isPresented: Binding(get: { target != nil }, set: { if !$0 { target = nil } }),
+                isPresented: Binding(get: { target.map { !startsWithoutAsking($0) } ?? false }, set: { if !$0 { target = nil } }),
                 titleVisibility: .visible,
                 presenting: target
             ) { target in
@@ -88,9 +90,25 @@ private struct DownloadRungDialog: ViewModifier {
                 let message = message(for: target)
                 if !message.isEmpty { Text(message) }
             }
+            // `initial`: a target already set when the modifier mounts would otherwise sit unseen.
+            .onChange(of: target?.id, initial: true) { _, _ in startWithDefaultQuality() }
             .alert(errorMessage ?? "", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("common.ok") {}
             }
+    }
+
+    /// Reads the setting only once a target exists, so an idle card (this modifier sits on every
+    /// media card) does not observe it.
+    private func startsWithoutAsking(_ target: DownloadTarget) -> Bool {
+        dependencies.downloadPreferences.defaultQuality != nil
+    }
+
+    private func startWithDefaultQuality() {
+        guard let target, startsWithoutAsking(target),
+              let defaultQuality = dependencies.downloadPreferences.defaultQuality else { return }
+        self.target = nil
+        guard let option = DownloadRungOption.preset(defaultQuality, in: options(for: target)) else { return }
+        start(target, option: option)
     }
 
     private func options(for target: DownloadTarget) -> [DownloadRungOption] {

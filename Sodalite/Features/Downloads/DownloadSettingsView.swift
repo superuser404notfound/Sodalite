@@ -1,7 +1,7 @@
 #if !os(tvOS)
 import SwiftUI
 
-/// Settings > Downloads (Sodalite#81): Wi-Fi only, storage used, delete this profile's downloads.
+/// Settings > Downloads (Sodalite#81): Wi-Fi only, default quality, storage used, delete this profile's downloads.
 struct DownloadSettingsView: View {
     @Environment(\.dependencies) private var dependencies
     @State private var confirmsDeleteAll = false
@@ -33,6 +33,19 @@ struct DownloadSettingsView: View {
                     label: { on in
                         on ? String(localized: "settings.playback.on", defaultValue: "On")
                            : String(localized: "settings.playback.off", defaultValue: "Off")
+                    }
+                )
+                .settingsValueScope(.device)
+
+                ValuePickerRow(
+                    icon: "arrow.down.circle",
+                    title: "downloads.dialog.title",
+                    subtitle: "settings.downloads.quality.subtitle",
+                    options: [nil] + StreamingQuality.allCases.map(Optional.some),
+                    selection: Binding(get: { prefs.defaultQuality }, set: { prefs.defaultQuality = $0 }),
+                    label: { quality in
+                        quality.map { String(localized: String.LocalizationValue($0.titleKey)) }
+                            ?? String(localized: "settings.downloads.quality.ask", defaultValue: "Ask Every Time")
                     }
                 )
                 .settingsValueScope(.device)

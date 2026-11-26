@@ -75657,6 +75657,650 @@
         }
       }
     },
+    "changelog.1_2_0.datedEpisodes.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pořady, které řadí epizody podle data vysílání místo čísla, třeba talk show a zprávy, teď pokračují další epizodou a nevracejí se do seznamu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programmer, der ordner afsnit efter sendedato i stedet for nummer, som talkshows og nyheder, går nu videre til næste afsnit i stedet for tilbage til listen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sendungen, die Folgen nach Ausstrahlungsdatum statt nach Nummer ordnen, etwa Talkshows und Nachrichten, spielen jetzt die nächste Folge, statt zur Liste zurückzukehren."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εκπομπές που ταξινομούν τα επεισόδια κατά ημερομηνία προβολής αντί για αριθμό, όπως talk show και ειδήσεις, συνεχίζουν πλέον στο επόμενο επεισόδιο αντί να επιστρέφουν στη λίστα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows that sort episodes by air date instead of a number, like talk shows and news, now go on to the next episode instead of back to the list."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los programas que ordenan los episodios por fecha de emisión en lugar de por número, como talk shows y noticias, ahora pasan al siguiente episodio en vez de volver a la lista."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohjelmat, jotka järjestävät jaksot esityspäivän mukaan numeron sijaan, kuten keskusteluohjelmat ja uutiset, jatkavat nyt seuraavaan jaksoon eivätkä palaa listaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les émissions qui classent leurs épisodes par date de diffusion plutôt que par numéro, comme les talk-shows et les infos, passent désormais à l'épisode suivant au lieu de revenir à la liste."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emisije koje epizode slažu po datumu emitiranja umjesto po broju, poput talk showova i vijesti, sada prelaze na sljedeću epizodu umjesto povratka na popis."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azok a műsorok, amelyek az epizódokat sorszám helyett adási dátum szerint rendezik, például talkshow-k és hírek, most a következő epizóddal folytatódnak, nem térnek vissza a listához."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I programmi che ordinano gli episodi per data di messa in onda invece che per numero, come talk show e notiziari, ora passano all'episodio successivo invece di tornare all'elenco."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トーク番組やニュースのように、話数ではなく放送日で並ぶ番組でも、一覧に戻らず次のエピソードを再生するようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "토크쇼나 뉴스처럼 회차 번호 대신 방영일로 정렬되는 프로그램도 이제 목록으로 돌아가지 않고 다음 에피소드를 재생합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programmer som sorterer episoder etter sendedato i stedet for nummer, som talkshow og nyheter, går nå videre til neste episode i stedet for tilbake til listen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows die afleveringen op uitzenddatum ordenen in plaats van op nummer, zoals talkshows en nieuws, gaan nu door naar de volgende aflevering in plaats van terug naar de lijst."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programy, które układają odcinki według daty emisji zamiast numeru, jak talk show i wiadomości, przechodzą teraz do następnego odcinka zamiast wracać do listy."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programas que ordenam episódios pela data de exibição em vez de número, como talk shows e telejornais, agora seguem para o próximo episódio em vez de voltar à lista."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programas que ordenam episódios pela data de emissão em vez de número, como talk shows e noticiários, passam agora ao episódio seguinte em vez de voltar à lista."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emisiunile care își ordonează episoadele după data difuzării în loc de număr, precum talk-show-urile și știrile, trec acum la episodul următor în loc să revină la listă."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шоу, где серии упорядочены по дате выхода, а не по номеру, например ток-шоу и новости, теперь переходят к следующей серии, а не возвращаются к списку."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relácie, ktoré radia epizódy podľa dátumu vysielania namiesto čísla, napríklad talkshow a správy, teraz pokračujú ďalšou epizódou a nevracajú sa do zoznamu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Program som sorterar avsnitt efter sändningsdatum i stället för nummer, som talkshower och nyheter, går nu vidare till nästa avsnitt i stället för tillbaka till listan."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölümleri numara yerine yayın tarihine göre sıralayan programlar, örneğin talk show'lar ve haberler, artık listeye dönmek yerine sonraki bölüme geçiyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шоу, де серії впорядковано за датою виходу, а не за номером, як-от ток-шоу та новини, тепер переходять до наступної серії, а не повертаються до списку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "脱口秀、新闻这类按播出日期而非集数排序的节目，现在会接着播放下一集，不再返回列表。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "脫口秀、新聞這類按播出日期而非集數排序的節目，現在會接著播放下一集，不再返回列表。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.datedEpisodes.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Další epizoda u denních pořadů"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Næste afsnit i daglige programmer"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächste Folge bei täglichen Sendungen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενο επεισόδιο σε καθημερινές εκπομπές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next episode on daily shows"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente episodio en programas diarios"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuraava jakso päivittäisissä ohjelmissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisode suivant pour les émissions quotidiennes"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sljedeća epizoda kod dnevnih emisija"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Következő epizód a napi műsoroknál"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodio successivo nei programmi quotidiani"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デイリー番組でも次のエピソードへ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일일 프로그램도 다음 에피소드로"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neste episode i daglige programmer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volgende aflevering bij dagelijkse shows"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Następny odcinek w programach codziennych"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo episódio em programas diários"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo episódio em programas diários"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episodul următor la emisiunile zilnice"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующая серия в ежедневных шоу"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ďalšia epizóda pri denných reláciách"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nästa avsnitt i dagliga program"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük programlarda sonraki bölüm"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наступна серія в щоденних шоу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日播节目也能自动播下一集"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日播節目也能自動播下一集"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.downloads.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržte film nebo epizodu v libovolném seznamu a zvolte Stáhnout. Když v nastavení stahování zvolíte kvalitu, každé stahování začne hned, bez ptaní. Na Macu klikněte pravým tlačítkem."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold en film eller et afsnit nede i en liste, og vælg Download. Vælg en kvalitet i indstillingerne for downloads, så starter hver download med det samme uden at spørge. På Mac højreklikker du."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte einen Film oder eine Folge in einer Liste gedrückt und wähle Laden. Stellst du in den Download-Einstellungen eine Qualität ein, startet jeder Download sofort, ohne jedes Mal zu fragen. Auf dem Mac per Rechtsklick."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κρατήστε πατημένη μια ταινία ή ένα επεισόδιο σε οποιαδήποτε λίστα και επιλέξτε Λήψη. Ορίστε ποιότητα στις ρυθμίσεις λήψεων και κάθε λήψη ξεκινά αμέσως, χωρίς ερώτηση. Στο Mac, δεξί κλικ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold a movie or episode in any list and pick Download. Choose a download quality in the download settings and every download starts right away, without asking each time. On the Mac, right-click."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsada una película o un episodio en cualquier lista y elige Descargar. Si fijas una calidad en los ajustes de descargas, cada descarga empieza al momento, sin preguntar. En el Mac, clic derecho."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paina elokuvaa tai jaksoa pitkään missä tahansa listassa ja valitse Lataa. Kun valitset laadun latausasetuksissa, jokainen lataus alkaa heti kysymättä. Macissa napsauta hiiren oikealla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenez un film ou un épisode dans n'importe quelle liste et choisissez Télécharger. Fixez une qualité dans les réglages des téléchargements et chaque téléchargement démarre aussitôt, sans question. Sur Mac, clic droit."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Držite film ili epizodu u bilo kojem popisu i odaberite Preuzmi. Odaberete li kvalitetu u postavkama preuzimanja, svako preuzimanje kreće odmah, bez pitanja. Na Macu desni klik."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarts nyomva egy filmet vagy epizódot bármelyik listában, és válaszd a Letöltés lehetőséget. Ha a letöltési beállításokban megadsz egy minőséget, minden letöltés azonnal indul, kérdés nélkül. Macen jobb kattintás."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni premuto un film o un episodio in qualsiasi elenco e scegli Scarica. Imposta una qualità nelle impostazioni dei download e ogni download parte subito, senza chiedere. Su Mac, clic destro."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧で映画やエピソードを長押しして「ダウンロード」を選べます。ダウンロード設定で画質を決めておくと、毎回確認せずにすぐ始まります。Mac では右クリックです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목록에서 영화나 에피소드를 길게 누르고 다운로드를 선택하세요. 다운로드 설정에서 화질을 정해 두면 매번 묻지 않고 바로 시작합니다. Mac에서는 오른쪽 클릭입니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold inne en film eller en episode i en liste og velg Last ned. Velg en kvalitet i nedlastingsinnstillingene, så starter hver nedlasting med en gang uten å spørre. På Mac høyreklikker du."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd een film of aflevering in een lijst ingedrukt en kies Downloaden. Kies een kwaliteit in de downloadinstellingen en elke download start meteen, zonder te vragen. Op de Mac klik je met de rechtermuisknop."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przytrzymaj film lub odcinek na dowolnej liście i wybierz Pobierz. Ustaw jakość w ustawieniach pobierania, a każde pobieranie ruszy od razu, bez pytania. Na Macu kliknij prawym przyciskiem."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque e segure um filme ou episódio em qualquer lista e escolha Baixar. Defina uma qualidade nos ajustes de downloads e cada download começa na hora, sem perguntar. No Mac, clique com o botão direito."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha premido um filme ou episódio em qualquer lista e escolha Transferir. Defina uma qualidade nas definições de transferências e cada transferência começa logo, sem perguntar. No Mac, clique com o botão direito."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ține apăsat pe un film sau un episod din orice listă și alege Descarcă. Setează o calitate în setările descărcărilor și fiecare descărcare pornește imediat, fără întrebări. Pe Mac, clic dreapta."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удерживайте фильм или серию в любом списке и выберите «Скачать». Задайте качество в настройках загрузок, и каждая загрузка начнётся сразу, без вопроса. На Mac используйте правый клик."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržte film alebo epizódu v ľubovoľnom zozname a zvoľte Stiahnuť. Keď v nastaveniach sťahovania zvolíte kvalitu, každé sťahovanie sa začne hneď, bez pýtania. Na Macu kliknite pravým tlačidlom."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Håll ned en film eller ett avsnitt i en lista och välj Ladda ned. Välj en kvalitet i inställningarna för nedladdningar så startar varje nedladdning direkt utan att fråga. På Mac högerklickar du."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herhangi bir listede bir filme veya bölüme uzun basın ve İndir'i seçin. İndirme ayarlarında bir kalite belirlerseniz her indirme sormadan hemen başlar. Mac'te sağ tıklayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Утримуйте фільм або серію в будь-якому списку й виберіть «Завантажити». Задайте якість у налаштуваннях завантажень, і кожне завантаження почнеться одразу, без запитання. На Mac клацніть правою кнопкою."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在任意列表中长按电影或剧集，选择“下载”。在下载设置中选好画质后，每次下载都会立即开始，不再询问。Mac 上请右键点按。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在任何列表中長按電影或單集，選擇「下載」。在下載設定中選好畫質後，每次下載都會立即開始，不再詢問。Mac 上請按右鍵。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.downloads.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stahování dlouhým stisknutím"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download med et langt tryk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laden per langem Drücken"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λήψη με παρατεταμένο πάτημα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download with a long press"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga con una pulsación larga"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lataa pitkällä painalluksella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Télécharger par appui long"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preuzimanje dugim pritiskom"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letöltés hosszú nyomással"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarica con una pressione prolungata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押しでダウンロード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "길게 눌러 다운로드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last ned med et langt trykk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloaden met lang drukken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pobieranie długim naciśnięciem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixe com um toque longo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transferir com um toque longo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descărcare cu apăsare lungă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачивание долгим нажатием"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sťahovanie dlhým stlačením"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ladda ned med en lång tryckning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzun basarak indir"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження довгим натисканням"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按即可下载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按即可下載"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.headphones.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -196080,6 +196724,330 @@
         }
       }
     },
+    "settings.downloads.quality.ask" : {
+      "comment" : "Download quality setting: the option that keeps asking on every download",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaždé se zeptat"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spørg hver gang"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedes Mal fragen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ερώτηση κάθε φορά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask Every Time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preguntar siempre"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kysy joka kerta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toujours demander"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pitaj svaki put"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mindig kérdezzen"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiedi ogni volta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎回確認"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "매번 묻기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spør hver gang"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elke keer vragen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pytaj za każdym razem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perguntar sempre"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perguntar sempre"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Întreabă de fiecare dată"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спрашивать каждый раз"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zakaždým sa opýtať"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fråga varje gång"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her seferinde sor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Питати щоразу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每次询问"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每次詢問"
+          }
+        }
+      }
+    },
+    "settings.downloads.quality.subtitle" : {
+      "comment" : "Explains the default download quality setting",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stahování začne v této kvalitě bez dotazu. Soubor, který už je pod ní, se stáhne beze změny."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads starter i denne kvalitet uden at spørge. En fil, der allerede ligger under, hentes som den er."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads starten ohne Nachfrage in dieser Qualität. Eine Datei, die schon darunter liegt, wird unverändert geladen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι λήψεις ξεκινούν σε αυτή την ποιότητα χωρίς ερώτηση. Ένα αρχείο που είναι ήδη χαμηλότερο λαμβάνεται ως έχει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads start at this quality without asking. A file already below it downloads as is."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las descargas empiezan en esta calidad sin preguntar. Un archivo que ya está por debajo se descarga tal cual."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lataukset alkavat tällä laadulla kysymättä. Jo valmiiksi pienempi tiedosto ladataan sellaisenaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les téléchargements démarrent dans cette qualité sans demander. Un fichier déjà en dessous est téléchargé tel quel."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preuzimanja počinju u ovoj kvaliteti bez pitanja. Datoteka koja je već ispod nje preuzima se nepromijenjena."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A letöltések kérdés nélkül ezen a minőségen indulnak. Az ennél már kisebb fájl változatlanul töltődik le."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I download partono in questa qualità senza chiedere. Un file già al di sotto viene scaricato così com'è."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "確認せずにこの画質でダウンロードを開始します。元からこれより低いファイルはそのままダウンロードします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "묻지 않고 이 화질로 다운로드를 시작합니다. 이미 이보다 낮은 파일은 그대로 다운로드합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nedlastinger starter i denne kvaliteten uten å spørre. En fil som allerede ligger under, lastes ned som den er."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads starten zonder te vragen in deze kwaliteit. Een bestand dat er al onder zit, wordt ongewijzigd gedownload."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pobieranie startuje w tej jakości bez pytania. Plik, który już jest poniżej, pobiera się bez zmian."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os downloads começam nesta qualidade sem perguntar. Um arquivo que já está abaixo é baixado como está."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As transferências começam nesta qualidade sem perguntar. Um ficheiro que já está abaixo é transferido tal como está."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descărcările pornesc la această calitate fără să întrebe. Un fișier aflat deja sub ea se descarcă neschimbat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загрузки начинаются в этом качестве без вопроса. Файл, который уже ниже, загружается как есть."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sťahovanie sa začne v tejto kvalite bez opýtania. Súbor, ktorý je už pod ňou, sa stiahne bez zmeny."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nedladdningar startar i den här kvaliteten utan att fråga. En fil som redan ligger under laddas ned som den är."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İndirmeler sormadan bu kalitede başlar. Zaten bunun altında olan bir dosya olduğu gibi indirilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантаження починаються в цій якості без запитання. Файл, який уже нижчий, завантажується як є."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载将直接以此画质开始，不再询问。本身低于此画质的文件按原样下载。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下載將直接以此畫質開始，不再詢問。本身低於此畫質的檔案按原樣下載。"
+          }
+        }
+      }
+    },
     "settings.downloads.storage" : {
       "comment" : "Settings row: storage used by downloads",
       "extractionState" : "manual",
@@ -222708,157 +223676,157 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapíná se automaticky, pokud je dostupné."
+            "value" : "Titulky v tomto jazyce se zapnou vždy, když je titul má. Při volbě Automaticky rozhoduje pravidlo níže."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktiveres automatisk hvis tilgængeligt."
+            "value" : "Viser altid undertekster på dette sprog, når en titel har dem. Ved Automatisk bestemmer reglen nedenfor."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wird automatisch aktiviert, wenn verfügbar."
+            "value" : "Zeigt Untertitel in dieser Sprache immer an, wenn ein Titel sie hat. Bei Automatisch entscheidet die Regel darunter."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ενεργοποιείται αυτόματα αν είναι διαθέσιμη."
+            "value" : "Εμφανίζει πάντα υπότιτλους σε αυτή τη γλώσσα όταν ο τίτλος τους έχει. Στο Αυτόματο αποφασίζει ο παρακάτω κανόνας."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turns on automatically if available."
+            "value" : "Always shows subtitles in this language when a title has them. On Auto, the rule below decides."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se activa automáticamente si está disponible."
+            "value" : "Muestra siempre subtítulos en este idioma cuando el título los tiene. En Automático decide la regla de abajo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Otetaan käyttöön automaattisesti, jos saatavilla."
+            "value" : "Näyttää aina tämän kielen tekstitykset, kun nimikkeessä on niitä. Automaattinen-tilassa päättää alla oleva sääntö."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activés automatiquement si disponibles."
+            "value" : "Affiche toujours les sous-titres dans cette langue quand le titre en a. En Automatique, la règle ci-dessous décide."
           }
         },
         "hr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uključuje se automatski ako je dostupno."
+            "value" : "Uvijek prikazuje titlove na ovom jeziku kada ih naslov ima. Na Automatski odlučuje pravilo ispod."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatikusan bekapcsol, ha elérhető."
+            "value" : "Mindig megjeleníti az ilyen nyelvű feliratot, ha a címhez van. Automatikus beállításnál az alábbi szabály dönt."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si attivano automaticamente se disponibili."
+            "value" : "Mostra sempre i sottotitoli in questa lingua quando il titolo li ha. Su Automatico decide la regola qui sotto."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "利用可能な場合、自動的にオンになります。"
+            "value" : "作品にこの言語の字幕があれば、常に表示します。自動の場合は下のルールに従います。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "사용 가능한 경우 자동으로 켜집니다."
+            "value" : "작품에 이 언어의 자막이 있으면 항상 표시합니다. 자동이면 아래 규칙을 따릅니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Slås på automatisk hvis tilgjengelig."
+            "value" : "Viser alltid undertekster på dette språket når tittelen har dem. På Automatisk avgjør regelen nedenfor."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wordt automatisch ingeschakeld indien beschikbaar."
+            "value" : "Toont altijd ondertitels in deze taal als een titel ze heeft. Bij Automatisch beslist de regel hieronder."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Włączane automatycznie jeśli dostępne."
+            "value" : "Zawsze pokazuje napisy w tym języku, gdy tytuł je ma. Przy ustawieniu Automatycznie decyduje reguła poniżej."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ativado automaticamente se disponível."
+            "value" : "Sempre mostra legendas neste idioma quando o título as tem. Em Automático, a regra abaixo decide."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ativa automaticamente se disponível."
+            "value" : "Mostra sempre legendas neste idioma quando o título as tem. Em Automático, decide a regra abaixo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se activează automat dacă este disponibilă."
+            "value" : "Afișează mereu subtitrări în această limbă când titlul le are. Pe Automat decide regula de mai jos."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Включаются автоматически, если доступны."
+            "value" : "Всегда показывает субтитры на этом языке, если они есть. В режиме «Автоматически» решает правило ниже."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zapne sa automaticky, ak je dostupné."
+            "value" : "Titulky v tomto jazyku sa zapnú vždy, keď ich titul má. Pri voľbe Automaticky rozhoduje pravidlo nižšie."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktiveras automatiskt om tillgängliga."
+            "value" : "Visar alltid undertexter på det här språket när titeln har dem. Med Automatiskt avgör regeln nedan."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mevcutsa otomatik olarak açılır."
+            "value" : "Bu dilde altyazı varsa her zaman gösterir. Otomatik seçiliyken aşağıdaki kural karar verir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вмикається автоматично, якщо доступно."
+            "value" : "Завжди показує субтитри цією мовою, якщо вони є. У режимі «Авто» вирішує правило нижче."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用时自动开启。"
+            "value" : "只要影片有该语言的字幕，就始终显示。设为自动时，由下方规则决定。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "若可用將自動開啟。"
+            "value" : "只要影片有該語言的字幕，就一律顯示。設為自動時，由下方規則決定。"
           }
         }
       }

@@ -15,6 +15,18 @@ enum Changelog {
                     icon: "headphones"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.downloads.title",
+                    "changelog.1_2_0.downloads.body",
+                    icon: "arrow.down.circle"
+                ),
+                ChangelogHighlight(
+                    .fix,
+                    "changelog.1_2_0.datedEpisodes.title",
+                    "changelog.1_2_0.datedEpisodes.body",
+                    icon: "forward.end"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_2_0.transcodeTracks.title",
                     "changelog.1_2_0.transcodeTracks.body",

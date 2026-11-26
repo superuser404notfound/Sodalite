@@ -40,7 +40,17 @@ extension PlayerViewModel {
     }
 
     static func nextDownloadedEpisode(after item: JellyfinItem, in pool: [DownloadedItem]) -> DownloadedItem? {
-        guard let series = item.seriesId, let season = item.parentIndexNumber, let index = item.indexNumber else { return nil }
+        guard let series = item.seriesId, let season = item.parentIndexNumber else { return nil }
+        guard let index = item.indexNumber else {
+            // A date-based show (no episode numbers) has no gap to detect offline: the next air date
+            // that is on the device is the one to play, which is what a week downloaded for a trip
+            // wants.
+            let sameSeason = pool.filter {
+                $0.snapshot.item.seriesId == series && $0.snapshot.item.parentIndexNumber == season
+            }
+            guard let next = EpisodeSuccession.next(after: item, in: sameSeason.map(\.snapshot.item)) else { return nil }
+            return sameSeason.first { $0.snapshot.item.id == next.id }
+        }
         // Only the IMMEDIATE successor: with E1 and E5 downloaded, E1 must not skip to E5. Without a
         // server nothing says whether a season has more episodes, so a season boundary is never
         // crossed offline; online the server names the successor and it plays from the device when
@@ -59,8 +69,9 @@ extension PlayerViewModel {
         let current = item
         let currentID = item.id
 
-        // Strict physical ordering, see EpisodeSuccession.
-        guard let currentSeasonID = item.seasonId, item.indexNumber != nil else { return }
+        // Strict physical ordering, see EpisodeSuccession. An episode without an index still has a
+        // successor there when it carries an air date (date-based shows).
+        guard let currentSeasonID = item.seasonId, EpisodeSuccession.canAdvance(from: item) else { return }
 
         do {
             let episodes = try await playbackService.getEpisodes(
@@ -375,7 +386,7 @@ extension PlayerViewModel {
 
     // MARK: - Season Episode Picker
 
-    /// Loads the current season's episodes (sorted by indexNumber) into `seasonEpisodes` for the transport-bar picker. No-ops for items without a series + season.
+    /// Loads the current season's episodes (in disc order, see `EpisodeSuccession.inDiscOrder`) into `seasonEpisodes` for the transport-bar picker. No-ops for items without a series + season.
     func loadSeasonEpisodes() async {
         guard let seriesID = item.seriesId,
               let seasonID = item.seasonId else {
@@ -386,7 +397,7 @@ extension PlayerViewModel {
             let episodes = try await playbackService.getEpisodes(
                 seriesID: seriesID, seasonID: seasonID, userID: userID
             )
-            seasonEpisodes = episodes.sorted { ($0.indexNumber ?? .max) < ($1.indexNumber ?? .max) }
+            seasonEpisodes = EpisodeSuccession.sortedInDiscOrder(episodes)
         } catch {
             #if DEBUG
             print("[SeasonPicker] Fetch failed: \(error)")
