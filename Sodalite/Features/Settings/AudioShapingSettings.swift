@@ -4,18 +4,21 @@ import AetherEngine
 /// AetherEngine#923 and #1044: the audio shaping settings, as the viewer picks them. Device values: they
 /// describe the room and the speakers behind this box, so every profile on it shares them.
 
-/// How many channels the box sends at most. Auto leaves the route to decide.
+/// How many channels the box sends at most. Auto leaves the route to decide. Headphones sends
+/// stereo too, but rendered binaurally (each speaker of the bed placed around the listener) instead
+/// of folded, so surround and the TrueHD / DTS:X heights survive on any pair of headphones.
 enum SpeakerLayout: String, CaseIterable, Sendable, Identifiable {
-    case auto, stereo, surround51
+    case auto, stereo, surround51, headphones
     var id: String { rawValue }
     var titleKey: String { "settings.playback.speakers.\(rawValue)" }
     var maxChannels: Int? {
         switch self {
-        case .auto:       return nil
-        case .stereo:     return 2
-        case .surround51: return 6
+        case .auto, .headphones: return nil
+        case .stereo:            return 2
+        case .surround51:        return 6
         }
     }
+    var binaural: Bool { self == .headphones }
 }
 
 /// How far the dialogue is lifted against the rest of the mix.
@@ -71,7 +74,8 @@ struct AudioShapingSettings: Equatable, Sendable {
                      dialogueGainDB: dialogue.gainDB,
                      compressor: nightModeActive(at: date, calendar: calendar) ? .night : nil,
                      // 0 dB is libswresample's lfe_mix_level, so each side gets the LFE 3 dB down.
-                     lfeMixDB: lfeInStereoDownmix ? 0 : nil)
+                     lfeMixDB: lfeInStereoDownmix ? 0 : nil,
+                     binaural: speakers.binaural)
     }
 
     /// "22:00" in the viewer's locale, for the schedule rows.

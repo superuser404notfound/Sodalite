@@ -585,7 +585,8 @@ struct PlaybackSettingsView: View {
                 ValuePickerRow(
                     icon: "speaker.wave.3",
                     title: "settings.playback.speakers",
-                    subtitle: "settings.playback.speakers.subtitle",
+                    subtitle: prefs.speakerLayout == .headphones
+                        ? "settings.playback.speakers.headphones.subtitle" : "settings.playback.speakers.subtitle",
                     options: SpeakerLayout.allCases,
                     selection: Binding(
                         get: { prefs.speakerLayout },

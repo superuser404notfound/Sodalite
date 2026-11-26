@@ -186,6 +186,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Dialogue Boost, Night Mode and Speakers**: lift voices over music and effects, compress loud scenes (always, or between two hours you set), and fold surround down to stereo or 5.1. In Settings → Playback and in the player's audio menu, per device. While one is on, the track is no longer passed through as its original bitstream.
 - **Audio Delay**: shifts the sound against the picture in 25 ms steps, up to half a second either way. For a TV or receiver whose processing puts lips and voices out of sync. Plus plays the sound later, minus earlier. One value per device, set in Settings → Playback or in the player's audio menu (left and right step it, Select resets it). A change while playing holds the picture for a moment while the engine re-times the audio.
 - **LFE in Stereo Downmix**: with Speakers on Stereo, the .1 bass channel (LFE) goes into left and right instead of being dropped. Meant for a 2.1 system whose subwoofer hangs off a stereo amp or streamer, behind a TV that only passes two channels on.
+- **Surround on headphones**: set Speakers to Headphones and surround sound, height channels from TrueHD and DTS:X included, is rendered into stereo that sounds around you instead of inside your head. It works on any headphones, Bluetooth too, because it leaves as plain stereo. Apple's spatial mixer places each speaker of the mix around the listener, without head tracking. Not meant for speakers.
 
 ### Subtitles and tracks
 
