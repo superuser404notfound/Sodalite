@@ -494,7 +494,7 @@ final class DetailViewModel {
     /// The episode after `episode` in disc order, crossing into the next season (Sodalite#230). Reads
     /// the season lists the page already holds and fetches only a list it has never loaded.
     func successor(of episode: JellyfinItem) async -> JellyfinItem? {
-        guard let seasonID = episode.seasonId else { return nil }
+        guard let seasonID = episode.seasonId, EpisodeSuccession.canAdvance(from: episode) else { return nil }
         // A season list that failed to load says nothing about the season being over.
         guard let list = await seasonEpisodes(seasonID: seasonID) else { return nil }
         if let next = EpisodeSuccession.next(after: episode, in: list) { return next }

@@ -6,8 +6,10 @@ import AetherEngine
 @MainActor
 struct LocalPlaybackTests {
     private func downloaded(route: DownloadRoute, position: Int64 = 0, id: String = "ep-1",
-                            season: Int = 1, index: Int = 1) -> DownloadedItem {
-        let item = try! JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"\#(id)","Name":"E","Type":"Episode","SeriesId":"s","SeasonId":"se\#(season)","ParentIndexNumber":\#(season),"IndexNumber":\#(index),"RunTimeTicks":36000000000}"#.utf8))
+                            season: Int = 1, index: Int? = 1, aired: String? = nil) -> DownloadedItem {
+        let indexField = index.map { #""IndexNumber":\#($0),"# } ?? ""
+        let airedField = aired.map { #""PremiereDate":"\#($0)","# } ?? ""
+        let item = try! JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"\#(id)","Name":"E","Type":"Episode","SeriesId":"s","SeasonId":"se\#(season)","ParentIndexNumber":\#(season),\#(indexField)\#(airedField)"RunTimeTicks":36000000000}"#.utf8))
         let source = try! JSONDecoder().decode(PlaybackMediaSource.self, from: Data(#"{"Id":"src","Container":"mkv","Bitrate":30000000,"MediaStreams":[{"Index":0,"Type":"Video","Codec":"hevc"},{"Index":1,"Type":"Audio","Codec":"aac","Language":"ger"},{"Index":3,"Type":"Subtitle","Codec":"subrip","Language":"ger"}]}"#.utf8))
         var manifest = DownloadManifest(itemID: id, seriesID: "s", seasonID: "se\(season)", quality: route == .original ? .original : .mbps4,
                                         route: route, mediaSourceID: "src", audioStreamIndex: nil, playSessionID: nil,
@@ -69,6 +71,17 @@ struct LocalPlaybackTests {
         // Offline nothing says S1 ends at E9, so the season boundary is not crossed.
         #expect(PlayerViewModel.nextDownloadedEpisode(after: current.snapshot.item, in: pool) == nil)
         #expect(PlayerViewModel.nextDownloadedEpisode(after: pool[0].snapshot.item, in: pool)?.id == "e3")
+    }
+
+    /// A date-based show offline: the next air date on the device plays, the season is not crossed.
+    @Test func aDatedDownloadAdvancesToTheNextDateOnTheDevice() {
+        let mon = downloaded(route: .original, id: "mon", index: nil, aired: "2024-03-04T00:00:00Z")
+        let wed = downloaded(route: .original, id: "wed", index: nil, aired: "2024-03-06T00:00:00Z")
+        let tue = downloaded(route: .original, id: "tue", index: nil, aired: "2024-03-05T00:00:00Z")
+        let other = downloaded(route: .original, id: "s2", season: 2, index: nil, aired: "2024-03-07T00:00:00Z")
+        let pool = [wed, other, tue]
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: mon.snapshot.item, in: pool)?.id == "tue")
+        #expect(PlayerViewModel.nextDownloadedEpisode(after: wed.snapshot.item, in: pool) == nil)
     }
 
     @Test func onlyTheImmediateSuccessorIsTaken() {

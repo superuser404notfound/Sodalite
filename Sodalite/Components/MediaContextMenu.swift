@@ -50,7 +50,9 @@ extension View {
 }
 
 /// Holds the card's download request, because a context menu closes before anything it starts could
-/// ask a question. The quality dialog then hangs off the card itself (on iPad, a popover at the card).
+/// ask a question. The quality dialog hangs off the card itself (on iPad, a popover at the card) and
+/// not off a shell-level host, because cards also live inside detail covers, where a dialog from the
+/// shell under the cover would never show.
 private struct MediaContextMenuHost: ViewModifier {
     let item: JellyfinItem
     let open: (JellyfinItem) -> Void
@@ -61,13 +63,28 @@ private struct MediaContextMenuHost: ViewModifier {
     }
     #else
     @State private var downloadTarget: DownloadTarget?
+    @Environment(\.dependencies) private var dependencies
 
     func body(content: Content) -> some View {
         content
             .contextMenu {
-                MediaContextMenu(item: item, open: open) { downloadTarget = .item(item, sourceID: nil) }
+                MediaContextMenu(item: item, open: open) { requestDownload() }
             }
             .downloadRungDialog(target: $downloadTarget)
+    }
+
+    /// A list card carries no MediaSources, so the dialog would have no sizes and the download would
+    /// take the server's first version instead of the one Play starts. The fetch also puts the
+    /// dialog after the menu's dismissal, which a presentation during it can collide with.
+    private func requestDownload() {
+        downloadTarget = nil
+        let card = item
+        let session = dependencies.sessionRegistry.session(for: card)
+        Task {
+            var detail = (try? await session.itemService.getItemDetail(userID: session.userID, itemID: card.id)) ?? card
+            detail.serverID = card.serverID
+            downloadTarget = .item(detail, sourceID: nil)
+        }
     }
     #endif
 }

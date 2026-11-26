@@ -166,7 +166,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Theme songs** (optional, Settings → Playback): a movie or show page plays its theme song from your server, fades in and out, and never starts over music from another app.
 - **Skip Intro and Skip Recap**: one tap, using the markers your server detected. Recap auto-skip has its own setting.
 - **Next episode**: plays automatically with a countdown of 5 to 30 seconds, or none. The countdown can sit on the credits or wait until the episode really ends. Without a countdown, credits and post-credit scenes play out first.
-- **Daily shows**: shows that Jellyfin sorts by air date and not by episode number (talk shows, news) go on to the next air date the same way.
+- **Daily shows**: shows that Jellyfin sorts by air date and not by episode number (talk shows, news) go on to the next air date the same way. Offline, the next air date you downloaded plays.
 - **Picture in Picture**: from a player button on Apple TV, automatically when you swipe home on iPhone and iPad. Also works there for titles the software decoder plays.
 - **iPhone Duo**: stand it half folded and the picture plays on the upper half, while the controls, the subtitles and, in live TV, the channel list stay on the lower half. Music shows the cover above and the queue below.
 - **Streaming quality**: limit the bitrate when the connection is slow (Original, or 40 down to 2 Mbit/s). Files that already fit keep playing directly. Set a default (on iPhone and iPad separately for Wi-Fi and cellular) or change it in the player; it reopens at the same second.
@@ -225,7 +225,7 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **Offline downloads**: movies, episodes or whole seasons, in the original or a smaller version, with your audio and subtitle choice. A title with several versions downloads the one selected on its page. What you watch offline syncs back to your server later.
 - **Download from any list**: hold a movie or episode (right-click on the Mac) and pick Download. It takes the version Play would start.
-- **Download quality**: Sodalite asks for the quality on every download until you pick one under Settings → Downloads → Download Quality. Then every download starts at once. A file already smaller than the picked quality downloads as it is.
+- **Download quality**: Sodalite asks for the quality on every download until you pick one under Settings → Downloads → Download Quality. Then every download starts at once, whole seasons included. A file already smaller than the picked quality downloads as it is.
 - **AirPlay** to any AirPlay display, with HDR and surround preserved.
 - **AirPlay with software-decoded titles**: these draw on the phone itself, so an AirPlay device gets only the sound, and the player says so. For interlaced TV recordings and channels it offers Show on TV, which moves the title to a route the Apple TV plays itself, at the same position (fast motion can show some combing there, since the phone's deinterlacer is not in the chain). Screen Mirroring carries the picture anyway, so the hint stays away while the screen is mirrored.
 - **HDMI adapter**: plug in a USB-C to HDMI adapter and the video fills the TV, with HDR, Dolby Vision and frame rate matching. Subtitles and software-decoded titles (MPEG-2, for example) move to the TV too, while the phone keeps the controls. The picture stays on the TV when the device locks.

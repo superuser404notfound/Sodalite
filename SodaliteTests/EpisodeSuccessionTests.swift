@@ -64,7 +64,27 @@ struct EpisodeSuccessionTests {
     @Test func aSeasonOfDatedEpisodesStartsAtTheOldest() throws {
         let list = [try dated("mar2", aired: "2024-03-02T00:00:00Z"), try dated("mar1", aired: "2024-03-01T00:00:00Z")]
         #expect(EpisodeSuccession.first(in: list)?.id == "mar1")
-        #expect(list.sorted(by: EpisodeSuccession.inDiscOrder).map(\.id) == ["mar1", "mar2"])
+        #expect(EpisodeSuccession.sortedInDiscOrder(list).map(\.id) == ["mar1", "mar2"])
+    }
+
+    /// An extra with neither number nor date has no place in the season. The player must stop there
+    /// instead of reading the nil successor as a finale and jumping into the next season.
+    @Test func anEpisodeWithoutIndexOrDateCannotAdvance() throws {
+        #expect(!EpisodeSuccession.canAdvance(from: try episode("extra", index: nil)))
+        #expect(EpisodeSuccession.canAdvance(from: try episode("e1", index: 1)))
+        #expect(EpisodeSuccession.canAdvance(from: try dated("mar1", aired: "2024-03-01T00:00:00Z")))
+    }
+
+    /// A dated special in a numbered season moves on to the next dated special, never to a numbered
+    /// episode that happens to air later, and the picker lists the specials after the numbered run.
+    @Test func anUnnumberedSpecialSkipsTheNumberedRun() throws {
+        let e1 = try item(#"{"Id":"e1","Name":"e1","Type":"Episode","SeriesId":"show","SeasonId":"s2024","IndexNumber":1,"PremiereDate":"2024-03-01T00:00:00Z"}"#)
+        let jan = try dated("jan", aired: "2024-01-01T00:00:00Z")
+        let feb = try dated("feb", aired: "2024-02-01T00:00:00Z")
+        let list = [e1, feb, jan]
+        #expect(EpisodeSuccession.next(after: jan, in: list)?.id == "feb")
+        #expect(EpisodeSuccession.next(after: feb, in: list) == nil)
+        #expect(EpisodeSuccession.sortedInDiscOrder(list).map(\.id) == ["e1", "jan", "feb"])
     }
 
     /// A numbered episode keeps the index rule even when air dates disagree with it.
