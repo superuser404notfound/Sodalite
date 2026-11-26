@@ -33,6 +33,16 @@ struct AudioShapingSettingsTests {
         #expect(SpeakerLayout.auto.maxChannels == nil)
     }
 
+    @Test("Headphones asks for binaural without a channel cap, and only Headphones does")
+    func headphonesIsBinaural() {
+        let shaping = AudioShapingSettings(speakers: .headphones).shaping(at: at(hour: 12), calendar: calendar)
+        #expect(shaping.binaural)
+        #expect(shaping.maxChannels == nil)
+        #expect(shaping.isActive, "binaural decodes, so passthrough has to step aside")
+        #expect(SpeakerLayout.allCases.filter(\.binaural) == [.headphones])
+        #expect(!AudioShapingSettings(speakers: .stereo).shaping(at: at(hour: 12), calendar: calendar).binaural)
+    }
+
     @Test("the LFE switch asks for 0 dB, and stays out of isActive on its own (AetherEngine#1044)")
     func lfeInStereoDownmix() {
         #expect(AudioShapingSettings().shaping(at: at(hour: 12), calendar: calendar).lfeMixDB == nil)

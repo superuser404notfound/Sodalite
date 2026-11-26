@@ -75657,6 +75657,328 @@
         }
       }
     },
+    "changelog.1_2_0.headphones.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nastavte Reproduktory na Sluchátka a prostorový zvuk včetně výškových kanálů TrueHD a DTS:X se změní ve stereo, které zní kolem vás, ne uvnitř hlavy. Funguje s jakýmikoli sluchátky, včetně Bluetooth. V Nastavení → Přehrávání a v nabídce zvuku přehrávače."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sæt Højttalere til Hovedtelefoner, så bliver surroundlyd og højdekanalerne fra TrueHD og DTS:X til stereo, der lyder omkring dig i stedet for inde i hovedet. Virker med alle hovedtelefoner, også Bluetooth. I Indstillinger → Afspilning og i afspillerens lydmenu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stell Lautsprecher auf Kopfhörer, und Surround-Ton samt den Höhenkanälen von TrueHD und DTS:X wird zu Stereo, das um dich herum klingt statt im Kopf. Funktioniert mit allen Kopfhörern, auch per Bluetooth. In Einstellungen → Wiedergabe und im Audiomenü des Players."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ορίστε τα Ηχεία σε Ακουστικά και ο surround ήχος, μαζί με τα κανάλια ύψους των TrueHD και DTS:X, γίνεται στερεοφωνικός ήχος που ακούγεται γύρω σας αντί για μέσα στο κεφάλι σας. Λειτουργεί με όλα τα ακουστικά, και με Bluetooth. Στις Ρυθμίσεις → Αναπαραγωγή και στο μενού ήχου του player."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set Speakers to Headphones and surround sound, along with the height channels of TrueHD and DTS:X, turns into stereo that sounds around you instead of inside your head. Works with any headphones, Bluetooth included. In Settings → Playback and in the player's audio menu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon Altavoces en Auriculares y el sonido envolvente, junto con los canales de altura de TrueHD y DTS:X, se convierte en estéreo que suena a tu alrededor en lugar de dentro de tu cabeza. Funciona con cualquier auricular, también Bluetooth. En Ajustes → Reproducción y en el menú de audio del reproductor."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitse Kaiuttimet-kohtaan Kuulokkeet, niin tilaääni ja TrueHD:n ja DTS:X:n korkeuskanavat muuttuvat stereoksi, joka kuuluu ympäriltäsi eikä pään sisältä. Toimii kaikkien kuulokkeiden kanssa, myös Bluetoothin kautta. Kohdassa Asetukset → Toisto ja soittimen äänivalikossa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglez Haut-parleurs sur Casque et le son surround, avec les canaux de hauteur du TrueHD et du DTS:X, devient une stéréo qui sonne autour de vous plutôt que dans votre tête. Fonctionne avec tous les casques, Bluetooth compris. Dans Réglages → Lecture et dans le menu audio du lecteur."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postavite Zvučnike na Slušalice i surround zvuk, zajedno s visinskim kanalima TrueHD-a i DTS:X-a, postaje stereo koji se čuje oko vas, a ne u glavi. Radi sa svim slušalicama, uključujući Bluetooth. U Postavkama → Reprodukcija i u audioizborniku playera."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Állítsd a Hangszórókat Fejhallgatóra, és a térhangzás a TrueHD és a DTS:X magassági csatornáival együtt olyan sztereóvá válik, amely körülötted szól, nem a fejedben. Bármilyen fejhallgatóval működik, Bluetooth-szal is. A Beállítások → Lejátszás menüben és a lejátszó hangmenüjében."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imposta Altoparlanti su Cuffie e l’audio surround, insieme ai canali di altezza di TrueHD e DTS:X, diventa uno stereo che suona intorno a te invece che dentro la testa. Funziona con qualsiasi cuffia, anche Bluetooth. In Impostazioni → Riproduzione e nel menu audio del player."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スピーカーをヘッドフォンにすると、サラウンドとTrueHD・DTS:Xの高さチャンネルが、頭の中ではなく周囲から聞こえるステレオになります。Bluetoothを含むあらゆるヘッドフォンで使えます。設定 → 再生 と、プレーヤーのオーディオメニューにあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스피커를 헤드폰으로 설정하면 서라운드 사운드와 TrueHD·DTS:X의 높이 채널이 머릿속이 아니라 주변에서 들리는 스테레오로 바뀝니다. Bluetooth를 포함한 모든 헤드폰에서 작동합니다. 설정 → 재생과 플레이어의 오디오 메뉴에 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sett Høyttalere til Hodetelefoner, så blir surroundlyd og høydekanalene fra TrueHD og DTS:X til stereo som høres rundt deg i stedet for inne i hodet. Fungerer med alle hodetelefoner, også Bluetooth. I Innstillinger → Avspilling og i avspillerens lydmeny."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zet Luidsprekers op Koptelefoon en surroundgeluid, samen met de hoogtekanalen van TrueHD en DTS:X, wordt stereo die om je heen klinkt in plaats van in je hoofd. Werkt met elke koptelefoon, ook via Bluetooth. In Instellingen → Afspelen en in het audiomenu van de speler."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustaw Głośniki na Słuchawki, a dźwięk przestrzenny razem z kanałami wysokości TrueHD i DTS:X zamieni się w stereo, które brzmi wokół ciebie, a nie w głowie. Działa z każdymi słuchawkami, także Bluetooth. W Ustawieniach → Odtwarzanie i w menu audio odtwarzacza."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defina Alto-falantes como Fones de ouvido e o som surround, junto com os canais de altura do TrueHD e do DTS:X, vira um estéreo que soa ao seu redor, e não dentro da cabeça. Funciona com qualquer fone, inclusive Bluetooth. Em Ajustes → Reprodução e no menu de áudio do player."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defina Altifalantes como Auscultadores e o som surround, com os canais de altura do TrueHD e do DTS:X, passa a um estéreo que soa à sua volta, e não dentro da cabeça. Funciona com quaisquer auscultadores, incluindo Bluetooth. Em Definições → Reprodução e no menu de áudio do leitor."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setează Difuzoare pe Căști, iar sunetul surround, împreună cu canalele de înălțime din TrueHD și DTS:X, devine stereo care se aude în jurul tău, nu în interiorul capului. Funcționează cu orice căști, inclusiv Bluetooth. În Setări → Redare și în meniul audio al playerului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите «Наушники» в пункте «Динамики», и объёмный звук вместе с каналами высоты TrueHD и DTS:X станет стерео, которое звучит вокруг вас, а не внутри головы. Работает с любыми наушниками, включая Bluetooth. В разделе «Настройки» → «Воспроизведение» и в аудиоменю плеера."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nastavte Reproduktory na Slúchadlá a priestorový zvuk spolu s výškovými kanálmi TrueHD a DTS:X sa zmení na stereo, ktoré znie okolo vás, nie v hlave. Funguje s akýmikoľvek slúchadlami, aj cez Bluetooth. V Nastaveniach → Prehrávanie a v zvukovej ponuke prehrávača."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ställ Högtalare på Hörlurar så blir surroundljud och höjdkanalerna från TrueHD och DTS:X stereo som låter runt dig i stället för inne i huvudet. Fungerar med alla hörlurar, även Bluetooth. I Inställningar → Uppspelning och i spelarens ljudmeny."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoparlörler’i Kulaklık yapın; surround ses, TrueHD ve DTS:X’in yükseklik kanallarıyla birlikte kafanızın içinde değil etrafınızda duyulan bir stereoya dönüşür. Bluetooth dahil tüm kulaklıklarla çalışır. Ayarlar → Oynatma’da ve oynatıcının ses menüsünde."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть «Навушники» в пункті «Динаміки», і об’ємний звук разом із каналами висоти TrueHD і DTS:X стане стерео, яке звучить навколо вас, а не всередині голови. Працює з будь-якими навушниками, зокрема Bluetooth. У розділі «Налаштування» → «Відтворення» та в аудіоменю плеєра."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把扬声器设为耳机，环绕声连同 TrueHD 和 DTS:X 的高度声道都会变成立体声，声音来自你周围，而不是在脑袋里。适用于所有耳机，包括蓝牙耳机。位于“设置”→“播放”以及播放器的音频菜单中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把揚聲器設為耳機，環繞聲連同 TrueHD 和 DTS:X 的高度聲道都會變成立體聲，聲音來自你周圍，而不是在腦袋裡。適用於所有耳機，包括藍牙耳機。位於「設定」→「播放」以及播放器的音訊選單中。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.headphones.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prostorový zvuk ve sluchátkách"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround i hovedtelefoner"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround auf Kopfhörern"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround στα ακουστικά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround on headphones"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonido envolvente en auriculares"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilaääni kuulokkeissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le surround au casque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround na slušalicama"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Térhangzás fejhallgatón"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround in cuffia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドフォンでサラウンド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "헤드폰으로 서라운드"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround på hodetelefoner"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround op je koptelefoon"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dźwięk przestrzenny w słuchawkach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround nos fones de ouvido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround nos auscultadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround în căști"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объёмный звук в наушниках"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priestorový zvuk v slúchadlách"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surround i hörlurar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulaklıkta surround"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об’ємний звук у навушниках"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳机里的环绕声"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳機裡的環繞聲"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.transcodeTracks.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -228015,6 +228337,330 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自動"
+          }
+        }
+      }
+    },
+    "settings.playback.speakers.headphones" : {
+      "comment" : "Speaker layout value: binaural stereo for headphones.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluchátka"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hovedtelefoner"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopfhörer"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ακουστικά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headphones"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auriculares"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuulokkeet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casque"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slušalice"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fejhallgató"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuffie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドフォン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "헤드폰"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hodetelefoner"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koptelefoon"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Słuchawki"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fones de ouvido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auscultadores"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Căști"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наушники"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slúchadlá"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hörlurar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulaklık"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Навушники"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳机"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳機"
+          }
+        }
+      }
+    },
+    "settings.playback.speakers.headphones.subtitle" : {
+      "comment" : "Playback settings: subtitle of the speaker layout picker while Headphones is picked.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sluchátka převedou prostorový zvuk a výškové kanály do sterea, které zní kolem vás, ne uvnitř hlavy. Funguje s jakýmikoli sluchátky, včetně Bluetooth. Není určeno pro reproduktory."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hovedtelefoner gør surroundlyd og højdekanaler til stereo, der lyder omkring dig i stedet for inde i hovedet. Virker med alle hovedtelefoner, også Bluetooth. Ikke beregnet til højttalere."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopfhörer macht aus Surround-Ton und Höhenkanälen Stereo, das um dich herum klingt statt im Kopf. Funktioniert mit allen Kopfhörern, auch per Bluetooth. Nicht für Lautsprecher gedacht."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η επιλογή Ακουστικά μετατρέπει τον surround ήχο και τα κανάλια ύψους σε στερεοφωνικό ήχο που ακούγεται γύρω σας αντί για μέσα στο κεφάλι σας. Λειτουργεί με όλα τα ακουστικά, και με Bluetooth. Δεν προορίζεται για ηχεία."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headphones turns surround sound and height channels into stereo that sounds around you instead of inside your head. Works with any headphones, Bluetooth included. Not meant for speakers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auriculares convierte el sonido envolvente y los canales de altura en estéreo que suena a tu alrededor en lugar de dentro de tu cabeza. Funciona con cualquier auricular, también Bluetooth. No está pensado para altavoces."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuulokkeet muuttaa tilaäänen ja korkeuskanavat stereoksi, joka kuuluu ympäriltäsi eikä pään sisältä. Toimii kaikkien kuulokkeiden kanssa, myös Bluetoothin kautta. Ei tarkoitettu kaiuttimille."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casque transforme le son surround et les canaux de hauteur en stéréo qui sonne autour de vous plutôt que dans votre tête. Fonctionne avec tous les casques, Bluetooth compris. Pas prévu pour des enceintes."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slušalice pretvaraju surround zvuk i visinske kanale u stereo koji se čuje oko vas, a ne u glavi. Radi sa svim slušalicama, uključujući Bluetooth. Nije namijenjeno zvučnicima."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Fejhallgató a térhangzást és a magassági csatornákat olyan sztereóvá alakítja, amely körülötted szól, nem a fejedben. Bármilyen fejhallgatóval működik, Bluetooth-szal is. Hangszórókhoz nem ajánlott."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuffie trasforma l’audio surround e i canali di altezza in stereo che suona intorno a te invece che dentro la testa. Funziona con qualsiasi cuffia, anche Bluetooth. Non pensato per gli altoparlanti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘッドフォンは、サラウンドと高さチャンネルを、頭の中ではなく周囲から聞こえるステレオに変換します。Bluetoothを含むあらゆるヘッドフォンで使えます。スピーカー向けではありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "헤드폰은 서라운드 사운드와 높이 채널을 머릿속이 아니라 주변에서 들리는 스테레오로 바꿉니다. Bluetooth를 포함한 모든 헤드폰에서 작동합니다. 스피커용이 아닙니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hodetelefoner gjør surroundlyd og høydekanaler om til stereo som høres rundt deg i stedet for inne i hodet. Fungerer med alle hodetelefoner, også Bluetooth. Ikke ment for høyttalere."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koptelefoon maakt van surroundgeluid en hoogtekanalen stereo die om je heen klinkt in plaats van in je hoofd. Werkt met elke koptelefoon, ook via Bluetooth. Niet bedoeld voor luidsprekers."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Słuchawki zamieniają dźwięk przestrzenny i kanały wysokości w stereo, które brzmi wokół ciebie, a nie w głowie. Działa z każdymi słuchawkami, także Bluetooth. Nie jest przeznaczone dla głośników."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fones de ouvido transforma o som surround e os canais de altura em estéreo que soa ao seu redor, e não dentro da cabeça. Funciona com qualquer fone, inclusive Bluetooth. Não é indicado para alto-falantes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auscultadores transforma o som surround e os canais de altura em estéreo que soa à sua volta, e não dentro da cabeça. Funciona com quaisquer auscultadores, incluindo Bluetooth. Não se destina a colunas."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Căști transformă sunetul surround și canalele de înălțime în stereo care se aude în jurul tău, nu în interiorul capului. Funcționează cu orice căști, inclusiv Bluetooth. Nu este destinat difuzoarelor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Наушники» превращают объёмный звук и каналы высоты в стерео, которое звучит вокруг вас, а не внутри головы. Работает с любыми наушниками, включая Bluetooth. Не для колонок."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slúchadlá premenia priestorový zvuk a výškové kanály na stereo, ktoré znie okolo vás, nie v hlave. Funguje s akýmikoľvek slúchadlami, aj cez Bluetooth. Nie je určené pre reproduktory."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hörlurar gör om surroundljud och höjdkanaler till stereo som låter runt dig i stället för inne i huvudet. Fungerar med alla hörlurar, även Bluetooth. Inte avsett för högtalare."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulaklık, surround sesi ve yükseklik kanallarını kafanın içinde değil etrafında duyulan bir stereoya dönüştürür. Bluetooth dahil tüm kulaklıklarla çalışır. Hoparlörler için değildir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Навушники» перетворюють об’ємний звук і канали висоти на стерео, яке звучить навколо вас, а не всередині голови. Працює з будь-якими навушниками, зокрема Bluetooth. Не для колонок."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳机会把环绕声和高度声道转换为立体声，让声音来自你周围，而不是在脑袋里。适用于所有耳机，包括蓝牙耳机。不适用于扬声器。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳機會把環繞聲和高度聲道轉換為立體聲，讓聲音來自你周圍，而不是在腦袋裡。適用於所有耳機，包括藍牙耳機。不適用於揚聲器。"
           }
         }
       }

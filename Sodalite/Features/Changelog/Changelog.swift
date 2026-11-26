@@ -9,6 +9,12 @@ enum Changelog {
             version: "1.2.0",
             highlights: [
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.headphones.title",
+                    "changelog.1_2_0.headphones.body",
+                    icon: "headphones"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_2_0.transcodeTracks.title",
                     "changelog.1_2_0.transcodeTracks.body",
