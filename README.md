@@ -197,7 +197,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Why Sodalite does not extract early itself**: extraction reads the whole file from the same disk the conversion reads from. On a test server that slowed a converted stream below real time, so the app only asks for a subtitle once you pick it.
 - **Tracks the server missed**: the subtitle menu lists every track inside the file, also the ones your server's scan did not record, and closed captions carried in the video picture itself.
 - **Styled ASS / SSA**: original fonts, colors and positions, or plain text if you prefer (Settings → Playback).
-- **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. Fully automatic.
+- **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. On by default, Settings → Playback → Automatic forced subtitles turns it off.
 - **Subtitles on skip back**: skipping back turns subtitles on until you are past where you jumped from, then off again. Also works in live TV's timeshift.
 - **Search and download subtitles** in the player when your server has none. Matches by file hash get a badge.
 - **Dual subtitles**: show a second text track above the first, for example the original plus a translation.
@@ -283,7 +283,7 @@ Every feature is free. Settings are named as they appear in the app.
 
 - **No tracking**: no analytics, no ads, no third-party SDKs. Sign-ins stay in your Keychain and your own iCloud.
 - **Self-signed certificates**: accept a certificate once, by its fingerprint, for that one address. A changed certificate asks again; there is no "allow anything" switch.
-- **Diagnostic Log** (Settings → Diagnostic Log): the last 300 lines from the app, with access tokens removed, so a bug report can carry the real error. Nothing is uploaded. Copy it on iPhone and iPad; on Apple TV, Export shows a QR code that opens it on your phone. An optional log file keeps up to 32 MB across restarts.
+- **Diagnostic Log** (Settings → Diagnostic Log): the last 300 lines from the app, with access tokens removed, so a bug report can carry the real error. Nothing is uploaded. Copy it on iPhone and iPad; on Apple TV, Export shows a QR code that opens it on your phone. An optional log file keeps up to 32 MB across restarts. It also notes why subtitles came on or stayed off when a title starts, whether from a remembered pick, the language settings or a forced track.
 
 ## Under the hood
 
