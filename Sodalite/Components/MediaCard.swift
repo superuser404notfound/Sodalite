@@ -122,6 +122,7 @@ struct MediaCard: View {
                 isFocused: isFocused
             )
         )
+        .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
     }
 
     private var itemInfo: some View {
