@@ -58,7 +58,7 @@ packages:
     traits: [TrueHDObjectAudio, DTSXObjectAudio, DolbyVisionStillReshaping, DolbyVisionFelCurves]
   SwiftAssRenderer:
     url: https://github.com/mihai8804858/swift-ass-renderer
-    version: 1.3.1
+    version: 1.3.2
 targets:
   Sodalite-tvOS:
     type: application

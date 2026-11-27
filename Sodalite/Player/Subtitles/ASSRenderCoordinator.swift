@@ -43,7 +43,7 @@ final class ASSRenderCoordinator {
     /// in steady-state streaming the side demuxer runs ~90 s ahead so new events are far off.
     private let reloadInterval: TimeInterval = 5
     /// Events starting further out than this wait in the builder. Every reload reparses the whole
-    /// growing script (and swift-ass-renderer 1.3.1 never frees the track it replaces), so a 5 s
+    /// growing script (and swift-ass-renderer 1.3.2 never frees the track it replaces), so a 5 s
     /// cadence on a heavily typeset track meant a full parse every 5 s for lines a minute away.
     /// The clock sink re-checks on every tick, so a waiting event still loads well before it shows.
     private let reloadLeadSeconds: Double = 30
@@ -78,13 +78,9 @@ final class ASSRenderCoordinator {
     /// Guards async font-write completion against a deactivate/re-activate during the writes.
     private var activationGeneration = 0
     /// Moves with every renderer built, so a glyph failure only drops the renderer that raised it.
-    ///
-    /// Not airtight. SwiftAssRenderer 1.3.1 sends every libass message through one process-wide
-    /// callback, owned by the most recently built renderer, and `freeTrack()` does not stop a render
-    /// already running on the old renderer's queue. A miss from that last render lands on the new
-    /// renderer's count. Draining the old queue before building the next one was tried and
-    /// dropped. It put plain text on screen for the length of a parse on every track switch, and
-    /// the overlay still drives the old renderer for one more SwiftUI pass anyway.
+    /// Since swift-ass-renderer 1.3.2 each library logs to its own renderer's output, so a last
+    /// render still running on a replaced renderer's queue counts against that one and lands here
+    /// with a stale generation.
     private var rendererGeneration = 0
 
     /// Activate for the selected embedded track (`header` = track's `assHeader`). Bails (renderer
@@ -179,8 +175,7 @@ final class ASSRenderCoordinator {
 
     private func installRenderer(fontsDir: URL, fullScript: Bool) {
         // Two font writes can finish in either order, so a renderer may already be up. It is
-        // replaced like a reinstall, or it would keep its track and keep rendering into the
-        // shared libass log.
+        // replaced like a reinstall, or it would keep its track and keep rendering.
         var fullScript = fullScript
         if let previous = renderer {
             previous.freeTrack()
