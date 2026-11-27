@@ -40,6 +40,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_2_0.narrowActions.title",
+                    "changelog.1_2_0.narrowActions.body",
+                    icon: "iphone"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_2_0.datedEpisodes.title",
                     "changelog.1_2_0.datedEpisodes.body",
                     icon: "forward.end"

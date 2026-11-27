@@ -77267,6 +77267,328 @@
         }
       }
     },
+    "changelog.1_2_0.narrowActions.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonu na výšku vytlačila tlačítka nad mřížkou knihovny v některých jazycích celou stránku za okraje obrazovky. Kde se popisky nevejdou, zobrazí se teď jen ikony a Filtr si ponechá svůj počet, dokud je filtr zapnutý."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone på højkant skubbede knapperne over et biblioteksgitter i nogle sprog hele siden ud over skærmkanterne. Hvor deres tekst ikke er plads til, vises de nu som ikoner, og Filter beholder sit antal, mens et filter er slået til."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem iPhone im Hochformat schoben die Knöpfe über dem Raster einer Mediathek in manchen Sprachen die ganze Seite über die Bildschirmränder. Wo ihre Beschriftung nicht passt, zeigen sie jetzt nur ihr Symbol, und Filter behält seine Zahl, solange ein Filter aktiv ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε iPhone σε κατακόρυφη θέση, τα κουμπιά πάνω από το πλέγμα μιας βιβλιοθήκης έσπρωχναν σε ορισμένες γλώσσες ολόκληρη τη σελίδα έξω από τις άκρες της οθόνης. Όπου οι ετικέτες τους δεν χωρούν, εμφανίζονται πλέον ως εικονίδια, και το Φίλτρο κρατά τον αριθμό του όσο ένα φίλτρο είναι ενεργό."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On an upright iPhone the buttons above a library grid pushed the whole page past the screen edges in some languages. Where their labels do not fit, they now show as icons, and Filter keeps its count while a filter is on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En un iPhone en vertical, los botones sobre la cuadrícula de una biblioteca empujaban toda la página fuera de los bordes de la pantalla en algunos idiomas. Donde sus etiquetas no caben, ahora se muestran como iconos, y Filtrar conserva su número mientras haya un filtro activo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pystyasentoisessa iPhonessa kirjastoruudukon yläpuolella olevat painikkeet työnsivät joillakin kielillä koko sivun näytön reunojen yli. Kun niiden tekstit eivät mahdu, ne näkyvät nyt kuvakkeina, ja Suodata säilyttää lukumääränsä niin kauan kuin suodatin on käytössä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur un iPhone en portrait, les boutons au-dessus de la grille d’une bibliothèque poussaient toute la page au-delà des bords de l’écran dans certaines langues. Là où leurs libellés ne tiennent pas, ils s’affichent désormais sous forme d’icônes, et Filtrer garde son nombre tant qu’un filtre est actif."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na uspravnom iPhoneu gumbi iznad rešetke knjižnice u nekim su jezicima gurali cijelu stranicu preko rubova zaslona. Gdje im natpisi ne stanu, sada se prikazuju kao ikone, a Filtar zadržava svoj broj dok je filtar uključen."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Álló iPhone-on a könyvtárrács feletti gombok egyes nyelveken az egész oldalt túltolták a képernyő szélein. Ahol a feliratuk nem fér el, most ikonként jelennek meg, a Szűrő pedig megtartja a számát, amíg egy szűrő be van kapcsolva."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su un iPhone in verticale, i pulsanti sopra la griglia di una libreria spingevano in alcune lingue l’intera pagina oltre i bordi dello schermo. Dove le etichette non entrano, ora appaiono come icone, e Filtra mantiene il suo numero finché un filtro è attivo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縦向きのiPhoneで、一部の言語ではライブラリのグリッド上のボタンがページ全体を画面の端からはみ出させていました。ラベルが収まらない場合はアイコンで表示されるようになり、フィルタが有効な間はフィルタの件数が表示されたままになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세로 방향 iPhone에서 일부 언어의 경우 라이브러리 격자 위의 버튼 때문에 페이지 전체가 화면 가장자리 밖으로 밀려났습니다. 이제 레이블이 들어가지 않으면 아이콘으로 표시되며, 필터가 켜져 있는 동안 필터 버튼은 개수를 계속 표시합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone på høykant dyttet knappene over et bibliotekrutenett hele siden forbi skjermkantene på enkelte språk. Der teksten ikke får plass, vises de nå som ikoner, og Filter beholder antallet sitt så lenge et filter er på."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op een rechtop gehouden iPhone duwden de knoppen boven een bibliotheekraster in sommige talen de hele pagina over de schermranden. Waar hun labels niet passen, verschijnen ze nu als symbolen, en Filter houdt zijn aantal zolang er een filter aan staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhonie w pionie przyciski nad siatką biblioteki w niektórych językach wypychały całą stronę poza krawędzie ekranu. Tam, gdzie ich etykiety się nie mieszczą, są teraz wyświetlane jako ikony, a Filtruj zachowuje swoją liczbę, dopóki filtr jest włączony."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em um iPhone na vertical, os botões acima da grade de uma biblioteca empurravam a página inteira para além das bordas da tela em alguns idiomas. Onde os rótulos não cabem, eles agora aparecem como ícones, e Filtrar mantém sua contagem enquanto um filtro estiver ativo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Num iPhone na vertical, os botões acima da grelha de uma biblioteca empurravam a página inteira para lá dos limites do ecrã nalguns idiomas. Onde as etiquetas não cabem, passam a aparecer como ícones, e Filtrar mantém a sua contagem enquanto um filtro estiver ativo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe un iPhone ținut vertical, butoanele de deasupra grilei unei biblioteci împingeau în unele limbi întreaga pagină dincolo de marginile ecranului. Acolo unde etichetele nu încap, acum apar ca pictograme, iar Filtru își păstrează numărul cât timp un filtru este activ."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone в вертикальной ориентации кнопки над сеткой медиатеки на некоторых языках выталкивали всю страницу за края экрана. Если подписи не помещаются, кнопки теперь показываются значками, а Фильтр сохраняет своё число, пока фильтр включён."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na iPhone na výšku tlačidlá nad mriežkou knižnice v niektorých jazykoch vytlačili celú stránku za okraje obrazovky. Kde sa ich popisy nezmestia, zobrazujú sa teraz ako ikony a Filter si ponechá svoj počet, kým je filter zapnutý."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På en iPhone i stående läge knuffade knapparna ovanför ett biblioteksrutnät på vissa språk hela sidan förbi skärmkanterna. Där etiketterna inte får plats visas de nu som symboler, och Filter behåller sitt antal så länge ett filter är på."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dikey tutulan bir iPhone’da, bazı dillerde kitaplık ızgarasının üstündeki düğmeler tüm sayfayı ekranın kenarlarının dışına itiyordu. Etiketlerinin sığmadığı yerde artık simge olarak görünüyorlar ve bir filtre açıkken Filtre sayısını göstermeye devam ediyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На iPhone у вертикальній орієнтації кнопки над сіткою медіатеки деякими мовами виштовхували всю сторінку за краї екрана. Якщо підписи не вміщаються, кнопки тепер показуються значками, а Фільтр зберігає своє число, доки фільтр увімкнено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在竖屏 iPhone 上，部分语言下资料库网格上方的按钮会把整个页面推出屏幕边缘。现在标签放不下时，按钮只显示图标；启用筛选时，筛选按钮会继续显示数量。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在直向 iPhone 上，部分語言下資料庫網格上方的按鈕會把整個頁面推出螢幕邊緣。現在標籤放不下時，按鈕只顯示圖示；啟用篩選時，篩選按鈕會繼續顯示數量。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.narrowActions.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačítka knihovny se vejdou na iPhone"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteksknapperne passer på iPhone"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mediathek-Knöpfe passen aufs iPhone"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα κουμπιά της βιβλιοθήκης χωρούν στο iPhone"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Library buttons fit on iPhone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los botones de la biblioteca caben en el iPhone"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kirjaston painikkeet mahtuvat iPhoneen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les boutons de la bibliothèque tiennent sur iPhone"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gumbi knjižnice stanu na iPhone"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A könyvtár gombjai elférnek iPhone-on"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I pulsanti della libreria entrano nell’iPhone"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリのボタンがiPhoneに収まるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리 버튼이 iPhone에 맞게 표시됨"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotekknappene får plass på iPhone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliotheekknoppen passen op de iPhone"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przyciski biblioteki mieszczą się na iPhonie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os botões da biblioteca cabem no iPhone"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os botões da biblioteca cabem no iPhone"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Butoanele bibliotecii încap pe iPhone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки медиатеки помещаются на iPhone"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tlačidlá knižnice sa zmestia na iPhone"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteksknapparna får plats på iPhone"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplık düğmeleri iPhone’a sığıyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кнопки медіатеки вміщаються на iPhone"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "资料库按钮适配 iPhone"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "資料庫按鈕適配 iPhone"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.showAll.body" : {
       "extractionState" : "manual",
       "localizations" : {
