@@ -36,7 +36,11 @@ struct LibrarySortSheet: View {
         #if os(iOS)
         .background(.thinMaterial)
         #endif
+        // tvOS only. On a phone the row focused from code wore the accent fill and read as a
+        // second selection (Sodalite#252).
+        #if os(tvOS)
         .onAppear { focusedKey = selection.key }
+        #endif
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif

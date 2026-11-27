@@ -76623,6 +76623,328 @@
         }
       }
     },
+    "changelog.1_2_0.filterSearch.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlouhé seznamy v nabídce Filtr knihovny, například Štítky a Studia, mají nyní vyhledávací pole, jsou seřazené od A do Z a na Apple TV se už nezasekávají. Play/Pause na Apple TV nebo Hotovo na iPhonu, iPadu a Macu zavře nabídku z jakékoli stránky. Na iPhonu a iPadu už první řádek po otevření nabídky nevypadá jako vybraný."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange lister i et biblioteks Filter-menu, som Tags og Studier, har nu et søgefelt, står fra A til Å og hakker ikke længere på Apple TV. Play/Pause på Apple TV eller Færdig på iPhone, iPad og Mac lukker menuen fra enhver side. På iPhone og iPad ser den første række ikke længere valgt ud, når menuen åbner."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange Listen im Filter-Menü einer Mediathek, etwa Tags und Studios, haben jetzt ein Suchfeld, stehen von A bis Z und stocken auf dem Apple TV nicht mehr. Play/Pause auf dem Apple TV oder Fertig auf iPhone, iPad und Mac schließt das Menü von jeder Seite aus. Auf iPhone und iPad sieht die erste Zeile beim Öffnen nicht mehr ausgewählt aus."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι μεγάλες λίστες στο μενού Φίλτρο μιας βιβλιοθήκης, όπως Ετικέτες και Στούντιο, έχουν πλέον πεδίο αναζήτησης, ταξινομούνται από το Α έως το Ω και δεν κολλάνε πια στο Apple TV. Το Play/Pause στο Apple TV ή το Τέλος σε iPhone, iPad και Mac κλείνει το μενού από οποιαδήποτε σελίδα. Σε iPhone και iPad η πρώτη γραμμή δεν φαίνεται πλέον επιλεγμένη όταν ανοίγει το μενού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Long lists in a library's Filter menu, such as Tags and Studios, now have a search field, run A to Z and no longer stall on Apple TV. Play/Pause on Apple TV, or Done on iPhone, iPad and Mac, closes the menu from any page. On iPhone and iPad the first row no longer looks picked when the menu opens."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las listas largas del menú Filtrar de una biblioteca, como Etiquetas y Estudios, ahora tienen un campo de búsqueda, van de la A a la Z y ya no se traban en el Apple TV. Play/Pause en el Apple TV, o Listo en iPhone, iPad y Mac, cierra el menú desde cualquier página. En iPhone y iPad la primera fila ya no parece seleccionada al abrir el menú."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kirjaston Suodata-valikon pitkissä luetteloissa, kuten Tagit ja Studiot, on nyt hakukenttä, ne ovat aakkosjärjestyksessä eivätkä enää takeltele Apple TV:ssä. Play/Pause Apple TV:ssä tai Valmis iPhonessa, iPadissa ja Macissa sulkee valikon miltä sivulta tahansa. iPhonessa ja iPadissa ensimmäinen rivi ei enää näytä valitulta, kun valikko avautuu."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les longues listes du menu Filtrer d'une bibliothèque, comme Tags et Studios, ont désormais un champ de recherche, sont triées de A à Z et ne saccadent plus sur l'Apple TV. Play/Pause sur l'Apple TV, ou Terminé sur iPhone, iPad et Mac, ferme le menu depuis n'importe quelle page. Sur iPhone et iPad, la première ligne ne semble plus sélectionnée à l'ouverture du menu."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dugi popisi u izborniku Filtar knjižnice, poput Oznaka i Studija, sada imaju polje za pretraživanje, poredani su od A do Ž i više ne zapinju na Apple TV-u. Play/Pause na Apple TV-u ili Gotovo na iPhoneu, iPadu i Macu zatvara izbornik s bilo koje stranice. Na iPhoneu i iPadu prvi redak više ne izgleda odabrano kad se izbornik otvori."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egy könyvtár Szűrő menüjének hosszú listái, például a Címkék és a Stúdiók, mostantól keresőmezőt kapnak, A-tól Z-ig rendezettek, és nem akadnak meg többé az Apple TV-n. A Play/Pause az Apple TV-n, illetve a Kész iPhone-on, iPaden és Macen bármelyik oldalról bezárja a menüt. iPhone-on és iPaden az első sor már nem tűnik kijelöltnek a menü megnyitásakor."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli elenchi lunghi nel menu Filtra di una libreria, come Tag e Studi, ora hanno un campo di ricerca, sono ordinati dalla A alla Z e non si bloccano più su Apple TV. Play/Pause su Apple TV, o Fine su iPhone, iPad e Mac, chiude il menu da qualsiasi pagina. Su iPhone e iPad la prima riga non sembra più selezionata quando si apre il menu."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブラリのフィルタメニューにあるタグやスタジオなどの長いリストに検索フィールドが付き、A〜Z順に並び、Apple TVでも引っかからなくなりました。Apple TVではPlay/Pause、iPhone・iPad・Macでは完了で、どのページからでもメニューを閉じられます。iPhoneとiPadでは、メニューを開いたときに最初の行が選択済みのように見えなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리 필터 메뉴의 태그, 스튜디오 같은 긴 목록에 검색 필드가 생기고 A부터 Z 순으로 정렬되며, Apple TV에서 더 이상 버벅이지 않습니다. Apple TV에서는 Play/Pause, iPhone, iPad, Mac에서는 완료를 누르면 어느 페이지에서든 메뉴가 닫힙니다. iPhone과 iPad에서는 메뉴를 열 때 첫 번째 행이 선택된 것처럼 보이지 않습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange lister i Filter-menyen i et bibliotek, som Tagger og Studioer, har nå et søkefelt, står fra A til Å og henger ikke lenger på Apple TV. Play/Pause på Apple TV, eller Ferdig på iPhone, iPad og Mac, lukker menyen fra hvilken som helst side. På iPhone og iPad ser ikke den første raden lenger valgt ut når menyen åpnes."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange lijsten in het Filter-menu van een bibliotheek, zoals Tags en Studio's, hebben nu een zoekveld, staan van A tot Z en haperen niet meer op de Apple TV. Play/Pause op de Apple TV, of Gereed op iPhone, iPad en Mac, sluit het menu vanaf elke pagina. Op iPhone en iPad lijkt de eerste rij bij het openen niet meer geselecteerd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Długie listy w menu Filtruj biblioteki, takie jak Tagi i Studia, mają teraz pole wyszukiwania, są ułożone od A do Z i nie zacinają się już na Apple TV. Play/Pause na Apple TV albo Gotowe na iPhonie, iPadzie i Macu zamyka menu z dowolnej strony. Na iPhonie i iPadzie pierwszy wiersz nie wygląda już na wybrany po otwarciu menu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listas longas no menu Filtrar de uma biblioteca, como Tags e Estúdios, agora têm um campo de busca, ficam em ordem de A a Z e não travam mais na Apple TV. Play/Pause na Apple TV, ou Concluído no iPhone, iPad e Mac, fecha o menu de qualquer página. No iPhone e no iPad, a primeira linha não parece mais selecionada ao abrir o menu."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As listas longas no menu Filtrar de uma biblioteca, como Etiquetas e Estúdios, têm agora um campo de pesquisa, estão ordenadas de A a Z e já não encravam na Apple TV. Play/Pause na Apple TV, ou Concluído no iPhone, iPad e Mac, fecha o menu a partir de qualquer página. No iPhone e no iPad, a primeira linha já não parece selecionada ao abrir o menu."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listele lungi din meniul Filtru al unei biblioteci, cum ar fi Etichete și Studiouri, au acum un câmp de căutare, sunt ordonate de la A la Z și nu se mai blochează pe Apple TV. Play/Pause pe Apple TV sau Gata pe iPhone, iPad și Mac închide meniul de pe orice pagină. Pe iPhone și iPad, primul rând nu mai pare selectat la deschiderea meniului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длинные списки в меню «Фильтр» медиатеки, например «Теги» и «Студии», теперь имеют поле поиска, отсортированы от А до Я и больше не подтормаживают на Apple TV. Play/Pause на Apple TV или «Готово» на iPhone, iPad и Mac закрывает меню с любой страницы. На iPhone и iPad первая строка больше не выглядит выбранной при открытии меню."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlhé zoznamy v ponuke Filter knižnice, napríklad Štítky a Štúdiá, majú teraz vyhľadávacie pole, sú zoradené od A po Z a na Apple TV sa už nezasekávajú. Play/Pause na Apple TV alebo Hotovo na iPhone, iPade a Macu zatvorí ponuku z akejkoľvek stránky. Na iPhone a iPade už prvý riadok po otvorení ponuky nevyzerá ako vybraný."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Långa listor i ett biblioteks Filter-meny, som Taggar och Studior, har nu ett sökfält, står i ordning från A till Ö och hackar inte längre på Apple TV. Play/Pause på Apple TV, eller Klar på iPhone, iPad och Mac, stänger menyn från vilken sida som helst. På iPhone och iPad ser den första raden inte längre vald ut när menyn öppnas."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir kitaplığın Filtre menüsündeki Etiketler ve Stüdyolar gibi uzun listelerde artık bir arama alanı var, A'dan Z'ye sıralanıyor ve Apple TV'de artık takılmıyor. Apple TV'de Play/Pause veya iPhone, iPad ve Mac'te Bitti, menüyü her sayfadan kapatır. iPhone ve iPad'de menü açıldığında ilk satır artık seçili gibi görünmüyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Довгі списки в меню «Фільтр» медіатеки, наприклад «Теги» та «Студії», тепер мають поле пошуку, впорядковані від А до Я і більше не пригальмовують на Apple TV. Play/Pause на Apple TV або «Готово» на iPhone, iPad і Mac закриває меню з будь-якої сторінки. На iPhone та iPad перший рядок більше не виглядає вибраним під час відкриття меню."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "资料库筛选菜单中的长列表（如标签和制片公司）现在有搜索栏，按 A 到 Z 排序，在 Apple TV 上也不再卡顿。在 Apple TV 上按 Play/Pause，或在 iPhone、iPad 和 Mac 上点按完成，可从任意页面关闭菜单。在 iPhone 和 iPad 上，打开菜单时第一行不再看起来像已选中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "資料庫篩選選單中的長列表（如標籤和製片公司）現在有搜尋欄，依 A 到 Z 排序，在 Apple TV 上也不再卡頓。在 Apple TV 上按 Play/Pause，或在 iPhone、iPad 和 Mac 上點按完成，即可從任何頁面關閉選單。在 iPhone 和 iPad 上，開啟選單時第一列不再看起來像已選取。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.filterSearch.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hledání v seznamech filtrů"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Søgning i filterlisterne"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche in den Filterlisten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναζήτηση στις λίστες φίλτρων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search in the filter lists"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda en las listas de filtros"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haku suodatinluetteloissa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche dans les listes de filtres"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pretraživanje popisa filtara"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keresés a szűrőlistákban"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricerca negli elenchi dei filtri"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタのリストを検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "필터 목록 검색"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Søk i filterlistene"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoeken in de filterlijsten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyszukiwanie na listach filtrów"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Busca nas listas de filtros"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesquisa nas listas de filtros"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Căutare în listele de filtre"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск в списках фильтров"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyhľadávanie v zoznamoch filtrov"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök i filterlistorna"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre listelerinde arama"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук у списках фільтрів"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在筛选列表中搜索"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在篩選列表中搜尋"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.headphones.body" : {
       "extractionState" : "manual",
       "localizations" : {
