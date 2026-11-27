@@ -110,6 +110,9 @@ struct FilteredGridView: View {
     /// across versions (Sodalite#73). A music playlist has no detail screen to open, so it is dropped
     /// here instead. nil-tolerant: an unknown media type stays visible.
     let hidesAudioPlaylists: Bool
+    /// Behind a Recently Released row: entries the library lists without a file have nothing to play,
+    /// and the row drops them too (`HomeReleaseRowQuery.airedOnly`).
+    let hidesVirtualItems: Bool
     /// A combined Home's servers, active first; with more than one the grid pages through all of
     /// them (Sodalite#85). nil or one entry keeps the single-server path.
     let sources: [HomeSource]?
@@ -153,6 +156,7 @@ struct FilteredGridView: View {
         sortScope: LibrarySortScope? = nil,
         defaultSort: LibrarySort = .default,
         hidesAudioPlaylists: Bool = false,
+        hidesVirtualItems: Bool = false,
         sources: [HomeSource]? = nil,
         isTabRoot: Bool = false
     ) {
@@ -165,6 +169,7 @@ struct FilteredGridView: View {
         self.sortScope = sortScope
         self.defaultSort = defaultSort
         self.hidesAudioPlaylists = hidesAudioPlaylists
+        self.hidesVirtualItems = hidesVirtualItems
         self.sources = sources
         let storedSort = sortScope.map { LibrarySortStore.sort($0, fallback: defaultSort) } ?? defaultSort
         _sort = State(initialValue: storedSort)
@@ -835,8 +840,16 @@ struct FilteredGridView: View {
 
     /// Narrowing the server cannot express. On the sparse grid the same rule hides a slot instead
     /// (`SparseGridStore` keeps the server's count).
+    private func isHiddenItem(_ item: JellyfinItem) -> Bool {
+        Self.hides(item, audioPlaylists: hidesAudioPlaylists, virtualItems: hidesVirtualItems)
+    }
+
+    private static func hides(_ item: JellyfinItem, audioPlaylists: Bool, virtualItems: Bool) -> Bool {
+        (audioPlaylists && item.isAudioPlaylist) || (virtualItems && item.isVirtual)
+    }
+
     private func browsable(_ items: [JellyfinItem]) -> [JellyfinItem] {
-        hidesAudioPlaylists ? items.filter { !$0.isAudioPlaylist } : items
+        items.filter { !isHiddenItem($0) }
     }
 
     /// Whether a load can skip the 10 000-item scan and the Seerr watch-provider calls and reuse
@@ -897,7 +910,9 @@ struct FilteredGridView: View {
                     page.limit = limit
                     return try await service.getItems(userID: userID, query: page)
                 },
-                isHidden: { [hidesAudioPlaylists] in hidesAudioPlaylists && $0.isAudioPlaylist },
+                isHidden: { [hidesAudioPlaylists, hidesVirtualItems] in
+                    Self.hides($0, audioPlaylists: hidesAudioPlaylists, virtualItems: hidesVirtualItems)
+                },
                 seed: seed
             )
             return

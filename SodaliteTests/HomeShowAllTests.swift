@@ -101,6 +101,19 @@ struct HomeShowAllTests {
         #expect(row?.hasMore == false)
     }
 
+    /// Audio playlists fill the page and the total, and the grid hides them, so they say nothing
+    /// about whether there are more video playlists.
+    @Test func audioPlaylistsDoNotMakeAShowAll() async throws {
+        let library = FakeLibrary()
+        let video = try (0..<10).map { try JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"v\#($0)","Name":"V","Type":"Playlist","MediaType":"Video"}"#.utf8)) }
+        let audio = try (0..<70).map { try JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"a\#($0)","Name":"A","Type":"Playlist","MediaType":"Audio"}"#.utf8)) }
+        library.page = video + audio
+        library.total = 80
+        let row = try await load(.playlists, library)
+        #expect(row?.items.count == 10)
+        #expect(row?.hasMore == false)
+    }
+
     @Test func continueWatchingNeverOffersMore() async throws {
         let library = FakeLibrary()
         library.resume = try movies(16)
@@ -109,10 +122,16 @@ struct HomeShowAllTests {
         #expect(row?.hasMore == false)
     }
 
-    @Test func aCachedRowFromBeforeTheFlagDecodesWithout() throws {
-        let json = #"{"type":"favorites","items":[]}"#
-        let row = try JSONDecoder().decode(HomeRowData.self, from: Data(json.utf8))
-        #expect(row.hasMore == false)
+    /// A feed cached by the build before the flag paints once before it reloads: a full row keeps
+    /// the card it had, a short one gets none.
+    @Test func aCachedRowFromBeforeTheFlagGuessesFromItsLength() throws {
+        let short = try JSONDecoder().decode(HomeRowData.self, from: Data(#"{"type":"favorites","items":[]}"#.utf8))
+        #expect(short.hasMore == false)
+        let fullRow = HomeRowData(type: .allMovies, items: try movies(30))
+        var json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(fullRow)) as! [String: Any]
+        json["hasMore"] = nil
+        let full = try JSONDecoder().decode(HomeRowData.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(full.hasMore == true)
     }
 
     // MARK: - Combined servers
@@ -120,14 +139,20 @@ struct HomeShowAllTests {
     @Test func aMergedRowLeavesMoreWhenOneServerDid() throws {
         let a = HomeRowData(type: .favorites, items: try movies(3), hasMore: true)
         let b = HomeRowData(type: .favorites, items: [try movie("b")])
-        #expect(HomeMerger.leavesMore([a, b], shown: 4, type: .favorites, mergedContinueWatching: false))
+        let merged = HomeMerger.mergeRows([a, b], type: .favorites, mergedContinueWatching: false)
+        #expect(merged.items.count == 4)
+        #expect(merged.hasMore)
     }
 
     @Test func aMergedRowLeavesMoreWhenTheMergeCutIt() throws {
         let a = HomeRowData(type: .latestMovies, items: try (0..<10).map { try movie("a\($0)") })
         let b = HomeRowData(type: .latestMovies, items: try (0..<10).map { try movie("b\($0)") })
-        #expect(HomeMerger.leavesMore([a, b], shown: 16, type: .latestMovies, mergedContinueWatching: false))
-        #expect(!HomeMerger.leavesMore([a, b], shown: 20, type: .latestMovies, mergedContinueWatching: false))
+        let merged = HomeMerger.mergeRows([a, b], type: .latestMovies, mergedContinueWatching: false)
+        #expect(merged.items.count == 16)
+        #expect(merged.hasMore)
+        let short = HomeMerger.mergeRows([a, HomeRowData(type: .latestMovies, items: [try movie("c")])], type: .latestMovies, mergedContinueWatching: false)
+        #expect(short.items.count == 11)
+        #expect(!short.hasMore)
     }
 
     // MARK: - The grid behind the card
@@ -160,10 +185,20 @@ struct HomeShowAllTests {
         #expect(shows.query.fields.contains("DateLastMediaAdded"))
     }
 
+    @Test func aLatestRowWithOneLibraryLeftPagesThatLibrary() throws {
+        let scoped = try #require(HomeShowAll.grid(for: row(.latestShows), latestLibraryID: "kids"))
+        #expect(scoped.query.parentID == "kids")
+        let whole = try #require(HomeShowAll.grid(for: row(.latestMovies)))
+        #expect(whole.query.parentID == nil)
+        // Only the two Latest rows take the scope.
+        #expect(HomeShowAll.grid(for: row(.topRatedMovies), latestLibraryID: "kids")?.query.parentID == nil)
+    }
+
     @Test func releaseAndRatingRowsOpenInTheirOrder() throws {
         let released = try #require(HomeShowAll.grid(for: row(.recentlyReleasedMovies)))
         #expect(released.defaultSort == .newestReleased)
         #expect(released.query.maxPremiereDate != nil)
+        #expect(released.hidesVirtualItems)
 
         let episodes = try #require(HomeShowAll.grid(for: row(.recentlyReleasedShows)))
         #expect(episodes.query.includeItemTypes == [.episode])

@@ -16,6 +16,8 @@ enum HomeShowAll {
         /// picked sort there would only turn it into the library grid.
         let offersSort: Bool
         var hidesAudioPlaylists = false
+        /// The release rows drop entries the library lists without a file (`HomeReleaseRowQuery.airedOnly`).
+        var hidesVirtualItems = false
     }
 
     /// Grid pages, the size every Home grid pages in.
@@ -23,33 +25,46 @@ enum HomeShowAll {
 
     /// nil for a row with nothing behind it to page, and for All Movies, All Series and collection
     /// shelves, which open grids of their own (`HomeView.allItemsFilter`, `collectionShelfFilter`).
-    static func grid(for row: HomeRowData, now: Date = Date()) -> Grid? {
+    /// `latestLibraryID` scopes Latest Movies or Latest Shows to the one library the row still reads
+    /// when the others of its kind are hidden in Customize Home.
+    static func grid(for row: HomeRowData, latestLibraryID: String? = nil, now: Date = Date()) -> Grid? {
         guard row.hasMore else { return nil }
         let fields = JellyfinEndpoint.homeRowFields
-        func list(_ types: [ItemType], sort: LibrarySort, offersSort: Bool = false, isFavorite: Bool? = nil) -> Grid {
+        func list(_ types: [ItemType], sort: LibrarySort, offersSort: Bool = false, isFavorite: Bool? = nil, parentID: String? = nil) -> Grid {
             Grid(
-                query: ItemQuery(includeItemTypes: types, limit: pageSize, isFavorite: isFavorite, fields: fields),
+                query: ItemQuery(
+                    parentID: parentID, includeItemTypes: types, limit: pageSize, isFavorite: isFavorite, fields: fields
+                ),
                 defaultSort: sort,
                 offersSort: offersSort
             )
         }
         switch row.type {
         case .latestMovies:
-            return list([.movie], sort: .newestAdded)
+            return list([.movie], sort: .newestAdded, parentID: latestLibraryID)
         case .latestShows:
             return Grid(
-                query: ItemQuery(includeItemTypes: [.series], limit: pageSize, fields: fields + ",DateLastMediaAdded"),
+                query: ItemQuery(
+                    parentID: latestLibraryID, includeItemTypes: [.series], limit: pageSize,
+                    fields: fields + ",DateLastMediaAdded"
+                ),
                 defaultSort: .newestEpisode,
                 offersSort: false
             )
         case .recentlyAdded:
             return list([.movie, .series], sort: .newestAdded)
         case .recentlyReleasedMovies:
-            return Grid(query: HomeReleaseRowQuery.movies(now: now, limit: pageSize), defaultSort: .newestReleased, offersSort: false)
+            return Grid(
+                query: HomeReleaseRowQuery.movies(now: now, limit: pageSize),
+                defaultSort: .newestReleased, offersSort: false, hidesVirtualItems: true
+            )
         case .recentlyReleasedShows:
             // The episodes themselves: no series sort follows the newest aired episode, and the row
             // folds them only to keep one tile per show in sixteen.
-            return Grid(query: HomeReleaseRowQuery.episodes(now: now, limit: pageSize), defaultSort: .newestReleased, offersSort: false)
+            return Grid(
+                query: HomeReleaseRowQuery.episodes(now: now, limit: pageSize),
+                defaultSort: .newestReleased, offersSort: false, hidesVirtualItems: true
+            )
         case .topRatedMovies:
             return list([.movie], sort: .highestRated)
         case .topRatedShows:

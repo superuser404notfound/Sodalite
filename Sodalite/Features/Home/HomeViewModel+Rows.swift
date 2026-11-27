@@ -363,7 +363,9 @@ extension HomeViewModel {
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 let video = response.items.filter { !$0.isAudioPlaylist }
                 items = Array(video.prefix(30))
-                hasMore = Self.leftMore(response, requested: query.limit) || video.count > items.count
+                // The page and the total count audio playlists too, which the grid hides, so a full
+                // page says more only once the row itself is full.
+                hasMore = video.count > items.count || (items.count == 30 && Self.leftMore(response, requested: query.limit))
 
             case .libraryLatest:
                 // Per-library Latest scoped by parentID alone. Deliberately NO IncludeItemTypes: it would filter before GroupItems grouping, collapsing an episodes-only library to one tile (Sodalite#12, DrHurt "latest in Series - French only loads 1 item"). ParentId already constrains the library, so the type hint the aggregate rows need (they drop ParentId) is the bug here.

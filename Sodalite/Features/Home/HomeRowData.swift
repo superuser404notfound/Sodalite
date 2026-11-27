@@ -66,14 +66,19 @@ struct HomeRowData: Identifiable, Sendable, Codable {
     /// depend on that having been true.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(HomeRowType.self, forKey: .type)
+        let items = try container.decode([JellyfinItem].self, forKey: .items)
         self.init(
-            type: try container.decode(HomeRowType.self, forKey: .type),
-            items: try container.decode([JellyfinItem].self, forKey: .items),
+            type: type,
+            items: items,
             libraryID: try container.decodeIfPresent(String.self, forKey: .libraryID),
             libraryName: try container.decodeIfPresent(String.self, forKey: .libraryName),
             serverID: try container.decodeIfPresent(String.self, forKey: .serverID),
             collectionType: try container.decodeIfPresent(String.self, forKey: .collectionType),
-            hasMore: try container.decodeIfPresent(Bool.self, forKey: .hasMore) ?? false
+            // A feed written before the flag: a full row is the best guess for its first paint,
+            // which is what All Movies and the collection shelves went by until then.
+            hasMore: try container.decodeIfPresent(Bool.self, forKey: .hasMore)
+                ?? (items.count >= HomeMerger.limit(for: type, mergedContinueWatching: false))
         )
     }
 

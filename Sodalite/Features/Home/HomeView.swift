@@ -149,6 +149,7 @@ struct HomeView: View {
                     sortScope: filter.sortScope,
                     defaultSort: filter.defaultSort,
                     hidesAudioPlaylists: filter.hidesAudioPlaylists,
+                    hidesVirtualItems: filter.hidesVirtualItems,
                     sources: filter.sources
                 )
                 // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
@@ -555,7 +556,9 @@ struct HomeView: View {
                             cardStyle: rowStyle,
                             showsSeriesArtwork: cwImage != .still,
                             itemLabel: { vm.serverLabel(forItem: $0, in: row) },
-                            onShowAll: showAllFilter(for: row).map { filter in { selectedFilter = filter } }
+                            // Built at the tap: a release grid's MaxPremiereDate is "now" then, not
+                            // whenever Home last rendered.
+                            onShowAll: showAllFilter(for: row) == nil ? nil : { selectedFilter = showAllFilter(for: row) }
                         )
                         .environment(\.dropSeries, row.type == .continueWatching || row.type == .nextUp
                             ? DropSeriesAction { item in
@@ -713,7 +716,7 @@ struct HomeView: View {
         if row.type == .allMovies || row.type == .allSeries {
             return allItemsFilter(row.type == .allMovies ? .movie : .series)
         }
-        guard let grid = HomeShowAll.grid(for: row) else { return nil }
+        guard let grid = HomeShowAll.grid(for: row, latestLibraryID: latestLibraryScope(for: row)) else { return nil }
         let title = viewModel?.customTitle(forRow: row.id) ?? HomeShowAll.title(for: row)
         // A library row belongs to one server; every other row merges all of them.
         if row.type == .libraryLatest, let libraryID = row.libraryID {
@@ -740,8 +743,26 @@ struct HomeView: View {
             sortScope: grid.offersSort ? sortScopeID.map { LibrarySortScope.homeRow(row.id, scope: $0) } : nil,
             defaultSort: grid.defaultSort,
             hidesAudioPlaylists: grid.hidesAudioPlaylists,
+            hidesVirtualItems: grid.hidesVirtualItems,
             sources: combinedSources
         )
+    }
+
+    /// Latest Movies and Latest Shows leave hidden libraries out. A grid pages one library or the
+    /// whole server, so with exactly one library of the kind left it pages that one; with several
+    /// left, or across combined servers, the grid lists the hidden ones too.
+    private func latestLibraryScope(for row: HomeRowData) -> String? {
+        guard combinedSources == nil, let vm = viewModel else { return nil }
+        let kind: String
+        switch row.type {
+        case .latestMovies: kind = "movies"
+        case .latestShows: kind = "tvshows"
+        default: return nil
+        }
+        let ofKind = vm.myMediaLibraries.filter { $0.collectionType == kind }
+        let shown = ofKind.filter { !vm.libraryLayout.isHidden($0, fallbackServerID: vm.serverID) }
+        guard shown.count == 1, ofKind.count > 1 else { return nil }
+        return shown[0].id
     }
 
     /// Every movie or every series on every combined server, alphabetical. The grid behind both the
@@ -848,6 +869,8 @@ struct FilterDestination: Identifiable, Hashable {
     var defaultSort: LibrarySort = .default
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).
     var hidesAudioPlaylists = false
+    /// Behind a Recently Released row: drop entries without a file, as the row does.
+    var hidesVirtualItems = false
     /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
     var serverID: String? = nil
     /// A combined Home's servers for a genre or provider tile; the grid pages through all of them.

@@ -399,12 +399,9 @@ final class HomeViewModel {
         } else {
             let rows = await fetchAcrossSources(entry.config)
             guard let first = rows.first else { return .empty }
-            let mergedContinueWatching = HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope)
-            let items = HomeMerger.merge(
-                rows.map(\.items), type: entry.type, mergedContinueWatching: mergedContinueWatching
-            )
-            let hasMore = HomeMerger.leavesMore(
-                rows, shown: items.count, type: entry.type, mergedContinueWatching: mergedContinueWatching
+            let (items, hasMore) = HomeMerger.mergeRows(
+                rows, type: entry.type,
+                mergedContinueWatching: HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope)
             )
             let merged = HomeRowData(
                 type: first.type, items: items, libraryID: first.libraryID,
