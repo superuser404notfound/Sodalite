@@ -76623,6 +76623,328 @@
         }
       }
     },
+    "changelog.1_2_0.styledSubtitles.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Když stylované titulky ASS používají znaky, které žádné písmo v zařízení nemá, například čínštinu vedle angličtiny, stopa nyní přejde na prostý text, aby zůstal čitelný každý řádek. Nastavení přehrávání se nemění."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når en stylet ASS-undertekst bruger tegn, som ingen skrifttype på enheden har, for eksempel kinesisk ved siden af engelsk, skifter sporet nu til ren tekst, så hver linje kan læses. Din afspilningsindstilling forbliver uændret."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn ein gestylter ASS-Untertitel Zeichen nutzt, die keine Schrift auf dem Gerät hat, etwa Chinesisch neben Englisch, wechselt die Spur jetzt zu reinem Text, damit jede Zeile lesbar bleibt. Deine Wiedergabe-Einstellung bleibt, wie sie ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όταν ένας μορφοποιημένος υπότιτλος ASS χρησιμοποιεί χαρακτήρες που δεν έχει καμία γραμματοσειρά της συσκευής, για παράδειγμα κινέζικα δίπλα σε αγγλικά, το κομμάτι περνά πλέον σε απλό κείμενο ώστε κάθε γραμμή να διαβάζεται. Η ρύθμιση αναπαραγωγής σας δεν αλλάζει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a styled ASS subtitle uses characters that no font on the device has, Chinese next to English for example, the track now switches to plain text so every line stays readable. Your Playback setting stays as it is."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando un subtítulo ASS con estilo usa caracteres que ninguna fuente del dispositivo tiene, por ejemplo chino junto a inglés, la pista pasa ahora a texto simple para que cada línea se pueda leer. Tu ajuste de reproducción no cambia."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun muotoiltu ASS-tekstitys käyttää merkkejä, joita mikään laitteen fontti ei sisällä, esimerkiksi kiinaa englannin rinnalla, raita vaihtuu nyt pelkkään tekstiin, jotta jokainen rivi pysyy luettavana. Toistoasetuksesi pysyy ennallaan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand un sous-titre ASS stylisé utilise des caractères qu'aucune police de l'appareil ne contient, par exemple du chinois à côté de l'anglais, la piste passe désormais en texte simple pour que chaque ligne reste lisible. Ton réglage de lecture ne change pas."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kada stilizirani ASS titl koristi znakove koje nema nijedan font na uređaju, primjerice kineski uz engleski, zapis sada prelazi na običan tekst kako bi svaki redak ostao čitljiv. Tvoja postavka reprodukcije ostaje ista."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha egy formázott ASS felirat olyan karaktereket használ, amelyek egyik betűtípusban sincsenek meg az eszközön, például kínait az angol mellett, a sáv most egyszerű szövegre vált, így minden sor olvasható marad. A lejátszási beállításod nem változik."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando un sottotitolo ASS con stile usa caratteri che nessun font del dispositivo contiene, per esempio cinese accanto all'inglese, la traccia ora passa al testo semplice, così ogni riga resta leggibile. L'impostazione di riproduzione non cambia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタイル付きASS字幕に、端末のどのフォントにもない文字（英語と並ぶ中国語など）が含まれる場合、すべての行を読めるようにトラックがプレーンテキストに切り替わるようになりました。再生設定は変わりません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스타일이 적용된 ASS 자막에 기기의 어떤 글꼴에도 없는 문자(예: 영어 옆의 중국어)가 있으면, 이제 모든 줄을 읽을 수 있도록 트랙이 일반 텍스트로 바뀝니다. 재생 설정은 그대로 유지됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Når en stilisert ASS-undertekst bruker tegn som ingen skrift på enheten har, for eksempel kinesisk ved siden av engelsk, bytter sporet nå til ren tekst slik at hver linje kan leses. Avspillingsinnstillingen din forblir som den er."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als een opgemaakte ASS-ondertitel tekens gebruikt die geen enkel lettertype op het apparaat heeft, bijvoorbeeld Chinees naast Engels, schakelt het spoor nu over op platte tekst, zodat elke regel leesbaar blijft. Je afspeelinstelling blijft zoals ze is."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gdy stylizowane napisy ASS używają znaków, których nie ma żadna czcionka na urządzeniu, na przykład chińskiego obok angielskiego, ścieżka przechodzi teraz na zwykły tekst, aby każdy wiersz był czytelny. Ustawienie odtwarzania się nie zmienia."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando uma legenda ASS estilizada usa caracteres que nenhuma fonte do aparelho tem, como chinês ao lado de inglês, a faixa agora muda para texto simples para que cada linha continue legível. Sua configuração de reprodução continua como está."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando uma legenda ASS com estilo usa caracteres que nenhum tipo de letra do dispositivo tem, por exemplo chinês ao lado de inglês, a faixa passa agora a texto simples para que cada linha continue legível. A tua definição de reprodução mantém-se."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Când o subtitrare ASS stilizată folosește caractere pe care niciun font de pe dispozitiv nu le are, de exemplu chineză lângă engleză, pista trece acum la text simplu, ca fiecare rând să rămână lizibil. Setarea de redare rămâne neschimbată."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если в стилизованных субтитрах ASS есть символы, которых нет ни в одном шрифте устройства, например китайский рядом с английским, дорожка теперь переключается на простой текст, чтобы каждая строка оставалась читаемой. Настройка воспроизведения не меняется."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keď štylizované titulky ASS používajú znaky, ktoré nemá žiadne písmo v zariadení, napríklad čínštinu vedľa angličtiny, stopa teraz prejde na obyčajný text, aby zostal čitateľný každý riadok. Nastavenie prehrávania sa nemení."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "När en formaterad ASS-undertext använder tecken som inget typsnitt på enheten har, till exempel kinesiska bredvid engelska, växlar spåret nu till ren text så att varje rad går att läsa. Din uppspelningsinställning förblir som den är."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biçimli bir ASS altyazısı cihazdaki hiçbir yazı tipinde olmayan karakterler kullandığında, örneğin İngilizcenin yanında Çince, parça artık düz metne geçer ve her satır okunabilir kalır. Oynatma ayarın olduğu gibi kalır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Якщо стилізовані субтитри ASS містять символи, яких немає в жодному шрифті пристрою, наприклад китайська поруч з англійською, доріжка тепер переходить на простий текст, щоб кожен рядок залишався читабельним. Налаштування відтворення не змінюється."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当样式 ASS 字幕用到设备上任何字体都没有的字符时（例如英文旁的中文），字幕轨道现在会切换为纯文本，让每一行都能看清。你的播放设置保持不变。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "當樣式 ASS 字幕用到裝置上任何字型都沒有的字元時（例如英文旁的中文），字幕軌現在會切換為純文字，讓每一行都看得清楚。你的播放設定維持不變。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.styledSubtitles.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chybějící znaky ve stylovaných titulcích"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manglende tegn i stylede undertekster"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlende Zeichen in gestylten Untertiteln"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χαρακτήρες που λείπουν στους μορφοποιημένους υπότιτλους"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missing characters in styled subtitles"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caracteres que faltan en subtítulos con estilo"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puuttuvat merkit muotoilluissa tekstityksissä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caractères manquants dans les sous-titres stylisés"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Znakovi koji nedostaju u stiliziranim titlovima"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiányzó karakterek a formázott feliratokban"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caratteri mancanti nei sottotitoli con stile"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタイル付き字幕で欠ける文字"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스타일 자막에서 빠진 문자"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manglende tegn i stiliserte undertekster"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ontbrekende tekens in opgemaakte ondertitels"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brakujące znaki w stylizowanych napisach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caracteres ausentes em legendas estilizadas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caracteres em falta nas legendas com estilo"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caractere lipsă în subtitrările stilizate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропавшие символы в стилизованных субтитрах"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chýbajúce znaky v štylizovaných titulkoch"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saknade tecken i formaterade undertexter"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biçimli altyazılarda eksik karakterler"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відсутні символи в стилізованих субтитрах"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "样式字幕中缺失的字符"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "樣式字幕中缺少的字元"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.transcodeTracks.body" : {
       "extractionState" : "manual",
       "localizations" : {

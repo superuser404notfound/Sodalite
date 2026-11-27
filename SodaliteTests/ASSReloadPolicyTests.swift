@@ -31,7 +31,7 @@ struct ASSReloadPolicyTests {
 }
 
 struct ASSFontFallbackTests {
-    private let missingChineseGlyph = "[swift-ass] fontselect: failed to find any fallback with glyph 0x4F60 for font: Microsoft YaHei, 400, 0"
+    private let missingChineseGlyph = "[swift-ass] fontselect: failed to find any fallback with glyph 0x4F60 for font: (Microsoft YaHei, 400, 0)"
 
     @Test("a missing Chinese glyph triggers fallback even if the English face rendered")
     func missingChineseGlyphFallsBack() {

@@ -76,6 +76,9 @@ final class ASSRenderCoordinator {
     var onRendererChanged: ((AssSubtitlesRenderer?) -> Void)?
     /// Guards async font-write completion against a deactivate/re-activate during the writes.
     private var activationGeneration = 0
+    /// Moves with every renderer built, so a glyph failure counts only against the renderer that
+    /// raised it, not against one rebuilt since with fonts that landed later.
+    private var rendererGeneration = 0
     private var fontFallback = ASSFontFallback()
 
     /// Activate for the selected embedded track (`header` = track's `assHeader`). Bails (renderer
@@ -90,7 +93,6 @@ final class ASSRenderCoordinator {
         guard let header, !header.isEmpty else { return }
         activationGeneration += 1
         let generation = activationGeneration
-        fontFallback.activate(generation: generation)
         let fontsDir = ASSFontCache.directory(itemID: itemID)
         ASSFontCache.prune(keeping: fontsDir)
         let fonts = player.fontAttachments
@@ -139,6 +141,7 @@ final class ASSRenderCoordinator {
 
     func deactivate() {
         activationGeneration += 1
+        rendererGeneration += 1
         fontFallback.deactivate()
         cancellables.removeAll()
         renderer?.freeTrack()
@@ -178,7 +181,9 @@ final class ASSRenderCoordinator {
 
     private func installRenderer(fontsDir: URL) {
         let config = FontConfig(fontsPath: fontsDir, fontProvider: .coreText)
-        let generation = activationGeneration
+        rendererGeneration += 1
+        let generation = rendererGeneration
+        fontFallback.activate(generation: generation)
         // Custom output receives warnings in Release too. Missing a requested family is normal:
         // only a terminal glyph-resolution failure should discard the author's styling.
         let renderer = AssSubtitlesRenderer(fontConfig: config, logOutput: .custom { [weak self] message in
@@ -202,11 +207,14 @@ final class ASSRenderCoordinator {
 
     private func handleFontFailure(_ message: String, generation: Int) {
         guard fontFallback.take(message: message, generation: generation) else { return }
-        // Keep the engine's raw cues and the user's preference intact. Publishing nil switches
-        // the overlay to its existing ASS-to-plain-text path for this activation only. Merely
-        // changing libass's default family cannot guarantee coverage for the missing glyph.
-        print("[subtitles] Styled ASS font resolution failed; using plain text for this track")
-        deactivate()
+        // Publishing nil switches the overlay to its ASS-to-plain-text path; the raw cues and the
+        // saved preference stay. Only the renderer goes: the builder keeps collecting events and
+        // the font sink stays up, because the engine reads a Matroska file's fonts after the first
+        // frame (AE#1129) and the face that has the glyph may be one of them. When it lands,
+        // `reinstallRenderer` brings styling back with the whole script.
+        LogTap.shared.note("[Subtitles] styled ASS shows plain text, libass found no glyph: \(message)")
+        renderer?.freeTrack()
+        renderer = nil
         onRendererChanged?(nil)
     }
 
@@ -321,6 +329,7 @@ final class ASSRenderCoordinator {
 /// libass can substitute a missing family successfully. React only when it exhausts glyph
 /// fallback, not to the initial "Glyph ... not found, selecting one more font" diagnostic.
 /// Kept independent of the renderer so the policy is testable without device-specific fonts.
+/// `generation` is the coordinator's renderer generation: each renderer gets one failure.
 nonisolated struct ASSFontFallback {
     private var generation: Int?
     private var hasFailed = false

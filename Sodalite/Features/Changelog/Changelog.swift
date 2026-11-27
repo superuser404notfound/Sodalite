@@ -28,6 +28,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_2_0.styledSubtitles.title",
+                    "changelog.1_2_0.styledSubtitles.body",
+                    icon: "character.bubble"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_2_0.transcodeTracks.title",
                     "changelog.1_2_0.transcodeTracks.body",
                     icon: "waveform"
