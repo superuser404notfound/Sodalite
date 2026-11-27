@@ -89,7 +89,7 @@ nonisolated struct TopShelfAPI: Sendable {
     private var authHeader: String {
         let parts = [
             "Client=\"Sodalite\"",
-            "Device=\"Apple TV\"",
+            "Device=\"\(ClientDevice.name)\"",
             "DeviceId=\"\(Self.deviceID)\"",
             "Version=\"1.0\"",
             "Token=\"\(session.accessToken)\"",

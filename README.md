@@ -286,6 +286,7 @@ Every feature is free. Settings are named as they appear in the app.
 ### Privacy and troubleshooting
 
 - **No tracking**: no analytics, no ads, no third-party SDKs. Sign-ins stay in your Keychain and your own iCloud.
+- **What your server sees**: Sodalite names itself by device type (Apple TV, iPhone, iPad or Mac), never by the name you gave the device. Jellyfin shows it in its device list, and addons can use it to tell your devices apart, for example to offer smaller versions on the phone.
 - **Self-signed certificates**: accept a certificate once, by its fingerprint, for that one address. A changed certificate asks again; there is no "allow anything" switch.
 - **Diagnostic Log** (Settings → Diagnostic Log): the last 300 lines from the app, with access tokens removed, so a bug report can carry the real error. Nothing is uploaded. Copy it on iPhone and iPad; on Apple TV, Export shows a QR code that opens it on your phone. An optional log file keeps up to 32 MB across restarts. It also notes why subtitles came on or stayed off when a title starts, whether from a remembered pick, the language settings or a forced track.
 

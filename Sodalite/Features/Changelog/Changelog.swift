@@ -52,6 +52,12 @@ enum Changelog {
                 ),
                 ChangelogHighlight(
                     .fix,
+                    "changelog.1_2_0.deviceType.title",
+                    "changelog.1_2_0.deviceType.body",
+                    icon: "ipad.and.iphone"
+                ),
+                ChangelogHighlight(
+                    .fix,
                     "changelog.1_2_0.styledSubtitles.title",
                     "changelog.1_2_0.styledSubtitles.body",
                     icon: "character.bubble"

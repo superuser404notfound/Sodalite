@@ -115,7 +115,7 @@ final class JellyfinClient {
     private func buildMediaBrowserHeader(includeToken: Bool) -> String {
         var authParts = [
             "Client=\"Sodalite\"",
-            "Device=\"Apple TV\"",
+            "Device=\"\(ClientDevice.name)\"",
             "DeviceId=\"\(deviceID)\"",
             "Version=\"\(appVersion)\"",
         ]
