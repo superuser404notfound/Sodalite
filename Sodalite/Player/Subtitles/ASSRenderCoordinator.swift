@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import AetherEngine
 import SwiftAssRenderer
+import Synchronization
 
 /// Drives swift-ass-renderer from AetherEngine's data surface for
 /// styled ASS/SSA subtitle tracks (AetherEngine#30 host contract):
@@ -76,15 +77,21 @@ final class ASSRenderCoordinator {
     var onRendererChanged: ((AssSubtitlesRenderer?) -> Void)?
     /// Guards async font-write completion against a deactivate/re-activate during the writes.
     private var activationGeneration = 0
-    /// Moves with every renderer built, so a glyph failure counts only against the renderer that
-    /// raised it, not against one rebuilt since with fonts that landed later.
+    /// Moves with every renderer built or dropped, so a glyph failure only ever drops the renderer
+    /// that raised it.
     private var rendererGeneration = 0
-    private var fontFallback = ASSFontFallback()
+    /// SwiftAssRenderer 1.3.1 sends every libass message through one process-wide callback, and the
+    /// most recently built renderer owns it. A render still running on a dropped renderer's queue
+    /// would report its glyph misses to the new one, so the next renderer waits until that queue
+    /// has drained. A time window would only make this unlikely.
+    private var retiringRenderer: AssSubtitlesRenderer?
+    private var installAfterRetire: (fontsDir: URL, generation: Int, fullScript: Bool)?
 
     /// Activate for the selected embedded track (`header` = track's `assHeader`). Bails (renderer
     /// stays nil, caller keeps the text path) when the header is missing or setup fails.
-    /// Fonts are written off-main (anime MKVs embed dozens of 5-20 MB CJK faces); when all files
-    /// already exist the renderer installs synchronously so `activate(...); renderer` still works.
+    /// Fonts are written off-main (anime MKVs embed dozens of 5-20 MB CJK faces). When all files
+    /// already exist and no dropped renderer is still draining, the renderer installs synchronously
+    /// so `activate(...); renderer` still works. Otherwise it arrives through `onRendererChanged`.
     /// The engine reads a Matroska file's fonts after the first frame (AE#1129), so an activation at
     /// load usually sees none yet: the renderer starts on whatever the item's cache holds and is
     /// rebuilt once the list lands with fonts the cache lacks.
@@ -97,13 +104,13 @@ final class ASSRenderCoordinator {
         ASSFontCache.prune(keeping: fontsDir)
         let fonts = player.fontAttachments
         if Self.allFontsPresent(fonts, in: fontsDir) {
-            installRenderer(fontsDir: fontsDir)
+            requestInstall(fontsDir: fontsDir, fullScript: false)
         } else {
             Task.detached(priority: .userInitiated) { [weak self] in
                 Self.writeFontAttachments(fonts, to: fontsDir)
                 await MainActor.run {
                     guard let self, self.activationGeneration == generation else { return }
-                    self.installRenderer(fontsDir: fontsDir)
+                    self.requestInstall(fontsDir: fontsDir, fullScript: false)
                 }
             }
         }
@@ -141,11 +148,9 @@ final class ASSRenderCoordinator {
 
     func deactivate() {
         activationGeneration += 1
-        rendererGeneration += 1
-        fontFallback.deactivate()
         cancellables.removeAll()
-        renderer?.freeTrack()
-        renderer = nil
+        retireRenderer()
+        installAfterRetire = nil
         builder = nil
         // The offered set is keyed against THIS builder's contents; a new track builds a new one.
         // `activate` deactivates first, so clearing here covers both directions.
@@ -170,29 +175,57 @@ final class ASSRenderCoordinator {
     /// libass reads its font directory when the renderer is built, so new fonts need a new one. It
     /// starts without a track, so the whole script goes in at once instead of waiting for a batch.
     private func reinstallRenderer(fontsDir: URL) {
-        renderer?.freeTrack()
-        installRenderer(fontsDir: fontsDir)
-        guard builder != nil else { return }
-        pendingEvents = true
-        earliestPendingStart = lastOffset
-        lastReloadAt = .distantPast
-        flushPendingEventsIfDue()
+        retireRenderer()
+        requestInstall(fontsDir: fontsDir, fullScript: true)
     }
 
-    private func installRenderer(fontsDir: URL) {
+    private func requestInstall(fontsDir: URL, fullScript: Bool) {
+        if retiringRenderer != nil {
+            installAfterRetire = (fontsDir, activationGeneration, fullScript)
+        } else {
+            installRenderer(fontsDir: fontsDir, fullScript: fullScript)
+        }
+    }
+
+    /// Drop the current renderer and hold it until its work queue has run what it already held.
+    private func retireRenderer() {
+        rendererGeneration += 1
+        guard let old = renderer else { return }
+        renderer = nil
+        old.freeTrack()
+        retiringRenderer = old
+        let id = ObjectIdentifier(old)
+        // With the track gone this frame draws nothing, and it completes after the queued work.
+        old.loadFrame(offset: 0) { [weak self] _ in
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated { self?.retiredRendererDrained(id) }
+            }
+        }
+    }
+
+    private func retiredRendererDrained(_ id: ObjectIdentifier) {
+        guard let retiringRenderer, ObjectIdentifier(retiringRenderer) == id else { return }
+        self.retiringRenderer = nil
+        guard let pending = installAfterRetire else { return }
+        installAfterRetire = nil
+        guard pending.generation == activationGeneration else { return }
+        installRenderer(fontsDir: pending.fontsDir, fullScript: pending.fullScript)
+    }
+
+    private func installRenderer(fontsDir: URL, fullScript: Bool) {
         let config = FontConfig(fontsPath: fontsDir, fontProvider: .coreText)
         rendererGeneration += 1
         let generation = rendererGeneration
-        fontFallback.activate(generation: generation)
-        // Custom output receives warnings in Release too. Missing a requested family is normal:
-        // only a terminal glyph-resolution failure should discard the author's styling.
+        // A custom output hears warnings in Release too. libass substituting a requested family
+        // is normal, so only characters it could not draw at all count (`ASSFontFallback`).
+        let glyphFailures = ASSGlyphFailures()
         let renderer = AssSubtitlesRenderer(fontConfig: config, logOutput: .custom { [weak self] message in
             #if DEBUG
             if message.level != .verbose { print(message.message) }
             #else
             if message.level == .fatal { print(message.message) }
             #endif
-            guard ASSFontFallback.isUnrenderableGlyph(message.message) else { return }
+            guard glyphFailures.take(message: message.message) else { return }
             Task { @MainActor [weak self] in
                 self?.handleFontFailure(message.message, generation: generation)
             }
@@ -201,20 +234,24 @@ final class ASSRenderCoordinator {
         // Paused, the clock does not tick, so without this the new renderer would sit at 0.
         renderer.setTimeOffset(scriptTime)
         onRendererChanged?(renderer)
+        if fullScript, builder != nil {
+            pendingEvents = true
+            earliestPendingStart = lastOffset
+            lastReloadAt = .distantPast
+        }
         // Surface events that arrived in the builder while fonts were being written.
         flushPendingEventsIfDue()
     }
 
     private func handleFontFailure(_ message: String, generation: Int) {
-        guard fontFallback.take(message: message, generation: generation) else { return }
-        // Publishing nil switches the overlay to its ASS-to-plain-text path; the raw cues and the
-        // saved preference stay. Only the renderer goes: the builder keeps collecting events and
-        // the font sink stays up, because the engine reads a Matroska file's fonts after the first
-        // frame (AE#1129) and the face that has the glyph may be one of them. When it lands,
-        // `reinstallRenderer` brings styling back with the whole script.
-        LogTap.shared.note("[Subtitles] styled ASS shows plain text, libass found no glyph: \(message)")
-        renderer?.freeTrack()
-        renderer = nil
+        guard generation == rendererGeneration, renderer != nil else { return }
+        // Publishing nil switches the overlay to its ASS-to-plain-text path. The raw cues and the
+        // saved preference stay, and so does the activation. The builder keeps collecting events
+        // and the font sink stays up, because the engine reads a Matroska file's fonts after the
+        // first frame (AE#1129) and the face that has these characters may be one of them. When
+        // it lands, `reinstallRenderer` brings styling back with the whole script.
+        LogTap.shared.note("[Subtitles] styled ASS shows plain text, libass could not draw \(ASSFontFallback.threshold) characters, last: \(message)")
+        retireRenderer()
         onRendererChanged?(nil)
     }
 
@@ -326,35 +363,48 @@ final class ASSRenderCoordinator {
     }
 }
 
-/// libass can substitute a missing family successfully. React only when it exhausts glyph
-/// fallback, not to the initial "Glyph ... not found, selecting one more font" diagnostic.
-/// Kept independent of the renderer so the policy is testable without device-specific fonts.
-/// `generation` is the coordinator's renderer generation: each renderer gets one failure.
+/// When styled ASS gives up. libass substituting a missing family is fine, and so is the first
+/// "Glyph ... not found, selecting one more font" line, which a fallback face usually resolves.
+/// What counts is a character it could not draw with any face. One such character (a lone PUA
+/// sign glyph, a symbol no font has) is not worth the typesetting of the whole track, so the switch
+/// waits for `threshold` distinct ones. A Chinese line next to English reaches that at once.
 nonisolated struct ASSFontFallback {
-    private var generation: Int?
-    private var hasFailed = false
+    static let threshold = 3
+    private var missing: Set<UInt32> = []
+    private var fired = false
 
-    mutating func activate(generation: Int) {
-        self.generation = generation
-        hasFailed = false
-    }
-
-    mutating func deactivate() {
-        generation = nil
-        hasFailed = false
-    }
-
-    mutating func take(message: String, generation: Int) -> Bool {
-        guard self.generation == generation, !hasFailed,
-              Self.isUnrenderableGlyph(message) else { return false }
-        hasFailed = true
+    /// True exactly once, for the message that brings the count of distinct characters libass
+    /// could not draw to `threshold`.
+    mutating func take(message: String) -> Bool {
+        guard !fired, let codepoint = Self.unrenderableCodepoint(message) else { return false }
+        missing.insert(codepoint)
+        guard missing.count >= Self.threshold else { return false }
+        fired = true
         return true
     }
 
-    static func isUnrenderableGlyph(_ message: String) -> Bool {
-        // These are terminal diagnostics from ass_fontselect.c and ass_font.c. Do not match
-        // a generic "font not found": another installed/attached face may still work.
-        message.contains("fontselect: failed to find any fallback with glyph 0x")
-            || (message.contains("Glyph 0x") && message.contains(" not found in font for ("))
+    /// The character from one of libass 1.4's two terminal messages (`ass_fontselect.c`,
+    /// `ass_font.c`), nil for anything else. A generic "font not found" is not one of them,
+    /// another attached or installed face may still have the character.
+    static func unrenderableCodepoint(_ message: String) -> UInt32? {
+        let markers = ["fontselect: failed to find any fallback with glyph 0x", "Glyph 0x"]
+        for marker in markers {
+            guard let start = message.range(of: marker) else { continue }
+            let rest = message[start.upperBound...]
+            if marker == "Glyph 0x", !rest.contains(" not found in font for (") { continue }
+            let hex = rest.prefix { $0.isHexDigit }
+            if let codepoint = UInt32(hex, radix: 16) { return codepoint }
+        }
+        return nil
+    }
+}
+
+/// One renderer's `ASSFontFallback`. libass logs from the renderer's work queue, so the count
+/// takes a lock there and only the one message that crosses the threshold hops to the main actor.
+nonisolated final class ASSGlyphFailures: Sendable {
+    private let state = Mutex(ASSFontFallback())
+
+    func take(message: String) -> Bool {
+        state.withLock { $0.take(message: message) }
     }
 }

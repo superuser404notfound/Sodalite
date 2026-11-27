@@ -31,82 +31,66 @@ struct ASSReloadPolicyTests {
 }
 
 struct ASSFontFallbackTests {
-    private let missingChineseGlyph = "[swift-ass] fontselect: failed to find any fallback with glyph 0x4F60 for font: (Microsoft YaHei, 400, 0)"
-
-    @Test("a missing Chinese glyph triggers fallback even if the English face rendered")
-    func missingChineseGlyphFallsBack() {
-        var policy = ASSFontFallback()
-        policy.activate(generation: 1)
-        let englishFallback = policy.take(message: "fontselect: (Arial, 400, 0) -> ArialMT, 0, ArialMT", generation: 1)
-        let chineseFallback = policy.take(message: missingChineseGlyph, generation: 1)
-        #expect(!englishFallback)
-        #expect(chineseFallback)
+    private func fallbackFailure(_ codepoint: String) -> String {
+        "[swift-ass] fontselect: failed to find any fallback with glyph 0x\(codepoint) for font: (Microsoft YaHei, 400, 0)"
     }
 
-    @Test("a missing requested font or initial glyph miss may still be resolved by libass")
+    @Test("a Chinese line no font covers switches the track to plain text")
+    func missingChineseLineFallsBack() {
+        var policy = ASSFontFallback()
+        let english = policy.take(message: "fontselect: (Arial, 400, 0) -> ArialMT, 0, ArialMT")
+        let results = ["4F60", "597D", "4E16"].map { policy.take(message: fallbackFailure($0)) }
+        #expect(!english)
+        #expect(results == [false, false, true])
+    }
+
+    @Test("messages libass recovers from never count")
     func successfulSubstitutionKeepsStyling() {
         let diagnostics = [
-            "fontselect: Using default font family: (Arial, 400, 0) -> Helvetica",
-            "fontselect: Using default font: Arial.ttf",
+            "fontselect: Using default font family: (Arial, 400, 0) -> Helvetica, 0, Helvetica",
+            "fontselect: Using default font: (Arial, 400, 0) -> Arial.ttf, 0, ArialMT",
             "Glyph 0x4F60 not found, selecting one more font for (Arial, 400, 0)",
             "Glyph 0x4F60 not found, broken font? Trying all charmaps",
             "fontselect: (Microsoft YaHei, 400, 0) -> PingFangSC-Regular, 0, PingFangSC-Regular",
             "unrelated parse warning"
         ]
-        var policy = ASSFontFallback()
-        policy.activate(generation: 1)
         for message in diagnostics {
-            let shouldFallback = policy.take(message: message, generation: 1)
-            #expect(!shouldFallback)
+            #expect(ASSFontFallback.unrenderableCodepoint(message) == nil)
         }
-        // Nonterminal messages must not consume the one-shot latch.
-        let terminalFallback = policy.take(message: missingChineseGlyph, generation: 1)
-        #expect(terminalFallback)
     }
 
-    @Test("a glyph missing even after all charmaps were tried is terminal")
-    func brokenFontFallsBack() {
-        #expect(ASSFontFallback.isUnrenderableGlyph(
-            "Glyph 0x4F60 not found in font for (BrokenFont, 400, 0)"))
+    @Test("both terminal libass messages yield the character")
+    func terminalMessagesParse() {
+        #expect(ASSFontFallback.unrenderableCodepoint(fallbackFailure("4F60")) == 0x4F60)
+        #expect(ASSFontFallback.unrenderableCodepoint(
+            "Glyph 0x1F3B5 not found in font for (BrokenFont, 400, 0)") == 0x1F3B5)
     }
 
-    @Test("many missing glyphs cause only one fallback transition")
+    @Test("one or two characters no font has keep the styling")
+    func strayGlyphsKeepStyling() {
+        var policy = ASSFontFallback()
+        let first = policy.take(message: fallbackFailure("E000"))
+        let again = policy.take(message: fallbackFailure("E000"))
+        let second = policy.take(message: "Glyph 0x2605 not found in font for (Sign, 400, 0)")
+        #expect(!first)
+        #expect(!again)
+        #expect(!second)
+    }
+
+    @Test("the switch fires once per renderer, however many characters follow")
     func failureIsLatched() {
         var policy = ASSFontFallback()
-        policy.activate(generation: 1)
-        let firstFailure = policy.take(message: missingChineseGlyph, generation: 1)
-        let repeatedFailure = policy.take(message: missingChineseGlyph, generation: 1)
-        #expect(firstFailure)
-        #expect(!repeatedFailure)
+        let results = (0..<6).map { policy.take(message: fallbackFailure(String(0x4E00 + $0, radix: 16))) }
+        #expect(results == [false, false, true, false, false, false])
     }
 
-    @Test("late callbacks cannot disable styling after a track switch or deactivation")
-    func staleCallbacksAreIgnored() {
-        var policy = ASSFontFallback()
-        let inactiveFailure = policy.take(message: missingChineseGlyph, generation: 1)
-        policy.activate(generation: 1)
-        policy.activate(generation: 2)
-        let staleFailure = policy.take(message: missingChineseGlyph, generation: 1)
-        let currentFailure = policy.take(message: missingChineseGlyph, generation: 2)
-        policy.deactivate()
-        let deactivatedFailure = policy.take(message: missingChineseGlyph, generation: 2)
-        #expect(!inactiveFailure)
-        #expect(!staleFailure)
-        #expect(currentFailure)
-        #expect(!deactivatedFailure)
-    }
-
-    @Test("the next activation can use styling again instead of changing the saved preference")
-    func nextActivationResetsFailure() {
-        var policy = ASSFontFallback()
-        policy.activate(generation: 1)
-        let firstActivationFailure = policy.take(message: missingChineseGlyph, generation: 1)
-        policy.deactivate()
-        policy.activate(generation: 3)
-        let healthyFontFallback = policy.take(message: "fontselect: (Arial, 400, 0) -> ArialMT", generation: 3)
-        let nextActivationFailure = policy.take(message: missingChineseGlyph, generation: 3)
-        #expect(firstActivationFailure)
-        #expect(!healthyFontFallback)
-        #expect(nextActivationFailure)
+    @Test("a new renderer starts with a fresh count")
+    func freshRendererCountsAgain() {
+        let first = ASSGlyphFailures()
+        let fired = ["4F60", "597D", "4E16"].map { first.take(message: fallbackFailure($0)) }
+        let next = ASSGlyphFailures()
+        let nextFirst = next.take(message: fallbackFailure("4F60"))
+        #expect(fired.last == true)
+        #expect(!nextFirst)
     }
 }
