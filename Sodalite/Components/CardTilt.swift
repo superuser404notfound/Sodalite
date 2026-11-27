@@ -8,13 +8,18 @@ import SwiftUI
 /// faint light while the thumb moves, and settles flat again when it lifts off.
 struct CardTilt: Equatable {
 
-    /// The steepest lean, in degrees. A poster is 250 to 350 pt wide on tvOS, so this moves its edges
-    /// by a few points, the same order as the focus lift itself.
-    static let maxAngle: Double = 4
+    /// The steepest lean, in degrees. 4 was tried first and on the living room Apple TV it barely
+    /// registered, so the lean has to read as one at couch distance.
+    static let maxAngle: Double = 9
+
+    /// How much of the pad's travel reaches the card. Small circles with a resting thumb report about
+    /// a third of the range in relative mode, so without it a casual thumb leaned the card by little
+    /// more than a degree.
+    static let gain: Double = 1.5
 
     /// Brightest the light gets at full lean. Zero at rest, so a focused card that is not being
     /// touched looks exactly as it did before this existed.
-    static let maxSheen: Double = 0.14
+    static let maxSheen: Double = 0.22
 
     static let flat = CardTilt(x: 0, y: 0)
 
@@ -36,7 +41,7 @@ struct CardTilt: Equatable {
     static func from(reading: RemoteTouchReading, origin: RemoteTouchReading?) -> CardTilt {
         guard reading.isTouching else { return .flat }
         let base = origin.flatMap { $0.touch == reading.touch ? $0 : nil }
-        return CardTilt(x: reading.x - (base?.x ?? 0), y: reading.y - (base?.y ?? 0))
+        return CardTilt(x: (reading.x - (base?.x ?? 0)) * gain, y: (reading.y - (base?.y ?? 0)) * gain)
     }
 
     /// How far off flat the card is, 0...1.

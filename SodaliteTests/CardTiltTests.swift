@@ -19,7 +19,7 @@ struct CardTiltTests {
 
         let later = RemoteTouchReading(x: 0.9, y: 0.1, touch: 5)
         let tilt = CardTilt.from(reading: later, origin: arrival)
-        #expect(abs(tilt.x - 0.2) < 1e-9)
+        #expect(abs(tilt.x - 0.2 * CardTilt.gain) < 1e-9)
         #expect(tilt.y == 0)
     }
 
@@ -27,8 +27,8 @@ struct CardTiltTests {
         let origin = RemoteTouchReading(x: 0.7, y: 0, touch: 5)
         let next = RemoteTouchReading(x: 0.3, y: -0.4, touch: 6)
         let tilt = CardTilt.from(reading: next, origin: origin)
-        #expect(tilt.x == 0.3)
-        #expect(tilt.y == -0.4)
+        #expect(abs(tilt.x - 0.3 * CardTilt.gain) < 1e-9)
+        #expect(abs(tilt.y + 0.4 * CardTilt.gain) < 1e-9)
     }
 
     @Test func leanIsClampedToTheMaximum() {
