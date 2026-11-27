@@ -4,6 +4,9 @@ import Foundation
 /// servers and plugins forward to addons (Sodalite#260). It was "Apple TV" on every platform, so an
 /// iPhone and an Apple TV on the same profile looked identical. The value is the device type, not
 /// the user's own name for the device: it has to stay the same so a rule keyed on it keeps working.
+///
+/// Not `UIDevice`: that is MainActor, and `TopShelfAPI`, which every app target compiles, reads this
+/// from a nonisolated context.
 nonisolated enum ClientDevice {
     static let name: String = {
         #if os(tvOS)
@@ -11,20 +14,22 @@ nonisolated enum ClientDevice {
         #elseif os(macOS)
         "Mac"
         #else
-        name(modelIdentifier: modelIdentifier, isiOSAppOnMac: ProcessInfo.processInfo.isiOSAppOnMac)
+        iOSName(modelIdentifier: modelIdentifier, isiOSAppOnMac: ProcessInfo.processInfo.isiOSAppOnMac)
         #endif
     }()
 
-    /// iOS half of the mapping. `UIDevice.userInterfaceIdiom` would say the same but is MainActor,
-    /// and the Top Shelf builds its header off the main actor.
-    static func name(modelIdentifier: String, isiOSAppOnMac: Bool) -> String {
+    /// The iOS app also runs on a Mac and on Vision Pro, which must not pass for a phone: an addon
+    /// that serves phones smaller files would hand them those.
+    static func iOSName(modelIdentifier: String, isiOSAppOnMac: Bool) -> String {
         if isiOSAppOnMac { return "Mac" }
-        return modelIdentifier.hasPrefix("iPad") ? "iPad" : "iPhone"
+        if modelIdentifier.hasPrefix("iPad") { return "iPad" }
+        if modelIdentifier.hasPrefix("RealityDevice") { return "Apple Vision Pro" }
+        return "iPhone"
     }
 
-    /// "iPhone17,1" on hardware. The simulator reports the host's "arm64" and keeps the simulated
-    /// model in its environment.
-    private static var modelIdentifier: String {
+    /// "iPhone17,1", "AppleTV14,1" on hardware. The simulator reports the host's "arm64" and keeps
+    /// the simulated model in its environment.
+    static var modelIdentifier: String {
         if let simulated = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] {
             return simulated
         }

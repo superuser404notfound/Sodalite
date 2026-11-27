@@ -73,13 +73,9 @@ nonisolated struct LogExportSession: Sendable {
         var hardware: String
 
         /// Deliberately not `UIDevice`: that is main-actor isolated, and this is built on whichever
-        /// thread opened the export. `ProcessInfo` and `uname` answer the same questions off it.
+        /// thread opened the export. `ProcessInfo` and `ClientDevice.modelIdentifier` answer the same questions off it.
         static var current: Environment {
-            var info = utsname()
-            uname(&info)
-            let hardware = withUnsafeBytes(of: &info.machine) { raw in
-                String(decoding: raw.prefix(while: { $0 != 0 }), as: UTF8.self)
-            }
+            let hardware = ClientDevice.modelIdentifier
             let version = ProcessInfo.processInfo.operatingSystemVersion
             var systemVersion = "\(version.majorVersion).\(version.minorVersion)"
             if version.patchVersion > 0 {
