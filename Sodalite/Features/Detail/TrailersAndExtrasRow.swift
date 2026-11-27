@@ -123,6 +123,7 @@ private struct YouTubeTrailerCard: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(trailer.title ?? String(localized: "detail.trailer"))

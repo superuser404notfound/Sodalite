@@ -87,6 +87,7 @@ struct SeerrEpisodeCard: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
 
             // Both lines always render (blank subtitle falls back to a space) so cards keep equal
             // total height without a hardcoded caption reserve that wouldn't survive a size-class change.

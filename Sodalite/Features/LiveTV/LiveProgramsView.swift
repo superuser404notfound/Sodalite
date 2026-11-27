@@ -212,6 +212,7 @@ private struct ProgramCard: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(program.name)

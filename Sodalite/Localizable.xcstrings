@@ -75657,6 +75657,328 @@
         }
       }
     },
+    "changelog.1_2_0.cardTilt.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV se vybraný plakát nyní mírně naklání podle palce na dotykové ploše ovladače a po uvolnění se vrátí zpět."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV hælder en markeret plakat nu en smule med tommelfingeren på fjernbetjeningens touchflade og retter sig op igen, når du slipper."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Apple TV neigt sich ein fokussiertes Poster jetzt leicht mit dem Daumen auf der Touch-Oberfläche der Fernbedienung und richtet sich wieder auf, wenn du loslässt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στο Apple TV, η επιλεγμένη αφίσα γέρνει πλέον ελαφρά με τον αντίχειρά σας στην επιφάνεια αφής του τηλεχειριστηρίου και επανέρχεται όταν τον σηκώσετε."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Apple TV, a focused poster now tilts a little with your thumb on the remote's touch surface and settles back when you let go."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el Apple TV, el póster enfocado ahora se inclina un poco con el pulgar sobre la superficie táctil del mando y vuelve a su sitio al soltarlo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV:ssä valittu juliste kallistuu nyt hieman peukalon mukana kaukosäätimen kosketuspinnalla ja palautuu, kun päästät irti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur l'Apple TV, l'affiche sélectionnée s'incline désormais légèrement sous votre pouce sur la surface tactile de la télécommande, puis se redresse quand vous relâchez."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV-u odabrani poster sada se lagano naginje prema palcu na dodirnoj površini daljinskog upravljača i vraća se kad ga pustite."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV-n a kijelölt plakát most enyhén megdől a hüvelykujjad mozgásával a távirányító érintőfelületén, és visszaáll, amikor elengeded."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su Apple TV, la locandina selezionata ora si inclina leggermente seguendo il pollice sulla superficie touch del telecomando e torna dritta quando lo sollevi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TVで、フォーカス中のポスターがリモコンのタッチ面上の親指の動きに合わせて少し傾き、指を離すと元に戻るようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV에서 선택한 포스터가 이제 리모컨 터치 표면 위 엄지의 움직임에 따라 살짝 기울고, 손을 떼면 제자리로 돌아옵니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV heller en markert plakat nå litt med tommelen på fjernkontrollens berøringsflate og retter seg opp igjen når du slipper."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Op de Apple TV kantelt een geselecteerde poster nu een beetje mee met je duim op het aanraakoppervlak van de afstandsbediening en veert terug als je loslaat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV zaznaczony plakat lekko przechyla się teraz za kciukiem na powierzchni dotykowej pilota i wraca na miejsce po puszczeniu."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, o pôster em foco agora se inclina um pouco com o polegar na superfície de toque do controle e volta ao lugar quando você solta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV, o cartaz em foco inclina-se agora ligeiramente com o polegar na superfície tátil do comando e volta ao lugar quando o solta."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pe Apple TV, afișul selectat se înclină acum ușor după degetul mare pe suprafața tactilă a telecomenzii și revine când îl ridici."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV выбранный постер теперь слегка наклоняется вслед за большим пальцем на сенсорной поверхности пульта и выпрямляется, когда вы отпускаете палец."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na Apple TV sa vybraný plagát teraz mierne nakláňa podľa palca na dotykovej ploche ovládača a po uvoľnení sa vráti späť."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "På Apple TV lutar en markerad affisch nu lite med tummen på fjärrkontrollens pekyta och rätar upp sig när du släpper."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple TV'de odaktaki afiş artık kumandanın dokunmatik yüzeyindeki başparmağınızla hafifçe eğiliyor ve parmağınızı kaldırınca düzeliyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На Apple TV вибраний постер тепер злегка нахиляється за великим пальцем на сенсорній поверхні пульта й вирівнюється, коли ви відпускаєте палець."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，聚焦的海报现在会随你在遥控器触控表面上的拇指轻轻倾斜，松开后恢复原位。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Apple TV 上，聚焦的海報現在會隨你在遙控器觸控表面上的拇指輕輕傾斜，放開後回到原位。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.cardTilt.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakáty se naklánějí s palcem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakater hælder med tommelfingeren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poster neigen sich mit dem Daumen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι αφίσες γέρνουν με τον αντίχειρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posters lean with your thumb"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pósteres se inclinan con el pulgar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Julisteet kallistuvat peukalon mukana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les affiches s'inclinent sous le pouce"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posteri se naginju s palcem"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A plakátok dőlnek a hüvelykujjal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le locandine si inclinano col pollice"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポスターが親指に合わせて傾く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포스터가 엄지를 따라 기울어집니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakater heller med tommelen"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posters kantelen mee met je duim"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plakaty przechylają się pod kciukiem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pôsteres se inclinam com o polegar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os cartazes inclinam-se com o polegar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișele se înclină după deget"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постеры наклоняются за пальцем"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plagáty sa nakláňajú s palcom"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affischer lutar med tummen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afişler başparmakla eğiliyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Постери нахиляються за пальцем"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "海报随拇指倾斜"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "海報隨拇指傾斜"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.datedEpisodes.body" : {
       "extractionState" : "manual",
       "localizations" : {

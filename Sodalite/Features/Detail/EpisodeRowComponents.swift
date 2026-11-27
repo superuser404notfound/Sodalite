@@ -234,6 +234,7 @@ struct EpisodeLandscapeCard: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             }
             .frame(width: artworkSize.width, height: artworkSize.height)
+            .focusTilt(isFocused: isFocused, cornerRadius: 12)
             // The ring's room, inside the card rather than outside it.
             .padding(EpisodeCardStroke.ringMargin)
 

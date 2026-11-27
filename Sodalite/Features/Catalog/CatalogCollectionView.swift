@@ -442,6 +442,8 @@ struct SeerrCollectionBanner: View {
                         isFocused: focused
                     )
                 )
+                // No focusTilt: the banner spans the screen, and 9 degrees would swing its edges by
+                // more than 100 pt where a poster's move by a dozen.
             }
         }
     }

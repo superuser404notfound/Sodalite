@@ -70,6 +70,7 @@ struct ArtworkTile<Fallback: View>: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
         }
     }
 }
