@@ -76623,6 +76623,328 @@
         }
       }
     },
+    "changelog.1_2_0.showAll.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Řada na stránce Domů, za kterou je víc, nyní končí kartou Zobrazit vše, včetně řady nejnovějších titulů každé knihovny a Oblíbených. Seznam se otevře v pořadí řady, u nejnovějších od nejnovějšího. Pokračovat ve sledování, Další a Připravované zůstávají krátké."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En række på Hjem med mere bagved slutter nu med kortet Vis alle, også hvert biblioteks række med det nyeste og Favoritter. Listen åbner i rækkens egen rækkefølge, nyeste først for rækkerne med det nyeste. Fortsæt med at se, Næste og Kommende forbliver korte."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Reihe auf der Startseite, hinter der mehr steckt, endet jetzt mit der Karte Alle anzeigen, auch die Neuesten-Reihe jeder Mediathek und die Favoriten. Die Liste öffnet in der Reihenfolge der Reihe, bei den Neuesten das Neueste zuerst. Weiterschauen, Als Nächstes und Demnächst bleiben kurz."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια γραμμή της Αρχικής που έχει περισσότερα τελειώνει τώρα με την κάρτα Εμφάνιση όλων, μαζί και η γραμμή με τα πιο πρόσφατα κάθε βιβλιοθήκης και τα Αγαπημένα. Η λίστα ανοίγει με τη σειρά της γραμμής, τα νεότερα πρώτα στις γραμμές με τα πιο πρόσφατα. Οι γραμμές Συνέχιση παρακολούθησης, Επόμενο και Προσεχώς μένουν σύντομες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Home row with more behind it now ends in a Show All card, including each library's Latest row and Favorites. The list opens in the row's own order, newest first for Latest rows. Continue Watching, Next Up and Upcoming stay short."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una fila de Inicio con más contenido detrás termina ahora con la tarjeta Ver todo, también la fila de lo último de cada biblioteca y Favoritos. La lista se abre en el orden de la fila, lo más nuevo primero en las filas de lo último. Seguir viendo, Siguiente y Próximamente siguen siendo cortas."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koti-näkymän rivi, jonka takana on enemmän, päättyy nyt Näytä kaikki -korttiin, myös jokaisen kirjaston uusimpien rivi ja Suosikit. Lista avautuu rivin omassa järjestyksessä, uusimpien riveillä uusin ensin. Jatka katselua, Seuraavaksi ja Tulossa pysyvät lyhyinä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une rangée de l'Accueil qui en contient davantage se termine désormais par la carte Tout afficher, y compris la rangée des derniers ajouts de chaque bibliothèque et les Favoris. La liste s'ouvre dans l'ordre de la rangée, les plus récents d'abord pour les derniers ajouts. Continuer à regarder, À suivre et À venir restent courtes."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redak na Početnoj iza kojeg ima još sada završava karticom Prikaži sve, uključujući redak najnovijeg iz svake biblioteke i Favorite. Popis se otvara redoslijedom retka, kod najnovijih od najnovijeg. Nastavi gledanje, Sljedeće i Uskoro ostaju kratki."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Kezdőlap minden sora, amely mögött több tartalom van, most egy Összes megjelenítése kártyával végződik, a könyvtárak legújabb sorai és a Kedvencek is. A lista a sor saját sorrendjében nyílik meg, a legújabb soroknál a legfrissebbel kezdve. A Folytatás, a Következő és a Hamarosan sor rövid marad."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una riga della Home con altri contenuti ora termina con la scheda Mostra tutto, anche la riga delle novità di ogni libreria e i Preferiti. L'elenco si apre nell'ordine della riga, dal più recente per le righe delle novità. Continua a guardare, Prossimo e In arrivo restano brevi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示しきれない項目があるホームの列の最後に「すべて表示」カードが付くようになりました。各ライブラリの最新の列やお気に入りも対象です。一覧は列と同じ順番で開き、最新の列では新しいものから並びます。「視聴を続ける」「次の再生」「近日公開」は短いままです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 많은 항목이 있는 홈의 줄 끝에 이제 모두 보기 카드가 표시됩니다. 각 보관함의 최신 줄과 즐겨찾기도 포함됩니다. 목록은 줄과 같은 순서로 열리며, 최신 줄은 가장 새로운 항목부터 보여 줍니다. 계속 시청, 다음, 방영 예정은 짧게 유지됩니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En rad på Hjem med mer bak seg slutter nå med kortet Vis alle, også hvert biblioteks rad med det nyeste og Favoritter. Listen åpnes i radens egen rekkefølge, nyeste først for radene med det nyeste. Fortsett å se, Neste og Kommende forblir korte."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een rij op Home met meer erachter eindigt nu met de kaart Alles tonen, ook de rij met het nieuwste van elke bibliotheek en Favorieten. De lijst opent in de volgorde van de rij, het nieuwste eerst bij de rijen met het nieuwste. Verder kijken, Volgende en Binnenkort blijven kort."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rząd na stronie Główna, za którym kryje się więcej, kończy się teraz kartą Pokaż wszystko, także rząd najnowszych z każdej biblioteki i Ulubione. Lista otwiera się w kolejności rzędu, w rzędach najnowszych od najnowszego. Kontynuuj oglądanie, Następne i Nadchodzące pozostają krótkie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma fileira do Início com mais conteúdo agora termina com o cartão Ver tudo, incluindo a fileira de recentes de cada biblioteca e os Favoritos. A lista abre na ordem da fileira, os mais novos primeiro nas fileiras de recentes. Continuar assistindo, Próximo e Em breve continuam curtas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma fila do Início com mais conteúdo termina agora com o cartão Ver tudo, incluindo a fila dos mais recentes de cada biblioteca e os Favoritos. A lista abre pela ordem da fila, os mais recentes primeiro nas filas de recentes. Continuar a ver, A seguir e Brevemente continuam curtas."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un rând de pe Acasă care are mai mult conținut se încheie acum cu cardul Afișează tot, inclusiv rândul cu cele mai noi din fiecare bibliotecă și Favorite. Lista se deschide în ordinea rândului, cele mai noi primele la rândurile cu noutăți. Continuă vizionarea, Următorul și În curând rămân scurte."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ряд на Главной, за которым есть ещё, теперь заканчивается карточкой «Показать все», в том числе ряд новинок каждой медиатеки и Избранное. Список открывается в порядке ряда, в рядах новинок сначала самое новое. «Продолжить просмотр», «Далее» и «Скоро» остаются короткими."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rad na stránke Domov, za ktorým je viac, teraz končí kartou Zobraziť všetko, vrátane radu najnovších titulov každej knižnice a Obľúbených. Zoznam sa otvorí v poradí radu, pri najnovších od najnovšieho. Pokračovať v sledovaní, Ďalšie a Pripravované zostávajú krátke."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En rad på Hem med mer bakom sig slutar nu med kortet Visa alla, även varje biblioteks rad med det senaste och Favoriter. Listan öppnas i radens egen ordning, senaste först för raderna med det senaste. Fortsätt titta, Nästa och Kommande förblir korta."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana Sayfa'da arkasında daha fazlası olan her satır artık Tümünü göster kartıyla bitiyor, her kitaplığın en yeniler satırı ve Favoriler de dahil. Liste satırın kendi sırasıyla açılır, en yeniler satırlarında en yeni başta. İzlemeye Devam Et, Sırada ve Yakında kısa kalır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ряд на Головній, за яким є ще, тепер закінчується карткою «Показати все», зокрема ряд новинок кожної медіатеки та Улюблене. Список відкривається в порядку ряду, у рядах новинок спочатку найновіше. «Продовжити перегляд», «Наступне» та «Незабаром» лишаються короткими."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首页中还有更多内容的行，末尾现在会有一张“显示全部”卡片，包括每个媒体库的最新行和收藏。列表按该行自己的顺序打开，最新行从最新的开始。继续观看、接下来和即将播出保持原样。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首頁中還有更多內容的列，結尾現在會有一張「顯示全部」卡片，包括每個媒體庫的最新列和最愛。清單依該列自己的順序開啟，最新列從最新的開始。繼續觀看、接下來和即將播出維持原樣。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.showAll.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobrazit vše v každé řadě"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis alle i hver række"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle anzeigen in jeder Reihe"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση όλων σε κάθε γραμμή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All on every Home row"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todo en cada fila de Inicio"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Näytä kaikki jokaisessa rivissä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout afficher sur chaque rangée"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prikaži sve u svakom retku"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Összes megjelenítése minden sorban"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra tutto in ogni riga della Home"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのホームの列に「すべて表示」"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 홈 줄에 모두 보기"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis alle i hver rad"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles tonen in elke rij"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokaż wszystko w każdym rzędzie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver tudo em cada fileira do Início"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver tudo em cada fila do Início"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afișează tot pe fiecare rând"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Показать все» в каждом ряду"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zobraziť všetko v každom rade"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa alla i varje rad"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her satırda Tümünü göster"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Показати все» в кожному ряду"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每一行都能显示全部"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每一列都能顯示全部"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.styledSubtitles.body" : {
       "extractionState" : "manual",
       "localizations" : {

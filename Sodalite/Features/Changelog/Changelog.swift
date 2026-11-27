@@ -21,6 +21,12 @@ enum Changelog {
                     icon: "arrow.down.circle"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.showAll.title",
+                    "changelog.1_2_0.showAll.body",
+                    icon: "square.grid.2x2"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_2_0.datedEpisodes.title",
                     "changelog.1_2_0.datedEpisodes.body",

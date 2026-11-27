@@ -29,6 +29,10 @@ struct HomeRowData: Identifiable, Sendable, Codable {
     /// The library's `CollectionType` on a per-library row: "boxsets" makes it a collection shelf
     /// titled with the library's own name rather than "Latest in".
     var collectionType: String? = nil
+    /// The server had more than the row shows, so the row ends in a Show All card (Sodalite#258).
+    /// Read off the fetch, not off the row's length: a folded Latest row can end short of its cap
+    /// with more shows behind it, and a full row can be the whole list.
+    var hasMore = false
 
     /// Ids are unique here (per server, `originKey`), first occurrence wins, because the row renders through `ForEach(items)`
     /// and SwiftUI gives undefined layout when two children claim one identity: the second one
@@ -43,7 +47,8 @@ struct HomeRowData: Identifiable, Sendable, Codable {
         libraryID: String? = nil,
         libraryName: String? = nil,
         serverID: String? = nil,
-        collectionType: String? = nil
+        collectionType: String? = nil,
+        hasMore: Bool = false
     ) {
         self.type = type
         var seen = Set<String>()
@@ -52,6 +57,7 @@ struct HomeRowData: Identifiable, Sendable, Codable {
         self.libraryName = libraryName
         self.serverID = serverID
         self.collectionType = collectionType
+        self.hasMore = hasMore
     }
 
     /// Decoding routes through the init above instead of filling the properties directly, so a feed
@@ -66,7 +72,8 @@ struct HomeRowData: Identifiable, Sendable, Codable {
             libraryID: try container.decodeIfPresent(String.self, forKey: .libraryID),
             libraryName: try container.decodeIfPresent(String.self, forKey: .libraryName),
             serverID: try container.decodeIfPresent(String.self, forKey: .serverID),
-            collectionType: try container.decodeIfPresent(String.self, forKey: .collectionType)
+            collectionType: try container.decodeIfPresent(String.self, forKey: .collectionType),
+            hasMore: try container.decodeIfPresent(Bool.self, forKey: .hasMore) ?? false
         )
     }
 

@@ -19,7 +19,9 @@ struct LibrarySortTests {
             .releaseDate: "PremiereDate",
             .dateAdded: "DateCreated",
             .rating: "CommunityRating",
-            .runtime: "Runtime"
+            .runtime: "Runtime",
+            .lastEpisodeAdded: "DateLastContentAdded",
+            .episodeOrder: "SeriesSortName,ParentIndexNumber,IndexNumber"
         ]
         for key in LibrarySortKey.allCases {
             #expect(key.jellyfinValue == expected[key], "\(key.rawValue) lost its Jellyfin field")
@@ -80,6 +82,49 @@ struct LibrarySortTests {
         #expect(titleAscending.toggled(to: .rating) == LibrarySort(key: .rating, descending: true))
         #expect(titleAscending.toggled(to: .rating).toggled(to: .rating)
                 == LibrarySort(key: .rating, descending: false))
+    }
+
+    /// The two Home-row orders open the grid behind a row's Show All (Sodalite#258). In the picker
+    /// they would read as a second "Date added" and a second "Title".
+    @Test("the picker offers only the five library keys")
+    func menuLeavesOutRowOrders() {
+        #expect(LibrarySortKey.menuChoices == [.title, .releaseDate, .dateAdded, .rating, .runtime])
+        #expect(Set(LibrarySortKey.allCases).subtracting(LibrarySortKey.menuChoices) == [.lastEpisodeAdded, .episodeOrder])
+    }
+
+    @Test("a grid with an order of its own falls back to it, not to Title A-Z")
+    func fallbackSort() {
+        let newest = LibrarySort(key: .dateAdded, descending: true)
+        #expect(LibrarySort(storedValue: nil, fallback: newest) == newest)
+        #expect(LibrarySort(storedValue: "fileSize:desc", fallback: newest) == newest)
+        #expect(LibrarySort(storedValue: "title:asc", fallback: newest) == .default)
+    }
+
+    @Test("a merged Latest Shows grid orders by the newest episode")
+    func lastEpisodeOrder() throws {
+        func series(_ id: String, _ added: String?) throws -> JellyfinItem {
+            let date = added.map { #","DateLastMediaAdded":"\#($0)""# } ?? ""
+            return try JSONDecoder().decode(JellyfinItem.self, from: Data(#"{"Id":"\#(id)","Name":"\#(id)","Type":"Series"\#(date)}"#.utf8))
+        }
+        let sort = LibrarySort(key: .lastEpisodeAdded, descending: true)
+        let fresh = try series("fresh", "2026-11-25T08:27:14Z")
+        let stale = try series("stale", "2026-09-06T07:43:50Z")
+        let undated = try series("undated", nil)
+        #expect(sort.orders(fresh, before: stale) == true)
+        #expect(sort.orders(stale, before: fresh) == false)
+        #expect(sort.orders(stale, before: undated) == true)
+    }
+
+    @Test("a merged Favorite Episodes grid orders by show, season and episode")
+    func episodeOrder() throws {
+        func episode(_ show: String, _ season: Int, _ number: Int) throws -> JellyfinItem {
+            try JSONDecoder().decode(JellyfinItem.self, from: Data(
+                #"{"Id":"\#(show)\#(season)\#(number)","Name":"Ep","Type":"Episode","SeriesName":"\#(show)","ParentIndexNumber":\#(season),"IndexNumber":\#(number)}"#.utf8))
+        }
+        let sort = LibrarySort(key: .episodeOrder, descending: false)
+        #expect(sort.orders(try episode("Alias", 5, 1), before: try episode("Bluey", 1, 1)) == true)
+        #expect(sort.orders(try episode("Bluey", 1, 9), before: try episode("Bluey", 2, 1)) == true)
+        #expect(sort.orders(try episode("Bluey", 2, 3), before: try episode("Bluey", 2, 2)) == false)
     }
 
     @Test("direction wording is specific to the key")

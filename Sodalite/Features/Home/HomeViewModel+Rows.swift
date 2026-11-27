@@ -118,6 +118,9 @@ extension HomeViewModel {
         do {
             let type = config.type
             let items: [JellyfinItem]
+            // Continue Watching, Next Up and Upcoming stay false: they are queues of what to watch
+            // next, built by endpoints a grid cannot page.
+            var hasMore = false
 
             switch type {
             case .continueWatching:
@@ -170,11 +173,14 @@ extension HomeViewModel {
                         includeItemTypes: [.movie],
                         limit: 16
                     )
+                    hasMore = items.count >= 16
                 } else {
                     let lists = await latestLists(
                         source: source, libraryIDs: movieLibraries.map(\.id), includeItemTypes: [.movie], limit: 16
                     )
-                    items = Array(HomeMerger.merge(lists, type: .latestMovies, mergedContinueWatching: false).prefix(16))
+                    let merged = HomeMerger.merge(lists, type: .latestMovies, mergedContinueWatching: false, limit: .max)
+                    items = Array(merged.prefix(16))
+                    hasMore = lists.contains { $0.count >= 16 } || merged.count > items.count
                 }
 
             case .latestShows:
@@ -204,7 +210,9 @@ extension HomeViewModel {
                         includeItemTypes: [.series, .episode],
                         limit: 64
                     )
-                    items = Array(await foldIntoSeries(latest, source: source).prefix(16))
+                    let folded = await foldIntoSeries(latest, source: source)
+                    items = Array(folded.prefix(16))
+                    hasMore = latest.count >= 64 || folded.count > items.count
                 } else {
                     let lists = await latestLists(
                         source: source, libraryIDs: showLibraries.map(\.id), includeItemTypes: nil, limit: 16
@@ -216,7 +224,9 @@ extension HomeViewModel {
                             merged.append(list[index])
                         }
                     }
-                    items = Array(await foldIntoSeries(merged, source: source).prefix(16))
+                    let folded = await foldIntoSeries(merged, source: source)
+                    items = Array(folded.prefix(16))
+                    hasMore = lists.contains { $0.count >= 16 } || folded.count > items.count
                 }
 
             case .allMovies:
@@ -229,6 +239,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .allSeries:
                 let query = ItemQuery(
@@ -240,6 +251,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .favorites:
                 let query = ItemQuery(
@@ -252,6 +264,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .favoriteEpisodes:
                 // Series/season/episode sort keeps several favorites of one show adjacent; no
@@ -266,6 +279,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .topRatedMovies:
                 let query = ItemQuery(
@@ -277,6 +291,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .topRatedShows:
                 let query = ItemQuery(
@@ -288,6 +303,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .recentlyAdded:
                 let query = ItemQuery(
@@ -299,6 +315,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .recentlyReleasedMovies:
                 let response = try await source.libraryService.getItems(
@@ -306,6 +323,7 @@ extension HomeViewModel {
                     query: HomeReleaseRowQuery.movies(now: Date(), limit: 20)
                 )
                 items = HomeReleaseRowQuery.airedOnly(response.items)
+                hasMore = Self.leftMore(response, requested: 20)
 
             case .recentlyReleasedShows:
                 // Episodes folded onto their series, so a show that aired last night ranks by that
@@ -315,7 +333,9 @@ extension HomeViewModel {
                     query: HomeReleaseRowQuery.episodes(now: Date(), limit: 64)
                 )
                 let aired = HomeReleaseRowQuery.airedOnly(response.items)
-                items = Array(await foldIntoSeries(aired, source: source).prefix(16))
+                let folded = await foldIntoSeries(aired, source: source)
+                items = Array(folded.prefix(16))
+                hasMore = Self.leftMore(response, requested: 64) || folded.count > items.count
 
             case .collections:
                 let query = ItemQuery(
@@ -327,6 +347,7 @@ extension HomeViewModel {
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
                 items = response.items
+                hasMore = Self.leftMore(response, requested: query.limit)
 
             case .playlists:
                 // Over-fetch: audio playlists are dropped below, and Jellyfin has no server-side
@@ -340,22 +361,27 @@ extension HomeViewModel {
                     fields: JellyfinEndpoint.homeRowFields
                 )
                 let response = try await source.libraryService.getItems(userID: source.userID, query: query)
-                items = Array(response.items.filter { !$0.isAudioPlaylist }.prefix(30))
+                let video = response.items.filter { !$0.isAudioPlaylist }
+                items = Array(video.prefix(30))
+                hasMore = Self.leftMore(response, requested: query.limit) || video.count > items.count
 
             case .libraryLatest:
                 // Per-library Latest scoped by parentID alone. Deliberately NO IncludeItemTypes: it would filter before GroupItems grouping, collapsing an episodes-only library to one tile (Sodalite#12, DrHurt "latest in Series - French only loads 1 item"). ParentId already constrains the library, so the type hint the aggregate rows need (they drop ParentId) is the bug here.
                 guard let libraryID = config.libraryID else { return nil }
                 if config.collectionType == "boxsets" {
-                    items = try await source.libraryService.getItems(
-                        userID: source.userID, query: Self.collectionShelfQuery(libraryID: libraryID)
-                    ).items
+                    let query = Self.collectionShelfQuery(libraryID: libraryID)
+                    let response = try await source.libraryService.getItems(userID: source.userID, query: query)
+                    items = response.items
+                    hasMore = Self.leftMore(response, requested: query.limit)
                     break
                 }
                 // Over-fetch + post-fold cap (latestShows rationale): the fold can dedupe a series against its own episodes, shrinking the row below 16.
                 let latest = try await latestInLibrary(
                     source: source, libraryID: libraryID, includeItemTypes: nil, limit: 24
                 )
-                items = Array(await foldIntoSeries(latest, source: source).prefix(16))
+                let folded = await foldIntoSeries(latest, source: source)
+                items = Array(folded.prefix(16))
+                hasMore = latest.count >= 24 || folded.count > items.count
 
             case .myMedia, .genres, .discoverProviders, .traktWatchlist, .traktLists:
                 return nil
@@ -367,9 +393,18 @@ extension HomeViewModel {
                 libraryID: config.libraryID,
                 libraryName: config.libraryName,
                 serverID: source.serverID,
-                collectionType: config.collectionType
+                collectionType: config.collectionType,
+                hasMore: hasMore
             )
         }
+    }
+
+    /// A full page, or a total past what came back. The page test is the one that holds everywhere:
+    /// a server that builds its lists from remote catalogs reports a total that ends at the page it
+    /// just sent.
+    nonisolated static func leftMore(_ response: JellyfinItemsResponse, requested: Int?) -> Bool {
+        if let requested, response.items.count >= requested { return true }
+        return response.totalRecordCount > response.items.count
     }
 
     /// A collection shelf: the library's own folders in the order the server gives them. No SortBy,

@@ -22,7 +22,7 @@ struct LibrarySortSheet: View {
 
             ScrollView {
                 VStack(spacing: isCompact ? 12 : 16) {
-                    ForEach(LibrarySortKey.allCases, id: \.self) { key in
+                    ForEach(LibrarySortKey.menuChoices, id: \.self) { key in
                         row(key)
                     }
                 }

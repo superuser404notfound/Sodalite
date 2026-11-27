@@ -101,6 +101,10 @@ struct FilteredGridView: View {
     /// tiles pass nil: their list is merged client-side from two phases, so a server sort would only
     /// order half of it.
     let sortScope: LibrarySortScope?
+    /// The order the grid opens in until the profile picks another, and the only order it caches.
+    /// Title A-Z everywhere except behind a Home row's Show All, which keeps the row's order
+    /// (Sodalite#258).
+    let defaultSort: LibrarySort
     /// Playlists grid only: Jellyfin answers IncludeItemTypes=Playlist with audio and video playlists
     /// alike, and `MediaType` on a Playlist is a computed property, so no server-side filter holds
     /// across versions (Sodalite#73). A music playlist has no detail screen to open, so it is dropped
@@ -147,6 +151,7 @@ struct FilteredGridView: View {
         smartProviderRegion: String? = nil,
         cacheScope: FilterCacheScope? = nil,
         sortScope: LibrarySortScope? = nil,
+        defaultSort: LibrarySort = .default,
         hidesAudioPlaylists: Bool = false,
         sources: [HomeSource]? = nil,
         isTabRoot: Bool = false
@@ -158,15 +163,16 @@ struct FilteredGridView: View {
         self.smartProviderRegion = smartProviderRegion
         self.cacheScope = cacheScope
         self.sortScope = sortScope
+        self.defaultSort = defaultSort
         self.hidesAudioPlaylists = hidesAudioPlaylists
         self.sources = sources
-        let storedSort = sortScope.map(LibrarySortStore.sort) ?? .default
+        let storedSort = sortScope.map { LibrarySortStore.sort($0, fallback: defaultSort) } ?? defaultSort
         _sort = State(initialValue: storedSort)
         // Hydrate from FilterCache in init so the first render paints the cached grid; doing it in .task means a frame with isLoading=true first (the brief loading flash on every tap).
         // Only the default sort: the cache holds one order per key, so a custom sort would paint the
         // alphabetical list and then reshuffle it once the fetch lands.
         let sparse = Self.usesSparseGrid(sources: sources, smartProviderID: smartProviderID, query: query)
-        if storedSort == .default,
+        if storedSort == defaultSort,
            let scope = cacheScope,
            let cached = FilterCache.shared.homeFilterItems(filterKey: scope.key, identity: scope.identity),
            !cached.isEmpty {
@@ -526,7 +532,7 @@ struct FilteredGridView: View {
                 loadFailed = false
                 isLoading = false
                 // Same rule as before: only the unfiltered default order feeds init hydration.
-                if let scope = cacheScope, watchFilter == .all, filterSelection.isEmpty, sort == .default {
+                if let scope = cacheScope, watchFilter == .all, filterSelection.isEmpty, sort == defaultSort {
                     FilterCache.shared.setHomeFilterItems(
                         browsable(page), filterKey: scope.key, identity: scope.identity
                     )
@@ -911,7 +917,7 @@ struct FilteredGridView: View {
             case .replaced(let cacheable):
                 loadFailed = false
                 if items.map(\.originKey) != mergedGrid.items.map(\.originKey) { items = mergedGrid.items }
-                if cacheable, let scope = cacheScope, !isWatchFiltered, sort == .default {
+                if cacheable, let scope = cacheScope, !isWatchFiltered, sort == defaultSort {
                     FilterCache.shared.setHomeFilterItems(mergedGrid.items, filterKey: scope.key, identity: scope.identity)
                 }
             }
@@ -1015,8 +1021,8 @@ struct FilteredGridView: View {
             }
             isLoading = false
             // Cache only the unfiltered default order: it feeds init hydration (always .all, always
-            // Title A-Z) + empty-tile-hide counts, both needing the full library in the shipped order.
-            if let scope = cacheScope, !isWatchFiltered, sort == .default {
+            // the default sort) + empty-tile-hide counts, both needing the full library in the shipped order.
+            if let scope = cacheScope, !isWatchFiltered, sort == defaultSort {
                 FilterCache.shared.setHomeFilterItems(
                     phase1, filterKey: scope.key, identity: scope.identity
                 )
@@ -1090,7 +1096,7 @@ struct FilteredGridView: View {
         isLoading = false
 
         // Persist the resolved list so the next visit hydrates synchronously, no library fetch or watch-provider roundtrip. Unfiltered default only (phase-1 rationale).
-        if let scope = cacheScope, !isWatchFiltered, sort == .default {
+        if let scope = cacheScope, !isWatchFiltered, sort == defaultSort {
             FilterCache.shared.setHomeFilterItems(
                 merged, filterKey: scope.key, identity: scope.identity
             )

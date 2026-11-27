@@ -8,6 +8,14 @@ enum LibrarySortKey: String, CaseIterable, Sendable {
     case dateAdded
     case rating
     case runtime
+    /// Series by their newest episode, the order of a Latest Shows row. Not in the menu: only the
+    /// grid behind that row's Show All opens in it (Sodalite#258).
+    case lastEpisodeAdded
+    /// Episodes by show, season and number, the order of the Favorite Episodes row. Not in the menu.
+    case episodeOrder
+
+    /// What the sort picker offers. The other keys only open the grid behind a Home row.
+    static let menuChoices: [LibrarySortKey] = [.title, .releaseDate, .dateAdded, .rating, .runtime]
 
     var jellyfinValue: String {
         switch self {
@@ -16,19 +24,23 @@ enum LibrarySortKey: String, CaseIterable, Sendable {
         case .dateAdded: "DateCreated"
         case .rating: "CommunityRating"
         case .runtime: "Runtime"
+        // Series.DateLastMediaAdded. Measured on Jellyfin 12.2: the same order /Items/Latest groups
+        // shows in, where DateCreated puts a long-running show at the date it was first added.
+        case .lastEpisodeAdded: "DateLastContentAdded"
+        case .episodeOrder: "SeriesSortName,ParentIndexNumber,IndexNumber"
         }
     }
 
     /// Direction a freshly picked key starts in: newest, best and longest first everywhere except the alphabet.
-    var startsDescending: Bool { self != .title }
+    var startsDescending: Bool { self != .title && self != .episodeOrder }
 
     var localizedLabel: String {
         switch self {
-        case .title:
+        case .title, .episodeOrder:
             String(localized: "library.sort.key.title", defaultValue: "Title")
         case .releaseDate:
             String(localized: "library.sort.key.releaseDate", defaultValue: "Release date")
-        case .dateAdded:
+        case .dateAdded, .lastEpisodeAdded:
             String(localized: "library.sort.key.dateAdded", defaultValue: "Date added")
         case .rating:
             String(localized: "library.sort.key.rating", defaultValue: "Rating")
@@ -41,11 +53,11 @@ enum LibrarySortKey: String, CaseIterable, Sendable {
     /// ratings; the same two words for all five would leave the user guessing which end they get.
     func localizedDirection(descending: Bool) -> String {
         switch self {
-        case .title:
+        case .title, .episodeOrder:
             descending
                 ? String(localized: "library.sort.direction.zToA", defaultValue: "Z to A")
                 : String(localized: "library.sort.direction.aToZ", defaultValue: "A to Z")
-        case .releaseDate, .dateAdded:
+        case .releaseDate, .dateAdded, .lastEpisodeAdded:
             descending
                 ? String(localized: "library.sort.direction.newestFirst", defaultValue: "Newest first")
                 : String(localized: "library.sort.direction.oldestFirst", defaultValue: "Oldest first")
@@ -77,11 +89,11 @@ struct LibrarySort: Equatable, Sendable {
     /// Tolerant read for UserDefaults and cloud payloads: a missing value is a fresh install, an
     /// unparsable one a key written by a newer build. Both keep the shipped default rather than
     /// failing the read.
-    init(storedValue: String?) {
-        guard let storedValue else { self = .default; return }
+    init(storedValue: String?, fallback: LibrarySort = .default) {
+        guard let storedValue else { self = fallback; return }
         let parts = storedValue.split(separator: ":", maxSplits: 1)
         guard let rawKey = parts.first, let key = LibrarySortKey(rawValue: String(rawKey)) else {
-            self = .default
+            self = fallback
             return
         }
         self.key = key
@@ -159,8 +171,9 @@ enum LibrarySortStore {
         prefix(scope: scope.scope) + scope.key
     }
 
-    static func sort(_ scope: LibrarySortScope) -> LibrarySort {
-        LibrarySort(storedValue: UserDefaults.standard.string(forKey: storageKey(scope)))
+    /// `fallback` is the grid's own order, for a scope the profile never picked a sort in.
+    static func sort(_ scope: LibrarySortScope, fallback: LibrarySort = .default) -> LibrarySort {
+        LibrarySort(storedValue: UserDefaults.standard.string(forKey: storageKey(scope)), fallback: fallback)
     }
 
     static func setSort(_ sort: LibrarySort, scope: LibrarySortScope) {
@@ -212,6 +225,15 @@ extension LibrarySort {
         case .dateAdded: primary = compare(lhs.dateCreated, rhs.dateCreated)
         case .rating: primary = compare(lhs.communityRating, rhs.communityRating)
         case .runtime: primary = compare(lhs.runTimeTicks, rhs.runTimeTicks)
+        case .lastEpisodeAdded: primary = compare(lhs.dateLastMediaAdded, rhs.dateLastMediaAdded)
+        case .episodeOrder:
+            let show = (lhs.seriesName ?? "").localizedStandardCompare(rhs.seriesName ?? "")
+            if show != .orderedSame {
+                primary = descending ? show == .orderedDescending : show == .orderedAscending
+            } else {
+                primary = compare(lhs.parentIndexNumber, rhs.parentIndexNumber)
+                    ?? compare(lhs.indexNumber, rhs.indexNumber)
+            }
         }
         if let primary { return primary }
         let byName = (lhs.sortName ?? lhs.name).localizedStandardCompare(rhs.sortName ?? rhs.name)
