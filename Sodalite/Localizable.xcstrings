@@ -76301,6 +76301,328 @@
         }
       }
     },
+    "changelog.1_2_0.deviceType.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite se Jellyfinu na každém zařízení hlásil jako Apple TV. iPhone, iPad a Mac se teď hlásí vlastním názvem, takže přehled ukazuje správné zařízení a doplňky mohou každému nabídnout vlastní verze, například menší soubory v telefonu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite meldte sig over for Jellyfin som Apple TV på alle enheder. iPhone, iPad og Mac oplyser nu deres eget navn, så dashboardet viser den rigtige enhed, og tilføjelser kan give hver enhed sine egne versioner, for eksempel mindre filer på telefonen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite meldete sich bei Jellyfin auf jedem Gerät als Apple TV. iPhone, iPad und Mac nennen jetzt ihren eigenen Namen, damit das Dashboard das richtige Gerät zeigt und Addons jedem seine eigenen Versionen geben können, etwa kleinere Dateien auf dem Handy."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Sodalite δηλωνόταν στο Jellyfin ως Apple TV σε κάθε συσκευή. Τα iPhone, iPad και Mac δηλώνουν πλέον το δικό τους όνομα, ώστε ο πίνακας ελέγχου να δείχνει τη σωστή συσκευή και τα πρόσθετα να δίνουν σε καθεμία τις δικές της εκδόσεις, π.χ. μικρότερα αρχεία στο κινητό."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite told Jellyfin it was an Apple TV on every device. iPhone, iPad and Mac now name themselves, so the dashboard shows the right device and addons can give each one its own versions, like smaller files on the phone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite se presentaba ante Jellyfin como Apple TV en todos los dispositivos. iPhone, iPad y Mac ahora dicen su propio nombre, así que el panel muestra el dispositivo correcto y los complementos pueden dar a cada uno sus propias versiones, como archivos más pequeños en el móvil."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite ilmoitti itsensä Jellyfinille Apple TV:ksi jokaisella laitteella. iPhone, iPad ja Mac kertovat nyt oman nimensä, joten hallintapaneeli näyttää oikean laitteen ja lisäosat voivat antaa kullekin omat versionsa, esimerkiksi pienempiä tiedostoja puhelimeen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite se présentait à Jellyfin comme une Apple TV sur tous les appareils. L’iPhone, l’iPad et le Mac donnent désormais leur propre nom : le tableau de bord affiche le bon appareil et les modules peuvent proposer à chacun ses propres versions, comme des fichiers plus légers sur le téléphone."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite se Jellyfinu na svakom uređaju predstavljao kao Apple TV. iPhone, iPad i Mac sada navode vlastiti naziv, pa nadzorna ploča prikazuje pravi uređaj, a dodaci svakom mogu dati vlastite verzije, primjerice manje datoteke na telefonu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Sodalite minden eszközön Apple TV-ként jelentkezett a Jellyfinnél. Az iPhone, az iPad és a Mac most a saját nevét adja meg, így az irányítópult a helyes eszközt mutatja, a bővítmények pedig mindegyiknek saját változatot adhatnak, például kisebb fájlokat a telefonra."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite si presentava a Jellyfin come Apple TV su ogni dispositivo. iPhone, iPad e Mac ora indicano il proprio nome, così la dashboard mostra il dispositivo giusto e i componenti aggiuntivi possono dare a ognuno le sue versioni, come file più piccoli sul telefono."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite はどのデバイスでも Jellyfin に Apple TV として名乗っていました。iPhone、iPad、Mac はそれぞれ自分の名前を伝えるようになり、ダッシュボードに正しいデバイスが表示され、アドオンもデバイスごとに別のバージョン(スマートフォンには小さいファイルなど)を出せます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite는 모든 기기에서 Jellyfin에 Apple TV로 표시되었습니다. 이제 iPhone, iPad, Mac이 각자의 이름을 알리므로 대시보드에 올바른 기기가 표시되고, 애드온이 기기마다 다른 버전(예: 휴대폰에는 더 작은 파일)을 제공할 수 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite meldte seg som Apple TV overfor Jellyfin på alle enheter. iPhone, iPad og Mac oppgir nå sitt eget navn, så dashbordet viser riktig enhet, og tillegg kan gi hver enhet sine egne versjoner, for eksempel mindre filer på telefonen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite meldde zich bij Jellyfin op elk apparaat als Apple TV. iPhone, iPad en Mac noemen nu hun eigen naam, zodat het dashboard het juiste apparaat toont en add-ons elk apparaat eigen versies kunnen geven, zoals kleinere bestanden op de telefoon."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite przedstawiał się Jellyfinowi jako Apple TV na każdym urządzeniu. iPhone, iPad i Mac podają teraz własną nazwę, więc panel pokazuje właściwe urządzenie, a dodatki mogą dać każdemu jego własne wersje, na przykład mniejsze pliki na telefonie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Sodalite se apresentava ao Jellyfin como Apple TV em todos os dispositivos. iPhone, iPad e Mac agora informam o próprio nome, então o painel mostra o dispositivo certo e os complementos podem dar a cada um as suas versões, como arquivos menores no celular."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Sodalite apresentava-se ao Jellyfin como Apple TV em todos os dispositivos. iPhone, iPad e Mac indicam agora o próprio nome, por isso o painel mostra o dispositivo certo e os suplementos podem dar a cada um as suas versões, como ficheiros mais pequenos no telemóvel."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite se prezenta în Jellyfin ca Apple TV pe orice dispozitiv. iPhone, iPad și Mac își spun acum propriul nume, așa că panoul arată dispozitivul corect, iar suplimentele pot oferi fiecăruia propriile versiuni, de exemplu fișiere mai mici pe telefon."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite на любом устройстве представлялся Jellyfin как Apple TV. Теперь iPhone, iPad и Mac называют себя сами, поэтому панель управления показывает нужное устройство, а дополнения могут отдавать каждому свои версии, например файлы поменьше на телефон."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite sa Jellyfinu na každom zariadení hlásil ako Apple TV. iPhone, iPad a Mac sa teraz hlásia vlastným názvom, takže prehľad ukazuje správne zariadenie a doplnky môžu každému ponúknuť vlastné verzie, napríklad menšie súbory v telefóne."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite presenterade sig för Jellyfin som Apple TV på alla enheter. iPhone, iPad och Mac anger nu sitt eget namn, så att instrumentpanelen visar rätt enhet och tillägg kan ge varje enhet egna versioner, till exempel mindre filer på telefonen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite her cihazda Jellyfin’e kendini Apple TV olarak tanıtıyordu. iPhone, iPad ve Mac artık kendi adını bildiriyor; böylece pano doğru cihazı gösteriyor ve eklentiler her cihaza kendi sürümlerini, örneğin telefona daha küçük dosyaları verebiliyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite на кожному пристрої представлявся Jellyfin як Apple TV. Тепер iPhone, iPad і Mac називають себе самі, тож панель керування показує правильний пристрій, а доповнення можуть віддавати кожному власні версії, наприклад менші файли на телефон."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite 以前在所有设备上都向 Jellyfin 报告自己是 Apple TV。现在 iPhone、iPad 和 Mac 会报告各自的名称,控制台会显示正确的设备,插件也能为每台设备提供不同的版本,例如在手机上使用更小的文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sodalite 以前在所有裝置上都向 Jellyfin 回報自己是 Apple TV。現在 iPhone、iPad 和 Mac 會回報各自的名稱,控制台會顯示正確的裝置,外掛也能為每台裝置提供不同的版本,例如在手機上使用較小的檔案。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.deviceType.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server rozpozná iPhone, iPad a Mac"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Din server genkender iPhone, iPad og Mac"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Server erkennt iPhone, iPad und Mac"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ο διακομιστής αναγνωρίζει iPhone, iPad και Mac"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your server sees iPhone, iPad and Mac"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu servidor reconoce iPhone, iPad y Mac"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palvelin tunnistaa iPhonen, iPadin ja Macin"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre serveur reconnaît l’iPhone, l’iPad et le Mac"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poslužitelj prepoznaje iPhone, iPad i Mac"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A szerver felismeri az iPhone-t, az iPadet és a Macet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il server riconosce iPhone, iPad e Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーが iPhone、iPad、Mac を区別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버가 iPhone, iPad, Mac을 구분합니다"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serveren kjenner igjen iPhone, iPad og Mac"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je server herkent iPhone, iPad en Mac"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serwer rozpoznaje iPhone’a, iPada i Maca"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu servidor reconhece iPhone, iPad e Mac"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O servidor reconhece iPhone, iPad e Mac"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverul recunoaște iPhone, iPad și Mac"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер различает iPhone, iPad и Mac"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server rozpozná iPhone, iPad a Mac"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Servern känner igen iPhone, iPad och Mac"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu iPhone, iPad ve Mac’i tanıyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер розрізняє iPhone, iPad і Mac"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器能区分 iPhone、iPad 和 Mac"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伺服器能分辨 iPhone、iPad 和 Mac"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.downloads.body" : {
       "extractionState" : "manual",
       "localizations" : {
