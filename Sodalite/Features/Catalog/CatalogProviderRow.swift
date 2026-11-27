@@ -106,6 +106,7 @@ private struct ProviderTile: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
         }
     }
 

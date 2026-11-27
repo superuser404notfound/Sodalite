@@ -20,6 +20,7 @@ struct PlaceholderCard: View {
                 .fill(Color.Theme.surface)
                 .frame(width: size.width, height: size.height)
                 .overlay(MediaFocusRing(cornerRadius: ArtworkCorner.radius, isFocused: isFocused))
+                .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: " ").font(.caption)
                 Text(verbatim: " ").font(.caption2)

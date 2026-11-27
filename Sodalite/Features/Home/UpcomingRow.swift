@@ -123,5 +123,6 @@ struct UpcomingCard: View {
         .overlay(
             MediaFocusRing(cornerRadius: ArtworkCorner.radius, isFocused: isFocused)
         )
+        .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
     }
 }

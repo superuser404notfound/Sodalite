@@ -80,13 +80,18 @@ extension View {
     /// Leans focused artwork under the thumb on tvOS. Apply it after the artwork's overlays and its
     /// focus ring, so badges and ring lean with the picture. A no-op on iOS and macOS.
     func focusTilt(isFocused: Bool, cornerRadius: CGFloat) -> some View {
-        modifier(FocusTiltModifier(isFocused: isFocused, cornerRadius: cornerRadius))
+        focusTilt(isFocused: isFocused, in: RoundedRectangle(cornerRadius: cornerRadius))
+    }
+
+    /// The same for artwork of any shape, such as a cast portrait. `shape` bounds the sheen.
+    func focusTilt<S: Shape>(isFocused: Bool, in shape: S) -> some View {
+        modifier(FocusTiltModifier(isFocused: isFocused, shape: shape))
     }
 }
 
-private struct FocusTiltModifier: ViewModifier {
+private struct FocusTiltModifier<S: Shape>: ViewModifier {
     let isFocused: Bool
-    let cornerRadius: CGFloat
+    let shape: S
 
     #if os(tvOS)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -110,7 +115,7 @@ private struct FocusTiltModifier: ViewModifier {
                         )
                         .opacity(tilt.sheenOpacity)
                         .blendMode(.plusLighter)
-                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                        .clipShape(shape)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                     }

@@ -33,6 +33,7 @@ struct ShowAllCard: View {
             }
             .frame(width: cardSize.width, height: cardSize.height)
             .overlay(MediaFocusRing(cornerRadius: ArtworkCorner.radius, isFocused: isFocused))
+            .focusTilt(isFocused: isFocused, cornerRadius: ArtworkCorner.radius)
 
             // Empty title and subtitle lines, the height a MediaCard's caption takes.
             VStack(alignment: .leading, spacing: 2) {

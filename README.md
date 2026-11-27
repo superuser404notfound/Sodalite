@@ -280,6 +280,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Watch Stats**: your totals, completion rate, hours, top genres and most-rewatched titles, worked out on the device.
 - **26 languages**: Czech, Danish, Dutch, English, Finnish, French, German, Greek, Croatian, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese (Brazil and Portugal), Romanian, Russian, Slovak, Spanish, Swedish, Turkish, Ukrainian, Chinese (Simplified and Traditional).
 - **Design**: dark and minimal with the artwork first, Liquid Glass accents, and controls made for each input: Siri Remote, touch, keyboard and mouse.
+- **Posters that lean** (Apple TV): a focused poster, episode still or cast photo tilts with your thumb on the remote's touch surface and settles back when you let go. Reduce Motion turns it off.
 
 ### Privacy and troubleshooting
 

@@ -157,6 +157,7 @@ private struct MediaCastCard: View {
                     isFocused: isFocused
                 )
             )
+            .focusTilt(isFocused: isFocused, in: Circle())
 
             VStack(spacing: 2) {
                 // Four of the 24 measured cast names still overrun the tvOS label at 25pt;
