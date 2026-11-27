@@ -219,55 +219,14 @@ struct FilteredGridView: View {
                     .padding(.trailing, showsRail ? Self.railClearance : 0)
                     .padding(.top, 8)
 
-                    HStack {
-                        GlassActionButton(
-                            title: "action.shuffle",
-                            systemImage: "shuffle",
-                            action: {
-                                guard let userID = sessionUserID else { return }
-                                // Draws from what the filter menu leaves, not the whole library.
-                                guard let base = menuNarrowed(query, serverID: serverKey) else { return }
-                                // Shows libraries shuffle episodes across the whole
-                                // library; everything else keeps its own item types.
-                                var types = query.includeItemTypes ?? [.movie]
-                                let showsSeries = types.contains(.series)
-                                if showsSeries { types = [.episode] }
-                                if browsesFolders { types = [.video] }
-                                let throughSeries = showsSeries && !filterSelection.isEmpty
-                                Task {
-                                    let queue = throughSeries
-                                        ? await VideoShuffleQueue.buildFromSeries(
-                                            seriesQuery: base, service: session.libraryService, userID: userID)
-                                        : await VideoShuffleQueue.build(
-                                            parentID: query.parentID,
-                                            baseQuery: base,
-                                            itemTypes: types,
-                                            service: session.libraryService,
-                                            userID: userID
-                                        )
-                                    guard let first = queue.first else { return }
-                                    playItem = first
-                                    playQueue = queue
-                                    showPlayer = true
-                                }
-                            }
-                        )
-                        if sortScope != nil {
-                            GlassActionButton(
-                                title: "library.sort.action",
-                                systemImage: "arrow.up.arrow.down",
-                                action: { showSortSheet = true }
-                            )
-                        }
-                        // On every grid, streaming tiles included: their two phases are both
-                        // narrowed, unlike a sort, which could only order one of them.
-                        GlassActionButton(
-                            title: "library.filter.title",
-                            systemImage: "line.3.horizontal.decrease",
-                            subtitle: filterSelection.isEmpty ? nil : String(filterSelection.activeCount),
-                            action: openFilterMenu
-                        )
-                        Spacer()
+                    // Fixed-size pills cannot shrink, so a row wider than the screen pushed the whole
+                    // page past both edges (TestFlight, 1.1.1 on an iPhone 15 in Portuguese; English
+                    // is already a few points too wide on a 390 pt iPhone). Shuffle gives up its
+                    // label first because its glyph explains itself, then all three do.
+                    ViewThatFits(in: .horizontal) {
+                        actionRow(collapsesShuffle: false)
+                        actionRow(collapsesShuffle: true)
+                        actionRow(collapsesShuffle: true).environment(\.collapsesActionButtonLabel, true)
                     }
                     .padding(.horizontal, metrics.gridInset)
                     .padding(.trailing, showsRail ? Self.railClearance : 0)
@@ -798,6 +757,60 @@ struct FilteredGridView: View {
     private func menuNarrowed(_ base: ItemQuery, serverID: String) -> ItemQuery? {
         guard !filterSelection.isEmpty else { return base }
         return filterSelection.applied(to: base, facets: facets?.byServer[serverID])
+    }
+
+    private func actionRow(collapsesShuffle: Bool) -> some View {
+        HStack {
+            GlassActionButton(title: "action.shuffle", systemImage: "shuffle", action: shuffle)
+                .environment(\.collapsesActionButtonLabel, collapsesShuffle)
+            if sortScope != nil {
+                GlassActionButton(
+                    title: "library.sort.action",
+                    systemImage: "arrow.up.arrow.down",
+                    action: { showSortSheet = true }
+                )
+            }
+            // On every grid, streaming tiles included: their two phases are both
+            // narrowed, unlike a sort, which could only order one of them.
+            GlassActionButton(
+                title: "library.filter.title",
+                systemImage: "line.3.horizontal.decrease",
+                subtitle: filterSelection.isEmpty ? nil : String(filterSelection.activeCount),
+                // The count is the only sign a filter is on, so the collapsed row keeps it.
+                alwaysShowsLabel: !filterSelection.isEmpty,
+                action: openFilterMenu
+            )
+            Spacer()
+        }
+    }
+
+    private func shuffle() {
+        guard let userID = sessionUserID else { return }
+        // Draws from what the filter menu leaves, not the whole library.
+        guard let base = menuNarrowed(query, serverID: serverKey) else { return }
+        // Shows libraries shuffle episodes across the whole
+        // library; everything else keeps its own item types.
+        var types = query.includeItemTypes ?? [.movie]
+        let showsSeries = types.contains(.series)
+        if showsSeries { types = [.episode] }
+        if browsesFolders { types = [.video] }
+        let throughSeries = showsSeries && !filterSelection.isEmpty
+        Task {
+            let queue = throughSeries
+                ? await VideoShuffleQueue.buildFromSeries(
+                    seriesQuery: base, service: session.libraryService, userID: userID)
+                : await VideoShuffleQueue.build(
+                    parentID: query.parentID,
+                    baseQuery: base,
+                    itemTypes: types,
+                    service: session.libraryService,
+                    userID: userID
+                )
+            guard let first = queue.first else { return }
+            playItem = first
+            playQueue = queue
+            showPlayer = true
+        }
     }
 
     private func openFilterMenu() {
