@@ -181,6 +181,25 @@ struct LibraryFilterTests {
         #expect(merged.byServer.keys.sorted() == ["a", "b"])
     }
 
+    /// One server sends tags and studios in no useful order, which made a long list unusable.
+    @Test func facetsFromOneServerAreSortedToo() {
+        var a = ServerFacets()
+        a.tags = ["noir", "Heist", "1980s", "ambient"]
+        a.studios = ["Warner Bros.", "A24"]
+        let merged = LibraryFacets.merge([("a", a)])
+        #expect(merged.tags == ["1980s", "ambient", "Heist", "noir"])
+        #expect(merged.studios == ["A24", "Warner Bros."])
+    }
+
+    @Test func searchNarrowsCaseAndAccentBlind() {
+        let options = ["Amélie Studios", "neo-noir", "Noir", "Heist"].map { title in
+            LibraryFilterSheet.Option(id: title, title: title, isOn: { _ in false }, toggle: { _ in })
+        }
+        #expect(LibraryFilterSheet.narrowed(options, by: "amelie").map(\.title) == ["Amélie Studios"])
+        #expect(LibraryFilterSheet.narrowed(options, by: " NOIR ").map(\.title) == ["neo-noir", "Noir"])
+        #expect(LibraryFilterSheet.narrowed(options, by: "").count == 4)
+    }
+
     @Test func groupsTheServerAnsweredEmptyStayHidden() {
         var facets = LibraryFacets()
         facets.genres = ["Drama"]

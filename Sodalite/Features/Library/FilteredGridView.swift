@@ -325,6 +325,9 @@ struct FilteredGridView: View {
                             }
                         }
                         .frame(maxWidth: .infinity, minHeight: 400)
+                        // The button sits centred under a left-aligned action row, and Down from
+                        // there only looks straight below. A full-width section catches the move.
+                        .focusSectionCompat()
                     } else {
                         let style = cardStyle
                         LazyVGrid(columns: [

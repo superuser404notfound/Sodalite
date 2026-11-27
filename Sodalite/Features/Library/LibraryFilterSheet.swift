@@ -2,7 +2,8 @@ import SwiftUI
 
 /// The library grid's filter menu (Sodalite#252): the groups, and one group's checklist. Edits the
 /// grid's draft; the grid applies it when the panel closes. Menu on tvOS (and the back button
-/// elsewhere) leaves a checklist for the groups, and the groups for the grid.
+/// elsewhere) leaves a checklist for the groups, and the groups for the grid. Play/Pause on tvOS
+/// and Done elsewhere close it from either page.
 struct LibraryFilterSheet: View {
     @Binding var selection: LibraryFilterSelection
     let groups: [LibraryFilterGroup]
@@ -11,18 +12,34 @@ struct LibraryFilterSheet: View {
     let tintColor: Color
 
     @State private var openGroup: LibraryFilterGroup?
+    /// The open group's rows, built once when it opens. Rebuilt in `body` they cost a pass over the
+    /// whole list on every focus step: 13 ms for 30,000 tags in the tvOS simulator, several times
+    /// that on an Apple TV.
+    @State private var groupOptions: [Option] = []
+    /// `groupOptions` narrowed by `searchText`, kept for the same reason.
+    @State private var shownOptions: [Option] = []
+    @State private var searchText = ""
     @FocusState private var focusedRow: String?
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     private var isCompact: Bool { hSizeClass == .compact }
 
     var body: some View {
         VStack(spacing: isCompact ? 20 : 36) {
             header
+            if openGroup != nil && isSearchable {
+                searchField
+            }
             ScrollView {
                 LazyVStack(spacing: isCompact ? 12 : 16) {
-                    if let openGroup {
-                        ForEach(options(for: openGroup)) { option in
+                    if openGroup != nil {
+                        ForEach(shownOptions) { option in
                             optionRow(option)
+                        }
+                        if shownOptions.isEmpty && !searchText.isEmpty {
+                            Text("search.empty.noResults")
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 8)
                         }
                     } else {
                         if !selection.isEmpty {
@@ -51,20 +68,35 @@ struct LibraryFilterSheet: View {
         #if os(iOS)
         .background(.thinMaterial)
         #endif
-        .onAppear { focusedRow = groups.first.map(groupRowID) }
+        .onAppear { focus(groups.first.map(groupRowID)) }
         // Deeper than the cover's own Menu handler, so it wins while a checklist is open. Only
         // then: installed on the groups page too, it swallowed the press that closes the panel.
         .onExitCommandIfEnabled(openGroup != nil) {
             if let group = openGroup { close(group) }
         }
+        // The way out from a checklist without two Menu presses. Closing applies the draft.
+        .onPlayPauseCommandCompat { dismiss() }
+        .onChange(of: searchText) { _, _ in narrowOptions() }
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
     }
 
-    @ViewBuilder
     private var header: some View {
-        HStack(spacing: 16) {
+        Group {
+            if let openGroup {
+                Text(openGroup.localizedTitle)
+            } else {
+                Text("library.filter.title")
+            }
+        }
+        .font(isCompact ? .title3 : .title2)
+        .fontWeight(.semibold)
+        .lineLimit(1)
+        // Keeps a long title clear of Back and Done; it truncates instead of running under them.
+        .padding(.horizontal, isCompact ? 56 : 160)
+        .frame(maxWidth: 760)
+        .overlay(alignment: .leading) {
             #if !os(tvOS)
             if let group = openGroup {
                 Button { close(group) } label: {
@@ -75,33 +107,82 @@ struct LibraryFilterSheet: View {
                 .accessibilityLabel(Text("common.back"))
             }
             #endif
-            Group {
-                if let openGroup {
-                    Text(openGroup.localizedTitle)
-                } else {
-                    Text("library.filter.title")
-                }
+        }
+        .overlay(alignment: .trailing) {
+            #if os(tvOS)
+            // Not a focus stop: on a long checklist a button up here would be a long way off.
+            Label {
+                Text("common.done")
+            } icon: {
+                Image(systemName: "playpause.fill")
             }
-            .font(isCompact ? .title3 : .title2)
-            .fontWeight(.semibold)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            #else
+            Button("common.done") { dismiss() }
+                .fontWeight(.semibold)
+                .buttonStyle(.plain)
+                .foregroundStyle(tintColor)
+            #endif
         }
     }
 
+    /// Long lists get a search field. The threshold is about a screenful of rows.
+    private var isSearchable: Bool { groupOptions.count >= Self.searchThreshold }
+    static let searchThreshold = 15
+    private static let searchRowID = "search"
+
+    private var searchField: some View {
+        TextField("search.placeholder", text: $searchText)
+            .font(.body)
+            .verbatimTextEntry()
+            // tvOS draws its own field; a fill around it showed as a second frame.
+            #if !os(tvOS)
+            .padding(isCompact ? 12 : 16)
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.Theme.surfaceElevated))
+            #endif
+            .frame(maxWidth: 760)
+            .focused($focusedRow, equals: Self.searchRowID)
+    }
+
+    private func narrowOptions() {
+        shownOptions = Self.narrowed(groupOptions, by: searchText)
+    }
+
+    /// Case and accent blind, anywhere in the name: "amelie" finds "Amélie", "noir" finds "neo-noir".
+    static func narrowed(_ options: [Option], by text: String) -> [Option] {
+        let needle = text.trimmingCharacters(in: .whitespaces)
+        guard !needle.isEmpty else { return options }
+        return options.filter { $0.title.localizedStandardContains(needle) }
+    }
+
     private func open(_ group: LibraryFilterGroup) {
+        searchText = ""
+        groupOptions = options(for: group)
+        shownOptions = groupOptions
         openGroup = group
-        focus(options(for: group).first?.id)
+        // A long list starts on its search field, the quickest way into it.
+        focus(isSearchable ? Self.searchRowID : groupOptions.first?.id)
     }
 
     /// Back to the groups, with focus on the group just left.
     private func close(_ group: LibraryFilterGroup) {
         openGroup = nil
+        searchText = ""
+        groupOptions = []
+        shownOptions = []
         focus(groupRowID(group))
     }
 
     /// The page swap rebuilds the rows, and an assignment made in the same turn is dropped: focus
     /// fell to the first row, which on the way back is Clear All. One turn later it sticks.
+    ///
+    /// tvOS only. On iOS and macOS the remote's cursor has no meaning: a row focused from code wore
+    /// the accent fill on a phone and read as a second, wrong selection next to the tick.
     private func focus(_ id: String?) {
+        #if os(tvOS)
         Task { focusedRow = id }
+        #endif
     }
 
     private func groupRowID(_ group: LibraryFilterGroup) -> String { "group-\(group.rawValue)" }
@@ -111,15 +192,19 @@ struct LibraryFilterSheet: View {
     private func groupRow(_ group: LibraryFilterGroup) -> some View {
         let id = groupRowID(group)
         let isFocused = focusedRow == id
+        let picked = summary(for: group)
         return HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(group.localizedTitle)
                     .font(.body)
                     .fontWeight(.medium)
-                Text(summary(for: group))
+                // A group that narrows the grid shows its picks in the accent; on a focused row
+                // the row itself is the accent, so the text keeps the row's colour there.
+                Text(picked ?? String(localized: "library.filter.any"))
                     .font(.caption)
                     .lineLimit(1)
-                    .opacity(0.75)
+                    .foregroundStyle(isFocused ? Color.black : picked != nil ? tintColor : Color.primary)
+                    .opacity(picked == nil ? 0.75 : 1)
             }
             Spacer(minLength: 0)
             Image(systemName: "chevron.forward")
@@ -171,9 +256,9 @@ struct LibraryFilterSheet: View {
 
     // MARK: - Content
 
-    /// What is picked in a group, in list order, or "Any". The facet groups read the lists
+    /// What is picked in a group, in list order, or nil for "Any". The facet groups read the lists
     /// directly: a library can carry thousands of studios and tags, and this runs per row per redraw.
-    private func summary(for group: LibraryFilterGroup) -> String {
+    private func summary(for group: LibraryFilterGroup) -> String? {
         let picked: [String]
         switch group {
         case .genres: picked = (facets?.genres ?? []).filter(selection.genres.contains)
@@ -188,7 +273,7 @@ struct LibraryFilterSheet: View {
         case .filters, .features, .videoType, .seriesStatus:
             picked = options(for: group).filter { $0.isOn(selection) }.map(\.title)
         }
-        guard !picked.isEmpty else { return String(localized: "library.filter.any") }
+        guard !picked.isEmpty else { return nil }
         return picked.joined(separator: ", ")
     }
 

@@ -180,7 +180,8 @@ struct LibraryFacets: Sendable, Equatable {
     var byServer: [String: ServerFacets] = [:]
 
     /// Names compare case-insensitively, the way Jellyfin matches them; the first spelling wins.
-    /// Years run newest first, like the web client's list.
+    /// Names and languages are sorted even from one server, which sends tags and studios in no
+    /// useful order. Years run newest first, like the web client's list.
     static func merge(_ servers: [(serverID: String, facets: ServerFacets)]) -> LibraryFacets {
         var merged = LibraryFacets()
         merged.genres = joinNames(servers.map(\.facets.genres))
@@ -200,7 +201,6 @@ struct LibraryFacets: Sendable, Equatable {
         for name in lists.joined() where !name.isEmpty && seen.insert(name.lowercased()).inserted {
             names.append(name)
         }
-        guard lists.count > 1 else { return names }
         return names.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
@@ -210,7 +210,6 @@ struct LibraryFacets: Sendable, Equatable {
         for language in lists.joined() where seen.insert(language.value.lowercased()).inserted {
             languages.append(language)
         }
-        guard lists.count > 1 else { return languages }
         return languages.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 }
