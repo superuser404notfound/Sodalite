@@ -64,6 +64,7 @@ The high-value areas, what we most want feedback on:
 - Subtitle search: when a track is missing, search and download one from inside the player
 - Dual subtitles: pick a secondary track from the Secondary section at the top of the subtitle menu and confirm two lines render (try an SRT and an ASS track). Switching the secondary track and turning it off should work, and seeking should keep both lines in sync
 - An ASS / SSA subtitle track with heavy styling (anime fansubs are ideal): do fonts, colors and positions look right? Try the styled / plain toggle in Playback settings
+- A single embedded Chinese + English ASS track with an unavailable Chinese font: if libass cannot find any substitute for a glyph, both languages should automatically use plain text for that track activation. A missing named font that can be substituted should keep styling. Switch to a healthy track and confirm styling returns; the Playback setting should stay unchanged. This recovery listens for libass's terminal glyph-resolution diagnostics, so clipping or incorrect authored positioning without a font error still needs investigation.
 - Resume from where you stopped, on multiple devices
 - Network Buffer (Settings > Playback > Streaming): on a slow WebDAV / rclone-backed server, raise the level and watch the lighter buffered-ahead band on the scrub bar grow as the on-disk buffer fills. It applies to direct play; a server-transcoded title shows no band
 - Auto-play next episode for series
