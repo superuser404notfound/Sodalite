@@ -33,6 +33,12 @@ enum Changelog {
                     icon: "rotate.3d"
                 ),
                 ChangelogHighlight(
+                    .improve,
+                    "changelog.1_2_0.filterSearch.title",
+                    "changelog.1_2_0.filterSearch.body",
+                    icon: "line.3.horizontal.decrease"
+                ),
+                ChangelogHighlight(
                     .fix,
                     "changelog.1_2_0.datedEpisodes.title",
                     "changelog.1_2_0.datedEpisodes.body",
