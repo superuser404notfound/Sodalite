@@ -180,14 +180,14 @@ struct LibraryFacets: Sendable, Equatable {
     var byServer: [String: ServerFacets] = [:]
 
     /// Names compare case-insensitively, the way Jellyfin matches them; the first spelling wins.
-    /// Names and languages are sorted even from one server, which sends tags and studios in no
-    /// useful order. Years run newest first, like the web client's list.
+    /// Tags and studios are sorted even from one server, which sends them in no useful order; the
+    /// other lists keep a single server's own order. Years run newest first, like the web client.
     static func merge(_ servers: [(serverID: String, facets: ServerFacets)]) -> LibraryFacets {
         var merged = LibraryFacets()
         merged.genres = joinNames(servers.map(\.facets.genres))
         merged.officialRatings = joinNames(servers.map(\.facets.officialRatings))
-        merged.tags = joinNames(servers.map(\.facets.tags))
-        merged.studios = joinNames(servers.map(\.facets.studios))
+        merged.tags = joinNames(servers.map(\.facets.tags), alwaysSorted: true)
+        merged.studios = joinNames(servers.map(\.facets.studios), alwaysSorted: true)
         merged.years = Array(Set(servers.flatMap(\.facets.years))).sorted(by: >)
         merged.audioLanguages = joinLanguages(servers.map(\.facets.audioLanguages))
         merged.subtitleLanguages = joinLanguages(servers.map(\.facets.subtitleLanguages))
@@ -195,12 +195,13 @@ struct LibraryFacets: Sendable, Equatable {
         return merged
     }
 
-    private static func joinNames(_ lists: [[String]]) -> [String] {
+    private static func joinNames(_ lists: [[String]], alwaysSorted: Bool = false) -> [String] {
         var seen = Set<String>()
         var names: [String] = []
         for name in lists.joined() where !name.isEmpty && seen.insert(name.lowercased()).inserted {
             names.append(name)
         }
+        guard alwaysSorted || lists.count > 1 else { return names }
         return names.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
@@ -210,6 +211,7 @@ struct LibraryFacets: Sendable, Equatable {
         for language in lists.joined() where seen.insert(language.value.lowercased()).inserted {
             languages.append(language)
         }
+        guard lists.count > 1 else { return languages }
         return languages.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 }

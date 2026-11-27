@@ -18,6 +18,10 @@ struct LibraryFilterSheet: View {
     @State private var groupOptions: [Option] = []
     /// `groupOptions` narrowed by `searchText`, kept for the same reason.
     @State private var shownOptions: [Option] = []
+    /// `groupOptions` titles folded for search, built on the first search in a group.
+    @State private var searchKeys: [String] = []
+    /// Width of the header's trailing control, so a long title truncates before it reaches it.
+    @State private var headerSideWidth: CGFloat = 0
     @State private var searchText = ""
     @FocusState private var focusedRow: String?
     @Environment(\.dismiss) private var dismiss
@@ -77,6 +81,13 @@ struct LibraryFilterSheet: View {
         // The way out from a checklist without two Menu presses. Closing applies the draft.
         .onPlayPauseCommandCompat { dismiss() }
         .onChange(of: searchText) { _, _ in narrowOptions() }
+        // Facets are written once today; this keeps an open checklist honest if that changes.
+        .onChange(of: facets) { _, _ in
+            guard let openGroup else { return }
+            groupOptions = options(for: openGroup)
+            searchKeys = []
+            narrowOptions()
+        }
         #if os(iOS)
         .presentationDetents([.medium, .large])
         #endif
@@ -93,8 +104,8 @@ struct LibraryFilterSheet: View {
         .font(isCompact ? .title3 : .title2)
         .fontWeight(.semibold)
         .lineLimit(1)
-        // Keeps a long title clear of Back and Done; it truncates instead of running under them.
-        .padding(.horizontal, isCompact ? 56 : 160)
+        // Keeps a long title clear of Back and Done. It truncates instead of running under them.
+        .padding(.horizontal, headerSideWidth + (isCompact ? 12 : 24))
         .frame(maxWidth: 760)
         .overlay(alignment: .leading) {
             #if !os(tvOS)
@@ -110,7 +121,7 @@ struct LibraryFilterSheet: View {
         }
         .overlay(alignment: .trailing) {
             #if os(tvOS)
-            // Not a focus stop: on a long checklist a button up here would be a long way off.
+            // Not a focus stop. On a long checklist a button up here would be a long way off.
             Label {
                 Text("common.done")
             } icon: {
@@ -118,11 +129,13 @@ struct LibraryFilterSheet: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { headerSideWidth = $0 }
             #else
             Button("common.done") { dismiss() }
                 .fontWeight(.semibold)
                 .buttonStyle(.plain)
                 .foregroundStyle(tintColor)
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { headerSideWidth = $0 }
             #endif
         }
     }
@@ -146,19 +159,33 @@ struct LibraryFilterSheet: View {
     }
 
     private func narrowOptions() {
-        shownOptions = Self.narrowed(groupOptions, by: searchText)
+        if !searchText.isEmpty, searchKeys.count != groupOptions.count {
+            searchKeys = Self.searchKeys(for: groupOptions)
+        }
+        shownOptions = Self.narrowed(groupOptions, keys: searchKeys, by: searchText)
     }
 
-    /// Case and accent blind, anywhere in the name: "amelie" finds "Amélie", "noir" finds "neo-noir".
-    static func narrowed(_ options: [Option], by text: String) -> [Option] {
-        let needle = text.trimmingCharacters(in: .whitespaces)
-        guard !needle.isEmpty else { return options }
-        return options.filter { $0.title.localizedStandardContains(needle) }
+    /// Titles folded once per group, so each keystroke is a plain substring test per row instead
+    /// of an ICU comparison over thousands of names.
+    static func searchKeys(for options: [Option]) -> [String] {
+        options.map { fold($0.title) }
+    }
+
+    /// Case and accent blind, anywhere in the name. "amelie" finds "Amélie", "noir" finds "neo-noir".
+    static func narrowed(_ options: [Option], keys: [String], by text: String) -> [Option] {
+        let needle = fold(text.trimmingCharacters(in: .whitespaces))
+        guard !needle.isEmpty, keys.count == options.count else { return options }
+        return zip(options, keys).filter { $0.1.contains(needle) }.map(\.0)
+    }
+
+    private static func fold(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
     }
 
     private func open(_ group: LibraryFilterGroup) {
         searchText = ""
         groupOptions = options(for: group)
+        searchKeys = []
         shownOptions = groupOptions
         openGroup = group
         // A long list starts on its search field, the quickest way into it.
@@ -170,6 +197,7 @@ struct LibraryFilterSheet: View {
         openGroup = nil
         searchText = ""
         groupOptions = []
+        searchKeys = []
         shownOptions = []
         focus(groupRowID(group))
     }
@@ -177,12 +205,14 @@ struct LibraryFilterSheet: View {
     /// The page swap rebuilds the rows, and an assignment made in the same turn is dropped: focus
     /// fell to the first row, which on the way back is Clear All. One turn later it sticks.
     ///
-    /// tvOS only. On iOS and macOS the remote's cursor has no meaning: a row focused from code wore
-    /// the accent fill on a phone and read as a second, wrong selection next to the tick.
+    /// On iOS and macOS only when a row already has focus, which means a keyboard is driving the
+    /// panel. On a touch screen a row focused from code wore the accent fill and read as a second,
+    /// wrong selection next to the tick.
     private func focus(_ id: String?) {
-        #if os(tvOS)
-        Task { focusedRow = id }
+        #if !os(tvOS)
+        guard focusedRow != nil else { return }
         #endif
+        Task { focusedRow = id }
     }
 
     private func groupRowID(_ group: LibraryFilterGroup) -> String { "group-\(group.rawValue)" }
@@ -198,12 +228,12 @@ struct LibraryFilterSheet: View {
                 Text(group.localizedTitle)
                     .font(.body)
                     .fontWeight(.medium)
-                // A group that narrows the grid shows its picks in the accent; on a focused row
+                // A group that narrows the grid shows its picks in the accent. On a focused row
                 // the row itself is the accent, so the text keeps the row's colour there.
                 Text(picked ?? String(localized: "library.filter.any"))
                     .font(.caption)
                     .lineLimit(1)
-                    .foregroundStyle(isFocused ? Color.black : picked != nil ? tintColor : Color.primary)
+                    .modifier(AccentWhen(isOn: picked != nil && !isFocused, tint: tintColor))
                     .opacity(picked == nil ? 0.75 : 1)
             }
             Spacer(minLength: 0)
@@ -256,16 +286,16 @@ struct LibraryFilterSheet: View {
 
     // MARK: - Content
 
-    /// What is picked in a group, in list order, or nil for "Any". The facet groups read the lists
-    /// directly: a library can carry thousands of studios and tags, and this runs per row per redraw.
+    /// What is picked in a group, or nil for "Any". Built from the picks, not by walking the facet
+    /// lists. A library can carry tens of thousands of tags, and this runs per row per redraw.
     private func summary(for group: LibraryFilterGroup) -> String? {
         let picked: [String]
         switch group {
-        case .genres: picked = (facets?.genres ?? []).filter(selection.genres.contains)
-        case .parentalRatings: picked = (facets?.officialRatings ?? []).filter(selection.officialRatings.contains)
-        case .tags: picked = (facets?.tags ?? []).filter(selection.tags.contains)
-        case .studios: picked = (facets?.studios ?? []).filter(selection.studios.contains)
-        case .years: picked = (facets?.years ?? []).filter(selection.years.contains).map(String.init)
+        case .genres: picked = Self.sortedNames(selection.genres)
+        case .parentalRatings: picked = Self.sortedNames(selection.officialRatings)
+        case .tags: picked = Self.sortedNames(selection.tags)
+        case .studios: picked = Self.sortedNames(selection.studios)
+        case .years: picked = selection.years.sorted(by: >).map(String.init)
         case .audioLanguages:
             picked = (facets?.audioLanguages ?? []).filter { selection.audioLanguages.contains($0.value) }.map(\.name)
         case .subtitleLanguages:
@@ -275,6 +305,10 @@ struct LibraryFilterSheet: View {
         }
         guard !picked.isEmpty else { return nil }
         return picked.joined(separator: ", ")
+    }
+
+    private static func sortedNames(_ names: Set<String>) -> [String] {
+        names.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
     struct Option: Identifiable {
@@ -348,5 +382,19 @@ struct LibraryFilterSheet: View {
 
     private static func localized(_ key: String) -> String {
         String(localized: String.LocalizationValue(key))
+    }
+}
+
+/// The accent on a view when `isOn`, otherwise whatever foreground the view already inherits.
+private struct AccentWhen: ViewModifier {
+    let isOn: Bool
+    let tint: Color
+
+    func body(content: Content) -> some View {
+        if isOn {
+            content.foregroundStyle(tint)
+        } else {
+            content
+        }
     }
 }
