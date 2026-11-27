@@ -77,21 +77,20 @@ final class ASSRenderCoordinator {
     var onRendererChanged: ((AssSubtitlesRenderer?) -> Void)?
     /// Guards async font-write completion against a deactivate/re-activate during the writes.
     private var activationGeneration = 0
-    /// Moves with every renderer built or dropped, so a glyph failure only ever drops the renderer
-    /// that raised it.
+    /// Moves with every renderer built, so a glyph failure only drops the renderer that raised it.
+    ///
+    /// Not airtight. SwiftAssRenderer 1.3.1 sends every libass message through one process-wide
+    /// callback, owned by the most recently built renderer, and `freeTrack()` does not stop a render
+    /// already running on the old renderer's queue. A miss from that last render lands on the new
+    /// renderer's count. Draining the old queue before building the next one was tried and
+    /// dropped. It put plain text on screen for the length of a parse on every track switch, and
+    /// the overlay still drives the old renderer for one more SwiftUI pass anyway.
     private var rendererGeneration = 0
-    /// SwiftAssRenderer 1.3.1 sends every libass message through one process-wide callback, and the
-    /// most recently built renderer owns it. A render still running on a dropped renderer's queue
-    /// would report its glyph misses to the new one, so the next renderer waits until that queue
-    /// has drained. A time window would only make this unlikely.
-    private var retiringRenderer: AssSubtitlesRenderer?
-    private var installAfterRetire: (fontsDir: URL, generation: Int, fullScript: Bool)?
 
     /// Activate for the selected embedded track (`header` = track's `assHeader`). Bails (renderer
     /// stays nil, caller keeps the text path) when the header is missing or setup fails.
-    /// Fonts are written off-main (anime MKVs embed dozens of 5-20 MB CJK faces). When all files
-    /// already exist and no dropped renderer is still draining, the renderer installs synchronously
-    /// so `activate(...); renderer` still works. Otherwise it arrives through `onRendererChanged`.
+    /// Fonts are written off-main (anime MKVs embed dozens of 5-20 MB CJK faces); when all files
+    /// already exist the renderer installs synchronously so `activate(...); renderer` still works.
     /// The engine reads a Matroska file's fonts after the first frame (AE#1129), so an activation at
     /// load usually sees none yet: the renderer starts on whatever the item's cache holds and is
     /// rebuilt once the list lands with fonts the cache lacks.
@@ -104,13 +103,13 @@ final class ASSRenderCoordinator {
         ASSFontCache.prune(keeping: fontsDir)
         let fonts = player.fontAttachments
         if Self.allFontsPresent(fonts, in: fontsDir) {
-            requestInstall(fontsDir: fontsDir, fullScript: false)
+            installRenderer(fontsDir: fontsDir, fullScript: false)
         } else {
             Task.detached(priority: .userInitiated) { [weak self] in
                 Self.writeFontAttachments(fonts, to: fontsDir)
                 await MainActor.run {
                     guard let self, self.activationGeneration == generation else { return }
-                    self.requestInstall(fontsDir: fontsDir, fullScript: false)
+                    self.installRenderer(fontsDir: fontsDir, fullScript: false)
                 }
             }
         }
@@ -149,8 +148,8 @@ final class ASSRenderCoordinator {
     func deactivate() {
         activationGeneration += 1
         cancellables.removeAll()
-        retireRenderer()
-        installAfterRetire = nil
+        renderer?.freeTrack()
+        renderer = nil
         builder = nil
         // The offered set is keyed against THIS builder's contents; a new track builds a new one.
         // `activate` deactivates first, so clearing here covers both directions.
@@ -175,44 +174,18 @@ final class ASSRenderCoordinator {
     /// libass reads its font directory when the renderer is built, so new fonts need a new one. It
     /// starts without a track, so the whole script goes in at once instead of waiting for a batch.
     private func reinstallRenderer(fontsDir: URL) {
-        retireRenderer()
-        requestInstall(fontsDir: fontsDir, fullScript: true)
-    }
-
-    private func requestInstall(fontsDir: URL, fullScript: Bool) {
-        if retiringRenderer != nil {
-            installAfterRetire = (fontsDir, activationGeneration, fullScript)
-        } else {
-            installRenderer(fontsDir: fontsDir, fullScript: fullScript)
-        }
-    }
-
-    /// Drop the current renderer and hold it until its work queue has run what it already held.
-    private func retireRenderer() {
-        rendererGeneration += 1
-        guard let old = renderer else { return }
-        renderer = nil
-        old.freeTrack()
-        retiringRenderer = old
-        let id = ObjectIdentifier(old)
-        // With the track gone this frame draws nothing, and it completes after the queued work.
-        old.loadFrame(offset: 0) { [weak self] _ in
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated { self?.retiredRendererDrained(id) }
-            }
-        }
-    }
-
-    private func retiredRendererDrained(_ id: ObjectIdentifier) {
-        guard let retiringRenderer, ObjectIdentifier(retiringRenderer) == id else { return }
-        self.retiringRenderer = nil
-        guard let pending = installAfterRetire else { return }
-        installAfterRetire = nil
-        guard pending.generation == activationGeneration else { return }
-        installRenderer(fontsDir: pending.fontsDir, fullScript: pending.fullScript)
+        installRenderer(fontsDir: fontsDir, fullScript: true)
     }
 
     private func installRenderer(fontsDir: URL, fullScript: Bool) {
+        // Two font writes can finish in either order, so a renderer may already be up. It is
+        // replaced like a reinstall, or it would keep its track and keep rendering into the
+        // shared libass log.
+        var fullScript = fullScript
+        if let previous = renderer {
+            previous.freeTrack()
+            fullScript = true
+        }
         let config = FontConfig(fontsPath: fontsDir, fontProvider: .coreText)
         rendererGeneration += 1
         let generation = rendererGeneration
@@ -251,7 +224,8 @@ final class ASSRenderCoordinator {
         // first frame (AE#1129) and the face that has these characters may be one of them. When
         // it lands, `reinstallRenderer` brings styling back with the whole script.
         LogTap.shared.note("[Subtitles] styled ASS shows plain text, libass could not draw \(ASSFontFallback.threshold) characters, last: \(message)")
-        retireRenderer()
+        renderer?.freeTrack()
+        renderer = nil
         onRendererChanged?(nil)
     }
 
@@ -365,11 +339,12 @@ final class ASSRenderCoordinator {
 
 /// When styled ASS gives up. libass substituting a missing family is fine, and so is the first
 /// "Glyph ... not found, selecting one more font" line, which a fallback face usually resolves.
-/// What counts is a character it could not draw with any face. One such character (a lone PUA
-/// sign glyph, a symbol no font has) is not worth the typesetting of the whole track, so the switch
-/// waits for `threshold` distinct ones. A Chinese line next to English reaches that at once.
+/// What counts is a character it could not draw with any face. A few such characters (a PUA sign
+/// glyph, a symbol no font has) are not worth the typesetting of the whole track, so the switch
+/// waits for `threshold` distinct ones over the renderer's life. One or two Chinese lines next to
+/// English reach that at once.
 nonisolated struct ASSFontFallback {
-    static let threshold = 3
+    static let threshold = 5
     private var missing: Set<UInt32> = []
     private var fired = false
 

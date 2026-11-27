@@ -39,9 +39,9 @@ struct ASSFontFallbackTests {
     func missingChineseLineFallsBack() {
         var policy = ASSFontFallback()
         let english = policy.take(message: "fontselect: (Arial, 400, 0) -> ArialMT, 0, ArialMT")
-        let results = ["4F60", "597D", "4E16"].map { policy.take(message: fallbackFailure($0)) }
+        let results = ["4F60", "597D", "4E16", "754C", "4E2D"].map { policy.take(message: fallbackFailure($0)) }
         #expect(!english)
-        #expect(results == [false, false, true])
+        #expect(results == [false, false, false, false, true])
     }
 
     @Test("messages libass recovers from never count")
@@ -66,28 +66,30 @@ struct ASSFontFallbackTests {
             "Glyph 0x1F3B5 not found in font for (BrokenFont, 400, 0)") == 0x1F3B5)
     }
 
-    @Test("one or two characters no font has keep the styling")
+    @Test("a few stray characters no font has keep the styling")
     func strayGlyphsKeepStyling() {
         var policy = ASSFontFallback()
-        let first = policy.take(message: fallbackFailure("E000"))
-        let again = policy.take(message: fallbackFailure("E000"))
-        let second = policy.take(message: "Glyph 0x2605 not found in font for (Sign, 400, 0)")
-        #expect(!first)
-        #expect(!again)
-        #expect(!second)
+        let stray = [
+            fallbackFailure("E000"),
+            fallbackFailure("E000"),
+            "Glyph 0x2605 not found in font for (Sign, 400, 0)",
+            fallbackFailure("1F3B5"),
+            fallbackFailure("E001"),
+        ].map { policy.take(message: $0) }
+        #expect(stray == [false, false, false, false, false])
     }
 
     @Test("the switch fires once per renderer, however many characters follow")
     func failureIsLatched() {
         var policy = ASSFontFallback()
-        let results = (0..<6).map { policy.take(message: fallbackFailure(String(0x4E00 + $0, radix: 16))) }
-        #expect(results == [false, false, true, false, false, false])
+        let results = (0..<8).map { policy.take(message: fallbackFailure(String(0x4E00 + $0, radix: 16))) }
+        #expect(results == [false, false, false, false, true, false, false, false])
     }
 
     @Test("a new renderer starts with a fresh count")
     func freshRendererCountsAgain() {
         let first = ASSGlyphFailures()
-        let fired = ["4F60", "597D", "4E16"].map { first.take(message: fallbackFailure($0)) }
+        let fired = ["4F60", "597D", "4E16", "754C", "4E2D"].map { first.take(message: fallbackFailure($0)) }
         let next = ASSGlyphFailures()
         let nextFirst = next.take(message: fallbackFailure("4F60"))
         #expect(fired.last == true)
