@@ -399,15 +399,14 @@ final class HomeViewModel {
         } else {
             let rows = await fetchAcrossSources(entry.config)
             guard let first = rows.first else { return .empty }
-            let items = HomeMerger.merge(
-                rows.map(\.items),
-                type: entry.type,
+            let (items, hasMore) = HomeMerger.mergeRows(
+                rows, type: entry.type,
                 mergedContinueWatching: HomeRowConfig.mergeContinueWatchingNextUp(scope: homeScope)
             )
             let merged = HomeRowData(
                 type: first.type, items: items, libraryID: first.libraryID,
                 libraryName: first.libraryName, serverID: rows.count == 1 ? first.serverID : nil,
-                collectionType: first.collectionType
+                collectionType: first.collectionType, hasMore: hasMore
             )
             return merged.items.isEmpty ? .emptied(id: entry.id, isTag: false) : .media(merged)
         }

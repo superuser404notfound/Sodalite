@@ -59,6 +59,14 @@ nonisolated enum HomeMerger {
         return Array(result.map(\.item).prefix(limit))
     }
 
+    /// One row from every server's copy of it, and whether titles stay behind it (Sodalite#258): one
+    /// server had more than it sent, or the merge cut the joined list to the row's length.
+    static func mergeRows(_ rows: [HomeRowData], type: HomeRowType, mergedContinueWatching: Bool) -> (items: [JellyfinItem], hasMore: Bool) {
+        let joined = merge(rows.map(\.items), type: type, mergedContinueWatching: mergedContinueWatching, limit: .max)
+        let items = rows.count > 1 ? Array(joined.prefix(limit(for: type, mergedContinueWatching: mergedContinueWatching))) : joined
+        return (items, rows.contains(where: \.hasMore) || joined.count > items.count)
+    }
+
     private struct Entry {
         let item: JellyfinItem
         let source: Int

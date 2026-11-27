@@ -18,7 +18,7 @@ enum FilterCacheKey {
             "home-hero-\(mode)"
         }
 
-        /// The full list behind a capped Home row ("All Movies", "All Series").
+        /// The full list behind a Home row's Show All card, keyed by the row's id (Sodalite#258).
         nonisolated static func row(_ type: String) -> String {
             "home-row-\(type)"
         }

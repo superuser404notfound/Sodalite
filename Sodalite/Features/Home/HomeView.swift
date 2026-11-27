@@ -147,7 +147,9 @@ struct HomeView: View {
                     smartProviderRegion: filter.smartProviderRegion,
                     cacheScope: filter.cacheScope,
                     sortScope: filter.sortScope,
+                    defaultSort: filter.defaultSort,
                     hidesAudioPlaylists: filter.hidesAudioPlaylists,
+                    hidesVirtualItems: filter.hidesVirtualItems,
                     sources: filter.sources
                 )
                 // A My Media tile from a combined Home's secondary browses that server (Sodalite#85).
@@ -554,7 +556,9 @@ struct HomeView: View {
                             cardStyle: rowStyle,
                             showsSeriesArtwork: cwImage != .still,
                             itemLabel: { vm.serverLabel(forItem: $0, in: row) },
-                            onShowAll: showAllFilter(for: row).map { filter in { selectedFilter = filter } }
+                            // Built at the tap: a release grid's MaxPremiereDate is "now" then, not
+                            // whenever Home last rendered.
+                            onShowAll: showAllFilter(for: row) == nil ? nil : { selectedFilter = showAllFilter(for: row) }
                         )
                         .environment(\.dropSeries, row.type == .continueWatching || row.type == .nextUp
                             ? DropSeriesAction { item in
@@ -704,13 +708,61 @@ struct HomeView: View {
         )
     }
 
-    /// The full list behind a capped "All Movies" / "All Series" row; nil while the row is not full,
-    /// since it then already shows everything there is.
+    /// The full list behind a row the server had more for (Sodalite#258); nil while the row already
+    /// shows everything there is.
     private func showAllFilter(for row: HomeRowData) -> FilterDestination? {
+        guard row.hasMore else { return nil }
         if row.isCollectionShelf { return collectionShelfFilter(for: row) }
-        guard row.type == .allMovies || row.type == .allSeries,
-              row.items.count >= HomeMerger.limit(for: row.type, mergedContinueWatching: false) else { return nil }
-        return allItemsFilter(row.type == .allMovies ? .movie : .series)
+        if row.type == .allMovies || row.type == .allSeries {
+            return allItemsFilter(row.type == .allMovies ? .movie : .series)
+        }
+        guard let grid = HomeShowAll.grid(for: row, latestLibraryID: latestLibraryScope(for: row)) else { return nil }
+        let title = viewModel?.customTitle(forRow: row.id) ?? HomeShowAll.title(for: row)
+        // A library row belongs to one server; every other row merges all of them.
+        if row.type == .libraryLatest, let libraryID = row.libraryID {
+            let library = JellyfinLibrary(
+                id: libraryID, name: row.libraryName ?? "", collectionType: row.collectionType,
+                imageTags: nil, serverID: row.serverID
+            )
+            return FilterDestination(
+                title: title,
+                query: grid.query,
+                cacheScope: FilterCacheScope(
+                    key: FilterCacheKey.Home.row(row.id),
+                    identity: viewModel?.gridIdentity(forLibrary: library) ?? appState.cacheIdentity
+                        ?? CacheIdentity(serverID: "", userID: "")
+                ),
+                defaultSort: grid.defaultSort,
+                serverID: viewModel?.sources.first(where: { $0.serverID == row.serverID && !$0.isActive })?.serverID
+            )
+        }
+        return FilterDestination(
+            title: title,
+            query: grid.query,
+            cacheScope: homeTileScope(FilterCacheKey.Home.row(row.id)),
+            sortScope: grid.offersSort ? sortScopeID.map { LibrarySortScope.homeRow(row.id, scope: $0) } : nil,
+            defaultSort: grid.defaultSort,
+            hidesAudioPlaylists: grid.hidesAudioPlaylists,
+            hidesVirtualItems: grid.hidesVirtualItems,
+            sources: combinedSources
+        )
+    }
+
+    /// Latest Movies and Latest Shows leave hidden libraries out. A grid pages one library or the
+    /// whole server, so with exactly one library of the kind left it pages that one; with several
+    /// left, or across combined servers, the grid lists the hidden ones too.
+    private func latestLibraryScope(for row: HomeRowData) -> String? {
+        guard combinedSources == nil, let vm = viewModel else { return nil }
+        let kind: String
+        switch row.type {
+        case .latestMovies: kind = "movies"
+        case .latestShows: kind = "tvshows"
+        default: return nil
+        }
+        let ofKind = vm.myMediaLibraries.filter { $0.collectionType == kind }
+        let shown = ofKind.filter { !vm.libraryLayout.isHidden($0, fallbackServerID: vm.serverID) }
+        guard shown.count == 1, ofKind.count > 1 else { return nil }
+        return shown[0].id
     }
 
     /// Every movie or every series on every combined server, alphabetical. The grid behind both the
@@ -811,10 +863,14 @@ struct FilterDestination: Identifiable, Hashable {
     var smartProviderRegion: String?
     /// Where FilteredGridView caches this tile's results: the key, independent of smartProviderID so broadcast-only tiles (ABC/NBC/CBS) still cache and feed the empty-tile-hide pass, plus the session that fetched them. nil leaves the tile uncached.
     var cacheScope: FilterCacheScope?
-    /// Where the grid's sort choice is stored (Sodalite#78); nil leaves the tile on Title A-Z without a control.
+    /// Where the grid's sort choice is stored (Sodalite#78); nil leaves the tile on `defaultSort` without a control.
     var sortScope: LibrarySortScope?
+    /// The order the grid opens in; a Home row's Show All keeps the row's own (Sodalite#258).
+    var defaultSort: LibrarySort = .default
     /// Playlists view only: drop the audio playlists the type filter cannot separate (see FilteredGridView).
     var hidesAudioPlaylists = false
+    /// Behind a Recently Released row: drop entries without a file, as the row does.
+    var hidesVirtualItems = false
     /// The secondary server a combined Home's library tile belongs to; nil browses the active one.
     var serverID: String? = nil
     /// A combined Home's servers for a genre or provider tile; the grid pages through all of them.

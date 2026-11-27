@@ -63,6 +63,9 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
     var serverID: String?
     /// Jellyfin `DateCreated` (card field set), the sort key a combined Home's Latest rows merge by.
     var dateCreated: String?
+    /// Jellyfin `DateLastMediaAdded` on a series: when its newest episode arrived. Only the grid
+    /// behind Latest Shows asks for it (`LibrarySortKey.lastEpisodeAdded`), to merge servers by it.
+    var dateLastMediaAdded: String?
     /// Jellyfin `PrimaryImageAspectRatio` (card field set): the shape of the item's primary image,
     /// and so the card a server means it to be drawn as (see `ArtworkShape`).
     var primaryImageAspectRatio: Double?
@@ -196,6 +199,7 @@ struct JellyfinItem: Codable, Sendable, Identifiable, Equatable, Hashable {
         case mediaType = "MediaType"
         case serverID = "ServerId"
         case dateCreated = "DateCreated"
+        case dateLastMediaAdded = "DateLastMediaAdded"
         case primaryImageAspectRatio = "PrimaryImageAspectRatio"
         case childCount = "ChildCount"
         case localTrailerCount = "LocalTrailerCount"
