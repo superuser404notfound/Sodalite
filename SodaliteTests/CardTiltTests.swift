@@ -12,6 +12,12 @@ struct CardTiltTests {
         #expect(tilt.sheenOpacity == 0)
     }
 
+    @Test func noOriginYetIsFlat() {
+        // The first pass after focus arrives, before the card has recorded where the thumb was.
+        let swipe = RemoteTouchReading(x: 0.7, y: 0, touch: 5)
+        #expect(CardTilt.from(reading: swipe, origin: nil) == .flat)
+    }
+
     @Test func swipeThatMovedFocusLandsFlat() {
         // The swipe that brought focus here still has the thumb far right.
         let arrival = RemoteTouchReading(x: 0.7, y: 0.1, touch: 5)
@@ -48,3 +54,49 @@ struct CardTiltTests {
         #expect(tilt.sheenEnd.x == 1)
     }
 }
+
+#if os(tvOS)
+/// The pad side: a thumb passing through the deadzone is not a lift, a real lift is, and nothing is
+/// written while no card wants it.
+@MainActor
+struct RemoteTouchSourceTests {
+
+    private func settle() async throws {
+        try await Task.sleep(for: RemoteTouchSource.liftDelay * 2)
+    }
+
+    @Test func thumbThroughTheCentreStaysOneTouch() async throws {
+        let source = RemoteTouchSource()
+        source.acquire()
+        source.ingest(x: 0.5, y: 0)
+        let touch = source.reading.touch
+        source.ingest(x: 0, y: 0)
+        #expect(source.reading.isTouching)
+        source.ingest(x: -0.1, y: 0)
+        try await settle()
+        #expect(source.reading == RemoteTouchReading(x: -0.1, y: 0, touch: touch))
+    }
+
+    @Test func liftAfterTheDelayEndsTheTouch() async throws {
+        let source = RemoteTouchSource()
+        source.acquire()
+        source.ingest(x: 0.5, y: 0.2)
+        let touch = source.reading.touch
+        source.ingest(x: 0, y: 0)
+        try await settle()
+        #expect(!source.reading.isTouching)
+        source.ingest(x: 0.1, y: 0)
+        #expect(source.reading.touch == touch + 1)
+    }
+
+    @Test func nothingIsWrittenWithoutDemand() {
+        let source = RemoteTouchSource()
+        source.ingest(x: 0.5, y: 0)
+        #expect(source.reading == RemoteTouchReading())
+        source.acquire()
+        source.release()
+        source.ingest(x: 0.5, y: 0)
+        #expect(!source.reading.isTouching)
+    }
+}
+#endif

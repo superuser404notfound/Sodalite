@@ -36,12 +36,13 @@ struct CardTilt: Equatable {
     ///
     /// Measuring from that point is what keeps a swipe from landing on a card already leaning: the
     /// swipe that moves focus right has the pad reading far right when the new card arrives. The
-    /// origin only counts while it belongs to the same touch; once the thumb has lifted (the pad
-    /// recentres to exactly 0,0 and the generation moves on), the next touch starts from zero.
+    /// origin only counts while it belongs to the same touch; once the thumb has lifted, the next
+    /// touch starts from zero. No origin yet means flat: on the first pass after focus arrives the
+    /// origin is still being set, and reading the swipe as an absolute lean made the card twitch.
     static func from(reading: RemoteTouchReading, origin: RemoteTouchReading?) -> CardTilt {
-        guard reading.isTouching else { return .flat }
-        let base = origin.flatMap { $0.touch == reading.touch ? $0 : nil }
-        return CardTilt(x: (reading.x - (base?.x ?? 0)) * gain, y: (reading.y - (base?.y ?? 0)) * gain)
+        guard reading.isTouching, let origin else { return .flat }
+        let base = origin.touch == reading.touch ? origin : RemoteTouchReading()
+        return CardTilt(x: (reading.x - base.x) * gain, y: (reading.y - base.y) * gain)
     }
 
     /// How far off flat the card is, 0...1.
@@ -69,9 +70,8 @@ struct RemoteTouchReading: Equatable {
     var y: Double = 0
     var touch: Int = 0
 
-    /// The pad reports exactly 0,0 when nothing is on it. A live thumb can cross the centre too, but
-    /// not land on it to the last bit for more than a passing sample, and at the centre the tilt is
-    /// flat either way.
+    /// `RemoteTouchSource` publishes exactly 0,0 only once the thumb has been off for a moment, so a
+    /// thumb passing through the deadzone at the centre does not count as lifted.
     var isTouching: Bool { x != 0 || y != 0 }
 }
 
@@ -122,11 +122,22 @@ private struct FocusTiltModifier<S: Shape>: ViewModifier {
                     .rotation3DEffect(.degrees(tilt.yawDegrees), axis: (x: 0, y: -1, z: 0), perspective: 0.6)
                     .rotation3DEffect(.degrees(tilt.pitchDegrees), axis: (x: 1, y: 0, z: 0), perspective: 0.6)
             }
-            .onChange(of: isFocused, initial: true) { _, focused in
-                guard focused else { origin = nil; return }
-                RemoteTouchSource.shared.start()
-                origin = RemoteTouchSource.shared.reading
-            }
+            .onChange(of: isFocused, initial: true) { _, focused in hold(focused) }
+            .onAppear { hold(isFocused) }
+            .onDisappear { hold(false) }
+    }
+
+    /// Keeps exactly one claim on the pad while focused and on screen. `origin` doubles as the claim:
+    /// it is non-nil exactly while this card holds one.
+    private func hold(_ wants: Bool) {
+        let source = RemoteTouchSource.shared
+        if wants, origin == nil {
+            source.acquire()
+            origin = source.reading
+        } else if !wants, origin != nil {
+            source.release()
+            origin = nil
+        }
     }
     #else
     func body(content: Content) -> some View { content }
