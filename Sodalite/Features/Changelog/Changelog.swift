@@ -68,6 +68,12 @@ enum Changelog {
                     "changelog.1_2_0.transcodeTracks.body",
                     icon: "waveform"
                 ),
+                ChangelogHighlight(
+                    .fix,
+                    "changelog.1_2_0.traditionalChinese.title",
+                    "changelog.1_2_0.traditionalChinese.body",
+                    icon: "captions.bubble"
+                ),
             ]
         ),
         // MARK: 1.1.1

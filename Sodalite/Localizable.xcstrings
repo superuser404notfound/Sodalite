@@ -78555,6 +78555,328 @@
         }
       }
     },
+    "changelog.1_2_0.traditionalChinese.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyhledávání titulků v přehrávači našlo jen zjednodušenou čínštinu. Teď nabízí obě, ZH-CN i ZH-TW, a začne na tradiční, když je na ni nastavené vaše zařízení."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekstsøgningen i afspilleren fandt kun forenklet kinesisk. Nu tilbyder den begge, ZH-CN og ZH-TW, og starter på traditionelt, når din enhed er sat til det."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Untertitelsuche im Player fand nur vereinfachtes Chinesisch. Jetzt bietet sie beides an, ZH-CN und ZH-TW, und startet auf traditionellem Chinesisch, wenn dein Gerät darauf eingestellt ist."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η αναζήτηση υποτίτλων στο πρόγραμμα αναπαραγωγής έβρισκε μόνο απλοποιημένα κινέζικα. Τώρα προσφέρει και τα δύο, ZH-CN και ZH-TW, και ξεκινά από τα παραδοσιακά όταν η συσκευή σας είναι ρυθμισμένη σε αυτά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The subtitle search in the player only found Simplified Chinese. It now offers both, ZH-CN and ZH-TW, and starts on Traditional when your device is set to it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La búsqueda de subtítulos del reproductor solo encontraba chino simplificado. Ahora ofrece ambos, ZH-CN y ZH-TW, y empieza por el tradicional si tu dispositivo está configurado así."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soittimen tekstityshaku löysi vain yksinkertaistettua kiinaa. Nyt se tarjoaa molemmat, ZH-CN ja ZH-TW, ja aloittaa perinteisestä, kun laitteesi kieli on asetettu siihen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche de sous-titres du lecteur ne trouvait que le chinois simplifié. Elle propose maintenant les deux, ZH-CN et ZH-TW, et commence par le traditionnel si votre appareil est réglé ainsi."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pretraga titlova u playeru nalazila je samo pojednostavljeni kineski. Sada nudi oba, ZH-CN i ZH-TW, i počinje s tradicionalnim kad je uređaj postavljen na njega."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lejátszó feliratkeresője csak egyszerűsített kínait talált. Most mindkettőt kínálja, ZH-CN és ZH-TW, és a hagyományossal indul, ha az eszközöd arra van állítva."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ricerca dei sottotitoli nel player trovava solo il cinese semplificato. Ora offre entrambi, ZH-CN e ZH-TW, e parte dal tradizionale se il dispositivo è impostato così."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレーヤーの字幕検索では簡体字中国語しか見つかりませんでした。ZH-CN と ZH-TW の両方を選べるようになり、デバイスが繁体字に設定されている場合は繁体字から始まります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "플레이어의 자막 검색이 간체 중국어만 찾았습니다. 이제 ZH-CN과 ZH-TW를 모두 제공하며, 기기가 번체로 설정되어 있으면 번체부터 시작합니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekstsøket i avspilleren fant bare forenklet kinesisk. Nå tilbyr det begge, ZH-CN og ZH-TW, og starter på tradisjonell når enheten din er satt til det."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het zoeken naar ondertitels in de speler vond alleen vereenvoudigd Chinees. Nu biedt het beide, ZH-CN en ZH-TW, en begint het bij traditioneel als je apparaat daarop staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyszukiwarka napisów w odtwarzaczu znajdowała tylko chiński uproszczony. Teraz oferuje oba, ZH-CN i ZH-TW, i zaczyna od tradycyjnego, gdy urządzenie jest na niego ustawione."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A busca de legendas no player só encontrava chinês simplificado. Agora oferece os dois, ZH-CN e ZH-TW, e começa no tradicional quando o seu aparelho está configurado assim."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pesquisa de legendas no leitor só encontrava chinês simplificado. Agora oferece os dois, ZH-CN e ZH-TW, e começa no tradicional quando o seu dispositivo está configurado assim."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Căutarea de subtitrări din player găsea doar chineză simplificată. Acum le oferă pe amândouă, ZH-CN și ZH-TW, și pornește de la cea tradițională când dispozitivul este setat așa."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск субтитров в плеере находил только упрощённый китайский. Теперь он предлагает оба варианта, ZH-CN и ZH-TW, и начинает с традиционного, если он выбран на устройстве."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyhľadávanie titulkov v prehrávači našlo len zjednodušenú čínštinu. Teraz ponúka obe, ZH-CN aj ZH-TW, a začne na tradičnej, keď je na ňu nastavené vaše zariadenie."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertextsökningen i spelaren hittade bara förenklad kinesiska. Nu erbjuder den båda, ZH-CN och ZH-TW, och börjar på traditionell när din enhet är inställd på det."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynatıcıdaki altyazı araması yalnızca Basitleştirilmiş Çince buluyordu. Artık ikisini de sunuyor, ZH-CN ve ZH-TW, ve cihazın Geleneksel Çince'ye ayarlıysa oradan başlıyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук субтитрів у плеєрі знаходив лише спрощену китайську. Тепер він пропонує обидва варіанти, ZH-CN і ZH-TW, і починає з традиційної, якщо її вибрано на пристрої."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放器中的字幕搜索以前只能找到简体中文。现在两者都可选，ZH-CN 和 ZH-TW，设备设为繁体中文时会默认选中繁体。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放器中的字幕搜尋以前只能找到簡體中文。現在兩者都可選，ZH-CN 和 ZH-TW，裝置設為繁體中文時會預設選取繁體。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.traditionalChinese.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titulky v tradiční čínštině"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekster på traditionelt kinesisk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untertitel in traditionellem Chinesisch"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Υπότιτλοι σε παραδοσιακά κινέζικα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitles in Traditional Chinese"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtítulos en chino tradicional"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstitykset perinteisellä kiinalla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-titres en chinois traditionnel"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titlovi na tradicionalnom kineskom"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feliratok hagyományos kínai nyelven"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sottotitoli in cinese tradizionale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繁体字中国語の字幕"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "번체 중국어 자막"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertekster på tradisjonell kinesisk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ondertitels in traditioneel Chinees"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napisy w chińskim tradycyjnym"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legendas em chinês tradicional"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legendas em chinês tradicional"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitrări în chineză tradițională"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Субтитры на традиционном китайском"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titulky v tradičnej čínštine"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undertexter på traditionell kinesiska"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geleneksel Çince altyazılar"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Субтитри традиційною китайською"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繁体中文字幕"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繁體中文字幕"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.transcodeTracks.body" : {
       "extractionState" : "manual",
       "localizations" : {

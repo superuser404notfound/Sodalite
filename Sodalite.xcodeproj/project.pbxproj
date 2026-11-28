@@ -1898,6 +1898,7 @@
 		BFEC96506EAA74C21FD4C5DC /* FilterChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 890B31FD8685F83343DC8FFA /* FilterChip.swift */; };
 		BFF5653A279BA319FB70DE19 /* ThemeSongPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3139BD66DF5F468C4995B0 /* ThemeSongPlayer.swift */; };
 		BFF68F1C6580B97F04EABD6F /* ServerRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37069EBB512D8095D5F68CED /* ServerRoute.swift */; };
+		C0015A8E0B611EEF9024DB3F /* SubtitleSearchLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE7F8EC34126553DCD7C573 /* SubtitleSearchLanguageTests.swift */; };
 		C00C827C94A3366BC7090A59 /* LiveTuneRefusal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5394300E7836775C37F461 /* LiveTuneRefusal.swift */; };
 		C0106CC1FFB8F99A00D40ED6 /* LocalSubnet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F14DE710C5A2E893C0DA6167 /* LocalSubnet.swift */; };
 		C018BAC11972578D1ED16B44 /* EpisodeMetadataFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B19E021DA509D66BA25B68 /* EpisodeMetadataFormatter.swift */; };
@@ -3578,6 +3579,7 @@
 		DE46251D3E90AB177A1A44B7 /* AudioDelayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDelayTests.swift; sourceTree = "<group>"; };
 		DE6F5DDE2F05B9FB53D03697 /* PlayerLoadingIndicatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLoadingIndicatorTests.swift; sourceTree = "<group>"; };
 		DECF686D0D9F20908257C450 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
+		DEE7F8EC34126553DCD7C573 /* SubtitleSearchLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleSearchLanguageTests.swift; sourceTree = "<group>"; };
 		DF24283A4B70A470FDB40EBC /* AccentChipLiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentChipLiftTests.swift; sourceTree = "<group>"; };
 		DF8D1C94A258062863ED46C1 /* TrackDisplayFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackDisplayFormatterTests.swift; sourceTree = "<group>"; };
 		DF91FDEDC07EA9BE000ED322 /* PlayerViewModel+Zap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerViewModel+Zap.swift"; sourceTree = "<group>"; };
@@ -4527,6 +4529,7 @@
 				1942006C1226C7DC98248F6C /* SubtitleOffsetTests.swift */,
 				194B5AEB74D5B8FE374A0C3E /* SubtitlePlacementGeometryTests.swift */,
 				7DF71A168A135377B4D68419 /* SubtitleRenumberTests.swift */,
+				DEE7F8EC34126553DCD7C573 /* SubtitleSearchLanguageTests.swift */,
 				BBB91CE16FE6545745E26DC6 /* SubtitleSidecarOnTranscodeTests.swift */,
 				0985DCFAB677410753AE9644 /* SubtitlesOnSkipBackPreferenceTests.swift */,
 				88BF35DD55F54D6E7F77618C /* SubtitleVerticalPositionTests.swift */,
@@ -7529,6 +7532,7 @@
 				9457C6F5E5572CD77DFFEC5A /* SubtitleOffsetTests.swift in Sources */,
 				B7D0740ACEADBECA23AA93B3 /* SubtitlePlacementGeometryTests.swift in Sources */,
 				53A1ABA90F11E3294EBF7B1A /* SubtitleRenumberTests.swift in Sources */,
+				C0015A8E0B611EEF9024DB3F /* SubtitleSearchLanguageTests.swift in Sources */,
 				6629DC14B5448BCF4B23006F /* SubtitleSidecarOnTranscodeTests.swift in Sources */,
 				CE9092062E0548DBB5884A49 /* SubtitleVerticalPositionTests.swift in Sources */,
 				430E94460CF5B9CD57E89253 /* SubtitleVideoRectTests.swift in Sources */,

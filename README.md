@@ -203,6 +203,7 @@ Every feature is free. Settings are named as they appear in the app.
 - **Forced subtitles**: signs and foreign dialogue still show while subtitles are off, like a disc player. On by default, Settings → Playback → Automatic forced subtitles turns it off.
 - **Subtitles on skip back**: skipping back turns subtitles on until you are past where you jumped from, then off again. Also works in live TV's timeshift.
 - **Search and download subtitles** in the player when your server has none. Matches by file hash get a badge.
+  Chinese comes as two entries, ZH-CN (Simplified) and ZH-TW (Traditional), because the OpenSubtitles plugin reads plain Chinese as Simplified.
 - **Dual subtitles**: show a second text track above the first, for example the original plus a translation.
 - **Audio track switcher**: change language or mix while you watch. At a lower streaming quality the server converts one audio track, so a new pick restarts the stream at the same second.
 - **Pick tracks before Play**: the Audio & Subtitles button next to Version on a movie or episode page picks the audio and subtitles of the version Play starts. The pick plays from the first second and is remembered like one made in the player. Untouched, it says Automatic and the player chooses as usual.
