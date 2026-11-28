@@ -8,6 +8,9 @@ struct FocusableCard<Content: View>: View {
     let action: () -> Void
     var highlightsOnPress = false
     var exposesButtonSemantics = false
+    /// Caps the focus lift at this many points per side, for a card that can be far wider than a
+    /// poster. At the `.card` scale a full-width collection banner grew 44 pt per side.
+    var maxLiftPerSide: CGFloat?
     @ViewBuilder let content: (_ isFocused: Bool) -> Content
 
     @Environment(\.cardMenuWillOpen) private var cardMenuWillOpen
@@ -30,7 +33,7 @@ struct FocusableCard<Content: View>: View {
             .focusableSurface()
             .focused($isFocused)
             .stableTap(isFocused: isFocused, longPressOpensMenu: opensMenuOnHold, onHold: opensMenuOnHold ? cardMenuWillOpen : nil) { action() }
-            .focusResponse(.card, isFocused: isHighlighted)
+            .modifier(CardLift(maxLiftPerSide: maxLiftPerSide, isFocused: isHighlighted))
     }
 
     @ViewBuilder
@@ -58,5 +61,24 @@ struct FocusableCard<Content: View>: View {
         #else
         isFocused
         #endif
+    }
+}
+
+/// The `.card` lift, capped against the measured width when the call site asks for it. Only capped
+/// cards measure, so a grid of posters does not pay a geometry callback per cell.
+private struct CardLift: ViewModifier {
+    let maxLiftPerSide: CGFloat?
+    let isFocused: Bool
+    @State private var width: CGFloat = 0
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let maxLiftPerSide {
+            content
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+                .focusResponse(.card.capped(toLift: maxLiftPerSide, width: width), isFocused: isFocused)
+        } else {
+            content.focusResponse(.card, isFocused: isFocused)
+        }
     }
 }

@@ -398,7 +398,8 @@ struct SeerrCollectionBanner: View {
                 .font(.title3)
                 .fontWeight(.semibold)
 
-            FocusableCard(action: action) { focused in
+            // Same distance as the cards around it (a 220 pt poster lifts 5.5 pt per side, a 360 pt still 9).
+            FocusableCard(action: action, maxLiftPerSide: 8) { focused in
                 ZStack(alignment: .bottomLeading) {
                     AsyncCachedImage(url: SeerrImageURL.backdrop(path: collection.backdropPath)) { image in
                         image
