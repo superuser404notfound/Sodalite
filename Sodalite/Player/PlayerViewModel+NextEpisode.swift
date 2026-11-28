@@ -281,6 +281,10 @@ extension PlayerViewModel {
         )
         advanceSessionGeneration()
         startFromBeginning = true
+        stopPictureAreaScan()
+        detectedPictureArea = nil
+        pictureAreaScanState = .idle
+        pictureAreaScanURL = nil
         // A response the successor warm fetched for THIS item is the one thing worth carrying across
         // the switch: it is exactly what the seam would otherwise ask the server for again while the
         // viewer waits on a black screen. Anything naming another item still goes, for the reason

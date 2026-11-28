@@ -498,6 +498,11 @@ final class PlayerViewModel {
     var pictureAreaScanState: PictureAreaScanState = .idle
     /// The size the picture is shown in, set by the host on layout; `.zero` until then.
     var pictureSurfaceSize: CGSize = .zero
+    @ObservationIgnored var pictureAreaCache: PictureAreaCache = .shared
+    /// The stills URL the scan reads (the scrub preview's source), nil when the source has none.
+    @ObservationIgnored var pictureAreaScanURL: URL?
+    @ObservationIgnored var pictureAreaTask: Task<Void, Never>?
+    @ObservationIgnored var pictureAreaExtractor: FrameExtractor?
 
     /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
     /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
@@ -1489,22 +1494,22 @@ final class PlayerViewModel {
 
             // Scrub preview + chapter thumbnails decode stills from the original file (isStatic:true)
             // regardless of playback method, so transcode sessions still get a preview.
+            let stillsURL: URL?
             if isLocalSession {
                 // The engine's still extractor reads a file:// source like any other (Sodalite#81).
-                frameExtractor = player.makeFrameExtractor(url: url)
+                stillsURL = url
             } else if source.isDiscFolder {
                 // Sodalite#185: the server answers Static=true on a disc folder with an ffmpeg session.
-                frameExtractor = nil
-            } else if let previewURL = playbackService.buildStreamURL(
-                itemID: item.id, mediaSourceID: source.id,
-                container: source.container, isStatic: true
-            ) {
-                // Session-coupled: elective thumbnail decodes yield while the engine's playback
-                // pipeline is starved (startup, restarts), instead of competing for the link.
-                frameExtractor = player.makeFrameExtractor(url: previewURL)
+                stillsURL = nil
             } else {
-                frameExtractor = nil
+                stillsURL = playbackService.buildStreamURL(
+                    itemID: item.id, mediaSourceID: source.id,
+                    container: source.container, isStatic: true)
             }
+            // Session-coupled: elective thumbnail decodes yield while the engine's playback
+            // pipeline is starved (startup, restarts), instead of competing for the link.
+            frameExtractor = stillsURL.map { player.makeFrameExtractor(url: $0) }
+            preparePictureArea(scanURL: stillsURL)
             configureScrubPreview(source: source)
 
             let startPos: Double?
@@ -1923,6 +1928,7 @@ final class PlayerViewModel {
         let extractorToClose = frameExtractor
         frameExtractor = nil
         Task { await extractorToClose?.shutdown() }
+        stopPictureAreaScan()
         deactivateASSRendering()
         if Self.clearsSharedFontCacheOnStop(isMultiviewTile: isMultiviewTile) {
             ASSFontCache.removeAll()
@@ -2062,6 +2068,7 @@ final class PlayerViewModel {
                     let firstPlay = !self.hasStartedPlaying
                     self.hasStartedPlaying = true
                     self.isPlaying = true
+                    self.startPictureAreaScanIfNeeded()
                     if firstPlay {
                         // Resolve the successor once the pipeline delivers frames, NOT lazily at the
                         // end window: a jump straight to the end never passes through that window, so
@@ -3164,6 +3171,7 @@ final class PlayerViewModel {
         pictureMode = choice.pictureMode
         if case .fill(let ratio) = choice { fillRatio = ratio }
         applyPictureMode()
+        startPictureAreaScanIfNeeded()
     }
 
     var activePictureChoice: PictureChoice {
