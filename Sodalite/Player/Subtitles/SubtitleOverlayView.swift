@@ -107,8 +107,7 @@ struct SubtitleOverlayView: View {
                 // libass scales PlayResX/Y onto its canvas per axis, so the canvas has to be the
                 // picture, not the screen: on a portrait iPhone the screen-sized canvas stretched
                 // every glyph tall and narrow and sat the lines under the bottom bar.
-                let rect = Self.videoRect(videoSize: videoSize, in: geo.size,
-                                          fillArea: fillArea)
+                let rect = Self.assCanvasRect(videoSize: videoSize, in: geo.size, fillArea: fillArea)
                 ASSRenderedSubtitles(
                     renderer: assRenderer,
                     reloadSignal: assReloadSignal,
@@ -734,6 +733,15 @@ struct SubtitleOverlayView: View {
             return CGRect(origin: .zero, size: bounds)
         }
         return PictureFillGeometry.planeRect(presentationSize: videoSize, area: fillArea, bounds: bounds)
+    }
+
+    /// The libass canvas. Under a letterbox zoom the zoomed plane overhangs the screen, and libass has
+    /// no per-line clamp, so dialogue authored in the bottom bar (most SRT-converted tracks) would
+    /// draw below the screen. The canvas stays at the full-frame fill instead (the old aspect fill):
+    /// every line readable, typeset signs a little off the zoomed picture (Sodalite#118).
+    nonisolated static func assCanvasRect(videoSize: CGSize, in bounds: CGSize, fillArea: CGRect?) -> CGRect {
+        videoRect(videoSize: videoSize, in: bounds,
+                  fillArea: fillArea == nil ? nil : CGRect(x: 0, y: 0, width: 1, height: 1))
     }
 
     /// Aspect-fit rect of the video plane within the overlay bounds. Full bounds when the

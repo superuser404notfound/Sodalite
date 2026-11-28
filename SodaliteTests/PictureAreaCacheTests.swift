@@ -37,4 +37,14 @@ struct PictureAreaCacheTests {
         #expect(cache.area(for: PictureAreaCache.key(serverID: "s", itemID: "i", mediaSourceID: "b")) == nil)
         #expect(cache.area(for: PictureAreaCache.key(serverID: "s", itemID: "i", mediaSourceID: "a")) == scope)
     }
+
+    @Test func asynchronousWritesLandAfterFlush() {
+        let file = tempFile()
+        defer { try? FileManager.default.removeItem(at: file) }
+        let cache = PictureAreaCache(fileURL: file, writesAsynchronously: true)
+        cache.store(scope, for: "k")
+        #expect(cache.area(for: "k") == scope)
+        cache.flush()
+        #expect(PictureAreaCache(fileURL: file).area(for: "k") == scope)
+    }
 }

@@ -490,9 +490,11 @@ final class PlayerViewModel {
     /// Session-local picture-fill mode, seeded from `PlaybackPreferences.pictureMode` at startPlayback.
     /// Transient override, not persisted; settings owns the global default.
     var pictureMode: PlaybackPreferences.PictureMode = .original
-    /// Sodalite#118: which ratio Fill zooms to. Per launch like `pictureMode`, so it carries across
-    /// the episodes of one player session; `auto` follows `detectedPictureArea`.
+    /// Sodalite#118: which ratio Fill zooms to. Reset with `pictureMode` at every start, like the
+    /// in-player picture choice always was; `auto` follows `detectedPictureArea`.
     var fillRatio: FillRatio = .auto
+    /// The previous episode's area, shown until this episode's own scan answers. Never a scan seed.
+    var provisionalPictureArea: PictureArea?
     /// Where the picture sits inside the frame, once a scan or the cache said so. Per item.
     var detectedPictureArea: PictureArea?
     var pictureAreaScanState: PictureAreaScanState = .idle
@@ -507,6 +509,7 @@ final class PlayerViewModel {
     @ObservationIgnored var pictureAreaScanURL: URL?
     @ObservationIgnored var pictureAreaTask: Task<Void, Never>?
     @ObservationIgnored var pictureAreaExtractor: FrameExtractor?
+    @ObservationIgnored var pictureAreaRetries = 0
 
     /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
     /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
@@ -1412,6 +1415,7 @@ final class PlayerViewModel {
         startDetailEnrichment()
         // Reset to the global default each session so in-player overrides don't bleed across episodes/movies.
         pictureMode = preferences.pictureMode
+        fillRatio = .auto
         applyPictureMode()
         #if DEBUG
         print("[PlayerVM] startPlayback: item=\(item.name), seriesId=\(item.seriesId ?? "nil"), type=\(item.type), chapters=\(chapters.count)")
@@ -3157,7 +3161,8 @@ final class PlayerViewModel {
         guard !pictureZoomSuppressed else { return nil }
         let size = videoSize
         let aspect = size.width > 0 && size.height > 0 ? Double(size.width / size.height) : 16.0 / 9.0
-        return activePictureChoice.area(presentationAspect: aspect, detected: detectedPictureArea)
+        return activePictureChoice.area(presentationAspect: aspect,
+                                        detected: detectedPictureArea ?? provisionalPictureArea)
     }
 
     /// Apply the picture choice to whichever layer is on screen: the engine zooms its own layers

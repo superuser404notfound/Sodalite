@@ -78,6 +78,16 @@ struct SubtitleVideoRectTests {
                 == CGRect(x: 240, y: 0, width: 1440, height: 1080))
     }
 
+    @Test("the ASS canvas stays on screen under a letterbox zoom")
+    func assCanvasStaysOnScreen() {
+        let h = (16.0 / 9.0) / 2.39
+        let band = CGRect(x: 0, y: (1 - h) / 2, width: 1, height: h)
+        let canvas = SubtitleOverlayView.assCanvasRect(videoSize: hdCanvas, in: tvBounds, fillArea: band)
+        #expect(canvas == CGRect(origin: .zero, size: tvBounds))
+        #expect(SubtitleOverlayView.assCanvasRect(videoSize: hdCanvas, in: tvBounds, fillArea: nil)
+                == CGRect(origin: .zero, size: tvBounds))
+    }
+
     // MARK: - Fill: the cue follows the picture
 
     /// The reported case: a 4:3 DVD raster on a 16:9 screen. In Fill the picture spans the full

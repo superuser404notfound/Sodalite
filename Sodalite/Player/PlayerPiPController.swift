@@ -131,8 +131,9 @@ final class PlayerPiPController: NSObject {
     }
 
     /// The Fill zoom, so the source layer over AVKit's video matches it (Sodalite#118).
-    func setPictureTransform(_ transform: CGAffineTransform) {
-        if sourceView.playerLayer.affineTransform() != transform { sourceView.playerLayer.setAffineTransform(transform) }
+    func setPictureTransform(_ transform: CGAffineTransform, animated: Bool) {
+        guard sourceView.playerLayer.affineTransform() != transform else { return }
+        PlayerHostController.setTransform(transform, on: sourceView.playerLayer, animated: animated)
     }
 }
 

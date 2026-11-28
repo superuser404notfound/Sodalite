@@ -549,29 +549,54 @@ final class PlayerHostController: AVPlayerViewController {
         pipController.setVideoGravity(.resizeAspect)
         #endif
         let layer = avkitPictureLayer()
+        let area = viewModel.effectivePictureArea
+        // A reused item reports an empty videoRect for a moment around a swap; keep the zoom instead of
+        // showing the bars until the next frame. The videoRect KVO re-applies once it is known.
+        if area != nil, let layer, layer.videoRect.isEmpty { return }
         var transform = CGAffineTransform.identity
-        if let area = viewModel.effectivePictureArea, let layer, !layer.videoRect.isEmpty {
+        if let area, let layer, !layer.videoRect.isEmpty {
             transform = PictureFillGeometry.coverTransform(plane: layer.videoRect, area: area,
                                                            bounds: layer.bounds.size)
+        } else if let area, layer == nil {
+            // No AVKit layer (the software path, or a native one AVKit has not built yet): the held still
+            // has to match the engine's zoomed surface under it.
+            transform = PictureFillGeometry.coverTransform(presentationSize: viewModel.videoSize, area: area,
+                                                           bounds: stillView.bounds.size)
         }
-        CATransaction.begin()
-        CATransaction.setDisableActions(!animated)
-        CATransaction.setAnimationDuration(0.35)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
         if let layer, layer.affineTransform() != transform {
-            layer.setAffineTransform(transform)
-            let area = viewModel.effectivePictureArea.map {
+            Self.setTransform(transform, on: layer, animated: animated)
+            let areaText = area.map {
                 String(format: "(%.3f,%.3f,%.3f,%.3f)", $0.minX, $0.minY, $0.width, $0.height)
             } ?? "none"
-            LogTap.shared.note("[Picture] choice=\(viewModel.activePictureChoice.logName) area=\(area) "
+            LogTap.shared.note("[Picture] choice=\(viewModel.activePictureChoice.logName) area=\(areaText) "
                 + "plane=\(Int(layer.videoRect.width))x\(Int(layer.videoRect.height)) "
                 + String(format: "scale=%.3f", transform.a) + (animated ? " animated" : ""))
         }
         #if os(tvOS)
-        pipController.setPictureTransform(transform)
+        pipController.setPictureTransform(transform, animated: animated)
         #endif
-        CATransaction.commit()
         stillView.layer.sublayerTransform = CATransform3DMakeAffineTransform(transform)
+    }
+
+    /// An explicit animation, because AVKit's render layer and the tvOS PiP source layer can be a view's
+    /// backing layer, and a view answers no action for its layer outside a UIView animation block: a
+    /// transaction's duration did nothing there and the zoom jumped.
+    static func setTransform(_ transform: CGAffineTransform, on layer: CALayer, animated: Bool) {
+        let target = CATransform3DMakeAffineTransform(transform)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        if animated {
+            let animation = CABasicAnimation(keyPath: "transform")
+            animation.fromValue = NSValue(caTransform3D: layer.presentation()?.transform ?? layer.transform)
+            animation.toValue = NSValue(caTransform3D: target)
+            animation.duration = 0.35
+            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            layer.add(animation, forKey: "sodalite.fill")
+        } else {
+            layer.removeAnimation(forKey: "sodalite.fill")
+        }
+        layer.transform = target
+        CATransaction.commit()
     }
 
     /// AVKit's render layer for the current player, cached weakly and re-found when AVKit swaps it.
@@ -579,7 +604,14 @@ final class PlayerHostController: AVPlayerViewController {
     private func avkitPictureLayer() -> AVPlayerLayer? {
         guard let avPlayer = player else { return nil }
         if let cached = pictureLayer, cached.player === avPlayer, cached.superlayer != nil { return cached }
+        #if os(tvOS)
+        // The PiP source layer sits in the same tree with the same player; it is zoomed separately.
+        let excluded: CALayer? = pipController.sourceView.layer
+        #else
+        let excluded: CALayer? = nil
+        #endif
         func find(_ layer: CALayer) -> AVPlayerLayer? {
+            if layer === excluded { return nil }
             if let pl = layer as? AVPlayerLayer, pl.player === avPlayer { return pl }
             for sub in layer.sublayers ?? [] { if let hit = find(sub) { return hit } }
             return nil

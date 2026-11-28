@@ -678,7 +678,10 @@ struct PlayerTouchControls: View {
                 }
             }
         case .picture:
-            return PictureChoice.all.filter { viewModel.isPictureChoiceEnabled($0) }.map { choice in
+            // A greyed-out row stays while it is the active one, so the panel always shows a check.
+            return PictureChoice.all.filter {
+                viewModel.isPictureChoiceEnabled($0) || $0 == viewModel.activePictureChoice
+            }.map { choice in
                 PickerRow(label: viewModel.pictureChoiceTitle(choice),
                           isActive: choice == viewModel.activePictureChoice) {
                     viewModel.selectPictureChoice(choice)

@@ -29,6 +29,7 @@ extension PlayerViewModel {
         pictureAreaScanURL = scanURL
         if let cached = pictureAreaCache.area(for: pictureAreaCacheKey) {
             detectedPictureArea = cached
+            provisionalPictureArea = nil
             if cached.isFullFrame { pictureAreaScanState = .finished }
             applyPictureMode()
         }
@@ -56,6 +57,7 @@ extension PlayerViewModel {
         let size = videoSize
         guard duration > 0, size.width > 0, size.height > 0 else {
             LogTap.shared.note("[PictureArea] scan deferred: duration=\(Int(duration)) size=\(Int(size.width))x\(Int(size.height))")
+            schedulePictureAreaRetry()
             return
         }
         // Its own extractor: one in-flight decode per extractor, and a scan sample must never cancel
@@ -97,15 +99,31 @@ extension PlayerViewModel {
     private func acceptPictureArea(_ area: PictureArea?, generation: Int) {
         guard sessionGeneration == generation, let area else { return }
         pictureAreaScanState = .finished
-        guard area != detectedPictureArea else { return }
+        let hadProvisional = provisionalPictureArea != nil
+        provisionalPictureArea = nil
+        guard area != detectedPictureArea || hadProvisional else { return }
         detectedPictureArea = area
-        pictureAreaCache.store(area, for: pictureAreaCacheKey)
         applyPictureMode(animated: true)
+        pictureAreaCache.store(area, for: pictureAreaCacheKey)
+    }
+
+    /// The presented size can arrive after the first `.playing`; ask again shortly instead of waiting
+    /// for a pause and resume. A few tries, then the next `.playing` or choice change takes over.
+    private func schedulePictureAreaRetry() {
+        guard pictureAreaRetries < 5 else { return }
+        pictureAreaRetries += 1
+        let generation = sessionGeneration
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard let self, self.sessionGeneration == generation else { return }
+            self.startPictureAreaScanIfNeeded()
+        }
     }
 
     func stopPictureAreaScan() {
         pictureAreaTask?.cancel()
         pictureAreaTask = nil
+        pictureAreaRetries = 0
         let extractor = pictureAreaExtractor
         pictureAreaExtractor = nil
         Task { await extractor?.shutdown() }
