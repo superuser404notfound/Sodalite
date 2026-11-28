@@ -27,6 +27,12 @@ enum Changelog {
                     icon: "square.grid.2x2"
                 ),
                 ChangelogHighlight(
+                    .new,
+                    "changelog.1_2_0.smartFill.title",
+                    "changelog.1_2_0.smartFill.body",
+                    icon: "rectangle.expand.vertical"
+                ),
+                ChangelogHighlight(
                     .improve,
                     "changelog.1_2_0.cardTilt.title",
                     "changelog.1_2_0.cardTilt.body",

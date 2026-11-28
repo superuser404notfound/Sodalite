@@ -29,21 +29,6 @@ The search field itself is settled. On Apple TV the tab runs on the system searc
 Store and the Apple TV app use), with dictation, the system keyboard and system focus handling, so
 the browse screen goes into the empty space under its keyboard.
 
-### Fill the screen on a wide film ([#118](https://github.com/superuser404notfound/Sodalite/issues/118))
-
-Picture Size gets a real zoom: pick the film's ratio (1.85, 2.00, 2.35, 2.40, 4:3) and the picture
-scales up until the image fills the screen, with the sides running off the edges. Same thing the
-Zoom button on a TV does, on the display layer, so nothing is decoded or encoded a second time.
-
-It is there because today's Fill does nothing at all on most wide films. Fill only finds something
-to crop when the video file itself is a different shape than the screen, and a wide film usually
-arrives as a 16:9 file with the black bars painted into the picture, so there is nothing to crop.
-Working the ratio out on its own can come later, with the menu kept as the override. And when the
-picture already fills the screen, the setting is greyed out instead of pretending to do something.
-
-Two things you give up on purpose: a 2.39:1 film loses about a quarter of its width, and any
-subtitles burned into the bar area go with it.
-
 ### Emby, Plex and Silo servers ([#51](https://github.com/superuser404notfound/Sodalite/issues/51))
 
 Sodalite gets a second kind of server next to Jellyfin: Emby first, then Plex, and Silo with its
