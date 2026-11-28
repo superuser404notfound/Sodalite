@@ -43,23 +43,51 @@ extension PlayerViewModel {
 
     /// ISO 639-2/T codes (`Locale` output) mapped to /B codes (curated list +
     /// Jellyfin) for the languages where the two variants differ.
-    private static let alpha3TtoB: [String: String] = [
+    static let alpha3TtoB: [String: String] = [
         "deu": "ger", "fra": "fre", "ces": "cze", "nld": "dut",
         "ell": "gre", "ron": "rum", "zho": "chi"
     ]
 
-    /// Settings language list minus the "Auto" (nil) entry, which has no code.
     var subtitleSearchLanguageOptions: [PlaybackPreferences.LanguageChoice] {
-        PlaybackPreferences.subtitleLanguageChoices.filter { $0.code != nil }
+        Self.subtitleSearchLanguageChoices
     }
 
-    /// Opens the overlay and runs the first search. Language seed: preferred
-    /// subtitle language, else device language, else English.
+    /// Jellyfin turns `chi` into `zh`, and the OpenSubtitles plugin always reads `zh` as zh-CN, so
+    /// Traditional Chinese needs its own entry. `zh-tw` is in the server's culture table since
+    /// 10.10 and reaches the plugin as is. `chi` stays the Simplified one, it is the path that
+    /// already worked. Search only: the settings list matches the 3-letter codes on tracks.
+    static let traditionalChineseSearchCode = "zh-tw"
+
+    /// Settings language list minus the "Auto" (nil) entry, with Chinese split in two.
+    static let subtitleSearchLanguageChoices: [PlaybackPreferences.LanguageChoice] =
+        PlaybackPreferences.subtitleLanguageChoices.flatMap { choice -> [PlaybackPreferences.LanguageChoice] in
+            guard let code = choice.code else { return [] }
+            guard code == "chi" else { return [choice] }
+            return [
+                PlaybackPreferences.LanguageChoice(code: "chi", short: "ZH-CN", titleKey: choice.titleKey),
+                PlaybackPreferences.LanguageChoice(
+                    code: traditionalChineseSearchCode, short: "ZH-TW", titleKey: choice.titleKey
+                ),
+            ]
+        }
+
+    /// Preferred subtitle language, else device language, else English. Chinese on a device set to
+    /// Traditional Chinese (script Hant, or Taiwan, Hong Kong, Macao) starts on the Traditional entry.
+    static func subtitleSearchSeed(preferred: String?, locale: Locale) -> String {
+        let deviceCode = locale.language.languageCode?.identifier(.alpha3)
+            .map { alpha3TtoB[$0] ?? $0 }
+        let seed = preferred ?? deviceCode ?? "eng"
+        guard seed == "chi", deviceCode == "chi" else { return seed }
+        let isTraditional = locale.language.script?.identifier == "Hant"
+            || ["TW", "HK", "MO"].contains(locale.region?.identifier ?? "")
+        return isTraditional ? traditionalChineseSearchCode : seed
+    }
+
+    /// Opens the overlay and runs the first search.
     func presentSubtitleSearch() {
-        let deviceCode = Locale.current.language.languageCode?.identifier(.alpha3)
-            .map { Self.alpha3TtoB[$0] ?? $0 }
-        let seed = preferences.preferredSubtitleLanguage ?? deviceCode ?? "eng"
-        subtitleSearchLanguage = seed
+        subtitleSearchLanguage = Self.subtitleSearchSeed(
+            preferred: preferences.preferredSubtitleLanguage, locale: Locale.current
+        )
         subtitleSearchFocus = .language(subtitleSearchCurrentLanguageIndex)
         subtitleSearchVisible = true
         Task { [weak self] in await self?.searchSubtitles() }
