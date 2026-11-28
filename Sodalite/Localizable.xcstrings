@@ -77589,6 +77589,328 @@
         }
       }
     },
+    "changelog.1_2_0.heroFirstPage.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po čerstvém spuštění mohl banner na domovské obrazovce zůstat u prvního titulu černý, zatímco ostatní se načetly. Teď to zkusí znovu, jakmile se ustálí spojení se serverem."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ved en frisk start kunne banneret på Hjem forblive sort på den første titel, mens alle de næste blev indlæst. Nu prøver det igen, så snart forbindelsen til din server er på plads."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frisch geöffnet konnte das Banner auf der Startseite beim ersten Titel schwarz bleiben, während alle weiteren luden. Es versucht es jetzt erneut, sobald die Verbindung zu deinem Server steht."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σε νέο άνοιγμα, το banner στην Αρχική μπορούσε να μείνει μαύρο στον πρώτο τίτλο, ενώ όλοι οι επόμενοι φόρτωναν. Τώρα δοκιμάζει ξανά μόλις σταθεροποιηθεί η σύνδεση με τον διακομιστή σου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opened fresh, the banner on Home could stay black on its first title while every later one loaded. It now tries again once the connection to your server has settled."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al abrir la app, el banner de Inicio podía quedarse en negro en el primer título mientras los demás cargaban. Ahora lo vuelve a intentar en cuanto la conexión con tu servidor se estabiliza."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juuri avattuna Kotinäkymän banneri saattoi jäädä mustaksi ensimmäisen nimikkeen kohdalla, vaikka kaikki seuraavat latautuivat. Nyt se yrittää uudelleen, kun yhteys palvelimeesi on vakiintunut."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l’ouverture, la bannière de l’accueil pouvait rester noire sur le premier titre alors que tous les suivants se chargeaient. Elle réessaie désormais dès que la connexion à votre serveur est établie."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri svježem otvaranju banner na početnoj mogao je ostati crn na prvom naslovu dok su se svi sljedeći učitali. Sada pokušava ponovno čim se veza s tvojim poslužiteljem ustali."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friss indításkor a kezdőlap bannere fekete maradhatott az első címnél, miközben a többi betöltődött. Most újra próbálkozik, amint a kapcsolat a szervereddel létrejött."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All’apertura, il banner della Home poteva restare nero sul primo titolo mentre tutti gli altri si caricavano. Ora riprova non appena la connessione al tuo server si è stabilizzata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動直後、ホームのバナーで最初のタイトルだけが黒いままになり、2枚目以降は表示されることがありました。サーバーとの接続が安定した時点で再読み込みするようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 새로 열면 홈 배너의 첫 번째 타이틀만 검게 남고 이후 타이틀은 모두 표시되는 경우가 있었습니다. 이제 서버 연결이 안정되면 다시 불러옵니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ved ny oppstart kunne banneret på Hjem forbli svart på den første tittelen mens alle de neste ble lastet. Nå prøver det igjen så snart tilkoblingen til serveren din er på plass."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bij een verse start kon de banner op Home zwart blijven bij de eerste titel, terwijl alle volgende wel laadden. Hij probeert het nu opnieuw zodra de verbinding met je server staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po świeżym uruchomieniu baner na ekranie głównym mógł pozostać czarny przy pierwszym tytule, choć kolejne się wczytywały. Teraz próbuje ponownie, gdy tylko połączenie z serwerem się ustabilizuje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao abrir o app, o banner da tela inicial podia ficar preto no primeiro título enquanto todos os seguintes carregavam. Agora ele tenta de novo assim que a conexão com seu servidor se estabiliza."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao abrir a app, o banner do Início podia ficar preto no primeiro título enquanto todos os seguintes carregavam. Agora volta a tentar assim que a ligação ao teu servidor estabiliza."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La o deschidere nouă, bannerul de pe Acasă putea rămâne negru la primul titlu, în timp ce toate celelalte se încărcau. Acum încearcă din nou imediat ce conexiunea cu serverul tău s-a stabilizat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При новом запуске баннер на главной мог оставаться чёрным на первом тайтле, хотя все следующие загружались. Теперь он пробует снова, как только соединение с сервером установится."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Po čerstvom spustení mohol banner na domovskej obrazovke zostať pri prvom titule čierny, zatiaľ čo ostatné sa načítali. Teraz to skúsi znova, len čo sa spojenie so serverom ustáli."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vid en ny start kunde bannern på Hem förbli svart på den första titeln medan alla följande laddades. Nu försöker den igen så snart anslutningen till din server är klar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama yeni açıldığında Ana Sayfa'daki banner ilk başlıkta siyah kalabiliyor, sonrakilerin hepsi yükleniyordu. Artık sunucuna bağlantı oturur oturmaz yeniden deniyor."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Після нового запуску банер на головній міг лишатися чорним на першому тайтлі, хоча всі наступні завантажувалися. Тепер він пробує знову, щойно з’єднання із сервером встановиться."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刚打开应用时，主页横幅的第一个标题可能一直是黑的，而后面的都能加载。现在与服务器的连接稳定后会重新加载。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剛開啟 App 時，首頁橫幅的第一個標題可能一直是黑的，而後面的都能載入。現在與伺服器的連線穩定後會重新載入。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.heroFirstPage.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "První obrázek banneru se načte hned po spuštění"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannerets første billede indlæses ved start"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstes Banner-Bild lädt beim Start"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η πρώτη εικόνα του banner φορτώνει στην εκκίνηση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The banner's first picture loads at launch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera imagen del banner carga al abrir"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannerin ensimmäinen kuva latautuu käynnistyksessä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La première image de la bannière se charge au lancement"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prva slika bannera učitava se pri pokretanju"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A banner első képe indításkor betöltődik"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prima immagine del banner si carica all’avvio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動時にバナーの最初の画像が表示されるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 시 배너의 첫 이미지가 표시됨"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannerets første bilde lastes ved oppstart"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eerste afbeelding van de banner laadt bij het opstarten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pierwszy obraz banera wczytuje się przy starcie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A primeira imagem do banner carrega ao abrir"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A primeira imagem do banner carrega ao abrir"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima imagine a bannerului se încarcă la pornire"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первая картинка баннера загружается при запуске"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prvý obrázok bannera sa načíta hneď po spustení"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bannerns första bild laddas vid start"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banner'ın ilk görseli açılışta yükleniyor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перше зображення банера завантажується під час запуску"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "横幅的第一张图片在启动时加载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橫幅的第一張圖片在啟動時載入"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.narrowActions.body" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -74,6 +74,12 @@ enum Changelog {
                     "changelog.1_2_0.traditionalChinese.body",
                     icon: "captions.bubble"
                 ),
+                ChangelogHighlight(
+                    .fix,
+                    "changelog.1_2_0.heroFirstPage.title",
+                    "changelog.1_2_0.heroFirstPage.body",
+                    icon: "photo"
+                ),
             ]
         ),
         // MARK: 1.1.1

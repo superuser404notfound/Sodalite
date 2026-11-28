@@ -324,6 +324,14 @@ struct HomeHeroCarousel: View {
                         _ = await loadArt(for: item)
                     }
                 }
+                // The banner paints its remembered titles before the server's address has proved
+                // itself, so the first page's URL has no token and may point at the route the
+                // resolve then replaces. A failed load of that URL was never asked again, and the
+                // first page stayed black while every later page loaded. Keyed on the URL, the
+                // page on screen gets another try once its address settles.
+                .task(id: artworkURL(for: current)) {
+                    await prepare(current)
+                }
         }
     }
 
