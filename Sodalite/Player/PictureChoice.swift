@@ -76,6 +76,14 @@ enum PictureChoice: Hashable, Sendable {
         return "\(fill) (\(auto))"
     }
 
+    /// For log lines: "original", "fill.auto", "fill.r239".
+    var logName: String {
+        switch self {
+        case .original: return "original"
+        case .fill(let ratio): return "fill.\(ratio.rawValue)"
+        }
+    }
+
     var pictureMode: PlaybackPreferences.PictureMode {
         if case .fill = self { return .fill }
         return .original

@@ -42,16 +42,28 @@ extension PlayerViewModel {
             pictureAreaScanState = .finished
             return
         }
-        let size = videoSize
-        guard let url = pictureAreaScanURL, player.duration > 0, size.width > 0, size.height > 0 else {
+        guard let url = pictureAreaScanURL else {
+            if pictureAreaScanState != .unavailable {
+                LogTap.shared.note("[PictureArea] no scan: this source has no stills URL")
+            }
             pictureAreaScanState = .unavailable
+            return
+        }
+        // The engine can publish its duration after the first `.playing`; the item's runtime covers
+        // that gap, and the next call retries anything else that is not known yet.
+        let runtime = item.runTimeTicks.map { Double($0) / 10_000_000 } ?? 0
+        let duration = player.duration > 0 ? player.duration : runtime
+        let size = videoSize
+        guard duration > 0, size.width > 0, size.height > 0 else {
+            LogTap.shared.note("[PictureArea] scan deferred: duration=\(Int(duration)) size=\(Int(size.width))x\(Int(size.height))")
             return
         }
         // Its own extractor: one in-flight decode per extractor, and a scan sample must never cancel
         // the scrub preview the viewer is looking at.
         let extractor = player.makeFrameExtractor(url: url)
         pictureAreaExtractor = extractor
-        _ = runPictureAreaScan(source: extractor, duration: player.duration,
+        LogTap.shared.note("[PictureArea] scan started: duration=\(Int(duration))s seeded=\(detectedPictureArea != nil)")
+        _ = runPictureAreaScan(source: extractor, duration: duration,
                                displayAspect: Double(size.width / size.height))
     }
 
@@ -88,7 +100,7 @@ extension PlayerViewModel {
         guard area != detectedPictureArea else { return }
         detectedPictureArea = area
         pictureAreaCache.store(area, for: pictureAreaCacheKey)
-        applyPictureMode()
+        applyPictureMode(animated: true)
     }
 
     func stopPictureAreaScan() {

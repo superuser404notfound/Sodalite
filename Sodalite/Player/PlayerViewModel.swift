@@ -499,6 +499,10 @@ final class PlayerViewModel {
     /// The size the picture is shown in, set by the host on layout; `.zero` until then.
     var pictureSurfaceSize: CGSize = .zero
     @ObservationIgnored var pictureAreaCache: PictureAreaCache = .shared
+    /// Set by the host while the picture is shown somewhere this screen's zoom does not belong.
+    var pictureZoomSuppressed = false {
+        didSet { if oldValue != pictureZoomSuppressed { applyPictureMode() } }
+    }
     /// The stills URL the scan reads (the scrub preview's source), nil when the source has none.
     @ObservationIgnored var pictureAreaScanURL: URL?
     @ObservationIgnored var pictureAreaTask: Task<Void, Never>?
@@ -2068,6 +2072,8 @@ final class PlayerViewModel {
                     let firstPlay = !self.hasStartedPlaying
                     self.hasStartedPlaying = true
                     self.isPlaying = true
+                    // The presented size is known now, which a picked ratio needs.
+                    if firstPlay { self.applyPictureMode() }
                     self.startPictureAreaScanIfNeeded()
                     if firstPlay {
                         // Resolve the successor once the pipeline delivers frames, NOT lazily at the
@@ -3145,20 +3151,28 @@ final class PlayerViewModel {
         return (pool.first { $0.codec?.lowercased() == codec?.lowercased() } ?? pool.first)?.index
     }
 
-    /// Apply `pictureMode` to whichever layer is on screen: writes to the engine AND fires
-    /// `onPictureModeChanged` so the host mirrors the gravity onto AVKit's own AVPlayerLayer (the layer
-    /// actually on screen for the native path, where without the callback the toggle is a no-op).
-    func applyPictureMode() {
-        switch pictureMode {
-        case .original: player.videoGravity = .resizeAspect
-        case .fill:     player.videoGravity = .resizeAspectFill
-        }
-        onPictureModeChanged?(pictureMode)
+    /// The part of the picture Fill makes cover the screen (Sodalite#118), nil for Original and while
+    /// the picture is not on this screen (PiP window, external display, AirPlay).
+    var effectivePictureArea: CGRect? {
+        guard !pictureZoomSuppressed else { return nil }
+        let size = videoSize
+        let aspect = size.width > 0 && size.height > 0 ? Double(size.width / size.height) : 16.0 / 9.0
+        return activePictureChoice.area(presentationAspect: aspect, detected: detectedPictureArea)
     }
 
-    /// Fired when `applyPictureMode` resolves a new gravity; PlayerHostController hooks it to update
-    /// AVPlayerViewController's own `videoGravity` (the native path's rendering).
-    var onPictureModeChanged: ((PlaybackPreferences.PictureMode) -> Void)?
+    /// Apply the picture choice to whichever layer is on screen: the engine zooms its own layers
+    /// (software path, the Mac's surface) and `onPictureGeometryChanged` lets the host zoom AVKit's
+    /// layer, which renders the native path and which the engine never reaches. Fill is always
+    /// aspect-fit plus a zoom; with the full frame as area that is exactly the old aspect fill.
+    func applyPictureMode(animated: Bool = false) {
+        player.videoGravity = .resizeAspect
+        let area = effectivePictureArea
+        player.setFillPictureArea(area, animated: animated)
+        onPictureGeometryChanged?(area, animated)
+    }
+
+    /// Fired by `applyPictureMode`; PlayerHostController zooms AVKit's own layer with it.
+    var onPictureGeometryChanged: ((CGRect?, Bool) -> Void)?
 
     /// Fired after every primary-subtitle selection (including "off"). Sodalite#98: the external-display
     /// subtitle window gates on a selection being active, so turning subtitles on mid-playback has to
@@ -3170,7 +3184,7 @@ final class PlayerViewModel {
     func selectPictureChoice(_ choice: PictureChoice) {
         pictureMode = choice.pictureMode
         if case .fill(let ratio) = choice { fillRatio = ratio }
-        applyPictureMode()
+        applyPictureMode(animated: true)
         startPictureAreaScanIfNeeded()
     }
 

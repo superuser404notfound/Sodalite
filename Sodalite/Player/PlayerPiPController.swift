@@ -129,6 +129,11 @@ final class PlayerPiPController: NSObject {
     func setVideoGravity(_ gravity: AVLayerVideoGravity) {
         sourceView.playerLayer.videoGravity = gravity
     }
+
+    /// The Fill zoom, so the source layer over AVKit's video matches it (Sodalite#118).
+    func setPictureTransform(_ transform: CGAffineTransform) {
+        if sourceView.playerLayer.affineTransform() != transform { sourceView.playerLayer.setAffineTransform(transform) }
+    }
 }
 
 // @preconcurrency: AVKit delivers these on the main thread; the MainActor-isolated methods keep willStart
