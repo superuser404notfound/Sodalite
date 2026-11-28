@@ -695,7 +695,21 @@ struct SubtitleOverlayView: View {
                            y: canvasRect.minY + position.minY * canvasRect.height + verticalShift,
                            width: position.width * canvasRect.width,
                            height: position.height * canvasRect.height)
-        return frame.offsetBy(dx: 0, dy: verticalClamp(frame, in: bounds))
+        let held = frame.offsetBy(dx: 0, dy: verticalClamp(frame, in: bounds))
+        return fillArea == nil ? held : horizontalFit(held, in: bounds)
+    }
+
+    /// A zoom that crops the sides (Fill 4:3 on a 16:9 file, Sodalite#118) widens a line past the
+    /// screen. One that fits moves in; one wider than the screen shrinks to its width, keeping its
+    /// bottom edge, since a line cut at both ends is as unreadable as a missing one.
+    nonisolated static func horizontalFit(_ frame: CGRect, in bounds: CGSize) -> CGRect {
+        guard bounds.width > 0, frame.width > 0 else { return frame }
+        if frame.width > bounds.width {
+            let height = frame.height * bounds.width / frame.width
+            return CGRect(x: 0, y: frame.maxY - height, width: bounds.width, height: height)
+        }
+        let x = min(max(frame.minX, 0), bounds.width - frame.width)
+        return CGRect(x: x, y: frame.minY, width: frame.width, height: frame.height)
     }
 
     /// Vertical delta that pulls `frame` back inside `bounds`, 0 when it already fits. Two

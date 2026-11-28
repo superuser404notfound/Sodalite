@@ -146,4 +146,26 @@ struct BitmapSubtitleCanvasTests {
         expectClose(lifted.minY, base.minY - 108, "lifted minY")
         expectClose(lifted.minX, base.minX, "minX unchanged")
     }
+
+    /// Sodalite#118: a zoom that crops the sides (Fill 4:3 on a 16:9 file) widened a wide PGS line
+    /// past both screen edges, because only the vertical position was held.
+    @Test func aWideLineUnderASideCropStaysOnScreen() {
+        let pillar = CGRect(x: 0.125, y: 0, width: 0.75, height: 1)
+        let line = CGRect(x: 0.075, y: 0.85, width: 0.85, height: 0.08)
+        let frame = SubtitleOverlayView.bitmapCueFrame(position: line, canvas: hdCanvas, videoSize: hdCanvas,
+                                                       in: tvBounds, fillArea: pillar)
+        #expect(frame.minX >= -0.5)
+        #expect(frame.maxX <= tvBounds.width + 0.5)
+        #expect(frame.maxY <= tvBounds.height + 0.5)
+    }
+
+    /// A line that fits keeps its size and only moves in.
+    @Test func aNarrowLineUnderASideCropKeepsItsSize() {
+        let pillar = CGRect(x: 0.125, y: 0, width: 0.75, height: 1)
+        let line = CGRect(x: 0.05, y: 0.85, width: 0.3, height: 0.08)
+        let frame = SubtitleOverlayView.bitmapCueFrame(position: line, canvas: hdCanvas, videoSize: hdCanvas,
+                                                       in: tvBounds, fillArea: pillar)
+        expectClose(frame.width, 0.3 * 1920 * (4.0 / 3.0), "width")
+        #expect(frame.minX >= -0.5)
+    }
 }
