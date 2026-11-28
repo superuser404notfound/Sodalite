@@ -503,6 +503,8 @@ struct PlayerTouchControls: View {
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(!row.isEnabled)
+                                .opacity(row.isEnabled ? 1 : 0.4)
 
                                 if let deleteIndex = row.deleteStreamIndex {
                                     Button {
@@ -586,6 +588,8 @@ struct PlayerTouchControls: View {
         /// A stepper row (subtitle timing, the audio shaping settings): minus and plus call this with
         /// -1 / +1, the label runs `action`, the panel stays.
         var stepper: ((Int) -> Void)? = nil
+        /// Shown dimmed and untappable (Fill (Auto) where it would change nothing, Sodalite#118).
+        var isEnabled = true
         let action: () -> Void
     }
 
@@ -678,12 +682,11 @@ struct PlayerTouchControls: View {
                 }
             }
         case .picture:
-            // A greyed-out row stays while it is the active one, so the panel always shows a check.
-            return PictureChoice.all.filter {
-                viewModel.isPictureChoiceEnabled($0) || $0 == viewModel.activePictureChoice
-            }.map { choice in
-                PickerRow(label: viewModel.pictureChoiceTitle(choice),
-                          isActive: choice == viewModel.activePictureChoice) {
+            // Greyed out, like tvOS and the Mac. The active row stays tappable so the panel can close on it.
+            return PictureChoice.all.map { choice in
+                let isActive = choice == viewModel.activePictureChoice
+                return PickerRow(label: viewModel.pictureChoiceTitle(choice), isActive: isActive,
+                                 isEnabled: isActive || viewModel.isPictureChoiceEnabled(choice)) {
                     viewModel.selectPictureChoice(choice)
                 }
             }

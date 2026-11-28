@@ -271,6 +271,7 @@ extension PlayerViewModel {
         // area, which seeds the next scan, so its look-ahead carries on where this one stopped.
         stopPictureAreaScan()
         if pictureAreaScanState == .scanning { pictureAreaScanState = .idle }
+        pictureChoiceCarries = !scope.isItemSwitch
         guard case .itemSwitch(let newItem) = scope else { return }
 
         item = newItem

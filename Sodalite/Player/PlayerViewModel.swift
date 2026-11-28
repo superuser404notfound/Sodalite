@@ -510,6 +510,11 @@ final class PlayerViewModel {
     @ObservationIgnored var pictureAreaTask: Task<Void, Never>?
     @ObservationIgnored var pictureAreaExtractor: FrameExtractor?
     @ObservationIgnored var pictureAreaRetries = 0
+    /// Moves with every scan start and stop. A same-item reload keeps the generation, so this is what
+    /// tells a first pass the stop left behind that its answer belongs to no one.
+    @ObservationIgnored var pictureAreaScanID = 0
+    /// Set by a same-item reload: the next session start keeps the viewer's picture pick.
+    @ObservationIgnored var pictureChoiceCarries = false
 
     /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
     /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
@@ -1413,9 +1418,7 @@ final class PlayerViewModel {
         liveRoute = nil
         applyChapterOrdering()
         startDetailEnrichment()
-        // Reset to the global default each session so in-player overrides don't bleed across episodes/movies.
-        pictureMode = preferences.pictureMode
-        fillRatio = .auto
+        applySessionPictureChoice()
         applyPictureMode()
         #if DEBUG
         print("[PlayerVM] startPlayback: item=\(item.name), seriesId=\(item.seriesId ?? "nil"), type=\(item.type), chapters=\(chapters.count)")
@@ -2945,6 +2948,7 @@ final class PlayerViewModel {
         pendingSessionCarry = nil
         clearError()
         resetSessionState(.sameItemReload)
+        forgetPictureArea()
         player.stop()
         beginPlayback()
     }

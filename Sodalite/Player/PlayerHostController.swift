@@ -123,6 +123,10 @@ final class PlayerHostController: AVPlayerViewController {
     private var externalPlaybackActive = false
     private weak var pictureLayer: AVPlayerLayer?
     private var pictureLayerObservation: NSKeyValueObservation?
+    #if os(iOS)
+    /// True while a rotation or resize is being laid out (see `viewWillTransition`).
+    private var pictureSizeTransitionActive = false
+    #endif
     /// Applied state of the native WebVTT rendering switch, so syncNativeSubtitleRendering only calls the VM on a
     /// real transition of the combined "video left the app's view hierarchy" state (PiP or external playback).
     private var nativeSubtitleRenderingApplied = false
@@ -543,6 +547,9 @@ final class PlayerHostController: AVPlayerViewController {
     /// the rest. AVKit leaves a transform on its layer alone (measured on tvOS 27.2, 2026-11-28), but
     /// every `self.player` assignment and layout pass re-applies it anyway, like gravity before it.
     func applyPictureGeometry(animated: Bool = false) {
+        #if os(iOS)
+        guard !pictureSizeTransitionActive else { return }
+        #endif
         videoGravity = .resizeAspect
         stillView.videoGravity = .resizeAspect
         #if os(tvOS)
@@ -604,6 +611,17 @@ final class PlayerHostController: AVPlayerViewController {
     private func avkitPictureLayer() -> AVPlayerLayer? {
         guard let avPlayer = player else { return nil }
         if let cached = pictureLayer, cached.player === avPlayer, cached.superlayer != nil { return cached }
+        guard let found = findAVKitRenderLayer(for: avPlayer) else { return nil }
+        pictureLayer = found
+        pictureLayerObservation = found.observe(\.videoRect, options: []) { [weak self] _, _ in
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.applyPictureGeometry() } }
+        }
+        return found
+    }
+
+    /// The AVPlayerLayer AVKit renders `avPlayer` with. One search for the zoom and the diagnostics, so
+    /// both name the same layer.
+    private func findAVKitRenderLayer(for avPlayer: AVPlayer) -> AVPlayerLayer? {
         #if os(tvOS)
         // The PiP source layer sits in the same tree with the same player; it is zoomed separately.
         let excluded: CALayer? = pipController.sourceView.layer
@@ -616,13 +634,27 @@ final class PlayerHostController: AVPlayerViewController {
             for sub in layer.sublayers ?? [] { if let hit = find(sub) { return hit } }
             return nil
         }
-        guard let root = viewIfLoaded?.layer, let found = find(root) else { return nil }
-        pictureLayer = found
-        pictureLayerObservation = found.observe(\.videoRect, options: []) { [weak self] _, _ in
-            DispatchQueue.main.async { MainActor.assumeIsolated { self?.applyPictureGeometry() } }
-        }
-        return found
+        return viewIfLoaded.flatMap { find($0.layer) }
     }
+
+    #if os(iOS)
+    /// AVKit's render layer can be a view's backing layer, and UIKit lays a transformed view out
+    /// through its transform: a rotation under a zoom would shrink the layer by the zoom. So the zoom
+    /// comes off for the size change and goes back on once the new bounds are in place.
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        if let layer = pictureLayer, !CATransform3DIsIdentity(layer.transform) {
+            Self.setTransform(.identity, on: layer, animated: false)
+        }
+        // The videoRect observation fires while the new size is laid out; it must not put the zoom
+        // back before the layout is done.
+        pictureSizeTransitionActive = true
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+            self?.pictureSizeTransitionActive = false
+            self?.applyPictureGeometry()
+        }
+    }
+    #endif
 
     /// Mount aetherView in AVKit's contentOverlayView for the SW (dav1d) path. Idempotent. contentOverlayView sits between AVKit's player layer and chrome, so engine frames render above the empty player surface and below our overlay.
     private func mountAetherViewIfNeeded() {
@@ -825,15 +857,7 @@ final class PlayerHostController: AVPlayerViewController {
         avkitLayerObservation?.invalidate()
         avkitLayerObservation = nil
 
-        func findLayer(_ layer: CALayer) -> AVPlayerLayer? {
-            if let pl = layer as? AVPlayerLayer, pl.player === avPlayer { return pl }
-            for sub in layer.sublayers ?? [] {
-                if let hit = findLayer(sub) { return hit }
-            }
-            return nil
-        }
-
-        guard let root = viewIfLoaded?.layer, let layer = findLayer(root) else {
+        guard let layer = findAVKitRenderLayer(for: avPlayer) else {
             guard attempt < 20 else {
                 LogTap.shared.note("[AVKitLayer] render layer NOT found after \(attempt) attempts")
                 return
@@ -847,6 +871,9 @@ final class PlayerHostController: AVPlayerViewController {
 
         let attachedAt = Date()
         LogTap.shared.note("[AVKitLayer] observing render layer (found on attempt \(attempt), ready=\(layer.isReadyForDisplay))")
+        // AVKit often builds this layer after `self.player` is set, when the rebind's apply found none.
+        // Without this the zoom stayed off after a quality change until the next layout pass.
+        if attempt > 0 { applyPictureGeometry() }
         avkitLayerObservation = layer.observe(
             \.isReadyForDisplay, options: [.new, .initial]
         ) { layer, change in
@@ -865,8 +892,7 @@ final class PlayerHostController: AVPlayerViewController {
                 guard let self, !Task.isCancelled, self.player === avPlayer else { return }
                 let stamp = String(format: "%.0f", Date().timeIntervalSince(attachedAt))
                 // Re-find each tick: AVKit may have swapped its internal layer (identity in log exposes it).
-                guard let root = self.viewIfLoaded?.layer,
-                      let current = findLayer(root) else {
+                guard let current = self.findAVKitRenderLayer(for: avPlayer) else {
                     let sig = "GONE"
                     if sig != lastSignature {
                         lastSignature = sig

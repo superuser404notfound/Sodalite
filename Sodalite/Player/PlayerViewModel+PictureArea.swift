@@ -48,6 +48,7 @@ extension PlayerViewModel {
                 LogTap.shared.note("[PictureArea] no scan: this source has no stills URL")
             }
             pictureAreaScanState = .unavailable
+            dropProvisionalPictureArea()
             return
         }
         // The engine can publish its duration after the first `.playing`; the item's runtime covers
@@ -74,30 +75,49 @@ extension PlayerViewModel {
         let scanner = PictureAreaScanner(source: source, duration: duration, displayAspect: displayAspect,
                                          seed: detectedPictureArea)
         let generation = sessionGeneration
+        pictureAreaScanID &+= 1
+        let scanID = pictureAreaScanID
         pictureAreaScanState = .scanning
         let first = Task { [weak self] in
             let area = await scanner.firstPass()
-            guard !Task.isCancelled else { return }
-            self?.acceptPictureArea(area, generation: generation)
+            guard !Task.isCancelled, let self, self.isCurrentPictureAreaScan(scanID, generation) else { return }
+            if let area {
+                self.acceptPictureArea(area)
+            } else {
+                // Too few usable frames. The look-ahead keeps trying, but the previous episode's zoom
+                // has no business on this one meanwhile.
+                self.dropProvisionalPictureArea()
+            }
         }
         pictureAreaTask = Task { [weak self] in
-            await first.value
+            // The first pass is its own task; a stop cancels this one, and the cancel has to reach it.
+            await withTaskCancellationHandler { await first.value } onCancel: { first.cancel() }
             while !Task.isCancelled {
                 try? await Task.sleep(for: Self.pictureAreaLookAheadInterval)
-                guard !Task.isCancelled, let self, self.sessionGeneration == generation else { return }
+                guard !Task.isCancelled, let self, self.isCurrentPictureAreaScan(scanID, generation) else { return }
                 if await scanner.current?.isFullFrame == true { return }
                 guard self.activePictureChoice == .fill(.auto), self.isPlaying else { continue }
                 let playhead = self.player.currentTime
-                if let wider = await scanner.advance(playhead: playhead) {
-                    self.acceptPictureArea(wider, generation: generation)
+                if let wider = await scanner.advance(playhead: playhead),
+                   self.isCurrentPictureAreaScan(scanID, generation) {
+                    self.acceptPictureArea(wider)
                 }
             }
         }
         return PictureAreaRun(firstPass: first)
     }
 
-    private func acceptPictureArea(_ area: PictureArea?, generation: Int) {
-        guard sessionGeneration == generation, let area else { return }
+    private func isCurrentPictureAreaScan(_ scanID: Int, _ generation: Int) -> Bool {
+        pictureAreaScanID == scanID && sessionGeneration == generation
+    }
+
+    private func dropProvisionalPictureArea() {
+        guard provisionalPictureArea != nil else { return }
+        provisionalPictureArea = nil
+        applyPictureMode(animated: true)
+    }
+
+    private func acceptPictureArea(_ area: PictureArea) {
         pictureAreaScanState = .finished
         let hadProvisional = provisionalPictureArea != nil
         provisionalPictureArea = nil
@@ -120,7 +140,30 @@ extension PlayerViewModel {
         }
     }
 
+    /// Each new item starts from the Picture Size preference, so a pick does not bleed into the next
+    /// episode or film. A same-item reload (quality change, outage retry, audio reopen) keeps the pick:
+    /// a hand-picked ratio is how the viewer overrides a wrong detection.
+    func applySessionPictureChoice() {
+        if pictureChoiceCarries {
+            pictureChoiceCarries = false
+            return
+        }
+        pictureMode = preferences.pictureMode
+        fillRatio = .auto
+    }
+
+    /// For a reload that plays another file under the same session (item recovery): the old file's
+    /// area says nothing about the new one.
+    func forgetPictureArea() {
+        stopPictureAreaScan()
+        detectedPictureArea = nil
+        provisionalPictureArea = nil
+        pictureAreaScanState = .idle
+        pictureAreaScanURL = nil
+    }
+
     func stopPictureAreaScan() {
+        pictureAreaScanID &+= 1
         pictureAreaTask?.cancel()
         pictureAreaTask = nil
         pictureAreaRetries = 0
