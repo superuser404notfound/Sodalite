@@ -36,7 +36,7 @@ struct SubtitleSearchLanguageTests {
         #expect(PlayerViewModel.subtitleSearchSeed(preferred: "chi", locale: Locale(identifier: identifier)) == "zh-tw")
     }
 
-    @Test("a Simplified Chinese device stays on chi", arguments: ["zh-Hans", "zh_CN", "zh-Hans-SG"])
+    @Test("a Simplified Chinese device stays on chi", arguments: ["zh-Hans", "zh_CN", "zh-Hans-SG", "zh-Hans-HK", "zh-Hans-MO"])
     func simplifiedSeed(identifier: String) {
         #expect(PlayerViewModel.subtitleSearchSeed(preferred: nil, locale: Locale(identifier: identifier)) == "chi")
     }

@@ -78,8 +78,14 @@ extension PlayerViewModel {
             .map { alpha3TtoB[$0] ?? $0 }
         let seed = preferred ?? deviceCode ?? "eng"
         guard seed == "chi", deviceCode == "chi" else { return seed }
-        let isTraditional = locale.language.script?.identifier == "Hant"
-            || ["TW", "HK", "MO"].contains(locale.region?.identifier ?? "")
+        // A named script wins: zh-Hans-HK is Simplified in Hong Kong. The region only decides
+        // when the locale names no script.
+        let isTraditional: Bool
+        if let script = locale.language.script?.identifier {
+            isTraditional = script == "Hant"
+        } else {
+            isTraditional = ["TW", "HK", "MO"].contains(locale.region?.identifier ?? "")
+        }
         return isTraditional ? traditionalChineseSearchCode : seed
     }
 
