@@ -26,10 +26,10 @@ struct SubtitleVideoRectTests {
     @Test("aspect-fit leaves the picture inside the bounds, aspect-fill covers them")
     func videoRectFollowsGravity() {
         let raster = CGSize(width: 1440, height: 1080)
-        let fit = SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillsSurface: false)
+        let fit = SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillArea: nil)
         #expect(fit == CGRect(x: 240, y: 0, width: 1440, height: 1080))
 
-        let fill = SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillsSurface: true)
+        let fill = SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillArea: CGRect(x: 0, y: 0, width: 1, height: 1))
         #expect(fill == CGRect(x: 0, y: -180, width: 1920, height: 1440))
         // Covering means no gap on either axis, and the overflow is centered.
         #expect(fill.minX <= 0 && fill.maxX >= tvBounds.width)
@@ -38,16 +38,54 @@ struct SubtitleVideoRectTests {
 
     @Test("a 16:9 raster fills and fits identically, so Fill is a no-op there")
     func matchingAspectIsANoOp() {
-        #expect(SubtitleOverlayView.videoRect(videoSize: hdCanvas, in: tvBounds, fillsSurface: true)
-                == SubtitleOverlayView.videoRect(videoSize: hdCanvas, in: tvBounds, fillsSurface: false))
+        #expect(SubtitleOverlayView.videoRect(videoSize: hdCanvas, in: tvBounds, fillArea: CGRect(x: 0, y: 0, width: 1, height: 1))
+                == SubtitleOverlayView.videoRect(videoSize: hdCanvas, in: tvBounds, fillArea: nil))
     }
 
     @Test("unknown video dims fall back to the full bounds under either gravity")
     func unknownDimsFallBack() {
-        for fills in [true, false] {
-            #expect(SubtitleOverlayView.videoRect(videoSize: .zero, in: tvBounds, fillsSurface: fills)
+        for fills in [CGRect(x: 0, y: 0, width: 1, height: 1), nil] as [CGRect?] {
+            #expect(SubtitleOverlayView.videoRect(videoSize: .zero, in: tvBounds, fillArea: fills)
                     == CGRect(origin: .zero, size: tvBounds))
         }
+    }
+
+    // MARK: - Sodalite#118: Fill zooms to a picture area
+
+    @Test("the full frame as fill area is the old aspect-fill rect")
+    func fullFillAreaMatchesOldFillRect() {
+        let raster = CGSize(width: 1440, height: 1080)
+        let full = CGRect(x: 0, y: 0, width: 1, height: 1)
+        #expect(SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillArea: full)
+                == CGRect(x: 0, y: -180, width: 1920, height: 1440))
+    }
+
+    @Test("a 2.39 area zooms the plane past the screen")
+    func letterboxAreaPlaneRect() {
+        let h = (16.0 / 9.0) / 2.39
+        let band = CGRect(x: 0, y: (1 - h) / 2, width: 1, height: h)
+        let plane = SubtitleOverlayView.videoRect(videoSize: hdCanvas, in: tvBounds, fillArea: band)
+        expectClose(plane.minX, -330.7, "minX")
+        expectClose(plane.minY, -186.0, "minY")
+        expectClose(plane.width, 2581.3, "width")
+        expectClose(plane.height, 1452.0, "height")
+    }
+
+    @Test("no fill area is the aspect-fit rect")
+    func nilAreaIsAspectFit() {
+        let raster = CGSize(width: 1440, height: 1080)
+        #expect(SubtitleOverlayView.videoRect(videoSize: raster, in: tvBounds, fillArea: nil)
+                == CGRect(x: 240, y: 0, width: 1440, height: 1080))
+    }
+
+    @Test("the ASS canvas stays on screen under a letterbox zoom")
+    func assCanvasStaysOnScreen() {
+        let h = (16.0 / 9.0) / 2.39
+        let band = CGRect(x: 0, y: (1 - h) / 2, width: 1, height: h)
+        let canvas = SubtitleOverlayView.assCanvasRect(videoSize: hdCanvas, in: tvBounds, fillArea: band)
+        #expect(canvas == CGRect(origin: .zero, size: tvBounds))
+        #expect(SubtitleOverlayView.assCanvasRect(videoSize: hdCanvas, in: tvBounds, fillArea: nil)
+                == CGRect(origin: .zero, size: tvBounds))
     }
 
     // MARK: - Fill: the cue follows the picture
@@ -62,10 +100,10 @@ struct SubtitleVideoRectTests {
 
         let fitFrame = SubtitleOverlayView.bitmapCueFrame(position: line, canvas: hdCanvas,
                                                           videoSize: raster, in: tvBounds,
-                                                          fillsSurface: false)
+                                                          fillArea: nil)
         let fillFrame = SubtitleOverlayView.bitmapCueFrame(position: line, canvas: hdCanvas,
                                                            videoSize: raster, in: tvBounds,
-                                                           fillsSurface: true)
+                                                           fillArea: CGRect(x: 0, y: 0, width: 1, height: 1))
         expectClose(fitFrame.width, 1152, "fit width")
         expectClose(fillFrame.width, 1536, "fill width")
         // Exactly the 25% the report predicted from reading the code.
@@ -80,7 +118,7 @@ struct SubtitleVideoRectTests {
         let frame = SubtitleOverlayView.bitmapCueFrame(
             position: CGRect(x: 0.2, y: 0.86, width: 0.6, height: 0.06),
             canvas: hdCanvas, videoSize: CGSize(width: 1440, height: 1080),
-            in: tvBounds, fillsSurface: true)
+            in: tvBounds, fillArea: CGRect(x: 0, y: 0, width: 1, height: 1))
         expectClose(frame.maxY, tvBounds.height, "maxY")
         expectClose(frame.minY, 993.6, "minY")
     }
@@ -90,7 +128,7 @@ struct SubtitleVideoRectTests {
         let frame = SubtitleOverlayView.bitmapCueFrame(
             position: CGRect(x: 0.2, y: 0.86, width: 0.6, height: 0.06),
             canvas: hdCanvas, videoSize: CGSize(width: 1920, height: 804),
-            in: tvBounds, fillsSurface: true)
+            in: tvBounds, fillArea: CGRect(x: 0, y: 0, width: 1, height: 1))
         #expect(frame.maxY <= tvBounds.height)
         expectClose(frame.maxY, tvBounds.height, "maxY")
     }

@@ -239,7 +239,7 @@ final class PlayerViewModel {
         case secondarySubtitle(highlighted: Int) // 0=Off, 1..=secondarySubtitleCandidates
         case speed(highlighted: Int)    // index into PlayerViewModel.speedOptions
         case quality(highlighted: Int)  // index into PlayerViewModel.pickerQualities
-        case picture(highlighted: Int)  // index into PlaybackPreferences.PictureMode.allCases
+        case picture(highlighted: Int)  // index into PictureChoice.all
     }
 
     var isDropdownOpen: Bool { trackDropdown != .none }
@@ -490,6 +490,31 @@ final class PlayerViewModel {
     /// Session-local picture-fill mode, seeded from `PlaybackPreferences.pictureMode` at startPlayback.
     /// Transient override, not persisted; settings owns the global default.
     var pictureMode: PlaybackPreferences.PictureMode = .original
+    /// Sodalite#118: which ratio Fill zooms to. Reset with `pictureMode` at every start, like the
+    /// in-player picture choice always was; `auto` follows `detectedPictureArea`.
+    var fillRatio: FillRatio = .auto
+    /// The previous episode's area, shown until this episode's own scan answers. Never a scan seed.
+    var provisionalPictureArea: PictureArea?
+    /// Where the picture sits inside the frame, once a scan or the cache said so. Per item.
+    var detectedPictureArea: PictureArea?
+    var pictureAreaScanState: PictureAreaScanState = .idle
+    /// The size the picture is shown in, set by the host on layout; `.zero` until then.
+    var pictureSurfaceSize: CGSize = .zero
+    @ObservationIgnored var pictureAreaCache: PictureAreaCache = .shared
+    /// Set by the host while the picture is shown somewhere this screen's zoom does not belong.
+    var pictureZoomSuppressed = false {
+        didSet { if oldValue != pictureZoomSuppressed { applyPictureMode() } }
+    }
+    /// The stills URL the scan reads (the scrub preview's source), nil when the source has none.
+    @ObservationIgnored var pictureAreaScanURL: URL?
+    @ObservationIgnored var pictureAreaTask: Task<Void, Never>?
+    @ObservationIgnored var pictureAreaExtractor: FrameExtractor?
+    @ObservationIgnored var pictureAreaRetries = 0
+    /// Moves with every scan start and stop. A same-item reload keeps the generation, so this is what
+    /// tells a first pass the stop left behind that its answer belongs to no one.
+    @ObservationIgnored var pictureAreaScanID = 0
+    /// Set by a same-item reload: the next session start keeps the viewer's picture pick.
+    @ObservationIgnored var pictureChoiceCarries = false
 
     /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
     /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
@@ -1393,8 +1418,7 @@ final class PlayerViewModel {
         liveRoute = nil
         applyChapterOrdering()
         startDetailEnrichment()
-        // Reset to the global default each session so in-player overrides don't bleed across episodes/movies.
-        pictureMode = preferences.pictureMode
+        applySessionPictureChoice()
         applyPictureMode()
         #if DEBUG
         print("[PlayerVM] startPlayback: item=\(item.name), seriesId=\(item.seriesId ?? "nil"), type=\(item.type), chapters=\(chapters.count)")
@@ -1481,22 +1505,22 @@ final class PlayerViewModel {
 
             // Scrub preview + chapter thumbnails decode stills from the original file (isStatic:true)
             // regardless of playback method, so transcode sessions still get a preview.
+            let stillsURL: URL?
             if isLocalSession {
                 // The engine's still extractor reads a file:// source like any other (Sodalite#81).
-                frameExtractor = player.makeFrameExtractor(url: url)
+                stillsURL = url
             } else if source.isDiscFolder {
                 // Sodalite#185: the server answers Static=true on a disc folder with an ffmpeg session.
-                frameExtractor = nil
-            } else if let previewURL = playbackService.buildStreamURL(
-                itemID: item.id, mediaSourceID: source.id,
-                container: source.container, isStatic: true
-            ) {
-                // Session-coupled: elective thumbnail decodes yield while the engine's playback
-                // pipeline is starved (startup, restarts), instead of competing for the link.
-                frameExtractor = player.makeFrameExtractor(url: previewURL)
+                stillsURL = nil
             } else {
-                frameExtractor = nil
+                stillsURL = playbackService.buildStreamURL(
+                    itemID: item.id, mediaSourceID: source.id,
+                    container: source.container, isStatic: true)
             }
+            // Session-coupled: elective thumbnail decodes yield while the engine's playback
+            // pipeline is starved (startup, restarts), instead of competing for the link.
+            frameExtractor = stillsURL.map { player.makeFrameExtractor(url: $0) }
+            preparePictureArea(scanURL: stillsURL)
             configureScrubPreview(source: source)
 
             let startPos: Double?
@@ -1915,6 +1939,7 @@ final class PlayerViewModel {
         let extractorToClose = frameExtractor
         frameExtractor = nil
         Task { await extractorToClose?.shutdown() }
+        stopPictureAreaScan()
         deactivateASSRendering()
         if Self.clearsSharedFontCacheOnStop(isMultiviewTile: isMultiviewTile) {
             ASSFontCache.removeAll()
@@ -2054,6 +2079,9 @@ final class PlayerViewModel {
                     let firstPlay = !self.hasStartedPlaying
                     self.hasStartedPlaying = true
                     self.isPlaying = true
+                    // The presented size is known now, which a picked ratio needs.
+                    if firstPlay { self.applyPictureMode() }
+                    self.startPictureAreaScanIfNeeded()
                     if firstPlay {
                         // Resolve the successor once the pipeline delivers frames, NOT lazily at the
                         // end window: a jump straight to the end never passes through that window, so
@@ -2920,6 +2948,7 @@ final class PlayerViewModel {
         pendingSessionCarry = nil
         clearError()
         resetSessionState(.sameItemReload)
+        forgetPictureArea()
         player.stop()
         beginPlayback()
     }
@@ -3130,30 +3159,75 @@ final class PlayerViewModel {
         return (pool.first { $0.codec?.lowercased() == codec?.lowercased() } ?? pool.first)?.index
     }
 
-    /// Apply `pictureMode` to whichever layer is on screen: writes to the engine AND fires
-    /// `onPictureModeChanged` so the host mirrors the gravity onto AVKit's own AVPlayerLayer (the layer
-    /// actually on screen for the native path, where without the callback the toggle is a no-op).
-    func applyPictureMode() {
-        switch pictureMode {
-        case .original: player.videoGravity = .resizeAspect
-        case .fill:     player.videoGravity = .resizeAspectFill
-        }
-        onPictureModeChanged?(pictureMode)
+    /// The part of the picture Fill makes cover the screen (Sodalite#118), nil for Original and while
+    /// the picture is not on this screen (PiP window, external display, AirPlay).
+    var effectivePictureArea: CGRect? {
+        guard !pictureZoomSuppressed else { return nil }
+        let size = videoSize
+        let aspect = size.width > 0 && size.height > 0 ? Double(size.width / size.height) : 16.0 / 9.0
+        return activePictureChoice.area(presentationAspect: aspect,
+                                        detected: detectedPictureArea ?? provisionalPictureArea)
     }
 
-    /// Fired when `applyPictureMode` resolves a new gravity; PlayerHostController hooks it to update
-    /// AVPlayerViewController's own `videoGravity` (the native path's rendering).
-    var onPictureModeChanged: ((PlaybackPreferences.PictureMode) -> Void)?
+    /// Apply the picture choice to whichever layer is on screen: the engine zooms its own layers
+    /// (software path, the Mac's surface) and `onPictureGeometryChanged` lets the host zoom AVKit's
+    /// layer, which renders the native path and which the engine never reaches. Fill is always
+    /// aspect-fit plus a zoom; with the full frame as area that is exactly the old aspect fill.
+    func applyPictureMode(animated: Bool = false) {
+        player.videoGravity = .resizeAspect
+        let area = effectivePictureArea
+        player.setFillPictureArea(area, animated: animated)
+        onPictureGeometryChanged?(area, animated)
+    }
+
+    /// Fired by `applyPictureMode`; PlayerHostController zooms AVKit's own layer with it.
+    var onPictureGeometryChanged: ((CGRect?, Bool) -> Void)?
 
     /// Fired after every primary-subtitle selection (including "off"). Sodalite#98: the external-display
     /// subtitle window gates on a selection being active, so turning subtitles on mid-playback has to
     /// re-evaluate that decision; without this it only re-ran on route or serving-state changes.
     var onSubtitleSelectionChanged: (() -> Void)?
 
-    /// In-player picker change; mutates session-local `pictureMode` and pushes to the engine. Not persisted.
-    func selectPictureMode(_ mode: PlaybackPreferences.PictureMode) {
-        pictureMode = mode
-        applyPictureMode()
+    /// In-player picker change; mutates session-local `pictureMode` / `fillRatio` and pushes to the
+    /// engine. Not persisted.
+    func selectPictureChoice(_ choice: PictureChoice) {
+        pictureMode = choice.pictureMode
+        if case .fill(let ratio) = choice { fillRatio = ratio }
+        applyPictureMode(animated: true)
+        startPictureAreaScanIfNeeded()
+    }
+
+    var activePictureChoice: PictureChoice {
+        pictureMode == .original ? .original : .fill(fillRatio)
+    }
+
+    func isPictureChoiceEnabled(_ choice: PictureChoice) -> Bool {
+        PictureChoice.isEnabled(choice, presentationSize: videoSize, surface: pictureSurfaceSize,
+                                detected: detectedPictureArea, scanState: pictureAreaScanState)
+    }
+
+    func pictureChoiceTitle(_ choice: PictureChoice) -> String {
+        switch choice {
+        case .original:
+            return String(localized: String.LocalizationValue(PlaybackPreferences.PictureMode.original.titleKey))
+        case .fill:
+            return choice.fillTitle(
+                fill: String(localized: String.LocalizationValue(PlaybackPreferences.PictureMode.fill.titleKey)),
+                auto: String(localized: "player.picture.auto"),
+                detected: detectedPictureArea)
+        }
+    }
+
+    /// The next enabled row from `index` in `offset`'s direction, or `index` when there is none.
+    func pictureHighlight(from index: Int, moving offset: Int) -> Int {
+        let rows = PictureChoice.all
+        var i = index
+        while true {
+            let next = i + (offset < 0 ? -1 : 1)
+            guard rows.indices.contains(next) else { return index }
+            if isPictureChoiceEnabled(rows[next]) { return next }
+            i = next
+        }
     }
 
     /// Seek to a chapter start. Index is into the sorted `chapters`; out-of-range no-ops.
@@ -4472,8 +4546,7 @@ final class PlayerViewModel {
 
     func openPictureDropdown() {
         controlsTimer?.cancel()
-        let modes = PlaybackPreferences.PictureMode.allCases
-        let currentIdx = modes.firstIndex(of: pictureMode) ?? 0
+        let currentIdx = PictureChoice.all.firstIndex(of: activePictureChoice) ?? 0
         trackDropdown = .picture(highlighted: currentIdx)
     }
 
@@ -4573,8 +4646,10 @@ final class PlayerViewModel {
             }
             scheduleControlsHide()
         case .picture(let idx):
-            let modes = PlaybackPreferences.PictureMode.allCases
-            if modes.indices.contains(idx) { selectPictureMode(modes[idx]) }
+            let choices = PictureChoice.all
+            if choices.indices.contains(idx), isPictureChoiceEnabled(choices[idx]) {
+                selectPictureChoice(choices[idx])
+            }
             trackDropdown = .none
             scheduleControlsHide()
         case .none:

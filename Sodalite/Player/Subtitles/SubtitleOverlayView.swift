@@ -59,7 +59,8 @@ struct SubtitleOverlayView: View {
     /// so the picture covers the surface and overflows it; cues placed against the picture have to
     /// follow it there instead of staying on the aspect-fit band the video would occupy in
     /// `.original` (#120).
-    var pictureMode: PlaybackPreferences.PictureMode = .original
+    /// The part of the picture Fill zooms to cover the screen, nil for Original (Sodalite#118).
+    var fillArea: CGRect? = nil
     /// Which share of the cues this instance draws. A folded iPhone Duo splits them over two
     /// instances: everything bound to the picture stays on it, the plain text lines move below the fold.
     var role: Role = .all
@@ -106,8 +107,7 @@ struct SubtitleOverlayView: View {
                 // libass scales PlayResX/Y onto its canvas per axis, so the canvas has to be the
                 // picture, not the screen: on a portrait iPhone the screen-sized canvas stretched
                 // every glyph tall and narrow and sat the lines under the bottom bar.
-                let rect = Self.videoRect(videoSize: videoSize, in: geo.size,
-                                          fillsSurface: pictureMode == .fill)
+                let rect = Self.assCanvasRect(videoSize: videoSize, in: geo.size, fillArea: fillArea)
                 ASSRenderedSubtitles(
                     renderer: assRenderer,
                     reloadSignal: assReloadSignal,
@@ -361,7 +361,7 @@ struct SubtitleOverlayView: View {
             let offset = Self.placedOffset(
                 placement: placement,
                 in: Self.videoRect(videoSize: videoSize, in: size,
-                                   fillsSurface: pictureMode == .fill),
+                                   fillArea: fillArea),
                 container: size,
                 margin: Self.placedMargin,
                 verticalShift: bitmapVerticalShift(in: size),
@@ -649,7 +649,7 @@ struct SubtitleOverlayView: View {
                                         pixelAspect: pixelAspect,
                                         in: size,
                                         verticalShift: bitmapVerticalShift(in: size),
-                                        fillsSurface: pictureMode == .fill)
+                                        fillArea: fillArea)
         return Image(decorative: image.cgImage, scale: 1, orientation: .up)
             .resizable()
             .interpolation(.high)
@@ -667,8 +667,8 @@ struct SubtitleOverlayView: View {
                                            pixelAspect: CGFloat = 1,
                                            in bounds: CGSize,
                                            verticalShift: CGFloat = 0,
-                                           fillsSurface: Bool = false) -> CGRect {
-        let videoRect = videoRect(videoSize: videoSize, in: bounds, fillsSurface: fillsSurface)
+                                           fillArea: CGRect? = nil) -> CGRect {
+        let videoRect = videoRect(videoSize: videoSize, in: bounds, fillArea: fillArea)
         // The canvas is in coded pixels and `videoSize` is presented, so the canvas widens by the
         // pixel aspect first. Without it a 720x576 DVB plane on 16:9 SD covered a 1024x576 picture
         // as a 5:4 shape, 1.42x too tall, and every bottom line landed below the screen.
@@ -721,20 +721,27 @@ struct SubtitleOverlayView: View {
         return dy
     }
 
-    /// Rect the picture occupies under the gravity currently on screen: aspect-fit for
-    /// `.original`, aspect-fill for `.fill`, where the picture covers the bounds and overflows
-    /// them on one axis. Cue geometry has to use this rather than the fit rect unconditionally,
-    /// or every cue placed against the picture stays on a band the picture left (#120).
+    /// Rect the picture plane occupies on screen: aspect-fit for Original, and for Fill the plane after
+    /// the zoom that makes `fillArea` cover the bounds (the full frame gives the old aspect fill, a
+    /// letterbox band zooms past the bars, Sodalite#118). Cue geometry has to use this rather than the
+    /// fit rect unconditionally, or every cue placed against the picture stays on a band the picture
+    /// left (#120).
     nonisolated static func videoRect(videoSize: CGSize, in bounds: CGSize,
-                                      fillsSurface: Bool) -> CGRect {
-        guard fillsSurface else { return aspectFitRect(videoSize: videoSize, in: bounds) }
+                                      fillArea: CGRect?) -> CGRect {
+        guard let fillArea else { return aspectFitRect(videoSize: videoSize, in: bounds) }
         guard videoSize.width > 0, videoSize.height > 0, bounds.width > 0, bounds.height > 0 else {
             return CGRect(origin: .zero, size: bounds)
         }
-        let scale = max(bounds.width / videoSize.width, bounds.height / videoSize.height)
-        let w = videoSize.width * scale
-        let h = videoSize.height * scale
-        return CGRect(x: (bounds.width - w) / 2, y: (bounds.height - h) / 2, width: w, height: h)
+        return PictureFillGeometry.planeRect(presentationSize: videoSize, area: fillArea, bounds: bounds)
+    }
+
+    /// The libass canvas. Under a letterbox zoom the zoomed plane overhangs the screen, and libass has
+    /// no per-line clamp, so dialogue authored in the bottom bar (most SRT-converted tracks) would
+    /// draw below the screen. The canvas stays at the full-frame fill instead (the old aspect fill):
+    /// every line readable, typeset signs a little off the zoomed picture (Sodalite#118).
+    nonisolated static func assCanvasRect(videoSize: CGSize, in bounds: CGSize, fillArea: CGRect?) -> CGRect {
+        videoRect(videoSize: videoSize, in: bounds,
+                  fillArea: fillArea == nil ? nil : CGRect(x: 0, y: 0, width: 1, height: 1))
     }
 
     /// Aspect-fit rect of the video plane within the overlay bounds. Full bounds when the

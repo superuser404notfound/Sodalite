@@ -78555,6 +78555,328 @@
         }
       }
     },
+    "changelog.1_2_0.smartFill.body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mnoho širokoúhlých filmů přichází jako soubor 16:9 s černými pruhy přímo v obraze, takže Vyplnit nemělo co oříznout. Nyní najde skutečný obraz a přiblíží ho, dokud nevyplní obrazovku. Filmy se scénami IMAX si ponechají celý obraz a v přehrávači si poměr stran můžeš zvolit i sám."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mange widescreen-film kommer som en 16:9-fil med de sorte bjælker i billedet, så Udfyld havde intet at beskære. Nu finder den det egentlige billede og zoomer, til det fylder skærmen. Film med IMAX-scener beholder hele billedet, og i afspilleren kan du også selv vælge formatet."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viele Breitbildfilme kommen als 16:9-Datei mit eingebrannten schwarzen Balken, darum hatte Vollbild nichts zum Zuschneiden. Jetzt findet es das eigentliche Bild und zoomt, bis es den Bildschirm füllt. Filme mit IMAX-Szenen behalten ihr volles Bild, und im Player kannst du das Format auch selbst wählen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πολλές ταινίες ευρείας οθόνης έρχονται ως αρχείο 16:9 με τις μαύρες λωρίδες μέσα στην εικόνα, οπότε η Πλήρης δεν είχε τίποτα να κόψει. Τώρα βρίσκει την πραγματική εικόνα και ζουμάρει μέχρι να γεμίσει την οθόνη. Οι ταινίες με σκηνές IMAX κρατούν ολόκληρη την εικόνα, και στο πρόγραμμα αναπαραγωγής μπορείς να επιλέξεις και μόνος σου την αναλογία."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Many wide films come as a 16:9 file with the black bars in the picture, so Fill had nothing to crop. It now finds the real picture and zooms until it fills the screen. Films with IMAX scenes keep their full picture, and in the player you can also pick the ratio yourself."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muchas películas panorámicas llegan como un archivo 16:9 con las franjas negras dentro de la imagen, así que Llenar no tenía nada que recortar. Ahora encuentra la imagen real y hace zoom hasta llenar la pantalla. Las películas con escenas IMAX conservan la imagen completa, y en el reproductor también puedes elegir la proporción tú mismo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moni laajakuvaelokuva tulee 16:9-tiedostona, jonka kuvaan mustat palkit on poltettu, joten Täytä-tilalla ei ollut mitään rajattavaa. Nyt se löytää varsinaisen kuvan ja zoomaa, kunnes kuva täyttää näytön. IMAX-kohtauksia sisältävät elokuvat säilyttävät koko kuvansa, ja soittimessa voit myös valita kuvasuhteen itse."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beaucoup de films en format large arrivent en fichier 16:9 avec les bandes noires incrustées dans l'image, donc Remplir n'avait rien à recadrer. Il trouve maintenant la vraie image et zoome jusqu'à remplir l'écran. Les films avec des scènes IMAX gardent leur image complète, et dans le lecteur tu peux aussi choisir le format toi-même."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mnogi širokokutni filmovi dolaze kao 16:9 datoteka s crnim trakama u samoj slici, pa Ispuni nije imalo što izrezati. Sada pronalazi stvarnu sliku i zumira dok ne ispuni zaslon. Filmovi s IMAX scenama zadržavaju cijelu sliku, a u playeru omjer možeš odabrati i sam."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sok szélesvásznú film 16:9-es fájlként érkezik, a fekete sávokkal magában a képben, így a Kitölt nem talált mit levágni. Most megtalálja a valódi képet, és addig nagyít, amíg az kitölti a képernyőt. Az IMAX-jeleneteket tartalmazó filmek megtartják a teljes képet, a lejátszóban pedig a képarányt magad is kiválaszthatod."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Molti film in formato panoramico arrivano come file 16:9 con le bande nere dentro l'immagine, quindi Riempi non aveva nulla da ritagliare. Ora trova l'immagine vera e zooma finché non riempie lo schermo. I film con scene IMAX mantengono l'immagine intera, e nel player puoi anche scegliere tu il formato."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多くのワイド映画は、黒帯が映像に焼き込まれた16:9ファイルで届くため、フィルでは切り取るものがありませんでした。今は実際の映像を見つけ、画面いっぱいになるまでズームします。IMAXシーンのある映画は映像全体を保ち、プレーヤーで比率を自分で選ぶこともできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "많은 와이드 영화가 검은 띠가 화면에 박힌 16:9 파일로 제공되어 채우기로는 자를 것이 없었습니다. 이제 실제 화면을 찾아 화면을 가득 채울 때까지 확대합니다. IMAX 장면이 있는 영화는 전체 화면을 유지하며, 플레이어에서 비율을 직접 고를 수도 있습니다."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mange vidformatfilmer kommer som en 16:9-fil med de svarte feltene i bildet, så Fyll hadde ingenting å beskjære. Nå finner den det egentlige bildet og zoomer til det fyller skjermen. Filmer med IMAX-scener beholder hele bildet, og i avspilleren kan du også velge formatet selv."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veel breedbeeldfilms komen als 16:9-bestand met de zwarte balken in het beeld, dus Vullen had niets om bij te snijden. Nu vindt het het echte beeld en zoomt het in tot het scherm vol is. Films met IMAX-scènes houden hun volledige beeld, en in de speler kun je de verhouding ook zelf kiezen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiele filmów panoramicznych trafia jako plik 16:9 z czarnymi pasami wtopionymi w obraz, więc Wypełnij nie miało czego przyciąć. Teraz znajduje właściwy obraz i przybliża go, aż wypełni ekran. Filmy ze scenami IMAX zachowują pełny obraz, a w odtwarzaczu możesz też samodzielnie wybrać proporcje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muitos filmes em tela larga chegam como um arquivo 16:9 com as faixas pretas dentro da imagem, então Preencher não tinha o que cortar. Agora ele encontra a imagem real e dá zoom até preencher a tela. Filmes com cenas IMAX mantêm a imagem inteira, e no player você também pode escolher a proporção."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muitos filmes em ecrã panorâmico chegam como um ficheiro 16:9 com as barras pretas dentro da imagem, por isso Preencher não tinha nada para cortar. Agora encontra a imagem real e faz zoom até preencher o ecrã. Os filmes com cenas IMAX mantêm a imagem completa, e no leitor também podes escolher a proporção."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multe filme pe ecran lat vin ca fișier 16:9 cu benzile negre în imagine, așa că Umple nu avea ce decupa. Acum găsește imaginea reală și face zoom până umple ecranul. Filmele cu scene IMAX își păstrează imaginea completă, iar în player poți alege și singur raportul."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Многие широкоэкранные фильмы приходят файлом 16:9 с чёрными полосами прямо в кадре, поэтому «Заполнить» нечего было обрезать. Теперь режим находит настоящую картинку и увеличивает её, пока она не заполнит экран. Фильмы со сценами IMAX сохраняют полный кадр, а в плеере формат можно выбрать и самому."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mnoho širokouhlých filmov prichádza ako súbor 16:9 s čiernymi pruhmi priamo v obraze, takže Vyplniť nemalo čo orezať. Teraz nájde skutočný obraz a priblíži ho, kým nevyplní obrazovku. Filmy so scénami IMAX si ponechajú celý obraz a v prehrávači si pomer strán môžeš zvoliť aj sám."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Många bredbildsfilmer kommer som en 16:9-fil med de svarta fälten i bilden, så Fyll hade inget att beskära. Nu hittar den den riktiga bilden och zoomar tills den fyller skärmen. Filmer med IMAX-scener behåller hela bilden, och i spelaren kan du också välja formatet själv."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birçok geniş ekran film, siyah bantlar görüntünün içinde olan 16:9 bir dosya olarak gelir, bu yüzden Doldur'un kırpacak bir şeyi yoktu. Artık gerçek görüntüyü bulur ve ekranı dolduruncaya kadar yakınlaştırır. IMAX sahneleri olan filmler tam görüntülerini korur, oynatıcıda en boy oranını kendin de seçebilirsin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Багато широкоекранних фільмів надходять файлом 16:9 з чорними смугами просто в кадрі, тож «Заповнити» не мало чого обрізати. Тепер режим знаходить справжню картинку й збільшує її, доки вона не заповнить екран. Фільми зі сценами IMAX зберігають повний кадр, а в плеєрі формат можна вибрати й самому."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "许多宽银幕电影以 16:9 文件提供，黑边直接压在画面里，所以填满此前没有可裁切的内容。现在它会找到真正的画面并放大到填满屏幕。带有 IMAX 场景的电影保留完整画面，你也可以在播放器中自己选择画面比例。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許多寬銀幕電影以 16:9 檔案提供，黑邊直接壓在畫面裡，所以填滿先前沒有可裁切的內容。現在它會找到真正的畫面並放大到填滿螢幕。帶有 IMAX 場景的電影保留完整畫面，你也可以在播放器中自行選擇畫面比例。"
+          }
+        }
+      }
+    },
+    "changelog.1_2_0.smartFill.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyplnit přiblíží obraz přes černé pruhy"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udfyld zoomer forbi sorte bjælker"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vollbild zoomt über schwarze Balken hinweg"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η Πλήρης ζουμάρει πέρα από τις μαύρες λωρίδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill zooms past black bars"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Llenar hace zoom más allá de las franjas negras"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Täytä zoomaa mustien palkkien ohi"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplir zoome au-delà des bandes noires"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ispuni zumira preko crnih traka"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Kitölt túlzoomol a fekete sávokon"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riempi zooma oltre le bande nere"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルが黒帯の外までズーム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "채우기가 검은 띠 너머까지 확대"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fyll zoomer forbi svarte felt"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vullen zoomt voorbij zwarte balken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wypełnij przybliża obraz ponad czarnymi pasami"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencher dá zoom além das faixas pretas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencher faz zoom para lá das barras pretas"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umple face zoom peste benzile negre"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Заполнить» увеличивает картинку поверх чёрных полос"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vyplniť priblíži obraz cez čierne pruhy"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fyll zoomar förbi svarta fält"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doldur siyah bantların ötesine yakınlaştırır"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Заповнити» збільшує картинку поверх чорних смуг"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "填满可越过黑边缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "填滿可越過黑邊縮放"
+          }
+        }
+      }
+    },
     "changelog.1_2_0.styledSubtitles.body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -160589,6 +160911,168 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "連線中斷，正在重新連線"
+          }
+        }
+      }
+    },
+    "player.picture.auto" : {
+      "comment" : "In-player picture menu: Fill picks the zoom itself, from the picture area it detected (Sodalite#118). Shown as \"Fill (Auto)\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτόματα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaattinen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatski"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatikus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatico"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatycznie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматически"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automaticky"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatiskt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматично"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
           }
         }
       }

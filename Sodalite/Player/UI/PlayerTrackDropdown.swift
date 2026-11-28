@@ -23,6 +23,9 @@ struct DropdownItem {
     /// Pins this row as a fixed footer below the scroll list (subtitle "Search online...").
     var isPinnedFooter: Bool = false
     var separatorAbove: Bool = false
+    /// A row that cannot be picked right now (Fill (Auto) when it would change nothing): dimmed and
+    /// skipped by the highlight.
+    var isEnabled: Bool = true
     /// Pins this row as a fixed header above the scroll list (subtitle "Secondary: ...").
     var isPinnedHeader: Bool = false
     var separatorBelow: Bool = false
@@ -298,6 +301,7 @@ struct PlayerTrackDropdownList: View {
         .frame(height: rowHeight)
         .background(item.isHighlighted ? Color.white.opacity(0.25) : Color.clear)
         .foregroundStyle(item.isHighlighted ? .white : .white.opacity(0.8))
+        .opacity(item.isEnabled ? 1 : 0.4)
         // Glide the highlight between rows instead of snapping.
         .animation(.smooth(duration: 0.32), value: item.isHighlighted)
     }

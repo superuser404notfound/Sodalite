@@ -267,6 +267,11 @@ extension PlayerViewModel {
         resetTrackState(clearsStreams: scope.isItemSwitch)
         // The engine comes back at 1.0x; the speed badge must match it instead of the prior session's rate.
         activeSpeedIndex = 2
+        // Every new session starts its own picture scan (Sodalite#118). A same-item reload keeps the
+        // area, which seeds the next scan, so its look-ahead carries on where this one stopped.
+        stopPictureAreaScan()
+        if pictureAreaScanState == .scanning { pictureAreaScanState = .idle }
+        pictureChoiceCarries = !scope.isItemSwitch
         guard case .itemSwitch(let newItem) = scope else { return }
 
         item = newItem
@@ -281,6 +286,13 @@ extension PlayerViewModel {
         )
         advanceSessionGeneration()
         startFromBeginning = true
+        // The outgoing episode's area keeps the zoom across the swap and until the new episode's own
+        // scan answers, so a scope series does not flash its bars at every episode. Display only: a
+        // seeded scan would skip sampling and could crop a wider episode.
+        provisionalPictureArea = detectedPictureArea ?? provisionalPictureArea
+        detectedPictureArea = nil
+        pictureAreaScanState = .idle
+        pictureAreaScanURL = nil
         // A response the successor warm fetched for THIS item is the one thing worth carrying across
         // the switch: it is exactly what the seam would otherwise ask the server for again while the
         // viewer waits on a black screen. Anything naming another item still goes, for the reason

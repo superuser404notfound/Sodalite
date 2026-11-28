@@ -29,6 +29,8 @@ struct MacPlayerScreen: View {
         ZStack {
             Color.black
             AetherPlayerSurface(engine: viewModel.player)
+                // Fill (Auto) greys out against the window it is shown in (Sodalite#118).
+                .onGeometryChange(for: CGSize.self, of: { $0.size }) { viewModel.pictureSurfaceSize = $0 }
             // The title bar is hidden, so the picture is the handle. A layer of its own, under the
             // chrome, so dragging never steals a press meant for the transport (Apple's Destination
             // Video sample layers it the same way).

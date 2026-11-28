@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import CoreGraphics
 import AetherEngine
 @testable import Sodalite
 
@@ -70,6 +71,8 @@ struct PlayerSessionStateTests {
         vm.nextEpisodeCountdown = 3
         vm.remainingSeconds = 2100
         vm.remainingSampledAt = Date()
+        vm.detectedPictureArea = .fullFrame
+        vm.pictureAreaScanState = .finished
 
         vm.resetSessionState(.itemSwitch(to: try episode("e2")))
 
@@ -98,9 +101,28 @@ struct PlayerSessionStateTests {
         #expect(vm.nextEpisodeCountdown == 10)
         #expect(vm.remainingSeconds == 0)
         #expect(vm.remainingSampledAt == nil)
+        #expect(vm.detectedPictureArea == nil)
+        // The outgoing episode's area keeps the zoom across the swap until the new scan answers.
+        #expect(vm.provisionalPictureArea == .fullFrame)
+        #expect(vm.pictureAreaScanState == .idle)
+        #expect(vm.pictureAreaTask == nil)
     }
 
     /// PCORE-203: the engine drops the secondary line on every load; the view model must too.
+    /// Sodalite#118 review: a same-item reload (outage retry, rung switch) used to leave a finished
+    /// scan task behind, and its `pictureAreaTask == nil` guard refused every later scan.
+    @Test func aSameItemReloadStopsTheScanAndKeepsTheArea() throws {
+        let vm = makeViewModel(item: try episode("e1"))
+        let scope = PictureArea(rect: CGRect(x: 0, y: 0.128, width: 1, height: 0.744), snappedRatio: 2.39)
+        vm.detectedPictureArea = scope
+        vm.pictureAreaScanState = .scanning
+        vm.pictureAreaTask = Task {}
+        vm.resetSessionState(.sameItemReload)
+        #expect(vm.pictureAreaTask == nil)
+        #expect(vm.pictureAreaScanState == .idle)
+        #expect(vm.detectedPictureArea == scope)
+    }
+
     @Test func aReloadOfTheSameItemClearsBothSubtitlePicksAndKeepsTheItem() throws {
         let vm = makeViewModel(item: try episode("e1"))
         vm.subtitleStreams = [stream(3), stream(4)]

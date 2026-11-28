@@ -121,6 +121,12 @@ final class PlayerHostController: AVPlayerViewController {
     /// usesExternalPlaybackWhileExternalScreenIsActive, or an AirPlay receiver). Set from the
     /// isExternalPlaybackActive KVO, combined with pipActive to decide native-subtitle rendering.
     private var externalPlaybackActive = false
+    private weak var pictureLayer: AVPlayerLayer?
+    private var pictureLayerObservation: NSKeyValueObservation?
+    #if os(iOS)
+    /// True while a rotation or resize is being laid out (see `viewWillTransition`).
+    private var pictureSizeTransitionActive = false
+    #endif
     /// Applied state of the native WebVTT rendering switch, so syncNativeSubtitleRendering only calls the VM on a
     /// real transition of the combined "video left the app's view hierarchy" state (PiP or external playback).
     private var nativeSubtitleRenderingApplied = false
@@ -266,8 +272,9 @@ final class PlayerHostController: AVPlayerViewController {
                     }
                     #endif
                     self.player = avPlayer
-                    // Each `self.player` assignment resets videoGravity to .resizeAspect, so re-apply the user's picture-mode after every rebind or an audio-switch reload silently drops fill mode.
-                    self.applyVideoGravity(for: self.viewModel.pictureMode)
+                    // Each `self.player` assignment resets videoGravity and AVKit may build a new render
+                    // layer, so re-apply the picture after every rebind or an audio-switch reload drops Fill.
+                    self.applyPictureGeometry()
                     #if os(tvOS)
                     self.pipController.bind(player: avPlayer)
                     self.updatePiPAvailability()
@@ -337,16 +344,16 @@ final class PlayerHostController: AVPlayerViewController {
         #endif
 
         // Applied to AVPlayerViewController directly because AVKit's internal layer renders the native path; engine.videoGravity's layer is never mounted here.
-        viewModel.onPictureModeChanged = { [weak self] mode in
-            self?.applyVideoGravity(for: mode)
+        viewModel.onPictureGeometryChanged = { [weak self] _, animated in
+            self?.applyPictureGeometry(animated: animated)
         }
 
         #if os(iOS)
         // Sodalite#98: turning subtitles on or off mid-playback flips one of the decision's inputs.
         viewModel.onSubtitleSelectionChanged = { [weak self] in self?.updateExternalSubtitleWindow() }
         #endif
-        // Seed initial gravity: applyPictureMode may have fired before the callback was wired, else AVKit stays at default .resizeAspect.
-        applyVideoGravity(for: viewModel.pictureMode)
+        // Seed: applyPictureMode may have fired before the callback was wired.
+        applyPictureGeometry()
 
         engine.$playbackBackend
             .receive(on: DispatchQueue.main)
@@ -534,18 +541,120 @@ final class PlayerHostController: AVPlayerViewController {
         )
     }
 
-    /// Apply picture-mode as videoGravity directly on this AVPlayerViewController, the surface AVKit renders the native path with (engine.nativeHost.playerLayer is unmounted here).
-    private func applyVideoGravity(for mode: PlaybackPreferences.PictureMode) {
-        switch mode {
-        case .original: self.videoGravity = .resizeAspect
-        case .fill:     self.videoGravity = .resizeAspectFill
-        }
-        stillView.videoGravity = videoGravity
-        #if os(tvOS)
-        // The PiP source layer covers AVKit's video; mismatched gravity would visibly double-expose.
-        pipController.setVideoGravity(videoGravity)
+    /// Sodalite#118: Fill as a zoom on the AVPlayerLayer AVKit renders the native path with (the engine's
+    /// own layer is not mounted here, so its fill area never reaches the screen), mirrored onto the held
+    /// still and the tvOS PiP source layer that sits over it. Gravity stays aspect-fit; the zoom does
+    /// the rest. AVKit leaves a transform on its layer alone (measured on tvOS 27.2, 2026-11-28), but
+    /// every `self.player` assignment and layout pass re-applies it anyway, like gravity before it.
+    func applyPictureGeometry(animated: Bool = false) {
+        #if os(iOS)
+        guard !pictureSizeTransitionActive else { return }
         #endif
+        videoGravity = .resizeAspect
+        stillView.videoGravity = .resizeAspect
+        #if os(tvOS)
+        pipController.setVideoGravity(.resizeAspect)
+        #endif
+        let layer = avkitPictureLayer()
+        let area = viewModel.effectivePictureArea
+        // A reused item reports an empty videoRect for a moment around a swap; keep the zoom instead of
+        // showing the bars until the next frame. The videoRect KVO re-applies once it is known.
+        if area != nil, let layer, layer.videoRect.isEmpty { return }
+        var transform = CGAffineTransform.identity
+        if let area, let layer, !layer.videoRect.isEmpty {
+            transform = PictureFillGeometry.coverTransform(plane: layer.videoRect, area: area,
+                                                           bounds: layer.bounds.size)
+        } else if let area, layer == nil {
+            // No AVKit layer (the software path, or a native one AVKit has not built yet): the held still
+            // has to match the engine's zoomed surface under it.
+            transform = PictureFillGeometry.coverTransform(presentationSize: viewModel.videoSize, area: area,
+                                                           bounds: stillView.bounds.size)
+        }
+        if let layer, layer.affineTransform() != transform {
+            Self.setTransform(transform, on: layer, animated: animated)
+            let areaText = area.map {
+                String(format: "(%.3f,%.3f,%.3f,%.3f)", $0.minX, $0.minY, $0.width, $0.height)
+            } ?? "none"
+            LogTap.shared.note("[Picture] choice=\(viewModel.activePictureChoice.logName) area=\(areaText) "
+                + "plane=\(Int(layer.videoRect.width))x\(Int(layer.videoRect.height)) "
+                + String(format: "scale=%.3f", transform.a) + (animated ? " animated" : ""))
+        }
+        #if os(tvOS)
+        pipController.setPictureTransform(transform, animated: animated)
+        #endif
+        stillView.layer.sublayerTransform = CATransform3DMakeAffineTransform(transform)
     }
+
+    /// An explicit animation, because AVKit's render layer and the tvOS PiP source layer can be a view's
+    /// backing layer, and a view answers no action for its layer outside a UIView animation block: a
+    /// transaction's duration did nothing there and the zoom jumped.
+    static func setTransform(_ transform: CGAffineTransform, on layer: CALayer, animated: Bool) {
+        let target = CATransform3DMakeAffineTransform(transform)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        if animated {
+            let animation = CABasicAnimation(keyPath: "transform")
+            animation.fromValue = NSValue(caTransform3D: layer.presentation()?.transform ?? layer.transform)
+            animation.toValue = NSValue(caTransform3D: target)
+            animation.duration = 0.35
+            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            layer.add(animation, forKey: "sodalite.fill")
+        } else {
+            layer.removeAnimation(forKey: "sodalite.fill")
+        }
+        layer.transform = target
+        CATransaction.commit()
+    }
+
+    /// AVKit's render layer for the current player, cached weakly and re-found when AVKit swaps it.
+    /// Its `videoRect` is observed so the zoom lands once the first frame gives the plane a size.
+    private func avkitPictureLayer() -> AVPlayerLayer? {
+        guard let avPlayer = player else { return nil }
+        if let cached = pictureLayer, cached.player === avPlayer, cached.superlayer != nil { return cached }
+        guard let found = findAVKitRenderLayer(for: avPlayer) else { return nil }
+        pictureLayer = found
+        pictureLayerObservation = found.observe(\.videoRect, options: []) { [weak self] _, _ in
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.applyPictureGeometry() } }
+        }
+        return found
+    }
+
+    /// The AVPlayerLayer AVKit renders `avPlayer` with. One search for the zoom and the diagnostics, so
+    /// both name the same layer.
+    private func findAVKitRenderLayer(for avPlayer: AVPlayer) -> AVPlayerLayer? {
+        #if os(tvOS)
+        // The PiP source layer sits in the same tree with the same player; it is zoomed separately.
+        let excluded: CALayer? = pipController.sourceView.layer
+        #else
+        let excluded: CALayer? = nil
+        #endif
+        func find(_ layer: CALayer) -> AVPlayerLayer? {
+            if layer === excluded { return nil }
+            if let pl = layer as? AVPlayerLayer, pl.player === avPlayer { return pl }
+            for sub in layer.sublayers ?? [] { if let hit = find(sub) { return hit } }
+            return nil
+        }
+        return viewIfLoaded.flatMap { find($0.layer) }
+    }
+
+    #if os(iOS)
+    /// AVKit's render layer can be a view's backing layer, and UIKit lays a transformed view out
+    /// through its transform: a rotation under a zoom would shrink the layer by the zoom. So the zoom
+    /// comes off for the size change and goes back on once the new bounds are in place.
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        if let layer = pictureLayer, !CATransform3DIsIdentity(layer.transform) {
+            Self.setTransform(.identity, on: layer, animated: false)
+        }
+        // The videoRect observation fires while the new size is laid out; it must not put the zoom
+        // back before the layout is done.
+        pictureSizeTransitionActive = true
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+            self?.pictureSizeTransitionActive = false
+            self?.applyPictureGeometry()
+        }
+    }
+    #endif
 
     /// Mount aetherView in AVKit's contentOverlayView for the SW (dav1d) path. Idempotent. contentOverlayView sits between AVKit's player layer and chrome, so engine frames render above the empty player surface and below our overlay.
     private func mountAetherViewIfNeeded() {
@@ -583,6 +692,8 @@ final class PlayerHostController: AVPlayerViewController {
     /// takes back over only once BOTH are inactive.
     func syncNativeSubtitleRendering() {
         let shouldRenderNatively = pipActive || externalPlaybackActive
+        // The zoom belongs to this screen; a PiP window or an external screen shows the plain picture.
+        viewModel.pictureZoomSuppressed = shouldRenderNatively
         guard shouldRenderNatively != nativeSubtitleRenderingApplied else { return }
         nativeSubtitleRenderingApplied = shouldRenderNatively
         if shouldRenderNatively {
@@ -611,7 +722,7 @@ final class PlayerHostController: AVPlayerViewController {
         if let avPlayer = viewModel.player.currentAVPlayer, player !== avPlayer {
             player = avPlayer
             // Each `self.player` assignment resets videoGravity to .resizeAspect.
-            applyVideoGravity(for: viewModel.pictureMode)
+            applyPictureGeometry()
         }
         syncNativeSubtitleRendering()
     }
@@ -746,15 +857,7 @@ final class PlayerHostController: AVPlayerViewController {
         avkitLayerObservation?.invalidate()
         avkitLayerObservation = nil
 
-        func findLayer(_ layer: CALayer) -> AVPlayerLayer? {
-            if let pl = layer as? AVPlayerLayer, pl.player === avPlayer { return pl }
-            for sub in layer.sublayers ?? [] {
-                if let hit = findLayer(sub) { return hit }
-            }
-            return nil
-        }
-
-        guard let root = viewIfLoaded?.layer, let layer = findLayer(root) else {
+        guard let layer = findAVKitRenderLayer(for: avPlayer) else {
             guard attempt < 20 else {
                 LogTap.shared.note("[AVKitLayer] render layer NOT found after \(attempt) attempts")
                 return
@@ -768,6 +871,9 @@ final class PlayerHostController: AVPlayerViewController {
 
         let attachedAt = Date()
         LogTap.shared.note("[AVKitLayer] observing render layer (found on attempt \(attempt), ready=\(layer.isReadyForDisplay))")
+        // AVKit often builds this layer after `self.player` is set, when the rebind's apply found none.
+        // Without this the zoom stayed off after a quality change until the next layout pass.
+        if attempt > 0 { applyPictureGeometry() }
         avkitLayerObservation = layer.observe(
             \.isReadyForDisplay, options: [.new, .initial]
         ) { layer, change in
@@ -786,8 +892,7 @@ final class PlayerHostController: AVPlayerViewController {
                 guard let self, !Task.isCancelled, self.player === avPlayer else { return }
                 let stamp = String(format: "%.0f", Date().timeIntervalSince(attachedAt))
                 // Re-find each tick: AVKit may have swapped its internal layer (identity in log exposes it).
-                guard let root = self.viewIfLoaded?.layer,
-                      let current = findLayer(root) else {
+                guard let current = self.findAVKitRenderLayer(for: avPlayer) else {
                     let sig = "GONE"
                     if sig != lastSignature {
                         lastSignature = sig
@@ -975,6 +1080,10 @@ final class PlayerHostController: AVPlayerViewController {
         // the user holds), leaving the controls a few points wider than the screen in portrait.
         if let host = overlayHostingView, host.frame != view.bounds {
             host.frame = view.bounds
+        }
+        if viewModel.pictureSurfaceSize != view.bounds.size {
+            viewModel.pictureSurfaceSize = view.bounds.size
+            applyPictureGeometry()
         }
         #if os(iOS)
         updateFoldLayout()
@@ -1836,9 +1945,7 @@ final class PlayerHostController: AVPlayerViewController {
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .quality(highlighted: newIdx)
         case .picture(let idx):
-            let count = PlaybackPreferences.PictureMode.allCases.count
-            let newIdx = max(0, min(count - 1, idx + offset))
-            viewModel.trackDropdown = .picture(highlighted: newIdx)
+            viewModel.trackDropdown = .picture(highlighted: viewModel.pictureHighlight(from: idx, moving: offset))
         case .none:
             break
         }
