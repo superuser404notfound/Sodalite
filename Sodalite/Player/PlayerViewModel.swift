@@ -239,7 +239,7 @@ final class PlayerViewModel {
         case secondarySubtitle(highlighted: Int) // 0=Off, 1..=secondarySubtitleCandidates
         case speed(highlighted: Int)    // index into PlayerViewModel.speedOptions
         case quality(highlighted: Int)  // index into PlayerViewModel.pickerQualities
-        case picture(highlighted: Int)  // index into PlaybackPreferences.PictureMode.allCases
+        case picture(highlighted: Int)  // index into PictureChoice.all
     }
 
     var isDropdownOpen: Bool { trackDropdown != .none }
@@ -490,6 +490,14 @@ final class PlayerViewModel {
     /// Session-local picture-fill mode, seeded from `PlaybackPreferences.pictureMode` at startPlayback.
     /// Transient override, not persisted; settings owns the global default.
     var pictureMode: PlaybackPreferences.PictureMode = .original
+    /// Sodalite#118: which ratio Fill zooms to. Per launch like `pictureMode`, so it carries across
+    /// the episodes of one player session; `auto` follows `detectedPictureArea`.
+    var fillRatio: FillRatio = .auto
+    /// Where the picture sits inside the frame, once a scan or the cache said so. Per item.
+    var detectedPictureArea: PictureArea?
+    var pictureAreaScanState: PictureAreaScanState = .idle
+    /// The size the picture is shown in, set by the host on layout; `.zero` until then.
+    var pictureSurfaceSize: CGSize = .zero
 
     /// Sodalite#223: the viewer's Enhanced Upscaling choice for this video, nil while it follows the
     /// setting. Survives the reloads of the same video (quality, outage, audio), not an item switch.
@@ -3150,10 +3158,45 @@ final class PlayerViewModel {
     /// re-evaluate that decision; without this it only re-ran on route or serving-state changes.
     var onSubtitleSelectionChanged: (() -> Void)?
 
-    /// In-player picker change; mutates session-local `pictureMode` and pushes to the engine. Not persisted.
-    func selectPictureMode(_ mode: PlaybackPreferences.PictureMode) {
-        pictureMode = mode
+    /// In-player picker change; mutates session-local `pictureMode` / `fillRatio` and pushes to the
+    /// engine. Not persisted.
+    func selectPictureChoice(_ choice: PictureChoice) {
+        pictureMode = choice.pictureMode
+        if case .fill(let ratio) = choice { fillRatio = ratio }
         applyPictureMode()
+    }
+
+    var activePictureChoice: PictureChoice {
+        pictureMode == .original ? .original : .fill(fillRatio)
+    }
+
+    func isPictureChoiceEnabled(_ choice: PictureChoice) -> Bool {
+        PictureChoice.isEnabled(choice, presentationSize: videoSize, surface: pictureSurfaceSize,
+                                detected: detectedPictureArea, scanState: pictureAreaScanState)
+    }
+
+    func pictureChoiceTitle(_ choice: PictureChoice) -> String {
+        switch choice {
+        case .original:
+            return String(localized: String.LocalizationValue(PlaybackPreferences.PictureMode.original.titleKey))
+        case .fill:
+            return choice.fillTitle(
+                fill: String(localized: String.LocalizationValue(PlaybackPreferences.PictureMode.fill.titleKey)),
+                auto: String(localized: "player.picture.auto"),
+                detected: detectedPictureArea)
+        }
+    }
+
+    /// The next enabled row from `index` in `offset`'s direction, or `index` when there is none.
+    func pictureHighlight(from index: Int, moving offset: Int) -> Int {
+        let rows = PictureChoice.all
+        var i = index
+        while true {
+            let next = i + (offset < 0 ? -1 : 1)
+            guard rows.indices.contains(next) else { return index }
+            if isPictureChoiceEnabled(rows[next]) { return next }
+            i = next
+        }
     }
 
     /// Seek to a chapter start. Index is into the sorted `chapters`; out-of-range no-ops.
@@ -4472,8 +4515,7 @@ final class PlayerViewModel {
 
     func openPictureDropdown() {
         controlsTimer?.cancel()
-        let modes = PlaybackPreferences.PictureMode.allCases
-        let currentIdx = modes.firstIndex(of: pictureMode) ?? 0
+        let currentIdx = PictureChoice.all.firstIndex(of: activePictureChoice) ?? 0
         trackDropdown = .picture(highlighted: currentIdx)
     }
 
@@ -4573,8 +4615,10 @@ final class PlayerViewModel {
             }
             scheduleControlsHide()
         case .picture(let idx):
-            let modes = PlaybackPreferences.PictureMode.allCases
-            if modes.indices.contains(idx) { selectPictureMode(modes[idx]) }
+            let choices = PictureChoice.all
+            if choices.indices.contains(idx), isPictureChoiceEnabled(choices[idx]) {
+                selectPictureChoice(choices[idx])
+            }
             trackDropdown = .none
             scheduleControlsHide()
         case .none:

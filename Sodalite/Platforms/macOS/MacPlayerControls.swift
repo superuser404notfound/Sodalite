@@ -191,10 +191,11 @@ struct MacPlayerMenus: View {
     }
 
     @ViewBuilder private var pictureItems: some View {
-        ForEach(PlaybackPreferences.PictureMode.allCases, id: \.self) { mode in
-            choice(String(localized: String.LocalizationValue(mode.titleKey)), isOn: mode == viewModel.pictureMode) {
-                viewModel.selectPictureMode(mode)
+        ForEach(PictureChoice.all, id: \.self) { picture in
+            choice(viewModel.pictureChoiceTitle(picture), isOn: picture == viewModel.activePictureChoice) {
+                viewModel.selectPictureChoice(picture)
             }
+            .disabled(!viewModel.isPictureChoiceEnabled(picture))
         }
     }
 

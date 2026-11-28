@@ -360,12 +360,14 @@ struct TransportBar: View {
 
     private var pictureDropdownItems: [DropdownItem] {
         guard case .picture(let highlighted) = trackDropdown else { return [] }
-        return PlaybackPreferences.PictureMode.allCases.enumerated().map { idx, mode in
-            DropdownItem(
-                title: String(localized: String.LocalizationValue(mode.titleKey)),
-                isActive: mode == pictureMode,
+        return PictureChoice.all.enumerated().map { idx, choice in
+            var item = DropdownItem(
+                title: viewModel.pictureChoiceTitle(choice),
+                isActive: choice == viewModel.activePictureChoice,
                 isHighlighted: idx == highlighted
             )
+            item.isEnabled = viewModel.isPictureChoiceEnabled(choice)
+            return item
         }
     }
 

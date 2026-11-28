@@ -1836,9 +1836,7 @@ final class PlayerHostController: AVPlayerViewController {
             let newIdx = max(0, min(count - 1, idx + offset))
             viewModel.trackDropdown = .quality(highlighted: newIdx)
         case .picture(let idx):
-            let count = PlaybackPreferences.PictureMode.allCases.count
-            let newIdx = max(0, min(count - 1, idx + offset))
-            viewModel.trackDropdown = .picture(highlighted: newIdx)
+            viewModel.trackDropdown = .picture(highlighted: viewModel.pictureHighlight(from: idx, moving: offset))
         case .none:
             break
         }

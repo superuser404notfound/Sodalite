@@ -678,10 +678,10 @@ struct PlayerTouchControls: View {
                 }
             }
         case .picture:
-            return PlaybackPreferences.PictureMode.allCases.map { mode in
-                PickerRow(label: String(localized: String.LocalizationValue(mode.titleKey)),
-                          isActive: mode == viewModel.pictureMode) {
-                    viewModel.selectPictureMode(mode)
+            return PictureChoice.all.filter { viewModel.isPictureChoiceEnabled($0) }.map { choice in
+                PickerRow(label: viewModel.pictureChoiceTitle(choice),
+                          isActive: choice == viewModel.activePictureChoice) {
+                    viewModel.selectPictureChoice(choice)
                 }
             }
         case .episodes:
