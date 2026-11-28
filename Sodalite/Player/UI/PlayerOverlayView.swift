@@ -1002,7 +1002,7 @@ private struct SubtitleLayer: View {
                 hasSecondaryTrack: viewModel.activeSecondarySubtitleIndex != nil,
                 videoSize: viewModel.videoSize,
                 pixelAspect: viewModel.videoPixelAspect,
-                pictureMode: viewModel.pictureMode,
+                fillArea: viewModel.effectivePictureArea,
                 role: role
             )
         }
